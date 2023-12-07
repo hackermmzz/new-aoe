@@ -4,7 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += \
+        core gui \
+        multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,10 +27,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        MainWidget.cpp
+        MainWidget.cpp \
+    GameWidget.cpp \
+    Coordinate.cpp \
+    GlobalVariate.cpp \
+    Map.cpp \
+    Block.cpp
 
 HEADERS += \
-        MainWidget.h
+        MainWidget.h \
+    GameWidget.h \
+    config.h \
+    Coordinate.h \
+    GlobalVariate.h \
+    Map.h \
+    Block.h
 
 FORMS += \
-        MainWidget.ui
+        MainWidget.ui \
+    GameWidget.ui
+
+
