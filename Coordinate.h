@@ -12,6 +12,8 @@ class Coordinate
 public:
     Coordinate();
 
+    virtual void nextframe();
+
     double getDR()
     {
         return this->DR;
@@ -36,7 +38,7 @@ public:
     {
         return this->imageH;
     }
-    std::list<Resource>::iterator getNowRes()
+    std::list<ImageResource>::iterator getNowRes()
     {
         return this->nowres;
     }
@@ -76,7 +78,7 @@ protected:
     int inWindow=0;
     //在游戏窗口内
 
-    std::list<Resource>::iterator nowres;
+    std::list<ImageResource>::iterator nowres;
 
 };
 

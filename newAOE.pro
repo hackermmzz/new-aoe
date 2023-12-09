@@ -32,7 +32,13 @@ SOURCES += \
     Coordinate.cpp \
     GlobalVariate.cpp \
     Map.cpp \
-    Block.cpp
+    Block.cpp \
+    MoveObject.cpp \
+    Building.cpp \
+    Resource.cpp \
+    Coores.cpp \
+    Blockres.cpp \
+    Human.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -41,7 +47,13 @@ HEADERS += \
     Coordinate.h \
     GlobalVariate.h \
     Map.h \
-    Block.h
+    Block.h \
+    MoveObject.h \
+    Building.h \
+    Resource.h \
+    Coores.h \
+    Blockres.h \
+    Human.h
 
 FORMS += \
         MainWidget.ui \

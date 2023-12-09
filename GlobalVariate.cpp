@@ -339,7 +339,7 @@ int Stone[5][5][5] =
 };
 
 
-void loadResource(std::string name, std::list<Resource> *targetlist)
+void loadResource(std::string name, std::list<ImageResource> *targetlist)
 {
     targetlist->clear();
     auto temp=&resMap[name];
@@ -347,9 +347,7 @@ void loadResource(std::string name, std::list<Resource> *targetlist)
     while(index!=temp->end())
     {
 
-        //        Resource *res=new Resource(*index);
-        //赋值pix
-        Resource *res=new Resource();
+        ImageResource *res=new ImageResource();
         //赋值pix
         res->pix=(*index);
         initMemory(res);
@@ -364,7 +362,7 @@ void loadResource(std::string name, std::list<Resource> *targetlist)
     }
 }
 
-void initMemory(Resource *res)
+void initMemory(ImageResource *res)
 {
     //赋值内存图
     QImage piximage=res->pix.toImage();
@@ -414,15 +412,15 @@ double countdistance(double L, double U, double L0, double U0)
     return sqrt((L-L0)*(L-L0)+(U-U0)*(U-U0));
 }
 
-void flipResource(std::list<Resource> *currentlist, std::list<Resource> *targetlist)
+void flipResource(std::list<ImageResource> *currentlist, std::list<ImageResource> *targetlist)
 {
     targetlist->clear();
-    std::list<Resource>::iterator iter = currentlist->begin();
+    std::list<ImageResource>::iterator iter = currentlist->begin();
     while (iter != currentlist->end())
     {
         QImage image = (*iter).pix.toImage();
         image = image.mirrored(true, false);
-        Resource *res = new Resource(QPixmap::fromImage(image));
+        ImageResource *res = new ImageResource(QPixmap::fromImage(image));
         initMemory(res);
         targetlist->push_back(*res);
         delete res;
@@ -430,12 +428,12 @@ void flipResource(std::list<Resource> *currentlist, std::list<Resource> *targetl
     }
 }
 
-void loadGrayRes(std::list<Resource> *res, std::list<Resource> *grayres)
+void loadGrayRes(std::list<ImageResource> *res, std::list<ImageResource> *grayres)
 {
     auto graypointer = res->begin();
     while (graypointer != res->end())
     {
-        Resource* res = new Resource(applyTransparencyEffect((*graypointer).pix, 0.5));
+        ImageResource* res = new ImageResource(applyTransparencyEffect((*graypointer).pix, 0.5));
         res->memorymap = (*graypointer).memorymap;
         grayres->push_back(*res);
         delete res;
@@ -443,12 +441,12 @@ void loadGrayRes(std::list<Resource> *res, std::list<Resource> *grayres)
     }
 }
 
-void loadBlackRes(std::list<Resource> *res, std::list<Resource> *blackres)
+void loadBlackRes(std::list<ImageResource> *res, std::list<ImageResource> *blackres)
 {
     auto blackpointer = res->begin();
     while (blackpointer != res->end())
     {
-        Resource* res = new Resource(applyTransparencyEffect((*blackpointer).pix, 1));
+        ImageResource* res = new ImageResource(applyTransparencyEffect((*blackpointer).pix, 1));
         res->memorymap = (*blackpointer).memorymap;
         blackres->push_back(*res);
         delete res;

@@ -1,6 +1,12 @@
-#include "Coordinate.h"
+﻿#include "Coordinate.h"
 
 Coordinate::Coordinate()
 {
 
 }
+
+void Coordinate::nextframe()
+{
+
+}
+

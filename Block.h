@@ -8,45 +8,45 @@ class Block:public Coordinate
 public:
     Block();
 
-    static std::list<Resource>* getblock(int i) {
+    static std::list<ImageResource>* getblock(int i) {
         return block[i];
     }
 
-    static std::list<Resource>* getgrayblock(int i)
+    static std::list<ImageResource>* getgrayblock(int i)
     {
         return grayblock[i];
     }
 
-    static std::list<Resource>* getblackblock(int i)
+    static std::list<ImageResource>* getblackblock(int i)
     {
         return blackblock[i];
     }
 
-    static void setblock(int i, std::list<Resource>* newValue) {
+    static void setblock(int i, std::list<ImageResource>* newValue) {
         block[i] = newValue;
     }
 
-    static void setgrayblock(int i,std::list<Resource>* newValue)
+    static void setgrayblock(int i,std::list<ImageResource>* newValue)
     {
         grayblock[i]=newValue;
     }
 
-    static void setblackblock(int i,std::list<Resource>* newValue)
+    static void setblackblock(int i,std::list<ImageResource>* newValue)
     {
         blackblock[i]=newValue;
     }
 
     static void allocateblock(int i)
     {
-        block[i]=new std::list<Resource>;
+        block[i]=new std::list<ImageResource>;
     }
     static void allocategrayblock(int i)
     {
-        grayblock[i]=new std::list<Resource>;
+        grayblock[i]=new std::list<ImageResource>;
     }
     static void allocateblackblock(int i)
     {
-        blackblock[i]=new std::list<Resource>;
+        blackblock[i]=new std::list<ImageResource>;
     }
 
     static void deallocateblock(int i) {
@@ -73,9 +73,9 @@ public:
     bool Visible=false;//是否可见
     bool Explored=false;//是否被探索
 
-    static std::list<Resource> *block[17];
-    static std::list<Resource> *grayblock[17];
-    static std::list<Resource> *blackblock[17];
+    static std::list<ImageResource> *block[17];
+    static std::list<ImageResource> *grayblock[17];
+    static std::list<ImageResource> *blackblock[17];
     static std::string Blockname[17];
     //    int Environment=0;//当前地皮编号 考虑用num代替
     //用基类中num代替

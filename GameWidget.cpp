@@ -178,7 +178,7 @@ void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)
 }
 
 //绘制内存图
-void GameWidget::drawmemory(int X, int Y, Resource res, int selectNum)
+void GameWidget::drawmemory(int X, int Y, ImageResource res, int selectNum)
 {
     for(int i=0;i<res.pix.width();i++)
     {

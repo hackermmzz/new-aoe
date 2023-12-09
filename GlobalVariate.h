@@ -190,12 +190,12 @@ struct pixMemoryMap
     }
 };
 
-struct Resource
+struct ImageResource
 {
     QPixmap pix;
     pixMemoryMap memorymap;
 
-    Resource(QPixmap pix):pix(pix)
+    ImageResource(QPixmap pix):pix(pix)
     {
         if (pix.isNull()) {
             // 图片未成功加载，执行错误处理操作
@@ -203,7 +203,7 @@ struct Resource
         }
     }
 
-    Resource()
+    ImageResource()
     {
 
     }
@@ -227,12 +227,12 @@ struct Point {
 int InitImageResMap(QString path);
 int InitSoundResMap(QString path);
 QPixmap applyTransparencyEffect(const QPixmap& originalPixmap, qreal opacity);
-void loadResource(std::string name,std::list<Resource> *targetlist);
-void loadGrayRes(std::list<Resource>* res, std::list<Resource>* grayres);
-void loadBlackRes(std::list<Resource>* res,std::list<Resource>* blackres);
+void loadResource(std::string name,std::list<ImageResource> *targetlist);
+void loadGrayRes(std::list<ImageResource>* res, std::list<ImageResource>* grayres);
+void loadBlackRes(std::list<ImageResource>* res,std::list<ImageResource>* blackres);
 
-void flipResource(std::list<Resource> *currentlist,std::list<Resource> *targetlist);
-void initMemory(Resource *res);
+void flipResource(std::list<ImageResource> *currentlist,std::list<ImageResource> *targetlist);
+void initMemory(ImageResource *res);
 double countdistance(double L,double U,double L0,double U0);
 int calculateManhattanDistance(int x1, int y1, int x2, int y2);
 
