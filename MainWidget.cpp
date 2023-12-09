@@ -33,6 +33,9 @@ MainWidget::MainWidget(bool MapJudge, QWidget *parent) :
 
     //向地图中添加资源
     initmap();
+
+
+    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 }
 
 MainWidget::~MainWidget()
@@ -69,4 +72,11 @@ void MainWidget::deleteBlock()
         Block::deallocateblackblock(i);
         Block::deallocategrayblock(i);
     }
+}
+void MainWidget::FrameUpdate()
+{
+    ui->Game->update();
+    emit mapmove();
+    return;
+
 }

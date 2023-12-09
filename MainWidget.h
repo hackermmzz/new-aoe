@@ -42,6 +42,14 @@ public:
 
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
+
+private slots:
+    void FrameUpdate();
+
+
+
+signals:
+    void mapmove();
 private:
     Ui::MainWidget *ui;
     QTimer *timer;

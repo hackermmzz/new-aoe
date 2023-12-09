@@ -7,6 +7,7 @@ GameWidget::GameWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     mainwidget=(MainWidget*)this->parentWidget();
+    connect(mainwidget,SIGNAL(mapmove()),this,SLOT(movemap()));
 }
 
 GameWidget::~GameWidget()

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>MainWidget</string>
   </property>
-  <widget class="GameWidget" name="widget" native="true">
+  <widget class="GameWidget" name="Game" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
