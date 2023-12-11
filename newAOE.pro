@@ -36,8 +36,6 @@ SOURCES += \
     MoveObject.cpp \
     Building.cpp \
     Resource.cpp \
-    Coores.cpp \
-    Blockres.cpp \
     Human.cpp
 
 HEADERS += \
@@ -51,8 +49,6 @@ HEADERS += \
     MoveObject.h \
     Building.h \
     Resource.h \
-    Coores.h \
-    Blockres.h \
     Human.h
 
 FORMS += \
