@@ -1,5 +1,8 @@
 ﻿#include "MainWidget.h"
 #include "ui_MainWidget.h"
+
+int g_globalNum=1;
+std::map<int,Coordinate*> g_Object;
 MainWidget::MainWidget(bool MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -46,8 +49,10 @@ MainWidget::~MainWidget()
 
 MainWidget::initmap()
 {
-
-
+    if(map->loadResource()==0)
+    {
+        return 0;
+    }
 
 }
 

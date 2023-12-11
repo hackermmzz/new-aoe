@@ -13,7 +13,7 @@
 using namespace std;
 class Coordinate;
 
-extern int g_selectNum;
+extern int g_globalNum;
 extern std::map<int,Coordinate*> g_Object;
 
 extern int MidX;

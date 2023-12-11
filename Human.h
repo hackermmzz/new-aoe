@@ -7,6 +7,7 @@ class Human:public MoveObject
 {
 public:
     Human();
+    Human(int Num,double DR,double UR);
 };
 
 #endif // HUMAN_H

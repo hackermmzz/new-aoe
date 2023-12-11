@@ -46,8 +46,16 @@ public:
     {
         return this->globalNum;
     }
+    int getNum()
+    {
+        return this->Num;
+    }
 
 protected:
+
+    int Num;//对象在对应类中的编号
+    //比如building类下Num==0为小房子
+    //在不同的类有着不同的含义
 
     double DR;//当前物体中心所在的坐标位置
     double UR;//在块类中该坐标即为正中心

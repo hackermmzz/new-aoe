@@ -7,6 +7,7 @@ class Building:public Coordinate
 {
 public:
     Building();
+    Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
 
     static std::list<ImageResource>* getBuild(int i) {
         return build[i];
@@ -52,6 +53,9 @@ private:
     //建筑所处时代 来确定不同时代建筑有何变化 ？时代要不要用player类下的
 
     double hpPercent;
+
+    int Foundation;
+    //地基类型
 
     static std::string Buildingname[4];
     static std::string Builtname[3][7];

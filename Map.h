@@ -3,9 +3,8 @@
 
 #include <Block.h>
 #include <config.h>
-//#include <Coores.h>
-//#include <Animal.h>
-//#include <Ruin.h>
+#include <StaticRes.h>
+#include <Animal.h>
 
 class Map
 {
@@ -28,12 +27,18 @@ public:
     // 生成不同地貌
     void generateLandforms();
 
+    int addStaticRes(int Num,double DR,double UR);
+
+    int addStaticRes(int Num, int BlockDR, int BlockUR);
+
+    int addAnimal(int Num,double DR,double UR);
+
+    int loadResource();
+
     Block **cell=new Block*[MAP_L];
 
-    int intmap[72][72]={};
-
-//    std::list<Coores *> coores={};
-//    std::list<Animal *> animal={};
+    std::list<StaticRes *> staticres={};
+    std::list<Animal *> animal={};
 //    std::list<Ruin *> ruin={};
 };
 

@@ -10,6 +10,10 @@ public:
 private:
     double Cnt;
 
+    double MaxCnt;
+
+
+
 };
 
 #endif // RESOURCE_H

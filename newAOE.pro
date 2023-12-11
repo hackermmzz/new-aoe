@@ -36,7 +36,10 @@ SOURCES += \
     MoveObject.cpp \
     Building.cpp \
     Resource.cpp \
-    Human.cpp
+    Human.cpp \
+    Animal.cpp \
+    StaticRes.cpp \
+    Player.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -49,7 +52,10 @@ HEADERS += \
     MoveObject.h \
     Building.h \
     Resource.h \
-    Human.h
+    Human.h \
+    Animal.h \
+    StaticRes.h \
+    Player.h
 
 FORMS += \
         MainWidget.ui \

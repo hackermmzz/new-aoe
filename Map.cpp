@@ -669,6 +669,62 @@ void Map::generateLandforms()
     return ;
 }
 
+int Map::addStaticRes(int Num, double DR, double UR)
+{
+    StaticRes *newstaticres=new StaticRes(Num,DR,UR);
+    this->staticres.push_back(newstaticres);
+    return 0;
+}
+
+int Map::addStaticRes(int Num, int BlockDR, int BlockUR)
+{
+    StaticRes *newstaticres=new StaticRes(Num,BlockDR,BlockUR);
+    this->staticres.push_back(newstaticres);
+    return 0;
+}
+
+int Map::addAnimal(int Num, double DR, double UR)
+{
+    Animal *newanimal=new Animal(Num,DR,UR);
+    this->animal.push_back(newanimal);
+    return 0;
+}
+
+int Map::loadResource()
+{
+//    for(int i = 0; i < MAP_U; i++)
+//    {
+//        for(int j = 0; j < MAP_L; j++)
+//        {
+//            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
+//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
+//            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
+//            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
+//            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
+//            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
+//            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
+//            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
+//            /*
+//                种类：
+//                0为空地；
+//                1为树木；
+//                2为浆果；
+//                3为瞪羚；
+//                4为石头；
+//                5为金矿；
+//                6为狮子；
+//                7为大象；
+//                9为主营；
+//                10为箭塔废墟；
+//                11为树林。
+//            */
+//            Gamemap[i][j] = 0;  // :)
+//            mapFlag[i][j] = 0;
+//        }
+//    }
+    return 0;
+}
+
 void Map::init(bool MapJudge)
 {
     for(int i=0;i<MAP_L;i++){
@@ -679,61 +735,61 @@ void Map::init(bool MapJudge)
             this->cell[i][j].Visible=true;
         }
     }
-//    generateLandforms();
-//    generateCenter();
-//    generateResources();
-//    generateResource();
+    generateLandforms();
+    generateCenter();
+    generateResources();
+    generateResource();
 
-//    if(MapJudge == true) // 随机地图时
-//    {
-//        std::ofstream outMapFile("Gamemap.txt");
-//        if (outMapFile.is_open())
-//        {
-//            for (int i = 0; i < MAP_L; i++)
-//            {
-//                for (int j = 0; j < MAP_U; j++)
-//                {
-//                    outMapFile << Gamemap[i][j] << "\n";
-//                }
-//            }
+    if(MapJudge == true) // 随机地图时
+    {
+        std::ofstream outMapFile("Gamemap.txt");
+        if (outMapFile.is_open())
+        {
+            for (int i = 0; i < MAP_L; i++)
+            {
+                for (int j = 0; j < MAP_U; j++)
+                {
+                    outMapFile << Gamemap[i][j] << "\n";
+                }
+            }
 
-//            outMapFile.close();
-////            qDebug() << "地图数据已导出为文件";
-//        }
-//        else
-//        {
-//            qDebug() << "无法导出地图文件";
-//        }
-//    }
-//    else if(MapJudge == false) // 固定地图时
-//    {
-//        QFile inputGameFile("Gamemap.txt"); // 打开文本文件以读取数据
+            outMapFile.close();
+//            qDebug() << "地图数据已导出为文件";
+        }
+        else
+        {
+            qDebug() << "无法导出地图文件";
+        }
+    }
+    else if(MapJudge == false) // 固定地图时
+    {
+        QFile inputGameFile("Gamemap.txt"); // 打开文本文件以读取数据
 
-//        if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
-//        {
-//            QTextStream in(&inputGameFile);
-//            int j = 0, i = 0;
-//            for (int T = 0; i < MAP_L * MAP_U; T++)
-//            {
-//                QString line = in.readLine();
-//                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-//                j++;
-//                if(j >= MAP_U)
-//                {
-//                    j = 0;
-//                    i++;
-//                }
-//                if(i >= MAP_L)
-//                {
-//                    break;
-//                }
-//            }
-//            inputGameFile.close();
-//            qDebug() << "地图数据已读取到游戏内";
-//        }
-//        else
-//        {
-//            qDebug() << "无法打开地图文件";
-//        }
-//    }
+        if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream in(&inputGameFile);
+            int j = 0, i = 0;
+            for (int T = 0; i < MAP_L * MAP_U; T++)
+            {
+                QString line = in.readLine();
+                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
+                j++;
+                if(j >= MAP_U)
+                {
+                    j = 0;
+                    i++;
+                }
+                if(i >= MAP_L)
+                {
+                    break;
+                }
+            }
+            inputGameFile.close();
+            qDebug() << "地图数据已读取到游戏内";
+        }
+        else
+        {
+            qDebug() << "无法打开地图文件";
+        }
+    }
 }
