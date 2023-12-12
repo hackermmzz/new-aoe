@@ -31,7 +31,7 @@ class MainWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit MainWidget(bool MapJudge, QWidget *parent = 0);
+    explicit MainWidget(int MapJudge, QWidget *parent = 0);
     ~MainWidget();
 
     initmap();
