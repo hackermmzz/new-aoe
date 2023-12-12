@@ -725,7 +725,7 @@ int Map::loadResource()
     return 0;
 }
 
-void Map::init(bool MapJudge)
+void Map::init(int MapJudge)
 {
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
@@ -740,9 +740,10 @@ void Map::init(bool MapJudge)
     generateResources();
     generateResource();
 
-    if(MapJudge == true) // 随机地图时
+    if(MapJudge == 0) // 随机产生地图
     {
-        std::ofstream outMapFile("Gamemap.txt");
+        qDebug() << "0";
+        std::ofstream outMapFile("tmpMap.txt");
         if (outMapFile.is_open())
         {
             for (int i = 0; i < MAP_L; i++)
@@ -761,9 +762,10 @@ void Map::init(bool MapJudge)
             qDebug() << "无法导出地图文件";
         }
     }
-    else if(MapJudge == false) // 固定地图时
+    else if(MapJudge == 1) // 读取上一次随机的地图
     {
-        QFile inputGameFile("Gamemap.txt"); // 打开文本文件以读取数据
+        qDebug() << "1";
+        QFile inputGameFile("tmpMap.txt"); // 打开文本文件以读取数据
 
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
@@ -785,11 +787,41 @@ void Map::init(bool MapJudge)
                 }
             }
             inputGameFile.close();
-            qDebug() << "地图数据已读取到游戏内";
+            qDebug() << "上一次的随机地图数据已读取到游戏内";
         }
         else
         {
-            qDebug() << "无法打开地图文件";
+            qDebug() << "无法打开上一次的随机地图文件";
         }
+    }
+    else if(MapJudge == 2)  // 读取确定的地图
+    {
+        qDebug() << "2";
+        QFile inputGameFile("gameMap.txt"); // 打开文本文件以读取数据
+
+        if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream in(&inputGameFile);
+            int j = 0, i = 0;
+            for (int T = 0; i < MAP_L * MAP_U; T++)
+            {
+                QString line = in.readLine();
+                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
+                j++;
+                if(j >= MAP_U)
+                {
+                    j = 0;
+                    i++;
+                }
+                if(i >= MAP_L)
+                {
+                    break;
+                }
+            }
+            inputGameFile.close();
+            qDebug() << "固定地图数据已读取到游戏内";
+        }
+        else qDebug() << "无法打开固定地图文件";
+
     }
 }

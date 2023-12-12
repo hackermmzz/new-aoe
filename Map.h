@@ -11,7 +11,7 @@ class Map
 public:
     Map();
     ~Map();
-    void init(bool MapJudge);
+    void init(int MapJudge);
     // 随机生成资源（多个），并添加到地图中
     void generateResources();
 
