@@ -11,7 +11,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 初始化资源
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
+
     initBlock();
+    initBuilding();
 
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
     this->setWindowTitle("Age Of Empires");     // 设置标题
@@ -34,12 +36,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     {
         memorymap[i]=new int[MEMORYCOLUMN];
     }
+    //玩家开辟空间
+    for(int i=0;i<MAXPLAYER;i++)
+        player[i]=new Player();
 
     // 向地图中添加资源
     initmap();
 
-
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+
+    player[0]->addBuilding(0,0,0);
 }
 
 MainWidget::~MainWidget()
@@ -69,6 +75,23 @@ void MainWidget::initBlock()
         loadBlackRes(Block::getblock(num),Block::getblackblock(num));
     }
 }
+void MainWidget::initBuilding()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        Building::allocatebuild(i);
+        loadResource(Building::getBuildingname(i),Building::getBuild(i));
+    }
+    for (int i = 1; i < 3; i++)
+    {
+        for(int j=0;j<7;j++)
+        {
+            Building::allocatebuilt(i,j);
+            loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));
+        }
+    }
+}
+
 
 void MainWidget::deleteBlock()
 {
@@ -77,6 +100,20 @@ void MainWidget::deleteBlock()
         Block::deallocateblock(i);
         Block::deallocateblackblock(i);
         Block::deallocategrayblock(i);
+    }
+}
+void MainWidget::deleteBuilding()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        Building::deallocatebuild(i);
+    }
+    for (int i = 1; i < 3; i++)
+    {
+        for(int j=0;j<7;j++)
+        {
+            Building::deallocatebuilt(i,j);
+        }
     }
 }
 void MainWidget::FrameUpdate()

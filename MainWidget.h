@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <Map.h>
 #include <qtimer.h>
-//#include <Player.h>
+#include <Player.h>
 #include <QTextBrowser>
 #include <GlobalVariate.h>
 #include <config.h>
@@ -37,10 +37,13 @@ public:
     initmap();
 
     void initBlock();
+    void initBuilding();
 
     void deleteBlock();
+    void deleteBuilding();
 
     Map *map;
+    Player* player[MAXPLAYER];
     int **memorymap=new int*[MEMORYROW];//动态
 
 private slots:
