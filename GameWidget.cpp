@@ -196,8 +196,6 @@ void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)
         std::list<Coordinate *>::iterator iter=drawlist->begin();
         while(1)//H越大说明越靠下，应该先打印H小的，所以H小的在前边
         {
-            //            qDebug()<<p->L;
-            //            qDebug()<<(*iter)->H;
             if(p->getimageH()<(*iter)->getimageH())
             {
                 drawlist->insert(iter,p);
@@ -215,7 +213,7 @@ void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)
 }
 
 //绘制内存图
-void GameWidget::drawmemory(int X, int Y, ImageResource res, int selectNum)
+void GameWidget::drawmemory(int X, int Y, ImageResource res, int globalNum)
 {
     for(int i=0;i<res.pix.width();i++)
     {
@@ -228,7 +226,7 @@ void GameWidget::drawmemory(int X, int Y, ImageResource res, int selectNum)
             {
                 if(res.memorymap.getMemoryMap(i,j)!=0)
                 {
-                    mainwidget->memorymap[mx/4][my/4]=selectNum;
+                    mainwidget->memorymap[mx/4][my/4]=globalNum;
                 }
             }
         }

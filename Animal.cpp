@@ -1,4 +1,5 @@
 ﻿#include "Animal.h"
+#include <QDebug>
 
  //以下为图片资源
 std::string Animal::Animalname[5]={"Tree","Gazelle","Elephant","Lion","Forest"};
@@ -71,4 +72,16 @@ Animal::Animal(int Num, double DR, double UR)
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
     
+}
+
+void Animal::nextframe()
+{
+    std::list<ImageResource> *nowlist=NULL;
+    nowlist=this->Stand[this->Num][this->Angle];
+    this->nowres++;
+    if(this->nowres==nowlist->end())
+    {
+        nowres=nowlist->begin();
+    }
+
 }

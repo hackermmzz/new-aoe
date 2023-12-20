@@ -31,7 +31,7 @@ public:
     int tranU(int X, int Y);
 
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
-    void drawmemory(int X, int Y, ImageResource res, int selectNum);
+    void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
 
 private slots:

@@ -39,7 +39,9 @@ SOURCES += \
     Human.cpp \
     Animal.cpp \
     StaticRes.cpp \
-    Player.cpp
+    Player.cpp \
+    Core.cpp \
+    Farmer.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -55,7 +57,9 @@ HEADERS += \
     Human.h \
     Animal.h \
     StaticRes.h \
-    Player.h
+    Player.h \
+    Core.h \
+    Farmer.h
 
 FORMS += \
         MainWidget.ui \

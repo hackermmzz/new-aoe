@@ -118,7 +118,6 @@ void Map::generateResources()
                         int tj = 0;
                         for(int J = j; J < j + 5; J++)
                         {
-//                            qDebug() << "(" << i << "," << j << ")";
                             mapFlag[I][J] = true;
                             if(Food[ResFlag][ti][tj] == 1) Gamemap[I][J] = 2;
                             tj++;
@@ -396,7 +395,6 @@ void Map::generateResource()
                 mapFlag[i][j] = true;
                 mapFlag[I][J] = true;
                 flag = 1;
-//                qDebug() << "在" << i << "," << j <<"和" << I << "," << J << "上生成象" << '2';
             }
         }
         if(flag == 1) break;
@@ -692,6 +690,7 @@ int Map::addAnimal(int Num, double DR, double UR)
 
 int Map::loadResource()
 {
+    addAnimal(1,0,0);
 //    for(int i = 0; i < MAP_U; i++)
 //    {
 //        for(int j = 0; j < MAP_L; j++)
@@ -742,7 +741,6 @@ void Map::init(int MapJudge)
 
     if(MapJudge == 0) // 随机产生地图
     {
-        qDebug() << "0";
         std::ofstream outMapFile("tmpMap.txt");
         if (outMapFile.is_open())
         {
@@ -764,7 +762,6 @@ void Map::init(int MapJudge)
     }
     else if(MapJudge == 1) // 读取上一次随机的地图
     {
-        qDebug() << "1";
         QFile inputGameFile("tmpMap.txt"); // 打开文本文件以读取数据
 
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -796,7 +793,6 @@ void Map::init(int MapJudge)
     }
     else if(MapJudge == 2)  // 读取确定的地图
     {
-        qDebug() << "2";
         QFile inputGameFile("gameMap.txt"); // 打开文本文件以读取数据
 
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))

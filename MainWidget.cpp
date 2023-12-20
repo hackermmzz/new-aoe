@@ -14,6 +14,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     initBlock();
     initBuilding();
+    initAnimal();
 
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
     this->setWindowTitle("Age Of Empires");     // 设置标题
@@ -46,6 +47,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
     player[0]->addBuilding(0,0,0);
+
 }
 
 MainWidget::~MainWidget()
@@ -92,6 +94,57 @@ void MainWidget::initBuilding()
     }
 }
 
+void MainWidget::initAnimal()
+{
+    for(int num=0;num<5;num++)
+    {
+        if(num==ANIMAL_TREE)
+        {
+            Animal::allocateStand(num,0);
+            Animal::allocateDie(num,0);
+            loadResource(Animal::getAnimalName(num),Animal::getStand(num,0));
+            loadResource(Animal::getAnimalcarcassname(num),Animal::getDie(num,0));
+            continue;
+        }
+        if(num==ANIMAL_GAZELLE||num==ANIMAL_LION)
+        {
+            for(int i=0;i<=4;i++)
+            {
+                Animal::allocateRun(num,i);
+                loadResource(Animal::getAnimalName(num)+"_Run_"+direction[i],Animal::getRun(num,i));
+            }
+            for(int i=5;i<8;i++)
+            {
+                Animal::allocateRun(num,i);
+                flipResource(Animal::getRun(num,8-i),Animal::getRun(num,i));
+            }
+        }
+        for(int i=0;i<=4;i++)
+        {
+            Animal::allocateAttack(num,i);
+            Animal::allocateWalk(num,i);
+            Animal::allocateStand(num,i);
+            Animal::allocateDie(num,i);
+            loadResource(Animal::getAnimalName(num)+"_Stand_"+direction[i],Animal::getStand(num,i));
+            loadResource(Animal::getAnimalName(num)+"_Walk_"+direction[i],Animal::getWalk(num,i));
+            loadResource(Animal::getAnimalName(num)+"_Attack_"+direction[i],Animal::getAttack(num,i));
+            loadResource(Animal::getAnimalName(num)+"_Die_"+direction[i],Animal::getDie(num,i));
+        }
+        for(int i=5;i<8;i++)
+        {
+            Animal::allocateAttack(num,i);
+            Animal::allocateWalk(num,i);
+            Animal::allocateStand(num,i);
+            Animal::allocateDie(num,i);
+            flipResource(Animal::getWalk(num,8-i),Animal::getWalk(num,i));
+            flipResource(Animal::getStand(num,8-i),Animal::getStand(num,i));
+            flipResource(Animal::getAttack(num,8-i),Animal::getAttack(num,i));
+            flipResource(Animal::getDie(num,8-i),Animal::getDie(num,i));
+        }
+    }
+}
+
+
 
 void MainWidget::deleteBlock()
 {
@@ -116,9 +169,49 @@ void MainWidget::deleteBuilding()
         }
     }
 }
+void MainWidget::deleteAnimal()
+{
+    for (int num = 0; num < 3; num++)
+    {
+        if (num == 0)
+        {
+            Animal::deallocateStand(num, 0);
+            Animal::deallocateDie(num, 0);
+            continue;
+        }
+        if (num == 1|| num == 3)
+        {
+            for (int i = 0; i <= 4; i++)
+            {
+                Animal::deallocateRun(num, i);
+            }
+            for (int i = 5; i < 8; i++)
+            {
+                Animal::deallocateRun(num, i);
+            }
+        }
+        for (int i = 0; i <= 4; i++)
+        {
+            Animal::deallocateAttack(num, i);
+            Animal::deallocateWalk(num, i);
+            Animal::deallocateStand(num, i);
+            Animal::deallocateDie(num, i);
+        }
+        for (int i = 5; i < 8; i++)
+        {
+            Animal::deallocateAttack(num, i);
+            Animal::deallocateWalk(num, i);
+            Animal::deallocateStand(num, i);
+            Animal::deallocateDie(num, i);
+        }
+    }
+}
+
+
 void MainWidget::FrameUpdate()
 {
     ui->Game->update();
+    core->gameUpdate(map,player,memorymap);
     emit mapmove();
     return;
 
