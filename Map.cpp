@@ -1,4 +1,4 @@
-#include "Map.h"
+﻿#include "Map.h"
 
 Map::Map()
 {
@@ -18,26 +18,26 @@ Map::~Map()
     }
     delete[] cell;
 
-    //    // 清空 coores 列表并调用析构函数释放内存
-    //    for (auto it = coores.begin(); it != coores.end(); ++it)
-    //    {
-    //        delete *it;
-    //    }
-    //    coores.clear();
+//    // 清空 coores 列表并调用析构函数释放内存
+//    for (auto it = coores.begin(); it != coores.end(); ++it)
+//    {
+//        delete *it;
+//    }
+//    coores.clear();
 
-    //    // 清空 animal 列表并调用析构函数释放内存
-    //    for (auto it = animal.begin(); it != animal.end(); ++it)
-    //    {
-    //        delete *it;
-    //    }
-    //    animal.clear();
+//    // 清空 animal 列表并调用析构函数释放内存
+//    for (auto it = animal.begin(); it != animal.end(); ++it)
+//    {
+//        delete *it;
+//    }
+//    animal.clear();
 
-    //    // 清空 ruin 列表并调用析构函数释放内存
-    //    for (auto it = ruin.begin(); it != ruin.end(); ++it)
-    //    {
-    //        delete *it;
-    //    }
-    //    ruin.clear();
+//    // 清空 ruin 列表并调用析构函数释放内存
+//    for (auto it = ruin.begin(); it != ruin.end(); ++it)
+//    {
+//        delete *it;
+//    }
+//    ruin.clear();
 }
 
 // 随机生成资源（多个），并添加到地图中
@@ -118,6 +118,7 @@ void Map::generateResources()
                         int tj = 0;
                         for(int J = j; J < j + 5; J++)
                         {
+//                            qDebug() << "(" << i << "," << j << ")";
                             mapFlag[I][J] = true;
                             if(Food[ResFlag][ti][tj] == 1) Gamemap[I][J] = 2;
                             tj++;
@@ -298,10 +299,10 @@ void Map::generateResource()
             }
             if(rand() % 1260 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
             {
-                //Tree
-                Gamemap[i][j] = 1;
-                mapFlag[i][j] = true;
-                CountTree ++;
+                    //Tree
+                    Gamemap[i][j] = 1;
+                    mapFlag[i][j] = true;
+                    CountTree ++;
             }
         }
         if(CountTree >= TREEMAX) break;
@@ -315,64 +316,64 @@ void Map::generateResource()
         int i = 0, j = 0;
         switch(flag)
         {
-        case 0:
-            for(int i = MAP_L / 2 - 26; i <= MAP_L / 2 + 26; i++)
-            {
-                j = MAP_U / 2 - 26;
-                if(flag == 1) break;
-                if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+            case 0:
+                for(int i = MAP_L / 2 - 26; i <= MAP_L / 2 + 26; i++)
                 {
-                    Gamemap[i][j] = 6;
-                    mapFlag[i][j] = true;
-                    flag ++;
-                    break;
+                    j = MAP_U / 2 - 26;
+                    if(flag == 1) break;
+                    if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                    {
+                        Gamemap[i][j] = 6;
+                        mapFlag[i][j] = true;
+                        flag ++;
+                        break;
+                    }
                 }
-            }
-            break;
-        case 1:
-            for(int i = MAP_L / 2 - 26; i <= MAP_L / 2 + 26; i++)
-            {
-                j = MAP_U / 2 + 26;
-                if(flag == 2) break;
-                if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                break;
+            case 1:
+                for(int i = MAP_L / 2 - 26; i <= MAP_L / 2 + 26; i++)
                 {
-                    Gamemap[i][j] = 6;
-                    mapFlag[i][j] = true;
-                    flag ++;
-                    break;
+                    j = MAP_U / 2 + 26;
+                    if(flag == 2) break;
+                    if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                    {
+                        Gamemap[i][j] = 6;
+                        mapFlag[i][j] = true;
+                        flag ++;
+                        break;
+                    }
                 }
-            }
-            break;
-        case 2:
-            for(int j = MAP_U / 2 - 26; j <= MAP_U / 2 + 26; j++)
-            {
-                i = MAP_L / 2 - 26;
-                if(flag == 3) break;
-                if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                break;
+            case 2:
+                for(int j = MAP_U / 2 - 26; j <= MAP_U / 2 + 26; j++)
                 {
-                    Gamemap[i][j] = 6;
-                    mapFlag[i][j] = true;
-                    flag ++;
-                    break;
+                    i = MAP_L / 2 - 26;
+                    if(flag == 3) break;
+                    if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                    {
+                        Gamemap[i][j] = 6;
+                        mapFlag[i][j] = true;
+                        flag ++;
+                        break;
+                    }
                 }
-            }
-            break;
-        case 3:
-            for(int j = MAP_U / 2 - 26; j <= MAP_U / 2 + 26; j++)
-            {
-                i = MAP_L / 2 + 26;
-                if(flag == 4) break;
-                if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                break;
+            case 3:
+                for(int j = MAP_U / 2 - 26; j <= MAP_U / 2 + 26; j++)
                 {
-                    Gamemap[i][j] = 6;
-                    mapFlag[i][j] = true;
-                    flag ++;
-                    break;
+                    i = MAP_L / 2 + 26;
+                    if(flag == 4) break;
+                    if(rand() % 200 == 0 && mapFlag[i][j] == false && mapFlag[i - 1][j] == false && mapFlag[i + 1][j] == false && mapFlag[i][j + 1] == false && mapFlag[i - 1][j - 1] == false && mapFlag[i][j - 1] == false && mapFlag[i + 1][j - 1] == false && mapFlag[i - 1][j + 1] == false && mapFlag[i + 1][j + 1] == false)
+                    {
+                        Gamemap[i][j] = 6;
+                        mapFlag[i][j] = true;
+                        flag ++;
+                        break;
+                    }
                 }
-            }
-            break;
-        default:
-            break;
+                break;
+            default:
+                break;
         }
     }
 
@@ -395,6 +396,7 @@ void Map::generateResource()
                 mapFlag[i][j] = true;
                 mapFlag[I][J] = true;
                 flag = 1;
+//                qDebug() << "在" << i << "," << j <<"和" << I << "," << J << "上生成象" << '2';
             }
         }
         if(flag == 1) break;
@@ -690,7 +692,6 @@ int Map::addAnimal(int Num, double DR, double UR)
 
 int Map::loadResource()
 {
-    addAnimal(1,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
 //    for(int i = 0; i < MAP_U; i++)
 //    {
 //        for(int j = 0; j < MAP_L; j++)
@@ -724,121 +725,6 @@ int Map::loadResource()
     return 0;
 }
 
-void Map::GenerateTerrain()
-{
-    srand(time(NULL));
-
-    // 1.每间隔10格，设置一个高度锚点，高度在2~4之间；
-    for(int i = 0; i < 72; i += 10)
-    {
-        for(int j = 0; j < 72; j += 10)
-        {
-            mapHeight[i][j] = rand() % 5 + 2;
-        }
-    }
-
-    // 2. 加权平均算出每个方格里各Block的高度
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 71; j++)
-        {
-            if(mapHeight[i][j] == 0)
-            {
-                int LUi = (i / 10) * 10;
-                int LUj = (j / 10) * 10;
-                int RUi = (i / 10) * 10;
-                int RUj = (j / 10 + 1) * 10;
-                int LDi = (i / 10 + 1) * 10;
-                int LDj = (j / 10) * 10;
-                int RDi = (i / 10 + 1) * 10;
-                int RDj = (j / 10 + 1) * 10;
-                double MapH_LU = mapHeight[LUi][LUj];
-                double MapH_RU = mapHeight[RUi][RUj];
-                double MapH_LD = mapHeight[LDi][LDj];
-                double MapH_RD = mapHeight[RDi][RDj];
-                // 此时地块与四个角的点的曼哈顿距离 / 在整个大块里（10 * 10小块矩阵）理论上最远的距离（即20）= 高度占左上角的比例
-                double LU = 1 - smooth(double(abs(i - LUi) + abs(j - LUj)) / 20);
-                double RU = 1 - smooth(double(abs(i - RUi) + abs(j - RUj)) / 20);
-                double LD = 1 - smooth(double(abs(i - LDi) + abs(j - LDj)) / 20);
-                double RD = 1 - smooth(double(abs(i - RDi) + abs(j - RDj)) / 20);
-                mapHeight[i][j] = int((LU * MapH_LU + RU * MapH_RU + LD * MapH_LD + RD * MapH_RD) / 2 + 0.5);
-            }
-        }
-    }
-
-    // 3.初步修整地图边缘
-    for(int i = 0; i < 72; i++)
-    {
-        mapHeight[i][71] = mapHeight[i][70];
-        mapHeight[i][0] = mapHeight[i][1];
-    }
-    for(int j = 0; j < 72; j++)
-    {
-        mapHeight[71][j] = mapHeight[70][j];
-        mapHeight[0][j] = mapHeight[1][j];
-    }
-
-    // 将可能存在的突出/凹陷部分平滑化
-    for(int tmp = 2; tmp < 7; tmp ++)
-    {
-        for(int i = 1; i < 71; i++)
-        {
-            for(int j = 1; j < 71; j++)
-            {
-                if(mapHeight[i][j] == tmp)
-                {
-                    if(mapHeight[i - 1][j - 1] == mapHeight[i + 1][j + 1] && mapHeight[i][j] != mapHeight[i - 1][j - 1])
-                        mapHeight[i][j] = mapHeight[i - 1][j - 1];
-                    if(mapHeight[i - 1][j + 1] == mapHeight[i + 1][j - 1] && mapHeight[i][j] != mapHeight[i + 1][j - 1])
-                        mapHeight[i][j] = mapHeight[i - 1][j + 1];
-                    if(mapHeight[i][j - 1] == mapHeight[i][j + 1] && mapHeight[i][j] != mapHeight[i][j + 1])
-                        mapHeight[i][j] = mapHeight[i][j - 1];
-                    if(mapHeight[i - 1][j] == mapHeight[i + 1][j] && mapHeight[i][j] != mapHeight[i + 1][j])
-                        mapHeight[i][j] = mapHeight[i - 1][j];
-                }
-            }
-        }
-    }
-
-    // 再次修整地图边缘
-    for(int i = 0; i < 72; i++)
-    {
-        mapHeight[i][71] = mapHeight[i][70];
-        mapHeight[i][0] = mapHeight[i][1];
-    }
-    for(int j = 0; j < 72; j++)
-    {
-        mapHeight[71][j] = mapHeight[70][j];
-        mapHeight[0][j] = mapHeight[1][j];
-    }
-
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 72; j++)
-        {
-            this->cell[i][j].setMapHeight(mapHeight[i][j]);
-        }
-    }
-    return ;
-}
-
-double Map::smooth(double x)
-{
-    return 3 * pow(x, 2) - 2 * pow(x, 3);
-}
-
-void Map::clearData()
-{
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 72; j++)
-        {
-            mapHeight[i][j] = 0;
-        }
-    }
-    return ;
-}
-
 void Map::init(int MapJudge)
 {
     for(int i=0;i<MAP_L;i++){
@@ -847,17 +733,16 @@ void Map::init(int MapJudge)
             this->cell[i][j].Explored=true;
             //改地图可见度在这里
             this->cell[i][j].Visible=true;
-            this->cell[i][j].setMapHeight(MAPHEIGHT_FLAT);
         }
     }
     generateLandforms();
     generateCenter();
     generateResources();
     generateResource();
-    GenerateTerrain();
 
     if(MapJudge == 0) // 随机产生地图
     {
+        qDebug() << "0";
         std::ofstream outMapFile("tmpMap.txt");
         if (outMapFile.is_open())
         {
@@ -870,7 +755,7 @@ void Map::init(int MapJudge)
             }
 
             outMapFile.close();
-            //            qDebug() << "地图数据已导出为文件";
+//            qDebug() << "地图数据已导出为文件";
         }
         else
         {
@@ -879,6 +764,7 @@ void Map::init(int MapJudge)
     }
     else if(MapJudge == 1) // 读取上一次随机的地图
     {
+        qDebug() << "1";
         QFile inputGameFile("tmpMap.txt"); // 打开文本文件以读取数据
 
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -910,6 +796,7 @@ void Map::init(int MapJudge)
     }
     else if(MapJudge == 2)  // 读取确定的地图
     {
+        qDebug() << "2";
         QFile inputGameFile("gameMap.txt"); // 打开文本文件以读取数据
 
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -937,6 +824,4 @@ void Map::init(int MapJudge)
         else qDebug() << "无法打开固定地图文件";
 
     }
-
-    clearData();
 }

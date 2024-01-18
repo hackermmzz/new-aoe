@@ -19,8 +19,3 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     this->BlockDR=BlockDR;
     this->BlockUR=BlockUR;
 }
-
-void StaticRes::nextframe()
-{
-
-}

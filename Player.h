@@ -13,13 +13,13 @@ public:
 
     int addHuman(int Num,double DR,double UR);
 
+private:
+
     //建筑池子
     std::list<Building *> build;
 
     //人口池子
     std::list<Human *> human;
-
-private:
 
     //当前文明
     int civilization=1;
