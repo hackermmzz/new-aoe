@@ -31,10 +31,8 @@ public:
     int tranU(int X, int Y);
 
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
-    void drawmemory(int X, int Y, ImageResource res, int globalNum);
+    void drawmemory(int X, int Y, ImageResource res, int selectNum);
     void emptymemorymap();
-
-    MouseEvent *mouseEvent=new MouseEvent();
 
 private slots:
     void movemap();
@@ -62,8 +60,7 @@ private:
     QPoint selectionEndPos;
 
     //是否展示地图的格子线
-    bool showLine = true;
-
+    bool showLine = false;
 //    bool pos = false;
 };
 

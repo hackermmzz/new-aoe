@@ -99,16 +99,6 @@ struct tagAction
     int BuildingNum;
     int obSN;
 };
-
-struct MouseEvent
-{
-    QPoint memoryMapPosition;  // 点击窗口的相对位置
-    double DR;
-    double UR;
-    int mouseEventType;
-    //鼠标点击类型 自定义对应关系 左键点击 左键拉框 右键点击等
-};
-
 extern std::map<int, tagAction> g_AiAction;
 
 extern tagGame AIGame;
