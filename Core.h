@@ -4,6 +4,7 @@
 #include <GlobalVariate.h>
 #include <Map.h>
 #include <Player.h>
+#include <QMouseEvent>
 
 class Core
 {
