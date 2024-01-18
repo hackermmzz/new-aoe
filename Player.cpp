@@ -18,3 +18,10 @@ int Player::addHuman(int Num, double DR, double UR)
     human.push_back(newhuman);
     return 0;
 }
+
+int Player::addFarmer(double DR, double UR)
+{
+    Farmer *newfarmer=new Farmer(DR,UR);
+    human.push_back(newfarmer);
+    return 0;
+}

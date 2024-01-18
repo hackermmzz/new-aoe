@@ -7,6 +7,20 @@ Core::Core()
 
 void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *mouseEvent)
 {
+
+    std::list<Human *>::iterator humaniter=player[0]->human.begin();
+    while(humaniter!=player[0]->human.end())
+    {
+        Farmer *farmer=(Farmer *)(*humaniter);
+        if(farmer->needTranState())
+        {
+            farmer->setNowState(farmer->getPreState());
+            farmer->setPreStateIsIdle();
+            farmer->setNowRes();
+        }
+        humaniter++;
+    }
+
     std::list<Animal*>::iterator animaliter=map->animal.begin();
     while(animaliter!=map->animal.end())
     {
@@ -19,6 +33,43 @@ void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *m
         (*SRiter)->nextframe();
         SRiter++;
     }
+    std::list<Human *>::iterator hiter=player[0]->human.begin();
+    while(hiter!=player[0]->human.end())
+    {
+        (*hiter)->nextframe();
+        (*hiter)->updateLU();
+        hiter++;
+    }
+
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
+    {
+        if(mouseEvent->mouseEventType==LEFT_PRESS)
+        {
+            nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+
+            mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+        }
+        if(mouseEvent->mouseEventType==RIGHT_PRESS&&nowobject!=NULL)
+        {
+            if(nowobject->getSort()==SORT_FARMER)
+            {
+                Farmer *farmer=(Farmer *)nowobject;
+                if(!farmer->isWalking())
+                    farmer->setPreWalk();
+                farmer->setdestination(mouseEvent->DR,mouseEvent->UR);
+                Point start,destination;
+                start.x=tranBlockDR(farmer->getDR());
+                start.y=tranBlockUR(farmer->getUR());
+                destination.x=tranBlockDR(farmer->getDR0());
+                destination.y=tranBlockUR(farmer->getUR0());
+                map->loadfindPathMap();
+                farmer->setPath(findPath(map->findPathMap,map,start,destination));
+
+                mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+            }
+        }
+    }
+
 }
 
 bool Core::isValidPoint(const int (&map)[MAP_L][MAP_U], const Point &p)
@@ -143,3 +194,4 @@ stack<Point> Core::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Poi
 
     return stack<Point>();
 }
+

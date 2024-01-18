@@ -1,7 +1,7 @@
 ﻿#ifndef PLAYER_H
 #define PLAYER_H
 
-#include <Human.h>
+#include <Farmer.h>
 #include <Building.h>
 
 class Player
@@ -12,6 +12,8 @@ public:
     int addBuilding(int Num,int BlockDR,int BlockUR);
 
     int addHuman(int Num,double DR,double UR);
+
+    int addFarmer(double DR,double UR);
 
     //建筑池子
     std::list<Building *> build;

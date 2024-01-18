@@ -13,7 +13,6 @@ GameWidget::GameWidget(QWidget *parent) :
 GameWidget::~GameWidget()
 {
     delete ui;
-    delete mouseEvent;
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {
@@ -106,6 +105,15 @@ void GameWidget::paintEvent(QPaintEvent *)
             insert(p,&drawlist);
             biter++;
         }
+
+        std::list<Human *> *h=&(mainwidget->player[i]->human);
+        std::list<Human *>::iterator hiter=h->begin();
+        while(!h->empty()&&hiter!=h->end())
+        {
+            Coordinate *p=*hiter;
+            insert(p,&drawlist);
+            hiter++;
+        }
     }
 
     //地图资源相关 树木石块等
@@ -147,7 +155,23 @@ void GameWidget::paintEvent(QPaintEvent *)
 
 void GameWidget::mousePressEvent(QMouseEvent *event)
 {
+    if(event->button()==Qt::LeftButton)
+    {
+        mainwidget->mouseEvent->memoryMapX=event->x()/4;
+        mainwidget->mouseEvent->memoryMapY=event->y()/4;
+        mainwidget->mouseEvent->mouseEventType=LEFT_PRESS;
+        mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
+        mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
 
+    }
+    else if(event->button()==Qt::RightButton)
+    {
+        mainwidget->mouseEvent->memoryMapX=event->x()/4;
+        mainwidget->mouseEvent->memoryMapY=event->y()/4;
+        mainwidget->mouseEvent->mouseEventType=RIGHT_PRESS;
+        mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
+        mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
+    }
 }
 
 void GameWidget::mouseReleaseEvent(QMouseEvent* event)
@@ -156,34 +180,34 @@ void GameWidget::mouseReleaseEvent(QMouseEvent* event)
 }
 
 //坐标间的相互转化
-int GameWidget::tranX(int L, int U)
+int GameWidget::tranX(int DR, int UR)
 {
     int X;
     //    X=L*2.0/gen5+U*2.0/gen5;
-    X=(L+U)*2/gen5;
+    X=(DR+UR)*2/gen5;
     return X;
 }
 
-int GameWidget::tranY(int L, int U)
+int GameWidget::tranY(int DR, int UR)
 {
     int Y;
     //    Y=L/gen5-U/gen5;
-    Y=(L-U)/gen5;
+    Y=(DR-UR)/gen5;
     return Y;
 }
 
-int GameWidget::tranL(int X, int Y)
+int GameWidget::tranDR(int X, int Y)
 {
-    int L;
-    L=X*gen5/4.0+Y*gen5/2.0;
-    return L;
+    int DR;
+    DR=X*gen5/4.0+Y*gen5/2.0;
+    return DR;
 }
 
-int GameWidget::tranU(int X, int Y)
+int GameWidget::tranUR(int X, int Y)
 {
-    int U;
-    U=X*gen5/4.0-Y*gen5/2.0;
-    return U;
+    int UR;
+    UR=X*gen5/4.0-Y*gen5/2.0;
+    return UR;
 }
 //根据当前对象高度插入drawlist
 void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)

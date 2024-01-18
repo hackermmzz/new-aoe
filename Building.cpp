@@ -65,3 +65,10 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 }
+
+int Building::getSort()
+{
+    if(Num!=BUILDING_FARM)
+    return SORT_BUILDING;
+    else return SORT_FARM;
+}
