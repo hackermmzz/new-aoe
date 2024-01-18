@@ -18,13 +18,3 @@ void Block::nextframe()
 {
 
 }
-
-int Block::getMapHeight() const
-{
-    return MapHeight;
-}
-
-void Block::setMapHeight(int value)
-{
-    MapHeight = value;
-}

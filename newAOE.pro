@@ -40,8 +40,8 @@ SOURCES += \
     Animal.cpp \
     StaticRes.cpp \
     Player.cpp \
-    Core.cpp \
-    Farmer.cpp
+    ActWidget.cpp \
+    SelectWidget.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -58,11 +58,12 @@ HEADERS += \
     Animal.h \
     StaticRes.h \
     Player.h \
-    Core.h \
-    Farmer.h
+    ActWidget.h \
+    SelectWidget.h
 
 FORMS += \
         MainWidget.ui \
-    GameWidget.ui
+    GameWidget.ui \
+    SelectWidget.ui
 
 
