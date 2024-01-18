@@ -5,11 +5,15 @@
 #include <QPainter>
 #include <Map.h>
 #include <qtimer.h>
+<<<<<<< HEAD
 #include <Player.h>
 <<<<<<< HEAD
 //#include <Player.h>
 =======
 >>>>>>> 1f2b5bd5aebe6a887f0096d91a3c6c6a5b89ab98
+=======
+//#include <Player.h>
+>>>>>>> eea57b9c8cf543763200e5f180f769b6c6ea7937
 #include <QTextBrowser>
 #include <GlobalVariate.h>
 #include <config.h>
@@ -23,9 +27,10 @@
 //#include "AI.h"
 #include <windows.h>
 #include <unordered_set>
-#include <Core.h>
 //#include <AboutDialog.h>
 //#include <Option.h>
+#include <SelectWidget.h>
+#include <ActWidget.h>
 
 namespace Ui {
 class MainWidget;
@@ -42,21 +47,20 @@ public:
     initmap();
 
     void initBlock();
-    void initBuilding();
-    void initAnimal();
 
     void deleteBlock();
-    void deleteBuilding();
-    void deleteAnimal();
 
-    Core *core=new Core();
     Map *map;
+<<<<<<< HEAD
     Player* player[MAXPLAYER];
 <<<<<<< HEAD
     int **memorymap=new int*[MEMORYROW];//动态
 =======
     int **memorymap=new int*[MEMORYROW];
 >>>>>>> 1f2b5bd5aebe6a887f0096d91a3c6c6a5b89ab98
+=======
+    int **memorymap=new int*[MEMORYROW];//动态
+>>>>>>> eea57b9c8cf543763200e5f180f769b6c6ea7937
 
 private slots:
     void FrameUpdate();
