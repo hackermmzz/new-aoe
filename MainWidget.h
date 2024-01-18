@@ -52,7 +52,6 @@ public:
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
-    int **memorymap=new int*[MEMORYROW];
 
 private slots:
     void FrameUpdate();
