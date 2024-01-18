@@ -80,6 +80,15 @@ public:
     //    int Environment=0;//当前地皮编号 考虑用num代替
     //用基类中num代替
 
+    int getMapHeight() const;
+    void setMapHeight(int value);
+
+private:
+    int MapType;        // 地图块种类
+    int MapPattern;     // 地图块样式
+    int MapHeight;      // 地图块高度
+    int MapOffset;      // 地图块偏移量
+    int MapResource;    // 地图块存放的资源类型
 
 };
 
