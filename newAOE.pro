@@ -41,9 +41,7 @@ SOURCES += \
     StaticRes.cpp \
     Player.cpp \
     Core.cpp \
-    Farmer.cpp \
-    ActWidget.cpp \
-    SelectWidget.cpp
+    Farmer.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -61,14 +59,10 @@ HEADERS += \
     StaticRes.h \
     Player.h \
     Core.h \
-    Farmer.h \
-    ActWidget.h \
-    SelectWidget.h \
-    ActWidget.h
+    Farmer.h
 
 FORMS += \
         MainWidget.ui \
-    GameWidget.ui \
-    SelectWidget.ui
+    GameWidget.ui
 
 
