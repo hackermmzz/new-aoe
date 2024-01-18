@@ -7,9 +7,105 @@ class Farmer:public Human
 {
 public:
     Farmer();
+    Farmer(double DR,double UR);
     void nextframe();
+    int getSort();
 
     void setNowRes();
+
+    static std::string getFarmerName(int index) {
+        if (index >= 0 && index < 7) {
+            return FarmerName[index];
+        }
+        return "";
+    }
+    static std::string getFarmerCarry(int index) {
+        if (index >= 0 && index < 5) {
+            return FarmerCarry[index];
+        }
+        return "";
+    }
+    static std::list<ImageResource>* getCarry(int i, int j) {
+        return Carry[i][j];
+    }
+    static std::list<ImageResource>* getWork(int i, int j) {
+        return Work[i][j];
+    }
+
+    static std::list<ImageResource>* getWalk(int i, int j) {
+        return Walk[i][j];
+    }
+    static std::list<ImageResource>* getStand(int i, int j) {
+        return Stand[i][j];
+    }
+    static std::list<ImageResource>* getAttack(int i, int j) {
+        return Attack[i][j];
+    }
+    static std::list<ImageResource>* getDie(int i, int j) {
+        return Die[i][j];
+    }
+    static void setCarry(int i, int j, std::list<ImageResource>* newValue) {
+        Carry[i][j] = newValue;
+    }
+    static void setWork(int i, int j, std::list<ImageResource>* newValue) {
+        Work[i][j] = newValue;
+    }
+    static void setWalk(int i, int j, std::list<ImageResource>* newValue) {
+        Walk[i][j] = newValue;
+    }
+    static void setStand(int i, int j, std::list<ImageResource>* newValue) {
+        Stand[i][j] = newValue;
+    }
+    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {
+        Attack[i][j] = newValue;
+    }
+    static void setDie(int i, int j, std::list<ImageResource>* newValue) {
+        Die[i][j] = newValue;
+    }
+    static void allocateCarry(int i, int j) {
+        Carry[i][j] = new std::list<ImageResource>;
+    }
+    static void allocateWork(int i, int j) {
+        Work[i][j] = new std::list<ImageResource>;
+    }
+    static void allocateWalk(int i, int j) {
+        Walk[i][j] = new std::list<ImageResource>;
+    }
+    static void allocateStand(int i, int j) {
+        Stand[i][j] = new std::list<ImageResource>;
+    }
+    static void allocateAttack(int i, int j) {
+        Attack[i][j] = new std::list<ImageResource>;
+    }
+    static void allocateDie(int i, int j) {
+        Die[i][j] = new std::list<ImageResource>;
+    }
+    static void deallocateCarry(int i, int j) {
+        delete Carry[i][j];
+        Carry[i][j] = nullptr;
+    }
+    static void deallocateWork(int i, int j) {
+        delete Work[i][j];
+        Work[i][j] = nullptr;
+    }
+    static void deallocateWalk(int i, int j) {
+        delete Walk[i][j];
+        Walk[i][j] = nullptr;
+    }
+    static void deallocateStand(int i, int j) {
+        delete Stand[i][j];
+        Stand[i][j] = nullptr;
+    }
+    static void deallocateAttack(int i, int j) {
+        delete Attack[i][j];
+        Attack[i][j] = nullptr;
+    }
+
+    static void deallocateDie(int i, int j) {
+        delete Die[i][j];
+        Die[i][j] = nullptr;
+    }
+
 
 private:
     int state;
@@ -48,6 +144,9 @@ private:
     int resourceSort;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
+
+    int Blood;
+    int MaxBlood;
 
     static std::list<ImageResource> *Walk[7][8];
 

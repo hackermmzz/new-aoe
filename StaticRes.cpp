@@ -24,3 +24,8 @@ void StaticRes::nextframe()
 {
 
 }
+
+int StaticRes::getSort()
+{
+    return SORT_STATICRES;
+}

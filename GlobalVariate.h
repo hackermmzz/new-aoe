@@ -34,6 +34,10 @@ extern map<string, QSound*> SoundMap;
 
 extern std::list<Coordinate*> drawlist;
 
+extern Coordinate *nowobject;
+//当前选中对象
+//出于gamewidget和core均需要获取当前访问对象
+
 struct tagBuilding
 {
     int BlockL,BlockU;
@@ -102,11 +106,13 @@ struct tagAction
 
 struct MouseEvent
 {
-    QPoint memoryMapPosition;  // 点击窗口的相对位置
+    int memoryMapX;
+    int memoryMapY;
     double DR;
     double UR;
     int mouseEventType;
     //鼠标点击类型 自定义对应关系 左键点击 左键拉框 右键点击等
+
 };
 
 extern std::map<int, tagAction> g_AiAction;

@@ -13,6 +13,7 @@ public:
     Coordinate();
 
     virtual void nextframe();
+    virtual int getSort();
 
     double getDR()
     {
