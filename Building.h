@@ -15,6 +15,14 @@ public:
     static std::list<ImageResource>* getBuilt(int i,int j) {
         return built[i][j];
     }
+    static std::string getBuildingname(int index)
+    {
+        return Buildingname[index];
+    }
+    static std::string getBuiltname(int index1,int index2)
+    {
+        return Builtname[index1][index2];
+    }
 
     static void allocatebuild(int i)
     {
