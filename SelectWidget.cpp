@@ -54,46 +54,18 @@ void SelectWidget::initActs()
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         actions[i] = ACT_NULL;
-        actionStatus[i] = ACT_STATUS_ENABLED;
+        actionStatus[i] = ACT_STATUS_ENABLED;//重置窗口状态为可用，真正判断是否可用的代码在refreshActs
     }
     if(g_Object.find(currentSelectNum) == g_Object.end())
     {
         return;
     }
-//    ui->tipLbl->setText("");
-//    ui->objText->setText("");
     if(type == 1)//建筑
     {
-        Building *objBuilding = (Building *)(g_Object[currentSelectNum]);
-        if(objBuilding->getNum() == BUILDING_GRANARY)//谷仓
+        int *buildActions = ((Building *)g_Object[currentSelectNum])->getActions();
+        for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
         {
-            if(player[0]->getCiv() == CIVILIZATION_IRONAGE && !player[0]->getArrowTowerUnlocked())
-            {
-                actions[0] = ACT_UPGRADE_TOWERBUILD;
-            }
-        }
-        else if(objBuilding->getNum() == BUILDING_CENTER)//市镇中心
-        {
-            actions[0] = ACT_CREATEFARMER;
-            if(player[0]->getCiv() == CIVILIZATION_STONEAGE)
-            {
-                actions[1] = ACT_UPGRADE_AGE;
-            }
-        }
-        else if(objBuilding->getNum() == BUILDING_MARKET)//市场
-        {
-            if(!player[0]->getMarketResearch(0))
-            {
-                actions[0] = ACT_UPGRADE_WOOD;
-            }
-            if(!player[0]->getMarketResearch(1))
-            {
-                actions[1] = ACT_UPGRADE_STONE;
-            }
-            if(!player[0]->getMarketResearch(2))
-            {
-                actions[2] = ACT_UPGRADE_FARM;
-            }
+            actions[i] = buildActions[i];
         }
     }
     else if(type == 5)//人类
@@ -105,7 +77,7 @@ void SelectWidget::initActs()
         for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
         {
             actions[i] = ACT_NULL;
-            actionStatus[i] = ACT_STATUS_DISABLED;
+            actionStatus[i] = ACT_STATUS_ENABLED;
         }
     }
     if(g_Object[currentSelectNum]->getActSpeed() > 0)
@@ -130,7 +102,7 @@ void SelectWidget::refreshActs()
     int elapsedSec;
     if(this->getObj() != NULL && g_Object.find(currentSelectNum) != g_Object.end() && this->getObj() == g_Object[currentSelectNum])
     {
-        if(this->getObj()->getActSpeed() > 0) ui->objText->setText(QString::number((int)(this->getObj()->getActPercent())) + "%");
+        if(this->getObj()->getActSpeed() > 0) ui->objText->setText(QString::number((int)(this->getObj()->getActPercent())) + "%");//如果有进行中的任务则显示进度
         else ui->objText->setText("");
     }//行动的进度
 
@@ -162,7 +134,7 @@ void SelectWidget::refreshActs()
     //先进行行动状态更新(根据actions决定actionStatus数组)
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
-        switch(actions[i])
+        switch(actions[i])//根据actions数组的值（行动类别）判断可用性
         {
             case ACT_BUILD_ARROWTOWER:
                 if(player[0]->getStone() < BUILD_ARROWTOWER_STONE || !player[0]->getArrowTowerUnlocked())
@@ -230,11 +202,14 @@ void SelectWidget::refreshActs()
                     actionStatus[i] = ACT_STATUS_DISABLED;
                 }
                 break;
+            case ACT_NULL:
+                actionStatus[i] = ACT_STATUS_DISABLED;
+                break;
         }
     }
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
-        acts[i]->setStatus(actionStatus[i]);
+        acts[i]->setStatus(actionStatus[i]);//应用行动状态
     }
 
     //再进行快捷栏和状态栏显示更新(本窗口的内容)
@@ -313,8 +288,8 @@ void SelectWidget::refreshActs()
                     ui->objText->setText(QString::number((int)(objBuilding->getPercent())) + "%");
                     ui->objIconSmall->setPixmap(resMap["SmallIcon_Sandglass"].front());
                 }
-                ui->selectwidget->update();
-                ui->selectwidget->show();
+                this->update();
+                this->show();
             }
             else
             {
@@ -327,8 +302,8 @@ void SelectWidget::refreshActs()
             {
                 Coores *objCoores = (Coores *)(g_Object[currentSelectNum]);
                 int num = objCoores->getNum();
-                ui->selectwidget->setObj(g_Object[currentSelectNum]);
-                ui->selectwidget->setObjType(type);
+                this->setObj(g_Object[currentSelectNum]);
+                this->setObjType(type);
                 ui->objName->setText(QString::fromStdString(objCoores->getCooresDisplayName(num)));
                 ui->objHp->setText("");
                 ui->objIcon->setPixmap(resMap["Button_"+objCoores->getCooresName(num)].front().scaled(80,80));
@@ -336,8 +311,8 @@ void SelectWidget::refreshActs()
                 if(objCoores->getNum() == 0) ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
                 else if(objCoores->getNum() == 1) ui->objIconSmall->setPixmap(resMap["Icon_Stone"].front());
                 ui->objText->setText(QString::number((int)(objCoores->getCnt())));
-                ui->selectwidget->update();
-                ui->selectwidget->show();
+                this->update();
+                this->show();
             }
             else
             {
@@ -352,8 +327,8 @@ void SelectWidget::refreshActs()
                 if(!objFarmer->isDie())
                 {
                     int num = objFarmer->getstate();
-                    ui->selectwidget->setObj((Coordinate *)objFarmer);
-                    ui->selectwidget->setObjType(type);
+                    this->setObj((Coordinate *)objFarmer);
+                    this->setObjType(type);
                     QString name = QString::fromStdString(objFarmer->getDisplayName(num));
                     ui->objName->setText(name);
                     ui->objIcon->setPixmap(resMap["Button_Village"].front().scaled(110,110));
@@ -370,8 +345,8 @@ void SelectWidget::refreshActs()
                         ui->objText->setText(QString::number((int)(objFarmer->getresource())));
                     }
                     ui->objHp->setText(QString::number(objFarmer->getBlood()) + "/" + QString::number(objFarmer->getMaxBlood()));
-                    ui->selectwidget->update();
-                    ui->selectwidget->show();
+                    this->update();
+                    this->show();
                 }
                 else
                 {
@@ -387,16 +362,16 @@ void SelectWidget::refreshActs()
                 if(objAnimal->getCnt() <= 0) receiveselectNum(0);
                 else
                 {
-                    ui->selectwidget->setObj((Coordinate *)objAnimal);
-                    ui->selectwidget->setObjType(type);
+                    this->setObj((Coordinate *)objAnimal);
+                    this->setObjType(type);
                     ui->objName->setText("树");
                     ui->objIcon->setPixmap(resMap["Button_Tree"].front().scaled(110,110));
                     ui->objIconSmall->setPixmap(resMap["SmallIcon_Wood"].front());
                     ui->objText->setText(QString::number((int)(objAnimal->getCnt())));
                     if(objAnimal->isDie()) ui->objHp->setText("");
                     else ui->objHp->setText(QString::number(objAnimal->getBlood()) + "/" + QString::number(objAnimal->getMaxBlood()));
-                    ui->selectwidget->update();
-                    ui->selectwidget->show();
+                    this->update();
+                    this->show();
                 }
             }
             else
@@ -412,8 +387,8 @@ void SelectWidget::refreshActs()
                 if(objAnimal->getCnt() <= 0) receiveselectNum(0);
                 else
                 {
-                    ui->selectwidget->setObj((Coordinate *)objAnimal);
-                    ui->selectwidget->setObjType(type);
+                    this->setObj((Coordinate *)objAnimal);
+                    this->setObjType(type);
                     if(objAnimal->getNum() == 1)//瞪羚
                     {
                         ui->objName->setText("瞪羚");
@@ -434,8 +409,8 @@ void SelectWidget::refreshActs()
                     ui->objText->setText(QString::number((int)(objAnimal->getCnt())));
                     if(objAnimal->isDie()) ui->objHp->setText("");
                     else ui->objHp->setText(QString::number(objAnimal->getBlood()) + "/" + QString::number(objAnimal->getMaxBlood()));
-                    ui->selectwidget->update();
-                    ui->selectwidget->show();
+                    this->update();
+                    this->show();
                 }
             }
             else
@@ -448,7 +423,244 @@ void SelectWidget::refreshActs()
     {
         acts[i]->update();
     }
-    drawActs();
+}
+
+void SelectWidget::widgetAct(int num)
+{
+    if(acts[num]->getStatus() == ACT_STATUS_DISABLED) return;
+    int actName = acts[num]->getActName();
+    doActs(actName);
+}
+
+void SelectWidget::aiAct(int acter, int actName)
+{
+    doActs(actName);
+}
+
+int SelectWidget::doActs(int actName)
+{
+    if(this->getObj() == NULL) return ACTION_INVALID_ACTION;
+    if(actName == ACT_BUILD){
+        acts[0]->setPix(resMap["Button_House1"].front().scaled(80,80));
+        acts[0]->show();
+        acts[0]->setActName(ACT_BUILD_HOUSE);
+        acts[1]->setPix(resMap["Button_Granary"].front().scaled(80,80));
+        acts[1]->show();
+        acts[1]->setActName(ACT_BUILD_GRANARY);
+        acts[2]->setPix(resMap["Button_Stock"].front().scaled(80,80));
+        acts[2]->show();
+        acts[2]->setActName(ACT_BUILD_STOCK);
+        acts[3]->setPix(resMap["Exit"].front().scaled(80,80));
+        acts[3]->show();
+        acts[3]->setActName(ACT_BUILD_CANCEL);
+        if(player[0]->getWood() < BUILD_HOUSE_WOOD)
+        {
+            acts[0]->setStatus(ACT_STATUS_DISABLED);
+        }
+        if(player[0]->getWood() < BUILD_GRANARY_WOOD)
+        {
+            acts[1]->setStatus(ACT_STATUS_DISABLED);
+            acts[2]->setStatus(ACT_STATUS_DISABLED);
+        }
+        if(player[0]->getCiv() == CIVILIZATION_TOOLAGE)
+        {
+            acts[3]->setPix(resMap["Button_Farm"].front().scaled(80,80));
+            acts[3]->show();
+            acts[3]->setActName(ACT_BUILD_FARM);
+            acts[4]->setPix(resMap["Button_Market"].front().scaled(80,80));
+            acts[4]->show();
+            acts[4]->setActName(ACT_BUILD_MARKET);
+            acts[5]->setPix(resMap["Button_ArrowTower"].front().scaled(80,80));
+            acts[5]->show();
+            acts[5]->setActName(ACT_BUILD_ARROWTOWER);
+            acts[6]->setPix(resMap["Exit"].front().scaled(80,80));
+            acts[6]->show();
+            acts[6]->setActName(ACT_BUILD_CANCEL);
+            std::list<Building *>::iterator buildIt = player[0]->build.begin();
+            bool isGranaryBuilt = false, isMarketBuilt = false;
+            for(; buildIt != player[0]->build.end(); buildIt++)
+            {
+                if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish())//建成谷仓
+                {
+                    isGranaryBuilt = true;
+                }
+                if((*buildIt)->getNum() == BUILDING_MARKET && (*buildIt)->isFinish())//建成市场
+                {
+                    isMarketBuilt = true;
+                }
+            }
+            if(!isGranaryBuilt || player[0]->getWood() < BUILD_MARKET_WOOD)
+            {
+                acts[4]->setStatus(ACT_STATUS_DISABLED);
+            }
+            if(!isMarketBuilt || player[0]->getWood() < BUILD_FARM_WOOD)
+            {
+                acts[3]->setStatus(ACT_STATUS_DISABLED);
+            }
+            if(!player[0]->getArrowTowerUnlocked() || player[0]->getStone() < BUILD_ARROWTOWER_STONE)
+            {
+                acts[5]->setStatus(ACT_STATUS_DISABLED);
+            }
+        }
+
+    }
+    else if(actName == ACT_BUILD_HOUSE){
+        ui->Game->buildMode = BUILDING_HOME + 1;
+        QCursor my(resMap["House1"].front());
+        QApplication::setOverrideCursor(my);
+    }
+    else if(actName == ACT_BUILD_GRANARY){
+        ui->Game->buildMode = BUILDING_GRANARY + 1;
+        QCursor my(resMap["Granary"].front());
+        QApplication::setOverrideCursor(my);
+    }
+    else if(actName == ACT_BUILD_STOCK){
+        QCursor my(resMap["Stock"].front());
+        QApplication::setOverrideCursor(my);
+        ui->Game->buildMode = BUILDING_STOCK + 1;
+    }
+    else if(actName == ACT_BUILD_FARM){
+        QCursor my(resMap["Farm"].front());
+        QApplication::setOverrideCursor(my);
+        ui->Game->buildMode = BUILDING_FARM + 1;
+    }
+    else if(actName == ACT_BUILD_MARKET){
+        QCursor my(resMap["Market"].front());
+        QApplication::setOverrideCursor(my);
+        ui->Game->buildMode = BUILDING_MARKET + 1;
+    }
+    else if(actName == ACT_BUILD_ARROWTOWER){
+        QCursor my(resMap["ArrowTower"].front());
+        QApplication::setOverrideCursor(my);
+        ui->Game->buildMode = BUILDING_ARROWTOWER + 1;
+    }
+    else if(actName == ACT_BUILD_CANCEL)
+    {
+        QApplication::restoreOverrideCursor();
+        ui->Game->buildMode = 0;
+    }
+    else if(actName == ACT_CREATEFARMER){
+        if(player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD) return ACTION_INVALID_RESOURCE;
+        player[0]->setFood(player[0]->getFood() - BUILDING_CENTER_CREATEFARMER_FOOD);
+        this->getObj()->setActPercent(0);
+        this->getObj()->setActSpeed(0.25);
+        this->getObj()->setActNum(BUILDING_CENTER_CREATEFARMER);
+        this->getObj()->setActName(ACT_CREATEFARMER);
+    }
+    else if(actName == ACT_UPGRADE_AGE)
+    {
+        std::list<Building *>::iterator buildIt = player[0]->build.begin();
+        bool isGranaryBuilt = false, isStockBuilt = false;
+        for(; buildIt != player[0]->build.end(); buildIt++)
+        {
+            if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish()) isGranaryBuilt = true;
+            else if((*buildIt)->getNum() == BUILDING_STOCK && (*buildIt)->isFinish()) isStockBuilt = true;
+        }
+        if(!isGranaryBuilt || !isStockBuilt) return ACTION_INVALID_ACTION;
+
+        if(player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD) return ACTION_INVALID_RESOURCE;
+        player[0]->setFood(player[0]->getFood() - BUILDING_CENTER_UPGRADE_FOOD);
+        this->getObj()->setActPercent(0);
+        this->getObj()->setActSpeed(0.05);
+        this->getObj()->setActNum(BUILDING_CENTER_UPGRADE);
+        this->getObj()->setActName(ACT_UPGRADE_AGE);
+    }
+    else if(actName == ACT_UPGRADE_TOWERBUILD)
+    {
+        if(player[0]->getFood() < BUILDING_GRANARY_ARROWTOWER_FOOD) return ACTION_INVALID_RESOURCE;
+        player[0]->setFood(player[0]->getFood() - BUILDING_GRANARY_ARROWTOWER_FOOD);
+        this->getObj()->setActPercent(0);
+        this->getObj()->setActSpeed(0.25);
+        this->getObj()->setActNum(BUILDING_GRANARY_ARROWTOWER);
+        this->getObj()->setActName(ACT_UPGRADE_TOWERBUILD);
+    }
+    else if(actName == ACT_UPGRADE_WOOD)
+    {
+        if(player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD) return ACTION_INVALID_RESOURCE;
+        player[0]->setFood(player[0]->getFood() - BUILDING_MARKET_WOOD_UPGRADE_FOOD);
+        player[0]->setWood(player[0]->getWood() - BUILDING_MARKET_WOOD_UPGRADE_WOOD);
+        this->getObj()->setActPercent(0);
+        this->getObj()->setActSpeed(0.25);
+        this->getObj()->setActNum(BUILDING_MARKET_WOOD_UPGRADE);
+        this->getObj()->setActName(ACT_UPGRADE_WOOD);
+    }
+    else if(actName == ACT_UPGRADE_STONE)
+    {
+        if(player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE) return ACTION_INVALID_RESOURCE;
+        player[0]->setFood(player[0]->getFood() - BUILDING_MARKET_STONE_UPGRADE_FOOD);
+        player[0]->setStone(player[0]->getStone() - BUILDING_MARKET_STONE_UPGRADE_STONE);
+        this->getObj()->setActPercent(0);
+        this->getObj()->setActSpeed(0.25);
+        this->getObj()->setActNum(BUILDING_MARKET_STONE_UPGRADE);
+        this->getObj()->setActName(ACT_UPGRADE_STONE);
+    }
+    else if(actName == ACT_UPGRADE_FARM)
+    {
+        if(player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD || player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD) return ACTION_INVALID_RESOURCE;
+        player[0]->setFood(player[0]->getFood() - BUILDING_MARKET_FARM_UPGRADE_FOOD);
+        player[0]->setWood(player[0]->getWood() - BUILDING_MARKET_FARM_UPGRADE_WOOD);
+        this->getObj()->setActPercent(0);
+        this->getObj()->setActSpeed(0.25);
+        this->getObj()->setActNum(BUILDING_MARKET_FARM_UPGRADE);
+        this->getObj()->setActName(ACT_UPGRADE_FARM);
+    }
+    else if(actName == ACT_STOP)
+    {
+        this->getObj()->setActNum(0);
+        if(this->getObj()->getActName() == ACT_CREATEFARMER) player[0]->setFood(player[0]->getFood() + BUILDING_CENTER_CREATEFARMER_FOOD);
+        else if(this->getObj()->getActName() == ACT_UPGRADE_AGE) player[0]->setFood(player[0]->getFood() + BUILDING_CENTER_UPGRADE_FOOD);
+        else if(this->getObj()->getActName() == ACT_UPGRADE_TOWERBUILD) player[0]->setFood(player[0]->getFood() + BUILDING_GRANARY_ARROWTOWER_FOOD);
+        else if(this->getObj()->getActName() == ACT_UPGRADE_WOOD)
+        {
+            player[0]->setFood(player[0]->getFood() + BUILDING_MARKET_WOOD_UPGRADE_FOOD);
+            player[0]->setWood(player[0]->getWood() + BUILDING_MARKET_WOOD_UPGRADE_WOOD);
+        }
+        else if(this->getObj()->getActName() == ACT_UPGRADE_STONE)
+        {
+            player[0]->setFood(player[0]->getFood() + BUILDING_MARKET_STONE_UPGRADE_FOOD);
+            player[0]->setStone(player[0]->getStone() + BUILDING_MARKET_STONE_UPGRADE_STONE);
+        }
+        else if(this->getObj()->getActName() == ACT_UPGRADE_FARM)
+        {
+            player[0]->setFood(player[0]->getFood() + BUILDING_MARKET_FARM_UPGRADE_FOOD);
+            player[0]->setWood(player[0]->getWood() + BUILDING_MARKET_FARM_UPGRADE_WOOD);
+        }
+        if(this->getObj()->getActName() == ACT_CREATEFARMER || this->getObj()->getActName() == ACT_UPGRADE_AGE)
+        {
+            ui->objText->setText("");
+            this->getObj()->setActSpeed(0);
+            this->getObj()->setActPercent(0);
+            this->getObj()->setActName(ACT_NULL);
+        }
+        else if(this->getObj()->getActName() == ACT_UPGRADE_TOWERBUILD)
+        {
+            ui->objText->setText("");
+            this->getObj()->setActSpeed(0);
+            this->getObj()->setActPercent(0);
+            this->getObj()->setActName(ACT_NULL);
+        }
+        else if(this->getObj()->getActName() == ACT_UPGRADE_WOOD || this->getObj()->getActName() == ACT_UPGRADE_STONE || this->getObj()->getActName() == ACT_UPGRADE_FARM)
+        {
+            ui->objText->setText("");
+            this->getObj()->setActSpeed(0);
+            this->getObj()->setActPercent(0);
+            this->getObj()->setActName(ACT_NULL);
+        }
+        else
+        {
+            return ACTION_INVALID_ACTION;
+        }
+    }
+    for(int i = 0; i < 10; i++)
+    {
+        acts[i]->update();
+    }
+    return ACTION_SUCCESS;
+}
+
+void SelectWidget::updateActs()
+{
+
 }
 
 void SelectWidget::drawActs()

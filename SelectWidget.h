@@ -36,6 +36,7 @@ public:
     void updateActs();
     void initActs();
     void drawActs();
+    void doActs();
 private:
     Ui::SelectWidget *ui;
 //    Building * objBuilding;
@@ -46,6 +47,10 @@ private:
     int objType;//
     int actions[ACT_WINDOW_NUM_FREE] = {0};
     int actionStatus[ACT_WINDOW_NUM_FREE] = {0};
+    MainWidget *mainPtr;
+private slots:
+    void widgetAct(int num);
+    void aiAct(int acter, int actName);
 };
 
 #endif // SELECTWIDGET_H

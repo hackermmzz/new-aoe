@@ -58,7 +58,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 向地图中添加资源
     initmap();
 
-
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
     player[0]->addBuilding(0,30,30);
