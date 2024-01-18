@@ -38,6 +38,8 @@ public:
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
 
+    int intmap[72][72]={};
+
     std::list<StaticRes *> staticres={};
     std::list<Animal *> animal={};
 //    std::list<Ruin *> ruin={};

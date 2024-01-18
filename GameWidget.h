@@ -34,6 +34,8 @@ public:
     void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
 
+    MouseEvent *mouseEvent=new MouseEvent();
+
 private slots:
     void movemap();
     void UpdateData();
@@ -61,6 +63,7 @@ private:
 
     //是否展示地图的格子线
     bool showLine = true;
+
 //    bool pos = false;
 };
 
