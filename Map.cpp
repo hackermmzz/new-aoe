@@ -1,4 +1,4 @@
-﻿#include "Map.h"
+#include "Map.h"
 
 Map::Map()
 {
@@ -690,37 +690,37 @@ int Map::addAnimal(int Num, double DR, double UR)
 
 int Map::loadResource()
 {
-    addAnimal(1,0,0);
-    //    for(int i = 0; i < MAP_U; i++)
-    //    {
-    //        for(int j = 0; j < MAP_L; j++)
-    //        {
-    //            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
-    //            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
-    //            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
-    //            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
-    //            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
-    //            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
-    //            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
-    //            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
-    //            /*
-    //                种类：
-    //                0为空地；
-    //                1为树木；
-    //                2为浆果；
-    //                3为瞪羚；
-    //                4为石头；
-    //                5为金矿；
-    //                6为狮子；
-    //                7为大象；
-    //                9为主营；
-    //                10为箭塔废墟；
-    //                11为树林。
-    //            */
-    //            Gamemap[i][j] = 0;  // :)
-    //            mapFlag[i][j] = 0;
-    //        }
-    //    }
+    addAnimal(1,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
+//    for(int i = 0; i < MAP_U; i++)
+//    {
+//        for(int j = 0; j < MAP_L; j++)
+//        {
+//            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
+//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
+//            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
+//            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
+//            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
+//            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
+//            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
+//            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
+//            /*
+//                种类：
+//                0为空地；
+//                1为树木；
+//                2为浆果；
+//                3为瞪羚；
+//                4为石头；
+//                5为金矿；
+//                6为狮子；
+//                7为大象；
+//                9为主营；
+//                10为箭塔废墟；
+//                11为树林。
+//            */
+//            Gamemap[i][j] = 0;  // :)
+//            mapFlag[i][j] = 0;
+//        }
+//    }
     return 0;
 }
 

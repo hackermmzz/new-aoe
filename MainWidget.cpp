@@ -46,7 +46,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
-    player[0]->addBuilding(0,0,0);
+    player[0]->addBuilding(0,30,30);
 
 }
 
@@ -210,8 +210,10 @@ void MainWidget::deleteAnimal()
 
 void MainWidget::FrameUpdate()
 {
+    gameframe++;
+    ui->lcdNumber->display(gameframe);
     ui->Game->update();
-    core->gameUpdate(map,player,memorymap);
+    core->gameUpdate(map,player,memorymap,ui->Game->mouseEvent);
     emit mapmove();
     return;
 

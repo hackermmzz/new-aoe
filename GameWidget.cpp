@@ -13,6 +13,7 @@ GameWidget::GameWidget(QWidget *parent) :
 GameWidget::~GameWidget()
 {
     delete ui;
+    delete mouseEvent;
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {

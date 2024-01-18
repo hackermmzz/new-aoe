@@ -7,6 +7,9 @@ class Farmer:public Human
 {
 public:
     Farmer();
+    void nextframe();
+
+    void setNowRes();
 
 private:
     int state;
