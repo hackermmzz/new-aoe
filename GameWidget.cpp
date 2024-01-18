@@ -13,6 +13,7 @@ GameWidget::GameWidget(QWidget *parent) :
 GameWidget::~GameWidget()
 {
     delete ui;
+    delete mouseEvent;
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {
@@ -93,6 +94,43 @@ void GameWidget::paintEvent(QPaintEvent *)
     //绘制列表清空
     drawlist.clear();
 
+
+    //玩家的建筑部分 人物部分
+    for(int i=0;i<MAXPLAYER;i++)
+    {
+        std::list<Building *> *b=&(mainwidget->player[i]->build);
+        std::list<Building *>::iterator biter=b->begin();
+        while(!b->empty()&&biter!=b->end())
+        {
+            Coordinate *p=*biter;
+            insert(p,&drawlist);
+            biter++;
+        }
+    }
+
+    //地图资源相关 树木石块等
+    std::list<StaticRes*> *sr=&mainwidget->map->staticres;
+    if(!sr->empty())
+    {
+        std::list<StaticRes*>::iterator sriter=sr->begin();
+        while(sriter!=sr->end())
+        {
+            insert((*sriter),&drawlist);
+            sriter++;
+        }
+    }
+    std::list<Animal *> *ar=&mainwidget->map->animal;
+    if(!ar->empty())
+    {
+        std::list<Animal *>::iterator ariter=ar->begin();
+        while(ariter!=ar->end())
+        {
+            insert((*ariter),&drawlist);
+            ariter++;
+        }
+    }
+
+
     //drawlist正常绘制
     if(!drawlist.empty())
     {
@@ -159,8 +197,6 @@ void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)
         std::list<Coordinate *>::iterator iter=drawlist->begin();
         while(1)//H越大说明越靠下，应该先打印H小的，所以H小的在前边
         {
-            //            qDebug()<<p->L;
-            //            qDebug()<<(*iter)->H;
             if(p->getimageH()<(*iter)->getimageH())
             {
                 drawlist->insert(iter,p);
@@ -178,7 +214,7 @@ void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)
 }
 
 //绘制内存图
-void GameWidget::drawmemory(int X, int Y, ImageResource res, int selectNum)
+void GameWidget::drawmemory(int X, int Y, ImageResource res, int globalNum)
 {
     for(int i=0;i<res.pix.width();i++)
     {
@@ -191,7 +227,7 @@ void GameWidget::drawmemory(int X, int Y, ImageResource res, int selectNum)
             {
                 if(res.memorymap.getMemoryMap(i,j)!=0)
                 {
-                    mainwidget->memorymap[mx/4][my/4]=selectNum;
+                    mainwidget->memorymap[mx/4][my/4]=globalNum;
                 }
             }
         }
