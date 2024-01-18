@@ -3,7 +3,6 @@
 
 int g_globalNum=1;
 std::map<int,Coordinate*> g_Object;
-ActWidget *acts[ACT_WINDOW_NUM_FREE];
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)

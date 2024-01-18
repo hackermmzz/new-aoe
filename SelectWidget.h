@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <MainWidget.h>
-
+class MainWidget;
 namespace Ui {
 class SelectWidget;
 }
@@ -36,7 +36,7 @@ public:
     void updateActs();
     void initActs();
     void drawActs();
-    void doActs();
+    int doActs(int actName);
 private:
     Ui::SelectWidget *ui;
 //    Building * objBuilding;
