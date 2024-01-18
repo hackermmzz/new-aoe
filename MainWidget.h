@@ -6,6 +6,7 @@
 #include <Map.h>
 #include <qtimer.h>
 //#include <Player.h>
+#include <Player.h>
 #include <QTextBrowser>
 #include <GlobalVariate.h>
 #include <config.h>
@@ -19,6 +20,7 @@
 //#include "AI.h"
 #include <windows.h>
 #include <unordered_set>
+#include <Core.h>
 //#include <AboutDialog.h>
 //#include <Option.h>
 #include <SelectWidget.h>
@@ -39,11 +41,17 @@ public:
     initmap();
 
     void initBlock();
+    void initBuilding();
+    void initAnimal();
 
     void deleteBlock();
+    void deleteBuilding();
+    void deleteAnimal();
 
+    Core *core=new Core();
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
+    Player* player[MAXPLAYER];
 
 private slots:
     void FrameUpdate();
