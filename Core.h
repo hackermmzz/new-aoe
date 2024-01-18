@@ -4,7 +4,6 @@
 #include <GlobalVariate.h>
 #include <Map.h>
 #include <Player.h>
-#include <QMouseEvent>
 
 class Core
 {
@@ -16,6 +15,20 @@ public:
     vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);
     stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination);
     stack<Point> findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point& start, const Point& destination);
+
+
+
+    int tranBlockDR(double DR)
+    {
+        return DR/BLOCKSIDELENGTH;
+    }
+    int tranBlockUR(double UR)
+    {
+        return UR/BLOCKSIDELENGTH;
+    }
+
+private:
+
 };
 
 #endif // CORE_H

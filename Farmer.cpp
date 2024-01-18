@@ -16,6 +16,36 @@ Farmer::Farmer()
 
 }
 
+Farmer::Farmer(double DR, double UR)
+{
+    this->Angle=rand()%8;
+    this->MaxBlood=BLOOD_FARMER;
+    this->Blood=MaxBlood;
+    this->state=HUMAN_STATE_IDLE;
+    this->resource=0;
+    this->DR=DR;
+    this->UR=UR;
+    this->BlockDR=DR/BLOCKSIDELENGTH;
+    this->BlockUR=UR/BLOCKSIDELENGTH;
+    this->nextBlockDR=BlockDR;
+    this->nextBlockUR=BlockUR;
+    this->PredictedDR=DR;
+    this->PredictedUR=UR;
+    this->PreviousDR=DR;
+    this->PreviousUR=UR;
+    this->DR0=DR;
+    this->UR0=UR;
+    this->nowstate=MOVEOBJECT_STATE_STAND;
+    this->Angle=0;
+    setNowRes();
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
+    this->imageH=DR-UR;
+    this->globalNum=g_globalNum;
+    g_Object.insert({this->globalNum,this});
+    g_globalNum++;
+}
+
 void Farmer::nextframe()
 {
     std::list<ImageResource> *nowlist=NULL;
@@ -187,6 +217,11 @@ void Farmer::nextframe()
     this->BlockUR=UR/BLOCKSIDELENGTH;
     //更新高度
     this->imageH=DR-UR;
+}
+
+int Farmer::getSort()
+{
+    return SORT_FARMER;
 }
 
 void Farmer::setNowRes()

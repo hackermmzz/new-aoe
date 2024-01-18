@@ -40,6 +40,7 @@ public:
     Animal();
     Animal(int Num,double DR,double UR);
     void nextframe();
+    int getSort();
     static std::string getAnimalName(int index)
     {
             return Animalname[index];

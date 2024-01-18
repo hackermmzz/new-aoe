@@ -146,7 +146,78 @@ public:
         this->UR=PredictedUR;
     }
 
+    bool needTranState()
+    {
+        return this->prestate!=-1;
+    }
 
+    void setdestination(double DR0,double UR0)
+    {
+        setDR0(DR0);
+        setUR0(UR0);
+        this->BlockDR=DR/BLOCKSIDELENGTH;
+        this->BlockUR=UR/BLOCKSIDELENGTH;
+        //更新高度
+        this->imageH=DR-UR;
+    }
+    void setDR0(double DR0)
+    {
+        if(DR0<0)
+        {
+            this->DR0=0;
+        }
+        else if(DR0>MAP_L*BLOCKSIDELENGTH)
+        {
+            this->DR0=MAP_L*BLOCKSIDELENGTH-1;
+        }
+        else
+        {
+            this->DR0=DR0;
+        }
+    }
+    void setUR0(double UR0)
+    {
+        if(UR0<0)
+        {
+            this->UR0=0;
+        }
+        else if(UR0>MAP_U*BLOCKSIDELENGTH)
+        {
+            this->UR0=MAP_U*BLOCKSIDELENGTH-1;
+        }
+        else
+        {
+            this->UR0=UR0;
+        }
+    }
+    void setPreStand()
+    {
+        this->prestate=0;
+    }
+    void setPreWalk()
+    {
+        this->prestate=1;
+    }
+    void setNowState(int PreState)
+    {
+        this->nowstate=PreState;
+    }
+    void setPreStateIsIdle()
+    {
+        this->prestate=-1;
+    }
+    int getPreState()
+    {
+        return this->prestate;
+    }
+    double getDR0()
+    {
+        return this->DR0;
+    }
+    double getUR0()
+    {
+        return this->UR0;
+    }
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

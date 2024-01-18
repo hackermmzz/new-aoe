@@ -8,6 +8,7 @@ class Building:public Coordinate
 public:
     Building();
     Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
+    int getSort();
 
     static std::list<ImageResource>* getBuild(int i) {
         return build[i];

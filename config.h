@@ -276,7 +276,7 @@
 
 #define SORT_COORDINATE 0
 #define SORT_BUILDING 1
-#define SORT_COORES 2
+#define SORT_STATICRES 2
 #define SORT_HUMAN 4
 #define SORT_FARMER 5
 #define SORT_ANIMAL 7
@@ -359,5 +359,12 @@
 
 #define HOUSE_HUMAN_NUM 4
 #define MAX_HUMAN_NUM 50
+
+//鼠标结构体中对应鼠标点击事件
+#define NULL_MOUSEEVENT 0
+#define LEFT_PRESS 1
+#define RIGHT_PRESS 2
+
+
 
 #endif // CONFIG_H

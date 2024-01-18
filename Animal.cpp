@@ -105,3 +105,8 @@ void Animal::nextframe()
     }
 
 }
+
+int Animal::getSort()
+{
+    return SORT_ANIMAL;
+}

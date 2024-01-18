@@ -1,4 +1,4 @@
-#include "Map.h"
+﻿#include "Map.h"
 
 Map::Map()
 {
@@ -665,6 +665,100 @@ void Map::generateLandforms()
     }
 
     return ;
+}
+
+void Map::loadfindPathMap()
+{
+
+    clearfindPathMap();
+//    for (int i = 0; i < MAP_L; ++i)
+//    {
+//        for (int j = 0; j < MAP_U; ++j)
+//        {
+//            if(cell[i][j].Explored==false)
+//            {
+//                findPathMap[i][j]=1;
+//            }
+//        }
+//    }
+//    for(int i=0;i<MAXPLAYER;i++)
+//    {
+//        if(!player[i]->build.empty())
+//        {
+//            std::list<Building *>::iterator iter=player[i]->build.begin();
+//            while(iter!=player[i]->build.end())
+//            {
+//                if((*iter)->isMiddleFoundation())
+//                {
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+2]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+2]=1;
+//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+2]=1;
+//                }
+//                else if((*iter)->isSmallFoundation())
+//                {
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+//                }
+//                iter++;
+//            }
+//        }
+//        //        if(!player[i]->human.empty())
+//        //        {
+//        //            std::list<Human *>::iterator iter=player[i]->human.begin();
+//        //            while(iter!=player[i]->human.end())
+//        //            {
+//        //                CollisionObject.push_back((*ite));
+//        //                iter++;
+//        //            }
+//        //        }
+//    }
+//    if(!map->coores.empty())
+//    {
+//        std::list<Coores *>::iterator iter=map->coores.begin();
+//        while(iter!=map->coores.end())
+//        {
+//            if((*iter)->isBlockres())
+//            {
+//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+//                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+//                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+//            }
+//            iter++;
+//        }
+//    }
+//    if(!map->animal.empty())
+//    {
+//        std::list<Animal *>::iterator iter=map->animal.begin();
+//        while(iter!=map->animal.end())
+//        {
+//            Animal *animal=(Animal *)(*iter);
+//            if(animal->isTree())
+//            {
+//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//            }
+//            iter++;
+//        }
+//    }
+}
+
+void Map::clearfindPathMap()
+{
+    for (int i = 0; i < MAP_L; ++i)
+    {
+        for (int j = 0; j < MAP_U; ++j)
+        {
+            findPathMap[i][j] = 0;
+        }
+    }
 }
 
 int Map::addStaticRes(int Num, double DR, double UR)
