@@ -10,3 +10,8 @@ void Coordinate::nextframe()
 
 }
 
+int Coordinate::getSort()
+{
+    return SORT_COORDINATE;
+}
+

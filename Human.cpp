@@ -12,3 +12,8 @@ Human::Human(int Num, double DR, double UR)
     this->UR=UR;
 
 }
+
+void Human::nextframe()
+{
+
+}
