@@ -6,7 +6,10 @@
 #include <Map.h>
 #include <qtimer.h>
 #include <Player.h>
+<<<<<<< HEAD
 //#include <Player.h>
+=======
+>>>>>>> 1f2b5bd5aebe6a887f0096d91a3c6c6a5b89ab98
 #include <QTextBrowser>
 #include <GlobalVariate.h>
 #include <config.h>
@@ -23,8 +26,6 @@
 #include <Core.h>
 //#include <AboutDialog.h>
 //#include <Option.h>
-#include <SelectWidget.h>
-#include <ActWidget.h>
 
 namespace Ui {
 class MainWidget;
@@ -51,7 +52,11 @@ public:
     Core *core=new Core();
     Map *map;
     Player* player[MAXPLAYER];
+<<<<<<< HEAD
     int **memorymap=new int*[MEMORYROW];//动态
+=======
+    int **memorymap=new int*[MEMORYROW];
+>>>>>>> 1f2b5bd5aebe6a887f0096d91a3c6c6a5b89ab98
 
 private slots:
     void FrameUpdate();

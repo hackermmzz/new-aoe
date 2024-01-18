@@ -353,7 +353,6 @@ void loadResource(std::string name, std::list<ImageResource> *targetlist)
         initMemory(res);
         if(name=="Center1")
         {
-//            qDebug()<<"1";
             res->memorymap.fillBlockMemoryMap();
         }
         targetlist->push_back(*res);

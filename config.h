@@ -65,6 +65,18 @@
 #define KEY_DOWN 83
 #define KEY_RIGHT 68
 
+/********** 地图块种类 **********/
+#define MAPTYPE_FLAT 0      // 平地
+
+/********** 地图块高度 **********/
+#define MAPHEIGHT_FLAT 2    // 地形高度
+
+/********** 地图块样式 **********/
+#define MAPPATTERN_GRASS 0      // 草原
+#define MAPPATTERN_DESERT 1     // 沙漠
+#define MAPPATTERN_OCEAN 2      // 海洋/河流
+#define mAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
+
 
 /********** DebugText栏颜色 **********/
 #define COLOR_RED(STRING) QString("<font color=red>%1</font><font color=black> </font>").arg(STRING)

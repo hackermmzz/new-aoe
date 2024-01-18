@@ -3,7 +3,6 @@
 
 int g_globalNum=1;
 std::map<int,Coordinate*> g_Object;
-ActWidget *acts[ACT_WINDOW_NUM_FREE];
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -21,19 +20,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
 
-    SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
-    sel->show();
-    sel->move(20, 810);
-    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8};
-    for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
-    {
-        acts[i] = acts_[i];
-        acts[i]->setStatus(0);
-        acts[i]->setNum(i);
-//        acts[i]->hide();
-        acts[i]->setAttribute(Qt::WA_Hover, true);
-        acts[i]->installEventFilter(this);
-    }
     // 设定游戏计时器
     timer=new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
@@ -58,11 +44,17 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 向地图中添加资源
     initmap();
 
+<<<<<<< HEAD
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
     player[0]->addBuilding(0,30,30);
 
+=======
+>>>>>>> 1f2b5bd5aebe6a887f0096d91a3c6c6a5b89ab98
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+
+    player[0]->addBuilding(0,30,30);
+
 }
 
 MainWidget::~MainWidget()
