@@ -8,54 +8,64 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     ui(new Ui::MainWidget)
 {
     ui->setupUi(this);
-    // 初始化资源
+    // 初始化游戏资源
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
 
+    // 初始化游戏元素
     initBlock();
     initBuilding();
     initAnimal();
 
+    // 设置当前窗口属性
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
 
     // 设定游戏计时器
-    timer=new QTimer(this);
+    timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
     timer->start(40);
     //    connect(timer,&QTimer::timeout,this,&MainWidget::setShowTimeFrame);
-    // 游戏帧数初始化
-    gameframe=0;
 
-    // 新建map对象
-    map=new Map;
-    // map初始化
+    // 游戏帧数初始化
+    gameframe = 0;
+
+    // 新建map对象并初始化
+    map = new Map;
     map->init(MapJudge);
+
     // 内存图开辟空间
-    for(int i=0;i<MEMORYROW;i++)
+    for(int i = 0;i < MEMORYROW; i++)
     {
-        memorymap[i]=new int[MEMORYCOLUMN];
+        memorymap[i] = new int[MEMORYCOLUMN];
     }
+
     //玩家开辟空间
-    for(int i=0;i<MAXPLAYER;i++)
-        player[i]=new Player();
+    for(int i = 0; i < MAXPLAYER; i++)
+    {
+        player[i] = new Player();
+    }
 
     // 向地图中添加资源
     initmap();
 
-    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+    // 连接计时器的timeout信号到FrameUpdate槽函数，timeout频率即为帧周期
+    connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
 
-    player[0]->addBuilding(0,0,0);
+    // 测试用代码，可删除
+    player[0]->addBuilding(0, 0, 0);
 
 }
 
+// MainWidget析构函数
 MainWidget::~MainWidget()
 {
     delete ui;
     deleteBlock();
 }
 
+// 初始化地图
 MainWidget::initmap()
 {
     if(map->loadResource()==0)
@@ -65,6 +75,7 @@ MainWidget::initmap()
 
 }
 
+// 初始化区块
 void MainWidget::initBlock()
 {
     for(int num=0;num<17;num++)
@@ -77,6 +88,8 @@ void MainWidget::initBlock()
         loadBlackRes(Block::getblock(num),Block::getblackblock(num));
     }
 }
+
+// 初始化建筑
 void MainWidget::initBuilding()
 {
     for (int i = 0; i < 4; i++)
@@ -94,6 +107,7 @@ void MainWidget::initBuilding()
     }
 }
 
+// 初始化动物
 void MainWidget::initAnimal()
 {
     for(int num=0;num<5;num++)
@@ -144,8 +158,7 @@ void MainWidget::initAnimal()
     }
 }
 
-
-
+// 删除区块资源
 void MainWidget::deleteBlock()
 {
     for(int i=0;i<1;i++)
@@ -155,6 +168,8 @@ void MainWidget::deleteBlock()
         Block::deallocategrayblock(i);
     }
 }
+
+// 删除建筑资源
 void MainWidget::deleteBuilding()
 {
     for (int i = 0; i < 4; i++)
@@ -169,6 +184,8 @@ void MainWidget::deleteBuilding()
         }
     }
 }
+
+// 删除动物资源
 void MainWidget::deleteAnimal()
 {
     for (int num = 0; num < 3; num++)
@@ -207,7 +224,7 @@ void MainWidget::deleteAnimal()
     }
 }
 
-
+// 帧更新函数
 void MainWidget::FrameUpdate()
 {
     ui->Game->update();
