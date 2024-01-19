@@ -51,6 +51,7 @@ private:
 private slots:
     void widgetAct(int num);
     void aiAct(int acter, int actName);
+    void widgetUpdate();
 };
 
 #endif // SELECTWIDGET_H
