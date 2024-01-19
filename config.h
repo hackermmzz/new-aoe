@@ -67,6 +67,8 @@
 
 /********** 地图块种类 **********/
 #define MAPTYPE_FLAT 0      // 平地
+#define MAPTYPE_L0_UPTOLU 1 // L0边（向左上方凸起）
+#define MAPTYPE_L2_UPTOLU 2 // L2边（向左上方凸起，同L0）
 
 /********** 地图块高度 **********/
 #define MAPHEIGHT_FLAT 2    // 地形高度
