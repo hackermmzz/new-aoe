@@ -49,7 +49,10 @@ public:
     void deleteBuilding();
     void deleteAnimal();
     void deleteFarmer();
-
+    ActWidget* getActs(int num)
+    {
+        return acts[num];
+    }
     Core *core=new Core();
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
@@ -92,6 +95,7 @@ private:
 //    bool line = false;
 //    bool pos = false;
 //    bool showOverlap = true;
+    ActWidget *acts[ACT_WINDOW_NUM_FREE];
 };
 
 #endif // MAINWIDGET_H
