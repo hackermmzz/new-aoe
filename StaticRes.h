@@ -10,6 +10,8 @@ public:
     StaticRes();
     StaticRes(int Num,double DR,double UR);
     StaticRes(int Num, int BlockDR, int BlockUR);
+    void nextframe();
+    int getSort();
 
 private:
 

@@ -19,3 +19,13 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     this->BlockDR=BlockDR;
     this->BlockUR=BlockUR;
 }
+
+void StaticRes::nextframe()
+{
+
+}
+
+int StaticRes::getSort()
+{
+    return SORT_STATICRES;
+}

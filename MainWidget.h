@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <Map.h>
 #include <qtimer.h>
+//#include <Player.h>
 #include <Player.h>
 #include <QTextBrowser>
 #include <GlobalVariate.h>
@@ -22,6 +23,8 @@
 #include <Core.h>
 //#include <AboutDialog.h>
 //#include <Option.h>
+#include <SelectWidget.h>
+#include <ActWidget.h>
 
 namespace Ui {
 class MainWidget;
@@ -40,15 +43,19 @@ public:
     void initBlock();
     void initBuilding();
     void initAnimal();
+    void initFarmer();
 
     void deleteBlock();
     void deleteBuilding();
     void deleteAnimal();
+    void deleteFarmer();
 
     Core *core=new Core();
     Map *map;
+    int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
-    int **memorymap=new int*[MEMORYROW];
+    MouseEvent *mouseEvent=new MouseEvent();
+
 
 private slots:
     void FrameUpdate();
@@ -75,7 +82,7 @@ private:
 //    time_t t,t0;
 //    int LastFrame = 0;
 //    int CollisionMap[72][72];
-//    int findPathMap[72][72];
+
 //    std::list<Coordinate *> CollisionObject;
 //    std::list<Farmer *> *nowselectList=new std::list<Farmer *>;
 //    bool music = false;

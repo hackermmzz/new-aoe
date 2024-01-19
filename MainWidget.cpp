@@ -1,8 +1,9 @@
-﻿#include "MainWidget.h"
+#include "MainWidget.h"
 #include "ui_MainWidget.h"
 
 int g_globalNum=1;
 std::map<int,Coordinate*> g_Object;
+ActWidget *acts[ACT_WINDOW_NUM_FREE];
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -16,12 +17,26 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initBlock();
     initBuilding();
     initAnimal();
+    initFarmer();
 
     // 设置当前窗口属性
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
 
+    SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
+    sel->show();
+    sel->move(20, 810);
+    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8};
+    for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
+    {
+        acts[i] = acts_[i];
+        acts[i]->setStatus(0);
+        acts[i]->setNum(i);
+//        acts[i]->hide();
+        acts[i]->setAttribute(Qt::WA_Hover, true);
+        acts[i]->installEventFilter(this);
+    }
     // 设定游戏计时器
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
@@ -50,11 +65,11 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 向地图中添加资源
     initmap();
 
-    // 连接计时器的timeout信号到FrameUpdate槽函数，timeout频率即为帧周期
-    connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
 
-    // 测试用代码，可删除
-    player[0]->addBuilding(0, 0, 0);
+    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+
+    player[0]->addBuilding(0,30,30);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
 }
 
@@ -63,6 +78,9 @@ MainWidget::~MainWidget()
 {
     delete ui;
     deleteBlock();
+    deleteAnimal();
+    deleteFarmer();
+    deleteBuilding();
 }
 
 // 初始化地图
@@ -158,7 +176,89 @@ void MainWidget::initAnimal()
     }
 }
 
-// 删除区块资源
+void MainWidget::initFarmer()
+{
+    //加载素材
+    //"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"
+
+    for(int statei=0;statei<7;statei++)
+    {
+        for(int i=0;i<=4;i++)
+        {
+            Farmer::allocateWalk(statei,i);
+            Farmer::allocateStand(statei,i);
+            Farmer::allocateDie(statei,i);
+            loadResource(Farmer::getFarmerName(statei)+"_Stand_"+direction[i],Farmer::getStand(statei,i));
+            loadResource(Farmer::getFarmerName(statei)+"_Walk_"+direction[i],Farmer::getWalk(statei,i));
+            loadResource(Farmer::getFarmerName(statei)+"_Die_"+direction[i],Farmer::getDie(statei,i));
+        }
+        for(int i=5;i<8;i++)
+        {
+            Farmer::allocateWalk(statei,i);
+            Farmer::allocateStand(statei,i);
+            Farmer::allocateDie(statei,i);
+            flipResource(Farmer::getWalk(statei,8-i),Farmer::getWalk(statei,i));
+            flipResource(Farmer::getStand(statei,8-i),Farmer::getStand(statei,i));
+            flipResource(Farmer::getDie(statei,8-i),Farmer::getDie(statei,i));
+        }
+    }
+    //Work
+    for(int statei=0;statei<7;statei++)
+    {
+        if(statei==0)
+        {
+            continue;
+        }
+        for(int i=0;i<=4;i++)
+        {
+            Farmer::allocateWork(statei,i);
+            loadResource(Farmer::getFarmerName(statei)+"_Work_"+direction[i],Farmer::getWork(statei,i));
+        }
+        for(int i=5;i<8;i++)
+        {
+            Farmer::allocateWork(statei,i);
+            flipResource(Farmer::getWork(statei,8-i),Farmer::getWork(statei,i));
+        }
+    }
+    //Attack
+    for(int statei=0;statei<7;statei++)
+    {
+        if(statei==2||statei==3||statei==5||statei==6)
+        {
+            continue;
+        }
+        for(int i=0;i<=4;i++)
+        {
+            Farmer::allocateAttack(statei,i);
+            loadResource(Farmer::getFarmerName(statei)+"_Attack_"+direction[i],Farmer::getAttack(statei,i));
+        }
+        for(int i=5;i<8;i++)
+        {
+            Farmer::allocateAttack(statei,i);
+            flipResource(Farmer::getAttack(statei,8-i),Farmer::getAttack(statei,i));
+        }
+    }
+    //Carry 考虑如何对接
+    for(int statei=0;statei<=4;statei++)
+    {
+        if(statei==0)
+        {
+            continue;
+        }
+        for(int i=0;i<=4;i++)
+        {
+            Farmer::allocateCarry(statei,i);
+            loadResource(Farmer::getFarmerCarry(statei)+"_"+direction[i],Farmer::getCarry(statei,i));
+        }
+        for(int i=5;i<8;i++)
+        {
+            Farmer::allocateCarry(statei,i);
+            flipResource(Farmer::getCarry(statei,8-i),Farmer::getCarry(statei,i));
+        }
+    }
+
+}
+
 void MainWidget::deleteBlock()
 {
     for(int i=0;i<1;i++)
@@ -224,12 +324,88 @@ void MainWidget::deleteAnimal()
     }
 }
 
-// 帧更新函数
+void MainWidget::deleteFarmer()
+{
+    // 清理素材资源
+    for(int statei = 0; statei < 7; statei++)
+    {
+        for(int i = 0; i <= 4; i++)
+        {
+            Farmer::deallocateWalk(statei, i);
+            Farmer::deallocateStand(statei, i);
+            Farmer::deallocateDie(statei, i);
+        }
+        for(int i = 5; i < 8; i++)
+        {
+            Farmer::deallocateWalk(statei, i);
+            Farmer::deallocateStand(statei, i);
+            Farmer::deallocateDie(statei, i);
+        }
+    }
+
+    // 清理 Work 资源
+    for(int statei = 0; statei < 7; statei++)
+    {
+        if(statei == 0)
+        {
+            continue;
+        }
+
+        for(int i = 0; i <= 4; i++)
+        {
+            Farmer::deallocateWork(statei, i);
+        }
+        for(int i = 5; i < 8; i++)
+        {
+            Farmer::deallocateWork(statei, i);
+        }
+    }
+
+    // 清理 Attack 资源
+    for(int statei = 0; statei < 7; statei++)
+    {
+        if(statei == 2 || statei == 3 || statei == 5 || statei == 6)
+        {
+            continue;
+        }
+
+        for(int i = 0; i <= 4; i++)
+        {
+            Farmer::deallocateAttack(statei, i);
+        }
+        for(int i = 5; i < 8; i++)
+        {
+            Farmer::deallocateAttack(statei, i);
+        }
+    }
+
+    // 清理 Carry 资源
+    for(int statei = 0; statei <= 4; statei++)
+    {
+        if(statei == 0)
+        {
+            continue;
+        }
+
+        for(int i = 0; i <= 4; i++)
+        {
+            Farmer::deallocateCarry(statei, i);
+        }
+        for(int i = 5; i < 8; i++)
+        {
+            Farmer::deallocateCarry(statei, i);
+        }
+    }
+
+}
+
+
 void MainWidget::FrameUpdate()
 {
+    gameframe++;
+    ui->lcdNumber->display(gameframe);
     ui->Game->update();
-    core->gameUpdate(map,player,memorymap);
+    core->gameUpdate(map,player,memorymap,mouseEvent);
     emit mapmove();
     return;
-
 }

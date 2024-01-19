@@ -25,14 +25,16 @@ public:
     void mouseReleaseEvent(QMouseEvent *event);
 //    void keyPressEvent(QKeyEvent *event);
 
-    int tranX(int L, int U);
-    int tranY(int L,int U);
-    int tranL(int X,int Y);
-    int tranU(int X, int Y);
+    int tranX(int DR, int UR);
+    int tranY(int DR,int UR);
+    int tranDR(int X,int Y);
+    int tranUR(int X, int Y);
 
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
     void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
+
+
 
 private slots:
     void movemap();
@@ -61,6 +63,7 @@ private:
 
     //是否展示地图的格子线
     bool showLine = true;
+
 //    bool pos = false;
 };
 

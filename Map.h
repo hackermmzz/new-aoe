@@ -27,6 +27,9 @@ public:
     // 生成不同地貌
     void generateLandforms();
 
+    void loadfindPathMap();
+    void clearfindPathMap();
+
     int addStaticRes(int Num,double DR,double UR);
 
     int addStaticRes(int Num, int BlockDR, int BlockUR);
@@ -38,15 +41,19 @@ public:
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
 
+    int intmap[72][72]={};
+
     std::list<StaticRes *> staticres={};
     std::list<Animal *> animal={};
 //    std::list<Ruin *> ruin={};
+    int findPathMap[72][72];
 
 private:
     void GenerateTerrain();     // 用于生成地形（Block高度差）
     double smooth(double x);    // 用于平滑地图曲线
     void clearData();           // 用于清空所有地图创建时所建立的临时变量
     int mapHeight[72][72];
+
 };
 
 #endif // MAP_H

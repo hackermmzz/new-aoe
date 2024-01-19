@@ -667,6 +667,100 @@ void Map::generateLandforms()
     return ;
 }
 
+void Map::loadfindPathMap()
+{
+
+    clearfindPathMap();
+//    for (int i = 0; i < MAP_L; ++i)
+//    {
+//        for (int j = 0; j < MAP_U; ++j)
+//        {
+//            if(cell[i][j].Explored==false)
+//            {
+//                findPathMap[i][j]=1;
+//            }
+//        }
+//    }
+//    for(int i=0;i<MAXPLAYER;i++)
+//    {
+//        if(!player[i]->build.empty())
+//        {
+//            std::list<Building *>::iterator iter=player[i]->build.begin();
+//            while(iter!=player[i]->build.end())
+//            {
+//                if((*iter)->isMiddleFoundation())
+//                {
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+2]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+2]=1;
+//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+2]=1;
+//                }
+//                else if((*iter)->isSmallFoundation())
+//                {
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+//                }
+//                iter++;
+//            }
+//        }
+//        //        if(!player[i]->human.empty())
+//        //        {
+//        //            std::list<Human *>::iterator iter=player[i]->human.begin();
+//        //            while(iter!=player[i]->human.end())
+//        //            {
+//        //                CollisionObject.push_back((*ite));
+//        //                iter++;
+//        //            }
+//        //        }
+//    }
+//    if(!map->coores.empty())
+//    {
+//        std::list<Coores *>::iterator iter=map->coores.begin();
+//        while(iter!=map->coores.end())
+//        {
+//            if((*iter)->isBlockres())
+//            {
+//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+//                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+//                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+//            }
+//            iter++;
+//        }
+//    }
+//    if(!map->animal.empty())
+//    {
+//        std::list<Animal *>::iterator iter=map->animal.begin();
+//        while(iter!=map->animal.end())
+//        {
+//            Animal *animal=(Animal *)(*iter);
+//            if(animal->isTree())
+//            {
+//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+//            }
+//            iter++;
+//        }
+//    }
+}
+
+void Map::clearfindPathMap()
+{
+    for (int i = 0; i < MAP_L; ++i)
+    {
+        for (int j = 0; j < MAP_U; ++j)
+        {
+            findPathMap[i][j] = 0;
+        }
+    }
+}
+
 int Map::addStaticRes(int Num, double DR, double UR)
 {
     StaticRes *newstaticres=new StaticRes(Num,DR,UR);
@@ -690,37 +784,37 @@ int Map::addAnimal(int Num, double DR, double UR)
 
 int Map::loadResource()
 {
-    addAnimal(1,0,0);
-    //    for(int i = 0; i < MAP_U; i++)
-    //    {
-    //        for(int j = 0; j < MAP_L; j++)
-    //        {
-    //            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
-    //            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
-    //            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
-    //            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
-    //            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
-    //            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
-    //            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
-    //            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
-    //            /*
-    //                种类：
-    //                0为空地；
-    //                1为树木；
-    //                2为浆果；
-    //                3为瞪羚；
-    //                4为石头；
-    //                5为金矿；
-    //                6为狮子；
-    //                7为大象；
-    //                9为主营；
-    //                10为箭塔废墟；
-    //                11为树林。
-    //            */
-    //            Gamemap[i][j] = 0;  // :)
-    //            mapFlag[i][j] = 0;
-    //        }
-    //    }
+    addAnimal(1,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
+//    for(int i = 0; i < MAP_U; i++)
+//    {
+//        for(int j = 0; j < MAP_L; j++)
+//        {
+//            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
+//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
+//            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
+//            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
+//            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
+//            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
+//            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
+//            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
+//            /*
+//                种类：
+//                0为空地；
+//                1为树木；
+//                2为浆果；
+//                3为瞪羚；
+//                4为石头；
+//                5为金矿；
+//                6为狮子；
+//                7为大象；
+//                9为主营；
+//                10为箭塔废墟；
+//                11为树林。
+//            */
+//            Gamemap[i][j] = 0;  // :)
+//            mapFlag[i][j] = 0;
+//        }
+//    }
     return 0;
 }
 

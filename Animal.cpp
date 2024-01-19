@@ -72,16 +72,41 @@ Animal::Animal(int Num, double DR, double UR)
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
     
+    //
+    this->Angle=2;
+    this->nowres=Stand[this->Num][this->Angle]->begin();
+    //
 }
 
 void Animal::nextframe()
 {
     std::list<ImageResource> *nowlist=NULL;
-    nowlist=this->Stand[this->Num][this->Angle];
+    switch (this->nowstate) {
+    case 0:
+        nowlist=this->Stand[this->Num][this->Angle];
+        break;
+    case 1:
+        nowlist=this->Walk[this->Num][this->Angle];
+        break;
+    case 2:
+        nowlist=this->Attack[this->Num][this->Angle];
+        break;
+    case 3:
+        nowlist=this->Die[this->Num][this->Angle];
+        break;
+    case 6:
+        nowlist=this->Run[this->Num][this->Angle];
+        break;
+    }
     this->nowres++;
     if(this->nowres==nowlist->end())
     {
         nowres=nowlist->begin();
     }
 
+}
+
+int Animal::getSort()
+{
+    return SORT_ANIMAL;
 }

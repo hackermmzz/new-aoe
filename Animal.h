@@ -10,6 +10,16 @@ class Animal:public MoveObject,public Resource
 private:
     int Friendly=1;
     //友好度 1为友好 2为敌对
+
+    int state;
+    //对于Animal
+    /*
+     * 0 Idle       闲置状态 遍历人准备攻击或逃跑
+     * 1 Roaming    随机移动
+     * 2 Fleeing    逃跑
+     * 3 Chasing    找到人追人
+     * 4 Attacking  攻击中
+     */
     
     //以下为图片资源
     static std::list<ImageResource> *Walk[5][8];
@@ -30,6 +40,7 @@ public:
     Animal();
     Animal(int Num,double DR,double UR);
     void nextframe();
+    int getSort();
     static std::string getAnimalName(int index)
     {
             return Animalname[index];

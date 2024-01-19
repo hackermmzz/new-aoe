@@ -23,6 +23,96 @@
     </rect>
    </property>
   </widget>
+  <widget class="ActWidget" name="interact3" native="true">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>810</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact8" native="true">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>900</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact5" native="true">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>810</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact2" native="true">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>810</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact1" native="true">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>810</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact4" native="true">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>810</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact6" native="true">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>900</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact7" native="true">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>900</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNumber">
+   <property name="geometry">
+    <rect>
+     <x>680</x>
+     <y>20</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -30,6 +120,12 @@
    <class>GameWidget</class>
    <extends>QWidget</extends>
    <header>GameWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ActWidget</class>
+   <extends>QWidget</extends>
+   <header>ActWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

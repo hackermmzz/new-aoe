@@ -9,7 +9,26 @@ class Core
 {
 public:
     Core();
-    void gameUpdate(Map* map, Player* player[], int** memorymap);
+    void gameUpdate(Map* map, Player* player[], int** memorymap,MouseEvent *mouseEvent);
+
+    bool isValidPoint(const int (&map)[MAP_L][MAP_U], const Point& p);
+    vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);
+    stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination);
+    stack<Point> findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point& start, const Point& destination);
+
+
+
+    int tranBlockDR(double DR)
+    {
+        return DR/BLOCKSIDELENGTH;
+    }
+    int tranBlockUR(double UR)
+    {
+        return UR/BLOCKSIDELENGTH;
+    }
+
+private:
+
 };
 
 #endif // CORE_H
