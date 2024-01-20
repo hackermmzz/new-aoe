@@ -1,4 +1,4 @@
-﻿#ifndef BUILDING_H
+#ifndef BUILDING_H
 #define BUILDING_H
 
 #include <Coordinate.h>
@@ -41,10 +41,13 @@ public:
         delete built[i][j];
         built[i][j] = nullptr;
     }
+
+    // 疑似没用的函数
     int* getActions()
     {
-        return actions;
+//        return actions;
     }
+
     int getActNames(int num)
     {
         return actNames[num];
