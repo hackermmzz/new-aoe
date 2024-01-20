@@ -84,11 +84,12 @@ public:
     void setMapHeight(int value);
 
 private:
-    int MapType;        // 地图块种类
-    int MapPattern;     // 地图块样式
-    int MapHeight;      // 地图块高度
-    int MapOffset;      // 地图块偏移量
-    int MapResource;    // 地图块存放的资源类型
+    // 可优化成char类型
+    int Type;               // 地图块种类
+    int Pattern;            // 地图块样式
+    int Height;             // 地图块高度
+    int OffsetX, OffsetY;   // 地图块偏移量
+    int Resource;           // 地图块存放的资源类型
 
 };
 
