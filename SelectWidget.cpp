@@ -416,6 +416,11 @@ void SelectWidget::aiAct(int acter, int actName)
     doActs(actName);
 }
 
+void SelectWidget::widgetUpdate()
+{
+
+}
+
 int SelectWidget::doActs(int actName)
 {
     if(this->getObj() == NULL) return ACTION_INVALID_ACTION;
