@@ -1,59 +1,66 @@
-﻿        #include "MainWidget.h"
-    #include "ui_MainWidget.h"
+#include "MainWidget.h"
+#include "ui_MainWidget.h"
 
-    int g_globalNum=1;
-    std::map<int,Coordinate*> g_Object;
-    MainWidget::MainWidget(int MapJudge, QWidget *parent) :
-        QWidget(parent),
-        ui(new Ui::MainWidget)
+int g_globalNum=1;
+std::map<int,Coordinate*> g_Object;
+ActWidget *acts[ACT_WINDOW_NUM_FREE];
+MainWidget::MainWidget(int MapJudge, QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::MainWidget)
+{
+    ui->setupUi(this);
+    // 初始化游戏资源
+    InitImageResMap(RESPATH);   // 图像资源
+    InitSoundResMap(RESPATH);   // 音频资源
+
+    // 初始化游戏元素
+    initBlock();
+    initBuilding();
+    initAnimal();
+    initFarmer();
+
+    // 设置当前窗口属性
+    this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
+    this->setWindowTitle("Age Of Empires");     // 设置标题
+    this->setWindowIcon(QIcon());               // 设置图标（暂空）
+
+    SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
+    sel->show();
+    sel->move(20, 810);
+    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8};
+    for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
-        ui->setupUi(this);
-        // 初始化资源
-        InitImageResMap(RESPATH);   // 图像资源
-        InitSoundResMap(RESPATH);   // 音频资源
+        acts[i] = acts_[i];
+        acts[i]->setStatus(0);
+        acts[i]->setNum(i);
+//        acts[i]->hide();
+        acts[i]->setAttribute(Qt::WA_Hover, true);
+        acts[i]->installEventFilter(this);
+    }
+    // 设定游戏计时器
+    timer = new QTimer(this);
+    timer->setTimerType(Qt::PreciseTimer);
+    timer->start(40);
+    //    connect(timer,&QTimer::timeout,this,&MainWidget::setShowTimeFrame);
 
-        initBlock();
-        initBuilding();
-        initAnimal();
-        initFarmer();
+    // 游戏帧数初始化
+    gameframe = 0;
 
-        this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
-        this->setWindowTitle("Age Of Empires");     // 设置标题
-        this->setWindowIcon(QIcon());               // 设置图标（暂空）
+    // 新建map对象并初始化
+    map = new Map;
+    map->init(MapJudge);
 
-        SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
-        sel->show();
-        sel->move(20, 810);
-        ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8};
-        for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
-        {
-            acts[i] = acts_[i];
-            acts[i]->setStatus(0);
-            acts[i]->setNum(i);
-    //        acts[i]->hide();
-            acts[i]->setAttribute(Qt::WA_Hover, true);
-            acts[i]->installEventFilter(this);
-        }
-        // 设定游戏计时器
-        timer=new QTimer(this);
-        timer->setTimerType(Qt::PreciseTimer);
-        timer->start(40);
-        //    connect(timer,&QTimer::timeout,this,&MainWidget::setShowTimeFrame);
-        // 游戏帧数初始化
-        gameframe=0;
+    // 内存图开辟空间
+    for(int i = 0;i < MEMORYROW; i++)
+    {
+        memorymap[i] = new int[MEMORYCOLUMN];
+    }
 
-        // 新建map对象
-        map=new Map;
-        // map初始化
-        map->init(MapJudge);
-        // 内存图开辟空间
-        for(int i=0;i<MEMORYROW;i++)
-        {
-            memorymap[i]=new int[MEMORYCOLUMN];
-        }
-        //玩家开辟空间
-        for(int i=0;i<MAXPLAYER;i++)
-            player[i]=new Player();
+    // 玩家开辟空间
+    for(int i = 0; i < MAXPLAYER; i++)
+    {
+        player[i] = new Player();
+    }
 
         // 向地图中添加资源
         initmap();
@@ -65,6 +72,7 @@
 
     }
 
+    // MainWidget析构函数
     MainWidget::~MainWidget()
     {
         delete ui;
@@ -74,6 +82,7 @@
         deleteBuilding();
     }
 
+    // 初始化地图
     MainWidget::initmap()
     {
         if(map->loadResource()==0)
@@ -83,6 +92,7 @@
 
     }
 
+    // 初始化区块
     void MainWidget::initBlock()
     {
         for(int num=0;num<17;num++)
@@ -95,6 +105,8 @@
             loadBlackRes(Block::getblock(num),Block::getblackblock(num));
         }
     }
+
+    // 初始化建筑
     void MainWidget::initBuilding()
     {
         for (int i = 0; i < 4; i++)
@@ -112,6 +124,7 @@
         }
     }
 
+    // 初始化动物
     void MainWidget::initAnimal()
     {
         for(int num=0;num<5;num++)
@@ -162,6 +175,7 @@
         }
     }
 
+    // 初始化农民状态
     void MainWidget::initFarmer()
     {
         //加载素材
@@ -188,7 +202,7 @@
                 flipResource(Farmer::getDie(statei,8-i),Farmer::getDie(statei,i));
             }
         }
-        //Work
+        // Work
         for(int statei=0;statei<7;statei++)
         {
             if(statei==0)
@@ -206,7 +220,7 @@
                 flipResource(Farmer::getWork(statei,8-i),Farmer::getWork(statei,i));
             }
         }
-        //Attack
+        // Attack
         for(int statei=0;statei<7;statei++)
         {
             if(statei==2||statei==3||statei==5||statei==6)
@@ -224,7 +238,7 @@
                 flipResource(Farmer::getAttack(statei,8-i),Farmer::getAttack(statei,i));
             }
         }
-        //Carry 考虑如何对接
+        // Carry 考虑如何对接
         for(int statei=0;statei<=4;statei++)
         {
             if(statei==0)
@@ -245,6 +259,7 @@
 
     }
 
+    // 删除区块资源
     void MainWidget::deleteBlock()
     {
         for(int i=0;i<1;i++)
@@ -254,6 +269,8 @@
             Block::deallocategrayblock(i);
         }
     }
+
+    // 删除建筑资源
     void MainWidget::deleteBuilding()
     {
         for (int i = 0; i < 4; i++)
@@ -268,6 +285,8 @@
             }
         }
     }
+
+    // 删除动物资源
     void MainWidget::deleteAnimal()
     {
         for (int num = 0; num < 3; num++)
@@ -306,6 +325,7 @@
         }
     }
 
+    // 删除农民资源
     void MainWidget::deleteFarmer()
     {
         // 清理素材资源
@@ -381,7 +401,7 @@
 
     }
 
-
+    // 游戏帧更新
     void MainWidget::FrameUpdate()
     {
         gameframe++;
