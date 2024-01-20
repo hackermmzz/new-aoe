@@ -1,4 +1,4 @@
-﻿#include "SelectWidget.h"
+#include "SelectWidget.h"
 #include "ui_SelectWidget.h"
 
 SelectWidget::SelectWidget(QWidget *parent) :
@@ -631,130 +631,130 @@ int SelectWidget::doActs(int actName)
 
 void SelectWidget::updateActs()
 {
- //遍历建筑更新活动列表
-    std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
-    for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
-    {
-        if((*buildIt)->isFinish())
-        {
-            for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
-            {
-                (*buildIt)->setActNames(i, ACT_NULL);
-                (*buildIt)->setActStatus(i, ACT_STATUS_ENABLED);
-            }
-            if((*buildIt)->getNum() == BUILDING_CENTER)
-            {
-                if((*buildIt)->getActSpeed() > 0)
-                {
-                    (*buildIt)->setActNames(0, ACT_STOP);
-                    (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
-                }
-                else
-                {//创造村民判断
-                    (*buildIt)->setActNames(0, ACT_CREATEFARMER);
-                    if((player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD && (*buildIt)->getActNames(0) == ACT_CREATEFARMER) && (*buildIt)->getActName() == ACT_NULL)
-                    {
-                        (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
-                    }//判断食物
-                    else
-                    {
-                        if(human_num >= build_hold_human_num || human_num > MAX_HUMAN_NUM)
-                        {
-                            (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
-                        }
-                        else
-                        {
-                            (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
-                        }
-                    }//判断人口上限
-                    //升级时代判断
-                    if(player[0]->getCiv() == CIVILIZATION_STONEAGE)
-                    {
-                        (*buildIt)->setActNames(1, ACT_UPGRADE_AGE);
-                        if((*buildIt)->getActName() == ACT_NULL && (player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD || !(isGranaryBuilt && isStockBuilt)))
-                        {
-                            (*buildIt)->setActStatus(1, ACT_STATUS_DISABLED);
-                        }
-                        else
-                        {
-                            (*buildIt)->setActStatus(1, ACT_STATUS_ENABLED);
-                        }
-                    }
-                }
-            }
-            else if((*buildIt)->getNum() == BUILDING_GRANARY)
-            {
-                if(player[0]->getCiv() == CIVILIZATION_TOOLAGE)
-                {
-                    if((*buildIt)->getActSpeed() > 0)
-                    {
-                        (*buildIt)->setActNames(0, ACT_STOP);
-                    }
-                    else
-                    {
-                        if(!player[0]->getArrowTowerUnlocked())
-                        {
-                            (*buildIt)->setActNames(0, ACT_UPGRADE_TOWERBUILD);
-                            if(player[0]->getFood() < BUILDING_GRANARY_ARROWTOWER_FOOD)
-                            {
-                                (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
-                            }
-                            else
-                            {
-                                (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
-                            }
-                        }
-                    }
-                }
-            }
-            else if((*buildIt)->getNum() == BUILDING_MARKET)
-            {
-                if((*buildIt)->getActSpeed() > 0)
-                {
-                    (*buildIt)->setActNames(0, ACT_STOP);
-                }
-                else
-                {
-                    if(!player[0]->getMarketResearch(0))
-                    {
-                        (*buildIt)->setActNames(0, ACT_UPGRADE_WOOD);
-                        if(player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD)
-                        {
-                            (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
-                        }
-                        else
-                        {
-                            (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
-                        }
-                    }
-                    if(!player[0]->getMarketResearch(1))
-                    {
-                        (*buildIt)->setActNames(1, ACT_UPGRADE_STONE);
-                        if(player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE)
-                        {
-                            (*buildIt)->setActStatus(1, ACT_STATUS_DISABLED);
-                        }
-                        else
-                        {
-                            (*buildIt)->setActStatus(1, ACT_STATUS_ENABLED);
-                        }
-                    }
-                    if(!player[0]->getMarketResearch(2))
-                    {
-                        (*buildIt)->setActNames(2, ACT_UPGRADE_FARM);
-                        if(player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD || player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD)
-                        {
-                            (*buildIt)->setActStatus(2, ACT_STATUS_DISABLED);
-                        }
-                        else
-                        {
-                            (*buildIt)->setActStatus(2, ACT_STATUS_ENABLED);
-                        }
-                    }
-                }
-            }
-        }
-    }
+//  //遍历建筑更新活动列表
+//     std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
+//     for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
+//     {
+//         if((*buildIt)->isFinish())
+//         {
+//             for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
+//             {
+//                 (*buildIt)->setActNames(i, ACT_NULL);
+//                 (*buildIt)->setActStatus(i, ACT_STATUS_ENABLED);
+//             }
+//             if((*buildIt)->getNum() == BUILDING_CENTER)
+//             {
+//                 if((*buildIt)->getActSpeed() > 0)
+//                 {
+//                     (*buildIt)->setActNames(0, ACT_STOP);
+//                     (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
+//                 }
+//                 else
+//                 {//创造村民判断
+//                     (*buildIt)->setActNames(0, ACT_CREATEFARMER);
+//                     if((player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD && (*buildIt)->getActNames(0) == ACT_CREATEFARMER) && (*buildIt)->getActName() == ACT_NULL)
+//                     {
+//                         (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
+//                     }//判断食物
+//                     else
+//                     {
+//                         if(human_num >= build_hold_human_num || human_num > MAX_HUMAN_NUM)
+//                         {
+//                             (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
+//                         }
+//                         else
+//                         {
+//                             (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
+//                         }
+//                     }//判断人口上限
+//                     //升级时代判断
+//                     if(player[0]->getCiv() == CIVILIZATION_STONEAGE)
+//                     {
+//                         (*buildIt)->setActNames(1, ACT_UPGRADE_AGE);
+//                         if((*buildIt)->getActName() == ACT_NULL && (player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD || !(isGranaryBuilt && isStockBuilt)))
+//                         {
+//                             (*buildIt)->setActStatus(1, ACT_STATUS_DISABLED);
+//                         }
+//                         else
+//                         {
+//                             (*buildIt)->setActStatus(1, ACT_STATUS_ENABLED);
+//                         }
+//                     }
+//                 }
+//             }
+//             else if((*buildIt)->getNum() == BUILDING_GRANARY)
+//             {
+//                 if(player[0]->getCiv() == CIVILIZATION_TOOLAGE)
+//                 {
+//                     if((*buildIt)->getActSpeed() > 0)
+//                     {
+//                         (*buildIt)->setActNames(0, ACT_STOP);
+//                     }
+//                     else
+//                     {
+//                         if(!player[0]->getArrowTowerUnlocked())
+//                         {
+//                             (*buildIt)->setActNames(0, ACT_UPGRADE_TOWERBUILD);
+//                             if(player[0]->getFood() < BUILDING_GRANARY_ARROWTOWER_FOOD)
+//                             {
+//                                 (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
+//                             }
+//                             else
+//                             {
+//                                 (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//             else if((*buildIt)->getNum() == BUILDING_MARKET)
+//             {
+//                 if((*buildIt)->getActSpeed() > 0)
+//                 {
+//                     (*buildIt)->setActNames(0, ACT_STOP);
+//                 }
+//                 else
+//                 {
+//                     if(!player[0]->getMarketResearch(0))
+//                     {
+//                         (*buildIt)->setActNames(0, ACT_UPGRADE_WOOD);
+//                         if(player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD)
+//                         {
+//                             (*buildIt)->setActStatus(0, ACT_STATUS_DISABLED);
+//                         }
+//                         else
+//                         {
+//                             (*buildIt)->setActStatus(0, ACT_STATUS_ENABLED);
+//                         }
+//                     }
+//                     if(!player[0]->getMarketResearch(1))
+//                     {
+//                         (*buildIt)->setActNames(1, ACT_UPGRADE_STONE);
+//                         if(player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE)
+//                         {
+//                             (*buildIt)->setActStatus(1, ACT_STATUS_DISABLED);
+//                         }
+//                         else
+//                         {
+//                             (*buildIt)->setActStatus(1, ACT_STATUS_ENABLED);
+//                         }
+//                     }
+//                     if(!player[0]->getMarketResearch(2))
+//                     {
+//                         (*buildIt)->setActNames(2, ACT_UPGRADE_FARM);
+//                         if(player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD || player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD)
+//                         {
+//                             (*buildIt)->setActStatus(2, ACT_STATUS_DISABLED);
+//                         }
+//                         else
+//                         {
+//                             (*buildIt)->setActStatus(2, ACT_STATUS_ENABLED);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
 }
 
 void SelectWidget::drawActs()
