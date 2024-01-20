@@ -86,18 +86,21 @@ void ActWidget::paintEvent(QPaintEvent *)
     }
     else if(status == 2)//灰色图标
     {
-        QImage img = pix.toImage().scaled(80, 80);
-        for(int i = 0; i < 80; i++)
+        if(!pix.isNull())
         {
-            for(int j = 0; j < 80; j++)
+            QImage img = pix.toImage().scaled(80, 80);
+            for(int i = 0; i < 80; i++)
             {
-                QColor clr = img.pixelColor(i, j);
-                int gray = clr.red() * 0.3 + clr.green() * 0.59 + clr.blue() * 0.11;
-                img.setPixelColor(i, j, QColor(gray, gray, gray));
+                for(int j = 0; j < 80; j++)
+                {
+                    QColor clr = img.pixelColor(i, j);
+                    int gray = clr.red() * 0.3 + clr.green() * 0.59 + clr.blue() * 0.11;
+                    img.setPixelColor(i, j, QColor(gray, gray, gray));
+                }
             }
+            pix = QPixmap::fromImage(img);
+            painter.drawPixmap(0,0,80,80,pix);
         }
-        pix = QPixmap::fromImage(img);
-        painter.drawPixmap(0,0,80,80,pix);
     }
 }
 

@@ -41,8 +41,18 @@ public:
         delete built[i][j];
         built[i][j] = nullptr;
     }
-
-
+    int* getActions()
+    {
+        return actions;
+    }
+    int getActNames(int num)
+    {
+        return actNames[num];
+    }
+    void setActNames(int num, int name)
+    {
+        this->actNames[num] = name;
+    }
 private:
     static std::list<ImageResource> *build[4];
     //建设list
@@ -71,6 +81,7 @@ private:
 
     std::string BuildDisplayName[7]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔"};
     int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
+    int actNames[ACT_WINDOW_NUM_FREE] = {0};
 };
 
 #endif // BUILDING_H
