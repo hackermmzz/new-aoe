@@ -230,6 +230,112 @@ struct Point {
     int y;
 };
 
+struct conditionF
+{
+    int variableArgu;
+    bool (*condition)( Coordinate* , Coordinate * , int);
+
+    conditionF()
+    {
+
+    }
+
+    conditionF( bool (*func)(Coordinate* , Coordinate* , int))
+    {
+        condition = func;
+        variableArgu = 0;
+    }
+
+    conditionF( bool (*func)(Coordinate* , Coordinate* , int) , int variableArgu)
+    {
+        condition = func;
+        this->variableArgu = variableArgu;
+    }
+};
+
+struct detail_EventPhase
+{
+    /*关于条件
+    * 对所有条件：true 代表执行切换阶段操作
+    * 所有条件list中条件均为“或”连接
+    */
+
+    int phaseAmount = 0;
+    int phaseList[10];      //core中，由此值指示进入函数
+    conditionF chageCondition[9];   //切换phase的判断条件
+    map<int,int> changeLinkedList;  //关系链，
+    list<conditionF>forcedInterrupCondition;//细节控制的强制中止条件
+
+    map< int , list<conditionF> > loopOverCondition;  //loop的中止条件
+    /**
+    * 第一个键值：    loopEndPhase 为loop中阶段编号最大的阶段，    如：loop:1->2->3->1，loopEndPhase为3
+    * 第二个值 ：     loop的中止条件。在loopEndPhase进行判断，条件链表中有一个为真即中止
+    *               loop中止后将进入loop后的一个阶段。   如：loop:1->2->3->1，  中止条件在3进行判断，判断中止loop后，进入阶段4
+    */
+
+
+    detail_EventPhase()
+    {
+        phaseList[0] = CoreDetail_NormalEnd;
+    }
+
+
+    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition )
+    {
+        /** ********************************************************
+         *构造函数
+         *传入：    阶段总数 ， 阶段表 ， 各个阶段的切换条件表 ， 强制中止条件
+         */
+        this->phaseAmount = phaseAmount;
+        for(int i = 0; i<phaseAmount; i++)
+        {
+            phaseList[i] = theList[i];
+            chageCondition[i] = conditionList[i];
+            changeLinkedList[i] = i+1;
+        }
+        this->forcedInterrupCondition = forcedInterrupCondition;
+
+        phaseList[phaseAmount] = CoreDetail_NormalEnd;//中止细节操作
+    }
+
+    bool setLoop( int loopBeginPhase , int loopEndPhase , list<conditionF>overCondition )
+    {
+        if( loopBeginPhase<loopEndPhase && loopBeginPhase>-1&& loopEndPhase <phaseAmount )
+        {
+            changeLinkedList[loopEndPhase] = loopBeginPhase;
+            loopOverCondition[loopEndPhase] = overCondition;
+            return true;
+        }
+        else return false;
+    }
+
+
+    bool isLoop( int phase){ return phase<phaseAmount && phase>changeLinkedList[phase]; }
+    //判断phase是否是loopEndPhase，是否需要loop中止判断
+    //由于map对未在表内的键值自己设初值，可能会造成bug
+};
+
+
+struct relation_Object
+{
+    bool isExist;
+    Coordinate* goalObject;     //目标对象
+    int relationAct;
+    int nowPhaseNum = 0;
+
+    relation_Object()
+    {
+        isExist = false;
+    }
+
+    relation_Object( Coordinate* goal , int eventClass)
+    {
+        isExist = true;
+        goalObject = goal;
+        relationAct = eventClass;
+    }
+};
+
 /*
  * 0是成功
  * -1是SN不存在

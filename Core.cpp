@@ -1,12 +1,37 @@
 ﻿#include "Core.h"
 
+bool condition_AllFalse( Coordinate* object1, Coordinate* object2 , int operate){return false;}
+bool condition_UniObjectDie( Coordinate* , Coordinate* , int );
+bool condition_UniObjectUnderAttack( Coordinate* , Coordinate* , int );
+bool condition_UniObject_FullBackpack( Coordinate* , Coordinate* , int );
+bool condition_ObjectNearby( Coordinate* , Coordinate* , int );
+
 Core::Core()
 {
+    int *phaseList;
+    conditionF* conditionList;
+    list<conditionF>forcedInterrupCondition;
+    list<conditionF>overCondition;
+
+    //添加静态表
+    //行动：只移动
+    phaseList = new int(CoreDetail_Move);
+    conditionList = new ( conditionF )( conditionF(condition_ObjectNearby , OPERATECON_NEAR_ABSOLUTE) );
+    forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
+    forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
+
+    relation_Event_Staic[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
+    delete phaseList;
+    delete conditionList;
+    forcedInterrupCondition.clear();
+
+    //行动：采集
 
 }
 
 void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *mouseEvent)
 {
+
 
     std::list<Human *>::iterator humaniter=player[0]->human.begin();
     while(humaniter!=player[0]->human.end())
@@ -70,6 +95,7 @@ void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *m
         }
     }
 
+    manageRelationList();
 }
 
 bool Core::isValidPoint(const int (&map)[MAP_L][MAP_U], const Point &p)
@@ -195,3 +221,132 @@ stack<Point> Core::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Poi
     return stack<Point>();
 }
 
+//****************************************************************************************
+//
+//对人，命令不必手动中止，直接变更；对建筑，命令变更将被无视，必须手动中止当前命令后再下达新命令。
+bool Core::addRelation( Coordinate & object1, Coordinate & object2, int eventType)
+{
+    if(! relate_AllObject[&object1].isExist )
+    {
+        relate_AllObject[&object1] = relation_Object(&object2 , eventType);
+        return true;
+    }
+
+    return false;
+}
+
+void Core::suspendRelation(Coordinate & object)
+{
+    if(relate_AllObject[&object].isExist) relate_AllObject.erase(&object);
+}
+
+void Core::manageRelationList()
+{
+    Coordinate* object1;
+    Coordinate* object2;
+    relation_Object thisRelation;
+    detail_EventPhase thisDetailEven;
+    int nowPhaseNum;
+    bool needForcedInter;
+    list<conditionF> forcedInterrupCondition , overCondition;
+
+    for( map<Coordinate* , relation_Object>::iterator iter = relate_AllObject.begin() ; iter!=relate_AllObject.end() ;)
+    {
+        object1 = iter->first;
+        thisRelation = iter->second;
+        if( thisRelation.isExist )
+        {
+            object2 = thisRelation.goalObject;
+            nowPhaseNum = thisRelation.nowPhaseNum;
+            thisDetailEven = relation_Event_Staic[nowPhaseNum];
+            needForcedInter = false;
+
+            forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
+            for(list<conditionF>::iterator iter_list = forcedInterrupCondition.begin();iter_list!=forcedInterrupCondition.end();iter_list++)
+            {
+                if( iter_list->condition( object1,object2,iter_list->variableArgu ) )
+                {
+                    needForcedInter = true;
+                    break;
+                }
+            }
+            if( needForcedInter )
+            {
+                iter = relate_AllObject.erase(iter);
+                continue;
+            }
+
+            if( thisDetailEven.isLoop(nowPhaseNum) )
+            {
+                overCondition = thisDetailEven.loopOverCondition[nowPhaseNum];
+                for(list<conditionF>::iterator iter_list = overCondition.begin(); iter_list!= overCondition.end();iter_list++)
+                {
+                    if( iter_list->condition( object1 , object2 , iter_list->variableArgu ))
+                    {
+                        nowPhaseNum ++;
+                        iter->second.nowPhaseNum = nowPhaseNum;
+                        break;
+                    }
+                }
+            }
+
+            if( thisDetailEven.chageCondition[nowPhaseNum].condition(object1, object2 , thisDetailEven.chageCondition[nowPhaseNum].variableArgu))
+            {
+                nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
+                iter->second.nowPhaseNum = nowPhaseNum;
+            }
+
+            switch (thisDetailEven.phaseList[nowPhaseNum])
+            {
+            case CoreDetail_Move:
+
+                break;
+            case CoreDetail_Attack:
+
+                break;
+            case CoreDetail_Gather:
+                break;
+            case CoreDetail_NormalEnd:
+                break;
+            default:
+                break;
+            }
+            iter++;
+        }
+    }
+}
+
+//****************************************************************************************
+//通用的关系函数
+//
+bool condition_UniObjectDie( Coordinate* object1, Coordinate* object2 , int opreate)
+{
+    return false;
+
+}
+
+
+bool condition_UniObjectUnderAttack( Coordinate* object1, Coordinate* object2, int operate )
+{
+    return false;
+}
+
+bool condition_UniObject_FullBackpack( Coordinate* object1 , Coordinate* object2, int operate = OPERATECON_OBJECT1)
+{
+    if(operate == OPERATECON_OBJECT1)
+    {
+        return false;
+
+
+    }
+}
+
+bool condition_ObjectNearby( Coordinate* object1, Coordinate* object2, int operate = OPERATECON_NEAR_ABSOLUTE)
+{
+    if(operate == OPERATECON_NEAR_ABSOLUTE)
+    {
+        return false;
+    }
+
+
+}

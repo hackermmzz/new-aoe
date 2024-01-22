@@ -112,7 +112,7 @@ void Farmer::nextframe()
                 if(tempAngle!=Angle)
                 {
                     Angle=tempAngle;
-                    setNowRes();
+//                    setNowRes();
                 }
             }
             else if(pathI==0&&pathI<pathN-1)
