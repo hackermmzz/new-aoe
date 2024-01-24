@@ -320,6 +320,7 @@ struct relation_Object
 {
     bool isExist;
     Coordinate* goalObject;     //目标对象
+//    Coordinate goalObject_Record;
     int relationAct;
     int nowPhaseNum = 0;
 
@@ -332,8 +333,18 @@ struct relation_Object
     {
         isExist = true;
         goalObject = goal;
+//        goalObject_Record = *goalObject;
         relationAct = eventClass;
     }
+
+//    //使用该构造函数说明传入的对象会被销毁，
+//    relation_Object(Coordinate goal, int eventClass)
+//    {
+//        isExist = true;
+//        goalObject_Record = goal;
+//        goalObject = &goalObject_Record;
+//        relationAct = eventClass;
+//    }
 };
 
 /*
