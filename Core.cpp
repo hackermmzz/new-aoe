@@ -1,10 +1,10 @@
 ﻿#include "Core.h"
 
-bool condition_AllFalse( Coordinate* object1, Coordinate* object2 , int operate){return false;}
-bool condition_UniObjectDie( Coordinate* , Coordinate* , int );
-bool condition_UniObjectUnderAttack( Coordinate* , Coordinate* , int );
-bool condition_UniObject_FullBackpack( Coordinate* , Coordinate* , int );
-bool condition_ObjectNearby( Coordinate* , Coordinate* , int );
+bool condition_AllFalse( Coordinate* object1, relation_Object& relation , int operate){return false;}
+bool condition_UniObjectDie( Coordinate* , relation_Object& , int );
+bool condition_UniObjectUnderAttack( Coordinate* , relation_Object& , int );
+bool condition_UniObject_FullBackpack( Coordinate* , relation_Object& , int );
+bool condition_ObjectNearby( Coordinate* , relation_Object& , int );
 
 Core::Core()
 {
@@ -16,11 +16,12 @@ Core::Core()
     //添加静态表
     //行动：只移动
     phaseList = new int(CoreDetail_Move);
-    conditionList = new ( conditionF )( conditionF(condition_ObjectNearby , OPERATECON_NEAR_ABSOLUTE) );
+    conditionList = new ( conditionF )( conditionF(condition_ObjectNearby) );
     forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
     forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
 
-    relation_Event_Staic[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
+    relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
+    relation_Event_static[CoreEven_JustMoveTo].setEnd_Absolute();
     delete phaseList;
     delete conditionList;
     forcedInterrupCondition.clear();
@@ -29,9 +30,12 @@ Core::Core()
 
 }
 
-void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *mouseEvent)
+void Core::gameUpdate(Map* theMap, Player* player[], int** memorymap, MouseEvent *mouseEvent)
 {
-
+    this->theMap = theMap;
+    this->player = player;
+    this->memorymap = memorymap;
+    this->mouseEvent = mouseEvent;
 
     std::list<Human *>::iterator humaniter=player[0]->human.begin();
     while(humaniter!=player[0]->human.end())
@@ -46,14 +50,14 @@ void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *m
         humaniter++;
     }
 
-    std::list<Animal*>::iterator animaliter=map->animal.begin();
-    while(animaliter!=map->animal.end())
+    std::list<Animal*>::iterator animaliter=theMap->animal.begin();
+    while(animaliter!=theMap->animal.end())
     {
         (*animaliter)->nextframe();
         animaliter++;
     }
-    std::list<StaticRes*>::iterator SRiter=map->staticres.begin();
-    while(SRiter!=map->staticres.end())
+    std::list<StaticRes*>::iterator SRiter=theMap->staticres.begin();
+    while(SRiter!=theMap->staticres.end())
     {
         (*SRiter)->nextframe();
         SRiter++;
@@ -66,35 +70,8 @@ void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *m
         hiter++;
     }
 
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
-    {
-        if(mouseEvent->mouseEventType==LEFT_PRESS)
-        {
-            nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
-
-            mouseEvent->mouseEventType=NULL_MOUSEEVENT;
-        }
-        if(mouseEvent->mouseEventType==RIGHT_PRESS&&nowobject!=NULL)
-        {
-            if(nowobject->getSort()==SORT_FARMER)
-            {
-                Farmer *farmer=(Farmer *)nowobject;
-                if(!farmer->isWalking())
-                    farmer->setPreWalk();
-                farmer->setdestination(mouseEvent->DR,mouseEvent->UR);
-                Point start,destination;
-                start.x=tranBlockDR(farmer->getDR());
-                start.y=tranBlockUR(farmer->getUR());
-                destination.x=tranBlockDR(farmer->getDR0());
-                destination.y=tranBlockUR(farmer->getUR0());
-                map->loadfindPathMap();
-                farmer->setPath(findPath(map->findPathMap,map,start,destination));
-
-                mouseEvent->mouseEventType=NULL_MOUSEEVENT;
-            }
-        }
-    }
-
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
+    manageOrder();
     manageRelationList();
 }
 
@@ -221,85 +198,117 @@ stack<Point> Core::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Poi
     return stack<Point>();
 }
 
+//处理鼠标事件
+void Core::manageMouseEvent()
+{
+    if(mouseEvent->mouseEventType==LEFT_PRESS)
+    {
+        nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+
+        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    }
+    if(mouseEvent->mouseEventType==RIGHT_PRESS&&nowobject!=NULL)
+    {
+        if(nowobject->getSort()==SORT_FARMER)
+        {
+            if( g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]] == NULL )
+            {
+                suspendRelation(nowobject);
+                addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
+            }
+
+            mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+        }
+    }
+}
+//后续编写，用于处理AI指令
+void Core::manageOrder()
+{
+
+}
+
 //****************************************************************************************
 //
 //对人，命令不必手动中止，直接变更；对建筑，命令变更将被无视，必须手动中止当前命令后再下达新命令。
-bool Core::addRelation( Coordinate & object1, Coordinate & object2, int eventType)
+bool Core::addRelation( Coordinate * object1, Coordinate * object2, int eventType)
 {
-    if(! relate_AllObject[&object1].isExist )
+    if(! relate_AllObject[object1].isExist )
     {
-        relate_AllObject[&object1] = relation_Object(&object2 , eventType);
+        relate_AllObject[object1] = relation_Object(object2 , eventType);
+        return true;
+    }
+
+    return false;
+}
+bool Core::addRelation( Coordinate * object1, double DR , double UR, int eventType)
+{
+    if(! relate_AllObject[object1].isExist )
+    {
+        relate_AllObject[object1] = relation_Object(DR , UR , eventType);
         return true;
     }
 
     return false;
 }
 
-void Core::suspendRelation(Coordinate & object)
+void Core::suspendRelation(Coordinate * object)
 {
-    if(relate_AllObject[&object].isExist) relate_AllObject.erase(&object);
+    if(relate_AllObject[object].isExist) relate_AllObject.erase(object);
 }
 
 void Core::manageRelationList()
 {
     Coordinate* object1;
     Coordinate* object2;
-    relation_Object thisRelation;
-    detail_EventPhase thisDetailEven;
-    int nowPhaseNum;
-    bool needForcedInter;
     list<conditionF> forcedInterrupCondition , overCondition;
 
     for( map<Coordinate* , relation_Object>::iterator iter = relate_AllObject.begin() ; iter!=relate_AllObject.end() ;)
     {
         object1 = iter->first;
-        thisRelation = iter->second;
+        relation_Object& thisRelation = iter->second;
         if( thisRelation.isExist )
         {
+            int& nowPhaseNum = thisRelation.nowPhaseNum;
+            detail_EventPhase& thisDetailEven = relation_Event_static[nowPhaseNum];
             object2 = thisRelation.goalObject;
-            nowPhaseNum = thisRelation.nowPhaseNum;
-            thisDetailEven = relation_Event_Staic[nowPhaseNum];
-            needForcedInter = false;
 
+            //该部分为强制中止行动部分代码
             forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
             for(list<conditionF>::iterator iter_list = forcedInterrupCondition.begin();iter_list!=forcedInterrupCondition.end();iter_list++)
             {
-                if( iter_list->condition( object1,object2,iter_list->variableArgu ) )
+                if( iter_list->condition( object1,thisRelation,iter_list->variableArgu ) )
                 {
-                    needForcedInter = true;
+                    thisRelation.nowPhaseNum = thisDetailEven.phaseInterrup;
                     break;
                 }
             }
-            if( needForcedInter )
-            {
-                iter = relate_AllObject.erase(iter);
-                continue;
-            }
 
+            //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
             {
                 overCondition = thisDetailEven.loopOverCondition[nowPhaseNum];
                 for(list<conditionF>::iterator iter_list = overCondition.begin(); iter_list!= overCondition.end();iter_list++)
                 {
-                    if( iter_list->condition( object1 , object2 , iter_list->variableArgu ))
+                    if( iter_list->condition( object1 , thisRelation , iter_list->variableArgu ))
                     {
                         nowPhaseNum ++;
-                        iter->second.nowPhaseNum = nowPhaseNum;
                         break;
                     }
                 }
             }
 
-            if( thisDetailEven.chageCondition[nowPhaseNum].condition(object1, object2 , thisDetailEven.chageCondition[nowPhaseNum].variableArgu))
+            //判断是否需要切换当前阶段
+            if( nowPhaseNum < thisDetailEven.phaseAmount && thisDetailEven.chageCondition[nowPhaseNum].condition(object1, thisRelation , thisDetailEven.chageCondition[nowPhaseNum].variableArgu))
             {
                 nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
-                iter->second.nowPhaseNum = nowPhaseNum;
             }
 
+            //实际执行行动
             switch (thisDetailEven.phaseList[nowPhaseNum])
             {
             case CoreDetail_Move:
-
+                if(thisRelation.isUseAlterGoal)object_Move(object1 , thisRelation.DR_alter , thisRelation.UR_alter);
+                else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
                 break;
             case CoreDetail_Attack:
 
@@ -307,7 +316,11 @@ void Core::manageRelationList()
             case CoreDetail_Gather:
                 break;
             case CoreDetail_NormalEnd:
-                break;
+                iter = object_FinishAction(iter);
+                continue;
+            case CoreDetail_AbsoluteEnd:
+                iter = object_FinishAction_Absolute(iter);
+                continue;
             default:
                 break;
             }
@@ -317,21 +330,56 @@ void Core::manageRelationList()
 }
 
 //****************************************************************************************
+//通用的控制对象行动函数
+void Core::object_Move(Coordinate * object , double DR , double UR)
+{
+    MoveObject* moveObject = (MoveObject*)object;
+    if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
+    {
+        Point start,destination;
+        if( object->getSort() == SORT_FARMER )
+        {
+            if(!moveObject->isWalking()) moveObject->setPreWalk();
+            moveObject->setdestination(mouseEvent->DR, mouseEvent->UR);
+            start.x = tranBlockDR(moveObject->getDR());
+            start.y = tranBlockUR(moveObject->getUR());
+            destination.x = tranBlockDR(moveObject->getDR0());
+            destination.y = tranBlockUR(moveObject->getUR0());
+            theMap->loadfindPathMap();
+            moveObject->setPath(findPath(theMap->findPathMap , theMap , start , destination));
+        }
+    }
+}
+
+
+
+map<Coordinate* , relation_Object>::iterator Core::object_FinishAction(map<Coordinate* , relation_Object>::iterator iter)
+{
+    if(false)   //添代码，找寻相同类型的目标，自动更改目标对象；使得行动有自动性、连续性
+    {
+
+        return ++iter;
+    }
+    else return object_FinishAction_Absolute(iter);
+
+}
+
+//****************************************************************************************
 //通用的关系函数
 //
-bool condition_UniObjectDie( Coordinate* object1, Coordinate* object2 , int opreate)
+bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , int opreate)
 {
     return false;
 
 }
 
 
-bool condition_UniObjectUnderAttack( Coordinate* object1, Coordinate* object2, int operate )
+bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relation, int operate )
 {
     return false;
 }
 
-bool condition_UniObject_FullBackpack( Coordinate* object1 , Coordinate* object2, int operate = OPERATECON_OBJECT1)
+bool condition_UniObject_FullBackpack( Coordinate* object1 , relation_Object& relation, int operate = OPERATECON_OBJECT1)
 {
     if(operate == OPERATECON_OBJECT1)
     {
@@ -341,8 +389,15 @@ bool condition_UniObject_FullBackpack( Coordinate* object1 , Coordinate* object2
     }
 }
 
-bool condition_ObjectNearby( Coordinate* object1, Coordinate* object2, int operate = OPERATECON_NEAR_ABSOLUTE)
+bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int operate = OPERATECON_NEAR_ABSOLUTE)
 {
+    if(!relation.isGoalinit && relation.goalObject!= nullptr)
+    {
+        relation.DR_goal = object1->getDR();
+        relation.UR_goal = object1->getUR();
+        relation.isGoalinit = true;
+    }
+
     if(operate == OPERATECON_NEAR_ABSOLUTE)
     {
         return false;

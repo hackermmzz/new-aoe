@@ -11,6 +11,7 @@ Human::Human(int Num, double DR, double UR)
     this->DR=DR;
     this->UR=UR;
 
+    speed = HUMAN_SPEED;
 }
 
 void Human::nextframe()
