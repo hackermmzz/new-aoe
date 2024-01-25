@@ -3,9 +3,9 @@
 Map::Map()
 {
 
-    for(int i=0;i<MAP_L;i++)
+    for(int i = 0; i < MAP_L; i++)
     {
-        cell[i]=new Block[MAP_U];
+        cell[i] = new Block[MAP_U];
     }
 }
 
@@ -827,7 +827,7 @@ void Map::GenerateTerrain()
     {
         for(int j = 0; j < 72; j += 10)
         {
-            mapHeight[i][j] = rand() % 5 + 2;
+            this->cell[i][j].setMapHeight(rand() % 5 + 2);
         }
     }
 
@@ -836,7 +836,7 @@ void Map::GenerateTerrain()
     {
         for(int j = 0; j < 71; j++)
         {
-            if(mapHeight[i][j] == 0)
+            if(this->cell[i][j].getMapHeight() == MAPHEIGHT_EMPTY)
             {
                 int LUi = (i / 10) * 10;
                 int LUj = (j / 10) * 10;
@@ -846,16 +846,16 @@ void Map::GenerateTerrain()
                 int LDj = (j / 10) * 10;
                 int RDi = (i / 10 + 1) * 10;
                 int RDj = (j / 10 + 1) * 10;
-                double MapH_LU = mapHeight[LUi][LUj];
-                double MapH_RU = mapHeight[RUi][RUj];
-                double MapH_LD = mapHeight[LDi][LDj];
-                double MapH_RD = mapHeight[RDi][RDj];
+                double MapH_LU = this->cell[LUi][LUj].getMapHeight();
+                double MapH_RU = this->cell[RUi][RUj].getMapHeight();
+                double MapH_LD = this->cell[LDi][LDj].getMapHeight();
+                double MapH_RD = this->cell[RDi][RDj].getMapHeight();
                 // 此时地块与四个角的点的曼哈顿距离 / 在整个大块里（10 * 10小块矩阵）理论上最远的距离（即20）= 高度占左上角的比例
                 double LU = 1 - smooth(double(abs(i - LUi) + abs(j - LUj)) / 20);
                 double RU = 1 - smooth(double(abs(i - RUi) + abs(j - RUj)) / 20);
                 double LD = 1 - smooth(double(abs(i - LDi) + abs(j - LDj)) / 20);
                 double RD = 1 - smooth(double(abs(i - RDi) + abs(j - RDj)) / 20);
-                mapHeight[i][j] = int((LU * MapH_LU + RU * MapH_RU + LD * MapH_LD + RD * MapH_RD) / 2 + 0.5);
+                this->cell[i][j].setMapHeight(int((LU * MapH_LU + RU * MapH_RU + LD * MapH_LD + RD * MapH_RD) / 2 + 0.5));
             }
         }
     }
@@ -863,13 +863,13 @@ void Map::GenerateTerrain()
     // 3.初步修整地图边缘
     for(int i = 0; i < 72; i++)
     {
-        mapHeight[i][71] = mapHeight[i][70];
-        mapHeight[i][0] = mapHeight[i][1];
+        this->cell[i][71].setMapHeight(this->cell[i][70].getMapHeight());
+        this->cell[i][0].setMapHeight(this->cell[i][1].getMapHeight());
     }
     for(int j = 0; j < 72; j++)
     {
-        mapHeight[71][j] = mapHeight[70][j];
-        mapHeight[0][j] = mapHeight[1][j];
+        this->cell[71][j].setMapHeight(this->cell[70][j].getMapHeight());
+        this->cell[0][j].setMapHeight(this->cell[1][j].getMapHeight());
     }
 
     // 将可能存在的突出/凹陷部分平滑化
@@ -879,16 +879,16 @@ void Map::GenerateTerrain()
         {
             for(int j = 1; j < 71; j++)
             {
-                if(mapHeight[i][j] == tmp)
+                if(this->cell[i][j].getMapHeight() == tmp)
                 {
-                    if(mapHeight[i - 1][j - 1] == mapHeight[i + 1][j + 1] && mapHeight[i][j] != mapHeight[i - 1][j - 1])
-                        mapHeight[i][j] = mapHeight[i - 1][j - 1];
-                    if(mapHeight[i - 1][j + 1] == mapHeight[i + 1][j - 1] && mapHeight[i][j] != mapHeight[i + 1][j - 1])
-                        mapHeight[i][j] = mapHeight[i - 1][j + 1];
-                    if(mapHeight[i][j - 1] == mapHeight[i][j + 1] && mapHeight[i][j] != mapHeight[i][j + 1])
-                        mapHeight[i][j] = mapHeight[i][j - 1];
-                    if(mapHeight[i - 1][j] == mapHeight[i + 1][j] && mapHeight[i][j] != mapHeight[i + 1][j])
-                        mapHeight[i][j] = mapHeight[i - 1][j];
+                    if(this->cell[i - 1][j - 1].getMapHeight() == this->cell[i + 1][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i - 1][j - 1].getMapHeight())
+                        this->cell[i][j].setMapHeight(this->cell[i - 1][j - 1].getMapHeight());
+                    if(this->cell[i - 1][j + 1].getMapHeight() == this->cell[i + 1][j - 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j - 1].getMapHeight())
+                        this->cell[i][j].setMapHeight(this->cell[i - 1][j + 1].getMapHeight());
+                    if(this->cell[i][j - 1].getMapHeight() == this->cell[i][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i][j + 1].getMapHeight())
+                        this->cell[i][j].setMapHeight(this->cell[i][j - 1].getMapHeight());
+                    if(this->cell[i - 1][j].getMapHeight() == this->cell[i + 1][j].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j].getMapHeight())
+                        this->cell[i][j].setMapHeight(this->cell[i - 1][j].getMapHeight());
                 }
             }
         }
@@ -897,20 +897,21 @@ void Map::GenerateTerrain()
     // 再次修整地图边缘
     for(int i = 0; i < 72; i++)
     {
-        mapHeight[i][71] = mapHeight[i][70];
-        mapHeight[i][0] = mapHeight[i][1];
+        this->cell[i][71].setMapHeight(this->cell[i][70].getMapHeight());
+        this->cell[i][0].setMapHeight(this->cell[i][1].getMapHeight());
     }
     for(int j = 0; j < 72; j++)
     {
-        mapHeight[71][j] = mapHeight[70][j];
-        mapHeight[0][j] = mapHeight[1][j];
+        this->cell[71][j].setMapHeight(this->cell[70][j].getMapHeight());
+        this->cell[0][j].setMapHeight(this->cell[1][j].getMapHeight());
     }
 
+    // 给地图cell赋值高度
     for(int i = 0; i < 72; i++)
     {
         for(int j = 0; j < 72; j++)
         {
-            this->cell[i][j].setMapHeight(mapHeight[i][j]);
+            this->cell[i][j].setMapHeight(this->cell[i][j].getMapHeight());
         }
     }
     return ;
@@ -927,7 +928,7 @@ void Map::clearData()
     {
         for(int j = 0; j < 72; j++)
         {
-            mapHeight[i][j] = 0;
+            this->cell[i][j].setMapHeight(0);
         }
     }
     return ;
@@ -937,11 +938,11 @@ void Map::init(int MapJudge)
 {
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
-            this->cell[i][j].Num=0;
+            this->cell[i][j].Num = 0;
             this->cell[i][j].Explored=true;
             //改地图可见度在这里
             this->cell[i][j].Visible=true;
-            this->cell[i][j].setMapHeight(MAPHEIGHT_FLAT);
+            this->cell[i][j].setMapHeight(MAPHEIGHT_EMPTY);
         }
     }
     generateLandforms();

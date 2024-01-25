@@ -83,6 +83,12 @@ public:
     int getMapHeight() const;
     void setMapHeight(int value);
 
+    int getMapPattern() const;
+    void setMapPattern(int value);
+
+    int getMapResource() const;
+    void setMapResource(int value);
+
 private:
     // 可优化成char类型
     int Type;               // 地图块种类
