@@ -53,6 +53,7 @@ void Core::gameUpdate(Map* map, Player* player[], int** memorymap, MouseEvent *m
         {
             if(nowobject->getSort()==SORT_FARMER)
             {
+
                 Farmer *farmer=(Farmer *)nowobject;
                 if(!farmer->isWalking())
                     farmer->setPreWalk();
