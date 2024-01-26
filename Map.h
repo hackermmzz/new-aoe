@@ -52,7 +52,6 @@ private:
     void GenerateTerrain();     // 用于生成地形（Block高度差）
     double smooth(double x);    // 用于平滑地图曲线
     void clearData();           // 用于清空所有地图创建时所建立的临时变量
-    int mapHeight[72][72];
 
 };
 

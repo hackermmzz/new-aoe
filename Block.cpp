@@ -10,8 +10,14 @@ std::string Block::Blockname[17]={"Grass","Desert","Grass_Border_111","Grass_Bor
 
 Block::Block()
 {
-    this->Num=0;
-    this->nowres=block[this->Num]->begin();
+    this->Num = 0;
+    this->nowres = block[this->Num]->begin();
+    this->OffsetX = 0;
+    this->OffsetY = 0;
+    this->Type = MAPTYPE_FLAT;
+    this->Pattern = MAPPATTERN_GRASS;
+    this->Height = MAPHEIGHT_FLAT;
+    this->Resource = RESOURCE_EMPTY;
 }
 
 void Block::nextframe()
@@ -21,10 +27,30 @@ void Block::nextframe()
 
 int Block::getMapHeight() const
 {
-    return MapHeight;
+    return Height;
 }
 
 void Block::setMapHeight(int value)
 {
-    MapHeight = value;
+    Height = value;
+}
+
+int Block::getMapPattern() const
+{
+    return Pattern;
+}
+
+void Block::setMapPattern(int value)
+{
+    Pattern = value;
+}
+
+int Block::getMapResource() const
+{
+    return Resource;
+}
+
+void Block::setMapResource(int value)
+{
+    Resource = value;
 }

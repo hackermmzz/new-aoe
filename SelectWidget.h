@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <MainWidget.h>
-
+class MainWidget;
 namespace Ui {
 class SelectWidget;
 }
@@ -36,6 +36,7 @@ public:
     void updateActs();
     void initActs();
     void drawActs();
+    int doActs(int actName);
 private:
     Ui::SelectWidget *ui;
 //    Building * objBuilding;
@@ -46,6 +47,11 @@ private:
     int objType;//
     int actions[ACT_WINDOW_NUM_FREE] = {0};
     int actionStatus[ACT_WINDOW_NUM_FREE] = {0};
+    MainWidget *mainPtr;
+private slots:
+    void widgetAct(int num);
+    void aiAct(int acter, int actName);
+    void widgetUpdate();
 };
 
 #endif // SELECTWIDGET_H

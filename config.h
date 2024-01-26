@@ -64,18 +64,22 @@
 #define KEY_LEFT 65
 #define KEY_DOWN 83
 #define KEY_RIGHT 68
+#define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
 
 /********** 地图块种类 **********/
 #define MAPTYPE_FLAT 0      // 平地
+#define MAPTYPE_L0_UPTOLU 1 // L0边（向左上方凸起）
+#define MAPTYPE_L2_UPTOLU 2 // L2边（向左上方凸起，同L0）
 
 /********** 地图块高度 **********/
+#define MAPHEIGHT_EMPTY 0   // 未定义高度
 #define MAPHEIGHT_FLAT 2    // 地形高度
 
 /********** 地图块样式 **********/
 #define MAPPATTERN_GRASS 0      // 草原
 #define MAPPATTERN_DESERT 1     // 沙漠
 #define MAPPATTERN_OCEAN 2      // 海洋/河流
-#define mAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
+#define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
 
 
 /********** DebugText栏颜色 **********/
@@ -174,6 +178,7 @@
 /*
  * 如表 十进制位代表大的分类 个位代表他在大类中的具体编号
  */
+#define RESOURCE_EMPTY 0
 #define RESOURCE_BUSH 20
 #define RESOURCE_TREE 60
 #define RESOURCE_STONE 21
@@ -181,6 +186,8 @@
 #define RESOURCE_ELEPHANT 72
 #define RESOURCE_LION 73
 
+
+/********** 时代编号 **********/
 #define CIVILIZATION_STONEAGE 1
 #define CIVILIZATION_TOOLAGE 2
 #define CIVILIZATION_BRONZEAGE 3
