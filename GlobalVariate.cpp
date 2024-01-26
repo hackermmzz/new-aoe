@@ -25,6 +25,7 @@ std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 int InitImageResMap(QString path)
 {
     //判断路径是否存在
+    qDebug() << path;
     QDir dir(path);
     if(!dir.exists())
     {

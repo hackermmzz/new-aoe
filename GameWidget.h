@@ -20,6 +20,7 @@ public:
     explicit GameWidget(QWidget *parent = 0);
     ~GameWidget();
 
+    void drawMap(double x, double y, double width, double height, QPixmap pixmap, double offsetX, double offsetY);
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -33,8 +34,6 @@ public:
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
     void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
-
-
 
 private slots:
     void movemap();

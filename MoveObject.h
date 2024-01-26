@@ -9,8 +9,6 @@ protected:
     int blood;
     int maxBlood;
 
-    double speed;
-
     int Angle;
     //规定 从下顺时针分别为0 1 2 3 4 5 6 7
 
@@ -64,16 +62,10 @@ protected:
 public:
     MoveObject();
 
-    virtual void setNowRes()
-    {
-
-    }
-
     bool isWalking()
     {
         return this->nowstate==1;
     }
-    void updateMove();
 
     void calculateDiretionArray(stack<Point>& path);
     int calculateAngle(double L0,double U0);

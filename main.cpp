@@ -1,9 +1,12 @@
 ﻿#include "MainWidget.h"
 #include <QApplication>
+#include <QResource>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    // 注册二进制文件信息
     QResource::registerResource("./res.rcc");
 
     int MapJudge = 0;
