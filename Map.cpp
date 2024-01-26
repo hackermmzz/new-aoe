@@ -1,4 +1,4 @@
-﻿#include "Map.h"
+#include "Map.h"
 
 Map::Map()
 {
@@ -846,6 +846,9 @@ void Map::GenerateTerrain()
                 int LDj = (j / 10) * 10;
                 int RDi = (i / 10 + 1) * 10;
                 int RDj = (j / 10 + 1) * 10;
+                if(LDi >= 72) LDi = 71;
+                if(RDi >= 72) RDi = 71;
+                if(RDj >= 71) RDi = 70;
                 double MapH_LU = this->cell[LUi][LUj].getMapHeight();
                 double MapH_RU = this->cell[RUi][RUj].getMapHeight();
                 double MapH_LD = this->cell[LDi][LDj].getMapHeight();
