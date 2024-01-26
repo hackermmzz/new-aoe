@@ -37,7 +37,7 @@ public:
     int addAnimal(int Num,double DR,double UR);
 
     int loadResource();
-    
+
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
 

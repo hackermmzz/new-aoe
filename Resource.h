@@ -18,6 +18,8 @@ protected:
     double DecayRate=0;
     //腐烂速度
 
+
+
 };
 
 #endif // RESOURCE_H

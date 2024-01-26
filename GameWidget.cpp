@@ -14,17 +14,23 @@ GameWidget::~GameWidget()
 {
     delete ui;
 }
+
+void GameWidget::drawMap(double x, double y, double width, double height, QPixmap pixmap, double offsetX, double offsetY)
+{
+
+}
 void GameWidget::paintEvent(QPaintEvent *)
 {
+    // 创建QPainter对象
     QPainter painter(this);
 
+    // 绘制黑色背景
     painter.setPen(Qt::black);
-
     painter.fillRect(rect(), Qt::black);
 
-    //地图绘制部分
-    int x1=BlockDR;//x1，y1作为参考坐标，用来每次循环初始化x2，y2的值
-    int y1=BlockUR;//x2，y2则是引导绘制，用来实际判断cell中的内容
+    // 地图绘制部分
+    int x1=BlockDR;// x1，y1作为参考坐标，用来每次循环初始化x2，y2的值
+    int y1=BlockUR;// x2，y2则是引导绘制，用来实际判断cell中的内容
     int x2;
     int y2;
 

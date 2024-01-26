@@ -372,32 +372,6 @@
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
 
-//Core静态表
-//####关系事件名称
-#define CoreEven_JustMoveTo 0
-#define CoreEven_CreatBuilding 1
-#define CoreEven_Gather_NeedAttack 2
-#define CoreEven_Gather_DisNeedAttack 3
-#define CoreEven_Attacking 4
-#define CoreEven_FixBuilding 5
-
-//####对一个关系事件，细节关系的最大数量
-#define CoreDetailLinkMaxNum 11
-//####细节环节名称
-#define CoreDetail_NormalEnd -1
-#define CoreDetail_AbsoluteEnd -2
-#define CoreDetail_Move 0
-#define CoreDetail_Attack 1
-#define CoreDetail_Gather 2
-
-//Core关系函数的可变操作指令
-#define OPERATECON_DEFAULT 0
-//####距离判定
-#define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
-//####指定对象
-#define OPERATECON_OBJECT1 1
-#define OPERATECON_OBJECT2 2
-
 
 
 #endif // CONFIG_H
