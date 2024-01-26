@@ -32,26 +32,31 @@ Animal::Animal(int Num, double DR, double UR)
         this->Friendly = 2;
         this->MaxCnt = CNT_LION;
         this->maxBlood = BLOOD_LION;
+        speed = ANIMAL_SPEED;
     }
     else if( this->Num == ANIMAL_GAZELLE )
     {
         this->MaxCnt = CNT_GAZELLE;
         this->maxBlood = BLOOD_GAZELLE;
+        speed = ANIMAL_SPEED;
     }
     else if( this->Num == ANIMAL_ELEPHANT )
     {
         this->MaxCnt = CNT_ELEPHANT;
         this->maxBlood = BLOOD_ELEPHANT;
+        speed = ANIMAL_SPEED;
     }
     else if( this->Num == ANIMAL_TREE )
     {
         this->MaxCnt = CNT_TREE;
         this->maxBlood = BLOOD_TREE;
+        speed = 0;
     }
     else if( this->Num == ANIMAL_FOREST )
     {
         this->MaxCnt = CNT_FOREST;
         this->maxBlood = BLOOD_FOREST;
+        speed = 0;
     }
     
     //cnt与 maxcnt实际作用需区分
@@ -104,6 +109,7 @@ void Animal::nextframe()
         nowres=nowlist->begin();
     }
 
+    updateMove();
 }
 
 int Animal::getSort()

@@ -1,0 +1,164 @@
+######################################
+#1月25日
+#
+####config.h############################
+##Core静态表
+#关系事件名称
+CoreEven_JustMoveTo
+CoreEven_CreatBuilding
+CoreEven_Gather_NeedAttack
+CoreEven_Gather_DisNeedAttack
+CoreEven_Attacking
+CoreEven_FixBuilding
+
+#对一个关系事件，细节关系的最大数量
+CoreDetailLinkMaxNum  目前值为11
+
+#细节环节名称
+CoreDetail_NormalEnd 	表示本关系事件正常结束，可能需要寻找一定范围内相似目标，持续工作
+CoreDetail_AbsoluteEnd 	表示需要完全中止该关系事件，将其移出关系动态表
+CoreDetail_Move 
+CoreDetail_Attack 
+CoreDetail_Gather 
+
+##Core关系函数的可变操作指令
+OPERATECON_DEFAULT 
+#距离判定
+OPERATECON_NEAR_ABSOLUTE   值为OPERATECON_DEFAULT
+#指定对象
+OPERATECON_OBJECT1 	用于指定关系函数以object1为判断依据
+OPERATECON_OBJECT2 	用于指定关系函数以object2为判断依据
+
+####GlobalVariate类#######################
+######结构体relation_Object
+用途：存储某一Coodinate对象的目标对象和两个对象之间的关系
+重要参数：
+isExist	bool,true表示该关系存在
+goalObject	Coordinate*,存储目标对象
+relationAct	int,存储关系事件类比
+DR_goal,UR_goal	double,存储需要移动的目标位置
+isGoalInit		bool,true表示DR_goal,UR_goal有值
+DR_alter,UR_alter	double,存储更改后移动的目标位置
+isUseAlterGoal	bool,true表示移动使用DR_alter,UR_alter
+构造函数：
+relation_Object(目标对象的地址，关系事件类别)
+relation_Object(目标DR，目标UR ， 关系事件类别)
+
+######结构体conditionF
+用途：描述Core中静态表存储的条件
+结构体中包含两个成员，
+condition：返回值bool类型，参表（Coordinate* , relation_Object& , int）的函数指针，
+	用于指向描述两个Coordinate之间条件关系的函数 , 参表中Coordinate*指向动作发出者，relation_Object&中Coordinate*指向动作接收者
+	第三个int型参数为额外可变参数variableArgu，用于提供函数额外所需信息，或用于实现函数的多态性
+variableArgu:存储用于condition的第三个参数。
+构造函数:
+conditionF( bool (*func)(Coordinate* , relation_Object&, int) , int variableArgu)
+第二个参数可缺省，缺省后variableArgu值为0
+
+#######结构体detail_EventPhase
+用途：建立Core中的静态表
+重要参数：
+phaseAmount	int,描述的关系事件拥有的细节阶段数目
+phaseList		int[]，存储该关系事件的所有细节阶段
+changeLinkedList	map<int, int>，存储阶段之间的切换顺序，chageLinkedList[i] = j表示i的下一个阶段为j
+chageCondition	conditionF[]，存储各个细节阶段的切换条件
+phaseInterrup	int,值为CoreDetailLinkMaxNum-1，phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd
+forcedInterrupCondition list<conditionF>，存储该关系事件的强制中止条件
+
+构造函数:
+detail_EventPhase( int 阶段总数 , int* 阶段表, conditionF* 每个阶段的切换条件列表 , list< conditionF >本行动的强制结束条件 )
+可用成员函数：
+setLoop( loop的头阶段，loop的尾阶段 ， loop的中止条件 )
+	用于设置loop，设置后，loop的尾阶段的下一个切换的阶段将为loop的头阶段。
+	在代码运行过程中，loop的中止条件将在loop的尾阶段进行判断，当判断为true，阶段将切换为loop尾阶段+1;
+isLoop(需要判断的阶段phase)
+	返回true：phase为loop的尾阶段
+setEnd_Absolute()
+	使用该函数后，该关系事件的默认中止操作为CoreDetail_AbsoluteEnd，会将关系事件移出动态表
+	
+####Core类##############################
+###新增
+##private成员
+theMap	Map*,
+player	Player**
+memorymap	int**，
+mouseEvent	MouseEvent*，	以上为gameUpdate传入参数，因可能在Core各处使用，故在成员变量中存储
+relation_Event_static	map<int , detail_EventPhase>,静态表，存储关系事件类别的细节阶段
+relate_AllObject		map<Coordinate* , relation_Object> ，动态表，存储对象之间的关系
+##private成员函数
+仅有框架，需补充详细写：
+manageMouseEvent()	处理鼠标事件，以对动态表加表删表
+manageOrder()		处理外部传入指令集，以对动态表加表删表
+manageRelationList()	根据静态表，处理动态表中各个关系事件
+
+对动态表的操作：
+addRelation(操作对象地址，目标对象地址，关系事件类型)
+addRelation(操作对象地址，目标DR，目标UR,关系事件类型)	
+	该重载用于移动、初建造建筑等
+suspendRelation(操作对象地址)	
+	删除动态表中某行
+
+对行动控制。也只有框架：
+object_Move(操作对象，移动目标DR，移动目标UR)
+	寻路等部分代码也应放在其中
+object_FinishAction_Absolute(relate_AllObject的iterator)
+	直接删除relate_AllObject中iterator指向的内容
+	返回下一个需要处理的iterator
+object_FinishAction(relate_AllObject的iterator)
+	缺少判断目标点周围是否有同类型目标对象的代码，以实现连续工作
+	若无同类型目标对象，调用object_FinishAction_Absolute
+	返回下一个需要处理的iterator
+
+##public成员函数
+isObject_Free(需判断的对象地址)
+	返回true:表示对象在relate_AllObject表内有关系事件
+##Core.cpp中的关系函数
+这些函数作为关系模式，以动态地判断操作对象和目标对象之间的行动是否需要进行、切换
+函数的形式为：
+bool 函数名（Coordinate* 操作对象，relation_Object& 操作对象的目标、关系事件，int 动态操作符）
+	动态操作符用于实现函数的多重性或指定性。
+	如bool condition_UniObjectDie( Coordinate* , relation_Object& , int );
+		该函数判断某一对象是否死亡，int值为0则表示判断操作对象死亡，为1表示判断目标对象死亡
+	函数返回：判断需要切换阶段、中止关系时：返回true
+	否则：返回false
+
+##关于静态表设置，在Core（）构造函数中
+格式：(以CoreEven_JustMoveTo为例子）
+    int *phaseList;
+    conditionF* conditionList;
+    list<conditionF>forcedInterrupCondition;
+    list<conditionF>overCondition;
+
+    //设置阶段表
+    phaseList = new int(CoreDetail_Move);	
+    //设置各阶段切换条件
+    conditionList = new ( conditionF )( conditionF(condition_ObjectNearby) );	
+    //设置强制中止条件
+    forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
+    forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
+    //加入静态表
+    relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
+    //设置loop，如果有的话
+    overCondition.push_back(...);
+    relation_Event_static[CoreEven_JustMoveTo].setLoop(... , ... , overCondition)；
+    //设置中止为完全中止，如果需要的话
+    relation_Event_static[CoreEven_JustMoveTo].setEnd_Absolute();
+    
+    delete phaseList;
+    delete conditionList;
+    forcedInterrupCondition.clear();
+    overCondition.clear();
+    
+	
+####MoveObject类##############################
+##增加
+#protected成员
+speed	double,存储移动速度，在每个派生类中根据类别赋值，实现多态性
+
+#public函数
+virtual void setNowRes()
+	将setNowRes()改成虚函数，在派生类中重写，实现在控制移动时的多态性。
+
+##移动
+Farmer类-》MoveObject类
+将Farmer类nextframe()中控制移动部分代码移动到MoveObject类void updateMove()函数，以便于Core中更通用地调用。
