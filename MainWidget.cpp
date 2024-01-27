@@ -95,7 +95,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 初始化区块
     void MainWidget::initBlock()
     {
-        for(int num=0;num<17;num++)
+        for(int num=0; num < BLOCK_COUNT; num++)
         {
             Block::allocateblock(num);
             loadResource(Block::getBlockname(num),Block::getblock(num));
