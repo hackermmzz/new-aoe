@@ -71,4 +71,3 @@ FORMS += \
     GameWidget.ui \
     SelectWidget.ui
 
-
