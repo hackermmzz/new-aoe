@@ -232,8 +232,9 @@ struct Point {
 
 struct relation_Object
 {
-    bool isExist , isGoalinit , isUseAlterGoal=false;
+    bool isExist , isUseAlterGoal=false;
     Coordinate* goalObject;     //目标对象
+    int sort;
     int relationAct;
     int nowPhaseNum = 0;
     double DR_goal,UR_goal , DR_alter , UR_alter;
@@ -246,7 +247,6 @@ struct relation_Object
     relation_Object( Coordinate* goal , int eventClass)
     {
         isExist = true;
-        isGoalinit = false;
         goalObject = goal;
         relationAct = eventClass;
     }
@@ -254,7 +254,6 @@ struct relation_Object
     relation_Object(double DR_goal , double UR_goal , int eventClass )
     {
         isExist = true;
-        isGoalinit = true;
         goalObject = nullptr;
         this->DR_goal = DR_goal;
         this->UR_goal = UR_goal;

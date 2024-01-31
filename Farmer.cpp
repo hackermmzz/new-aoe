@@ -50,26 +50,6 @@ Farmer::Farmer(double DR, double UR)
 
 void Farmer::nextframe()
 {
-    std::list<ImageResource> *nowlist=NULL;
-
-    switch (this->nowstate) {
-    case 0:
-        nowlist=this->Stand[this->state][this->Angle];
-        break;
-    case 1:
-        //            qDebug()<<"1";
-        nowlist=this->Walk[this->state][this->Angle];
-        break;
-    case 2:
-        nowlist=this->Attack[this->state][this->Angle];
-        break;
-    case 5:
-        nowlist=this->Work[this->state][this->Angle];
-        break;
-        //    default:
-        //        break;
-    }
-
     nowres++;
     if(nowres==nowlist->end())
     {
@@ -87,21 +67,21 @@ int Farmer::getSort()
 
 void Farmer::setNowRes()
 {
-
     switch (this->nowstate) {
     case MOVEOBJECT_STATE_STAND:
-        this->nowres=this->Stand[this->state][this->Angle]->begin();
+        nowlist=this->Stand[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
-        this->nowres=this->Walk[this->state][this->Angle]->begin();
+        nowlist=this->Walk[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
-        this->nowres=this->Attack[this->state][this->Angle]->begin();
+        nowlist=this->Attack[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WORK:
-        this->nowres=this->Work[this->state][this->Angle]->begin();
+        nowlist=this->Work[this->state][this->Angle];
     default:
         break;
     }
 
+    nowres = nowlist->begin();
 }

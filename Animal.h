@@ -41,6 +41,7 @@ public:
     Animal(int Num,double DR,double UR);
     void nextframe();
     int getSort();
+    void setNowRes();
     static std::string getAnimalName(int index)
     {
             return Animalname[index];
