@@ -235,6 +235,9 @@ bool Core::addRelation( Coordinate * object1, Coordinate * object2, int eventTyp
     if(! relate_AllObject[object1].isExist )
     {
         relate_AllObject[object1] = relation_Object(object2 , eventType);
+        relate_AllObject[object1].DR_goal = object2->getDR();
+        relate_AllObject[object1].UR_goal = object2->getUR();
+        relate_AllObject[object1].sort = object2->getSort();
         return true;
     }
 
@@ -245,6 +248,7 @@ bool Core::addRelation( Coordinate * object1, double DR , double UR, int eventTy
     if(! relate_AllObject[object1].isExist )
     {
         relate_AllObject[object1] = relation_Object(DR , UR , eventType);
+        relate_AllObject[object1].sort = SORT_COORDINATE;
         return true;
     }
 
@@ -384,24 +388,13 @@ bool condition_UniObject_FullBackpack( Coordinate* object1 , relation_Object& re
     if(operate == OPERATECON_OBJECT1)
     {
         return false;
-
-
     }
 }
 
 bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int operate = OPERATECON_NEAR_ABSOLUTE)
 {
-    if(!relation.isGoalinit && relation.goalObject!= nullptr)
-    {
-        relation.DR_goal = object1->getDR();
-        relation.UR_goal = object1->getUR();
-        relation.isGoalinit = true;
-    }
-
     if(operate == OPERATECON_NEAR_ABSOLUTE)
     {
         return false;
     }
-
-
 }

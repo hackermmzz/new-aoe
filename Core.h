@@ -56,6 +56,8 @@ private:
     void object_Move(Coordinate * object , double DR , double UR);
     map<Coordinate* , relation_Object>::iterator object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator iter)
     {
+        MoveObject* thisObject = (MoveObject*)iter->first;
+        thisObject->setPreStand();
         return relate_AllObject.erase(iter);
     }
     map<Coordinate* , relation_Object>::iterator object_FinishAction(map<Coordinate* , relation_Object>::iterator);

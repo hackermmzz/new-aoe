@@ -60,6 +60,7 @@ protected:
     //stand walk attack die disappear work run
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
+    std::list<ImageResource> *nowlist=NULL;
     
 public:
     MoveObject();

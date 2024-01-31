@@ -79,13 +79,30 @@ Animal::Animal(int Num, double DR, double UR)
     
     //
     this->Angle=2;
-    this->nowres=Stand[this->Num][this->Angle]->begin();
+    this->nowlist = Stand[this->Num][this->Angle];
+    this->nowres = nowlist->begin();
     //
 }
 
 void Animal::nextframe()
 {
-    std::list<ImageResource> *nowlist=NULL;
+    this->nowres++;
+    if(this->nowres==nowlist->end())
+    {
+        nowres=nowlist->begin();
+    }
+
+    updateMove();
+}
+
+int Animal::getSort()
+{
+    return SORT_ANIMAL;
+}
+
+void Animal::setNowRes()
+{
+
     switch (this->nowstate) {
     case 0:
         nowlist=this->Stand[this->Num][this->Angle];
@@ -102,17 +119,9 @@ void Animal::nextframe()
     case 6:
         nowlist=this->Run[this->Num][this->Angle];
         break;
-    }
-    this->nowres++;
-    if(this->nowres==nowlist->end())
-    {
-        nowres=nowlist->begin();
+    default:
+        break;
     }
 
-    updateMove();
-}
-
-int Animal::getSort()
-{
-    return SORT_ANIMAL;
+    this->nowres = nowlist->begin();
 }
