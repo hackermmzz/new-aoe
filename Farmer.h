@@ -10,7 +10,6 @@ public:
     Farmer(double DR,double UR);
     void nextframe();
     int getSort();
-
     void setNowRes();
 
     static std::string getFarmerName(int index) {
@@ -165,7 +164,6 @@ private:
     std::string FarmerDisplayName[7]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人"};
     //    std::string actName[1]={};
     //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
-
 
 };
 

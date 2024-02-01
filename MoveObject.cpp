@@ -136,7 +136,7 @@ void MoveObject::updateMove()
                 if(tempAngle!=Angle)
                 {
                     Angle=tempAngle;
-//                    setNowRes();
+                    setNowRes();
                 }
             }
             else if(pathI==0&&pathI<pathN-1)
@@ -241,6 +241,4 @@ void MoveObject::updateMove()
     this->BlockUR=UR/BLOCKSIDELENGTH;
     //更新高度
     this->imageH=DR-UR;
-
-
 }
