@@ -16,16 +16,8 @@ public:
     stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination);
     stack<Point> findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point& start, const Point& destination);
 
-
-
-    int tranBlockDR(double DR)
-    {
-        return DR/BLOCKSIDELENGTH;
-    }
-    int tranBlockUR(double UR)
-    {
-        return UR/BLOCKSIDELENGTH;
-    }
+    int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
+    int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
 
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
@@ -45,21 +37,21 @@ private:
     map<Coordinate* , relation_Object> relate_AllObject;
     map<Coordinate* , relation_Object> relate_BuildingAndResource;
 
+    /************管理添加表************/
     void manageMouseEvent();
     void manageOrder();
-    //关系表相关维护
+
+    /*********关系表相关维护***********/
     void manageRelationList();
     bool addRelation( Coordinate * object1, Coordinate * object2, int eventType);
     bool addRelation( Coordinate * object1, double DR , double UR, int eventType);
     void suspendRelation(Coordinate * object);  //这个删除，就很鸡肋，有智障的感觉  //但指令有手动取消的行动，故需保留
-    //控制行动
-    void object_Move(Coordinate * object , double DR , double UR);
-    map<Coordinate* , relation_Object>::iterator object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator iter)
-    {
-        MoveObject* thisObject = (MoveObject*)iter->first;
-        thisObject->setPreStand();
-        return relate_AllObject.erase(iter);
-    }
+
+    /************控制行动************/
+    void object_Move(Coordinate * object , double DR , double UR);  //控制移动
+    void object_Attack(Coordinate* , Coordinate* ); //控制减少object2血量
+    void object_Gather(Coordinate* , Coordinate* ); //控制采集
+    map<Coordinate* , relation_Object>::iterator object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator);
     map<Coordinate* , relation_Object>::iterator object_FinishAction(map<Coordinate* , relation_Object>::iterator);
 
 };

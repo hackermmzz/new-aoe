@@ -1,10 +1,19 @@
 ﻿#include "Core.h"
 
+//****************************************************************************************
+//关系函数定义
+//永否
 bool condition_AllFalse( Coordinate* object1, relation_Object& relation , int operate){return false;}
+//单一Object死亡
 bool condition_UniObjectDie( Coordinate* , relation_Object& , int );
+//单一object被攻击中
 bool condition_UniObjectUnderAttack( Coordinate* , relation_Object& , int );
+//单一object背包容量满
 bool condition_UniObject_FullBackpack( Coordinate* , relation_Object& , int );
+//位置距离接近
 bool condition_ObjectNearby( Coordinate* , relation_Object& , int );
+//object目标能被采集
+bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int);
 
 Core::Core()
 {
@@ -27,7 +36,6 @@ Core::Core()
     forcedInterrupCondition.clear();
 
     //行动：采集
-
 }
 
 void Core::gameUpdate(Map* theMap, Player* player[], int** memorymap, MouseEvent *mouseEvent)
@@ -243,6 +251,7 @@ bool Core::addRelation( Coordinate * object1, Coordinate * object2, int eventTyp
 
     return false;
 }
+
 bool Core::addRelation( Coordinate * object1, double DR , double UR, int eventType)
 {
     if(! relate_AllObject[object1].isExist )
@@ -355,7 +364,22 @@ void Core::object_Move(Coordinate * object , double DR , double UR)
     }
 }
 
+void Core::object_Attack(Coordinate* object1 ,Coordinate* object2)
+{
 
+}
+
+void Core::object_Gather(Coordinate* object1 , Coordinate* object2)
+{
+
+}
+
+map<Coordinate* , relation_Object>::iterator Core::object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator iter)
+{
+    MoveObject* thisObject = (MoveObject*)iter->first;
+    thisObject->setPreStand();
+    return relate_AllObject.erase(iter);
+}
 
 map<Coordinate* , relation_Object>::iterator Core::object_FinishAction(map<Coordinate* , relation_Object>::iterator iter)
 {
@@ -374,9 +398,7 @@ map<Coordinate* , relation_Object>::iterator Core::object_FinishAction(map<Coord
 bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , int opreate)
 {
     return false;
-
 }
-
 
 bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relation, int operate )
 {
@@ -385,16 +407,49 @@ bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relat
 
 bool condition_UniObject_FullBackpack( Coordinate* object1 , relation_Object& relation, int operate = OPERATECON_OBJECT1)
 {
-    if(operate == OPERATECON_OBJECT1)
-    {
-        return false;
-    }
+    Farmer* object;
+    if(operate == OPERATECON_OBJECT1) object = (Farmer*)object1;
+    else object = (Farmer*)relation.goalObject;
+
+
 }
 
 bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int operate = OPERATECON_NEAR_ABSOLUTE)
 {
     if(operate == OPERATECON_NEAR_ABSOLUTE)
     {
-        return false;
+        if(relation.isUseAlterGoal)
+        {
+            if(fabs(object1->getDR()-relation.DR_alter)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(object1->getUR()-relation.UR_alter)<DISTANCE_Manhattan_MoveEndNEAR)
+            {
+                relation.isUseAlterGoal = false;
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            if(fabs(object1->getDR()-relation.DR_goal)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(object1->getUR()-relation.UR_goal)<DISTANCE_Manhattan_MoveEndNEAR)
+                return true;
+            else
+                return false;
+        }
+    }
+}
+
+bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation, int operate)
+{
+    Resource* object_gathered = (Resource*)relation.goalObject;
+    if(object_gathered->get_Gatherable()) return true;
+    else
+    {
+        MoveObject* object2 = (MoveObject*)relation.goalObject;
+        if(object2->isDie())
+        {
+            object_gathered->set_Gatherable(true);
+            return true;
+        }
+        else return false;
     }
 }

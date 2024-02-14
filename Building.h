@@ -2,6 +2,7 @@
 #define BUILDING_H
 
 #include <Coordinate.h>
+#include <Development.h>
 
 class Building:public Coordinate
 {
@@ -56,6 +57,7 @@ public:
     {
         this->actNames[num] = name;
     }
+    void setPlayerScience(Development* science){ this->playerScience = science; }
 private:
     static std::list<ImageResource> *build[4];
     //建设list
@@ -78,6 +80,8 @@ private:
 
     int Foundation;
     //地基类型
+
+    Development* playerScience = NULL;
 
     static std::string Buildingname[4];
     static std::string Builtname[3][7];

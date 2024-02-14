@@ -290,6 +290,7 @@
 #define SORT_TREEFOREST 6
 #define SORT_MISSILE 8
 #define SORT_FARM 9
+#define SORT_ARMY 10
 
 #define PRODUCTSORT_WOOD 1
 #define PRODUCTSORT_GRANARYFOOD 2
@@ -372,7 +373,7 @@
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
 
-//Core静态表
+/********** Core静态表 **********/
 //####关系事件名称
 #define CoreEven_JustMoveTo 0
 #define CoreEven_CreatBuilding 1
@@ -390,13 +391,191 @@
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
 
-//Core关系函数的可变操作指令
+/********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 0
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
 //####指定对象
 #define OPERATECON_OBJECT1 1
 #define OPERATECON_OBJECT2 2
+
+
+/********** 距离常量 **********/
+#define DISTANCE_Manhattan_MoveEndNEAR 0.00001
+#define DISTANCE_ATTACK_CLOSE (8*gen5)
+
+/********** 攻击方式 **********/
+#define ATTACKTYPE_CANTATTACK -1
+#define ATTACKTYPE_ANIMAL 0
+#define ATTACKTYPE_CLOSE 1
+#define ATTACKTYPE_SHOOT 2
+//转化
+#define ATTACKTYPE_CHANGE 3
+//投石车
+#define ATTACKTYPE_CATAPULT 4
+//弩炮
+#define ATTACKTYPE_BALISTA 5
+
+/********** 军队类别 **********/
+//步兵
+#define ARMY_INFANTRY 1
+//弓兵
+#define ARMY_ARCHER 3
+//骑兵
+#define ARMY_RIDER 4
+//祭
+#define ARMY_FLAMEN 5
+//攻城兵器
+#define ARMY_SIEGE 6
+//船
+#define ARMY_SHIP 7
+
+/********** 兵种类别 **********/
+#define AT_CLUBMAN 11
+#define AT_SWORDSMAN 12
+#define AT_SLINGER 13
+
+#define AT_HOPLITE 21
+
+#define AT_BOWMAN 31
+#define AT_IMPROVED 32
+#define AT_CHARIOTARCHER 33
+#define AT_HORSE 34
+#define AT_ELEPHENTARCHER 35
+
+#define AT_SCOUT 41
+#define AT_CAVALRY 42
+#define AT_CAMEL 43
+#define AT_CHARIOT 44
+#define AT_ELEPHENT 45
+
+/********** 祭祀 **********/
+#define AT_PRIEST 51
+
+/********** 攻城工具 **********/
+#define AT_THROWER 61
+#define AT_BALLISTA 62
+
+/********** 船类别 **********/
+#define SHIP_FISHING 71
+#define SHIP_TRADE 73
+#define SHIP_TRANSPORT 72
+#define SHIP_SCOUT 74
+#define SHIP_FIRE 75
+#define SHIP_CATAPUL 76
+#define SHIP_JUGGERNAUT 77
+
+/************士兵属性**************/
+//棍棒手
+#define BLOOD_CLUBMAN1 40
+//村民表格中速度为1.1,设置为gen(5)
+#define SPEED_CLUBMAN1 (1.2/1.1*HUMAN_SPEED)
+#define VISION_CLUBMAN1 4
+#define DIS_CLUBMAN1 0
+#define INTERVAL_CLUBMAN1 1.5
+#define ATK_CLUBMAN1 3
+#define DEFCLOSE_CLUBMAN1 0
+#define DEFSHOOT_CLUBMAN1 0
+
+//刀斧手
+#define BLOOD_CLUBMAN2 50
+#define SPEED_CLUBMAN2 (1.2/1.1*HUMAN_SPEED)
+#define VISION_CLUBMAN2 4
+#define DIS_CLUBMAN2 0
+#define INTERVAL_CLUBMAN2 1.5
+#define ATK_CLUBMAN2 5
+#define DEFCLOSE_CLUBMAN2 0
+#define DEFSHOOT_CLUBMAN2 0
+
+//短剑手
+#define BLOOD_SHORTSWORDSMAN1 60
+#define SPEED_SHORTSWORDSMAN1 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN1 4
+#define DIS_SHORTSWORDSMAN1 0
+#define INTERVAL_SHORTSWORDSMAN1 1.5
+#define ATK_SHORTSWORSMAN1 7
+#define DEFCLOSE_SHORTSWORSMAN1 1
+#define DEFSHOOT_SHORTSWORSMAN1 0
+
+//阔剑手
+#define BLOOD_SHORTSWORDSMAN2 70
+#define SPEED_SHORTSWORDSMAN2 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN2 4
+#define DIS_SHORTSWORDSMAN2 0
+#define INTERVAL_SHORTSWORDSMAN2 1.5
+#define ATK_SHORTSWORSMAN2 9
+#define DEFCLOSE_SHORTSWORSMAN2 1
+#define DEFSHOOT_SHORTSWORSMAN2 0
+
+//长剑手
+#define BLOOD_SHORTSWORDSMAN3 80
+#define SPEED_SHORTSWORDSMAN3 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN3 4
+#define DIS_SHORTSWORDSMAN3 0
+#define INTERVAL_SHORTSWORDSMAN3 1.5
+#define ATK_SHORTSWORSMAN3 11
+#define DEFCLOSE_SHORTSWORSMAN3 2
+#define DEFSHOOT_SHORTSWORSMAN3 0
+
+//铁甲步兵
+#define BLOOD_SHORTSWORDSMAN4 160
+#define SPEED_SHORTSWORDSMAN4 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN4 4
+#define DIS_SHORTSWORDSMAN4 0
+#define INTERVAL_SHORTSWORDSMAN4 1.5
+#define ATK_SHORTSWORSMAN4 13
+#define DEFCLOSE_SHORTSWORSMAN4 2
+#define DEFSHOOT_SHORTSWORSMAN4 0
+
+//投石者
+#define BLOOD_SLINGER 25
+#define SPEED_SLINGER (1.2/1.1*HUMAN_SPEED)
+#define VISION_SLINGER 5
+#define DIS_SLINGER 4
+#define INTERVAL_SLINGER 1.5
+#define ATK_SLINGER 2
+#define DEFCLOSE_SLINGER 0
+#define DEFSHOOT_SLINGER 2
+
+//弓箭手
+#define BLOOD_BOWMAN 35
+#define SPEED_BOWMAN (1.2/1.1*HUMAN_SPEED)
+#define VISION_BOWMAN 7
+#define DIS_BOWMAN 5
+#define INTERVAL_BOWMAN 1.4
+#define ATK_BOWMAN 3
+#define DEFCLOSE_BOWMAN 0
+#define DEFSHOOT_BOWMAN 0
+
+//长弓手
+#define BLOOD_IMPROVEDBOWMAN1 40
+#define SPEED_IMPROVEDBOWMAN1 (1.2/1.1*HUMAN_SPEED)
+#define VISION_IMPROVEDBOWMAN1 8
+#define DIS_IMPROVEDBOWMAN1 6
+#define INTERVAL_IMPROVEDBOWMAN1 1.4
+#define ATK_IMPROVEDBOWMAN1 4
+#define DEFCLOSE_IMPROVEDBOWMAN1 0
+#define DEFSHOOT_IMPROVEDBOWMAN1 0
+
+//十字弓手
+#define BLOOD_IMPROVEDBOWMAN2 45
+#define SPEED_IMPROVEDBOWMAN2 (1.2/1.1*HUMAN_SPEED)
+#define VISION_IMPROVEDBOWMAN2 9
+#define DIS_IMPROVEDBOWMAN2 7
+#define INTERVAL_IMPROVEDBOWMAN2 1.4
+#define ATK_IMPROVEDBOWMAN2 5
+#define DEFCLOSE_IMPROVEDBOWMAN2 0
+#define DEFSHOOT_IMPROVEDBOWMAN2 0
+
+//侦察骑兵
+#define BLOOD_SCOUT 60
+#define SPEED_SCOUT (2/1.1*HUMAN_SPEED)
+#define VISION_SCOUT 8
+#define DIS_SCOUT 0
+#define INTERVAL_SCOUT 1.5
+#define ATK_SCOUT 3
+#define DEFCLOSE_SCOUT 0
+#define DEFSHOOT_SCOUT 0
 
 
 

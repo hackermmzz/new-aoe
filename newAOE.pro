@@ -43,7 +43,9 @@ SOURCES += \
     Core.cpp \
     Farmer.cpp \
     ActWidget.cpp \
-    SelectWidget.cpp
+    SelectWidget.cpp \
+    Development.cpp \
+    Army.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -64,7 +66,9 @@ HEADERS += \
     Farmer.h \
     ActWidget.h \
     SelectWidget.h \
-    ActWidget.h
+    ActWidget.h \
+    Development.h \
+    Army.h
 
 FORMS += \
         MainWidget.ui \

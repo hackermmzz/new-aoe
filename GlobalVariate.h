@@ -350,6 +350,33 @@ struct detail_EventPhase
     void setEnd_Absolute(){ phaseList[phaseAmount] = CoreDetail_AbsoluteEnd; }
 };
 
+struct conditionDevelop
+{
+    int civilization;
+    int sort_building;
+
+    int need_Wood;
+    int need_Food;
+    int need_Stone;
+    int need_Gold;
+
+
+    conditionDevelop(){ }
+    conditionDevelop( int civilization , int sort_building,int need_Wood,int need_Food, int need_Stone,int need_Gold )
+    {
+        this->civilization = civilization;
+        this->sort_building = sort_building;
+        this->need_Wood = need_Wood;
+        this->need_Food = need_Food;
+        this->need_Stone = need_Stone;
+        this->need_Gold = need_Gold;
+    }
+
+    bool executable( int wood,int food,int stone,int gold ) { return wood>=need_Wood && food>=need_Food && stone>=need_Stone && gold>=need_Gold; }
+};
+
+
+
 /*
  * 0是成功
  * -1是SN不存在

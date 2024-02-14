@@ -6,10 +6,12 @@
 class MoveObject:public Coordinate
 {
 protected:
-    int blood;
-    int maxBlood;
+    double Blood;
+    int MaxBlood;
 
     double speed;
+
+    int vision;
 
     int Angle;
     //规定 从下顺时针分别为0 1 2 3 4 5 6 7
@@ -61,20 +63,40 @@ protected:
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
     std::list<ImageResource> *nowlist=NULL;
+
+    //攻击相关
+    Coordinate* attackObject = NULL;    //攻击目标
+    Coordinate* avangeObject = NULL;    //受到攻击的来源
+    int attackType = ATTACKTYPE_CANTATTACK;     //攻击类型
+    int atk = 0;    //攻击力
+    double dis_Attack = DISTANCE_ATTACK_CLOSE;  //攻击距离
+
+    /** 攻击间隔尚未理解其意义,故没有其的获取函数*/
+    double inter_Attack = 0; //攻击间隔
+    int defence_close = 0;  //肉搏防御
+    int defence_shoot = 0;  //投射防御
     
 public:
     MoveObject();
 
-    virtual void setNowRes()
-    {
+    /***********虚函数************/
+    virtual void setNowRes(){ }
 
-    }
+    virtual double getSpeed(){ return speed; }
+    virtual int getBlood(){ return (int)( Blood*MaxBlood ); }
+    virtual int getVision(){ return vision; }
 
-    bool isWalking()
-    {
-        return this->nowstate==1;
-    }
+    virtual int getATK(){ return atk; }
+    virtual int getDEF(int attackType_got){  if(attackType_got == ATTACKTYPE_CLOSE) return defence_close;
+                                             else if(attackType_got == ATTACKTYPE_SHOOT) return defence_shoot;}
+    virtual double getDis_attack(){ return dis_Attack; }
+    virtual int get_AttackType(){ return attackType; }
+    /*********以上虚函数************/
+
+    bool isWalking(){return this->nowstate==1;}
     void updateMove();
+    bool isDie(){return Blood<=0;}
+
 
     void calculateDiretionArray(stack<Point>& path);
     int calculateAngle(double L0,double U0);
@@ -227,6 +249,7 @@ public:
     {
         return this->UR0;
     }
+
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

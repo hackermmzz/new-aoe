@@ -8,9 +8,14 @@ class Farmer:public Human
 public:
     Farmer();
     Farmer(double DR,double UR);
+
+    /*********虚函数**********/
     void nextframe();
-    int getSort();
     void setNowRes();
+    int getSort();
+
+    /*******以上虚函数**********/
+
 
     static std::string getFarmerName(int index) {
         if (index >= 0 && index < 7) {
@@ -106,6 +111,7 @@ public:
     }
 
 
+
 private:
     int state;
     //指示状态 指示具体动作
@@ -143,9 +149,6 @@ private:
     int resourceSort;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
-
-    int Blood;
-    int MaxBlood;
 
     static std::list<ImageResource> *Walk[7][8];
 

@@ -1,0 +1,53 @@
+#ifndef DEVELOPMENT_H
+#define DEVELOPMENT_H
+
+#include <config.h>
+#include <GlobalVariate.h>
+
+class Development
+{
+public:
+    Development();
+
+    int get_level( int sort, int type );
+
+    double get_rate_Move(int sort,int type);
+    double get_rate_Blood(int sort , int type);
+    int get_addition_Blood( int sort , int type , int armyClass , int attackType );
+
+    double get_rate_Attack( int sort , int type , int armyClass , int attackType );
+    int get_addition_Attack( int sort , int type , int armyClass , int attackType );
+
+    double get_rate_Defence( int sort , int type , int armyClass , int attackType );
+    int get_addition_Defence( int sort , int type , int armyClass , int attackType );
+    int get_capacity(){ return 0; }
+
+
+private:
+    //研发工艺带来的数值加成
+    double rate_FarmerMove = 0;
+    double rate_FarmerBlood = 0;
+    int attack_close = 0;
+    int defence_infantry = 0;
+    int defence_archer = 0;
+    int defence_rider = 0;
+    int specialDefence_toShoot = 0;
+    int capacity_wood = 0;
+    int capacity_stone = 0;
+    int capacity_gold = 0;
+    int capacity_farm = 0;
+    int dis_shoot = 0;
+
+    //研发工艺，解锁或升级兵种、建筑
+    bool wheel = false;
+    int wall = 0;
+    int arrowTown = 0;
+    int level_Clubman = 0;
+    int level_ShortSwordsman = 0;
+
+    int level_Wall = 0;
+    int level_ArrowTower = 0;
+
+};
+
+#endif // DEVELOPMENT_H
