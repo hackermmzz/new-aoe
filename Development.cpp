@@ -119,3 +119,16 @@ int Development::get_level( int sort, int type )
 
     return 0;
 }
+
+
+int Development::get_addition_ResourceSort( int resourceSort )
+{
+    int addition = 0;
+    if(resourceSort == HUMAN_WOOD) addition = capacity_wood;
+    else if(resourceSort == HUMAN_STONE) addition = capacity_stone;
+    else if(resourceSort == HUMAN_GOLD) addition = capacity_gold;
+
+    return addition;
+}
+
+

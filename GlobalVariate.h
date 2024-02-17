@@ -254,7 +254,7 @@ struct relation_Object
     relation_Object(double DR_goal , double UR_goal , int eventClass )
     {
         isExist = true;
-        goalObject = nullptr;
+        goalObject = NULL;
         this->DR_goal = DR_goal;
         this->UR_goal = UR_goal;
         relationAct = eventClass;
@@ -264,23 +264,33 @@ struct relation_Object
 struct conditionF
 {
     int variableArgu;
-    bool (*condition)( Coordinate* , relation_Object & , int);
+    bool isNegation;
+    bool (*condition)( Coordinate* , relation_Object & , int , bool);
 
     conditionF()
     {
 
     }
 
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int))
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int,bool))
     {
         condition = func;
         variableArgu = OPERATECON_DEFAULT;
+        isNegation = false;
     }
 
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int) , int variableArgu)
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int , bool) , int variableArgu)
     {
         condition = func;
         this->variableArgu = variableArgu;
+        isNegation = false;
+    }
+
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int, bool) , int variableArgu , bool isNegation)
+    {
+        condition = func;
+        this->variableArgu = variableArgu;
+        this->isNegation = isNegation;
     }
 };
 

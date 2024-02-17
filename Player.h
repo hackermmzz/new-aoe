@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <Farmer.h>
+#include <Army.h>
 #include <Building.h>
 
 class Player

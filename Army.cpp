@@ -39,14 +39,14 @@ Army::Army(double DR,double UR,int type)
 
 void Army::nextframe()
 {
-
+    qDebug()<<"Army缺少nextframe";
 
 
 }
 
 void Army::setNowRes()
 {
-
+    qDebug()<<"Army缺少setNowRes";
 
 }
 
@@ -64,14 +64,14 @@ double Army::getSpeed()
 }
 
 //血量
-int Army::getBlood()
+int Army::getMaxBlood()
 {
     int realmBlood;
 
     if(upgradable) realmBlood = MaxBlood_change[playerScience->get_level(getSort(),type)];
     else realmBlood = MaxBlood;
 
-    return (int)( Blood* ( realmBlood*playerScience->get_rate_Blood(getSort(),type)+playerScience->get_addition_Blood(getSort(),type) ) );
+    return  realmBlood*playerScience->get_rate_Blood(getSort(),type)+playerScience->get_addition_Blood(getSort(),type);
 }
 
 //视野
@@ -87,11 +87,13 @@ int Army::getVision()
 //攻击力
 int Army::getATK()
 {
-    int atkValue;
+    int atkValue;//用于存储初始攻击力
 
+    //赋值初始攻击力,依据兵种是否能升级,划分两类赋值方式
     if(upgradable) atkValue = atk_change[playerScience->get_level(getSort(),type)];
     else atkValue = atk;
 
+    //再atkValue基础上,计算player及科技带来的加成,并返回
     return (int)( atkValue*playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType())) + \
             playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType()) + get_add_specialAttack();
 }
@@ -99,9 +101,10 @@ int Army::getATK()
 //防御力,分为获取肉搏防御力和投射物防御力
 int Army::getDEF(int attackType_got)
 {
-    int defValue;
+    int defValue = 0;//用于存储初始防御力
 
-    if(attackType_got == ATTACKTYPE_CLOSE)
+    //赋值defValue;根据attackType_got即收到的伤害类型,选择相应的防御类型:肉盾防御或投射防御.若为祭司转化或(投石车?等)无伤害减免
+    if(attackType_got == ATTACKTYPE_CLOSE || attackType_got == ATTACKTYPE_ANIMAL)
     {
         if(upgradable) defValue = defence_close_change[playerScience->get_level(getSort(),type)];
         else defValue = defence_close;
@@ -112,6 +115,7 @@ int Army::getDEF(int attackType_got)
         else defValue = defence_shoot;
     }
 
+    //在defValue的基础上,计算player及科技带来的 加成,并返回
     return (int)( defValue*playerScience->get_rate_Defence(getSort(),type,armyClass,attackType_got) ) + \
             playerScience->get_addition_Defence(getSort(),type,armyClass,attackType_got);
 }

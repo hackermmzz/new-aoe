@@ -14,6 +14,16 @@ public:
     void setNowRes();
     int getSort();
 
+        /***************指针强制转化****************/
+        //若要将Farmer类指针转化为父类指针,务必用以下函数!
+
+    void printer_ToCoordinate(Coordinate** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址
+    void printer_ToMoveObject(MoveObject** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址
+    void printer_ToHuman(Human** ptr){ *ptr = this; }    //传入ptr为Human类指针的地址
+    void printer_ToBloodHaver(BloodHaver** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+
+        /*************以上指针强制转化****************/
+
     /*******以上虚函数**********/
 
 
@@ -110,7 +120,9 @@ public:
         Die[i][j] = nullptr;
     }
 
-
+    double getResourceNowHave(){ return resource; }
+    int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
+    int getResourceSort(){ return resourceSort; }
 
 private:
     int state;
@@ -144,11 +156,15 @@ private:
     //当前工作对象
 
     double resource;
-    //资源携带量
+    //当前资源携带量
+
+    int resource_Max;
+    //最大资源携带量
 
     int resourceSort;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
+    //eg:HUMAN_WOOD
 
     static std::list<ImageResource> *Walk[7][8];
 

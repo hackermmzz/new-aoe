@@ -390,14 +390,16 @@
 #define CoreDetail_Move 0
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
+#define CoreDetail_ResourceIn 3
 
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 0
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
+#define OPERATECON_NEAR_ATTACK 10001
 //####指定对象
-#define OPERATECON_OBJECT1 1
-#define OPERATECON_OBJECT2 2
+#define OPERATECON_OBJECT1 10011
+#define OPERATECON_OBJECT2 10012
 
 
 /********** 距离常量 **********/

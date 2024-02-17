@@ -45,7 +45,8 @@ SOURCES += \
     ActWidget.cpp \
     SelectWidget.cpp \
     Development.cpp \
-    Army.cpp
+    Army.cpp \
+    Bloodhaver.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -68,7 +69,8 @@ HEADERS += \
     SelectWidget.h \
     ActWidget.h \
     Development.h \
-    Army.h
+    Army.h \
+    Bloodhaver.h
 
 FORMS += \
         MainWidget.ui \

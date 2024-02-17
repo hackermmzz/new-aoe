@@ -64,8 +64,7 @@ Animal::Animal(int Num, double DR, double UR)
     //cnt与 maxcnt实际作用需区分
     this->Cnt =this->MaxCnt;
     this->Blood = 1;
-
-    this->gatherable = true;
+    this->gatherable = false;
 
     this->state = ANIMAL_STATE_IDLE;
 

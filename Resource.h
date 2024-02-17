@@ -8,6 +8,7 @@ public:
     Resource();
 
     bool get_Gatherable(){return gatherable;}
+    int get_ResourceSort(){ return resourceSort; }
     void set_Gatherable(bool gatherable){this->gatherable = gatherable;}
 
 protected:
@@ -20,6 +21,11 @@ protected:
 
     double DecayRate=0;
     //腐烂速度
+
+    int resourceSort;
+    //指示资源的类型
+    //1指代木头 2指代肉 3指代石头 4指代金子
+    //eg:    HUMAN_WOOD
 
 };
 

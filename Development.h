@@ -13,14 +13,17 @@ public:
 
     double get_rate_Move(int sort,int type);
     double get_rate_Blood(int sort , int type);
-    int get_addition_Blood( int sort , int type , int armyClass , int attackType );
+    int get_addition_Blood( int sort , int type );
 
     double get_rate_Attack( int sort , int type , int armyClass , int attackType );
     int get_addition_Attack( int sort , int type , int armyClass , int attackType );
 
-    double get_rate_Defence( int sort , int type , int armyClass , int attackType );
-    int get_addition_Defence( int sort , int type , int armyClass , int attackType );
-    int get_capacity(){ return 0; }
+    int get_addition_DisAttack( int sort, int type , int armyClass , int attackType );
+
+    double get_rate_Defence( int sort , int type , int armyClass , int attackType_got );
+    int get_addition_Defence( int sort , int type , int armyClass , int attackType_got );
+
+    int get_addition_ResourceSort( int resourceSort );
 
 
 private:
@@ -32,6 +35,7 @@ private:
     int defence_archer = 0;
     int defence_rider = 0;
     int specialDefence_toShoot = 0;
+    //采集加成
     int capacity_wood = 0;
     int capacity_stone = 0;
     int capacity_gold = 0;

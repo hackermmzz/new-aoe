@@ -3,17 +3,19 @@
 //****************************************************************************************
 //关系函数定义
 //永否
-bool condition_AllFalse( Coordinate* object1, relation_Object& relation , int operate){return false;}
+bool condition_AllFalse( Coordinate* object1, relation_Object& relation , int operate , bool isNegation){return false;}
+//永真
+bool condition_AllTrue( Coordinate* object1, relation_Object& relation , int operate , bool isNegation){return true;}
 //单一Object死亡
-bool condition_UniObjectDie( Coordinate* , relation_Object& , int );
+bool condition_UniObjectDie( Coordinate* , relation_Object& , int , bool);
 //单一object被攻击中
-bool condition_UniObjectUnderAttack( Coordinate* , relation_Object& , int );
-//单一object背包容量满
-bool condition_UniObject_FullBackpack( Coordinate* , relation_Object& , int );
+bool condition_UniObjectUnderAttack( Coordinate* , relation_Object& , int ,bool);
+//工作者背包容量满
+bool condition_Object1_FullBackpack( Coordinate* , relation_Object& , int ,bool);
 //位置距离接近
-bool condition_ObjectNearby( Coordinate* , relation_Object& , int );
+bool condition_ObjectNearby( Coordinate* , relation_Object& , int ,bool);
 //object目标能被采集
-bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int);
+bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int ,bool);
 
 Core::Core()
 {
@@ -35,7 +37,22 @@ Core::Core()
     delete conditionList;
     forcedInterrupCondition.clear();
 
-    //行动：采集
+    //行动: 攻击
+    phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
+    conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK) , conditionF( conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true) )};
+    forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
+
+    relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList , forcedInterrupCondition );
+    overCondition.push_back(conditionF( condition_UniObjectDie,OPERATECON_OBJECT2 ));
+    relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);
+    delete phaseList;
+    delete conditionList;
+    forcedInterrupCondition.clear();
+    overCondition.clear();
+
+    //行动：采集_不需攻击
+
+
 }
 
 void Core::gameUpdate(Map* theMap, Player* player[], int** memorymap, MouseEvent *mouseEvent)
@@ -48,12 +65,15 @@ void Core::gameUpdate(Map* theMap, Player* player[], int** memorymap, MouseEvent
     std::list<Human *>::iterator humaniter=player[0]->human.begin();
     while(humaniter!=player[0]->human.end())
     {
-        Farmer *farmer=(Farmer *)(*humaniter);
-        if(farmer->needTranState())
+        if((*humaniter)->getSort() == SORT_FARMER)
         {
-            farmer->setNowState(farmer->getPreState());
-            farmer->setPreStateIsIdle();
-            farmer->setNowRes();
+            Farmer *farmer=(Farmer *)(*humaniter);
+            if(farmer->needTranState())
+            {
+                farmer->setNowState(farmer->getPreState());
+                farmer->setPreStateIsIdle();
+                farmer->setNowRes();
+            }
         }
         humaniter++;
     }
@@ -284,12 +304,13 @@ void Core::manageRelationList()
             int& nowPhaseNum = thisRelation.nowPhaseNum;
             detail_EventPhase& thisDetailEven = relation_Event_static[nowPhaseNum];
             object2 = thisRelation.goalObject;
+            conditionF* recordCondition;
 
             //该部分为强制中止行动部分代码
             forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
             for(list<conditionF>::iterator iter_list = forcedInterrupCondition.begin();iter_list!=forcedInterrupCondition.end();iter_list++)
             {
-                if( iter_list->condition( object1,thisRelation,iter_list->variableArgu ) )
+                if( iter_list->condition( object1,thisRelation,iter_list->variableArgu,iter_list->isNegation ) )
                 {
                     thisRelation.nowPhaseNum = thisDetailEven.phaseInterrup;
                     break;
@@ -302,7 +323,7 @@ void Core::manageRelationList()
                 overCondition = thisDetailEven.loopOverCondition[nowPhaseNum];
                 for(list<conditionF>::iterator iter_list = overCondition.begin(); iter_list!= overCondition.end();iter_list++)
                 {
-                    if( iter_list->condition( object1 , thisRelation , iter_list->variableArgu ))
+                    if( iter_list->condition( object1 , thisRelation , iter_list->variableArgu,iter_list->isNegation ))
                     {
                         nowPhaseNum ++;
                         break;
@@ -310,11 +331,11 @@ void Core::manageRelationList()
                 }
             }
 
+            recordCondition = &thisDetailEven.chageCondition[nowPhaseNum];
             //判断是否需要切换当前阶段
-            if( nowPhaseNum < thisDetailEven.phaseAmount && thisDetailEven.chageCondition[nowPhaseNum].condition(object1, thisRelation , thisDetailEven.chageCondition[nowPhaseNum].variableArgu))
-            {
+            if( nowPhaseNum < thisDetailEven.phaseAmount && recordCondition->condition(object1,thisRelation , recordCondition->variableArgu,recordCondition->isNegation))
                 nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
-            }
+
 
             //实际执行行动
             switch (thisDetailEven.phaseList[nowPhaseNum])
@@ -324,9 +345,11 @@ void Core::manageRelationList()
                 else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
                 break;
             case CoreDetail_Attack:
-
+                object_Attack(object1,object2);
                 break;
             case CoreDetail_Gather:
+                break;
+            case CoreDetail_ResourceIn:
                 break;
             case CoreDetail_NormalEnd:
                 iter = object_FinishAction(iter);
@@ -366,7 +389,63 @@ void Core::object_Move(Coordinate * object , double DR , double UR)
 
 void Core::object_Attack(Coordinate* object1 ,Coordinate* object2)
 {
+    int damage; //记录伤害
+    bool normalAttack = true;   //用于判断是否是祭司
+    BloodHaver* attacker = NULL;    //攻击者
+    BloodHaver* attackee = NULL;    //受攻击者
 
+    //攻击者指针赋值(object1强制转换)
+    switch(object1->getSort())
+    {
+    case SORT_BUILDING:
+        ((Building*)object1)->printer_ToBloodHaver(&attacker);
+        break;
+    case SORT_ANIMAL:
+        ((Animal*)object1)->printer_ToBloodHaver(&attacker);
+        break;
+    case SORT_FARMER:
+        ((Farmer*)object1)->printer_ToBloodHaver(&attacker);
+        break;
+    case SORT_ARMY:
+        ((Army*)object1)->printer_ToBloodHaver(&attacker);
+        if(((Army*)object1)->getArmyClass() == ARMY_FLAMEN) normalAttack = false;
+        break;
+    default:
+        break;
+    }
+    //受攻击者指针赋值(object2强制转换)
+    switch(object2->getSort())
+    {
+    case SORT_BUILDING:
+        ((Building*)object2)->printer_ToBloodHaver(&attackee);
+        break;
+    case SORT_ANIMAL:
+        ((Animal*)object2)->printer_ToBloodHaver(&attackee);
+        break;
+    case SORT_FARMER:
+        ((Farmer*)object2)->printer_ToBloodHaver(&attackee);
+        break;
+    case SORT_ARMY:
+        ((Army*)object2)->printer_ToBloodHaver(&attackee);
+        break;
+    default:
+        break;
+    }
+
+    if(attackee != NULL && attacker!=NULL)  //若指针均非空
+    {
+        if(normalAttack)
+        {
+            //非祭司,是普通的伤害计算公式
+            /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
+            qDebug()<<"缺少攻击的硬直,远程攻击需要投掷物命中再伤害计算";
+
+            attacker->setAttackObject(object2); //攻击者记录攻击目标, 用于对于army会计算特攻等
+            damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
+            if(damage<0) damage = 0;
+            attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
+        }
+    }
 }
 
 void Core::object_Gather(Coordinate* object1 , Coordinate* object2)
@@ -395,27 +474,138 @@ map<Coordinate* , relation_Object>::iterator Core::object_FinishAction(map<Coord
 //****************************************************************************************
 //通用的关系函数
 //
-bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , int opreate)
+bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , int operate , bool isNegation)
 {
-    return false;
+    BloodHaver* object_judget = NULL;
+    if(operate == OPERATECON_OBJECT1&& object1!=NULL)
+    {
+        switch(object1->getSort())
+        {
+        case SORT_BUILDING:
+            ((Building*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ANIMAL:
+            ((Animal*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_FARMER:
+            ((Farmer*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ARMY:
+            ((Army*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        default:
+            break;
+        }
+    }
+    else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL)
+    {
+        Coordinate* object2 = relation.goalObject;
+        switch(object2->getSort())
+        {
+        case SORT_BUILDING:
+            ((Building*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ANIMAL:
+            ((Animal*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_FARMER:
+            ((Farmer*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ARMY:
+            ((Army*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        default:
+            break;
+        }
+    }
+
+    if(object_judget != NULL) return isNegation ^ object_judget->isDie();
+    else return isNegation ^ true;
 }
 
-bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relation, int operate )
+bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relation, int operate, bool isNegation )
 {
-    return false;
+    BloodHaver* object_judget = NULL;
+    if(operate == OPERATECON_OBJECT1&& object1!=NULL)
+    {
+        switch(object1->getSort())
+        {
+        case SORT_BUILDING:
+            ((Building*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ANIMAL:
+            ((Animal*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_FARMER:
+            ((Farmer*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ARMY:
+            ((Army*)object1)->printer_ToBloodHaver(&object_judget);
+            break;
+        default:
+            break;
+        }
+    }
+    else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL)
+    {
+        Coordinate* object2 = relation.goalObject;
+        switch(object2->getSort())
+        {
+        case SORT_BUILDING:
+            ((Building*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ANIMAL:
+            ((Animal*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_FARMER:
+            ((Farmer*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        case SORT_ARMY:
+            ((Army*)object2)->printer_ToBloodHaver(&object_judget);
+            break;
+        default:
+            break;
+        }
+    }
+
+    if(object_judget != NULL) return isNegation ^ (object_judget->getAvangeObject() != NULL);
+    else return isNegation ^ true;
 }
 
-bool condition_UniObject_FullBackpack( Coordinate* object1 , relation_Object& relation, int operate = OPERATECON_OBJECT1)
+bool condition_Object1_FullBackpack( Coordinate* object1 , relation_Object& relation, int operate, bool isNegation = false)
 {
-    Farmer* object;
-    if(operate == OPERATECON_OBJECT1) object = (Farmer*)object1;
-    else object = (Farmer*)relation.goalObject;
+    Farmer* worker = (Farmer*)object1;
+    Resource* collectible = NULL;
 
+    switch (relation.goalObject->getSort())
+    {
+    case SORT_ANIMAL:
+        ((Animal*)relation.goalObject)->printer_ToResource(&collectible);
+        break;
+    case SORT_STATICRES:
+        ((StaticRes*)relation.goalObject)->printer_ToResource(&collectible);
+    default:
+        break;
+    }
+
+    if( collectible != NULL && (worker->getResourceSort()!= collectible->get_ResourceSort() || worker->getResourceNowHave()<worker->getResourceHave_Max()) )
+        return isNegation^false;
+    else
+    {
+        relation.isUseAlterGoal = true;
+        return isNegation^true;
+    }
 
 }
 
-bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int operate = OPERATECON_NEAR_ABSOLUTE)
+bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int operate = OPERATECON_NEAR_ABSOLUTE , bool isNegation = false)
 {
+    if(relation.goalObject!= NULL)
+    {
+        relation.DR_goal = relation.goalObject->getDR();
+        relation.UR_goal = relation.goalObject->getUR();
+    }
+
     if(operate == OPERATECON_NEAR_ABSOLUTE)
     {
         if(relation.isUseAlterGoal)
@@ -423,33 +613,50 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
             if(fabs(object1->getDR()-relation.DR_alter)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(object1->getUR()-relation.UR_alter)<DISTANCE_Manhattan_MoveEndNEAR)
             {
                 relation.isUseAlterGoal = false;
-                return true;
+                return isNegation^true;
             }
-            else
-                return false;
         }
-        else
-        {
-            if(fabs(object1->getDR()-relation.DR_goal)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(object1->getUR()-relation.UR_goal)<DISTANCE_Manhattan_MoveEndNEAR)
-                return true;
-            else
-                return false;
-        }
+        else return isNegation ^ (fabs(object1->getDR()-relation.DR_goal)<DISTANCE_Manhattan_MoveEndNEAR && fabs(object1->getUR()-relation.UR_goal)<DISTANCE_Manhattan_MoveEndNEAR);
+
     }
+    else if( operate == OPERATECON_NEAR_ATTACK )
+    {
+        BloodHaver* attacker;
+        switch (object1->getSort())
+        {
+        case SORT_FARMER:
+           ((Farmer*)object1)->printer_ToBloodHaver(&attacker);
+           attacker->setAttackObject(relation.goalObject); //farmer攻击对动物/军队会有不同的距离
+           break;
+        case SORT_ANIMAL:
+           ((Animal*)object1)->printer_ToBloodHaver(&attacker);
+           break;
+        case SORT_ARMY:
+           ((Army*)object1)->printer_ToBloodHaver(&attacker);
+           break;
+        default:
+           break;
+        }
+        return isNegation ^ (countdistance(object1->getDR(),object1->getUR(),relation.DR_goal,relation.UR_goal)<= attacker->getDis_attack());
+    }
+
+    return isNegation ^ false;
 }
 
-bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation, int operate)
+bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation, int operate , bool isNegation)
 {
-    Resource* object_gathered = (Resource*)relation.goalObject;
+    Resource* object_gathered ;
+    if(relation.goalObject->getSort() == SORT_ANIMAL) ((Animal*)relation.goalObject)->printer_ToResource(&object_gathered);
+    else if(relation.goalObject->getSort() == SORT_STATICRES) ((StaticRes*)relation.goalObject)->printer_ToResource(&object_gathered);
+
     if(object_gathered->get_Gatherable()) return true;
-    else
+    else    //除了animal是需要猎杀后再采集,其他的可以直接采集
     {
-        MoveObject* object2 = (MoveObject*)relation.goalObject;
-        if(object2->isDie())
+        if( ((Animal*)relation.goalObject)->isDie() )
         {
             object_gathered->set_Gatherable(true);
-            return true;
+            return isNegation ^ true;
         }
-        else return false;
+        else return isNegation^false;
     }
 }

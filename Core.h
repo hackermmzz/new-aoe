@@ -28,18 +28,18 @@ public:
     */
 
 private:
-    Map* theMap;
-    Player** player;
-    int** memorymap;
-    MouseEvent *mouseEvent;
+    Map* theMap;    //地图信息
+    Player** player;    //player信息
+    int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
+    MouseEvent *mouseEvent; //记录当前鼠标事件
 
-    map<int , detail_EventPhase> relation_Event_static;
-    map<Coordinate* , relation_Object> relate_AllObject;
+    map<int , detail_EventPhase> relation_Event_static;     //静态表,描述行动的流程链的表
+    map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
     map<Coordinate* , relation_Object> relate_BuildingAndResource;
 
     /************管理添加表************/
-    void manageMouseEvent();
-    void manageOrder();
+    void manageMouseEvent();    //鼠标添加
+    void manageOrder();     //指令添加
 
     /*********关系表相关维护***********/
     void manageRelationList();
@@ -49,7 +49,7 @@ private:
 
     /************控制行动************/
     void object_Move(Coordinate * object , double DR , double UR);  //控制移动
-    void object_Attack(Coordinate* , Coordinate* ); //控制减少object2血量
+    void object_Attack(Coordinate* , Coordinate* ); //控制因object1影响object2血量
     void object_Gather(Coordinate* , Coordinate* ); //控制采集
     map<Coordinate* , relation_Object>::iterator object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator);
     map<Coordinate* , relation_Object>::iterator object_FinishAction(map<Coordinate* , relation_Object>::iterator);
