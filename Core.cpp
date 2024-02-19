@@ -395,42 +395,9 @@ void Core::object_Attack(Coordinate* object1 ,Coordinate* object2)
     BloodHaver* attackee = NULL;    //受攻击者
 
     //攻击者指针赋值(object1强制转换)
-    switch(object1->getSort())
-    {
-    case SORT_BUILDING:
-        ((Building*)object1)->printer_ToBloodHaver(&attacker);
-        break;
-    case SORT_ANIMAL:
-        ((Animal*)object1)->printer_ToBloodHaver(&attacker);
-        break;
-    case SORT_FARMER:
-        ((Farmer*)object1)->printer_ToBloodHaver(&attacker);
-        break;
-    case SORT_ARMY:
-        ((Army*)object1)->printer_ToBloodHaver(&attacker);
-        if(((Army*)object1)->getArmyClass() == ARMY_FLAMEN) normalAttack = false;
-        break;
-    default:
-        break;
-    }
+    object1->printer_ToBloodHaver((void**)&attacker);
     //受攻击者指针赋值(object2强制转换)
-    switch(object2->getSort())
-    {
-    case SORT_BUILDING:
-        ((Building*)object2)->printer_ToBloodHaver(&attackee);
-        break;
-    case SORT_ANIMAL:
-        ((Animal*)object2)->printer_ToBloodHaver(&attackee);
-        break;
-    case SORT_FARMER:
-        ((Farmer*)object2)->printer_ToBloodHaver(&attackee);
-        break;
-    case SORT_ARMY:
-        ((Army*)object2)->printer_ToBloodHaver(&attackee);
-        break;
-    default:
-        break;
-    }
+    object2->printer_ToBloodHaver((void**)&attackee);
 
     if(attackee != NULL && attacker!=NULL)  //若指针均非空
     {
@@ -477,47 +444,8 @@ map<Coordinate* , relation_Object>::iterator Core::object_FinishAction(map<Coord
 bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , int operate , bool isNegation)
 {
     BloodHaver* object_judget = NULL;
-    if(operate == OPERATECON_OBJECT1&& object1!=NULL)
-    {
-        switch(object1->getSort())
-        {
-        case SORT_BUILDING:
-            ((Building*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ANIMAL:
-            ((Animal*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_FARMER:
-            ((Farmer*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ARMY:
-            ((Army*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        default:
-            break;
-        }
-    }
-    else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL)
-    {
-        Coordinate* object2 = relation.goalObject;
-        switch(object2->getSort())
-        {
-        case SORT_BUILDING:
-            ((Building*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ANIMAL:
-            ((Animal*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_FARMER:
-            ((Farmer*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ARMY:
-            ((Army*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        default:
-            break;
-        }
-    }
+    if(operate == OPERATECON_OBJECT1&& object1!=NULL) object1->printer_ToBloodHaver((void**)&object_judget);
+    else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL) relation.goalObject->printer_ToBloodHaver((void**)&object_judget);
 
     if(object_judget != NULL) return isNegation ^ object_judget->isDie();
     else return isNegation ^ true;
@@ -526,47 +454,8 @@ bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , in
 bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relation, int operate, bool isNegation )
 {
     BloodHaver* object_judget = NULL;
-    if(operate == OPERATECON_OBJECT1&& object1!=NULL)
-    {
-        switch(object1->getSort())
-        {
-        case SORT_BUILDING:
-            ((Building*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ANIMAL:
-            ((Animal*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_FARMER:
-            ((Farmer*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ARMY:
-            ((Army*)object1)->printer_ToBloodHaver(&object_judget);
-            break;
-        default:
-            break;
-        }
-    }
-    else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL)
-    {
-        Coordinate* object2 = relation.goalObject;
-        switch(object2->getSort())
-        {
-        case SORT_BUILDING:
-            ((Building*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ANIMAL:
-            ((Animal*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_FARMER:
-            ((Farmer*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        case SORT_ARMY:
-            ((Army*)object2)->printer_ToBloodHaver(&object_judget);
-            break;
-        default:
-            break;
-        }
-    }
+    if(operate == OPERATECON_OBJECT1&& object1!=NULL) object1->printer_ToBloodHaver((void**)&object_judget);
+    else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL) relation.goalObject->printer_ToBloodHaver((void**)&object_judget);
 
     if(object_judget != NULL) return isNegation ^ (object_judget->getAvangeObject() != NULL);
     else return isNegation ^ true;
@@ -577,16 +466,7 @@ bool condition_Object1_FullBackpack( Coordinate* object1 , relation_Object& rela
     Farmer* worker = (Farmer*)object1;
     Resource* collectible = NULL;
 
-    switch (relation.goalObject->getSort())
-    {
-    case SORT_ANIMAL:
-        ((Animal*)relation.goalObject)->printer_ToResource(&collectible);
-        break;
-    case SORT_STATICRES:
-        ((StaticRes*)relation.goalObject)->printer_ToResource(&collectible);
-    default:
-        break;
-    }
+    relation.goalObject->printer_ToResource((void**)&collectible);
 
     if( collectible != NULL && (worker->getResourceSort()!= collectible->get_ResourceSort() || worker->getResourceNowHave()<worker->getResourceHave_Max()) )
         return isNegation^false;
@@ -621,22 +501,8 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     }
     else if( operate == OPERATECON_NEAR_ATTACK )
     {
-        BloodHaver* attacker;
-        switch (object1->getSort())
-        {
-        case SORT_FARMER:
-           ((Farmer*)object1)->printer_ToBloodHaver(&attacker);
-           attacker->setAttackObject(relation.goalObject); //farmer攻击对动物/军队会有不同的距离
-           break;
-        case SORT_ANIMAL:
-           ((Animal*)object1)->printer_ToBloodHaver(&attacker);
-           break;
-        case SORT_ARMY:
-           ((Army*)object1)->printer_ToBloodHaver(&attacker);
-           break;
-        default:
-           break;
-        }
+        BloodHaver* attacker = NULL;
+        object1->printer_ToBloodHaver((void**)attacker);
         return isNegation ^ (countdistance(object1->getDR(),object1->getUR(),relation.DR_goal,relation.UR_goal)<= attacker->getDis_attack());
     }
 
@@ -646,8 +512,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation, int operate , bool isNegation)
 {
     Resource* object_gathered ;
-    if(relation.goalObject->getSort() == SORT_ANIMAL) ((Animal*)relation.goalObject)->printer_ToResource(&object_gathered);
-    else if(relation.goalObject->getSort() == SORT_STATICRES) ((StaticRes*)relation.goalObject)->printer_ToResource(&object_gathered);
+    relation.goalObject->printer_ToResource((void**)&object_gathered);
 
     if(object_gathered->get_Gatherable()) return true;
     else    //除了animal是需要猎杀后再采集,其他的可以直接采集

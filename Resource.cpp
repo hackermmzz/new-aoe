@@ -2,5 +2,4 @@
 
 Resource::Resource()
 {
-
 }

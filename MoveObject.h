@@ -64,13 +64,16 @@ protected:
 public:
     MoveObject();
 
-    /***********虚函数************/
+  /**********************虚函数**************************/
     virtual void setNowRes(){ }
 
     virtual double getSpeed(){ return speed; }
     virtual int getVision(){ return vision; }
 
-    /*********以上虚函数************/
+    /***************指针强制转化****************/
+    void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
 
     bool isWalking(){return this->nowstate==1;}
     void updateMove();

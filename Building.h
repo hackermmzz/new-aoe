@@ -11,11 +11,15 @@ public:
     Building();
     Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
 
-    /***********虚函数************/
+  /**********************虚函数**************************/
     int getSort();
     int getMaxBlood(){ return BuildingMaxBlood[Num]; }
 
-    /*********以上虚函数************/
+    /***************指针强制转化****************/
+    //若要将Building类指针转化为父类指针,务必用以下函数!
+    void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
 
     static std::list<ImageResource>* getBuild(int i) {
         return build[i];
@@ -65,12 +69,6 @@ public:
     }
     void setPlayerScience(Development* science){ this->playerScience = science; }
 
-    /***************指针强制转化****************/
-    //若要将Building类指针转化为父类指针,务必用以下函数!
-    void printer_ToCoordinate(Coordinate** ptr){ *ptr = this; }   //传入ptr为Coordinate指针的地址
-    void printer_ToBloodHaver(BloodHaver** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
-
-    /*************以上指针强制转化****************/
 
 private:
     static std::list<ImageResource> *build[4];

@@ -9,10 +9,14 @@ public:
 
     bool get_Gatherable(){return gatherable;}
     int get_ResourceSort(){ return resourceSort; }
+    int get_Cnt(){ return (int)(Cnt*MaxCnt); }
     void set_Gatherable(bool gatherable){this->gatherable = gatherable;}
+    void updateCnt_byGather( double gather){  Cnt -= gather/MaxCnt ;}
+    void updateCnt_byDecay(){ Cnt-=DecayRate; }
+    bool isGather_finish(){ return Cnt<=0; }
 
 protected:
-    double Cnt;
+    double Cnt = 1;
 
     int MaxCnt;
 

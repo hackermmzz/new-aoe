@@ -10,7 +10,7 @@ public:
     Army(double DR,double UR,int type);
     ~Army();
 
-    /*********虚函数**********/
+  /**********************虚函数**************************/
     void nextframe();
     void setNowRes();
 
@@ -27,17 +27,11 @@ public:
     //特攻,根据兵种不同,会有攻击力加成
     int get_add_specialAttack(){ return 0; }
 
-        /***************指针强制转化****************/
-        //若要将Army类指针转化为父类指针,务必用以下函数!
-
-    void printer_ToCoordinate(Coordinate** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址
-    void printer_ToMoveObject(MoveObject** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址
-    void printer_ToHuman(Human** ptr){ *ptr = this; }    //传入ptr为Human类指针的地址
-    void printer_ToBloodHaver(BloodHaver** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
-
-        /*************以上指针强制转化****************/
-
-    /*******以上虚函数**********/
+    /***************指针强制转化****************/
+    //若要将Army类指针转化为父类指针,务必用以下函数!
+    void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
     int getArmyClass(){ return armyClass; }
 
 private:

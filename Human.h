@@ -11,7 +11,7 @@ public:
     Human();
     Human(int Num,double DR,double UR);
 
-    /*********虚函数**********/
+  /**********************虚函数**************************/
     void nextframe();
     double getSpeed(){ return speed*playerScience->get_rate_Move(getSort(),type); }
     int getMaxBlood(){ return MaxBlood*playerScience->get_rate_Blood(getSort(),type)+ playerScience->get_addition_Blood(getSort(),type); }
@@ -21,15 +21,12 @@ public:
 
     int getDEF(int attackType_got);
 
-        /***************指针强制转化****************/
-        //若要将Human类指针转化为父类指针,务必用以下函数!
-    virtual void printer_ToCoordinate(Coordinate** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址
-    virtual void printer_ToMoveObject(MoveObject** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址
-    virtual void printer_ToBloodHaver(BloodHaver** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
-
-        /*************以上指针强制转化****************/
-
-    /*******以上虚函数**********/
+    /***************指针强制转化****************/
+    //若要将Human类指针转化为父类指针,务必用以下函数!
+    void printer_ToHuman(void** ptr){ *ptr = this; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
+    void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
 
     void setPlayerScience( Development* science ){ this->playerScience = science; }
 
