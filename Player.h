@@ -2,12 +2,14 @@
 #define PLAYER_H
 
 #include <Farmer.h>
+#include <Army.h>
 #include <Building.h>
 
 class Player
 {
 public:
     Player();
+    ~Player();
 
     int addBuilding(int Num,int BlockDR,int BlockUR);
 
@@ -113,6 +115,7 @@ public:
     {
         return this->startScores[type];
     }
+
 private:
 
     //当前文明
@@ -131,6 +134,9 @@ private:
     bool marketResearch[3] = {false};
     bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
+
+    //研究技术进度与成果
+    Development* playerScience;
 };
 
 #endif // PLAYER_H
