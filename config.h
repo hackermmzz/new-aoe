@@ -403,7 +403,7 @@
 
 
 /********** 距离常量 **********/
-#define DISTANCE_Manhattan_MoveEndNEAR 0.00001
+#define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
 
 /********** 攻击方式 **********/

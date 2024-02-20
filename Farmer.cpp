@@ -21,6 +21,7 @@ Farmer::Farmer(double DR, double UR)
     this->Blood=1;
     this->MaxBlood=BLOOD_FARMER;
     speed = HUMAN_SPEED;
+    this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
 
     this->Angle=rand()%8;

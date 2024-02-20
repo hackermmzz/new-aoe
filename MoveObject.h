@@ -75,7 +75,7 @@ public:
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
-    bool isWalking(){return this->nowstate==1;}
+    bool isWalking(){return this->nowstate==MOVEOBJECT_STATE_WALK;}
     void updateMove();
 
     void calculateDiretionArray(stack<Point>& path);

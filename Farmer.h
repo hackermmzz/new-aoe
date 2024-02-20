@@ -10,14 +10,19 @@ public:
     Farmer(double DR,double UR);
 
   /**********************虚函数**************************/
+    void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     void nextframe();
     void setNowRes();
     int getSort();
     double getDis_attack();
     int get_AttackType();
+
+    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
     /***************指针强制转化****************/
     //若要将Farmer类指针转化为父类指针,务必用以下函数!
-    void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    void printer_ToBloodHaver(void** ptr){ *ptr;
+                                           dynamic_cast<BloodHaver*>(this);
+        *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
@@ -118,6 +123,7 @@ public:
     double getResourceNowHave(){ return resource; }
     int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
     int getResourceSort(){ return resourceSort; }
+    void setState( int state ){ this->state = state; }
 
 private:
     int state;

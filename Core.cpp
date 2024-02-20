@@ -45,6 +45,7 @@ Core::Core()
     relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList , forcedInterrupCondition );
     overCondition.push_back(conditionF( condition_UniObjectDie,OPERATECON_OBJECT2 ));
     relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);
+
     delete phaseList;
     delete conditionList;
     forcedInterrupCondition.clear();
@@ -252,6 +253,7 @@ void Core::manageMouseEvent()
             if(nowobject->getSort() == SORT_FARMER)
             {
                 suspendRelation(nowobject);
+                ((Farmer*)nowobject)->setState(4);
                 addRelation(nowobject , object_click , CoreEven_Attacking );    //实际为需要击杀的采集，暂用攻击代替
             }
             else if( nowobject->getSort() == SORT_ARMY)
@@ -259,6 +261,7 @@ void Core::manageMouseEvent()
                 suspendRelation(nowobject);
                 addRelation(nowobject , object_click , CoreEven_Attacking );
             }
+            mouseEvent->mouseEventType=NULL_MOUSEEVENT;
         }
 
     }
@@ -282,7 +285,6 @@ bool Core::addRelation( Coordinate * object1, Coordinate * object2, int eventTyp
         relate_AllObject[object1].sort = object2->getSort();
         return true;
     }
-
     return false;
 }
 
@@ -316,7 +318,7 @@ void Core::manageRelationList()
         if( thisRelation.isExist )
         {
             int& nowPhaseNum = thisRelation.nowPhaseNum;
-            detail_EventPhase& thisDetailEven = relation_Event_static[nowPhaseNum];
+            detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
             object2 = thisRelation.goalObject;
             conditionF* recordCondition;
 
@@ -413,20 +415,21 @@ void Core::object_Attack(Coordinate* object1 ,Coordinate* object2)
     //受攻击者指针赋值(object2强制转换)
     object2->printer_ToBloodHaver((void**)&attackee);
 
-
-
     if(attackee != NULL && attacker!=NULL)  //若指针均非空
     {
+        if(!attacker->isAttacking()) attacker->setPreAttack();
         if(normalAttack)
         {
             //非祭司,是普通的伤害计算公式
             /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
-            qDebug()<<"缺少攻击的硬直,远程攻击需要投掷物命中再伤害计算";
+            qDebug()<<"Lack of attack rigidity, long range attacks require projectile hit and damage calculation";
 
             attacker->setAttackObject(object2); //攻击者记录攻击目标, 用于对于army会计算特攻等
             damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
+
             if(damage<0) damage = 0;
             attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
+            qDebug()<<"showhp"<<attackee->getBlood();
         }
     }
 }
@@ -438,8 +441,8 @@ void Core::object_Gather(Coordinate* object1 , Coordinate* object2)
 
 map<Coordinate* , relation_Object>::iterator Core::object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator iter)
 {
-    MoveObject* thisObject = (MoveObject*)iter->first;
-    thisObject->setPreStand();
+    ((MoveObject*)(iter->first))->setPreStand();
+
     return relate_AllObject.erase(iter);
 }
 
@@ -518,7 +521,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     else if( operate == OPERATECON_NEAR_ATTACK )
     {
         BloodHaver* attacker = NULL;
-        object1->printer_ToBloodHaver((void**)attacker);
+        object1->printer_ToBloodHaver((void**)&attacker);
         attacker->setAttackObject(relation.goalObject);
         return isNegation ^ (countdistance(object1->getDR(),object1->getUR(),relation.DR_goal,relation.UR_goal)<= attacker->getDis_attack());
     }
