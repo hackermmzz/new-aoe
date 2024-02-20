@@ -31,44 +31,51 @@ Animal::Animal(int Num, double DR, double UR)
     {
         this->Friendly = 2;
         this->MaxCnt = CNT_LION;
-        this->maxBlood = BLOOD_LION;
+        resourceSort = HUMAN_STOCKFOOD;
+        this->MaxBlood = BLOOD_LION;
         speed = ANIMAL_SPEED;
+        attackType = ATTACKTYPE_ANIMAL;
     }
     else if( this->Num == ANIMAL_GAZELLE )
     {
         this->MaxCnt = CNT_GAZELLE;
-        this->maxBlood = BLOOD_GAZELLE;
+        resourceSort = HUMAN_STOCKFOOD;
+        this->MaxBlood = BLOOD_GAZELLE;
         speed = ANIMAL_SPEED;
     }
     else if( this->Num == ANIMAL_ELEPHANT )
     {
         this->MaxCnt = CNT_ELEPHANT;
-        this->maxBlood = BLOOD_ELEPHANT;
+        resourceSort = HUMAN_STOCKFOOD;
+        this->MaxBlood = BLOOD_ELEPHANT;
         speed = ANIMAL_SPEED;
+        attackType = ATTACKTYPE_ANIMAL;
     }
     else if( this->Num == ANIMAL_TREE )
     {
         this->MaxCnt = CNT_TREE;
-        this->maxBlood = BLOOD_TREE;
+        resourceSort = HUMAN_WOOD;
+        this->MaxBlood = BLOOD_TREE;
         speed = 0;
     }
     else if( this->Num == ANIMAL_FOREST )
     {
         this->MaxCnt = CNT_FOREST;
-        this->maxBlood = BLOOD_FOREST;
+        resourceSort = HUMAN_WOOD;
+        this->MaxBlood = BLOOD_FOREST;
         speed = 0;
     }
-    
-    //cnt与 maxcnt实际作用需区分
-    this->Cnt =this->MaxCnt;
-    this->blood = this->maxBlood;
 
-    this->gatherable = true;
+    this->gatherable = false;
+    this->Blood = 1;
+
 
     this->state = ANIMAL_STATE_IDLE;
 
-    this->Angle = 0;
-    this->nowres = Stand[this->Num][this->Angle]->begin();
+//    this->Angle = 0;
+//    this->nowres = Stand[this->Num][this->Angle]->begin();
+    this->Angle=2;
+    setNowRes();
 
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -76,12 +83,7 @@ Animal::Animal(int Num, double DR, double UR)
     this->globalNum=g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-    
-    //
-    this->Angle=2;
-    this->nowlist = Stand[this->Num][this->Angle];
-    this->nowres = nowlist->begin();
-    //
+
 }
 
 void Animal::nextframe()

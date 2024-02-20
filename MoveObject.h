@@ -6,10 +6,9 @@
 class MoveObject:public Coordinate
 {
 protected:
-    int blood;
-    int maxBlood;
+    double speed;   //移动速度
 
-    double speed;
+    int vision; //视野
 
     int Angle;
     //规定 从下顺时针分别为0 1 2 3 4 5 6 7
@@ -65,15 +64,18 @@ protected:
 public:
     MoveObject();
 
-    virtual void setNowRes()
-    {
+  /**********************虚函数**************************/
+    virtual void setNowRes(){ }
 
-    }
+    virtual double getSpeed(){ return speed; }
+    virtual int getVision(){ return vision; }
 
-    bool isWalking()
-    {
-        return this->nowstate==1;
-    }
+    /***************指针强制转化****************/
+    void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
+
+    bool isWalking(){return this->nowstate==1;}
     void updateMove();
 
     void calculateDiretionArray(stack<Point>& path);
@@ -227,6 +229,7 @@ public:
     {
         return this->UR0;
     }
+
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

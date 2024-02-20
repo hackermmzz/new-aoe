@@ -12,9 +12,21 @@ class Coordinate
 public:
     Coordinate();
 
+  /**********************虚函数**************************/
     virtual void nextframe();
     virtual int getSort();
 
+
+
+    /***************指针强制转化****************/
+    //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
+    virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToMoveObject(void** ptr){ *ptr = NULL; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToHuman(void** ptr){ *ptr = NULL; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToBloodHaver(void** ptr){ *ptr = NULL; }   //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToResource(void** ptr){ *ptr = NULL; }     //传入ptr为Resource类指针的地址,需要强制转换为（void**）
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
     double getDR()
     {
         return this->DR;

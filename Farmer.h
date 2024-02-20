@@ -8,9 +8,18 @@ class Farmer:public Human
 public:
     Farmer();
     Farmer(double DR,double UR);
+
+  /**********************虚函数**************************/
     void nextframe();
-    int getSort();
     void setNowRes();
+    int getSort();
+
+    /***************指针强制转化****************/
+    //若要将Farmer类指针转化为父类指针,务必用以下函数!
+    void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
+
 
     static std::string getFarmerName(int index) {
         if (index >= 0 && index < 7) {
@@ -105,6 +114,9 @@ public:
         Die[i][j] = nullptr;
     }
 
+    double getResourceNowHave(){ return resource; }
+    int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
+    int getResourceSort(){ return resourceSort; }
 
 private:
     int state;
@@ -138,14 +150,15 @@ private:
     //当前工作对象
 
     double resource;
-    //资源携带量
+    //当前资源携带量
+
+    int resource_Max;
+    //最大资源携带量
 
     int resourceSort;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
-
-    int Blood;
-    int MaxBlood;
+    //eg:HUMAN_WOOD
 
     static std::list<ImageResource> *Walk[7][8];
 

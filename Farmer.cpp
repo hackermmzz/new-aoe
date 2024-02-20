@@ -18,9 +18,12 @@ Farmer::Farmer()
 
 Farmer::Farmer(double DR, double UR)
 {
-    this->Angle=rand()%8;
+    this->Blood=1;
     this->MaxBlood=BLOOD_FARMER;
-    this->Blood=MaxBlood;
+    speed = HUMAN_SPEED;
+    attackType = ATTACKTYPE_CLOSE;
+
+    this->Angle=rand()%8;
     this->state=HUMAN_STATE_IDLE;
     this->resource=0;
     this->DR=DR;
@@ -36,7 +39,7 @@ Farmer::Farmer(double DR, double UR)
     this->DR0=DR;
     this->UR0=UR;
     this->nowstate=MOVEOBJECT_STATE_STAND;
-    this->Angle=0;
+//    this->Angle=0;
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -44,8 +47,6 @@ Farmer::Farmer(double DR, double UR)
     this->globalNum=g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-
-    speed = HUMAN_SPEED;
 }
 
 void Farmer::nextframe()
