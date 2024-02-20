@@ -229,24 +229,38 @@ stack<Point> Core::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Poi
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
+    Coordinate* object_click = g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
-        nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+        nowobject=object_click;
 
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;
     }
     if(mouseEvent->mouseEventType==RIGHT_PRESS&&nowobject!=NULL)
     {
-        if(nowobject->getSort()==SORT_FARMER)
+        if( object_click== NULL )
         {
-            if( g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]] == NULL )
+            if( nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY )
             {
                 suspendRelation(nowobject);
                 addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
             }
-
             mouseEvent->mouseEventType=NULL_MOUSEEVENT;
         }
+        else if( object_click->getSort() == SORT_ANIMAL)
+        {
+            if(nowobject->getSort() == SORT_FARMER)
+            {
+                suspendRelation(nowobject);
+                addRelation(nowobject , object_click , CoreEven_Attacking );    //实际为需要击杀的采集，暂用攻击代替
+            }
+            else if( nowobject->getSort() == SORT_ARMY)
+            {
+                suspendRelation(nowobject);
+                addRelation(nowobject , object_click , CoreEven_Attacking );
+            }
+        }
+
     }
 }
 //后续编写，用于处理AI指令
@@ -399,6 +413,8 @@ void Core::object_Attack(Coordinate* object1 ,Coordinate* object2)
     //受攻击者指针赋值(object2强制转换)
     object2->printer_ToBloodHaver((void**)&attackee);
 
+
+
     if(attackee != NULL && attacker!=NULL)  //若指针均非空
     {
         if(normalAttack)
@@ -503,6 +519,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     {
         BloodHaver* attacker = NULL;
         object1->printer_ToBloodHaver((void**)attacker);
+        attacker->setAttackObject(relation.goalObject);
         return isNegation ^ (countdistance(object1->getDR(),object1->getUR(),relation.DR_goal,relation.UR_goal)<= attacker->getDis_attack());
     }
 

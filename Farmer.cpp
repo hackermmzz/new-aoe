@@ -86,3 +86,27 @@ void Farmer::setNowRes()
 
     nowres = nowlist->begin();
 }
+
+double Farmer::getDis_attack()
+{
+    double dis;
+
+
+    dis = dis_Attack;
+
+    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
+    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type,armyClass,get_AttackType() ) )*BLOCKSIDELENGTH;
+
+    return dis;
+
+}
+
+int Farmer::get_AttackType()
+{
+    if(attackObject != NULL && attackObject->getSort() == SORT_ANIMAL)
+    {
+        if(attackObject->Num == ANIMAL_TREE || attackObject->Num == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
+        else return ATTACKTYPE_SHOOT;
+    }
+    return ATTACKTYPE_CLOSE;
+}
