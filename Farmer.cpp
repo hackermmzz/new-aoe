@@ -91,11 +91,11 @@ double Farmer::getDis_attack()
 {
     double dis;
 
-
-    dis = dis_Attack;
+    if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
+    else dis = 0;
 
     if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
-    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type,armyClass,get_AttackType() ) )*BLOCKSIDELENGTH;
+    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
 
@@ -105,7 +105,7 @@ int Farmer::get_AttackType()
 {
     if(attackObject != NULL && attackObject->getSort() == SORT_ANIMAL)
     {
-        if(attackObject->Num == ANIMAL_TREE || attackObject->Num == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
+        if(attackObject->getNum() == ANIMAL_TREE || attackObject->getNum() == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
         else return ATTACKTYPE_SHOOT;
     }
     return ATTACKTYPE_CLOSE;
