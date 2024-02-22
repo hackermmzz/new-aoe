@@ -20,8 +20,7 @@ public:
     bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
     /***************指针强制转化****************/
     //若要将Farmer类指针转化为父类指针,务必用以下函数!
-    void printer_ToBloodHaver(void** ptr){ *ptr;
-                                           dynamic_cast<BloodHaver*>(this);
+    void printer_ToBloodHaver(void** ptr){
         *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
@@ -123,7 +122,11 @@ public:
     double getResourceNowHave(){ return resource; }
     int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
     int getResourceSort(){ return resourceSort; }
+    double get_quantityGather(){ return quantity_GatherOnce; }
     void setState( int state ){ this->state = state; }
+    void set_ResourceSort( int sort ){ this->resourceSort = sort; }
+    void update_addResource(){ resource+=quantity_GatherOnce; }
+    void update_resourceClear(){ resource = 0; }
 
 private:
     int state;
@@ -159,8 +162,10 @@ private:
     double resource;
     //当前资源携带量
 
-    int resource_Max;
+    int resource_Max = 10;
     //最大资源携带量
+
+    double quantity_GatherOnce = 0.2;
 
     int resourceSort;
     //指示所携带资源的类型

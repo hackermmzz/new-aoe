@@ -43,12 +43,14 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
     }
     if(Foundation==FOUNDATION_MIDDLE)
     {
+        BlockSizeLen = SIZELEN_MIDDLE;
         this->DR=(BlockDR+1.5)*BLOCKSIDELENGTH;
         this->UR=(BlockUR+1.5)*BLOCKSIDELENGTH;
         this->SideLength=3*BLOCKSIDELENGTH;
     }
     if(Foundation==FOUNDATION_BIG)
     {
+        BlockSizeLen = SIZELEN_BIG;
         this->DR=(BlockDR+2)*BLOCKSIDELENGTH;
         this->UR=(BlockUR+2)*BLOCKSIDELENGTH;
         this->SideLength=4*BLOCKSIDELENGTH;

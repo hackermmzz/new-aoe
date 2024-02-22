@@ -383,20 +383,28 @@
 #define CoreEven_FixBuilding 5
 
 //####对一个关系事件，细节关系的最大数量
-#define CoreDetailLinkMaxNum 11
+#define CoreDetailLinkMaxNum 14
 //####细节环节名称
 #define CoreDetail_NormalEnd -1
 #define CoreDetail_AbsoluteEnd -2
+#define CoreDetail_JumpPhase -3
 #define CoreDetail_Move 0
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
 #define CoreDetail_ResourceIn 3
+#define CoreDetail_FindNextGoal 4
 
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 0
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
+#define OPERATECON_MOVEALTER 200
+#define OPERATECHANGE_ALTER 100
 #define OPERATECON_NEAR_ATTACK 10001
+#define OPERATECON_NEAR_WORK 10002
+#define OPERATECON_NEARALTER_ABSOLUTE 20000
+#define OPERATECON_NEARALTER_WORK 20002
+
 //####指定对象
 #define OPERATECON_OBJECT1 10011
 #define OPERATECON_OBJECT2 10012
@@ -405,6 +413,11 @@
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
+
+/********** 占地边长-块坐标常量 **********/
+#define SIZELEN_SMALL 1
+#define SIZELEN_MIDDLE 2
+#define SIZELEN_BIG 4
 
 /********** 攻击方式 **********/
 #define ATTACKTYPE_CANTATTACK -1

@@ -238,6 +238,8 @@ struct relation_Object
     int relationAct;
     int nowPhaseNum = 0;
     double DR_goal,UR_goal , DR_alter , UR_alter;
+    double BlockDR_contrl , BlockUR_contrl;
+    double distance_AllowWork;
 
     relation_Object()
     {
@@ -259,34 +261,36 @@ struct relation_Object
         this->UR_goal = UR_goal;
         relationAct = eventClass;
     }
+
+    void set_distance_AllowWork( double sizeLen ){ distance_AllowWork = sizeLen/2.0 + 0.2; }
 };
 
 struct conditionF
 {
     int variableArgu;
     bool isNegation;
-    bool (*condition)( Coordinate* , relation_Object & , int , bool);
+    bool (*condition)( Coordinate* , relation_Object & , int& , bool);
 
     conditionF()
     {
 
     }
 
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int,bool))
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int& ,bool))
     {
         condition = func;
         variableArgu = OPERATECON_DEFAULT;
         isNegation = false;
     }
 
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int , bool) , int variableArgu)
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int& , bool) , int variableArgu)
     {
         condition = func;
         this->variableArgu = variableArgu;
         isNegation = false;
     }
 
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int, bool) , int variableArgu , bool isNegation)
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int& , bool) , int variableArgu , bool isNegation)
     {
         condition = func;
         this->variableArgu = variableArgu;
@@ -353,6 +357,8 @@ struct detail_EventPhase
         else return false;
     }
 
+    void setJump( int beginPhase, int endPhase ){ changeLinkedList[beginPhase] = endPhase; }
+
     bool isLoop( int phase){ return phase<phaseAmount && phase>changeLinkedList[phase]; }
     //判断phase是否是loopEndPhase，是否需要loop中止判断
     //由于map对未在表内的键值自己设初值，可能会造成bug
@@ -407,6 +413,10 @@ void loadBlackRes(std::list<ImageResource>* res,std::list<ImageResource>* blackr
 void flipResource(std::list<ImageResource> *currentlist,std::list<ImageResource> *targetlist);
 void initMemory(ImageResource *res);
 double countdistance(double L,double U,double L0,double U0);
+bool inSqure( double DR_D , double DR_U , double UR_D , double UR_U , double DR , double UR );
+
+bool inSqure_FromBcPoint( double BlockDR_c , double BlockUR_c , double Bsizelen , double DR , double UR );
+
 int calculateManhattanDistance(int x1, int y1, int x2, int y2);
 
 
