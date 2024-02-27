@@ -21,10 +21,23 @@ public:
 
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
-
+    static std::string getStaticResDisplayName(int num)
+    {
+        return StaticResDisplayName[num];
+    }
+    static std::string getStaticResName(int num)
+    {
+        return StaticResname[num];
+    }
+    double getCnt()
+    {
+        return this->Cnt;
+    }
 private:
     void setAttribute();
-
+    static std::string StaticResDisplayName[3];
+    static std::string StaticResname[3];
+    double Cnt;
 };
 
 #endif // STATICRES_H

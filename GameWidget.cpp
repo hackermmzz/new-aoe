@@ -162,7 +162,18 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
         mainwidget->mouseEvent->mouseEventType=LEFT_PRESS;
         mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
         mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
-
+        if(buildMode >= 0){
+            int hoverDR = (tranDR(event->x(), event->y()) + DR) / BLOCKSIDELENGTH;
+            int hoverUR = (tranUR(event->x(), event->y()) + UR) / BLOCKSIDELENGTH;
+            if(buildMode == 1 || buildMode == 3 || buildMode == 4 || buildMode == 5)
+            {
+                hoverDR--;
+                hoverUR--;
+            }
+            emit sendView(hoverDR, hoverUR, buildMode);
+            buildMode = -1;
+            QApplication::restoreOverrideCursor();
+        }
     }
     else if(event->button()==Qt::RightButton)
     {
@@ -338,3 +349,7 @@ void GameWidget::UpdateData()
 
 }
 
+void GameWidget::setBuildMode(int buildMode)
+{
+    this->buildMode = buildMode;
+}

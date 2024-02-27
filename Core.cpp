@@ -1,5 +1,5 @@
 ﻿#include "Core.h"
-
+#include "SelectWidget.h"
 //****************************************************************************************
 //关系函数定义
 //永否
@@ -232,7 +232,8 @@ void Core::manageMouseEvent()
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
         nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
-
+//        emit clickOnObject();
+        sel->initActs();
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;
     }
     if(mouseEvent->mouseEventType==RIGHT_PRESS&&nowobject!=NULL)
