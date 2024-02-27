@@ -34,66 +34,75 @@ Core::Core()
 
     //添加静态表
     //行动：只移动*************************************
-    phaseList = new int(CoreDetail_Move);
-    conditionList = new ( conditionF )( conditionF(condition_ObjectNearby) );
-    forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
-    forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
+    {
+        phaseList = new int(CoreDetail_Move);
+        conditionList = new ( conditionF )( conditionF(condition_ObjectNearby) );
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
 
-    relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
-    relation_Event_static[CoreEven_JustMoveTo].setEnd_Absolute();
-    delete phaseList;
-    delete conditionList;
-    forcedInterrupCondition.clear();
+        relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
+        relation_Event_static[CoreEven_JustMoveTo].setEnd_Absolute();
+        delete phaseList;
+        delete conditionList;
+        forcedInterrupCondition.clear();
+    }
+
 
     //行动: 攻击*************************************
-    phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-    conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
-    forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
+    {
+        phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
 
-    relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList , forcedInterrupCondition );
-    overCondition.push_back(conditionF( condition_UniObjectDie, OPERATECON_OBJECT2 ));
-    relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);   //向前跳转使用setLoop
+        relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList , forcedInterrupCondition );
+        overCondition.push_back(conditionF( condition_UniObjectDie, OPERATECON_OBJECT2 ));
+        relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);   //向前跳转使用setLoop
 
-    delete phaseList;
-    delete conditionList;
-    forcedInterrupCondition.clear();
-    overCondition.clear();
+        delete phaseList;
+        delete conditionList;
+        forcedInterrupCondition.clear();
+        overCondition.clear();
+    }
+
 
     //行动：采集_需攻击*************************************
-    phaseList = new int[12]{ /*0前往攻击目标*/CoreDetail_Move ,/*1攻击*/CoreDetail_Attack ,       /*2*/CoreDetail_JumpPhase ,\
-                           /*3前往资源建筑*/CoreDetail_Move ,  /*4资源放置*/CoreDetail_ResourceIn, /*5前往资源*/CoreDetail_Move,\
-                           /*6采集*/CoreDetail_Gather,        /*7找同类*/CoreDetail_FindNextGoal,/*8*/CoreDetail_JumpPhase ,\
-                           /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move};
-    conditionList = new conditionF[12]{ \
-            /*0*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,        /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
-            /*2*/conditionF(condition_AllTrue) ,                                    /*3*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
-            /*4*/conditionF(condition_Object1_FullBackpack,OPERATECON_OBJECT1,true),/*5*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
-            /*6*/conditionF(condition_Object1_FullBackpack) ,                       /*7*/conditionF(condition_TimesFalse,1),\
-            /*8*/conditionF(condition_AllTrue) ,                                    /*9*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK),\
-            /*10*/conditionF(condition_Object1_FullBackpack,OPERATECON_OBJECT1,true),/*11*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK)};
+    {
+        phaseList = new int[12]{ /*0前往攻击目标*/CoreDetail_Move ,/*1攻击*/CoreDetail_Attack ,       /*2*/CoreDetail_JumpPhase ,\
+                               /*3前往资源建筑*/CoreDetail_Move ,  /*4资源放置*/CoreDetail_ResourceIn, /*5前往资源*/CoreDetail_Move,\
+                               /*6采集*/CoreDetail_Gather,        /*7找同类*/CoreDetail_FindNextGoal,/*8*/CoreDetail_JumpPhase ,\
+                               /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move};
+        conditionList = new conditionF[12]{ \
+                /*0*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,        /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
+                /*2*/conditionF(condition_AllTrue) ,                                    /*3*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
+                /*4*/conditionF(condition_Object1_FullBackpack,OPERATECON_OBJECT1,true),/*5*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
+                /*6*/conditionF(condition_Object1_FullBackpack) ,                       /*7*/conditionF(condition_TimesFalse,1),\
+                /*8*/conditionF(condition_AllTrue) ,                                    /*9*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK),\
+                /*10*/conditionF(condition_Object1_FullBackpack,OPERATECON_OBJECT1,true),/*11*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK)};
 
-    forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
-    forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
 
-    relation_Event_static[CoreEven_Gather_NeedAttack] = detail_EventPhase(12,phaseList, conditionList,forcedInterrupCondition);
-    //设置循环，0->1，攻击猎物直至可采集
-    overCondition.push_back(conditionF(condition_Object2CanbeGather));
-    relation_Event_static[CoreEven_Gather_NeedAttack].setLoop(0,1,overCondition);
-    overCondition.clear();
-    //设置循环，3->6，持续采集，目标无资源不可采集
-    overCondition.push_back(conditionF(condition_Object2CanbeGather,OPERATECON_OBJECT2,true));
-    relation_Event_static[CoreEven_Gather_NeedAttack].setLoop(3,6,overCondition);
-    overCondition.clear();
-    //设置循环，0->8，持续工作，直至视野内无同类资源
-    overCondition.push_back(conditionF(condition_UniObjectNULL,OPERATECON_OBJECT2));
-    relation_Event_static[CoreEven_Gather_NeedAttack].setLoop(0,8,overCondition);
-    //猎物可采集后，跳转至前往资源
-    relation_Event_static[CoreEven_Gather_NeedAttack].setJump(2,5);
+        relation_Event_static[CoreEven_Gather_NeedAttack] = detail_EventPhase(12,phaseList, conditionList,forcedInterrupCondition);
+        //设置循环，0->1，攻击猎物直至可采集
+        overCondition.push_back(conditionF(condition_Object2CanbeGather));
+        relation_Event_static[CoreEven_Gather_NeedAttack].setLoop(0,1,overCondition);
+        overCondition.clear();
+        //设置循环，3->6，持续采集，目标无资源不可采集
+        overCondition.push_back(conditionF(condition_Object2CanbeGather,OPERATECON_OBJECT2,true));
+        relation_Event_static[CoreEven_Gather_NeedAttack].setLoop(3,6,overCondition);
+        overCondition.clear();
+        //设置循环，0->8，持续工作，直至视野内无同类资源
+        overCondition.push_back(conditionF(condition_UniObjectNULL,OPERATECON_OBJECT2));
+        relation_Event_static[CoreEven_Gather_NeedAttack].setLoop(0,8,overCondition);
+        //猎物可采集后，跳转至前往资源
+        relation_Event_static[CoreEven_Gather_NeedAttack].setJump(2,5);
 
-    delete phaseList;
-    delete conditionList;
-    forcedInterrupCondition.clear();
-    overCondition.clear();
+        delete phaseList;
+        delete conditionList;
+        forcedInterrupCondition.clear();
+        overCondition.clear();
+    }
+
 
 }
 
@@ -347,11 +356,19 @@ bool Core::addRelation( Coordinate * object1, Coordinate * object2, int eventTyp
         relate_AllObject[object1].UR_goal = object2->getUR();
         relate_AllObject[object1].sort = object2->getSort();
 
-        if(eventType == CoreEven_Gather_NeedAttack)
+        if(eventType == CoreEven_Gather_NeedAttack || eventType == CoreEven_Gather_DisNeedAttack)
         {
-            relate_AllObject[object1].BlockDR_contrl = object2->get_BlockDR_contrl();
-            relate_AllObject[object1].BlockUR_contrl = object2->get_BlockUR_contrl();
-            relate_AllObject[object1].set_distance_AllowWork(object2->get_BlockSizeLen());
+            if(object2->getSort() == SORT_ANIMAL && object2->getNum() != ANIMAL_TREE && object2->getNum()!= ANIMAL_FOREST)
+            {
+                relate_AllObject[object1].DR_centre = object2->getDR();
+                relate_AllObject[object1].UR_centre = object2->getUR();
+            }
+            else
+            {
+                relate_AllObject[object1].DR_centre = object2->get_BlockDR_centre()*BLOCKSIDELENGTH;
+                relate_AllObject[object1].UR_centre = object2->get_BlockUR_centre()*BLOCKSIDELENGTH;
+            }
+            relate_AllObject[object1].set_distance_AllowWork(object2->get_BlockSizeLen()*BLOCKSIDELENGTH);
         }
 
         return true;
@@ -389,6 +406,7 @@ void Core::manageRelationList()
         if( thisRelation.isExist )
         {
             int& nowPhaseNum = thisRelation.nowPhaseNum;
+            int exePhaseNum = nowPhaseNum;
             detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
             object2 = thisRelation.goalObject;
             conditionF* recordCondition;
@@ -425,28 +443,31 @@ void Core::manageRelationList()
 
 
             //实际执行行动
-            switch (thisDetailEven.phaseList[nowPhaseNum])
+            if(nowPhaseNum == exePhaseNum)  //nowphase变化后，放置提前行动。变化后的行动在下一帧开始做
             {
-            case CoreDetail_Move:
-                if(thisRelation.isUseAlterGoal)object_Move(object1 , thisRelation.DR_alter , thisRelation.UR_alter);
-                else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
-                break;
-            case CoreDetail_Attack:
-                object_Attack(object1,object2);
-                break;
-            case CoreDetail_Gather:
-                object_Gather(object1,object2);
-                break;
-            case CoreDetail_ResourceIn:
-                break;
-            case CoreDetail_NormalEnd:
-                iter = object_FinishAction(iter);
-                continue;
-            case CoreDetail_AbsoluteEnd:
-                iter = object_FinishAction_Absolute(iter);
-                continue;
-            default:
-                break;
+                switch (thisDetailEven.phaseList[nowPhaseNum])
+                {
+                case CoreDetail_Move:
+                    if(thisRelation.isUseAlterGoal)object_Move(object1 , thisRelation.DR_alter , thisRelation.UR_alter);
+                    else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
+                    break;
+                case CoreDetail_Attack:
+                    object_Attack(object1,object2);
+                    break;
+                case CoreDetail_Gather:
+                    object_Gather(object1,object2);
+                    break;
+                case CoreDetail_ResourceIn:
+                    break;
+                case CoreDetail_NormalEnd:
+                    iter = object_FinishAction(iter);
+                    continue;
+                case CoreDetail_AbsoluteEnd:
+                    iter = object_FinishAction_Absolute(iter);
+                    continue;
+                default:
+                    break;
+                }
             }
             iter++;
         }
@@ -640,7 +661,8 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
         }
             break;
         case OPERATECON_NEAR_WORK:
-            if( inSqure_FromBcPoint(relation.BlockDR_contrl,relation.BlockUR_contrl,relation.distance_AllowWork,object1->getDR() , object1->getUR()))
+
+            if( inSqure_FromBcPoint(relation.DR_centre,relation.UR_centre,relation.distance_AllowWork,object1->getDR() , object1->getUR()))
                 return isNegation^true;
             break;
         default:

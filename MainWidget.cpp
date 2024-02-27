@@ -67,8 +67,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
         connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
-        player[0]->addBuilding(0,30,30);
+        player[0]->addBuilding(BUILDING_CENTER,30,30);
         player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+
 
     }
 

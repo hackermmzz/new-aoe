@@ -416,11 +416,11 @@ bool inSqure( double DR_D , double DR_U , double UR_D , double UR_U , double DR 
 {
     return (DR_D - DR)*(DR_U-DR)<=0 && (UR_D-UR)*(UR_U - UR)<=0;
 }
-bool inSqure_FromBcPoint( double BlockDR_c , double BlockUR_c , double Bsizelen , double DR , double UR )
+bool inSqure_FromBcPoint( double DR_c , double UR_c , double dislen , double DR , double UR )
 {
-    double BDR_D = BlockDR_c - Bsizelen , BDR_U = BlockDR_c+Bsizelen;
-    double BUR_D = BlockUR_c - Bsizelen , BUR_U = BlockUR_c + Bsizelen;
-    return inSqure( BDR_D*BLOCKSIDELENGTH , BDR_U*BLOCKSIDELENGTH , BUR_D*BLOCKSIDELENGTH , BUR_U*BLOCKSIDELENGTH ,DR , UR );
+    double DR_D = DR_c - dislen , DR_U = DR_c+dislen;
+    double UR_D = UR_c - dislen , UR_U = UR_c + dislen;
+    return inSqure( DR_D , DR_U , UR_D , UR_U ,DR , UR );
 }
 
 

@@ -238,7 +238,7 @@ struct relation_Object
     int relationAct;
     int nowPhaseNum = 0;
     double DR_goal,UR_goal , DR_alter , UR_alter;
-    double BlockDR_contrl , BlockUR_contrl;
+    double DR_centre , UR_centre;
     double distance_AllowWork;
 
     relation_Object()
@@ -415,7 +415,7 @@ void initMemory(ImageResource *res);
 double countdistance(double L,double U,double L0,double U0);
 bool inSqure( double DR_D , double DR_U , double UR_D , double UR_U , double DR , double UR );
 
-bool inSqure_FromBcPoint( double BlockDR_c , double BlockUR_c , double Bsizelen , double DR , double UR );
+bool inSqure_FromBcPoint( double DR_c , double UR_c , double dislen , double DR , double UR );
 
 int calculateManhattanDistance(int x1, int y1, int x2, int y2);
 

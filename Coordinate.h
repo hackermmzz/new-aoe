@@ -64,9 +64,10 @@ public:
         return this->Num;
     }
 
-    double get_BlockDR_contrl(){ return BlockDR+BlockSizeLen/2.0; }
-    double get_BlockUR_contrl(){ return BlockUR+BlockSizeLen/2.0;}
+    double get_BlockDR_centre(){ return BlockDR+BlockSizeLen/2.0; }
+    double get_BlockUR_centre(){ return BlockUR+BlockSizeLen/2.0;}
     double get_BlockSizeLen(){ return BlockSizeLen; }
+    double get_SideLen(){return SideLength;}
 
 protected:
 
