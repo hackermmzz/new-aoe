@@ -10,12 +10,12 @@ Player::~Player()
     delete playerScience;
 }
 
-int Player::addBuilding(int Num, int BlockDR, int BlockUR)
+Building* Player::addBuilding(int Num, int BlockDR, int BlockUR)
 {
     Building *newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization);
     newbuilding->setPlayerScience(playerScience);
     build.push_back(newbuilding);
-    return 0;
+    return newbuilding;
 }
 
 int Player::addHuman(int Num, double DR, double UR)

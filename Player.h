@@ -11,7 +11,7 @@ public:
     Player();
     ~Player();
 
-    int addBuilding(int Num,int BlockDR,int BlockUR);
+    Building* addBuilding(int Num,int BlockDR,int BlockUR);
 
     int addHuman(int Num,double DR,double UR);
 
