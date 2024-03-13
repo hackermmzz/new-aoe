@@ -4,6 +4,24 @@
 int g_globalNum=1;
 std::map<int,Coordinate*> g_Object;
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
+std::map<int, std::string> actNames = {
+    {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
+    {ACT_UPGRADE_AGE, ACT_UPGRADE_AGE_NAME},
+    {ACT_UPGRADE_TOWERBUILD, ACT_UPGRADE_TOWERBUILD_NAME},
+    {ACT_UPGRADE_WOOD, ACT_UPGRADE_WOOD_NAME},
+    {ACT_UPGRADE_STONE, ACT_UPGRADE_STONE_NAME},
+    {ACT_UPGRADE_FARM, ACT_UPGRADE_FARM_NAME},
+    {ACT_STOP, ACT_STOP_NAME},
+    {ACT_BUILD, ACT_BUILD_NAME},
+    {ACT_BUILD_HOUSE, ACT_BUILD_HOUSE_NAME},
+    {ACT_BUILD_GRANARY, ACT_BUILD_GRANARY_NAME},
+    {ACT_BUILD_STOCK, ACT_BUILD_STOCK_NAME},
+    {ACT_BUILD_CANCEL, ACT_BUILD_CANCEL_NAME},
+    {ACT_BUILD_FARM, ACT_BUILD_FARM_NAME},
+    {ACT_BUILD_MARKET, ACT_BUILD_MARKET_NAME},
+    {ACT_BUILD_ARROWTOWER, ACT_BUILD_ARROWTOWER_NAME},
+    {ACT_NULL, ACT_NULL_NAME}
+};
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -25,24 +43,41 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
 
     SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
-    sel->show();
     sel->move(20, 810);
+    sel->show();
+
     ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8};
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         acts[i] = acts_[i];
         acts[i]->setStatus(0);
         acts[i]->setNum(i);
-//        acts[i]->hide();
+        acts[i]->hide();
         acts[i]->setAttribute(Qt::WA_Hover, true);
         acts[i]->installEventFilter(this);
     }
+    connect(ui->interact1,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact2,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact3,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact4,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact5,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact6,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact7,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact8,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->Game,SIGNAL(sendView(int,int,int)),sel,SLOT(getBuild(int,int,int)));
+    connect(sel,SIGNAL(sendBuildMode(int)),ui->Game,SLOT(setBuildMode(int)));
     // 设定游戏计时器
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
     timer->start(40);
     //    connect(timer,&QTimer::timeout,this,&MainWidget::setShowTimeFrame);
-
+    showTimer=new QTimer(this);
+    showTimer->setTimerType(Qt::PreciseTimer);
+    showTimer->start(1000);
+    connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
+    connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
+//    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
+    core->sel = sel;
     // 游戏帧数初始化
     gameframe = 0;
 
@@ -68,6 +103,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
         connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
         player[0]->addBuilding(0,30,30);
+        player[0]->addBuilding(BUILDING_CENTER, 33, 33);
         player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
     }
@@ -410,4 +446,32 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
         core->gameUpdate(map,player,memorymap,mouseEvent);
         emit mapmove();
         return;
+    }
+
+    bool MainWidget::eventFilter(QObject *watched, QEvent *event)
+    {
+        for(int i = 0; i < 10; i++)
+        {
+            if(watched == acts[i] && !acts[i]->isHidden()) {
+                if(event->type() == QEvent::HoverEnter) {
+                    ui->tipLbl->setText(QString::fromStdString(actNames[acts[i]->getActName()]));
+                    if(acts[i]->getStatus() != 2)
+                    {
+                        acts[i]->setStatus(0);
+                        acts[i]->update();
+                    }
+                }
+                else if(event->type() == QEvent::MouseButtonRelease && acts[i]->getStatus() != 2){
+                    acts[i]->setStatus(0);
+                }
+                else if(event->type() == QEvent::MouseButtonPress && acts[i]->getStatus() != 2){
+                    acts[i]->setStatus(1);
+                }
+                else if(event->type() == QEvent::HoverLeave && acts[i]->getStatus() != 2)
+                {
+                    ui->tipLbl->setText("");
+                }
+            }
+        }
+        return QWidget::eventFilter(watched,event);
     }

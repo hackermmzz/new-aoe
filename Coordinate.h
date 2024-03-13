@@ -63,7 +63,42 @@ public:
     {
         return this->Num;
     }
-
+    double getActPercent()
+    {
+        return this->actPercent;
+    }
+    double getActSpeed()
+    {
+        return this->actSpeed;
+    }
+    void setActName(int actName)
+    {
+        this->actName = actName;
+    }
+    int getActName()
+    {
+        return this->actName;
+    }
+    void setActSpeed(double actSpeed)
+    {
+        this->actSpeed = actSpeed;
+    }
+    void setActPercent(double actPercent)
+    {
+        this->actPercent = actPercent;
+    }
+    void updatePercent()
+    {
+        this->setActPercent(actPercent + actSpeed);
+    }
+    int getActNum()
+    {
+        return this->actNum;
+    }
+    void setActNum(int actNum)
+    {
+        this->actNum = actNum;
+    }
 protected:
 
     int Num;//对象在对应类中的编号
@@ -101,6 +136,12 @@ protected:
 
     std::list<ImageResource>::iterator nowres;
 
+    double actPercent = 0;
+    double actSpeed = 0;
+    int actName = 0;
+    //执行行动时的进度、速率和行动类型
+    int actNum=0;
+    //动作类型的编号
 };
 
 #endif // COORDINATE_H

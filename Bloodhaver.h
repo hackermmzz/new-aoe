@@ -30,8 +30,8 @@ public:
     void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); }
 
 protected:
-    double Blood;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
-    int MaxBlood;
+    double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
+    int MaxBlood = 100;
 
     //攻击相关
     Coordinate* attackObject = NULL;    //攻击目标
