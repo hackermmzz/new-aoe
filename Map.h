@@ -37,7 +37,7 @@ public:
     int addAnimal(int Num,double DR,double UR);
 
     int loadResource();
-    
+
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
 
@@ -49,9 +49,10 @@ public:
     int findPathMap[72][72];
 
 private:
-    void GenerateTerrain();     // 用于生成地形（Block高度差）
+    void GenerateTerrain();     // 用于生成地形高度（Block高度）
+    void GenerateType();        // 依据高度生成地形图Block种类
+    void CalOffset();           // 计算每个Block的偏移量
     double smooth(double x);    // 用于平滑地图曲线
-    void clearData();           // 用于清空所有地图创建时所建立的临时变量
 
 };
 
