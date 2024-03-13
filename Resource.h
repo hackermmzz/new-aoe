@@ -9,14 +9,13 @@ public:
 
     bool get_Gatherable(){return gatherable;}
     int get_ResourceSort(){ return resourceSort; }
-    int get_Cnt(){ return (int)(Cnt*MaxCnt); }
-    void set_Gatherable(bool gatherable){this->gatherable = gatherable;}
-    void updateCnt_byGather( double gather){  Cnt -= gather/MaxCnt ;}
-    void updateCnt_byDecay(){ Cnt-=DecayRate; }
+    int get_Cnt(){ return (int)Cnt; }
+    void updateCnt_byGather( double gather){  Cnt -= gather ;}
+    void updateCnt_byDecay(){ Cnt*=(1-DecayRate); }
     bool isGather_finish(){ return Cnt<=0; }
 
 protected:
-    double Cnt = 1;
+    double Cnt; //Cnt表示当前剩余的实际资源量
 
     int MaxCnt;
 

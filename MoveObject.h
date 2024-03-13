@@ -75,7 +75,9 @@ public:
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
-    bool isWalking(){return this->nowstate==1;}
+    bool isWalking(){return this->nowstate==MOVEOBJECT_STATE_WALK;}
+    bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
+    bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
     void updateMove();
 
     void calculateDiretionArray(stack<Point>& path);
@@ -209,9 +211,12 @@ public:
     {
         this->prestate=1;
     }
+    void setPreDie(){ this->prestate = MOVEOBJECT_STATE_DIE; }
+    void setPreWork(){ this->prestate = MOVEOBJECT_STATE_WORK; }
     void setNowState(int PreState)
     {
         this->nowstate=PreState;
+        this->setNowRes();
     }
     void setPreStateIsIdle()
     {
@@ -229,7 +234,7 @@ public:
     {
         return this->UR0;
     }
-
+    bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

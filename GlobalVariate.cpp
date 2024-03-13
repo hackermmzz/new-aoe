@@ -412,6 +412,17 @@ double countdistance(double L, double U, double L0, double U0)
 {
     return sqrt((L-L0)*(L-L0)+(U-U0)*(U-U0));
 }
+bool inSqure( double DR_D , double DR_U , double UR_D , double UR_U , double DR , double UR )
+{
+    return (DR_D - DR)*(DR_U-DR)<=0 && (UR_D-UR)*(UR_U - UR)<=0;
+}
+bool inSqure_FromBcPoint( double DR_c , double UR_c , double dislen , double DR , double UR )
+{
+    double DR_D = DR_c - dislen , DR_U = DR_c+dislen;
+    double UR_D = UR_c - dislen , UR_U = UR_c + dislen;
+    return inSqure( DR_D , DR_U , UR_D , UR_U ,DR , UR );
+}
+
 
 void flipResource(std::list<ImageResource> *currentlist, std::list<ImageResource> *targetlist)
 {

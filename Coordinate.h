@@ -1,4 +1,4 @@
-﻿#ifndef COORDINATE_H
+#ifndef COORDINATE_H
 #define COORDINATE_H
 
 #include <QPixmap>
@@ -63,6 +63,12 @@ public:
     {
         return this->Num;
     }
+
+    double get_BlockDR_centre(){ return BlockDR+BlockSizeLen/2.0; }
+    double get_BlockUR_centre(){ return BlockUR+BlockSizeLen/2.0;}
+    double get_BlockSizeLen(){ return BlockSizeLen; }
+    double get_SideLen(){return SideLength;}
+
     double getActPercent()
     {
         return this->actPercent;
@@ -115,6 +121,8 @@ protected:
 
     double imageX;//该物体的长宽（即占地面积）
     double imageY;//需要根据占地大小来就算确切的绘制偏移量
+
+    double BlockSizeLen = SIZELEN_SMALL; //物体占地,块坐标， 如小房子，为1，中型房子为2，动物为1
 
     double SideLength;
     //占地大小转换成游戏内坐标 边长
