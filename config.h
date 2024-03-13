@@ -67,19 +67,38 @@
 #define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
 
 /********** 地图块种类 **********/
-#define MAPTYPE_FLAT 0      // 平地
-#define MAPTYPE_L0_UPTOLU 1 // L0边（向左上方凸起）
-#define MAPTYPE_L2_UPTOLU 2 // L2边（向左上方凸起，同L0）
+/* L0边为右上角，L0到L3顺时针排列 */
+/* A0边为上方角，A0到A3顺时针排列 */
+#define MAPTYPE_EMPTY 0         // 未定义种类
+#define MAPTYPE_FLAT 1          // 平地
+#define MAPTYPE_A2_UPTOU 2      // A2角（向上方凸起）
+#define MAPTYPE_A0_DOWNTOD 3    // A0角（向下方凹陷）
+#define MAPTYPE_L1_UPTOLU 4     // L1边（向左上凸起）
+#define MAPTYPE_L3_DOWNTORD 4   // L3边（向右下凹陷）
+#define MAPTYPE_L0_DOWNTOLD 5   // L0边（向左下凹陷）
+#define MAPTYPE_L2_UPTORU 5     // L2边（向右上凸起）
+#define MAPTYPE_A1_UPTOL 6      // A1角（向左方凸起）
+#define MAPTYPE_A3_UPTOR 7      // A3角（向右方凸起）
+#define MAPTYPE_A1_DOWNTOL 8    // A1角（向左方凹陷）
+#define MAPTYPE_A3_DOWNTOR 9    // A3角（向右方凹陷）
+#define MAPTYPE_L0_UPTOLD 10    // L0边（向左下凸起）
+#define MAPTYPE_L2_DOWNTORU 10  // L2边（向右上凹陷）
+#define MAPTYPE_L3_UPTORD 11    // L3边（向右下凸起）
+#define MAPTYPE_L1_DOWNTOLU 11  // L1边（向左上凹陷）
+#define MAPTYPE_A2_DOWNTOU 12   // A2角（向上方凹陷）
+#define MAPTYPE_A0_UPTOD 13     // A0角（向下方凸起）
 
 /********** 地图块高度 **********/
 #define MAPHEIGHT_EMPTY 0   // 未定义高度
 #define MAPHEIGHT_FLAT 2    // 地形高度
+#define MAPHEIGHT_MAX 4     // 最高地形高度
 
 /********** 地图块样式 **********/
-#define MAPPATTERN_GRASS 0      // 草原
-#define MAPPATTERN_DESERT 1     // 沙漠
-#define MAPPATTERN_OCEAN 2      // 海洋/河流
-#define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
+#define MAPPATTERN_EMPTY 0      // 未定义样式
+#define MAPPATTERN_GRASS 1      // 草原
+#define MAPPATTERN_DESERT 2     // 沙漠
+#define MAPPATTERN_OCEAN 3      // 海洋/河流
+#define MAPPATTERN_SHOAL 4      // 浅滩（河流中可行走部分）
 
 
 /********** DebugText栏颜色 **********/

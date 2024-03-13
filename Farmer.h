@@ -118,7 +118,14 @@ public:
         delete Die[i][j];
         Die[i][j] = nullptr;
     }
-
+    std::string getDisplayName(int num)
+    {
+        return FarmerDisplayName[num];
+    }
+    int getState()
+    {
+        return state;
+    }
     double getResourceNowHave(){ return resource; }
     int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
     int getResourceSort(){ return resourceSort; }

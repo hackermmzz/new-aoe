@@ -5,8 +5,10 @@
 #include <Map.h>
 #include <Player.h>
 
+class SelectWidget;
 class Core
 {
+
 public:
     Core();
     void gameUpdate(Map* map, Player* player[], int** memorymap,MouseEvent *mouseEvent);
@@ -26,7 +28,7 @@ public:
     *传出:   true:当前对象已有关系，在关系表里
     *       false:当前对象不在表内
     */
-
+    SelectWidget *sel = nullptr;
 private:
     Map* theMap;    //地图信息
     Player** player;    //player信息
@@ -54,6 +56,9 @@ private:
     map<Coordinate* , relation_Object>::iterator object_FinishAction_Absolute(map<Coordinate* , relation_Object>::iterator);
     map<Coordinate* , relation_Object>::iterator object_FinishAction(map<Coordinate* , relation_Object>::iterator);
 
+//signals:
+//    void clickOnObject();
+    //点击对象时触发
 };
 
 #endif // CORE_H

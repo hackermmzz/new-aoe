@@ -9,6 +9,7 @@ std::string Building::Builtname[3][7]={
                                        {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower"},
                                        {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower"}
                                       };
+std::string Building::BuildDisplayName[7]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔"};
 
 Building::Building()
 {
