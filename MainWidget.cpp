@@ -106,6 +106,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
         player[0]->addBuilding(BUILDING_CENTER, 33, 33);
         player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
+
     }
 
     // MainWidget析构函数

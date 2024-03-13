@@ -12,6 +12,8 @@ public:
     BloodHaver();
 
     /***********虚函数************/
+    virtual void setPreAttack( ){ }
+    virtual bool isAttacking(){ return false;}
     virtual int getMaxBlood(){ return MaxBlood; }
 
     virtual int getATK(){ return atk; }

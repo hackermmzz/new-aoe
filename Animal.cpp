@@ -66,6 +66,7 @@ Animal::Animal(int Num, double DR, double UR)
         speed = 0;
     }
 
+    this->Cnt = this->MaxCnt;
     this->gatherable = false;
     this->Blood = 1;
 
@@ -88,13 +89,25 @@ Animal::Animal(int Num, double DR, double UR)
 
 void Animal::nextframe()
 {
-    this->nowres++;
-    if(this->nowres==nowlist->end())
+    if(isDie())
     {
-        nowres=nowlist->begin();
+        if( !isDying() )
+        {
+             setPreDie();
+             this->gatherable = true;
+        }
+        else if(!get_isActionEnd() ) nowres++;
     }
+    else
+    {
+        this->nowres++;
+        if(this->nowres==nowlist->end())
+        {
+            nowres=nowlist->begin();
+        }
 
-    updateMove();
+        updateMove();
+    }
 }
 
 int Animal::getSort()
@@ -115,7 +128,7 @@ void Animal::setNowRes()
     case 2:
         nowlist=this->Attack[this->Num][this->Angle];
         break;
-    case 3:
+    case MOVEOBJECT_STATE_DIE:
         nowlist=this->Die[this->Num][this->Angle];
         break;
     case 6:

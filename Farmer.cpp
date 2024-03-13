@@ -21,6 +21,7 @@ Farmer::Farmer(double DR, double UR)
     this->Blood=1;
     this->MaxBlood=BLOOD_FARMER;
     speed = HUMAN_SPEED;
+    this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
 
     this->Angle=rand()%8;
@@ -85,4 +86,28 @@ void Farmer::setNowRes()
     }
 
     nowres = nowlist->begin();
+}
+
+double Farmer::getDis_attack()
+{
+    double dis;
+
+    if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
+    else dis = 0;
+
+    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
+    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
+
+    return dis;
+
+}
+
+int Farmer::get_AttackType()
+{
+    if(attackObject != NULL && attackObject->getSort() == SORT_ANIMAL)
+    {
+        if(attackObject->getNum() == ANIMAL_TREE || attackObject->getNum() == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
+        else return ATTACKTYPE_SHOOT;
+    }
+    return ATTACKTYPE_CLOSE;
 }
