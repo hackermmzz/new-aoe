@@ -46,7 +46,10 @@ SOURCES += \
     SelectWidget.cpp \
     Development.cpp \
     Army.cpp \
-    Bloodhaver.cpp
+    Bloodhaver.cpp \
+    Missile.cpp \
+    Core_CondiFunc.cpp \
+    Core_List.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -70,7 +73,10 @@ HEADERS += \
     ActWidget.h \
     Development.h \
     Army.h \
-    Bloodhaver.h
+    Bloodhaver.h \
+    Missile.h \
+    Core_CondiFunc.h \
+    Core_List.h
 
 FORMS += \
         MainWidget.ui \

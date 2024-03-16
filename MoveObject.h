@@ -7,6 +7,7 @@ class MoveObject:public Coordinate
 {
 protected:
     double speed;   //移动速度
+    bool changeToRun = false;
 
     int vision; //视野
 
@@ -69,6 +70,8 @@ public:
 
     virtual double getSpeed(){ return speed; }
     virtual int getVision(){ return vision; }
+    bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
+    void resetCoreAttribute(){ changeToRun = false; }
 
     /***************指针强制转化****************/
     void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
@@ -79,6 +82,8 @@ public:
     bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
     void updateMove();
+
+    void beginRun(){ changeToRun = true; }
 
     void calculateDiretionArray(stack<Point>& path);
     int calculateAngle(double L0,double U0);
@@ -234,7 +239,7 @@ public:
     {
         return this->UR0;
     }
-    bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
+
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

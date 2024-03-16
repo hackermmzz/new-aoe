@@ -9,8 +9,8 @@
 class Animal:public MoveObject,public Resource,public BloodHaver
 {
 private:
-    int Friendly=1;
-    //友好度 1为友好 2为敌对
+    int Friendly=FRIENDLY_NULL;
+    //友好度 1为友好 2为敌对 3为中立 0为无
 
     int state;
     //对于Animal
@@ -22,6 +22,8 @@ private:
      * 4 Attacking  攻击中
      */
     
+    bool moveAble = true;
+
     //以下为图片资源
     static std::list<ImageResource> *Walk[5][8];
 
@@ -44,6 +46,7 @@ public:
     void nextframe();
     int getSort();
     void setNowRes();
+
     /***************指针强制转化****************/
     //若要将Animal类指针转化为父类指针,务必用以下函数!
 
@@ -131,6 +134,8 @@ public:
         Run[i][j] = nullptr;
     }
 
+    bool isTree(){ return moveAble;}
+    int get_Friendly(){ return Friendly; }
 };
 
 #endif // ANIMAL_H

@@ -16,6 +16,8 @@ Army::Army(double DR,double UR,int type)
     this->UR=UR;
     this->BlockDR=DR/BLOCKSIDELENGTH;
     this->BlockUR=UR/BLOCKSIDELENGTH;
+
+    setSideLenth();
     this->nextBlockDR=BlockDR;
     this->nextBlockUR=BlockUR;
     this->PredictedDR=DR;
@@ -95,7 +97,7 @@ int Army::getATK()
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
     return (int)( atkValue*playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType())) + \
-            playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType()) + get_add_specialAttack();
+            playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType());
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力

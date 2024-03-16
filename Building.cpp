@@ -35,26 +35,23 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
     {
         Foundation=FOUNDATION_MIDDLE;
     }
+
     if(Foundation==FOUNDATION_SMALL)
     {
-        this->DR=(BlockDR+1)*BLOCKSIDELENGTH;
-        this->UR=(BlockUR+1)*BLOCKSIDELENGTH;
-        this->SideLength=2*BLOCKSIDELENGTH;
+        BlockSizeLen = SIZELEN_SMALL;
     }
-    if(Foundation==FOUNDATION_MIDDLE)
+    else if(Foundation==FOUNDATION_MIDDLE)
     {
         BlockSizeLen = SIZELEN_MIDDLE;
-        this->DR=(BlockDR+1.5)*BLOCKSIDELENGTH;
-        this->UR=(BlockUR+1.5)*BLOCKSIDELENGTH;
-        this->SideLength=3*BLOCKSIDELENGTH;
     }
-    if(Foundation==FOUNDATION_BIG)
+    else if(Foundation==FOUNDATION_BIG)
     {
         BlockSizeLen = SIZELEN_BIG;
-        this->DR=(BlockDR+2)*BLOCKSIDELENGTH;
-        this->UR=(BlockUR+2)*BLOCKSIDELENGTH;
-        this->SideLength=4*BLOCKSIDELENGTH;
     }
+
+    setDetailPointAttrb_FormBlock();
+
+
     this->Percent=Percent;
     if(Percent!=100)
     {

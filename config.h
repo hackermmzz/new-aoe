@@ -151,10 +151,11 @@
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
-#define HUMAN_GRANARYFOOD 2
+#define HUMAN_STOCKFOOD 2
 #define HUMAN_STONE 3
 #define HUMAN_GOLD 4
-#define HUMAN_STOCKFOOD 5
+#define HUMAN_GRANARYFOOD 5
+
 
 /********** 动作返回编号 **********/
 /*
@@ -331,8 +332,8 @@
 
 #define FARMER_VILLAGER 0
 #define FARMER_LUMBER 1
-#define FARMER_GATHERER 2
-#define FARMER_MINER 3
+#define FARMER_GATHERER 3
+#define FARMER_MINER 2
 #define FARMER_HUNTER 4
 #define FARMER_FARMER 5
 #define FARMER_WORKER 6
@@ -377,8 +378,7 @@
 //####关系事件名称
 #define CoreEven_JustMoveTo 0
 #define CoreEven_CreatBuilding 1
-#define CoreEven_Gather_NeedAttack 2
-#define CoreEven_Gather_DisNeedAttack 3
+#define CoreEven_Gather 2
 #define CoreEven_Attacking 4
 #define CoreEven_FixBuilding 5
 
@@ -392,14 +392,16 @@
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
 #define CoreDetail_ResourceIn 3
-#define CoreDetail_FindNextGoal 4
+//#define CoreDetail_FindNextGoal 4
 
 /********** Core关系函数的可变操作指令 **********/
-#define OPERATECON_DEFAULT 0
+#define OPERATECON_DEFAULT 11111
+#define OPERATECHANGE 100
+#define OPERATECHANGE_TIME 1000
+
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
 #define OPERATECON_MOVEALTER 200
-#define OPERATECHANGE_ALTER 100
 #define OPERATECON_NEAR_ATTACK 10001
 #define OPERATECON_NEAR_WORK 10002
 #define OPERATECON_NEARALTER_ABSOLUTE 20000
@@ -409,14 +411,18 @@
 #define OPERATECON_OBJECT1 10011
 #define OPERATECON_OBJECT2 10012
 
+#define OPERATECON_TIMEONCE 00001
+#define OPERATE_TIMEMAX 10
+
 
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
 
 /********** 占地边长-块坐标常量 **********/
-#define SIZELEN_SMALL 1
-#define SIZELEN_MIDDLE 2
+#define SIZELEN_SINGEL 1
+#define SIZELEN_SMALL 2
+#define SIZELEN_MIDDLE 3
 #define SIZELEN_BIG 4
 
 /********** 攻击方式 **********/
@@ -593,6 +599,19 @@
 #define DEFCLOSE_SCOUT 0
 #define DEFSHOOT_SCOUT 0
 
+/********** animal友好度 **********/
+#define FRIENDLY_NULL 0
+#define FRIENDLY_FRI 1
+#define FRIENDLY_ENEMY 2
+#define FRIENDLY_FENCY 3
 
+
+/********** 飞行物类别 **********/
+#define Missile_Spear 1001
+#define Missile_Arrow 1002
+
+/********** 飞行物属性 **********/
+#define Missile_Speed_Spear (4*HUMAN_SPEED)
+#define Missile_Speed_Arrow (4*HUMAN_SPEED)
 
 #endif // CONFIG_H

@@ -9,6 +9,7 @@ class Player
 {
 public:
     Player();
+    Player(int);
     ~Player();
 
     int addBuilding(int Num,int BlockDR,int BlockUR);
@@ -16,6 +17,18 @@ public:
     int addHuman(int Num,double DR,double UR);
 
     int addFarmer(double DR,double UR);
+
+    list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele )
+    {
+        delete *iterDele;
+        return human.erase(iterDele);
+    }
+
+    list<Building*>::iterator deleteBuilding( list<Building*>::iterator iterDele )
+    {
+        delete *iterDele;
+        return build.erase(iterDele);
+    }
 
     //建筑池子
     std::list<Building *> build;
@@ -116,7 +129,10 @@ public:
         return this->startScores[type];
     }
 
+    void changeResource( int resourceSort , int num );
+
 private:
+    int represent;
 
     //当前文明
     int civilization=1;

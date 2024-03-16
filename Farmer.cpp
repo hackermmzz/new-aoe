@@ -31,6 +31,8 @@ Farmer::Farmer(double DR, double UR)
     this->UR=UR;
     this->BlockDR=DR/BLOCKSIDELENGTH;
     this->BlockUR=UR/BLOCKSIDELENGTH;
+
+    setSideLenth();
     this->nextBlockDR=BlockDR;
     this->nextBlockUR=BlockUR;
     this->PredictedDR=DR;
@@ -74,7 +76,10 @@ void Farmer::setNowRes()
         nowlist=this->Stand[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
-        nowlist=this->Walk[this->state][this->Angle];
+        if(get_MatchingOfResourceAndCarry() && resource != 0 && (resourceSort!=HUMAN_GRANARYFOOD||state == FARMER_FARMER ))
+            nowlist = this->Carry[this->resourceSort][this->Angle];
+        else
+            nowlist=this->Walk[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
         nowlist=this->Attack[this->state][this->Angle];

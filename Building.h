@@ -14,6 +14,7 @@ public:
   /**********************虚函数**************************/
     int getSort();
     int getMaxBlood(){ return BuildingMaxBlood[Num]; }
+    int getPlayerRepresent(){ return playerRepresent; }
 
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
@@ -63,11 +64,15 @@ public:
     {
         return actNames[num];
     }
+
     void setActNames(int num, int name)
     {
         this->actNames[num] = name;
     }
     void setPlayerScience(Development* science){ this->playerScience = science; }
+
+    void setPlayerRepresent( int represent ){ playerRepresent = represent; }
+
 
 
 private:
@@ -77,8 +82,7 @@ private:
     static std::list<ImageResource> *built[3][7];
     //建设完成的list
 
-    int Num;
-    //建筑编号
+    int playerRepresent;
 
     double Percent = 0;
     //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图

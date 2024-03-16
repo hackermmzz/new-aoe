@@ -53,7 +53,7 @@ public:
     {
         return acts[num];
     }
-    Core *core=new Core();
+    Core *core;
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];

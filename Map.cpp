@@ -784,7 +784,7 @@ int Map::addAnimal(int Num, double DR, double UR)
 
 int Map::loadResource()
 {
-    addAnimal(1,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
+    addAnimal(ANIMAL_GAZELLE,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
 //    for(int i = 0; i < MAP_U; i++)
 //    {
 //        for(int j = 0; j < MAP_L; j++)
@@ -1038,3 +1038,4 @@ void Map::init(int MapJudge)
 
     clearData();
 }
+
