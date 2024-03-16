@@ -36,7 +36,10 @@ public:
     {
         return Builtname[index1][index2];
     }
-
+    static std::string getDisplayName(int num)
+    {
+        return BuildDisplayName[num];
+    }
     static void allocatebuild(int i)
     {
         build[i]=new std::list<ImageResource>;
@@ -54,12 +57,6 @@ public:
         built[i][j] = nullptr;
     }
 
-    // 疑似没用的函数
-    int* getActions()
-    {
-//        return actions;
-    }
-
     int getActNames(int num)
     {
         return actNames[num];
@@ -69,12 +66,32 @@ public:
     {
         this->actNames[num] = name;
     }
-    void setPlayerScience(Development* science){ this->playerScience = science; }
+    int getActStatus(int num)
+    {
+        return actStatus[num];
+    }
+    void setActStatus(int num, int status)
+    {
+        this->actStatus[num] = status;
+    }
 
+    //设置科技，用于计算科技提升
+    void setPlayerScience(Development* science){ this->playerScience = science; }
+    //设置隶属player
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
-
-
+    bool isFinish()
+    {
+        return this->Percent>=100;
+    }
+    double getCnt()
+    {
+        return this->Cnt;
+    }
+    double getPercent()
+    {
+        return this->Percent;
+    }
 private:
     static std::list<ImageResource> *build[4];
     //建设list
@@ -99,10 +116,14 @@ private:
 
     static std::string Buildingname[4];
     static std::string Builtname[3][7];
+    static std::string BuildDisplayName[7];
 
-    std::string BuildDisplayName[7]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔"};
     int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
     int actNames[ACT_WINDOW_NUM_FREE] = {0};
+    int actStatus[ACT_WINDOW_NUM_FREE] = {0};
+
+    //需要优化，考虑农田直接抽一个类
+    double Cnt;
 };
 
 #endif // BUILDING_H

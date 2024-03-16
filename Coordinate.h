@@ -1,4 +1,4 @@
-﻿#ifndef COORDINATE_H
+#ifndef COORDINATE_H
 #define COORDINATE_H
 
 #include <QPixmap>
@@ -72,6 +72,48 @@ public:
 
     double get_BlockSizeLen(){ return BlockSizeLen; }
     double get_SideLen(){return SideLength;}
+
+
+/*****************act获取***************/
+//需要协商，act位置
+    double getActPercent()
+    {
+        return this->actPercent;
+    }
+    double getActSpeed()
+    {
+        return this->actSpeed;
+    }
+    void setActName(int actName)
+    {
+        this->actName = actName;
+    }
+    int getActName()
+    {
+        return this->actName;
+    }
+    void setActSpeed(double actSpeed)
+    {
+        this->actSpeed = actSpeed;
+    }
+    void setActPercent(double actPercent)
+    {
+        this->actPercent = actPercent;
+    }
+    void updatePercent()
+    {
+        this->setActPercent(actPercent + actSpeed);
+    }
+    int getActNum()
+    {
+        return this->actNum;
+    }
+    void setActNum(int actNum)
+    {
+        this->actNum = actNum;
+    }
+/*****************act获取***************/
+
 protected:
 
     int Num;//对象在对应类中的编号
@@ -111,7 +153,6 @@ protected:
 
     std::list<ImageResource>::iterator nowres;
 
-
     void setDetailPointAttrb_FormBlock()
     {
         DR = ( BlockDR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
@@ -119,6 +160,15 @@ protected:
         setSideLenth();
     }
     void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
+
+    /*****************act获取***************/
+    double actPercent = 0;
+    double actSpeed = 0;
+    int actName = 0;
+    //执行行动时的进度、速率和行动类型
+    int actNum=0;
+    //动作类型的编号
+    /*****************act获取***************/
 };
 
 #endif // COORDINATE_H

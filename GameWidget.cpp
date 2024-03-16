@@ -56,30 +56,40 @@ void GameWidget::paintEvent(QPaintEvent *)
                 y2++;
                 continue;
             }
+            // 此处以下的drawPixmap函数中，添加偏移量OffsetX/Y以对齐各地块
             if(i%2==0)
             {
                 if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)
-                    painter.drawPixmap(-32+64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
+//                    painter.drawPixmap(-32+64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                {
+                    qDebug() << -32+64*j + mainwidget->map->cell[x2][y2].getOffsetX() << ' ' << -16+16*i + mainwidget->map->cell[x2][y2].getOffsetY();
+                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                }
                 else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)
                 {
-                    painter.drawPixmap(-32+64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+//                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 }
                 else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)
                 {
-                    painter.drawPixmap(-32+64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+//                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 }
             }
             if(i%2==1)
             {
                 if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)
-                    painter.drawPixmap(64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
+//                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)
                 {
-                    painter.drawPixmap(64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+//                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 }
                 else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)
                 {
-                    painter.drawPixmap(64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+//                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
+                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 }
             }
             x2++;
@@ -162,7 +172,18 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
         mainwidget->mouseEvent->mouseEventType=LEFT_PRESS;
         mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
         mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
-
+        if(buildMode >= 0){
+            int hoverDR = (tranDR(event->x(), event->y()) + DR) / BLOCKSIDELENGTH;
+            int hoverUR = (tranUR(event->x(), event->y()) + UR) / BLOCKSIDELENGTH;
+            if(buildMode == 1 || buildMode == 3 || buildMode == 4 || buildMode == 5)
+            {
+                hoverDR--;
+                hoverUR--;
+            }
+            emit sendView(hoverDR, hoverUR, buildMode);
+            buildMode = -1;
+            QApplication::restoreOverrideCursor();
+        }
     }
     else if(event->button()==Qt::RightButton)
     {
@@ -338,3 +359,7 @@ void GameWidget::UpdateData()
 
 }
 
+void GameWidget::setBuildMode(int buildMode)
+{
+    this->buildMode = buildMode;
+}

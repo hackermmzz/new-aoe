@@ -68,15 +68,16 @@ public:
 
     void nextframe();
 
+    // 以前用于分辨地块种类的变量，已废弃
     int Num;
 
     bool Visible=false;//是否可见
     bool Explored=false;//是否被探索
 
-    static std::list<ImageResource> *block[17];
-    static std::list<ImageResource> *grayblock[17];
-    static std::list<ImageResource> *blackblock[17];
-    static std::string Blockname[17];
+    static std::list<ImageResource> *block[BLOCK_COUNT];
+    static std::list<ImageResource> *grayblock[BLOCK_COUNT];
+    static std::list<ImageResource> *blackblock[BLOCK_COUNT];
+    static std::string Blockname[BLOCK_COUNT];
     //    int Environment=0;//当前地皮编号 考虑用num代替
     //用基类中num代替
 
@@ -89,13 +90,22 @@ public:
     int getMapResource() const;
     void setMapResource(int value);
 
+    int getOffsetX() const;
+    void setOffsetX(int value);
+
+    int getOffsetY() const;
+    void setOffsetY(int value);
+
+    int getMapType() const;
+    void setMapType(int value);
+
 private:
     // 可优化成char类型
-    int Type;               // 地图块种类
-    int Pattern;            // 地图块样式
+    int Type;               // 地图块种类（地形凹凸）
+    int Pattern;            // 地图块样式（草地、沙漠等）
     int Height;             // 地图块高度
     int OffsetX, OffsetY;   // 地图块偏移量
-    int Resource;           // 地图块存放的资源类型
+    int Resource;           // 地图块存放的资源类型（默认为无资源，即空地）
 
 };
 

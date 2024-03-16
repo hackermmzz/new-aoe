@@ -20,10 +20,10 @@
 //#include "AI.h"
 #include <windows.h>
 #include <unordered_set>
-#include <Core.h>
+#include <SelectWidget.h>
 //#include <AboutDialog.h>
 //#include <Option.h>
-#include <SelectWidget.h>
+#include <Core.h>
 #include <ActWidget.h>
 
 namespace Ui {
@@ -53,7 +53,13 @@ public:
     {
         return acts[num];
     }
+<<<<<<< HEAD
     Core *core;
+=======
+
+    bool eventFilter(QObject *watched, QEvent *event);
+    Core *core=new Core();
+>>>>>>> upstream/master
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
@@ -70,7 +76,7 @@ signals:
 private:
     Ui::MainWidget *ui;
     QTimer *timer;
-//    QTimer *showTimer;
+    QTimer *showTimer;
     int gameframe;
 //    tagGame *Game=new tagGame;
 //    int Winnning=0;

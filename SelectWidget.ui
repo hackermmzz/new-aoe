@@ -30,7 +30,7 @@
     </font>
    </property>
    <property name="text">
-    <string>111</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="objIcon">
@@ -51,8 +51,8 @@
     <rect>
      <x>130</x>
      <y>60</y>
-     <width>31</width>
-     <height>31</height>
+     <width>41</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
@@ -83,7 +83,7 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>120</y>
+     <y>130</y>
      <width>121</width>
      <height>31</height>
     </rect>

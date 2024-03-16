@@ -1,4 +1,6 @@
 ﻿#include "StaticRes.h"
+std::string StaticRes::StaticResname[3]={"","",""};
+std::string StaticRes::StaticResDisplayName[3] = {"","",""};
 
 StaticRes::StaticRes()
 {

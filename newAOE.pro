@@ -82,4 +82,3 @@ FORMS += \
         MainWidget.ui \
     GameWidget.ui \
     SelectWidget.ui
-

@@ -1,4 +1,5 @@
-﻿#include "Core.h"
+#include "SelectWidget.h"
+#include "Core.h"
 
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
@@ -85,7 +86,8 @@ void Core::manageMouseEvent()
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
         nowobject=object_click;
-
+//        emit clickOnObject();
+        sel->initActs();
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;
     }
     if(mouseEvent->mouseEventType==RIGHT_PRESS && nowobject!=NULL)

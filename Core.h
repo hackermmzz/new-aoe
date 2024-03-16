@@ -2,13 +2,18 @@
 #define CORE_H
 
 #include <Core_List.h>
+#include "SelectWidget.h"
 
+class SelectWidget;
 class Core
 {
+
 public:
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
     void gameUpdate();
+
+    SelectWidget *sel = nullptr;
 
 private:
     Map* theMap;    //地图信息
@@ -22,6 +27,9 @@ private:
     void manageMouseEvent();    //鼠标添加
     void manageOrder();     //指令添加
 
+//signals:
+//    void clickOnObject();
+    //点击对象时触发
 };
 
 #endif // CORE_H
