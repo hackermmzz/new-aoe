@@ -19,6 +19,8 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     this->Num=Num;
     this->BlockDR=BlockDR;
     this->BlockUR=BlockUR;
+
+    setDetailPointAttrb_FormBlock();
 }
 
 void StaticRes::nextframe()

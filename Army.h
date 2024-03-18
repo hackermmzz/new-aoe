@@ -13,6 +13,7 @@ public:
   /**********************虚函数**************************/
     void nextframe();
     void setNowRes();
+    void setAttribute();
 
     int getSort(){ return SORT_ARMY; }
 
@@ -25,7 +26,8 @@ public:
     double getDis_attack();
 
     //特攻,根据兵种不同,会有攻击力加成
-    int get_add_specialAttack(){ return 0; }
+    //需要优化，更改获取特攻、计算特攻方式。
+    int get_add_specialAttack(Coordinate* attackee){ return 0; }
 
     /***************指针强制转化****************/
     //若要将Army类指针转化为父类指针,务必用以下函数!
@@ -50,8 +52,6 @@ private:
     int* defence_close_change  = NULL;  //肉搏防御
     int* defence_shoot_change  = NULL;  //投射防御
     /*****************/
-
-    void setAttribute();
 
 };
 

@@ -15,9 +15,8 @@ public:
     void nextframe();
     double getSpeed(){ return speed*playerScience->get_rate_Move(getSort(),type); }
     int getMaxBlood(){ return MaxBlood*playerScience->get_rate_Blood(getSort(),type)+ playerScience->get_addition_Blood(getSort(),type); }
-
+    int getPlayerRepresent(){ return playerRepresent; }
     int getATK(){ return (int)(atk*playerScience->get_rate_Attack(getSort(),type,ARMY_INFANTRY,get_AttackType())) + playerScience->get_addition_Attack(getSort(),type,ARMY_INFANTRY,get_AttackType()); }
-    virtual int get_add_specialAttack( ){ return 0; }
 
     int getDEF(int attackType_got);
 
@@ -29,12 +28,15 @@ public:
   /********************以上虚函数**************************/
 
     void setPlayerScience( Development* science ){ this->playerScience = science; }
+    void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
     int getType(){ return type; }
+
 
 protected:
     Development* playerScience = NULL;
     int type = 0;
+    int playerRepresent;
 };
 
 #endif // HUMAN_H

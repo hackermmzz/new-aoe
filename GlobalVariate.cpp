@@ -412,15 +412,9 @@ double countdistance(double L, double U, double L0, double U0)
 {
     return sqrt((L-L0)*(L-L0)+(U-U0)*(U-U0));
 }
-bool inSqure( double DR_D , double DR_U , double UR_D , double UR_U , double DR , double UR )
+bool isNear_Manhattan( double dr , double ur , double dr1  , double ur1 , double distance )
 {
-    return (DR_D - DR)*(DR_U-DR)<=0 && (UR_D-UR)*(UR_U - UR)<=0;
-}
-bool inSqure_FromBcPoint( double DR_c , double UR_c , double dislen , double DR , double UR )
-{
-    double DR_D = DR_c - dislen , DR_U = DR_c+dislen;
-    double UR_D = UR_c - dislen , UR_U = UR_c + dislen;
-    return inSqure( DR_D , DR_U , UR_D , UR_U ,DR , UR );
+    return fabs(dr - dr1)<=distance && fabs(ur - ur1)<=distance;
 }
 
 
@@ -470,4 +464,18 @@ int calculateManhattanDistance(int x1, int y1, int x2, int y2)
 {
         int distance = abs(x1 - x2) + abs(y1 - y2);
         return distance;
+}
+
+double calculateManhattanDistance(double x1, double y1, double x2, double y2)
+{
+    return fabs(x1-x2)+fabs(y1-y2);
+}
+
+void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirror , double dis)
+{
+    double dr_deta = dr_mirror-dr, ur_deta = ur_mirror - ur;
+    double total = fabs(dr_deta)+fabs(ur_deta);
+
+    dr = dr_mirror+dr_deta/total*dis;
+    ur = ur_mirror+ur_deta/total*dis;
 }

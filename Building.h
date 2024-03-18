@@ -14,6 +14,7 @@ public:
   /**********************虚函数**************************/
     int getSort();
     int getMaxBlood(){ return BuildingMaxBlood[Num]; }
+    int getPlayerRepresent(){ return playerRepresent; }
 
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
@@ -60,6 +61,7 @@ public:
     {
         return actNames[num];
     }
+
     void setActNames(int num, int name)
     {
         this->actNames[num] = name;
@@ -72,7 +74,12 @@ public:
     {
         this->actStatus[num] = status;
     }
+
+    //设置科技，用于计算科技提升
     void setPlayerScience(Development* science){ this->playerScience = science; }
+    //设置隶属player
+    void setPlayerRepresent( int represent ){ playerRepresent = represent; }
+
     bool isFinish()
     {
         return this->Percent>=100;
@@ -85,14 +92,6 @@ public:
     {
         return this->Percent;
     }
-    int getNum()
-    {
-        return Num;
-    }
-    int getBlood()
-    {
-        return this->Blood;
-    }
 private:
     static std::list<ImageResource> *build[4];
     //建设list
@@ -100,8 +99,7 @@ private:
     static std::list<ImageResource> *built[3][7];
     //建设完成的list
 
-    int Num;
-    //建筑编号
+    int playerRepresent;
 
     double Percent = 0;
     //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图
@@ -123,6 +121,8 @@ private:
     int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
     int actNames[ACT_WINDOW_NUM_FREE] = {0};
     int actStatus[ACT_WINDOW_NUM_FREE] = {0};
+
+    //需要优化，考虑农田直接抽一个类
     double Cnt;
 };
 
