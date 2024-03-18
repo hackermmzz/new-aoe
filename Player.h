@@ -18,6 +18,7 @@ public:
 
     int addFarmer(double DR,double UR);
 
+
     list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele )
     {
         delete *iterDele;

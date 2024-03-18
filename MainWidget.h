@@ -44,11 +44,13 @@ public:
     void initBuilding();
     void initAnimal();
     void initFarmer();
+    void initArmy();
 
     void deleteBlock();
     void deleteBuilding();
     void deleteAnimal();
     void deleteFarmer();
+    void deleteArmy();
     ActWidget* getActs(int num)
     {
         return acts[num];
