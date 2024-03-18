@@ -6,10 +6,10 @@
 class MoveObject:public Coordinate
 {
 protected:
-    int blood;
-    int maxBlood;
+    double speed;   //移动速度
+    bool changeToRun = false;
 
-    double speed;
+    int vision; //视野
 
     int Angle;
     //规定 从下顺时针分别为0 1 2 3 4 5 6 7
@@ -60,20 +60,30 @@ protected:
     //stand walk attack die disappear work run
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
+    std::list<ImageResource> *nowlist=NULL;
     
 public:
     MoveObject();
 
-    virtual void setNowRes()
-    {
+  /**********************虚函数**************************/
+    virtual void setNowRes(){ }
 
-    }
+    virtual double getSpeed(){ return speed; }
+    virtual int getVision(){ return vision; }
+    bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
+    void resetCoreAttribute(){ changeToRun = false; }
 
-    bool isWalking()
-    {
-        return this->nowstate==1;
-    }
+    /***************指针强制转化****************/
+    void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
+
+    bool isWalking(){return this->nowstate==MOVEOBJECT_STATE_WALK;}
+    bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
+    bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
     void updateMove();
+
+    void beginRun(){ changeToRun = true; }
 
     void calculateDiretionArray(stack<Point>& path);
     int calculateAngle(double L0,double U0);
@@ -206,9 +216,12 @@ public:
     {
         this->prestate=1;
     }
+    void setPreDie(){ this->prestate = MOVEOBJECT_STATE_DIE; }
+    void setPreWork(){ this->prestate = MOVEOBJECT_STATE_WORK; }
     void setNowState(int PreState)
     {
         this->nowstate=PreState;
+        this->setNowRes();
     }
     void setPreStateIsIdle()
     {
@@ -226,6 +239,7 @@ public:
     {
         return this->UR0;
     }
+
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

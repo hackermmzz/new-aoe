@@ -1,4 +1,4 @@
-﻿#ifndef COORDINATE_H
+#ifndef COORDINATE_H
 #define COORDINATE_H
 
 #include <QPixmap>
@@ -12,9 +12,27 @@ class Coordinate
 public:
     Coordinate();
 
+  /**********************虚函数**************************/
     virtual void nextframe();
     virtual int getSort();
 
+    virtual bool get_isActionEnd(){ return true; }
+
+    virtual int getPlayerRepresent(){ return MAXPLAYER; }
+
+    virtual void setAttribute(){ }
+
+    virtual void resetCoreAttribute(){}
+
+    /***************指针强制转化****************/
+    //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
+    virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToMoveObject(void** ptr){ *ptr = NULL; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToHuman(void** ptr){ *ptr = NULL; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToBloodHaver(void** ptr){ *ptr = NULL; }   //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToResource(void** ptr){ *ptr = NULL; }     //传入ptr为Resource类指针的地址,需要强制转换为（void**）
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
     double getDR()
     {
         return this->DR;
@@ -52,6 +70,50 @@ public:
         return this->Num;
     }
 
+    double get_BlockSizeLen(){ return BlockSizeLen; }
+    double get_SideLen(){return SideLength;}
+
+
+/*****************act获取***************/
+//需要协商，act位置
+    double getActPercent()
+    {
+        return this->actPercent;
+    }
+    double getActSpeed()
+    {
+        return this->actSpeed;
+    }
+    void setActName(int actName)
+    {
+        this->actName = actName;
+    }
+    int getActName()
+    {
+        return this->actName;
+    }
+    void setActSpeed(double actSpeed)
+    {
+        this->actSpeed = actSpeed;
+    }
+    void setActPercent(double actPercent)
+    {
+        this->actPercent = actPercent;
+    }
+    void updatePercent()
+    {
+        this->setActPercent(actPercent + actSpeed);
+    }
+    int getActNum()
+    {
+        return this->actNum;
+    }
+    void setActNum(int actNum)
+    {
+        this->actNum = actNum;
+    }
+/*****************act获取***************/
+
 protected:
 
     int Num;//对象在对应类中的编号
@@ -68,6 +130,8 @@ protected:
 
     double imageX;//该物体的长宽（即占地面积）
     double imageY;//需要根据占地大小来就算确切的绘制偏移量
+
+    double BlockSizeLen = SIZELEN_SINGEL; //物体占地,块坐标， 如小房子，为2，中型房子为3，动物为1
 
     double SideLength;
     //占地大小转换成游戏内坐标 边长
@@ -89,6 +153,22 @@ protected:
 
     std::list<ImageResource>::iterator nowres;
 
+    void setDetailPointAttrb_FormBlock()
+    {
+        DR = ( BlockDR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
+        UR = ( BlockUR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
+        setSideLenth();
+    }
+    void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
+
+    /*****************act获取***************/
+    double actPercent = 0;
+    double actSpeed = 0;
+    int actName = 0;
+    //执行行动时的进度、速率和行动类型
+    int actNum=0;
+    //动作类型的编号
+    /*****************act获取***************/
 };
 
 #endif // COORDINATE_H

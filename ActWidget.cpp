@@ -115,6 +115,5 @@ void ActWidget::mouseReleaseEvent(QMouseEvent *event)
 }
 void ActWidget::mousePressEvent(QMouseEvent *event){
     this->update();
-    qDebug() << this->num;
 }
 

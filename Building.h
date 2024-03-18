@@ -2,13 +2,25 @@
 #define BUILDING_H
 
 #include <Coordinate.h>
+#include <Development.h>
+#include <Bloodhaver.h>
 
-class Building:public Coordinate
+class Building:public Coordinate,public BloodHaver
 {
 public:
     Building();
     Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
+
+  /**********************虚函数**************************/
     int getSort();
+    int getMaxBlood(){ return BuildingMaxBlood[Num]; }
+    int getPlayerRepresent(){ return playerRepresent; }
+
+    /***************指针强制转化****************/
+    //若要将Building类指针转化为父类指针,务必用以下函数!
+    void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
 
     static std::list<ImageResource>* getBuild(int i) {
         return build[i];
@@ -24,7 +36,10 @@ public:
     {
         return Builtname[index1][index2];
     }
-
+    static std::string getDisplayName(int num)
+    {
+        return BuildDisplayName[num];
+    }
     static void allocatebuild(int i)
     {
         build[i]=new std::list<ImageResource>;
@@ -42,19 +57,40 @@ public:
         built[i][j] = nullptr;
     }
 
-    // 疑似没用的函数
-    int* getActions()
-    {
-//        return actions;
-    }
-
     int getActNames(int num)
     {
         return actNames[num];
     }
+
     void setActNames(int num, int name)
     {
         this->actNames[num] = name;
+    }
+    int getActStatus(int num)
+    {
+        return actStatus[num];
+    }
+    void setActStatus(int num, int status)
+    {
+        this->actStatus[num] = status;
+    }
+
+    //设置科技，用于计算科技提升
+    void setPlayerScience(Development* science){ this->playerScience = science; }
+    //设置隶属player
+    void setPlayerRepresent( int represent ){ playerRepresent = represent; }
+
+    bool isFinish()
+    {
+        return this->Percent>=100;
+    }
+    double getCnt()
+    {
+        return this->Cnt;
+    }
+    double getPercent()
+    {
+        return this->Percent;
     }
 private:
     static std::list<ImageResource> *build[4];
@@ -63,8 +99,7 @@ private:
     static std::list<ImageResource> *built[3][7];
     //建设完成的list
 
-    int Num;
-    //建筑编号
+    int playerRepresent;
 
     double Percent = 0;
     //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图
@@ -74,17 +109,21 @@ private:
     int civ;
     //建筑所处时代 来确定不同时代建筑有何变化 ？时代要不要用player类下的
 
-    double hpPercent;
-
     int Foundation;
     //地基类型
 
+    Development* playerScience = NULL;
+
     static std::string Buildingname[4];
     static std::string Builtname[3][7];
+    static std::string BuildDisplayName[7];
 
-    std::string BuildDisplayName[7]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔"};
     int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
     int actNames[ACT_WINDOW_NUM_FREE] = {0};
+    int actStatus[ACT_WINDOW_NUM_FREE] = {0};
+
+    //需要优化，考虑农田直接抽一个类
+    double Cnt;
 };
 
 #endif // BUILDING_H

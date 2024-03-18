@@ -8,10 +8,22 @@ class Farmer:public Human
 public:
     Farmer();
     Farmer(double DR,double UR);
-    void nextframe();
-    int getSort();
 
+  /**********************虚函数**************************/
+    void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
+    void nextframe();
     void setNowRes();
+    int getSort();
+    double getDis_attack();
+    int get_AttackType();
+
+    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
+    /***************指针强制转化****************/
+    //若要将Farmer类指针转化为父类指针,务必用以下函数!
+    void printer_ToBloodHaver(void** ptr){*ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    /*************以上指针强制转化****************/
+  /********************以上虚函数**************************/
+
 
     static std::string getFarmerName(int index) {
         if (index >= 0 && index < 7) {
@@ -105,6 +117,32 @@ public:
         delete Die[i][j];
         Die[i][j] = nullptr;
     }
+    std::string getDisplayName(int num)
+    {
+        return FarmerDisplayName[num];
+    }
+    int getState()
+    {
+        return state;
+    }
+    double getResourceNowHave(){ return resource; }
+    int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
+    int getResourceSort(){ return resourceSort; }
+    double get_quantityGather(){ return quantity_GatherOnce; }
+    bool get_isFullBackpack(){ return resource >= getResourceHave_Max(); }//用于普通情况下判断farmer是否满背包
+    //用于采集时，考虑不同种类资源类型情况，判断farmer背包满
+    bool get_isFullBackpack( int resourceSort ){ return resourceSort == this->resourceSort && resource >= getResourceHave_Max(); }
+
+    bool get_isEmptyBackpack(){ return resource == 0; }
+
+    bool get_MatchingOfResourceAndCarry(){ return (state == FARMER_LUMBER && resourceSort == HUMAN_WOOD)\
+                                         || (state == FARMER_MINER && (resourceSort == HUMAN_STONE || resourceSort == HUMAN_GOLD ))\
+                                         || ((state == FARMER_GATHERER|| state == FARMER_FARMER) && resourceSort == HUMAN_GRANARYFOOD) \
+                                         || (state == FARMER_HUNTER && resourceSort == HUMAN_STOCKFOOD) ;}
+    void setState( int state ){ this->state = state; }
+    void set_ResourceSort( int sort ){ this->resourceSort = sort; }
+    void update_addResource(){ resource+=quantity_GatherOnce; }
+    void update_resourceClear(){ resource = 0; }
 
 
 private:
@@ -139,14 +177,17 @@ private:
     //当前工作对象
 
     double resource;
-    //资源携带量
+    //当前资源携带量
+
+    int resource_Max = 50;
+    //最大资源携带量
+
+    double quantity_GatherOnce = 2;
 
     int resourceSort;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
-
-    int Blood;
-    int MaxBlood;
+    //eg:HUMAN_WOOD
 
     static std::list<ImageResource> *Walk[7][8];
 
@@ -165,7 +206,6 @@ private:
     std::string FarmerDisplayName[7]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人"};
     //    std::string actName[1]={};
     //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
-
 
 };
 

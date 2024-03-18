@@ -531,136 +531,144 @@ void Map::genDesert(int i, int j, int number, int Map[][74])
 
 void Map::generateLandforms()
 {
-    int Map[74][74] = {0};
-    srand(time(nullptr));
-    for(int i = 0; i < GENERATELANDFORMS_NUM; i++)
-    {
-        int randX = rand() % 72, randY = rand() % 72;
-        genDesert(randX + 1, randY + 1, 25 + rand() % 5, Map);
-    }
+    //    int Map[74][74] = {0};
+    //    srand(time(nullptr));
+    //    for(int i = 0; i < GENERATELANDFORMS_NUM; i++)
+    //    {
+    //        int randX = rand() % 72, randY = rand() % 72;
+    //        genDesert(randX + 1, randY + 1, 25 + rand() % 5, Map);
+    //    }
 
-    // 沙地赋值为1，草地赋值为0
-    for(int i = 0; i < 74; i++)
+    //    // 沙地赋值为1，草地赋值为0
+    //    for(int i = 0; i < 74; i++)
+    //    {
+    //        for(int j = 0; j < 74; j++)
+    //        {
+    //            if(i == 0 || i == 73) Map[i][j] = 1;
+    //            else
+    //            {
+    //                if(j == 0 || j == 73) Map[i][j] = 1;
+    //            }
+    //            if(Map[i][j] != 0)
+    //            {
+    //                Map[i][j] = 1;
+    //            }
+    //        }
+    //    }
+
+    //    for (int i = 1; i < 73; i++)
+    //    {
+    //        for (int j = 1; j < 73; j++)
+    //        {
+    //            int TmpCal[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    //            if (Map[i][j] != 0)
+    //            {
+    //                int ZeroCnt = 0;
+    //                int FlagK = 0;
+    //                int tmpk[4] = {0};
+    //                for (int k = 0; k < 4; k++)
+    //                {
+    //                    // 如果沙地旁有草地，则记录草地相对沙地的位置和草地数量（0 <= cnt <= 4）
+    //                    if (Map[i + TmpCal[k][0]][j + TmpCal[k][1]] == 0)
+    //                    {
+    //                        ZeroCnt++;
+    //                        tmpk[k] = 1;
+    //                    }
+    //                }
+    //                Map[i][j] = Map[i][j] * 10 + ZeroCnt;
+    //                FlagK = tmpk[0] * 1000 + tmpk[1] * 100 + tmpk[2] * 10 + tmpk[3];
+
+    //                // 判断FlagK的值
+    //                switch (ZeroCnt)
+    //                {
+    //                case 1:
+    //                    FlagK = (FlagK == 1000) ? 1 : (FlagK == 100) ? 2 : (FlagK == 10) ? 3 : (FlagK == 1) ? 4 : 0;
+    //                    break;
+    //                case 2:
+    //                    FlagK = (FlagK == 1001) ? 4 : (FlagK == 1010) ? 6 : (FlagK == 1100) ? 1 : (FlagK == 101) ? 5 : (FlagK == 110) ? 2 : (FlagK == 11) ? 3 : 0;
+    //                    break;
+    //                case 3:
+    //                    FlagK = (FlagK == 1011) ? 4 : (FlagK == 1101) ? 1 : (FlagK == 1110) ? 2 : (FlagK == 111) ? 3 : 0;
+    //                    break;
+    //                default:
+    //                    FlagK = 0;
+    //                    break;
+    //                }
+    //                Map[i][j] = Map[i][j] * 10 + FlagK;
+    //            }
+    //        }
+    //    }
+
+    //    for(int i = 1; i < 73; i++)
+    //    {
+    //        for(int j = 1; j < 73; j++)
+    //        {
+    //            if(Map[i][j] == 0)
+    //            {
+    //                this->cell[i - 1][j - 1].Num = 0;
+    //            }
+    //            else
+    //            {
+    //                switch(Map[i][j])
+    //                {
+    //                case 100:
+    //                    this->cell[i - 1][j - 1].Num = 1;
+    //                    break;
+    //                case 111:
+    //                    this->cell[i - 1][j - 1].Num = 2;
+    //                    break;
+    //                case 112:
+    //                    this->cell[i - 1][j - 1].Num = 3;
+    //                    break;
+    //                case 113:
+    //                    this->cell[i - 1][j - 1].Num = 4;
+    //                    break;
+    //                case 114:
+    //                    this->cell[i - 1][j - 1].Num = 5;
+    //                    break;
+    //                case 121:
+    //                    this->cell[i - 1][j - 1].Num = 6;
+    //                    break;
+    //                case 122:
+    //                    this->cell[i - 1][j - 1].Num = 7;
+    //                    break;
+    //                case 123:
+    //                    this->cell[i - 1][j - 1].Num = 8;
+    //                    break;
+    //                case 124:
+    //                    this->cell[i - 1][j - 1].Num = 9;
+    //                    break;
+    //                case 125:
+    //                    this->cell[i - 1][j - 1].Num = 10;
+    //                    break;
+    //                case 126:
+    //                    this->cell[i - 1][j - 1].Num = 11;
+    //                    break;
+    //                case 131:
+    //                    this->cell[i - 1][j - 1].Num = 12;
+    //                    break;
+    //                case 132:
+    //                    this->cell[i - 1][j - 1].Num = 13;
+    //                    break;
+    //                case 133:
+    //                    this->cell[i - 1][j - 1].Num = 14;
+    //                    break;
+    //                case 134:
+    //                    this->cell[i - 1][j - 1].Num = 15;
+    //                    break;
+    //                case 140:
+    //                    this->cell[i - 1][j - 1].Num = 16;
+    //                    break;
+    //                }
+    //            }
+    //        }
+    //    }
+
+    for(int i = 0; i < 72; i++)
     {
-        for(int j = 0; j < 74; j++)
+        for(int j = 0; j < 72; j++)
         {
-            if(i == 0 || i == 73) Map[i][j] = 1;
-            else
-            {
-                if(j == 0 || j == 73) Map[i][j] = 1;
-            }
-            if(Map[i][j] != 0)
-            {
-                Map[i][j] = 1;
-            }
-        }
-    }
-
-    for (int i = 1; i < 73; i++)
-    {
-        for (int j = 1; j < 73; j++)
-        {
-            int TmpCal[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
-            if (Map[i][j] != 0)
-            {
-                int ZeroCnt = 0;
-                int FlagK = 0;
-                int tmpk[4] = {0};
-                for (int k = 0; k < 4; k++)
-                {
-                    // 如果沙地旁有草地，则记录草地相对沙地的位置和草地数量（0 <= cnt <= 4）
-                    if (Map[i + TmpCal[k][0]][j + TmpCal[k][1]] == 0)
-                    {
-                        ZeroCnt++;
-                        tmpk[k] = 1;
-                    }
-                }
-                Map[i][j] = Map[i][j] * 10 + ZeroCnt;
-                FlagK = tmpk[0] * 1000 + tmpk[1] * 100 + tmpk[2] * 10 + tmpk[3];
-
-                // 判断FlagK的值
-                switch (ZeroCnt)
-                {
-                case 1:
-                    FlagK = (FlagK == 1000) ? 1 : (FlagK == 100) ? 2 : (FlagK == 10) ? 3 : (FlagK == 1) ? 4 : 0;
-                    break;
-                case 2:
-                    FlagK = (FlagK == 1001) ? 4 : (FlagK == 1010) ? 6 : (FlagK == 1100) ? 1 : (FlagK == 101) ? 5 : (FlagK == 110) ? 2 : (FlagK == 11) ? 3 : 0;
-                    break;
-                case 3:
-                    FlagK = (FlagK == 1011) ? 4 : (FlagK == 1101) ? 1 : (FlagK == 1110) ? 2 : (FlagK == 111) ? 3 : 0;
-                    break;
-                default:
-                    FlagK = 0;
-                    break;
-                }
-                Map[i][j] = Map[i][j] * 10 + FlagK;
-            }
-        }
-    }
-
-    for(int i = 1; i < 73; i++)
-    {
-        for(int j = 1; j < 73; j++)
-        {
-            if(Map[i][j] == 0)
-            {
-                this->cell[i - 1][j - 1].Num = 0;
-            }
-            else
-            {
-                switch(Map[i][j])
-                {
-                case 100:
-                    this->cell[i - 1][j - 1].Num = 1;
-                    break;
-                case 111:
-                    this->cell[i - 1][j - 1].Num = 2;
-                    break;
-                case 112:
-                    this->cell[i - 1][j - 1].Num = 3;
-                    break;
-                case 113:
-                    this->cell[i - 1][j - 1].Num = 4;
-                    break;
-                case 114:
-                    this->cell[i - 1][j - 1].Num = 5;
-                    break;
-                case 121:
-                    this->cell[i - 1][j - 1].Num = 6;
-                    break;
-                case 122:
-                    this->cell[i - 1][j - 1].Num = 7;
-                    break;
-                case 123:
-                    this->cell[i - 1][j - 1].Num = 8;
-                    break;
-                case 124:
-                    this->cell[i - 1][j - 1].Num = 9;
-                    break;
-                case 125:
-                    this->cell[i - 1][j - 1].Num = 10;
-                    break;
-                case 126:
-                    this->cell[i - 1][j - 1].Num = 11;
-                    break;
-                case 131:
-                    this->cell[i - 1][j - 1].Num = 12;
-                    break;
-                case 132:
-                    this->cell[i - 1][j - 1].Num = 13;
-                    break;
-                case 133:
-                    this->cell[i - 1][j - 1].Num = 14;
-                    break;
-                case 134:
-                    this->cell[i - 1][j - 1].Num = 15;
-                    break;
-                case 140:
-                    this->cell[i - 1][j - 1].Num = 16;
-                    break;
-                }
-            }
+            this->cell[i][j].setMapPattern(MAPPATTERN_GRASS);
         }
     }
 
@@ -671,83 +679,83 @@ void Map::loadfindPathMap()
 {
 
     clearfindPathMap();
-//    for (int i = 0; i < MAP_L; ++i)
-//    {
-//        for (int j = 0; j < MAP_U; ++j)
-//        {
-//            if(cell[i][j].Explored==false)
-//            {
-//                findPathMap[i][j]=1;
-//            }
-//        }
-//    }
-//    for(int i=0;i<MAXPLAYER;i++)
-//    {
-//        if(!player[i]->build.empty())
-//        {
-//            std::list<Building *>::iterator iter=player[i]->build.begin();
-//            while(iter!=player[i]->build.end())
-//            {
-//                if((*iter)->isMiddleFoundation())
-//                {
-//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
-//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+2]=1;
-//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
-//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
-//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+2]=1;
-//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()]=1;
-//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+1]=1;
-//                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+2]=1;
-//                }
-//                else if((*iter)->isSmallFoundation())
-//                {
-//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-//                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
-//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
-//                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
-//                }
-//                iter++;
-//            }
-//        }
-//        //        if(!player[i]->human.empty())
-//        //        {
-//        //            std::list<Human *>::iterator iter=player[i]->human.begin();
-//        //            while(iter!=player[i]->human.end())
-//        //            {
-//        //                CollisionObject.push_back((*ite));
-//        //                iter++;
-//        //            }
-//        //        }
-//    }
-//    if(!map->coores.empty())
-//    {
-//        std::list<Coores *>::iterator iter=map->coores.begin();
-//        while(iter!=map->coores.end())
-//        {
-//            if((*iter)->isBlockres())
-//            {
-//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
-//                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
-//                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
-//            }
-//            iter++;
-//        }
-//    }
-//    if(!map->animal.empty())
-//    {
-//        std::list<Animal *>::iterator iter=map->animal.begin();
-//        while(iter!=map->animal.end())
-//        {
-//            Animal *animal=(Animal *)(*iter);
-//            if(animal->isTree())
-//            {
-//                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-//            }
-//            iter++;
-//        }
-//    }
+    //    for (int i = 0; i < MAP_L; ++i)
+    //    {
+    //        for (int j = 0; j < MAP_U; ++j)
+    //        {
+    //            if(cell[i][j].Explored==false)
+    //            {
+    //                findPathMap[i][j]=1;
+    //            }
+    //        }
+    //    }
+    //    for(int i=0;i<MAXPLAYER;i++)
+    //    {
+    //        if(!player[i]->build.empty())
+    //        {
+    //            std::list<Building *>::iterator iter=player[i]->build.begin();
+    //            while(iter!=player[i]->build.end())
+    //            {
+    //                if((*iter)->isMiddleFoundation())
+    //                {
+    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+2]=1;
+    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+2]=1;
+    //                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()]=1;
+    //                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+1]=1;
+    //                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+2]=1;
+    //                }
+    //                else if((*iter)->isSmallFoundation())
+    //                {
+    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+    //                }
+    //                iter++;
+    //            }
+    //        }
+    //        //        if(!player[i]->human.empty())
+    //        //        {
+    //        //            std::list<Human *>::iterator iter=player[i]->human.begin();
+    //        //            while(iter!=player[i]->human.end())
+    //        //            {
+    //        //                CollisionObject.push_back((*ite));
+    //        //                iter++;
+    //        //            }
+    //        //        }
+    //    }
+    //    if(!map->coores.empty())
+    //    {
+    //        std::list<Coores *>::iterator iter=map->coores.begin();
+    //        while(iter!=map->coores.end())
+    //        {
+    //            if((*iter)->isBlockres())
+    //            {
+    //                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+    //                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
+    //                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
+    //                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
+    //            }
+    //            iter++;
+    //        }
+    //    }
+    //    if(!map->animal.empty())
+    //    {
+    //        std::list<Animal *>::iterator iter=map->animal.begin();
+    //        while(iter!=map->animal.end())
+    //        {
+    //            Animal *animal=(Animal *)(*iter);
+    //            if(animal->isTree())
+    //            {
+    //                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
+    //            }
+    //            iter++;
+    //        }
+    //    }
 }
 
 void Map::clearfindPathMap()
@@ -784,37 +792,38 @@ int Map::addAnimal(int Num, double DR, double UR)
 
 int Map::loadResource()
 {
-    addAnimal(1,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
-//    for(int i = 0; i < MAP_U; i++)
-//    {
-//        for(int j = 0; j < MAP_L; j++)
-//        {
-//            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
-//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
-//            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
-//            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
-//            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
-//            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
-//            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
-//            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
-//            /*
-//                种类：
-//                0为空地；
-//                1为树木；
-//                2为浆果；
-//                3为瞪羚；
-//                4为石头；
-//                5为金矿；
-//                6为狮子；
-//                7为大象；
-//                9为主营；
-//                10为箭塔废墟；
-//                11为树林。
-//            */
-//            Gamemap[i][j] = 0;  // :)
-//            mapFlag[i][j] = 0;
-//        }
-//    }
+    addAnimal(ANIMAL_GAZELLE,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
+    addAnimal(1,0*BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2,72*BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2);
+    //    for(int i = 0; i < MAP_U; i++)
+    //    {
+    //        for(int j = 0; j < MAP_L; j++)
+    //        {
+    //            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
+    //            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
+    //            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
+    //            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
+    //            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
+    //            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
+    //            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
+    //            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
+    //            /*
+    //                种类：
+    //                0为空地；
+    //                1为树木；
+    //                2为浆果；
+    //                3为瞪羚；
+    //                4为石头；
+    //                5为金矿；
+    //                6为狮子；
+    //                7为大象；
+    //                9为主营；
+    //                10为箭塔废墟；
+    //                11为树林。
+    //            */
+    //            Gamemap[i][j] = 0;  // :)
+    //            mapFlag[i][j] = 0;
+    //        }
+    //    }
     return 0;
 }
 
@@ -827,6 +836,11 @@ void Map::GenerateTerrain()
     {
         for(int j = 0; j < 72; j += 10)
         {
+            if(i == 0 || i == 71 || j == 0 || j == 71)
+            {
+                this->cell[i][j].setMapHeight(3);
+                continue;
+            }
             this->cell[i][j].setMapHeight(rand() % 5 + 2);
         }
     }
@@ -866,75 +880,225 @@ void Map::GenerateTerrain()
     // 3.初步修整地图边缘
     for(int i = 0; i < 72; i++)
     {
-        this->cell[i][71].setMapHeight(this->cell[i][70].getMapHeight());
-        this->cell[i][0].setMapHeight(this->cell[i][1].getMapHeight());
+        this->cell[i][71].setMapHeight(0);
+        this->cell[i][0].setMapHeight(0);
     }
     for(int j = 0; j < 72; j++)
     {
-        this->cell[71][j].setMapHeight(this->cell[70][j].getMapHeight());
-        this->cell[0][j].setMapHeight(this->cell[1][j].getMapHeight());
+        this->cell[71][j].setMapHeight(0);
+        this->cell[0][j].setMapHeight(0);
     }
 
     // 将可能存在的突出/凹陷部分平滑化
-    for(int tmp = 2; tmp < 7; tmp ++)
+    for(int tmp = 2; tmp < 5; tmp ++)
     {
-        for(int i = 1; i < 71; i++)
+        int T = 20;
+        while(T--)
         {
-            for(int j = 1; j < 71; j++)
+            for(int i = 1; i < 71; i++)
             {
-                if(this->cell[i][j].getMapHeight() == tmp)
+                for(int j = 1; j < 71; j++)
                 {
-                    if(this->cell[i - 1][j - 1].getMapHeight() == this->cell[i + 1][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i - 1][j - 1].getMapHeight())
-                        this->cell[i][j].setMapHeight(this->cell[i - 1][j - 1].getMapHeight());
-                    if(this->cell[i - 1][j + 1].getMapHeight() == this->cell[i + 1][j - 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j - 1].getMapHeight())
-                        this->cell[i][j].setMapHeight(this->cell[i - 1][j + 1].getMapHeight());
-                    if(this->cell[i][j - 1].getMapHeight() == this->cell[i][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i][j + 1].getMapHeight())
-                        this->cell[i][j].setMapHeight(this->cell[i][j - 1].getMapHeight());
-                    if(this->cell[i - 1][j].getMapHeight() == this->cell[i + 1][j].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j].getMapHeight())
-                        this->cell[i][j].setMapHeight(this->cell[i - 1][j].getMapHeight());
+                    if(this->cell[i][j].getMapHeight() == tmp)
+                    {
+                        if(this->cell[i - 1][j - 1].getMapHeight() == this->cell[i + 1][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i - 1][j - 1].getMapHeight())
+                            this->cell[i][j].setMapHeight(this->cell[i - 1][j - 1].getMapHeight());
+                        if(this->cell[i - 1][j + 1].getMapHeight() == this->cell[i + 1][j - 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j - 1].getMapHeight())
+                            this->cell[i][j].setMapHeight(this->cell[i - 1][j + 1].getMapHeight());
+                        if(this->cell[i][j - 1].getMapHeight() == this->cell[i][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i][j + 1].getMapHeight())
+                            this->cell[i][j].setMapHeight(this->cell[i][j - 1].getMapHeight());
+                        if(this->cell[i - 1][j].getMapHeight() == this->cell[i + 1][j].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j].getMapHeight())
+                            this->cell[i][j].setMapHeight(this->cell[i - 1][j].getMapHeight());
+                    }
                 }
             }
         }
     }
 
-    // 再次修整地图边缘
-    for(int i = 0; i < 72; i++)
-    {
-        this->cell[i][71].setMapHeight(this->cell[i][70].getMapHeight());
-        this->cell[i][0].setMapHeight(this->cell[i][1].getMapHeight());
-    }
-    for(int j = 0; j < 72; j++)
-    {
-        this->cell[71][j].setMapHeight(this->cell[70][j].getMapHeight());
-        this->cell[0][j].setMapHeight(this->cell[1][j].getMapHeight());
-    }
+    //    // 再次修整地图边缘
+    //    for(int i = 0; i < 72; i++)
+    //    {
+    //        for(int j = 0; j < 72; j++)
+    //        {
+    //            if(this->cell[i][j].getMapHeight() <= 3) this->cell[i][j].setMapHeight(3);
+    //            else this->cell[i][j].setMapHeight(4);
+    //        }
+    //    }
 
-    // 给地图cell赋值高度
     for(int i = 0; i < 72; i++)
     {
         for(int j = 0; j < 72; j++)
         {
-            this->cell[i][j].setMapHeight(this->cell[i][j].getMapHeight());
+            if(this->cell[i][j].getMapHeight() > 4) this->cell[i][j].setMapHeight(4);
+            else if(this->cell[i][j].getMapHeight() < 3) this->cell[i][j].setMapHeight(3);
         }
     }
+
+    // 测试：将地形高度存储进Gamemap[][]然后读取
+    for(int i = 0; i < 72; i++)
+    {
+        for(int j = 0; j < 72; j++)
+        {
+            Gamemap[i][j] = this->cell[i][j].getMapHeight();
+        }
+    }
+
+    return ;
+}
+
+void Map::GenerateType()
+{
+    /*
+     * 坐标系映射如下：
+     * —————→ y
+     * |
+     * |
+     * ↓
+     * x
+     */
+    for(int i = 0; i < MAP_L; i++)
+    {
+        for(int j = 0; j < MAP_U; j++)
+        {
+            if(i == 0 || i == 71 || j == 0 || j == 71)
+            {
+                this->cell[i][j].setMapType(MAPTYPE_FLAT);
+                continue;
+            }
+            // 判断四个角与中间区块的高度差
+            int heightDiffA = abs(this->cell[i][j].getMapHeight() - this->cell[i - 1][j - 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i + 1][j - 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i - 1][j + 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i + 1][j + 1].getMapHeight());
+            switch(heightDiffA)
+            {
+            case 1:
+                if(this->cell[i + 1][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A3_UPTOR);
+                }
+                else if(this->cell[i + 1][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
+                }
+                else if(this->cell[i - 1][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
+                }
+                else if(this->cell[i - 1][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A1_UPTOL);
+                }
+                break;
+            }
+
+            // 判断四条临边与中间区块的高度差
+            int heightDiffL = abs(this->cell[i][j].getMapHeight() - this->cell[i - 1][j].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i + 1][j].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i][j - 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i][j + 1].getMapHeight());
+            switch(heightDiffL)
+            {
+            case 2:
+                /*
+                    * X 0 X
+                    * 0 # 1
+                    * X 1 X
+                    */
+                if((this->cell[i + 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A1_DOWNTOL);
+                }
+                /*
+                     * X 1 X
+                     * 1 # 0
+                     * X 0 X
+                     */
+                else if((this->cell[i - 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A3_DOWNTOR);
+                }
+                /*
+                     * X 1 X
+                     * 0 # 1
+                     * X 0 X
+                     */
+                else if((this->cell[i - 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A0_DOWNTOD);
+                }
+                /*
+                     * X 0 X
+                     * 1 # 0
+                     * X 1 X
+                     */
+                else if((this->cell[i + 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_A0_DOWNTOD);
+                }
+                break;
+
+            case 1:
+                if(this->cell[i + 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_L3_UPTORD);
+                }
+                else if(this->cell[i - 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_L1_UPTOLU);
+                }
+                else if(this->cell[i][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_L2_UPTORU);
+                }
+                else if(this->cell[i][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                {
+                    this->cell[i][j].setMapType(MAPTYPE_L0_UPTOLD);
+                }
+                break;
+            }
+
+            if(this->cell[i][j].getMapType() == 13) this->cell[i][j].setMapType(12);
+            //            if(this->cell[i][j].getMapType() == 2) this->cell[i][j].setMapType(3);
+            // 经验函数
+            if(this->cell[i][j].getMapHeight() != 3)
+            {
+                this->cell[i][j].setOffsetY(-15);
+            }
+            if(this->cell[i][j].getMapType() == 2 || this->cell[i][j].getMapType() == 3 || this->cell[i][j].getMapType() == 4 || this->cell[i][j].getMapType() == 5 || this->cell[i][j].getMapType() == 8 || this->cell[i][j].getMapType() == 9)
+            {
+                this->cell[i][j].setOffsetY(-15);
+            }
+            if(this->cell[i][j].getMapType() == 13 && this->cell[i][j + 1].getMapType() == 13 && this->cell[i - 1][j].getMapType() == 13)
+            {
+                this->cell[i][j].setMapType(12);
+            }
+            //            if(this->cell[i][j].getMapType() == 3 && this->cell[i][j + 1].getMapType() == 3 && this->cell[i - 1][j].getMapType() == 3)
+            //            {
+            //                this->cell[i][j].setMapType(2);
+            //            }
+            if(this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j] .getMapType() == 2)
+            {
+                this->cell[i][j].setMapType(3);
+                qDebug() << "cell[" << i << "][" << j << "].getMapType() == " << 3;
+            }
+            if((this->cell[i][j].getMapType() == 2 && this->cell[i][j - 1] .getMapType() == 2) || (this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j] .getMapType() == 2))
+            {
+                this->cell[i][j].setMapType(3);
+                qDebug() << "cell[" << i << "][" << j << "].getMapType() == " << 3;
+            }
+            if((this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j].getMapType() == 5 && this->cell[i][j - 1].getMapType() == 4) || (this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j].getMapType() == 3 && this->cell[i][j - 1].getMapType() == 4))
+            {
+                this->cell[i][j].setMapType(3);
+                qDebug() << "cell[" << i << "][" << j << "].getMapType() == " << 3;
+            }
+        }
+    }
+}
+
+void Map::CalOffset()
+{
+
     return ;
 }
 
 double Map::smooth(double x)
 {
     return 3 * pow(x, 2) - 2 * pow(x, 3);
-}
-
-void Map::clearData()
-{
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 72; j++)
-        {
-            this->cell[i][j].setMapHeight(0);
-        }
-    }
-    return ;
 }
 
 void Map::init(int MapJudge)
@@ -953,6 +1117,28 @@ void Map::init(int MapJudge)
     generateResources();
     generateResource();
     GenerateTerrain();
+    GenerateType();
+
+    for(int i = 0; i < 72; i++)
+    {
+        for(int j = 0; j < 72; j++)
+        {
+            if(this->cell[i][j].getMapType() != 0 && this->cell[i][j].getMapType() != 1)
+            {
+                this->cell[i][j].Num = this->cell[i][j].getMapPattern() * 15 + this->cell[i][j].getMapType();
+            }
+            else if(this->cell[i][j].getMapType() == 1)
+            {
+                // 设置平地全部为草地
+                this->cell[i][j].Num = MAPPATTERN_GRASS;
+            }
+            else if(this->cell[i][j].getMapType() == 0)
+            {
+                qDebug() << "第" << i << "行第" << j <<"列的地块MapType未定义！";
+            }
+            if(this->cell[i][j].Num >= 29) qDebug() << "cell[" << i << "][" << j << "].Num >= 29";
+        }
+    }
 
     if(MapJudge == 0) // 随机产生地图
     {
@@ -963,12 +1149,14 @@ void Map::init(int MapJudge)
             {
                 for (int j = 0; j < MAP_U; j++)
                 {
-                    outMapFile << Gamemap[i][j] << "\n";
+                    //                    outMapFile << Gamemap[i][j] << "\n";
+                    outMapFile << this->cell[i][j].getMapHeight() << " ";
                 }
+                outMapFile << "\n";
             }
 
             outMapFile.close();
-            //            qDebug() << "地图数据已导出为文件";
+            qDebug() << "地图数据已导出为文件";
         }
         else
         {
@@ -983,19 +1171,26 @@ void Map::init(int MapJudge)
         {
             QTextStream in(&inputGameFile);
             int j = 0, i = 0;
-            for (int T = 0; i < MAP_L * MAP_U; T++)
+            //            for (int T = 0; i < MAP_L * MAP_U; T++)
+            //            {
+            //                QString line = in.readLine();
+            //                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
+            //                j++;
+            //                if(j >= MAP_U)
+            //                {
+            //                    j = 0;
+            //                    i++;
+            //                }
+            //                if(i >= MAP_L)
+            //                {
+            //                    break;
+            //                }
+            //            }
+            for(int i = 0; i < 72; i++)
             {
-                QString line = in.readLine();
-                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-                j++;
-                if(j >= MAP_U)
+                for(int j = 0; j < 72; j++)
                 {
-                    j = 0;
-                    i++;
-                }
-                if(i >= MAP_L)
-                {
-                    break;
+                    this->cell[i][j].setMapHeight(Gamemap[i][j]);
                 }
             }
             inputGameFile.close();
@@ -1014,19 +1209,26 @@ void Map::init(int MapJudge)
         {
             QTextStream in(&inputGameFile);
             int j = 0, i = 0;
-            for (int T = 0; i < MAP_L * MAP_U; T++)
+            //            for (int T = 0; i < MAP_L * MAP_U; T++)
+            //            {
+            //                QString line = in.readLine();
+            //                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
+            //                j++;
+            //                if(j >= MAP_U)
+            //                {
+            //                    j = 0;
+            //                    i++;
+            //                }
+            //                if(i >= MAP_L)
+            //                {
+            //                    break;
+            //                }
+            //            }
+            for(int i = 0; i < 72; i++)
             {
-                QString line = in.readLine();
-                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-                j++;
-                if(j >= MAP_U)
+                for(int j = 0; j < 72; j++)
                 {
-                    j = 0;
-                    i++;
-                }
-                if(i >= MAP_L)
-                {
-                    break;
+                    this->cell[i][j].setMapHeight(Gamemap[i][j]);
                 }
             }
             inputGameFile.close();
@@ -1035,6 +1237,5 @@ void Map::init(int MapJudge)
         else qDebug() << "无法打开固定地图文件";
 
     }
-
-    clearData();
 }
+

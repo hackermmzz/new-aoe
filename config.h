@@ -67,19 +67,38 @@
 #define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
 
 /********** 地图块种类 **********/
-#define MAPTYPE_FLAT 0      // 平地
-#define MAPTYPE_L0_UPTOLU 1 // L0边（向左上方凸起）
-#define MAPTYPE_L2_UPTOLU 2 // L2边（向左上方凸起，同L0）
+/* L0边为右上角，L0到L3顺时针排列 */
+/* A0边为上方角，A0到A3顺时针排列 */
+#define MAPTYPE_EMPTY 0         // 未定义种类
+#define MAPTYPE_FLAT 1          // 平地
+#define MAPTYPE_A2_UPTOU 2      // A2角（向上方凸起）
+#define MAPTYPE_A0_DOWNTOD 3    // A0角（向下方凹陷）
+#define MAPTYPE_L1_UPTOLU 4     // L1边（向左上凸起）
+#define MAPTYPE_L3_DOWNTORD 4   // L3边（向右下凹陷）
+#define MAPTYPE_L0_DOWNTOLD 5   // L0边（向左下凹陷）
+#define MAPTYPE_L2_UPTORU 5     // L2边（向右上凸起）
+#define MAPTYPE_A1_UPTOL 6      // A1角（向左方凸起）
+#define MAPTYPE_A3_UPTOR 7      // A3角（向右方凸起）
+#define MAPTYPE_A1_DOWNTOL 8    // A1角（向左方凹陷）
+#define MAPTYPE_A3_DOWNTOR 9    // A3角（向右方凹陷）
+#define MAPTYPE_L0_UPTOLD 10    // L0边（向左下凸起）
+#define MAPTYPE_L2_DOWNTORU 10  // L2边（向右上凹陷）
+#define MAPTYPE_L3_UPTORD 11    // L3边（向右下凸起）
+#define MAPTYPE_L1_DOWNTOLU 11  // L1边（向左上凹陷）
+#define MAPTYPE_A2_DOWNTOU 12   // A2角（向上方凹陷）
+#define MAPTYPE_A0_UPTOD 13     // A0角（向下方凸起）
 
 /********** 地图块高度 **********/
 #define MAPHEIGHT_EMPTY 0   // 未定义高度
 #define MAPHEIGHT_FLAT 2    // 地形高度
+#define MAPHEIGHT_MAX 4     // 最高地形高度
 
 /********** 地图块样式 **********/
-#define MAPPATTERN_GRASS 0      // 草原
-#define MAPPATTERN_DESERT 1     // 沙漠
-#define MAPPATTERN_OCEAN 2      // 海洋/河流
-#define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
+#define MAPPATTERN_EMPTY 0      // 未定义样式
+#define MAPPATTERN_GRASS 1      // 草原
+#define MAPPATTERN_DESERT 2     // 沙漠
+#define MAPPATTERN_OCEAN 3      // 海洋/河流
+#define MAPPATTERN_SHOAL 4      // 浅滩（河流中可行走部分）
 
 
 /********** DebugText栏颜色 **********/
@@ -151,10 +170,11 @@
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
-#define HUMAN_GRANARYFOOD 2
+#define HUMAN_STOCKFOOD 2
 #define HUMAN_STONE 3
 #define HUMAN_GOLD 4
-#define HUMAN_STOCKFOOD 5
+#define HUMAN_GRANARYFOOD 5
+
 
 /********** 动作返回编号 **********/
 /*
@@ -290,6 +310,7 @@
 #define SORT_TREEFOREST 6
 #define SORT_MISSILE 8
 #define SORT_FARM 9
+#define SORT_ARMY 10
 
 #define PRODUCTSORT_WOOD 1
 #define PRODUCTSORT_GRANARYFOOD 2
@@ -330,8 +351,8 @@
 
 #define FARMER_VILLAGER 0
 #define FARMER_LUMBER 1
-#define FARMER_GATHERER 2
-#define FARMER_MINER 3
+#define FARMER_GATHERER 3
+#define FARMER_MINER 2
 #define FARMER_HUNTER 4
 #define FARMER_FARMER 5
 #define FARMER_WORKER 6
@@ -372,32 +393,244 @@
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
 
-//Core静态表
+/********** Core静态表 **********/
 //####关系事件名称
 #define CoreEven_JustMoveTo 0
 #define CoreEven_CreatBuilding 1
-#define CoreEven_Gather_NeedAttack 2
-#define CoreEven_Gather_DisNeedAttack 3
+#define CoreEven_Gather 2
 #define CoreEven_Attacking 4
 #define CoreEven_FixBuilding 5
 
 //####对一个关系事件，细节关系的最大数量
-#define CoreDetailLinkMaxNum 11
+#define CoreDetailLinkMaxNum 14
 //####细节环节名称
 #define CoreDetail_NormalEnd -1
 #define CoreDetail_AbsoluteEnd -2
+#define CoreDetail_JumpPhase -3
 #define CoreDetail_Move 0
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
+#define CoreDetail_ResourceIn 3
+//#define CoreDetail_FindNextGoal 4
 
-//Core关系函数的可变操作指令
-#define OPERATECON_DEFAULT 0
+/********** Core关系函数的可变操作指令 **********/
+#define OPERATECON_DEFAULT 11111
+#define OPERATECHANGE 100
+#define OPERATECHANGE_TIME 1000
+
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
+#define OPERATECON_MOVEALTER 200
+#define OPERATECON_NEAR_ATTACK 10001
+#define OPERATECON_NEAR_WORK 10002
+#define OPERATECON_NEARALTER_ABSOLUTE 20000
+#define OPERATECON_NEARALTER_WORK 20002
+
 //####指定对象
-#define OPERATECON_OBJECT1 1
-#define OPERATECON_OBJECT2 2
+#define OPERATECON_OBJECT1 10011
+#define OPERATECON_OBJECT2 10012
+
+#define OPERATECON_TIMEONCE 00001
+#define OPERATE_TIMEMAX 10
 
 
+/********** 距离常量 **********/
+#define DISTANCE_Manhattan_MoveEndNEAR 0.0001
+#define DISTANCE_ATTACK_CLOSE (8*gen5)
+
+/********** 占地边长-块坐标常量 **********/
+#define SIZELEN_SINGEL 1
+#define SIZELEN_SMALL 2
+#define SIZELEN_MIDDLE 3
+#define SIZELEN_BIG 4
+
+/********** 攻击方式 **********/
+#define ATTACKTYPE_CANTATTACK -1
+#define ATTACKTYPE_ANIMAL 0
+#define ATTACKTYPE_CLOSE 1
+#define ATTACKTYPE_CLOSE_TOTREE 11
+#define ATTACKTYPE_SHOOT 2
+//转化
+#define ATTACKTYPE_CHANGE 3
+//投石车
+#define ATTACKTYPE_CATAPULT 4
+//弩炮
+#define ATTACKTYPE_BALISTA 5
+
+/********** 军队类别 **********/
+//步兵
+#define ARMY_INFANTRY 1
+//弓兵
+#define ARMY_ARCHER 3
+//骑兵
+#define ARMY_RIDER 4
+//祭
+#define ARMY_FLAMEN 5
+//攻城兵器
+#define ARMY_SIEGE 6
+//船
+#define ARMY_SHIP 7
+
+/********** 兵种类别 **********/
+#define AT_CLUBMAN 11
+#define AT_SWORDSMAN 12
+#define AT_SLINGER 13
+
+#define AT_HOPLITE 21
+
+#define AT_BOWMAN 31
+#define AT_IMPROVED 32
+#define AT_CHARIOTARCHER 33
+#define AT_HORSE 34
+#define AT_ELEPHENTARCHER 35
+
+#define AT_SCOUT 41
+#define AT_CAVALRY 42
+#define AT_CAMEL 43
+#define AT_CHARIOT 44
+#define AT_ELEPHENT 45
+
+/********** 祭祀 **********/
+#define AT_PRIEST 51
+
+/********** 攻城工具 **********/
+#define AT_THROWER 61
+#define AT_BALLISTA 62
+
+/********** 船类别 **********/
+#define SHIP_FISHING 71
+#define SHIP_TRADE 73
+#define SHIP_TRANSPORT 72
+#define SHIP_SCOUT 74
+#define SHIP_FIRE 75
+#define SHIP_CATAPUL 76
+#define SHIP_JUGGERNAUT 77
+
+/************士兵属性**************/
+//棍棒手
+#define BLOOD_CLUBMAN1 40
+//村民表格中速度为1.1,设置为gen(5)
+#define SPEED_CLUBMAN1 (1.2/1.1*HUMAN_SPEED)
+#define VISION_CLUBMAN1 4
+#define DIS_CLUBMAN1 0
+#define INTERVAL_CLUBMAN1 1.5
+#define ATK_CLUBMAN1 3
+#define DEFCLOSE_CLUBMAN1 0
+#define DEFSHOOT_CLUBMAN1 0
+
+//刀斧手
+#define BLOOD_CLUBMAN2 50
+#define SPEED_CLUBMAN2 (1.2/1.1*HUMAN_SPEED)
+#define VISION_CLUBMAN2 4
+#define DIS_CLUBMAN2 0
+#define INTERVAL_CLUBMAN2 1.5
+#define ATK_CLUBMAN2 5
+#define DEFCLOSE_CLUBMAN2 0
+#define DEFSHOOT_CLUBMAN2 0
+
+//短剑手
+#define BLOOD_SHORTSWORDSMAN1 60
+#define SPEED_SHORTSWORDSMAN1 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN1 4
+#define DIS_SHORTSWORDSMAN1 0
+#define INTERVAL_SHORTSWORDSMAN1 1.5
+#define ATK_SHORTSWORSMAN1 7
+#define DEFCLOSE_SHORTSWORSMAN1 1
+#define DEFSHOOT_SHORTSWORSMAN1 0
+
+//阔剑手
+#define BLOOD_SHORTSWORDSMAN2 70
+#define SPEED_SHORTSWORDSMAN2 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN2 4
+#define DIS_SHORTSWORDSMAN2 0
+#define INTERVAL_SHORTSWORDSMAN2 1.5
+#define ATK_SHORTSWORSMAN2 9
+#define DEFCLOSE_SHORTSWORSMAN2 1
+#define DEFSHOOT_SHORTSWORSMAN2 0
+
+//长剑手
+#define BLOOD_SHORTSWORDSMAN3 80
+#define SPEED_SHORTSWORDSMAN3 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN3 4
+#define DIS_SHORTSWORDSMAN3 0
+#define INTERVAL_SHORTSWORDSMAN3 1.5
+#define ATK_SHORTSWORSMAN3 11
+#define DEFCLOSE_SHORTSWORSMAN3 2
+#define DEFSHOOT_SHORTSWORSMAN3 0
+
+//铁甲步兵
+#define BLOOD_SHORTSWORDSMAN4 160
+#define SPEED_SHORTSWORDSMAN4 (1.2/1.1*HUMAN_SPEED)
+#define VISION_SHORTSWORDSMAN4 4
+#define DIS_SHORTSWORDSMAN4 0
+#define INTERVAL_SHORTSWORDSMAN4 1.5
+#define ATK_SHORTSWORSMAN4 13
+#define DEFCLOSE_SHORTSWORSMAN4 2
+#define DEFSHOOT_SHORTSWORSMAN4 0
+
+//投石者
+#define BLOOD_SLINGER 25
+#define SPEED_SLINGER (1.2/1.1*HUMAN_SPEED)
+#define VISION_SLINGER 5
+#define DIS_SLINGER 4
+#define INTERVAL_SLINGER 1.5
+#define ATK_SLINGER 2
+#define DEFCLOSE_SLINGER 0
+#define DEFSHOOT_SLINGER 2
+
+//弓箭手
+#define BLOOD_BOWMAN 35
+#define SPEED_BOWMAN (1.2/1.1*HUMAN_SPEED)
+#define VISION_BOWMAN 7
+#define DIS_BOWMAN 5
+#define INTERVAL_BOWMAN 1.4
+#define ATK_BOWMAN 3
+#define DEFCLOSE_BOWMAN 0
+#define DEFSHOOT_BOWMAN 0
+
+//长弓手
+#define BLOOD_IMPROVEDBOWMAN1 40
+#define SPEED_IMPROVEDBOWMAN1 (1.2/1.1*HUMAN_SPEED)
+#define VISION_IMPROVEDBOWMAN1 8
+#define DIS_IMPROVEDBOWMAN1 6
+#define INTERVAL_IMPROVEDBOWMAN1 1.4
+#define ATK_IMPROVEDBOWMAN1 4
+#define DEFCLOSE_IMPROVEDBOWMAN1 0
+#define DEFSHOOT_IMPROVEDBOWMAN1 0
+
+//十字弓手
+#define BLOOD_IMPROVEDBOWMAN2 45
+#define SPEED_IMPROVEDBOWMAN2 (1.2/1.1*HUMAN_SPEED)
+#define VISION_IMPROVEDBOWMAN2 9
+#define DIS_IMPROVEDBOWMAN2 7
+#define INTERVAL_IMPROVEDBOWMAN2 1.4
+#define ATK_IMPROVEDBOWMAN2 5
+#define DEFCLOSE_IMPROVEDBOWMAN2 0
+#define DEFSHOOT_IMPROVEDBOWMAN2 0
+
+//侦察骑兵
+#define BLOOD_SCOUT 60
+#define SPEED_SCOUT (2/1.1*HUMAN_SPEED)
+#define VISION_SCOUT 8
+#define DIS_SCOUT 0
+#define INTERVAL_SCOUT 1.5
+#define ATK_SCOUT 3
+#define DEFCLOSE_SCOUT 0
+#define DEFSHOOT_SCOUT 0
+
+/********** animal友好度 **********/
+#define FRIENDLY_NULL 0
+#define FRIENDLY_FRI 1
+#define FRIENDLY_ENEMY 2
+#define FRIENDLY_FENCY 3
+
+
+/********** 飞行物类别 **********/
+#define Missile_Spear 1001
+#define Missile_Arrow 1002
+
+/********** 飞行物属性 **********/
+#define Missile_Speed_Spear (4*HUMAN_SPEED)
+#define Missile_Speed_Arrow (4*HUMAN_SPEED)
 
 #endif // CONFIG_H

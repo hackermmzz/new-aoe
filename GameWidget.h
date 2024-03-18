@@ -39,8 +39,9 @@ public:
 private slots:
     void movemap();
     void UpdateData();
-
+    void setBuildMode(int buildMode);
 signals:
+    void sendView(int BlockL, int BlockU, int num);
 
 private:
     Ui::GameWidget *ui;
@@ -63,7 +64,7 @@ private:
 
     //是否展示地图的格子线
     bool showLine = true;
-
+    int buildMode = -1;
 //    bool pos = false;
 };
 

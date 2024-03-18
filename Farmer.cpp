@@ -18,15 +18,21 @@ Farmer::Farmer()
 
 Farmer::Farmer(double DR, double UR)
 {
-    this->Angle=rand()%8;
+    this->Blood=1;
     this->MaxBlood=BLOOD_FARMER;
-    this->Blood=MaxBlood;
+    speed = HUMAN_SPEED;
+    this->atk = 3;
+    attackType = ATTACKTYPE_CLOSE;
+
+    this->Angle=rand()%8;
     this->state=HUMAN_STATE_IDLE;
     this->resource=0;
     this->DR=DR;
     this->UR=UR;
     this->BlockDR=DR/BLOCKSIDELENGTH;
     this->BlockUR=UR/BLOCKSIDELENGTH;
+
+    setSideLenth();
     this->nextBlockDR=BlockDR;
     this->nextBlockUR=BlockUR;
     this->PredictedDR=DR;
@@ -36,7 +42,7 @@ Farmer::Farmer(double DR, double UR)
     this->DR0=DR;
     this->UR0=UR;
     this->nowstate=MOVEOBJECT_STATE_STAND;
-    this->Angle=0;
+//    this->Angle=0;
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -44,32 +50,10 @@ Farmer::Farmer(double DR, double UR)
     this->globalNum=g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-
-    speed = HUMAN_SPEED;
 }
 
 void Farmer::nextframe()
 {
-    std::list<ImageResource> *nowlist=NULL;
-
-    switch (this->nowstate) {
-    case 0:
-        nowlist=this->Stand[this->state][this->Angle];
-        break;
-    case 1:
-        //            qDebug()<<"1";
-        nowlist=this->Walk[this->state][this->Angle];
-        break;
-    case 2:
-        nowlist=this->Attack[this->state][this->Angle];
-        break;
-    case 5:
-        nowlist=this->Work[this->state][this->Angle];
-        break;
-        //    default:
-        //        break;
-    }
-
     nowres++;
     if(nowres==nowlist->end())
     {
@@ -87,21 +71,48 @@ int Farmer::getSort()
 
 void Farmer::setNowRes()
 {
-
     switch (this->nowstate) {
     case MOVEOBJECT_STATE_STAND:
-        this->nowres=this->Stand[this->state][this->Angle]->begin();
+        nowlist=this->Stand[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
-        this->nowres=this->Walk[this->state][this->Angle]->begin();
+        if(get_MatchingOfResourceAndCarry() && resource != 0 && (resourceSort!=HUMAN_GRANARYFOOD||state == FARMER_FARMER ))
+            nowlist = this->Carry[this->resourceSort][this->Angle];
+        else
+            nowlist=this->Walk[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
-        this->nowres=this->Attack[this->state][this->Angle]->begin();
+        nowlist=this->Attack[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WORK:
-        this->nowres=this->Work[this->state][this->Angle]->begin();
+        nowlist=this->Work[this->state][this->Angle];
     default:
         break;
     }
 
+    nowres = nowlist->begin();
+}
+
+double Farmer::getDis_attack()
+{
+    double dis;
+
+    if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
+    else dis = 0;
+
+    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
+    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
+
+    return dis;
+
+}
+
+int Farmer::get_AttackType()
+{
+    if(attackObject != NULL && attackObject->getSort() == SORT_ANIMAL)
+    {
+        if(attackObject->getNum() == ANIMAL_TREE || attackObject->getNum() == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
+        else return ATTACKTYPE_SHOOT;
+    }
+    return ATTACKTYPE_CLOSE;
 }

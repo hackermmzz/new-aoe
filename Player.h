@@ -2,18 +2,33 @@
 #define PLAYER_H
 
 #include <Farmer.h>
+#include <Army.h>
 #include <Building.h>
 
 class Player
 {
 public:
     Player();
+    Player(int);
+    ~Player();
 
-    int addBuilding(int Num,int BlockDR,int BlockUR);
+    Building* addBuilding(int Num,int BlockDR,int BlockUR);
 
     int addHuman(int Num,double DR,double UR);
 
     int addFarmer(double DR,double UR);
+
+    list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele )
+    {
+        delete *iterDele;
+        return human.erase(iterDele);
+    }
+
+    list<Building*>::iterator deleteBuilding( list<Building*>::iterator iterDele )
+    {
+        delete *iterDele;
+        return build.erase(iterDele);
+    }
 
     //建筑池子
     std::list<Building *> build;
@@ -113,7 +128,11 @@ public:
     {
         return this->startScores[type];
     }
+
+    void changeResource( int resourceSort , int num );
+
 private:
+    int represent;
 
     //当前文明
     int civilization=1;
@@ -131,6 +150,9 @@ private:
     bool marketResearch[3] = {false};
     bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
+
+    //研究技术进度与成果
+    Development* playerScience;
 };
 
 #endif // PLAYER_H

@@ -24,51 +24,70 @@ Animal::Animal(int Num, double DR, double UR)
     this->UR=UR;
     this->BlockDR = transBlock(this->DR);
     this->BlockUR = transBlock(this->UR);
+    this->DR0=DR;
+    this->UR0=UR;
+    this->PredictedDR=DR;
+    this->PredictedUR=UR;
+    this->PreviousDR=DR;
+    this->PreviousUR=UR;
     this->visible = 0;
+    setSideLenth();
     
     //以下根据Num种类特判
     if( this->Num == ANIMAL_LION ) 
     {
-        this->Friendly = 2;
+        this->Friendly = FRIENDLY_ENEMY;
         this->MaxCnt = CNT_LION;
-        this->maxBlood = BLOOD_LION;
+        resourceSort = HUMAN_STOCKFOOD;
+        this->MaxBlood = BLOOD_LION;
         speed = ANIMAL_SPEED;
+        attackType = ATTACKTYPE_ANIMAL;
     }
     else if( this->Num == ANIMAL_GAZELLE )
     {
+        Friendly = FRIENDLY_FRI;
         this->MaxCnt = CNT_GAZELLE;
-        this->maxBlood = BLOOD_GAZELLE;
+        resourceSort = HUMAN_STOCKFOOD;
+        this->MaxBlood = BLOOD_GAZELLE;
         speed = ANIMAL_SPEED;
     }
     else if( this->Num == ANIMAL_ELEPHANT )
     {
+        Friendly = FRIENDLY_FENCY;
         this->MaxCnt = CNT_ELEPHANT;
-        this->maxBlood = BLOOD_ELEPHANT;
+        resourceSort = HUMAN_STOCKFOOD;
+        this->MaxBlood = BLOOD_ELEPHANT;
         speed = ANIMAL_SPEED;
+        attackType = ATTACKTYPE_ANIMAL;
     }
     else if( this->Num == ANIMAL_TREE )
     {
         this->MaxCnt = CNT_TREE;
-        this->maxBlood = BLOOD_TREE;
+        resourceSort = HUMAN_WOOD;
+        this->MaxBlood = BLOOD_TREE;
         speed = 0;
+        moveAble = false;
     }
     else if( this->Num == ANIMAL_FOREST )
     {
         this->MaxCnt = CNT_FOREST;
-        this->maxBlood = BLOOD_FOREST;
+        resourceSort = HUMAN_WOOD;
+        this->MaxBlood = BLOOD_FOREST;
         speed = 0;
+        moveAble = false;
     }
-    
-    //cnt与 maxcnt实际作用需区分
-    this->Cnt =this->MaxCnt;
-    this->blood = this->maxBlood;
 
-    this->gatherable = true;
+    this->Cnt = this->MaxCnt;
+    this->gatherable = false;
+    this->Blood = 1;
+
 
     this->state = ANIMAL_STATE_IDLE;
 
-    this->Angle = 0;
-    this->nowres = Stand[this->Num][this->Angle]->begin();
+//    this->Angle = 0;
+//    this->nowres = Stand[this->Num][this->Angle]->begin();
+    this->Angle=2;
+    setNowRes();
 
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -76,43 +95,57 @@ Animal::Animal(int Num, double DR, double UR)
     this->globalNum=g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-    
-    //
-    this->Angle=2;
-    this->nowres=Stand[this->Num][this->Angle]->begin();
-    //
+
 }
 
 void Animal::nextframe()
 {
-    std::list<ImageResource> *nowlist=NULL;
-    switch (this->nowstate) {
-    case 0:
-        nowlist=this->Stand[this->Num][this->Angle];
-        break;
-    case 1:
-        nowlist=this->Walk[this->Num][this->Angle];
-        break;
-    case 2:
-        nowlist=this->Attack[this->Num][this->Angle];
-        break;
-    case 3:
-        nowlist=this->Die[this->Num][this->Angle];
-        break;
-    case 6:
-        nowlist=this->Run[this->Num][this->Angle];
-        break;
-    }
-    this->nowres++;
-    if(this->nowres==nowlist->end())
+    if(isDie())
     {
-        nowres=nowlist->begin();
+        if( !isDying() )
+        {
+             setPreDie();
+             changeToGatherAble();  //死亡后，设置资源为可采集
+        }
+        else if(!get_isActionEnd() ) nowres++;
     }
+    else
+    {
+        this->nowres++;
+        if(this->nowres==nowlist->end())
+        {
+            nowres=nowlist->begin();
+        }
 
-    updateMove();
+        updateMove();
+    }
 }
 
 int Animal::getSort()
 {
     return SORT_ANIMAL;
+}
+
+void Animal::setNowRes()
+{
+
+    switch (this->nowstate) {
+    case 0:
+        nowlist=this->Stand[this->Num][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_WALK:
+        if(changeToRun) nowlist=this->Run[this->Num][this->Angle];
+        else  nowlist=this->Walk[this->Num][this->Angle];
+        break;
+    case 2:
+        nowlist=this->Attack[this->Num][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_DIE:
+        nowlist=this->Die[this->Num][this->Angle];
+        break;
+    default:
+        break;
+    }
+
+    this->nowres = nowlist->begin();
 }

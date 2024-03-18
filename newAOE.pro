@@ -43,7 +43,13 @@ SOURCES += \
     Core.cpp \
     Farmer.cpp \
     ActWidget.cpp \
-    SelectWidget.cpp
+    SelectWidget.cpp \
+    Development.cpp \
+    Army.cpp \
+    Bloodhaver.cpp \
+    Missile.cpp \
+    Core_CondiFunc.cpp \
+    Core_List.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -64,11 +70,15 @@ HEADERS += \
     Farmer.h \
     ActWidget.h \
     SelectWidget.h \
-    ActWidget.h
+    ActWidget.h \
+    Development.h \
+    Army.h \
+    Bloodhaver.h \
+    Missile.h \
+    Core_CondiFunc.h \
+    Core_List.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
     SelectWidget.ui
-
-

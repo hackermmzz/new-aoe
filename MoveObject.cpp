@@ -117,10 +117,10 @@ void MoveObject::updateMove()
                 double dUR=nextUR-UR;
                 double dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
                 // 根据速率计算每次的坐标变化量
-                double ratio = speed / static_cast<double>(dis);
+                double ratio = getSpeed() / static_cast<double>(dis);
                 VDR = round(dDR * ratio);
                 VUR = round(dUR * ratio);
-                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<speed)
+                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
                 {
                     PredictedDR=nextDR;
                     PredictedUR=nextUR;
@@ -136,7 +136,7 @@ void MoveObject::updateMove()
                 if(tempAngle!=Angle)
                 {
                     Angle=tempAngle;
-//                    setNowRes();
+                    setNowRes();
                 }
             }
             else if(pathI==0&&pathI<pathN-1)
@@ -146,10 +146,10 @@ void MoveObject::updateMove()
                 double dUR=nextUR-UR;
                 double dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
                 // 根据速率计算每次的坐标变化量
-                double ratio = speed / static_cast<double>(dis);
+                double ratio = getSpeed() / static_cast<double>(dis);
                 VDR = round(dDR * ratio);
                 VUR = round(dUR * ratio);
-                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<speed)
+                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
                 {
                     PredictedDR=nextDR;
                     PredictedUR=nextUR;
@@ -178,9 +178,9 @@ void MoveObject::updateMove()
                     Angle=d[pathI];
                     setNowRes();
                 }
-                VDR=VariationDR[Angle]*speed;
-                VUR=VariationUR[Angle]*speed;
-                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<speed)
+                VDR=VariationDR[Angle]*getSpeed();
+                VUR=VariationUR[Angle]*getSpeed();
+                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
                 {
                     PredictedDR=nextDR;
                     PredictedUR=nextUR;
@@ -190,7 +190,7 @@ void MoveObject::updateMove()
                     PredictedDR=PreviousDR+VDR;
                     PredictedUR=PreviousUR+VUR;
                 }
-                if(fabs(nextDR-DR)<0.00001&&fabs(nextUR-UR)<0.00001)
+                if(fabs(nextDR-DR)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(nextUR-UR)<DISTANCE_Manhattan_MoveEndNEAR)
                 {
                     setNextBlock();
                     pathI++;
@@ -210,10 +210,10 @@ void MoveObject::updateMove()
                 double dUR=nextUR-UR;
                 double dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
                 // 根据速率计算每次的坐标变化量
-                double ratio = speed / static_cast<double>(dis);
+                double ratio = getSpeed() / static_cast<double>(dis);
                 VDR = round(dDR * ratio);
                 VUR = round(dUR * ratio);
-                if(countdistance(DR,UR,nextDR,nextUR)<speed)
+                if(countdistance(DR,UR,nextDR,nextUR)<getSpeed())
                 {
                     PredictedDR=nextDR;
                     PredictedUR=nextUR;
@@ -223,7 +223,7 @@ void MoveObject::updateMove()
                     PredictedDR=PreviousDR+VDR;
                     PredictedUR=PreviousUR+VUR;
                 }
-                if(fabs(nextDR-DR)<0.00001&&fabs(nextUR-UR)<0.00001)
+                if(fabs(nextDR-DR)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(nextUR-UR)<DISTANCE_Manhattan_MoveEndNEAR)
                 {
                     pathI=0;
                     pathN=0;
@@ -241,6 +241,4 @@ void MoveObject::updateMove()
     this->BlockUR=UR/BLOCKSIDELENGTH;
     //更新高度
     this->imageH=DR-UR;
-
-
 }
