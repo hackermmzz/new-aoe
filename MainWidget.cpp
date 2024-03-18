@@ -77,7 +77,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
 //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
-    core->sel = sel;
     // 游戏帧数初始化
     gameframe = 0;
 
@@ -104,6 +103,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
     core = new Core(map,player,memorymap,mouseEvent);
+
+    core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 }
 

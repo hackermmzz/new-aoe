@@ -2,7 +2,7 @@
 #define CORE_H
 
 #include <Core_List.h>
-#include "SelectWidget.h"
+
 
 class SelectWidget;
 class Core

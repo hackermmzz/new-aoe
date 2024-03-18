@@ -22,89 +22,26 @@ struct relation_Object
     bool needResourceBuilding = false;
     bool respondConduct = true;
 
-    relation_Object()
-    {
-        isExist = false;
-        goalObject = NULL;
-    }
-
-    relation_Object( Coordinate* goal , int eventClass)
-    {
-        isExist = true;
-        goalObject = goal;
-        relationAct = eventClass;
-        sort = goalObject->getSort();
-        update_GoalPoint();
-        init_AlterOb();
-    }
-
-    relation_Object(double DR_goal , double UR_goal , int eventClass )
-    {
-        isExist = true;
-        goalObject = NULL;
-        this->DR_goal = DR_goal;
-        this->UR_goal = UR_goal;
-        relationAct = eventClass;
-        init_AlterOb();
-    }
+    //构造函数
+    relation_Object() {isExist = false; goalObject = NULL;}
+    relation_Object( Coordinate* goal , int eventClass);
+    relation_Object(double DR_goal , double UR_goal , int eventClass );
 
     void set_distance_AllowWork(){ distance_AllowWork = goalObject->getSideLength()/2.0 + 0.2*BLOCKSIDELENGTH; }
 
     void set_dis_AllowWork_alter(){ dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 0.2*BLOCKSIDELENGTH; }
 
-    void set_ResourceBuildingType()
-    {
-        Resource* resource = NULL;
-        goalObject->printer_ToResource((void**)&resource);
+    void set_ResourceBuildingType();
 
-        if( resource ==NULL )  resourceBuildingType = BUILDING_CENTER;
-        else resourceBuildingType = resource->get_ReturnBuildingType();
-    }
+    void set_AlterOb(Coordinate* AlterObject , double dis_record);
 
-    void set_AlterOb(Coordinate* AlterObject , double dis_record)
-    {
-        alterOb = AlterObject;
-        distance_Record = dis_record;
-        update_Attrib_alter();
-    }
+    void update_GoalPoint();
 
-    void update_GoalPoint()
-    {
-        if(goalObject!= NULL)
-        {
-            DR_goal = goalObject->getDR();
-            UR_goal = goalObject->getUR();
-            set_distance_AllowWork();
-        }
-    }
+    void update_Attrib_alter();
 
-    void update_Attrib_alter()
-    {
-        if(alterOb!= NULL)
-        {
-            DR_alter = alterOb->getDR();
-            UR_alter = alterOb->getUR();
-            set_dis_AllowWork_alter();
-        }
-    }
+    void init_AlterOb();
 
-    void init_AlterOb()
-    {
-        alterOb = NULL;
-        dis_AllowWork_alter = 1e6;
-        distance_Record = 1e6;
-    }
-
-    void init_AttackAb( Coordinate* object1 )
-    {
-        BloodHaver* attacker = NULL;
-        object1->printer_ToBloodHaver((void**)&attacker);
-        if(attacker!=NULL)
-        {
-             attacker->setAttackObject(goalObject); //攻击者记录攻击目标, 用于对于army会计算特攻,farmer计算距离
-             disAttack = attacker->getDis_attack();
-        }
-    }
+    void init_AttackAb( Coordinate* object1 );
 };
 
 struct conditionF
@@ -113,31 +50,11 @@ struct conditionF
     bool isNegation;
     bool (*condition)( Coordinate* , relation_Object & , int& , bool);
 
-    conditionF()
-    {
-
-    }
-
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int& ,bool))
-    {
-        condition = func;
-        variableArgu = OPERATECON_DEFAULT;
-        isNegation = false;
-    }
-
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int& , bool) , int variableArgu)
-    {
-        condition = func;
-        this->variableArgu = variableArgu;
-        isNegation = false;
-    }
-
-    conditionF( bool (*func)(Coordinate* , relation_Object & , int& , bool) , int variableArgu , bool isNegation)
-    {
-        condition = func;
-        this->variableArgu = variableArgu;
-        this->isNegation = isNegation;
-    }
+    //构造函数
+    conditionF(){}
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int& ,bool));
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int& , bool) , int variableArgu);
+    conditionF( bool (*func)(Coordinate* , relation_Object & , int& , bool) , int variableArgu , bool isNegation);
 };
 
 struct detail_EventPhase
@@ -162,42 +79,11 @@ struct detail_EventPhase
     *               loop中止后将进入loop后的一个阶段。   如：loop:1->2->3->1，  中止条件在3进行判断，判断中止loop后，进入阶段4
     */
 
+    //构造函数
+    detail_EventPhase();
+    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition );
 
-    detail_EventPhase()
-    {
-        phaseList[0] = CoreDetail_NormalEnd;
-        phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd;
-    }
-
-    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition )
-    {
-        /** ********************************************************
-         *构造函数
-         *传入：    阶段总数 ， 阶段表 ， 各个阶段的切换条件表 ， 强制中止条件
-         */
-        this->phaseAmount = phaseAmount;
-        for(int i = 0; i<phaseAmount; i++)
-        {
-            phaseList[i] = theList[i];
-            chageCondition[i] = conditionList[i];
-            changeLinkedList[i] = i+1;
-        }
-        this->forcedInterrupCondition = forcedInterrupCondition;
-
-        phaseList[phaseAmount] = CoreDetail_NormalEnd;//中止细节操作
-        phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd;  //强制中止
-    }
-
-    bool setLoop( int loopBeginPhase , int loopEndPhase , list<conditionF>overCondition )
-    {
-        if( loopBeginPhase<loopEndPhase && loopBeginPhase>-1&& loopEndPhase <phaseAmount )
-        {
-            changeLinkedList[loopEndPhase] = loopBeginPhase;
-            loopOverCondition[loopEndPhase] = overCondition;
-            return true;
-        }
-        else return false;
-    }
+    bool setLoop( int loopBeginPhase , int loopEndPhase , list<conditionF>overCondition );
 
     void setJump( int beginPhase, int endPhase ){ changeLinkedList[beginPhase] = endPhase; }
 

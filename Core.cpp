@@ -96,7 +96,6 @@ void Core::manageMouseEvent()
         {
             if( nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY )
             {
-
                 interactionList->addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
             }
             mouseEvent->mouseEventType=NULL_MOUSEEVENT;
@@ -105,34 +104,35 @@ void Core::manageMouseEvent()
         {
             switch(nowobject->getSort())
             {
-            case SORT_FARMER:
-                switch (object_click->getSort()) {
-                case SORT_ANIMAL:
-                    ((Farmer*)nowobject)->setState(4);  //设置state为猎人
-                    interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
+                case SORT_FARMER:
+                    switch (object_click->getSort())
+                    {
+                        case SORT_ANIMAL:
+                            ((Farmer*)nowobject)->setState(4);  //设置state为猎人
+                            interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
+                            break;
+                        default:
+                            break;
+                    }
                     break;
+
+                case SORT_ARMY:
+                    switch (object_click->getSort())
+                    {
+                        case SORT_ANIMAL:
+                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+
                 default:
                     break;
-                }
-                break;
-
-            case SORT_ARMY:
-                switch (object_click->getSort()) {
-                case SORT_ANIMAL:
-                    interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
-                    break;
-                default:
-                    break;
-                }
-                break;
-
-            default:
-                break;
             }
 
             mouseEvent->mouseEventType=NULL_MOUSEEVENT;
         }
-
     }
 }
 //后续编写，用于处理AI指令

@@ -8,6 +8,7 @@ class Core_List
 public:
     Core_List(){ }
     Core_List(Map* theMap, Player* player[]);
+    ~Core_List(){}
 
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
