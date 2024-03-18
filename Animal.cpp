@@ -24,12 +24,19 @@ Animal::Animal(int Num, double DR, double UR)
     this->UR=UR;
     this->BlockDR = transBlock(this->DR);
     this->BlockUR = transBlock(this->UR);
+    this->DR0=DR;
+    this->UR0=UR;
+    this->PredictedDR=DR;
+    this->PredictedUR=UR;
+    this->PreviousDR=DR;
+    this->PreviousUR=UR;
     this->visible = 0;
+    setSideLenth();
     
     //以下根据Num种类特判
     if( this->Num == ANIMAL_LION ) 
     {
-        this->Friendly = 2;
+        this->Friendly = FRIENDLY_ENEMY;
         this->MaxCnt = CNT_LION;
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_LION;
@@ -38,6 +45,7 @@ Animal::Animal(int Num, double DR, double UR)
     }
     else if( this->Num == ANIMAL_GAZELLE )
     {
+        Friendly = FRIENDLY_FRI;
         this->MaxCnt = CNT_GAZELLE;
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_GAZELLE;
@@ -45,6 +53,7 @@ Animal::Animal(int Num, double DR, double UR)
     }
     else if( this->Num == ANIMAL_ELEPHANT )
     {
+        Friendly = FRIENDLY_FENCY;
         this->MaxCnt = CNT_ELEPHANT;
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_ELEPHANT;
@@ -57,6 +66,7 @@ Animal::Animal(int Num, double DR, double UR)
         resourceSort = HUMAN_WOOD;
         this->MaxBlood = BLOOD_TREE;
         speed = 0;
+        moveAble = false;
     }
     else if( this->Num == ANIMAL_FOREST )
     {
@@ -64,6 +74,7 @@ Animal::Animal(int Num, double DR, double UR)
         resourceSort = HUMAN_WOOD;
         this->MaxBlood = BLOOD_FOREST;
         speed = 0;
+        moveAble = false;
     }
 
     this->Cnt = this->MaxCnt;
@@ -94,7 +105,7 @@ void Animal::nextframe()
         if( !isDying() )
         {
              setPreDie();
-             this->gatherable = true;
+             changeToGatherAble();  //死亡后，设置资源为可采集
         }
         else if(!get_isActionEnd() ) nowres++;
     }
@@ -122,17 +133,15 @@ void Animal::setNowRes()
     case 0:
         nowlist=this->Stand[this->Num][this->Angle];
         break;
-    case 1:
-        nowlist=this->Walk[this->Num][this->Angle];
+    case MOVEOBJECT_STATE_WALK:
+        if(changeToRun) nowlist=this->Run[this->Num][this->Angle];
+        else  nowlist=this->Walk[this->Num][this->Angle];
         break;
     case 2:
         nowlist=this->Attack[this->Num][this->Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
         nowlist=this->Die[this->Num][this->Angle];
-        break;
-    case 6:
-        nowlist=this->Run[this->Num][this->Angle];
         break;
     default:
         break;

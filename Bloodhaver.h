@@ -17,6 +17,7 @@ public:
     virtual int getMaxBlood(){ return MaxBlood; }
 
     virtual int getATK(){ return atk; }
+    virtual int get_add_specialAttack(Coordinate* attackee ){ return 0; }
     virtual int getDEF(int attackType_got){  if(attackType_got == ATTACKTYPE_CLOSE) return defence_close;
                                              else if(attackType_got == ATTACKTYPE_SHOOT) return defence_shoot;
                                              else return 0;}
@@ -31,6 +32,8 @@ public:
     Coordinate* getAvangeObject(){ return avangeObject; }
     void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); }
 
+    void initAvengeObject(){ avangeObject = NULL; }
+
 protected:
     double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
     int MaxBlood = 100;
@@ -41,6 +44,9 @@ protected:
     int attackType = ATTACKTYPE_CANTATTACK;     //攻击类型
     int atk = 0;    //攻击力
     double dis_Attack = DISTANCE_ATTACK_CLOSE;  //攻击距离
+
+    //需细化，特攻表
+    std::map<int , int> lab_SpecialAttack;
 
     /** 攻击间隔尚未理解其意义,故没有其的获取函数*/
     double inter_Attack = 0; //攻击间隔

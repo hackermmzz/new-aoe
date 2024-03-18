@@ -16,7 +16,13 @@ public:
     virtual void nextframe();
     virtual int getSort();
 
+    virtual bool get_isActionEnd(){ return true; }
 
+    virtual int getPlayerRepresent(){ return MAXPLAYER; }
+
+    virtual void setAttribute(){ }
+
+    virtual void resetCoreAttribute(){}
 
     /***************指针强制转化****************/
     //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
@@ -64,11 +70,12 @@ public:
         return this->Num;
     }
 
-    double get_BlockDR_centre(){ return BlockDR+BlockSizeLen/2.0; }
-    double get_BlockUR_centre(){ return BlockUR+BlockSizeLen/2.0;}
     double get_BlockSizeLen(){ return BlockSizeLen; }
     double get_SideLen(){return SideLength;}
 
+
+/*****************act获取***************/
+//需要协商，act位置
     double getActPercent()
     {
         return this->actPercent;
@@ -105,6 +112,8 @@ public:
     {
         this->actNum = actNum;
     }
+/*****************act获取***************/
+
 protected:
 
     int Num;//对象在对应类中的编号
@@ -122,7 +131,7 @@ protected:
     double imageX;//该物体的长宽（即占地面积）
     double imageY;//需要根据占地大小来就算确切的绘制偏移量
 
-    double BlockSizeLen = SIZELEN_SMALL; //物体占地,块坐标， 如小房子，为1，中型房子为2，动物为1
+    double BlockSizeLen = SIZELEN_SINGEL; //物体占地,块坐标， 如小房子，为2，中型房子为3，动物为1
 
     double SideLength;
     //占地大小转换成游戏内坐标 边长
@@ -144,12 +153,22 @@ protected:
 
     std::list<ImageResource>::iterator nowres;
 
+    void setDetailPointAttrb_FormBlock()
+    {
+        DR = ( BlockDR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
+        UR = ( BlockUR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
+        setSideLenth();
+    }
+    void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
+
+    /*****************act获取***************/
     double actPercent = 0;
     double actSpeed = 0;
     int actName = 0;
     //执行行动时的进度、速率和行动类型
     int actNum=0;
     //动作类型的编号
+    /*****************act获取***************/
 };
 
 #endif // COORDINATE_H

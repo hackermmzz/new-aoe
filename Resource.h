@@ -1,6 +1,7 @@
 ﻿#ifndef RESOURCE_H
 #define RESOURCE_H
 
+#include <config.h>
 
 class Resource
 {
@@ -10,9 +11,11 @@ public:
     bool get_Gatherable(){return gatherable;}
     int get_ResourceSort(){ return resourceSort; }
     int get_Cnt(){ return (int)Cnt; }
+    int get_ReturnBuildingType();
+
     void updateCnt_byGather( double gather){  Cnt -= gather ;}
     void updateCnt_byDecay(){ Cnt*=(1-DecayRate); }
-    bool isGather_finish(){ return Cnt<=0; }
+    bool is_Surplus(){ return Cnt>0; }
 
 protected:
     double Cnt; //Cnt表示当前剩余的实际资源量
@@ -30,6 +33,8 @@ protected:
     //1指代木头 2指代肉 3指代石头 4指代金子
     //eg:    HUMAN_WOOD
 
+    //设置资源为可采集
+    void changeToGatherAble(){ gatherable = true; }
 };
 
 #endif // RESOURCE_H

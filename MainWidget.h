@@ -54,8 +54,9 @@ public:
         return acts[num];
     }
 
+    Core *core;
+
     bool eventFilter(QObject *watched, QEvent *event);
-    Core *core=new Core();
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];

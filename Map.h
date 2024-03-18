@@ -38,6 +38,18 @@ public:
 
     int loadResource();
 
+    list<Animal*>::iterator deleteAnimal( list<Animal*>::iterator iterDele)
+    {
+        delete *iterDele;
+        return animal.erase(iterDele);
+    }
+
+    list<StaticRes*>::iterator deleteStaticRes( list<StaticRes*>::iterator iterDele )
+    {
+        delete *iterDele;
+        return staticres.erase(iterDele);
+    }
+    
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
 
