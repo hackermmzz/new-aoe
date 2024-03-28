@@ -53,7 +53,6 @@ bool Core_List::addRelation( Coordinate * object1, double DR , double UR, int ev
         relate_AllObject[object1].respondConduct = respond;
         relate_AllObject[object1].sort = SORT_COORDINATE;
 
-
         return true;
     }
 

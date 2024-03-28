@@ -140,11 +140,8 @@ bool detail_EventPhase::setLoop( int loopBeginPhase , int loopEndPhase , list<co
 
 //****************************************************************************************
 //通用的关系函数
-//永否
-bool condition_AllFalse( Coordinate* object1, relation_Object& relation , int& operate , bool isNegation){return false;}
-
 //永真
-bool condition_AllTrue( Coordinate* object1, relation_Object& relation , int& operate , bool isNegation){return true;}
+bool condition_AllTrue( Coordinate* object1, relation_Object& relation , int& operate , bool isNegation){return isNegation^true;}
 
 //times次假
 bool condition_TimesFalse( Coordinate* object1, relation_Object& relation , int& operate , bool isNegation)

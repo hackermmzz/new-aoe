@@ -131,6 +131,8 @@ public:
 
     void changeResource( int resourceSort , int num );
 
+    bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
+
 private:
     int represent;
 

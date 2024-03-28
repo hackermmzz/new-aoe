@@ -2,7 +2,7 @@
 
 Development::Development()
 {
-
+    init_DevelopLab();
 }
 
 double Development::get_rate_Move(int sort , int type)
@@ -132,3 +132,17 @@ int Development::get_addition_ResourceSort( int resourceSort )
 }
 
 
+void Development::init_DevelopLab()
+{
+    conditionDevelop* newNode;
+
+    developLab[BUILDING_CENTER].buildCon = NULL;
+    newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
+                                   0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
+    developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
+    developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
+    newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_UPGRADE,\
+                                   0, BUILDING_CENTER_UPGRADE_FOOD);
+    developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].setHead(newNode);
+
+}

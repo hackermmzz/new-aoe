@@ -25,7 +25,15 @@ public:
 
     int get_addition_ResourceSort( int resourceSort );
 
+    bool get_isBuildingAble( int buildingNum , int wood ,int food , int stone ,int gold )
+        { return developLab[buildingNum].buildCon->executable(wood , food ,stone ,gold); }
 
+    double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
+
+    double get_actTime( int buildingNum, int actNum )
+        { return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
+
+    void init_DevelopLab();
 private:
     //研发工艺带来的数值加成
     double rate_FarmerMove = 0;
@@ -52,6 +60,7 @@ private:
     int level_Wall = 0;
     int level_ArrowTower = 0;
 
+    map< int , st_buildAction > developLab;
 };
 
 #endif // DEVELOPMENT_H

@@ -137,6 +137,17 @@
 #define BUILDING_MARKET_FARM_UPGRADE_NAME "研发驯养动物:农场食物产量+75(花费:200食物,50木头)"
 #define BUILDING_ACTION_CANCEL_NAME "中止"
 
+/********** 建筑动作耗时 **********/
+//单位为秒
+#define TIME_BUILDING_CENTER_CREATEFARMER 20
+#define TIME_BUILDING_CENTER_UPGRADE 60
+#define TIME_BUILD_HOME 20
+#define TIME_BUILD_STOCK 40
+#define TIME_BUILD_GRANARY 40
+
+
+
+
 /********** 人物状态 **********/
 /*
  * 0代表为空闲状态

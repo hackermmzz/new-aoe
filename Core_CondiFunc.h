@@ -103,8 +103,6 @@ struct detail_EventPhase
     bool 是否取反（true表取反，flase按原真值输出） ）
 */
 
-//永否
-bool condition_AllFalse( Coordinate*, relation_Object& , int& , bool);
 //永真
 bool condition_AllTrue( Coordinate*, relation_Object&, int& , bool);
 //times次假

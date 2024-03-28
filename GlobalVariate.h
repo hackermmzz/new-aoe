@@ -234,16 +234,24 @@ struct Point {
 struct conditionDevelop
 {
     int civilization;
-    int sort_building;
+    int sort_building;  //所属建筑
+
+    double times_second;
+
+    bool unlock = false;    //表示是否执行过一次
+
+    //记录前置条件
+    list<conditionDevelop*> preCondition;
+
+    conditionDevelop* nextDevAction = NULL;
 
     int need_Wood;
     int need_Food;
     int need_Stone;
     int need_Gold;
 
-
     conditionDevelop(){ }
-    conditionDevelop( int civilization , int sort_building,int need_Wood,int need_Food, int need_Stone,int need_Gold )
+    conditionDevelop( int civilization , int sort_building, double needTimes ,  int need_Wood = 0, int need_Food = 0, int need_Stone = 0 , int need_Gold = 0 )
     {
         this->civilization = civilization;
         this->sort_building = sort_building;
@@ -251,9 +259,59 @@ struct conditionDevelop
         this->need_Food = need_Food;
         this->need_Stone = need_Stone;
         this->need_Gold = need_Gold;
+        this->times_second = needTimes;
     }
 
     bool executable( int wood,int food,int stone,int gold ) { return wood>=need_Wood && food>=need_Food && stone>=need_Stone && gold>=need_Gold; }
+
+    void addPreCondition(conditionDevelop* con_need){ preCondition.push_back(con_need);  }
+
+    bool isShowable( int nowcivilization )
+    {
+        if(civilization>nowcivilization) return false;
+
+        for(list<conditionDevelop*>::iterator iter = preCondition.begin(); iter!= preCondition.end(); iter++)
+            if(!(*iter)->unlock) return false;
+
+        return true;
+    }
+};
+
+struct st_upgradeLab{
+    conditionDevelop *headAct = NULL , *nowExecuteNode = NULL , *endNode = NULL;
+
+    st_upgradeLab(){}
+    ~st_upgradeLab()
+    {
+        while(headAct!=endNode)
+        {
+            nowExecuteNode = headAct;
+            headAct = headAct->nextDevAction;
+            delete nowExecuteNode;
+        }
+        delete endNode;
+    }
+
+    void setHead(conditionDevelop* head) { endNode = nowExecuteNode = headAct= head; }
+
+    void push_back( conditionDevelop* node )
+    {
+        endNode->nextDevAction = node;
+        endNode = node;
+    }
+
+    void endNodeAsOver(){ endNode->nextDevAction = endNode; }
+
+    void shift(){ if(headAct!=NULL) headAct = headAct->nextDevAction; }
+};
+
+struct st_buildAction
+{
+    conditionDevelop* buildCon;
+
+    map<int , st_upgradeLab> actCon;
+
+    st_buildAction(){}
 };
 
 
