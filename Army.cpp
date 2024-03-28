@@ -1,4 +1,12 @@
-#include "Army.h"
+﻿#include "Army.h"
+
+std::list<ImageResource>* Army::Walk[4][8];
+std::list<ImageResource>* Army::Disappear[4][8];
+std::list<ImageResource>* Army::Stand[4][8];
+std::list<ImageResource>* Army::Attack[4][8];
+std::list<ImageResource>* Army::Die[4][8];
+
+std::string Army::ArmyName[4]={"Archer","Axeman","Clubman","Scout"};
 
 Army::Army()
 {

@@ -1,4 +1,4 @@
-#include "MainWidget.h"
+﻿#include "MainWidget.h"
 #include "ui_MainWidget.h"
 
 int g_globalNum=1;
@@ -36,6 +36,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initBuilding();
     initAnimal();
     initFarmer();
+    initArmy();
 
     // 设置当前窗口属性
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
@@ -76,7 +77,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     showTimer->start(1000);
     connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
-//    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
+    //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
     // 游戏帧数初始化
     gameframe = 0;
 
@@ -116,6 +117,7 @@ MainWidget::~MainWidget()
     deleteAnimal();
     deleteFarmer();
     deleteBuilding();
+    deleteArmy();
     delete core;
 }
 
@@ -296,6 +298,44 @@ void MainWidget::initFarmer()
 
 }
 
+void MainWidget::initArmy()
+{
+    //加载素材
+    //"Archer","Axeman","Clubman","Scout"
+
+    // Stand Walk Die
+    for(int statei=0;statei<4;statei++)
+    {
+        for(int i=0;i<=4;i++)
+        {
+            Army::allocateWalk(statei,i);
+            Army::allocateStand(statei,i);
+            Army::allocateDie(statei,i);
+            Army::allocateDisappear(statei,i);
+            Army::allocateAttack(statei,i);
+            loadResource(Army::getArmyName(statei)+"_Attack_"+direction[i],Army::getAttack(statei,i));
+            loadResource(Army::getArmyName(statei)+"_Work_"+direction[i],Army::getDisappear(statei,i));
+            loadResource(Army::getArmyName(statei)+"_Stand_"+direction[i],Army::getStand(statei,i));
+            loadResource(Army::getArmyName(statei)+"_Walk_"+direction[i],Army::getWalk(statei,i));
+            loadResource(Army::getArmyName(statei)+"_Die_"+direction[i],Army::getDie(statei,i));
+        }
+        for(int i=5;i<8;i++)
+        {
+            Army::allocateWalk(statei,i);
+            Army::allocateStand(statei,i);
+            Army::allocateDie(statei,i);
+            Army::allocateDisappear(statei,i);
+            Army::allocateAttack(statei,i);
+            flipResource(Army::getAttack(statei,8-i),Army::getAttack(statei,i));
+            flipResource(Army::getDisappear(statei,8-i),Army::getDisappear(statei,i));
+            flipResource(Army::getWalk(statei,8-i),Army::getWalk(statei,i));
+            flipResource(Army::getStand(statei,8-i),Army::getStand(statei,i));
+            flipResource(Army::getDie(statei,8-i),Army::getDie(statei,i));
+        }
+    }
+
+}
+
 // 删除区块资源
 void MainWidget::deleteBlock()
 {
@@ -368,13 +408,7 @@ void MainWidget::deleteFarmer()
     // 清理素材资源
     for(int statei = 0; statei < 7; statei++)
     {
-        for(int i = 0; i <= 4; i++)
-        {
-            Farmer::deallocateWalk(statei, i);
-            Farmer::deallocateStand(statei, i);
-            Farmer::deallocateDie(statei, i);
-        }
-        for(int i = 5; i < 8; i++)
+        for(int i = 0; i < 8; i++)
         {
             Farmer::deallocateWalk(statei, i);
             Farmer::deallocateStand(statei, i);
@@ -390,11 +424,7 @@ void MainWidget::deleteFarmer()
             continue;
         }
 
-        for(int i = 0; i <= 4; i++)
-        {
-            Farmer::deallocateWork(statei, i);
-        }
-        for(int i = 5; i < 8; i++)
+        for(int i = 0; i < 8; i++)
         {
             Farmer::deallocateWork(statei, i);
         }
@@ -408,11 +438,7 @@ void MainWidget::deleteFarmer()
             continue;
         }
 
-        for(int i = 0; i <= 4; i++)
-        {
-            Farmer::deallocateAttack(statei, i);
-        }
-        for(int i = 5; i < 8; i++)
+        for(int i = 0; i < 8; i++)
         {
             Farmer::deallocateAttack(statei, i);
         }
@@ -426,16 +452,28 @@ void MainWidget::deleteFarmer()
             continue;
         }
 
-        for(int i = 0; i <= 4; i++)
-        {
-            Farmer::deallocateCarry(statei, i);
-        }
-        for(int i = 5; i < 8; i++)
+        for(int i = 0; i < 8; i++)
         {
             Farmer::deallocateCarry(statei, i);
         }
     }
 
+}
+
+void MainWidget::deleteArmy()
+{
+    // 清理素材资源
+    for(int statei = 0; statei < 4; statei++)
+    {
+        for(int i = 0; i < 8; i++)
+        {
+            Army::deallocateWalk(statei, i);
+            Army::deallocateStand(statei, i);
+            Army::deallocateDie(statei, i);
+            Army::deallocateAttack(statei, i);
+            Army::deallocateDisappear(statei, i);
+        }
+    }
 }
 
 bool MainWidget::eventFilter(QObject *watched, QEvent *event)
