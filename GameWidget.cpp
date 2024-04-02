@@ -62,7 +62,7 @@ void GameWidget::paintEvent(QPaintEvent *)
                 if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)
 //                    painter.drawPixmap(-32+64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 {
-                    qDebug() << -32+64*j + mainwidget->map->cell[x2][y2].getOffsetX() << ' ' << -16+16*i + mainwidget->map->cell[x2][y2].getOffsetY();
+//                    qDebug() << -32+64*j + mainwidget->map->cell[x2][y2].getOffsetX() << ' ' << -16+16*i + mainwidget->map->cell[x2][y2].getOffsetY();
                     painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 }
                 else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)
