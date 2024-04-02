@@ -49,10 +49,14 @@ public:
     int findPathMap[72][72];
 
 private:
+    int CheckNeighborHigher(int x, int y, int currentCalHeight);
+    int CheckNeighborType(int x, int y, int selectType);
+    bool CheckBorder(int x, int y, int currentCalHeight);
     void GenerateTerrain();     // 用于生成地形高度（Block高度）
     void GenerateType();        // 依据高度生成地形图Block种类
     void CalOffset();           // 计算每个Block的偏移量
-    double smooth(double x);    // 用于平滑地图曲线
+
+    short m_heightMap[80][80];
 
 };
 
