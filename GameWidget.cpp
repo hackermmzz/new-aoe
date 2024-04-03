@@ -36,7 +36,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 //        }
 //    }
 
-    for(int i=0;i<GAMEWIDGET_HEIGHT/(mainwidget->map->cell[0][0].block[0]->front().pix.height()/2.0)+2;i++)
+    for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 5; i++)
     {
         x2=x1;
         y2=y1;
@@ -48,7 +48,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             x1++;
         }
         //此处改动不采用nowres来显示图片
-        for(int j=0;j<GAMEWIDGET_WIDTH/mainwidget->map->cell[0][0].block[0]->front().pix.width()+1;j++) // 行绘制
+        for(int j = 0; j < GAMEWIDGET_WIDTH / mainwidget->map->cell[0][0].block[0]->front().pix.width() + 1; j++) // 行绘制
         {
             if(x2>=MAP_L||y2>=MAP_U||x2<0||y2<0)
             {
