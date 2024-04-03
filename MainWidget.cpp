@@ -99,8 +99,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 向地图中添加资源
     initmap();
-    player[0]->addBuilding( BUILDING_CENTER ,30,30);
-    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
+    // 添加资源测试
+    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
+//    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
     core = new Core(map,player,memorymap,mouseEvent);
