@@ -898,19 +898,65 @@ bool Map::CheckBorder(int x, int y, int currentCalHeight)
 void Map::GenerateTerrain()
 {
     srand(time(NULL));
-    for(int height = MAPHEIGHT_FLAT + 1; height < MAPHEIGHT_MAX; height ++) {
+    for(int height = MAPHEIGHT_FLAT + 1; height < MAPHEIGHT_PERCENT; height ++) {
+        // 每层微调生成概率
+        int percent = MAPHEIGHT_PERCENT;
+        switch (height) {
+        case 1:
+            percent -= 3;   // 57
+            break;
+        case 2:
+            percent += 13;  // 70
+            break;
+        case 3:
+            percent -= 10;  // 60
+            break;
+        case 4:
+            percent += 40;  // 100
+            break;
+        default:
+            break;
+        }
         for(int i = 0; i < 80; i ++)
-            for(int j = 0; j < 80; j ++)
-                if(rand() % 100 < MAPHEIGHT_PERCENT && m_heightMap[i][j] == height - 1 && CheckBorder(i, j, height))
+            for(int j = 0; j < 80; j ++) {
+                if(rand() % 100 < percent && m_heightMap[i][j] == height - 1 && CheckBorder(i, j, height))
                     m_heightMap[i][j] ++;
+            }
+
+        if(height == 1) {
+            for(int i = 0; i < 20; i ++) {
+                for(int j = 0; j < 20; j ++) {
+                    m_heightMap[i][j] = 0;
+                }
+            }
+        }
 
         for(int optCounter = 0; optCounter <= MAPHEIGHT_OPTCOUNT; optCounter ++)    // optCounter：当前优化次数
+        {
             for(int i = 0; i < 80; i ++)
                 for(int j = 0; j < 80; j ++) {
                     int count = CheckNeighborHigher(i, j, height);
                     if(m_heightMap[i][j] == height && count < 4) m_heightMap[i][j] --;
                     else if(m_heightMap[i][j] == height - 1 && count >= 5) m_heightMap[i][j] ++;
                 }
+            if(optCounter == MAPHEIGHT_OPTCOUNT - 10)
+                for(int i = 2; i < 78; i ++)
+                    for(int j = 2; j < 78; j ++) {
+                        int count = CheckNeighborHigher(i, j, height);
+                        if(m_heightMap[i][j] == height - 1 && count >= 2) {
+                            if(m_heightMap[i - 1][j - 1] == height && m_heightMap[i + 1][j + 1] == height) {
+                                //                                qDebug() << "修改" << i << ',' << j << "处";
+                                m_heightMap[i - 1][j - 1] --;
+                                m_heightMap[i + 1][j + 1] --;
+                            }
+                            if(m_heightMap[i - 1][j + 1] == height && m_heightMap[i + 1][j - 1] == height) {
+                                //                                qDebug() << "修改" << i << ',' << j << "处";
+                                m_heightMap[i - 1][j + 1] --;
+                                m_heightMap[i + 1][j - 1] --;
+                            }
+                        }
+                    }
+        }
     }
 
     // 取中心高度值存入cell以防止地图边界资源生成断裂
@@ -1049,7 +1095,7 @@ void Map::GenerateType()
             int count = CheckNeighborType(i, j, MAPTYPE_A2_UPTOU) +
                     CheckNeighborType(i, j, MAPTYPE_L3_DOWNTORD) +
                     CheckNeighborType(i, j, MAPTYPE_L0_DOWNTOLD);
-                    CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
+            CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
                     CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count == 0) {
                 if(j + 1 < 72 && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
@@ -1148,7 +1194,7 @@ void Map::init(int MapJudge)
             {
                 for (int j = 0; j < MAP_U; j++)
                 {
-//                    outMapFile << Gamemap[i][j] << "\n";
+                    //                    outMapFile << Gamemap[i][j] << "\n";
                     outMapFile << this->cell[i][j].getMapHeight() << ' ';
                 }
                 outMapFile << "\n";
