@@ -1049,21 +1049,17 @@ void Map::GenerateType()
             int count = CheckNeighborType(i, j, MAPTYPE_A2_UPTOU) +
                     CheckNeighborType(i, j, MAPTYPE_L3_DOWNTORD) +
                     CheckNeighborType(i, j, MAPTYPE_L0_DOWNTOLD);
-            CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
+                    CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
                     CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count == 0) {
                 if(j + 1 < 72 && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
                     this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
             }
-
-            //            count = CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
-            //                    CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
-            //            if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count > 0)
-            //                this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
-
-            //            count = CheckNeighborType(i, j, MAPTYPE_L3_UPTORD) + CheckNeighborType(i, j, MAPTYPE_L2_DOWNTORU);
-            //            if(this->cell[i][j].getMapType() == MAPTYPE_A2_DOWNTOU && count > 0)
-            //                this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
+            if(i + 1 < 72 && j + 1 < 72 && (this->cell[i - 1][j].getMapType() == MAPTYPE_A0_DOWNTOD || this->cell[i - 1][j].getMapType() == MAPTYPE_L2_UPTORU) && this->cell[i][j + 1].getMapType() == MAPTYPE_A0_DOWNTOD && this->cell[i + 1][j].getMapType() == MAPTYPE_FLAT)
+                this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
+            count = CheckNeighborType(i, j, MAPTYPE_L0_UPTOLD) + CheckNeighborType(i, j, MAPTYPE_L3_UPTORD);
+            if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count > 0)
+                this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
         }
     }
 }
@@ -1111,10 +1107,10 @@ void Map::init(int MapJudge)
             this->cell[i][j].Visible = true;
         }
     }
-//    generateLandforms();    // 在草地中生成小片沙漠
-//    generateCenter();       // 生成市镇中心及附近资源
-//    generateResources();    // 生成片状资源
-//    generateResource();     // 生成独立资源
+    //    generateLandforms();    // 在草地中生成小片沙漠
+    //    generateCenter();       // 生成市镇中心及附近资源
+    //    generateResources();    // 生成片状资源
+    //    generateResource();     // 生成独立资源
     GenerateTerrain();      // 元胞自动机生成地图高度
     GenerateType();         // 通过高度差计算调用的地图块资源
     CalOffset();            // 计算偏移量
@@ -1131,9 +1127,9 @@ void Map::init(int MapJudge)
             else if(this->cell[i][j].getMapType() == 1)
             {
                 // 设置平地全部为草地
-                //                 this->cell[i][j].Num = MAPPATTERN_GRASS;
+                this->cell[i][j].Num = MAPPATTERN_GRASS;
                 // 测试时设置平地全部为沙漠，便于调试
-                this->cell[i][j].Num = MAPPATTERN_DESERT;
+                //                this->cell[i][j].Num = MAPPATTERN_DESERT;
             }
             else if(this->cell[i][j].getMapType() == 0)
             {
@@ -1152,7 +1148,8 @@ void Map::init(int MapJudge)
             {
                 for (int j = 0; j < MAP_U; j++)
                 {
-                    outMapFile << Gamemap[i][j] << "\n";
+//                    outMapFile << Gamemap[i][j] << "\n";
+                    outMapFile << this->cell[i][j].getMapHeight() << ' ';
                 }
                 outMapFile << "\n";
             }

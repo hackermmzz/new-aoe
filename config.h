@@ -91,7 +91,7 @@
 /********** 地图块高度 **********/
 #define MAPHEIGHT_FLAT 0        // 地形高度
 #define MAPHEIGHT_MAX 5         // 最高地形高度
-#define MAPHEIGHT_PERCENT 60    // 生成概率，范围0~100
+#define MAPHEIGHT_PERCENT 63    // 生成概率，范围0~100
 #define MAPHEIGHT_OPTCOUNT 30   // 生成高度时的优化次数，范围要求>=5
 
 /********** 地图块样式 **********/
