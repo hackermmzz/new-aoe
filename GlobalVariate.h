@@ -245,10 +245,8 @@ struct conditionDevelop
 
     conditionDevelop* nextDevAction = NULL;
 
-    int need_Wood;
-    int need_Food;
-    int need_Stone;
-    int need_Gold;
+    //需要的物资
+    int need_Wood ,need_Food ,need_Stone , need_Gold;
 
     conditionDevelop(){ }
     conditionDevelop( int civilization , int sort_building, double needTimes ,  int need_Wood = 0, int need_Food = 0, int need_Stone = 0 , int need_Gold = 0 )
@@ -307,11 +305,19 @@ struct st_upgradeLab{
 
 struct st_buildAction
 {
-    conditionDevelop* buildCon;
+    conditionDevelop* buildCon = NULL;
 
     map<int , st_upgradeLab> actCon;
 
     st_buildAction(){}
+    ~st_buildAction()
+    {
+        if(buildCon!=NULL)
+        {
+            delete buildCon;
+            buildCon = NULL;
+        }
+    }
 };
 
 

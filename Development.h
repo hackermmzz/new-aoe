@@ -23,6 +23,8 @@ public:
     double get_rate_Defence( int sort , int type , int armyClass , int attackType_got );
     int get_addition_Defence( int sort , int type , int armyClass , int attackType_got );
 
+    double get_rate_HitTarget(){ return 1+rate_hitTarget; }
+
     int get_addition_ResourceSort( int resourceSort );
 
     bool get_isBuildingAble( int buildingNum , int wood ,int food , int stone ,int gold )
@@ -34,10 +36,14 @@ public:
         { return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
     void init_DevelopLab();
+
+    void upgradeDevelop(int buildingType){ developLab[buildingType].buildCon->unlock = true; }
+    void upgradeDevelop(int buildingType , int buildact){}
 private:
     //研发工艺带来的数值加成
     double rate_FarmerMove = 0;
     double rate_FarmerBlood = 0;
+    double rate_hitTarget = 0;
     int attack_close = 0;
     int defence_infantry = 0;
     int defence_archer = 0;

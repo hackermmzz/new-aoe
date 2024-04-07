@@ -19,8 +19,10 @@ struct relation_Object
     double distance_Record; //游戏中的距离的记录,为曼哈顿距离，用于更新relation
     double disAttack = 0;
 
+    int times_Execution = 0;
+
     bool needResourceBuilding = false;
-    bool respondConduct = true;
+    bool respondConduct = false;
 
     //构造函数
     relation_Object() {isExist = false; goalObject = NULL;}
@@ -31,6 +33,7 @@ struct relation_Object
 
     void set_dis_AllowWork_alter(){ dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 0.2*BLOCKSIDELENGTH; }
 
+    //如果goalObject是Resource的子类，则根据资源种类设置对应资源建筑的类型
     void set_ResourceBuildingType();
 
     void set_AlterOb(Coordinate* AlterObject , double dis_record);
@@ -42,6 +45,10 @@ struct relation_Object
     void init_AlterOb();
 
     void init_AttackAb( Coordinate* object1 );
+
+    void set_ExecutionTime(int times){ times_Execution = times; }
+    void excutionOnce(){ if(times_Execution>0) times_Execution--; }
+    bool is_ExecutionOver(){ return times_Execution == 0; }
 };
 
 struct conditionF
@@ -70,7 +77,7 @@ struct detail_EventPhase
     int phaseList[CoreDetailLinkMaxNum];      //core中，由此值指示进入函数
     conditionF chageCondition[CoreDetailLinkMaxNum-2];   //切换phase的判断条件
     map<int,int> changeLinkedList;  //关系链，
-    list<conditionF>forcedInterrupCondition;//细节控制的强制中止条件
+//    list<conditionF>forcedInterrupCondition;//细节控制的强制中止条件
 
     map< int , list<conditionF> > loopOverCondition;  //loop的中止条件
     /**
@@ -81,7 +88,7 @@ struct detail_EventPhase
 
     //构造函数
     detail_EventPhase();
-    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition );
+    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList /*, list< conditionF >forcedInterrupCondition */);
 
     bool setLoop( int loopBeginPhase , int loopEndPhase , list<conditionF>overCondition );
 
@@ -113,6 +120,8 @@ bool condition_UniObjectDie( Coordinate* , relation_Object& , int& , bool);
 bool condition_UniObjectUnderAttack( Coordinate* , relation_Object& , int& ,bool);
 //单一object为NULL
 bool condition_UniObjectNULL( Coordinate* , relation_Object& , int& ,bool);
+//单一object的行动完成度百分比
+bool condition_UniObjectPercent( Coordinate* , relation_Object& , int& , bool );
 //工作者背包空
 bool condition_Object1_EmptyBackpack( Coordinate* , relation_Object& , int& ,bool);
 //工作者背包容量满

@@ -60,19 +60,19 @@ protected:
     //stand walk attack die disappear work run
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
-    std::list<ImageResource> *nowlist=NULL;
     
 public:
     MoveObject();
 
   /**********************虚函数**************************/
-    virtual void setNowRes(){ }
-
+    virtual int calculateAngle(double nextDR, double nextUR);
     virtual double getSpeed(){ return speed; }
     virtual int getVision(){ return vision; }
     bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
+    bool get_isActionImageToPhaseFromEnd(int phaseFormEnd){ return this->nowres == prev(nowlist->end(),phaseFormEnd); }
     void resetCoreAttribute(){ changeToRun = false; }
 
+    virtual void updateMove();
     /***************指针强制转化****************/
     void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
     /*************以上指针强制转化****************/
@@ -81,12 +81,10 @@ public:
     bool isWalking(){return this->nowstate==MOVEOBJECT_STATE_WALK;}
     bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
-    void updateMove();
 
     void beginRun(){ changeToRun = true; }
 
     void calculateDiretionArray(stack<Point>& path);
-    int calculateAngle(double L0,double U0);
 
     void setPath(stack<Point> path)
     {

@@ -108,7 +108,7 @@ detail_EventPhase::detail_EventPhase()
     phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd;
 }
 
-detail_EventPhase::detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition )
+detail_EventPhase::detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList/* , list< conditionF >forcedInterrupCondition*/ )
 {
     /** ********************************************************
      *构造函数
@@ -121,7 +121,7 @@ detail_EventPhase::detail_EventPhase( int phaseAmount , int* theList, conditionF
         chageCondition[i] = conditionList[i];
         changeLinkedList[i] = i+1;
     }
-    this->forcedInterrupCondition = forcedInterrupCondition;
+//    this->forcedInterrupCondition = forcedInterrupCondition;
 
     phaseList[phaseAmount] = CoreDetail_NormalEnd;//中止细节操作
     phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd;  //强制中止
@@ -146,8 +146,10 @@ bool condition_AllTrue( Coordinate* object1, relation_Object& relation , int& op
 //times次假
 bool condition_TimesFalse( Coordinate* object1, relation_Object& relation , int& operate , bool isNegation)
 {
-    if(operate/OPERATECHANGE_TIME == 0) return isNegation^true;
-    else {operate --; return isNegation^false;}
+    if(relation.is_ExecutionOver()) return isNegation^true;
+
+    relation.excutionOnce();
+    return isNegation^false;
 }
 
 //单一Object死亡
@@ -169,7 +171,7 @@ bool condition_UniObjectUnderAttack( Coordinate* object1, relation_Object& relat
     else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL) relation.goalObject->printer_ToBloodHaver((void**)&object_judget);
 
     if(object_judget == NULL) return isNegation ^ true;
-    else return isNegation ^ (object_judget->getAvangeObject() != NULL);
+    else return isNegation ^ object_judget->isGotAttack();
 }
 
 //单一object为NULL
@@ -181,6 +183,20 @@ bool condition_UniObjectNULL( Coordinate* object1, relation_Object& relation, in
 
     if(judge == NULL) return isNegation^true;
     else return isNegation^false;
+}
+
+//单一object的行动完成度百分比
+bool condition_UniObjectPercent(  Coordinate* object1, relation_Object& relation, int& operate, bool isNegation )
+{
+    Coordinate* judge = NULL;
+    int relationAct = relation.relationAct;
+    if(operate == OPERATECON_OBJECT1) judge = object1;
+    else if(operate == OPERATECON_OBJECT2) judge = relation.goalObject;
+
+    if(relationAct == CoreEven_FixBuilding) return isNegation^((Building*)judge)->isFullHp();
+    else if(relationAct == CoreEven_BuildingAct) return isNegation^((Building*)judge)->is_ActionFinish();
+
+    return isNegation^true;
 }
 
 //工作者背包空
@@ -240,6 +256,9 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
             case OPERATECON_NEAR_WORK:
                 dis = relation.distance_AllowWork;
                 break;
+            case OPERATECON_NEAR_MISSILE:
+                dis = ((Missile*)object1)->get_Distance_hitTarget();
+
             default:
                 break;
         }
@@ -247,6 +266,15 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
         ur2 = relation.UR_goal;
     }
 
+    //对飞行物的距离判定进行特判
+    if(operate == OPERATECON_NEAR_MISSILE)
+    {
+        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 )<=dis )
+            ((Missile*)object1)->hitTarget();
+        return isNegation^((Missile*)object1)->isMissileFinishTask();
+    }
+
+    //一般性距离判断（使用曼哈顿距离）
     if(isNear_Manhattan(dr1 ,ur1 , dr2 , ur2 , dis))
     {
         if(relation.isUseAlterGoal) relation.isUseAlterGoal = false;

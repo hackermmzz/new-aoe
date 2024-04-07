@@ -35,8 +35,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initBlock();
     initBuilding();
     initAnimal();
+    initStaticResource();
     initFarmer();
     initArmy();
+    initMissile();
 
     // 设置当前窗口属性
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
@@ -115,9 +117,11 @@ MainWidget::~MainWidget()
     delete ui;
     deleteBlock();
     deleteAnimal();
+    deleteStaticResource();
     deleteFarmer();
     deleteBuilding();
     deleteArmy();
+    deleteMissile();
     delete core;
 }
 
@@ -211,6 +215,16 @@ void MainWidget::initAnimal()
             flipResource(Animal::getAttack(num,8-i),Animal::getAttack(num,i));
             flipResource(Animal::getDie(num,8-i),Animal::getDie(num,i));
         }
+    }
+}
+
+// 初始化不可移动的资源
+void MainWidget::initStaticResource()
+{
+    for(int num = 0; num<3; num++)
+    {
+        StaticRes::allocateStaticResource(num);
+        loadResource(StaticRes::getStaticResName(num) , StaticRes::getStaticResource(num));
     }
 }
 
@@ -336,6 +350,17 @@ void MainWidget::initArmy()
 
 }
 
+void MainWidget::initMissile()
+{
+    //加载飞行物素材
+
+    for(int statei = 0; statei<NUMBER_MISSILE; statei++)
+    {
+        Missile::allocatemissile(statei);
+        loadResource(Missile::getMissilename(statei),Missile::getmissile(statei));
+    }
+}
+
 // 删除区块资源
 void MainWidget::deleteBlock()
 {
@@ -400,6 +425,13 @@ void MainWidget::deleteAnimal()
             Animal::deallocateDie(num, i);
         }
     }
+}
+
+// 删除不可移动的资源
+void MainWidget::deleteStaticResource()
+{
+    for(int num = 0; num<3; num++)
+        StaticRes::deallocateStaticResource(num);
 }
 
 // 删除农民资源
@@ -474,6 +506,12 @@ void MainWidget::deleteArmy()
             Army::deallocateDisappear(statei, i);
         }
     }
+}
+
+// 删除飞行物资源
+void MainWidget::deleteMissile()
+{
+    for(int statei = 0; statei < NUMBER_MISSILE; statei++ ) Missile::deallocatemissile(statei);
 }
 
 bool MainWidget::eventFilter(QObject *watched, QEvent *event)

@@ -38,6 +38,9 @@ private:
     bool isGranaryBuilt = false;
     bool isStockBuilt = false;
     bool isMarketBuilt = false;
+
+    Core_List* corelist = NULL;
+
 public slots:
     void widgetAct(int num);
     void aiAct(int acter, int actName);

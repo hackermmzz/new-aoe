@@ -65,6 +65,7 @@
 #define KEY_DOWN 83
 #define KEY_RIGHT 68
 #define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
+#define FRAMES_PER_SECOND 25    //每秒帧数
 
 /********** 地图块种类 **********/
 /* L0边为右上角，L0到L3顺时针排列 */
@@ -139,13 +140,40 @@
 
 /********** 建筑动作耗时 **********/
 //单位为秒
+//市政中心
 #define TIME_BUILDING_CENTER_CREATEFARMER 20
 #define TIME_BUILDING_CENTER_UPGRADE 60
+
 #define TIME_BUILD_HOME 20
-#define TIME_BUILD_STOCK 40
-#define TIME_BUILD_GRANARY 40
+#define TIME_BUILD_STOCK 30
+#define TIME_BUILD_GRANARY 30
+
+//兵营
+#define TIME_BUILD_BARRACKS 30
+#define TIME_BUILDING_BARRACKS_CREATE_CLUBMAN 26
+#define TIME_BUILDING_BARRACKS_CREATE_SLINGER 23
+
+//靶场
+#define TIME_BUILD_ARCHERYRANGE 40
+#define TIME_BUILDING_ARCHERYRANGE_CREATE_BOWMAN 30
+
+//马厩
+#define TIME_BUILD_STABLE 40
 
 
+
+/********** Coordinate子类中 Num值实际指代种类 **********/
+//资源
+#define NUM_STATICRES_Bush 0
+#define NUM_STATICRES_Stone 1
+#define NUM_STATICRES_GoldOre 2
+
+//动物
+#define ANIMAL_TREE 0
+#define ANIMAL_GAZELLE 1
+#define ANIMAL_ELEPHANT 2
+#define ANIMAL_LION 3
+#define ANIMAL_FOREST 4
 
 
 /********** 人物状态 **********/
@@ -294,17 +322,6 @@
 #define VISION_FARM 4
 #define VISION_ARROWTOWER 10
 
-
-#define ANIMAL_TREE 0
-#define ANIMAL_GAZELLE 1
-#define ANIMAL_ELEPHANT 2
-#define ANIMAL_LION 3
-#define ANIMAL_FOREST 4
-
-#define COORES_BUSH 0
-#define COORES_STONE 1
-#define COORES_GOLDORE 2
-
 /********** 地基编号 **********/
 #define FOUNDATION_SMALL 0
 #define FOUNDATION_MIDDLE 1
@@ -404,6 +421,9 @@
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
 
+/********** 同Class中图像资源种类数 **********/
+#define NUMBER_MISSILE 2
+
 /********** Core静态表 **********/
 //####关系事件名称
 #define CoreEven_JustMoveTo 0
@@ -411,6 +431,9 @@
 #define CoreEven_Gather 2
 #define CoreEven_Attacking 4
 #define CoreEven_FixBuilding 5
+#define CoreEven_BuildingAct 6
+#define CoreEven_MissileAttack 7
+
 
 //####对一个关系事件，细节关系的最大数量
 #define CoreDetailLinkMaxNum 14
@@ -423,17 +446,18 @@
 #define CoreDetail_Gather 2
 #define CoreDetail_ResourceIn 3
 //#define CoreDetail_FindNextGoal 4
+#define CoreDetail_UpdateRatio 5
 
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 11111
 #define OPERATECHANGE 100
-#define OPERATECHANGE_TIME 1000
 
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
 #define OPERATECON_MOVEALTER 200
 #define OPERATECON_NEAR_ATTACK 10001
 #define OPERATECON_NEAR_WORK 10002
+#define OPERATECON_NEAR_MISSILE 10003
 #define OPERATECON_NEARALTER_ABSOLUTE 20000
 #define OPERATECON_NEARALTER_WORK 20002
 
@@ -441,13 +465,14 @@
 #define OPERATECON_OBJECT1 10011
 #define OPERATECON_OBJECT2 10012
 
-#define OPERATECON_TIMEONCE 00001
+#define OPERATECON_TIMES 00001
 #define OPERATE_TIMEMAX 10
 
 
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
+#define DISTANCE_HIT_TARGET 4
 
 /********** 占地边长-块坐标常量 **********/
 #define SIZELEN_SINGEL 1
@@ -635,10 +660,11 @@
 #define FRIENDLY_ENEMY 2
 #define FRIENDLY_FENCY 3
 
+#define PhaseFromEnd_Attack_ThrowMissile 25
 
 /********** 飞行物类别 **********/
-#define Missile_Spear 1001
-#define Missile_Arrow 1002
+#define Missile_Spear 0
+#define Missile_Arrow 1
 
 /********** 飞行物属性 **********/
 #define Missile_Speed_Spear (4*HUMAN_SPEED)

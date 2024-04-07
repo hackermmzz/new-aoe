@@ -17,10 +17,12 @@ public:
     virtual int getSort();
 
     virtual bool get_isActionEnd(){ return true; }
+    virtual bool get_isActionImageToPhaseFromEnd(int phaseFormEnd){ return true; }
 
     virtual int getPlayerRepresent(){ return MAXPLAYER; }
 
     virtual void setAttribute(){ }
+    virtual void setNowRes(){ }
 
     virtual void resetCoreAttribute(){}
 
@@ -31,6 +33,8 @@ public:
     virtual void printer_ToHuman(void** ptr){ *ptr = NULL; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
     virtual void printer_ToBloodHaver(void** ptr){ *ptr = NULL; }   //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
     virtual void printer_ToResource(void** ptr){ *ptr = NULL; }     //传入ptr为Resource类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToBuilding(void** ptr){ *ptr = NULL; }
+    virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
     double getDR()
@@ -152,6 +156,7 @@ protected:
     //在游戏窗口内
 
     std::list<ImageResource>::iterator nowres;
+    std::list<ImageResource> *nowlist=NULL;
 
     void setDetailPointAttrb_FormBlock()
     {

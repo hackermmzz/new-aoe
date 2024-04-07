@@ -136,7 +136,9 @@ void Development::init_DevelopLab()
 {
     conditionDevelop* newNode;
 
+    //市镇中心
     developLab[BUILDING_CENTER].buildCon = NULL;
+    //new分配空间在结构体内析构
     newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
                                    0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
     developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
@@ -144,5 +146,8 @@ void Development::init_DevelopLab()
     newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_UPGRADE,\
                                    0, BUILDING_CENTER_UPGRADE_FOOD);
     developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].setHead(newNode);
+
+    //房屋
+    developLab[BUILDING_HOME].buildCon =new conditionDevelop( CIVILIZATION_STONEAGE , BUILDING_HOME , TIME_BUILD_HOME , BUILD_HOUSE_WOOD );
 
 }

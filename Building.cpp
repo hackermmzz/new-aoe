@@ -31,6 +31,7 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
     else if(Num==BUILDING_ARROWTOWER)
     {
         Foundation=FOUNDATION_SMALL;
+        type_Missile = Missile_Arrow;
     }
     else
     {
@@ -54,11 +55,8 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
 
 
     this->Percent=Percent;
-    if(Percent!=100)
-    {
-        this->nowres=build[this->Foundation]->begin();
-    }
-    else this->nowres=built[civ][this->Num]->begin();
+    setNowRes();
+
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
     this->globalNum=10000+g_globalNum;
@@ -71,4 +69,50 @@ int Building::getSort()
     if(Num!=BUILDING_FARM)
     return SORT_BUILDING;
     else return SORT_FARM;
+}
+
+void Building::setAction( int actNum)
+{
+    this->actNum = actNum;
+//    this->actName =
+
+    actPercent = 0;
+    ratio_Action = get_retio_Action();
+}
+
+void Building::update_Build()
+{
+    double ratio = get_retio_Build();
+    if(Percent<100) Percent+=ratio;
+    Blood+=ratio/100;
+
+    if(Blood>1) Blood = 1;
+}
+
+void Building::setNowRes()
+{
+    std::list<ImageResource>* tempNowlist = NULL;
+    if(Percent<100) tempNowlist = build[Foundation];
+    else tempNowlist = built[civ][Num];
+
+    if(tempNowlist != nowlist)
+    {
+        nowlist = tempNowlist;
+        nowres = nowlist->begin();
+    }
+}
+
+void Building::nextframe()
+{
+
+    setNowRes();
+    if(Percent<100) advance(nowres , Percent/25);
+    else
+    {
+        nowres++;
+        if(nowres==nowlist->end())  nowres=nowlist->begin(); //读到最后回到最初
+    }
+
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
 }

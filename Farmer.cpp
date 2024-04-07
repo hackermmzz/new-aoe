@@ -42,6 +42,8 @@ Farmer::Farmer(double DR, double UR)
     this->DR0=DR;
     this->UR0=UR;
     this->nowstate=MOVEOBJECT_STATE_STAND;
+
+    type_Missile = Missile_Spear;
 //    this->Angle=0;
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
@@ -62,6 +64,8 @@ void Farmer::nextframe()
     }
 
     updateMove();
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
 }
 
 int Farmer::getSort()

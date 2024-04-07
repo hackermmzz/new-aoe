@@ -1,6 +1,7 @@
 ﻿#ifndef PLAYER_H
 #define PLAYER_H
 
+#include <Missile.h>
 #include <Farmer.h>
 #include <Army.h>
 #include <Building.h>
@@ -12,12 +13,11 @@ public:
     Player(int);
     ~Player();
 
+    //添加对象
     Building* addBuilding(int Num,int BlockDR,int BlockUR);
-
     int addHuman(int Num,double DR,double UR);
-
     int addFarmer(double DR,double UR);
-
+    Missile* addMissile( Coordinate* attacker , Coordinate* attackee );
 
     list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele )
     {
@@ -31,12 +31,28 @@ public:
         return build.erase(iterDele);
     }
 
+    list<Missile*>::iterator deleteMissile( list<Missile*>::iterator iterDele )
+    {
+        delete *iterDele;
+        return missile.erase(iterDele);
+    }
+
+    void deleteMissile_Attacker( Coordinate* attacker )
+    {
+        for(list<Missile*>::iterator iter = missile.begin();iter!=missile.end();iter++)
+            (*iter)->deleteAttackerSponsor(attacker);
+    }
+
     //建筑池子
     std::list<Building *> build;
 
     //人口池子
     std::list<Human *> human;
 
+    //当前所属飞行物
+    std::list<Missile*> missile;
+
+    //获取资源持有数量
     int getWood()
     {
         return this->wood;
@@ -53,10 +69,13 @@ public:
     {
         return this->gold;
     }
+
+    //获取科技树
     bool *getmarketResearch()
     {
         return this->marketResearch;
     }
+
     void setWood(int wood)
     {
         this->wood = wood;
@@ -132,8 +151,11 @@ public:
 
     void changeResource( int resourceSort , int num );
 
+   /*建筑行动相关判断********************************************/
+    //判断是否可建筑
     bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
 
+   /*以上建筑行动相关判断********************************************/
 private:
     int represent;
 

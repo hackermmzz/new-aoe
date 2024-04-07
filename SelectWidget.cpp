@@ -533,10 +533,12 @@ int SelectWidget::doActs(int actName)
     else if(actName == ACT_CREATEFARMER){
         if(mainPtr->player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD) return ACTION_INVALID_RESOURCE;
         mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_CENTER_CREATEFARMER_FOOD);
+        //设置actpercent行动速度
         nowobject->setActPercent(0);
         nowobject->setActSpeed(0.25);//设置每帧完成进度,进度到达100.0即完成
         nowobject->setActNum(BUILDING_CENTER_CREATEFARMER);
         nowobject->setActName(ACT_CREATEFARMER);
+//        corelist->addRelation(nowobject , CoreEven_BuildingAct,BUILDING_CENTER_CREATEFARMER);
     }
     else if(actName == ACT_UPGRADE_AGE)
     {
@@ -804,6 +806,7 @@ void SelectWidget::drawActs()
     }
 }
 
+//所有建筑行动
 void SelectWidget::actionUpdate()
 {
     std::list<Building *>::iterator it = mainPtr->player[0]->build.begin();
@@ -1031,6 +1034,7 @@ void SelectWidget::actionUpdate()
     }
 }
 
+//所有建造
 Building *SelectWidget::getBuild(int BlockL, int BlockU, int num)
 {
     num++;
