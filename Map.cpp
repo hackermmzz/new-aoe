@@ -2,7 +2,6 @@
 
 Map::Map()
 {
-
     for(int i = 0; i < MAP_L; i++)
     {
         cell[i] = new Block[MAP_U];
@@ -40,9 +39,13 @@ Map::~Map()
     //    ruin.clear();
 }
 
-// 随机生成资源（多个），并添加到地图中
-void Map::generateResources()
-{
+/*
+ * 函数：Map::generateResources；
+ * 参数：无；
+ * 内容：随机在地图上生成成片的资源；
+ * 返回值：空。
+ */
+void Map::generateResources() {
     srand(time(NULL));
     // flag用于表示是否已经生成，若已生成则flag为1，否则为0
     int flag = 0;
@@ -279,9 +282,13 @@ void Map::generateResources()
 
 }
 
-// 随机生成资源（单个），并添加到地图中
-void Map::generateResource()
-{
+/*
+ * 函数：Map::generateResource；
+ * 参数：无；
+ * 内容：随机在地图上生成单独的资源；
+ * 返回值：空。
+ */
+void Map::generateResource() {
     srand(time(NULL));
 
     int CountTree = 0;
@@ -454,9 +461,13 @@ void Map::generateResource()
 
 }
 
-// 生成城镇中心13 * 13的部分
-void Map::generateCenter()
-{
+/*
+ * 函数：Map::generateCenter；
+ * 参数：无；
+ * 内容：在地图中央13 * 13的部分单独生成市镇中心附近的资源；
+ * 返回值：空。
+ */
+void Map::generateCenter() {
     srand(time(NULL));
 
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
@@ -516,8 +527,15 @@ void Map::generateCenter()
     return ;
 }
 
-void Map::genDesert(int i, int j, int number, int Map[][74])
-{
+/*
+ * 函数：Map::genDesert；
+ * 参数：i, j——对应xy坐标；
+ *      number——最大生成半径；
+ *      Map[][74]——记录生成沙漠的地块；
+ * 内容：随机在地图上绘制沙漠地貌；
+ * 返回值：空。
+ */
+void Map::genDesert(int i, int j, int number, int Map[][74]) {
     if(number > 0 && i < 73 && i >= 1 && j < 73 && j >= 1 && Map[i][j] == 0)
     {
         Map[i][j] = number;
@@ -529,154 +547,133 @@ void Map::genDesert(int i, int j, int number, int Map[][74])
     return ;
 }
 
-void Map::generateLandforms()
-{
-    //    int Map[74][74] = {0};
-    //    srand(time(nullptr));
-    //    for(int i = 0; i < GENERATELANDFORMS_NUM; i++)
-    //    {
-    //        int randX = rand() % 72, randY = rand() % 72;
-    //        genDesert(randX + 1, randY + 1, 25 + rand() % 5, Map);
-    //    }
+/*
+ * 函数：generateLandforms；
+ * 参数：无；
+ * 内容：绘制沙漠地貌的边缘；
+ * 返回值：空。
+ */
+void Map::generateLandforms() {
+    int Map[74][74] = {0};
+    srand(time(nullptr));
+    for(int i = 0; i < GENERATELANDFORMS_NUM; i++) {
+        int randX = rand() % 72, randY = rand() % 72;
+        genDesert(randX + 1, randY + 1, 25 + rand() % 5, Map);
+    }
 
-    //    // 沙地赋值为1，草地赋值为0
-    //    for(int i = 0; i < 74; i++)
-    //    {
-    //        for(int j = 0; j < 74; j++)
-    //        {
-    //            if(i == 0 || i == 73) Map[i][j] = 1;
-    //            else
-    //            {
-    //                if(j == 0 || j == 73) Map[i][j] = 1;
-    //            }
-    //            if(Map[i][j] != 0)
-    //            {
-    //                Map[i][j] = 1;
-    //            }
-    //        }
-    //    }
-
-    //    for (int i = 1; i < 73; i++)
-    //    {
-    //        for (int j = 1; j < 73; j++)
-    //        {
-    //            int TmpCal[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
-    //            if (Map[i][j] != 0)
-    //            {
-    //                int ZeroCnt = 0;
-    //                int FlagK = 0;
-    //                int tmpk[4] = {0};
-    //                for (int k = 0; k < 4; k++)
-    //                {
-    //                    // 如果沙地旁有草地，则记录草地相对沙地的位置和草地数量（0 <= cnt <= 4）
-    //                    if (Map[i + TmpCal[k][0]][j + TmpCal[k][1]] == 0)
-    //                    {
-    //                        ZeroCnt++;
-    //                        tmpk[k] = 1;
-    //                    }
-    //                }
-    //                Map[i][j] = Map[i][j] * 10 + ZeroCnt;
-    //                FlagK = tmpk[0] * 1000 + tmpk[1] * 100 + tmpk[2] * 10 + tmpk[3];
-
-    //                // 判断FlagK的值
-    //                switch (ZeroCnt)
-    //                {
-    //                case 1:
-    //                    FlagK = (FlagK == 1000) ? 1 : (FlagK == 100) ? 2 : (FlagK == 10) ? 3 : (FlagK == 1) ? 4 : 0;
-    //                    break;
-    //                case 2:
-    //                    FlagK = (FlagK == 1001) ? 4 : (FlagK == 1010) ? 6 : (FlagK == 1100) ? 1 : (FlagK == 101) ? 5 : (FlagK == 110) ? 2 : (FlagK == 11) ? 3 : 0;
-    //                    break;
-    //                case 3:
-    //                    FlagK = (FlagK == 1011) ? 4 : (FlagK == 1101) ? 1 : (FlagK == 1110) ? 2 : (FlagK == 111) ? 3 : 0;
-    //                    break;
-    //                default:
-    //                    FlagK = 0;
-    //                    break;
-    //                }
-    //                Map[i][j] = Map[i][j] * 10 + FlagK;
-    //            }
-    //        }
-    //    }
-
-    //    for(int i = 1; i < 73; i++)
-    //    {
-    //        for(int j = 1; j < 73; j++)
-    //        {
-    //            if(Map[i][j] == 0)
-    //            {
-    //                this->cell[i - 1][j - 1].Num = 0;
-    //            }
-    //            else
-    //            {
-    //                switch(Map[i][j])
-    //                {
-    //                case 100:
-    //                    this->cell[i - 1][j - 1].Num = 1;
-    //                    break;
-    //                case 111:
-    //                    this->cell[i - 1][j - 1].Num = 2;
-    //                    break;
-    //                case 112:
-    //                    this->cell[i - 1][j - 1].Num = 3;
-    //                    break;
-    //                case 113:
-    //                    this->cell[i - 1][j - 1].Num = 4;
-    //                    break;
-    //                case 114:
-    //                    this->cell[i - 1][j - 1].Num = 5;
-    //                    break;
-    //                case 121:
-    //                    this->cell[i - 1][j - 1].Num = 6;
-    //                    break;
-    //                case 122:
-    //                    this->cell[i - 1][j - 1].Num = 7;
-    //                    break;
-    //                case 123:
-    //                    this->cell[i - 1][j - 1].Num = 8;
-    //                    break;
-    //                case 124:
-    //                    this->cell[i - 1][j - 1].Num = 9;
-    //                    break;
-    //                case 125:
-    //                    this->cell[i - 1][j - 1].Num = 10;
-    //                    break;
-    //                case 126:
-    //                    this->cell[i - 1][j - 1].Num = 11;
-    //                    break;
-    //                case 131:
-    //                    this->cell[i - 1][j - 1].Num = 12;
-    //                    break;
-    //                case 132:
-    //                    this->cell[i - 1][j - 1].Num = 13;
-    //                    break;
-    //                case 133:
-    //                    this->cell[i - 1][j - 1].Num = 14;
-    //                    break;
-    //                case 134:
-    //                    this->cell[i - 1][j - 1].Num = 15;
-    //                    break;
-    //                case 140:
-    //                    this->cell[i - 1][j - 1].Num = 16;
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //    }
-
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 72; j++)
-        {
-            this->cell[i][j].setMapPattern(MAPPATTERN_GRASS);
+    // 沙地赋值为1，草地赋值为0
+    for(int i = 0; i < 74; i++) {
+        for(int j = 0; j < 74; j++) {
+            if(i == 0 || i == 73) Map[i][j] = 1;
+            else {
+                if(j == 0 || j == 73) Map[i][j] = 1;
+            }
+            if(Map[i][j] != 0) {
+                Map[i][j] = 1;
+            }
         }
     }
 
+    for (int i = 1; i < 73; i++) {
+        for (int j = 1; j < 73; j++) {
+            int TmpCal[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+            if (Map[i][j] != 0) {
+                int ZeroCnt = 0;
+                int FlagK = 0;
+                int tmpk[4] = {0};
+                for (int k = 0; k < 4; k++) {
+                    // 如果沙地旁有草地，则记录草地相对沙地的位置和草地数量（0 <= cnt <= 4）
+                    if (Map[i + TmpCal[k][0]][j + TmpCal[k][1]] == 0) {
+                        ZeroCnt++;
+                        tmpk[k] = 1;
+                    }
+                }
+                Map[i][j] = Map[i][j] * 10 + ZeroCnt;
+                FlagK = tmpk[0] * 1000 + tmpk[1] * 100 + tmpk[2] * 10 + tmpk[3];
+
+                // 判断FlagK的值
+                switch (ZeroCnt) {
+                    case 1:
+                        FlagK = (FlagK == 1000) ? 1 : (FlagK == 100) ? 2 : (FlagK == 10) ? 3 : (FlagK == 1) ? 4 : 0;
+                        break;
+                    case 2:
+                        FlagK = (FlagK == 1001) ? 4 : (FlagK == 1010) ? 6 : (FlagK == 1100) ? 1 : (FlagK == 101) ? 5 : (FlagK == 110) ? 2 : (FlagK == 11) ? 3 : 0;
+                        break;
+                    case 3:
+                        FlagK = (FlagK == 1011) ? 4 : (FlagK == 1101) ? 1 : (FlagK == 1110) ? 2 : (FlagK == 111) ? 3 : 0;
+                        break;
+                    default:
+                        FlagK = 0;
+                        break;
+                }
+                Map[i][j] = Map[i][j] * 10 + FlagK;
+            }
+        }
+    }
+
+    for(int i = 1; i < 73; i++) {
+        for(int j = 1; j < 73; j++) {
+            if(Map[i][j] == 0) {
+                this->cell[i - 1][j - 1].Num = 0;
+            }
+            else {
+                switch(Map[i][j]) {
+                    case 100:
+                        this->cell[i - 1][j - 1].Num = 1;
+                        break;
+                    case 111:
+                        this->cell[i - 1][j - 1].Num = 2;
+                        break;
+                    case 112:
+                        this->cell[i - 1][j - 1].Num = 3;
+                        break;
+                    case 113:
+                        this->cell[i - 1][j - 1].Num = 4;
+                        break;
+                    case 114:
+                        this->cell[i - 1][j - 1].Num = 5;
+                        break;
+                    case 121:
+                        this->cell[i - 1][j - 1].Num = 6;
+                        break;
+                    case 122:
+                        this->cell[i - 1][j - 1].Num = 7;
+                        break;
+                    case 123:
+                        this->cell[i - 1][j - 1].Num = 8;
+                        break;
+                    case 124:
+                        this->cell[i - 1][j - 1].Num = 9;
+                        break;
+                    case 125:
+                        this->cell[i - 1][j - 1].Num = 10;
+                        break;
+                    case 126:
+                        this->cell[i - 1][j - 1].Num = 11;
+                        break;
+                    case 131:
+                        this->cell[i - 1][j - 1].Num = 12;
+                        break;
+                    case 132:
+                        this->cell[i - 1][j - 1].Num = 13;
+                        break;
+                    case 133:
+                        this->cell[i - 1][j - 1].Num = 14;
+                        break;
+                    case 134:
+                        this->cell[i - 1][j - 1].Num = 15;
+                        break;
+                    case 140:
+                        this->cell[i - 1][j - 1].Num = 16;
+                        break;
+                }
+            }
+        }
+    }
     return ;
 }
 
-void Map::loadfindPathMap()
-{
+void Map::loadfindPathMap() {
 
     clearfindPathMap();
     //    for (int i = 0; i < MAP_L; ++i)
@@ -758,8 +755,7 @@ void Map::loadfindPathMap()
     //    }
 }
 
-void Map::clearfindPathMap()
-{
+void Map::clearfindPathMap() {
     for (int i = 0; i < MAP_L; ++i)
     {
         for (int j = 0; j < MAP_U; ++j)
@@ -769,29 +765,38 @@ void Map::clearfindPathMap()
     }
 }
 
-int Map::addStaticRes(int Num, double DR, double UR)
-{
+int Map::addStaticRes(int Num, double DR, double UR) {
     StaticRes *newstaticres=new StaticRes(Num,DR,UR);
     this->staticres.push_back(newstaticres);
     return 0;
 }
 
-int Map::addStaticRes(int Num, int BlockDR, int BlockUR)
-{
+int Map::addStaticRes(int Num, int BlockDR, int BlockUR) {
     StaticRes *newstaticres=new StaticRes(Num,BlockDR,BlockUR);
     this->staticres.push_back(newstaticres);
     return 0;
 }
 
-int Map::addAnimal(int Num, double DR, double UR)
-{
+/*
+ * 函数：Map::addAnimal；
+ * 参数：Num——动物种类；
+ *      DR，UR——动物生成的xy坐标；
+ * 内容：在对应坐标生成一个动物；
+ * 返回值：生成成功返回true。
+ */
+bool Map::addAnimal(int Num, double DR, double UR) {
     Animal *newanimal=new Animal(Num,DR,UR);
     this->animal.push_back(newanimal);
-    return 0;
+    return true;
 }
 
-int Map::loadResource()
-{
+/*
+ * 函数：Map::loadResource；
+ * 参数：无；
+ * 内容：随机生成资源；
+ * 返回值：生成成功返回true。
+ */
+bool Map::loadResource() {
     addAnimal(ANIMAL_GAZELLE,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
     addAnimal(1,0*BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2,72*BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2);
     //    for(int i = 0; i < MAP_U; i++)
@@ -824,7 +829,7 @@ int Map::loadResource()
     //            mapFlag[i][j] = 0;
     //        }
     //    }
-    return 0;
+    return true;
 }
 
 /*
@@ -835,8 +840,7 @@ int Map::loadResource()
  * 内容：计算block(x, y)周围8个block有几个高度是高出来的；
  * 返回值：返回数量。
  */
-int Map::CheckNeighborHigher(int x, int y, int currentCalHeight)
-{
+int Map::CheckNeighborHigher(int x, int y, int currentCalHeight) {
     int count = 0;
     int dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
     int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
@@ -856,8 +860,7 @@ int Map::CheckNeighborHigher(int x, int y, int currentCalHeight)
  * 内容：统计block(x, y)周围8个block有几个是selectType类型；
  * 返回值：返回数量。
  */
-int Map::CheckNeighborType(int x, int y, int selectType)
-{
+int Map::CheckNeighborType(int x, int y, int selectType) {
     int count = 0;
     int dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
     int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
@@ -877,8 +880,7 @@ int Map::CheckNeighborType(int x, int y, int selectType)
  * 内容：检查block(x, y)是否为当前高度的边界；
  * 返回值：如果是，返回false；如果不是，返回true。
  */
-bool Map::CheckBorder(int x, int y, int currentCalHeight)
-{
+bool Map::CheckBorder(int x, int y, int currentCalHeight) {
     int dx[24] = {-2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2};
     int dy[24] = {-2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
     for(int i = 0; i < 24; i ++) {
@@ -892,11 +894,10 @@ bool Map::CheckBorder(int x, int y, int currentCalHeight)
 /*
  * 函数：Map::GenerateTerrain；
  * 参数：无；
- * 内容：*元胞自动机*逐层生成地形高度；
+ * 内容：*细胞自动机*逐层生成地形高度；
  * 返回值：空。
  */
-void Map::GenerateTerrain()
-{
+void Map::GenerateTerrain() {
     srand(time(NULL));
     for(int height = MAPHEIGHT_FLAT + 1; height < MAPHEIGHT_PERCENT; height ++) {
         // 每层微调生成概率
@@ -965,8 +966,13 @@ void Map::GenerateTerrain()
             this->cell[i - 4][j - 4].setMapHeight(m_heightMap[i][j]);
 }
 
-void Map::GenerateType()
-{
+/*
+ * 函数：Map::GenerateType；
+ * 参数：无；
+ * 内容：依据附近地形差确定对应坐标需要绘制的block类型；
+ * 返回值：空。
+ */
+void Map::GenerateType() {
     /*
      * 坐标系映射如下：
      * —————→ y
@@ -1110,8 +1116,13 @@ void Map::GenerateType()
     }
 }
 
-void Map::CalOffset()
-{
+/*
+ * 函数：Map::CalOffset；
+ * 参数：无；
+ * 内容：计算每种block不同高度对应的偏移量；
+ * 返回值：空。
+ */
+void Map::CalOffset() {
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U; j ++) {
             // 偏移
@@ -1143,24 +1154,13 @@ void Map::CalOffset()
     return ;
 }
 
-void Map::init(int MapJudge)
-{
-    for(int i=0;i<MAP_L;i++){
-        for(int j=0;j<MAP_U;j++){
-            this->cell[i][j].Num = 0;
-            this->cell[i][j].Explored = true;
-            //改地图可见度在这里
-            this->cell[i][j].Visible = true;
-        }
-    }
-    //    generateLandforms();    // 在草地中生成小片沙漠
-    //    generateCenter();       // 生成市镇中心及附近资源
-    //    generateResources();    // 生成片状资源
-    //    generateResource();     // 生成独立资源
-    GenerateTerrain();      // 元胞自动机生成地图高度
-    GenerateType();         // 通过高度差计算调用的地图块资源
-    CalOffset();            // 计算偏移量
-
+/*
+ * 函数：Map::InitFaultHandle；
+ * 参数：无；
+ * 内容：抛出地图生成中的错误；
+ * 返回值：空。
+ */
+void Map::InitFaultHandle() {
     for(int i = 0; i < 72; i++)
     {
         for(int j = 0; j < 72; j++)
@@ -1184,8 +1184,34 @@ void Map::init(int MapJudge)
             if(this->cell[i][j].Num >= 29) qDebug() << "cell[" << i << "][" << j << "].Num >= 29";
         }
     }
+}
 
-    if(MapJudge == 0) // 随机产生地图
+/*
+ * 函数：Map::InitCell；
+ * 参数：Num——初始化地图块类型；
+ *      isExplored——地图块是否被探索过；
+ *      isVisible——地图块是否可见；
+ * 内容：初始化cell数组；
+ * 返回值：空。
+ */
+void Map::InitCell(int Num, bool isExplored, bool isVisible) {
+    for(int i = 0; i < MAP_L; i ++) {
+        for(int j = 0; j < MAP_U;j ++) {
+            this->cell[i][j].Num = 0;
+            this->cell[i][j].Explored = true;
+            this->cell[i][j].Visible = true;    // 地图可见度
+        }
+    }
+}
+
+/*
+ * 函数：Map::GenerateMapTxt；
+ * 参数：获取启动参数，判断是否输出地图；
+ * 内容：导出或读取地图txt文件；
+ * 返回值：空。
+ */
+void Map::GenerateMapTxt(int MapJudge) {
+    if(MapJudge == 0)       // 随机产生地图
     {
         std::ofstream outMapFile("tmpMap.txt");
         if (outMapFile.is_open())
@@ -1208,7 +1234,7 @@ void Map::init(int MapJudge)
             qDebug() << "无法导出地图文件";
         }
     }
-    else if(MapJudge == 1) // 读取上一次随机的地图
+    else if(MapJudge == 1)  // 读取上一次随机的地图
     {
         QFile inputGameFile("tmpMap.txt"); // 打开文本文件以读取数据
 
@@ -1266,7 +1292,25 @@ void Map::init(int MapJudge)
             qDebug() << "固定地图数据已读取到游戏内";
         }
         else qDebug() << "无法打开固定地图文件";
-
     }
+}
+
+/*
+ * 函数：Map::init；
+ * 参数：无；
+ * 内容：初始化地图的总函数；
+ * 返回值：空。
+ */
+void Map::init(int MapJudge) {
+    InitCell(0, true, true);    // 第二个参数修改为false时可令地图全部可见
+//    generateLandforms();        // 在草地中生成小片沙漠
+//    generateCenter();           // 生成市镇中心及附近资源
+//    generateResources();        // 生成片状资源
+//    generateResource();         // 生成独立资源
+    GenerateTerrain();          // 元胞自动机生成地图高度
+    GenerateType();             // 通过高度差计算调用的地图块资源
+    CalOffset();                // 计算偏移量
+    InitFaultHandle();          // 抛出地图生成中的错误
+    GenerateMapTxt(MapJudge);   // 生成地图文件
 }
 
