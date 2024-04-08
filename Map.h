@@ -18,7 +18,7 @@ public:
     // 随机生成资源（单个），并添加到地图中
     void generateResource();
 
-    // 生成城镇中心附近11*11的部分
+    // 生成城镇中心附近13*13的部分
     void generateCenter();
 
     // 随机生成沙漠地貌
@@ -34,9 +34,9 @@ public:
 
     int addStaticRes(int Num, int BlockDR, int BlockUR);
 
-    int addAnimal(int Num,double DR,double UR);
+    bool addAnimal(int Num,double DR,double UR);
 
-    int loadResource();
+    bool loadResource();
 
     list<Animal*>::iterator deleteAnimal( list<Animal*>::iterator iterDele)
     {
@@ -67,6 +67,9 @@ private:
     void GenerateTerrain();     // 用于生成地形高度（Block高度）
     void GenerateType();        // 依据高度生成地形图Block种类
     void CalOffset();           // 计算每个Block的偏移量
+    void InitFaultHandle();     // 初始化错误处理
+    void InitCell(int Num, bool isExplored, bool isVisible);
+    void GenerateMapTxt(int MapJudge);
 
     short m_heightMap[80][80];
 
