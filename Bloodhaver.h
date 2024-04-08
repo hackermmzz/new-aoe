@@ -23,16 +23,43 @@ public:
                                              else return 0;}
     virtual double getDis_attack(){ return dis_Attack; }
     virtual int get_AttackType(){ return attackType; }
+
+    virtual void init_Blood(){ Blood = 1; }
+
+    //判断本攻击单位的攻击方式是否需要投掷物
+    virtual bool is_missileAttack(){ return type_Missile != -1; }
     /*********以上虚函数************/
 
+    //判断死亡
     bool isDie(){return Blood<=0;}
-    void setAttackObject(Coordinate* attackObject){ this->attackObject = attackObject; }
-    void setAvangeObject( Coordinate* avangeObject ){ this->avangeObject = avangeObject; }
-    int getBlood(){ return (int)( Blood*getMaxBlood() ); }
-    Coordinate* getAvangeObject(){ return avangeObject; }
-    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); }
+    //判断满血（部分判断的边界条件）
+    bool isFullHp(){ return Blood >= 1; }
+    //判断是否受到了攻击
+    bool isGotAttack(){ return gotAttack; }
 
-    void initAvengeObject(){ avangeObject = NULL; }
+    //设置攻击目标
+    void setAttackObject(Coordinate* attackObject){ this->attackObject = attackObject; }
+    //受到攻击，设置“复仇”目标，用于做受到攻击时的反应
+    void setAvangeObject( Coordinate* avangeObject ){ this->avangeObject = avangeObject; underAttack(); updateAvangeObjectPosition(); }
+    void setAvangeObject( double DR , double UR ){ underAttack(); DR_avange = DR; UR_avange = UR; }
+    //设置说明本单位受到了攻击
+    void underAttack(){ gotAttack = true; }
+
+    //获取血量
+    int getBlood(){ return (int)( Blood*getMaxBlood() ); }
+    //获取“复仇”目标
+    Coordinate* getAvangeObject(){ return avangeObject; }
+    //如果攻击方式需要投掷物，获取投掷物类型
+    int get_type_Missile(){return type_Missile;}
+    //获取“复仇”目标位置
+    void get_AvangeObject_Position( double& DR, double& UR ){ DR = DR_avange; UR = UR_avange; }
+
+    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); }
+    //更新“复仇”目标的当前位置
+    void updateAvangeObjectPosition(){ if(avangeObject!=NULL)
+                                        { DR_avange = avangeObject->getDR(); UR_avange = avangeObject->getUR(); } }
+
+    void initAvengeObject(){ avangeObject = NULL; gotAttack = false; }
 
 protected:
     double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
@@ -40,10 +67,14 @@ protected:
 
     //攻击相关
     Coordinate* attackObject = NULL;    //攻击目标
+    bool gotAttack = false;
     Coordinate* avangeObject = NULL;    //受到攻击的来源
+    double DR_avange=0,UR_avange=0;     //攻击来源的位置
+
     int attackType = ATTACKTYPE_CANTATTACK;     //攻击类型
     int atk = 0;    //攻击力
     double dis_Attack = DISTANCE_ATTACK_CLOSE;  //攻击距离
+    int type_Missile = -1;
 
     //需细化，特攻表
     std::map<int , int> lab_SpecialAttack;

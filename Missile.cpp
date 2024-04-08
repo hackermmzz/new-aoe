@@ -1,47 +1,178 @@
 #include "Missile.h"
 
-std::string Missile::missilename[1] = { "Spear" };
-
-std::list<ImageResource> Missile::*missile[1];
+std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" };
+std::list<ImageResource>* Missile::missile[NUMBER_MISSILE];
 
 Missile::Missile()
 {
 
 }
 
-Missile::Missile(int type, double beginDR , double beginUR , double goalDR , double goalUR , double damage)
+Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee)
 {
+    recordAttacker(attacker);
     this->Num = type;
-    this->DR = beginDR;
-    this->UR = beginUR;
-    this->DR0 = goalDR;
-    this->UR0 = goalUR;
-    this->damage = damage;
-
+    this->DR = attacker->getDR();
+    this->UR = attacker->getUR();
+    this->DR0 = attackee->getDR();
+    this->UR0 = attackee->getUR();
     setAttribute();
+    Angle = calculateAngle(this->DR0, this->UR0);
+    //Angle计算有bug 近距离时可能出现超大负数
+    setNowRes();
 }
 
 void Missile::setAttribute()
 {
-    switch (Num) {
+    switch (Num){
     case Missile_Spear:
         isAOE = false;
+        isMandatoryArrive = false;
         speed = Missile_Speed_Spear;
         break;
 
     case Missile_Arrow:
         isAOE = false;
+        isMandatoryArrive = false;
         speed = Missile_Speed_Arrow;
         break;
 
     default:
         break;
     }
-
+    calculateDMove();
 }
 
 
 void Missile::nextframe()
 {
+    updateMove();
+    updateLU();
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/8.0;
+}
 
+void Missile::setNowRes()
+{
+    nowlist = missile[Num];
+
+    nowres = nowlist->begin();
+    advance(nowres , Angle);
+}
+
+void Missile::calculateDMove()
+{
+    double total;
+
+    dDR = DR0 - DR;
+    dUR = UR0 - UR;
+    total = sqrt(dDR*dDR+dUR*dUR);
+
+    if(total!=0)
+    {
+        dDR = dDR*speed/total;
+        dUR = dUR*speed/total;
+    }
+}
+
+int Missile::calculateAngle(double nextDR, double nextUR)
+{
+    //角度设置有问题，需要修改
+    int tempAngle = 0;
+    double dDR =round( nextDR - DR) , dUR = round(nextUR - UR);
+    double sita;
+
+    if(dUR>0)
+    {
+        if(dDR == 0) tempAngle = 27;
+        sita = atan(dUR/dDR);
+        sita = ( sita<0 ? sita+1.57 : sita);
+        tempAngle = 35 - round(5.096*sita);
+        tempAngle = tempAngle>31?tempAngle-32:tempAngle;
+    }
+    else
+    {
+        if(dDR == 0)tempAngle = 11;
+        sita = atan(-dUR/dDR);
+        sita = ( sita<0 ? sita+1.57 : sita);
+        tempAngle = 3 + round(5.096*sita);
+    }
+
+    return tempAngle;
+}
+
+void Missile::updateMove()
+{
+    if(!isWorking())setPreWalk();
+
+    if(fabs(DR0-DR)<fabs(dDR) || fabs(UR0-UR)<fabs(dUR))
+    {
+        PredictedDR=DR0;
+        PredictedUR=UR0;
+    }
+    else
+    {
+        PredictedDR=DR+dDR;
+        PredictedUR=UR+dUR;
+    }
+
+    this->BlockDR=DR/BLOCKSIDELENGTH;
+    this->BlockUR=UR/BLOCKSIDELENGTH;
+    //更新高度
+    this->imageH=DR-UR;
+}
+
+
+void Missile::recordAttacker(Coordinate* attacker)
+{
+    AttackSponsor = attacker;
+    Building* record_build = NULL;
+    Farmer* record_farmer = NULL;
+    Army* record_army = NULL;
+
+    this->Sort_attacker = attacker->getSort();
+    //对象记录attacker信息，防止attacker死亡后无法访问
+    switch (Sort_attacker) {
+    case SORT_BUILDING:
+        record_build = new Building();
+        *record_build = *((Building*)attacker);
+        AttackerRecord = record_build;
+        break;
+    case SORT_ARMY:
+        record_army = new Army();
+        *record_army = *((Army*)attacker);
+        AttackerRecord = record_army;
+        break;
+    case SORT_FARMER:
+        record_farmer = new Farmer();
+        *record_farmer = *((Farmer*)attacker);
+        AttackerRecord = record_farmer;
+        break;
+    default:
+        break;
+    }
+}
+
+
+BloodHaver* Missile::getAttackAponsor()
+{
+    BloodHaver* attacker = NULL;
+    if(AttackSponsor!=NULL) AttackSponsor->printer_ToBloodHaver((void**)&attacker);
+    else AttackerRecord->printer_ToBloodHaver((void**)&attacker);   //如果攻击发起者已经死亡，则使用记录的Attacker（进行攻击相关计算）
+
+    return attacker;
+}
+
+void Missile::get_AttackSponsor_Position(double& DR , double& UR)
+{
+    if(isAttackerDie)
+    {
+        DR = AttackerRecord->getDR();
+        UR = AttackerRecord->getUR();
+    }
+    else
+    {
+        DR = AttackSponsor->getDR();
+        UR = AttackSponsor->getUR();
+    }
 }

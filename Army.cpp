@@ -208,6 +208,8 @@ void Army::setAttribute()
         inter_Attack = INTERVAL_BOWMAN;
         defence_close = DEFCLOSE_BOWMAN;
         defence_shoot = DEFSHOOT_BOWMAN;
+
+        type_Missile = Missile_Arrow;
         break;
 
     case AT_SCOUT:      //侦察骑兵

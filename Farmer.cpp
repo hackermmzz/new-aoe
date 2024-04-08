@@ -42,6 +42,8 @@ Farmer::Farmer(double DR, double UR)
     this->DR0=DR;
     this->UR0=UR;
     this->nowstate=MOVEOBJECT_STATE_STAND;
+
+    type_Missile = Missile_Spear;
 //    this->Angle=0;
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
@@ -54,6 +56,7 @@ Farmer::Farmer(double DR, double UR)
 
 void Farmer::nextframe()
 {
+    updateState();
     nowres++;
     if(nowres==nowlist->end())
     {
@@ -62,6 +65,8 @@ void Farmer::nextframe()
     }
 
     updateMove();
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
 }
 
 int Farmer::getSort()
@@ -115,4 +120,26 @@ int Farmer::get_AttackType()
         else return ATTACKTYPE_SHOOT;
     }
     return ATTACKTYPE_CLOSE;
+}
+
+void Farmer::updateState()
+{
+    switch (interactSort) {
+    case SORT_ANIMAL:
+        if(interactNum ==ANIMAL_TREE || interactNum==ANIMAL_FOREST) setState(1);
+        else setState(4);
+        break;
+    case SORT_BUILDING:
+        setState(6);
+        break;
+    case SORT_STATICRES:
+        if(interactNum == NUM_STATICRES_Bush) setState(2);
+        else setState(3);
+        break;
+    default:
+        setState(0);
+        break;
+    }
+
+
 }

@@ -32,6 +32,8 @@ Animal::Animal(int Num, double DR, double UR)
     this->PreviousUR=UR;
     this->visible = 0;
     setSideLenth();
+
+    this->Angle = 0;
     
     //以下根据Num种类特判
     if( this->Num == ANIMAL_LION ) 
@@ -62,6 +64,7 @@ Animal::Animal(int Num, double DR, double UR)
     }
     else if( this->Num == ANIMAL_TREE )
     {
+        this->Angle = 0;
         this->MaxCnt = CNT_TREE;
         resourceSort = HUMAN_WOOD;
         this->MaxBlood = BLOOD_TREE;
@@ -70,6 +73,7 @@ Animal::Animal(int Num, double DR, double UR)
     }
     else if( this->Num == ANIMAL_FOREST )
     {
+        this->Angle = 0;
         this->MaxCnt = CNT_FOREST;
         resourceSort = HUMAN_WOOD;
         this->MaxBlood = BLOOD_FOREST;
@@ -81,12 +85,9 @@ Animal::Animal(int Num, double DR, double UR)
     this->gatherable = false;
     this->Blood = 1;
 
-
     this->state = ANIMAL_STATE_IDLE;
-
-//    this->Angle = 0;
 //    this->nowres = Stand[this->Num][this->Angle]->begin();
-    this->Angle=2;
+//    this->Angle=2;
     setNowRes();
 
     this->imageX=this->nowres->pix.width()/2.0;
@@ -111,13 +112,15 @@ void Animal::nextframe()
     }
     else
     {
-        this->nowres++;
-        if(this->nowres==nowlist->end())
+        if(Num!=ANIMAL_TREE && Num!=ANIMAL_FOREST)
         {
-            nowres=nowlist->begin();
-        }
+            this->nowres++;
+            if(this->nowres==nowlist->end())nowres=nowlist->begin();
 
-        updateMove();
+            updateMove();
+        }
+        this->imageX=this->nowres->pix.width()/2.0;
+        this->imageY=this->nowres->pix.width()/4.0;
     }
 }
 
@@ -137,7 +140,7 @@ void Animal::setNowRes()
         if(changeToRun) nowlist=this->Run[this->Num][this->Angle];
         else  nowlist=this->Walk[this->Num][this->Angle];
         break;
-    case 2:
+    case MOVEOBJECT_STATE_ATTACK:
         nowlist=this->Attack[this->Num][this->Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
