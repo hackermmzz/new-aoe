@@ -20,8 +20,10 @@ public:
 
   /**********************虚函数**************************/
     void nextframe();
-    int getSort();
+    int getSort(){return SORT_STATICRES;}
 
+    void setAttribute();
+    void setNowRes();
     /***************指针强制转化****************/
     //若要将StaticRes类指针转化为父类指针,务必用以下函数!
     void printer_ToResource(void** ptr){ *ptr = dynamic_cast<Resource*>(this); }    //传入ptr为Resource类指针的地址
@@ -45,7 +47,6 @@ public:
   /**********************以上静态函数**************************/
 
 private:
-    void setAttribute();
     static std::string StaticResDisplayName[3];
     static std::string StaticResname[3];
     static std::list<ImageResource> *staticResource[3]; //存储image资源的链表

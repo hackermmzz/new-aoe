@@ -18,6 +18,7 @@ bool Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eve
 
     if(! relate_AllObject[object1].isExist )
     {
+        object1->set_interAct(object2->getSort() , object2->getNum());
         relate_AllObject[object1] = relation_Object(object2 , eventType);
         relate_AllObject[object1].respondConduct = respond;
 
@@ -119,6 +120,7 @@ void Core_List::manageRelationList()
 //                }
 //            }
 
+            qDebug()<<object1<<8;
             //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
             {
@@ -133,10 +135,12 @@ void Core_List::manageRelationList()
                 }
             }
 
+            qDebug()<<object1<<9;
             recordCondition = &thisDetailEven.chageCondition[nowPhaseNum];
             //判断是否需要切换当前阶段
             if( nowPhaseNum < thisDetailEven.phaseAmount && recordCondition->condition(object1,thisRelation , recordCondition->variableArgu,recordCondition->isNegation))
                 nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
+            qDebug()<<object1<<10;
 
             //实际执行行动
             if(nowPhaseNum == exePhaseNum)  //nowphase变化后，防止提前行动。变化后的行动在下一帧开始做
@@ -148,7 +152,9 @@ void Core_List::manageRelationList()
                         else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
                         break;
                     case CoreDetail_Attack:
+                        qDebug()<<object1<<11;
                         object_Attack(object1,object2);
+                        qDebug()<<object1<<12;
                         break;
                     case CoreDetail_Gather:
                         object_Gather(object1,object2);
@@ -188,6 +194,7 @@ void Core_List::manageRelationList()
                 }
             }
             iter++;
+
         }
         else iter = relate_AllObject.erase(iter);
     }
@@ -306,6 +313,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
         //非祭司,是普通的伤害计算公式
         /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
 
+        qDebug()<<55;
         if(attacker->is_missileAttack())
         {
             if(object1->get_isActionImageToPhaseFromEnd(PhaseFromEnd_Attack_ThrowMissile))
@@ -316,6 +324,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
             calculateDamage = true;
             if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
         }
+        qDebug()<<66;
     }
     else if(missile!=NULL && missile->is_HitTarget() && attackee!=NULL )
     {
@@ -459,7 +468,16 @@ void Core_List::conduct_Attacked(Coordinate* object)
             }
             else if(object->getSort() == SORT_FARMER)
             {
-
+//                if(attacker!=NULL)
+//                {
+//                    if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking,false);
+//                    else
+//                    {
+//                        calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
+//                        suspendRelation(object);
+//                        addRelation(object,dr,ur,CoreEven_JustMoveTo,false);
+//                    }
+//                }
             }
         }
     }

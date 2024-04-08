@@ -78,6 +78,8 @@ public:
     double get_SideLen(){return SideLength;}
 
 
+    void set_interAct(int interSort , int interNum){ interactSort = interSort ; interactNum = interNum; }
+
 /*****************act获取***************/
 //需要协商，act位置
     double getActPercent()
@@ -123,6 +125,10 @@ protected:
     int Num;//对象在对应类中的编号
     //比如building类下Num==0为小房子
     //在不同的类有着不同的含义
+
+    //此时此刻交互对象的类别和Num
+    int interactSort = -1;
+    int interactNum = -1;
 
     double DR;//当前物体中心所在的坐标位置
     double UR;//在块类中该坐标即为正中心

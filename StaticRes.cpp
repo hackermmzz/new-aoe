@@ -14,6 +14,14 @@ StaticRes::StaticRes(int Num, double DR, double UR)
     this->Num=Num;
     this->DR=DR;
     this->UR=UR;
+    BlockDR = DR/BLOCKSIDELENGTH;
+    BlockUR = UR/BLOCKSIDELENGTH;
+    setNowRes();
+    setAttribute();
+
+    this->globalNum=g_globalNum;
+    g_Object.insert({this->globalNum,this});
+    g_globalNum++;
 }
 
 StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
@@ -22,20 +30,52 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     this->BlockDR=BlockDR;
     this->BlockUR=BlockUR;
 
+    setNowRes();
+    setAttribute();
     setDetailPointAttrb_FormBlock();
+
+    this->globalNum=g_globalNum;
+    g_Object.insert({this->globalNum,this});
+    g_globalNum++;
 }
 
 void StaticRes::nextframe()
 {
 
-}
 
-int StaticRes::getSort()
-{
-    return SORT_STATICRES;
 }
 
 void StaticRes::setAttribute()
 {
+    switch(Num){
+    case NUM_STATICRES_Bush:
+        MaxCnt = CNT_BUSH;
+        resourceSort = HUMAN_GRANARYFOOD;
+        BlockSizeLen = SIZELEN_SINGEL;
+        break;
+    case NUM_STATICRES_Stone:
+        MaxCnt = CNT_STONE;
+        resourceSort = HUMAN_STONE;
+        BlockSizeLen = SIZELEN_SMALL;
+        break;
+    case NUM_STATICRES_GoldOre:
+        MaxCnt = CNT_GOLDORE;
+        resourceSort = HUMAN_GOLD;
+        BlockSizeLen = SIZELEN_SMALL;
+        break;
+    default:
+        break;
+    }
+    setSideLenth();
+    this->Cnt = MaxCnt;
+}
 
+void StaticRes::setNowRes()
+{
+    nowlist = staticResource[Num];
+
+    nowres = nowlist->begin();
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
+    this->imageH=DR-UR;
 }

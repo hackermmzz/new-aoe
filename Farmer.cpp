@@ -56,6 +56,7 @@ Farmer::Farmer(double DR, double UR)
 
 void Farmer::nextframe()
 {
+    updateState();
     nowres++;
     if(nowres==nowlist->end())
     {
@@ -119,4 +120,26 @@ int Farmer::get_AttackType()
         else return ATTACKTYPE_SHOOT;
     }
     return ATTACKTYPE_CLOSE;
+}
+
+void Farmer::updateState()
+{
+    switch (interactSort) {
+    case SORT_ANIMAL:
+        if(interactNum ==ANIMAL_TREE || interactNum==ANIMAL_FOREST) setState(1);
+        else setState(4);
+        break;
+    case SORT_BUILDING:
+        setState(6);
+        break;
+    case SORT_STATICRES:
+        if(interactNum == NUM_STATICRES_Bush) setState(2);
+        else setState(3);
+        break;
+    default:
+        setState(0);
+        break;
+    }
+
+
 }

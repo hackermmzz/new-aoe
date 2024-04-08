@@ -142,13 +142,12 @@ void Core::manageMouseEvent()
                 case SORT_FARMER:
                     switch (object_click->getSort())
                     {
+                        case SORT_STATICRES:
                         case SORT_ANIMAL:
-                            if(interactionList->addRelation(nowobject , object_click , CoreEven_Gather))
-                                ((Farmer*)nowobject)->setState(4);  //设置state为猎人
+                            interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
                             break;
                         case SORT_BUILDING:
-                            if(interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding))
-                                ((Farmer*)nowobject)->setState(6);
+                            interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
                         default:
                             break;
                     }
@@ -164,6 +163,9 @@ void Core::manageMouseEvent()
                             break;
                     }
                     break;
+
+                case SORT_ANIMAL:
+                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 
                 default:
                     break;

@@ -18,6 +18,7 @@ Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee)
     this->UR0 = attackee->getUR();
     setAttribute();
     Angle = calculateAngle(this->DR0, this->UR0);
+    //Angle计算有bug 近距离时可能出现超大负数
     setNowRes();
 }
 

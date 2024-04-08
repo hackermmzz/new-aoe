@@ -25,14 +25,15 @@ public:
     virtual int get_AttackType(){ return attackType; }
 
     virtual void init_Blood(){ Blood = 1; }
+
+    //判断本攻击单位的攻击方式是否需要投掷物
+    virtual bool is_missileAttack(){ return type_Missile != -1; }
     /*********以上虚函数************/
 
     //判断死亡
     bool isDie(){return Blood<=0;}
     //判断满血（部分判断的边界条件）
     bool isFullHp(){ return Blood >= 1; }
-    //判断本攻击单位的攻击方式是否需要投掷物
-    bool is_missileAttack(){ return type_Missile != -1; }
     //判断是否受到了攻击
     bool isGotAttack(){ return gotAttack; }
 
