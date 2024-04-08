@@ -124,6 +124,16 @@ void GameWidget::paintEvent(QPaintEvent *)
             insert(p,&drawlist);
             hiter++;
         }
+
+        //绘制投掷物
+        std::list<Missile *> *mis = &(mainwidget->player[i]->missile);
+        std::list<Missile *>::iterator misiter = mis->begin();
+        while(!mis->empty() && misiter!=mis->end())
+        {
+            Coordinate* p = *misiter;
+            insert(p , &drawlist);
+            misiter++;
+        }
     }
 
     //地图资源相关 树木石块等

@@ -108,7 +108,6 @@ public:
         Die[i][j] = nullptr;
     }
 
-
 private:
     int armyClass;
     bool upgradable;
@@ -124,6 +123,7 @@ private:
     double* inter_Attack_change = NULL; //攻击间隔
     int* defence_close_change  = NULL;  //肉搏防御
     int* defence_shoot_change  = NULL;  //投射防御
+
     /*****************/
 
 

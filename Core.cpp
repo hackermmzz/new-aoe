@@ -15,8 +15,11 @@ void Core::gameUpdate()
 {
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
-        std::list<Human *>::iterator humaniter=player[playerIndx]->human.begin() , iterEnd = player[playerIndx]->human.end();
-        while(humaniter!=iterEnd)
+        std::list<Human *>::iterator humaniter=player[playerIndx]->human.begin() , humaniterEnd = player[playerIndx]->human.end();
+        list<Building*>::iterator builditer = player[playerIndx]->build.begin() , builditerEnd = player[playerIndx]->build.end();
+        list<Missile*>::iterator missileiter = player[playerIndx]->missile.begin() , missileiterEnd = player[playerIndx]->missile.end();
+
+        while(humaniter!=humaniterEnd)
         {       
             if((*humaniter)->needTranState())
             {
@@ -24,18 +27,50 @@ void Core::gameUpdate()
                 if((*humaniter)->isDying())
                 {
                     interactionList->eraseObject(*humaniter);
+                    player[playerIndx]->deleteMissile_Attacker(*humaniter);
                 }
                 (*humaniter)->setPreStateIsIdle();
             }
             interactionList->conduct_Attacked(*humaniter);
 
-            if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd()) humaniter = player[playerIndx]->human.erase(humaniter);
+            if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd()) humaniter = player[playerIndx]->deleteHuman(humaniter);
             else
             {
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
 
                 humaniter++;
+            }
+        }
+
+        while(builditer!= builditerEnd)
+        {
+            interactionList->conduct_Attacked(*builditer);
+            if((*builditer)->isDie())
+            {
+                player[playerIndx]->deleteMissile_Attacker(*builditer);
+                interactionList->eraseObject(*builditer);
+                builditer= player[playerIndx]->deleteBuilding(builditer);
+            }
+            else
+            {
+                (*builditer)->nextframe();
+                builditer++;
+            }
+        }
+
+        while(missileiter!=missileiterEnd)
+        {
+//            qDebug()<<playerIndx<<(player[playerIndx]->missile.size())<<((*missileiter)->isNeedDelete());s
+            if((*missileiter)->isNeedDelete())
+            {
+                interactionList->eraseObject(*missileiter);
+                missileiter = player[playerIndx]->deleteMissile(missileiter);
+            }
+            else
+            {
+                (*missileiter)->nextframe();
+                missileiter++;
             }
         }
     }
@@ -107,10 +142,12 @@ void Core::manageMouseEvent()
                 case SORT_FARMER:
                     switch (object_click->getSort())
                     {
+                        case SORT_STATICRES:
                         case SORT_ANIMAL:
-                            ((Farmer*)nowobject)->setState(4);  //设置state为猎人
                             interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
                             break;
+                        case SORT_BUILDING:
+                            interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
                         default:
                             break;
                     }
@@ -126,6 +163,9 @@ void Core::manageMouseEvent()
                             break;
                     }
                     break;
+
+                case SORT_ANIMAL:
+                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 
                 default:
                     break;

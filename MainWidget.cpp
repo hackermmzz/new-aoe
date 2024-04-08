@@ -35,8 +35,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initBlock();
     initBuilding();
     initAnimal();
+    initStaticResource();
     initFarmer();
     initArmy();
+    initMissile();
 
     // 设置当前窗口属性
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
@@ -99,10 +101,24 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 向地图中添加资源
     initmap();
+
     // 添加资源测试
+    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
     player[0]->addBuilding(BUILDING_CENTER, 10, 10);
-//    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
+    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
+    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
+
+    map->addAnimal(ANIMAL_TREE , 40 , 50);
+//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
+
+    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
+    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
+    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
+
 
     core = new Core(map,player,memorymap,mouseEvent);
 
@@ -116,9 +132,11 @@ MainWidget::~MainWidget()
     delete ui;
     deleteBlock();
     deleteAnimal();
+    deleteStaticResource();
     deleteFarmer();
     deleteBuilding();
     deleteArmy();
+    deleteMissile();
     delete core;
 }
 
@@ -212,6 +230,16 @@ void MainWidget::initAnimal()
             flipResource(Animal::getAttack(num,8-i),Animal::getAttack(num,i));
             flipResource(Animal::getDie(num,8-i),Animal::getDie(num,i));
         }
+    }
+}
+
+// 初始化不可移动的资源
+void MainWidget::initStaticResource()
+{
+    for(int num = 0; num<3; num++)
+    {
+        StaticRes::allocateStaticResource(num);
+        loadResource(StaticRes::getStaticResName(num) , StaticRes::getStaticResource(num));
     }
 }
 
@@ -337,6 +365,17 @@ void MainWidget::initArmy()
 
 }
 
+void MainWidget::initMissile()
+{
+    //加载飞行物素材
+
+    for(int statei = 0; statei<NUMBER_MISSILE; statei++)
+    {
+        Missile::allocatemissile(statei);
+        loadResource(Missile::getMissilename(statei),Missile::getmissile(statei));
+    }
+}
+
 // 删除区块资源
 void MainWidget::deleteBlock()
 {
@@ -401,6 +440,13 @@ void MainWidget::deleteAnimal()
             Animal::deallocateDie(num, i);
         }
     }
+}
+
+// 删除不可移动的资源
+void MainWidget::deleteStaticResource()
+{
+    for(int num = 0; num<3; num++)
+        StaticRes::deallocateStaticResource(num);
 }
 
 // 删除农民资源
@@ -475,6 +521,12 @@ void MainWidget::deleteArmy()
             Army::deallocateDisappear(statei, i);
         }
     }
+}
+
+// 删除飞行物资源
+void MainWidget::deleteMissile()
+{
+    for(int statei = 0; statei < NUMBER_MISSILE; statei++ ) Missile::deallocatemissile(statei);
 }
 
 bool MainWidget::eventFilter(QObject *watched, QEvent *event)

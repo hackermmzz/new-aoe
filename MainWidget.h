@@ -6,13 +6,10 @@
 #include <Map.h>
 #include <qtimer.h>
 //#include <Player.h>
-#include <Player.h>
 #include <QTextBrowser>
 #include <GlobalVariate.h>
 #include <config.h>
-//#include <Animal.h>
 #include <QElapsedTimer>
-//#include <Missile.h>
 #include <stack>
 #include <queue>
 #include <QButtonGroup>
@@ -43,14 +40,18 @@ public:
     void initBlock();
     void initBuilding();
     void initAnimal();
+    void initStaticResource();
     void initFarmer();
     void initArmy();
+    void initMissile();
 
     void deleteBlock();
     void deleteBuilding();
     void deleteAnimal();
+    void deleteStaticResource();
     void deleteFarmer();
     void deleteArmy();
+    void deleteMissile();
     ActWidget* getActs(int num)
     {
         return acts[num];

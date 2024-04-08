@@ -1,6 +1,7 @@
 ﻿#ifndef PLAYER_H
 #define PLAYER_H
 
+#include <Missile.h>
 #include <Farmer.h>
 #include <Army.h>
 #include <Building.h>
@@ -12,31 +13,32 @@ public:
     Player(int);
     ~Player();
 
-    Building* addBuilding(int Num,int BlockDR,int BlockUR);
-
+    //***************************************************************
+    //添加对象
+    Building* addBuilding(int Num,int BlockDR,int BlockUR , double percent = 0);
     int addHuman(int Num,double DR,double UR);
-
+    Army* addArmy(int Num , double DR , double UR);
     int addFarmer(double DR,double UR);
+    Missile* addMissile( Coordinate* attacker , Coordinate* attackee );
 
+    //删除实例对象
+    list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele );
+    list<Building*>::iterator deleteBuilding( list<Building*>::iterator iterDele );
+    list<Missile*>::iterator deleteMissile( list<Missile*>::iterator iterDele );
 
-    list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele )
-    {
-        delete *iterDele;
-        return human.erase(iterDele);
-    }
-
-    list<Building*>::iterator deleteBuilding( list<Building*>::iterator iterDele )
-    {
-        delete *iterDele;
-        return build.erase(iterDele);
-    }
-
+    //删除missile的投掷者
+    void deleteMissile_Attacker( Coordinate* attacker );
+    //***************************************************************
     //建筑池子
     std::list<Building *> build;
-
     //人口池子
     std::list<Human *> human;
+    //当前所属飞行物
+    std::list<Missile*> missile;
 
+    //***************************************************************
+    //控制资源
+    //获取资源持有数量
     int getWood()
     {
         return this->wood;
@@ -53,25 +55,27 @@ public:
     {
         return this->gold;
     }
+
+    void setWood(int wood){this->wood = wood;}
+    void setFood(int food){this->food = food;}
+    void setStone(int stone){this->stone = stone;}
+    void setGold(int gold){this->gold = gold;}
+    //更改资源数量
+    void changeResource( int resourceSort , int num , bool negative = false);
+
+   /*建筑行动相关********************************************/
+    //判断是否可建筑
+    bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
+
+    void finishBuild( Building* buildBuilding ){playerScience->finishAction(buildBuilding->getNum());}
+    void enforcementAction( Building* actBuild );
+   /*以上建筑行动相关********************************************/
+
+
+    //获取科技树
     bool *getmarketResearch()
     {
         return this->marketResearch;
-    }
-    void setWood(int wood)
-    {
-        this->wood = wood;
-    }
-    void setFood(int food)
-    {
-        this->food = food;
-    }
-    void setStone(int stone)
-    {
-        this->stone = stone;
-    }
-    void setGold(int gold)
-    {
-        this->gold = gold;
     }
     void setCiv(int civ)
     {
@@ -130,10 +134,8 @@ public:
         return this->startScores[type];
     }
 
-    void changeResource( int resourceSort , int num );
-
 private:
-    int represent;
+    int represent;  //player阵营
 
     //当前文明
     int civilization=1;
@@ -146,14 +148,15 @@ private:
     int food=200;
     int stone=150;
     int gold=0;
-    int score=0;
+    int score=0;    //得分
+
+    //研究技术进度与成果
+    Development* playerScience;
+
     bool isArrowTowerUnlocked = false;
     bool marketResearch[3] = {false};
     bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
-
-    //研究技术进度与成果
-    Development* playerScience;
 };
 
 #endif // PLAYER_H
