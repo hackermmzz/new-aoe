@@ -3,6 +3,7 @@
 
 int g_globalNum=1;
 std::map<int,Coordinate*> g_Object;
+std::queue<instruction> instructions;   ///AI返回的指令队列
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -105,6 +106,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
     core = new Core(map,player,memorymap,mouseEvent);
+    AI *ai = new AI();
+    ai->start();
 
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));

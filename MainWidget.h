@@ -17,7 +17,7 @@
 #include <queue>
 #include <QButtonGroup>
 #include <QMessageBox>
-//#include "AI.h"
+#include "AI.h"
 #include <windows.h>
 #include <unordered_set>
 #include <SelectWidget.h>

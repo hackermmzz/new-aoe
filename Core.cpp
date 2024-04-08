@@ -138,6 +138,23 @@ void Core::manageMouseEvent()
 //后续编写，用于处理AI指令
 void Core::manageOrder()
 {
-
+    while(!instructions.empty()){
+        instruction cur=instructions.front();
+        instructions.pop();
+        Coordinate* self=cur.self;
+        switch (cur.type) {
+        case 0:{    /// type 0:终止对象self的动作
+            interactionList->suspendRelation(self);
+            break;
+        }
+        case 1:{    /// type 1:命令村民self走向指定坐标L0，U0
+            Point des=cur.destination;
+            interactionList->addRelation(self,des.x,des.y,CoreEven_JustMoveTo);
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 
