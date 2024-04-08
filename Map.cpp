@@ -827,123 +827,142 @@ int Map::loadResource()
     return 0;
 }
 
+/*
+ * 函数：Map::checkNeighborHigher；
+ * 参数：heightMap[][80]——临时高度数组；
+ *      x——x坐标；y——y坐标；
+ *      currentCalHeight——当前正在生成的高度;
+ * 内容：计算block(x, y)周围8个block有几个高度是高出来的；
+ * 返回值：返回数量。
+ */
+int Map::CheckNeighborHigher(int x, int y, int currentCalHeight)
+{
+    int count = 0;
+    int dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+    int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+    for(int i = 0; i < 8; i ++) {
+        int tx = x + dx[i], ty = y + dy[i];
+        if(tx < 0 || ty < 0 || tx > 79 || ty > 79) continue;
+        if(m_heightMap[tx][ty] == currentCalHeight) count ++;
+    }
+    return count;
+}
+
+/*
+ * 函数：Map::CheckNeighborType
+ * 参数：x：x坐标；
+ *      y：y坐标；
+ *      selectType：需要搜索的blockType类型;
+ * 内容：统计block(x, y)周围8个block有几个是selectType类型；
+ * 返回值：返回数量。
+ */
+int Map::CheckNeighborType(int x, int y, int selectType)
+{
+    int count = 0;
+    int dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+    int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+    for(int i = 0; i < 8; i ++) {
+        int tx = x + dx[i], ty = y + dy[i];
+        if(tx < 0 || ty < 0 || tx > 71 || ty > 71) continue;
+        if(this->cell[tx][ty].getMapType() == selectType) count ++;
+    }
+    return count;
+}
+
+/*
+ * 函数：Map::checkBorder；
+ * 参数：heightMap[][80]——临时高度数组；
+ *      x——x坐标；y——y坐标；
+ *      currentCalHeight——当前正在生成的高度；
+ * 内容：检查block(x, y)是否为当前高度的边界；
+ * 返回值：如果是，返回false；如果不是，返回true。
+ */
+bool Map::CheckBorder(int x, int y, int currentCalHeight)
+{
+    int dx[24] = {-2, -1, 0, 1, 2, -2, -1, 0, 1, 2, -2, -1, 1, 2, -2, -1, 0, 1, 2, -2, -1, 0, 1, 2};
+    int dy[24] = {-2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
+    for(int i = 0; i < 24; i ++) {
+        int tx = x + dx[i], ty = y + dy[i];
+        if(tx < 0 || ty < 0 || tx > 79 || ty > 79) continue;
+        if(m_heightMap[tx][ty] <= currentCalHeight - 2) return false;
+    }
+    return true;
+}
+
+/*
+ * 函数：Map::GenerateTerrain；
+ * 参数：无；
+ * 内容：*元胞自动机*逐层生成地形高度；
+ * 返回值：空。
+ */
 void Map::GenerateTerrain()
 {
     srand(time(NULL));
-
-    // 1.每间隔10格，设置一个高度锚点，高度在2~4之间；
-    for(int i = 0; i < 72; i += 10)
-    {
-        for(int j = 0; j < 72; j += 10)
-        {
-            if(i == 0 || i == 71 || j == 0 || j == 71)
-            {
-                this->cell[i][j].setMapHeight(3);
-                continue;
-            }
-            this->cell[i][j].setMapHeight(rand() % 5 + 2);
+    for(int height = MAPHEIGHT_FLAT + 1; height < MAPHEIGHT_PERCENT; height ++) {
+        // 每层微调生成概率
+        int percent = MAPHEIGHT_PERCENT;
+        switch (height) {
+        case 1:
+            percent -= 3;   // 57
+            break;
+        case 2:
+            percent += 13;  // 70
+            break;
+        case 3:
+            percent -= 10;  // 60
+            break;
+        case 4:
+            percent += 40;  // 100
+            break;
+        default:
+            break;
         }
-    }
-
-    // 2. 加权平均算出每个方格里各Block的高度
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 71; j++)
-        {
-            if(this->cell[i][j].getMapHeight() == MAPHEIGHT_EMPTY)
-            {
-                int LUi = (i / 10) * 10;
-                int LUj = (j / 10) * 10;
-                int RUi = (i / 10) * 10;
-                int RUj = (j / 10 + 1) * 10;
-                int LDi = (i / 10 + 1) * 10;
-                int LDj = (j / 10) * 10;
-                int RDi = (i / 10 + 1) * 10;
-                int RDj = (j / 10 + 1) * 10;
-                if(LDi >= 72) LDi = 71;
-                if(RDi >= 72) RDi = 71;
-                if(RDj >= 71) RDi = 70;
-                double MapH_LU = this->cell[LUi][LUj].getMapHeight();
-                double MapH_RU = this->cell[RUi][RUj].getMapHeight();
-                double MapH_LD = this->cell[LDi][LDj].getMapHeight();
-                double MapH_RD = this->cell[RDi][RDj].getMapHeight();
-                // 此时地块与四个角的点的曼哈顿距离 / 在整个大块里（10 * 10小块矩阵）理论上最远的距离（即20）= 高度占左上角的比例
-                double LU = 1 - smooth(double(abs(i - LUi) + abs(j - LUj)) / 20);
-                double RU = 1 - smooth(double(abs(i - RUi) + abs(j - RUj)) / 20);
-                double LD = 1 - smooth(double(abs(i - LDi) + abs(j - LDj)) / 20);
-                double RD = 1 - smooth(double(abs(i - RDi) + abs(j - RDj)) / 20);
-                this->cell[i][j].setMapHeight(int((LU * MapH_LU + RU * MapH_RU + LD * MapH_LD + RD * MapH_RD) / 2 + 0.5));
+        for(int i = 0; i < 80; i ++)
+            for(int j = 0; j < 80; j ++) {
+                if(rand() % 100 < percent && m_heightMap[i][j] == height - 1 && CheckBorder(i, j, height))
+                    m_heightMap[i][j] ++;
             }
-        }
-    }
 
-    // 3.初步修整地图边缘
-    for(int i = 0; i < 72; i++)
-    {
-        this->cell[i][71].setMapHeight(0);
-        this->cell[i][0].setMapHeight(0);
-    }
-    for(int j = 0; j < 72; j++)
-    {
-        this->cell[71][j].setMapHeight(0);
-        this->cell[0][j].setMapHeight(0);
-    }
-
-    // 将可能存在的突出/凹陷部分平滑化
-    for(int tmp = 2; tmp < 5; tmp ++)
-    {
-        int T = 20;
-        while(T--)
-        {
-            for(int i = 1; i < 71; i++)
-            {
-                for(int j = 1; j < 71; j++)
-                {
-                    if(this->cell[i][j].getMapHeight() == tmp)
-                    {
-                        if(this->cell[i - 1][j - 1].getMapHeight() == this->cell[i + 1][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i - 1][j - 1].getMapHeight())
-                            this->cell[i][j].setMapHeight(this->cell[i - 1][j - 1].getMapHeight());
-                        if(this->cell[i - 1][j + 1].getMapHeight() == this->cell[i + 1][j - 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j - 1].getMapHeight())
-                            this->cell[i][j].setMapHeight(this->cell[i - 1][j + 1].getMapHeight());
-                        if(this->cell[i][j - 1].getMapHeight() == this->cell[i][j + 1].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i][j + 1].getMapHeight())
-                            this->cell[i][j].setMapHeight(this->cell[i][j - 1].getMapHeight());
-                        if(this->cell[i - 1][j].getMapHeight() == this->cell[i + 1][j].getMapHeight() && this->cell[i][j].getMapHeight() != this->cell[i + 1][j].getMapHeight())
-                            this->cell[i][j].setMapHeight(this->cell[i - 1][j].getMapHeight());
-                    }
+        if(height == 1) {
+            for(int i = 0; i < 20; i ++) {
+                for(int j = 0; j < 20; j ++) {
+                    m_heightMap[i][j] = 0;
                 }
             }
         }
-    }
 
-    //    // 再次修整地图边缘
-    //    for(int i = 0; i < 72; i++)
-    //    {
-    //        for(int j = 0; j < 72; j++)
-    //        {
-    //            if(this->cell[i][j].getMapHeight() <= 3) this->cell[i][j].setMapHeight(3);
-    //            else this->cell[i][j].setMapHeight(4);
-    //        }
-    //    }
-
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 72; j++)
+        for(int optCounter = 0; optCounter <= MAPHEIGHT_OPTCOUNT; optCounter ++)    // optCounter：当前优化次数
         {
-            if(this->cell[i][j].getMapHeight() > 4) this->cell[i][j].setMapHeight(4);
-            else if(this->cell[i][j].getMapHeight() < 3) this->cell[i][j].setMapHeight(3);
+            for(int i = 0; i < 80; i ++)
+                for(int j = 0; j < 80; j ++) {
+                    int count = CheckNeighborHigher(i, j, height);
+                    if(m_heightMap[i][j] == height && count < 4) m_heightMap[i][j] --;
+                    else if(m_heightMap[i][j] == height - 1 && count >= 5) m_heightMap[i][j] ++;
+                }
+            if(optCounter == MAPHEIGHT_OPTCOUNT - 10)
+                for(int i = 2; i < 78; i ++)
+                    for(int j = 2; j < 78; j ++) {
+                        int count = CheckNeighborHigher(i, j, height);
+                        if(m_heightMap[i][j] == height - 1 && count >= 2) {
+                            if(m_heightMap[i - 1][j - 1] == height && m_heightMap[i + 1][j + 1] == height) {
+                                //                                qDebug() << "修改" << i << ',' << j << "处";
+                                m_heightMap[i - 1][j - 1] --;
+                                m_heightMap[i + 1][j + 1] --;
+                            }
+                            if(m_heightMap[i - 1][j + 1] == height && m_heightMap[i + 1][j - 1] == height) {
+                                //                                qDebug() << "修改" << i << ',' << j << "处";
+                                m_heightMap[i - 1][j + 1] --;
+                                m_heightMap[i + 1][j - 1] --;
+                            }
+                        }
+                    }
         }
     }
 
-    // 测试：将地形高度存储进Gamemap[][]然后读取
-    for(int i = 0; i < 72; i++)
-    {
-        for(int j = 0; j < 72; j++)
-        {
-            Gamemap[i][j] = this->cell[i][j].getMapHeight();
-        }
-    }
-
-    return ;
+    // 取中心高度值存入cell以防止地图边界资源生成断裂
+    for(int i = 4; i < 76; i ++)
+        for(int j = 4; j < 76; j ++)
+            this->cell[i - 4][j - 4].setMapHeight(m_heightMap[i][j]);
 }
 
 void Map::GenerateType()
@@ -956,41 +975,56 @@ void Map::GenerateType()
      * ↓
      * x
      */
-    for(int i = 0; i < MAP_L; i++)
+    for(int i = 4; i < MAP_L + 4; i++)
     {
-        for(int j = 0; j < MAP_U; j++)
+        for(int j = 4; j < MAP_U + 4; j++)
         {
-            if(i == 0 || i == 71 || j == 0 || j == 71)
-            {
-                this->cell[i][j].setMapType(MAPTYPE_FLAT);
-                continue;
-            }
             // 判断四个角与中间区块的高度差
-            int heightDiffA = abs(this->cell[i][j].getMapHeight() - this->cell[i - 1][j - 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i + 1][j - 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i - 1][j + 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i + 1][j + 1].getMapHeight());
+            int heightDiffA = abs(m_heightMap[i][j] - m_heightMap[i - 1][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i - 1][j + 1]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j + 1]);
+            // 判断四条临边与中间区块的高度差
+            int heightDiffL = abs(m_heightMap[i][j] - m_heightMap[i - 1][j]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j]) + abs(m_heightMap[i][j] - m_heightMap[i][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i][j + 1]);
             switch(heightDiffA)
             {
             case 1:
-                if(this->cell[i + 1][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                /*
+                    * X X X
+                    * X # X
+                    * X X 1
+                    */
+                if(m_heightMap[i + 1][j + 1] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A3_UPTOR);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A3_UPTOR);
                 }
-                else if(this->cell[i + 1][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                /*
+                    * X X X
+                    * X # X
+                    * 1 X X
+                    */
+                else if(m_heightMap[i + 1][j - 1] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A2_DOWNTOU);
                 }
-                else if(this->cell[i - 1][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                /*
+                    * X X 1
+                    * X # X
+                    * X X X
+                    */
+                else if(m_heightMap[i - 1][j + 1] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A2_UPTOU);
                 }
-                else if(this->cell[i - 1][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                /*
+                    * 1 X X
+                    * X # X
+                    * X X X
+                    */
+                else if(m_heightMap[i - 1][j - 1] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A1_UPTOL);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A1_UPTOL);
                 }
                 break;
             }
 
-            // 判断四条临边与中间区块的高度差
-            int heightDiffL = abs(this->cell[i][j].getMapHeight() - this->cell[i - 1][j].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i + 1][j].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i][j - 1].getMapHeight()) + abs(this->cell[i][j].getMapHeight() - this->cell[i][j + 1].getMapHeight());
             switch(heightDiffL)
             {
             case 2:
@@ -999,106 +1033,114 @@ void Map::GenerateType()
                     * 0 # 1
                     * X 1 X
                     */
-                if((this->cell[i + 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                if((m_heightMap[i + 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j + 1] - m_heightMap[i][j] == 1))
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A1_DOWNTOL);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A1_DOWNTOL);
                 }
                 /*
                      * X 1 X
                      * 1 # 0
                      * X 0 X
                      */
-                else if((this->cell[i - 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                else if((m_heightMap[i - 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j - 1] - m_heightMap[i][j] == 1))
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A3_DOWNTOR);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A3_DOWNTOR);
                 }
                 /*
                      * X 1 X
                      * 0 # 1
                      * X 0 X
                      */
-                else if((this->cell[i - 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                else if((m_heightMap[i - 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j + 1] - m_heightMap[i][j] == 1))
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A0_DOWNTOD);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A0_DOWNTOD);
                 }
                 /*
                      * X 0 X
                      * 1 # 0
                      * X 1 X
                      */
-                else if((this->cell[i + 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1) && (this->cell[i][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1))
+                else if((m_heightMap[i + 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j - 1] - m_heightMap[i][j] == 1))
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_A0_DOWNTOD);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A0_DOWNTOD);
                 }
                 break;
 
             case 1:
-                if(this->cell[i + 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                if(m_heightMap[i + 1][j] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_L3_UPTORD);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L3_UPTORD);
                 }
-                else if(this->cell[i - 1][j].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                else if(m_heightMap[i - 1][j] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_L1_UPTOLU);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L1_UPTOLU);
                 }
-                else if(this->cell[i][j + 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                else if(m_heightMap[i][j + 1] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_L2_UPTORU);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L2_UPTORU);
                 }
-                else if(this->cell[i][j - 1].getMapHeight() - this->cell[i][j].getMapHeight() == 1)
+                else if(m_heightMap[i][j - 1] - m_heightMap[i][j] == 1)
                 {
-                    this->cell[i][j].setMapType(MAPTYPE_L0_UPTOLD);
+                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L0_UPTOLD);
                 }
                 break;
             }
+        }
+    }
 
-            if(this->cell[i][j].getMapType() == 13) this->cell[i][j].setMapType(12);
-            //            if(this->cell[i][j].getMapType() == 2) this->cell[i][j].setMapType(3);
-            // 经验函数
-            if(this->cell[i][j].getMapHeight() != 3)
-            {
-                this->cell[i][j].setOffsetY(-15);
+    // 特殊处理
+    for(int i = 0; i < MAP_L; i ++) {
+        for(int j = 0; j < MAP_U; j ++) {
+
+            int count = CheckNeighborType(i, j, MAPTYPE_A2_UPTOU) +
+                    CheckNeighborType(i, j, MAPTYPE_L3_DOWNTORD) +
+                    CheckNeighborType(i, j, MAPTYPE_L0_DOWNTOLD);
+            CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
+                    CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
+            if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count == 0) {
+                if(j + 1 < 72 && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
+                    this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
             }
-            if(this->cell[i][j].getMapType() == 2 || this->cell[i][j].getMapType() == 3 || this->cell[i][j].getMapType() == 4 || this->cell[i][j].getMapType() == 5 || this->cell[i][j].getMapType() == 8 || this->cell[i][j].getMapType() == 9)
-            {
-                this->cell[i][j].setOffsetY(-15);
-            }
-            if(this->cell[i][j].getMapType() == 13 && this->cell[i][j + 1].getMapType() == 13 && this->cell[i - 1][j].getMapType() == 13)
-            {
-                this->cell[i][j].setMapType(12);
-            }
-            //            if(this->cell[i][j].getMapType() == 3 && this->cell[i][j + 1].getMapType() == 3 && this->cell[i - 1][j].getMapType() == 3)
-            //            {
-            //                this->cell[i][j].setMapType(2);
-            //            }
-            if(this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j] .getMapType() == 2)
-            {
-                this->cell[i][j].setMapType(3);
-                qDebug() << "cell[" << i << "][" << j << "].getMapType() == " << 3;
-            }
-            if((this->cell[i][j].getMapType() == 2 && this->cell[i][j - 1] .getMapType() == 2) || (this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j] .getMapType() == 2))
-            {
-                this->cell[i][j].setMapType(3);
-                qDebug() << "cell[" << i << "][" << j << "].getMapType() == " << 3;
-            }
-            if((this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j].getMapType() == 5 && this->cell[i][j - 1].getMapType() == 4) || (this->cell[i][j].getMapType() == 2 && this->cell[i + 1][j].getMapType() == 3 && this->cell[i][j - 1].getMapType() == 4))
-            {
-                this->cell[i][j].setMapType(3);
-                qDebug() << "cell[" << i << "][" << j << "].getMapType() == " << 3;
-            }
+            if(i + 1 < 72 && j + 1 < 72 && (this->cell[i - 1][j].getMapType() == MAPTYPE_A0_DOWNTOD || this->cell[i - 1][j].getMapType() == MAPTYPE_L2_UPTORU) && this->cell[i][j + 1].getMapType() == MAPTYPE_A0_DOWNTOD && this->cell[i + 1][j].getMapType() == MAPTYPE_FLAT)
+                this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
+            count = CheckNeighborType(i, j, MAPTYPE_L0_UPTOLD) + CheckNeighborType(i, j, MAPTYPE_L3_UPTORD);
+            if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count > 0)
+                this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
         }
     }
 }
 
 void Map::CalOffset()
 {
+    for(int i = 0; i < MAP_L; i ++) {
+        for(int j = 0; j < MAP_U; j ++) {
+            // 偏移
+            if(this->cell[i][j].getMapHeight() > 0)
+            {
+                this->cell[i][j].setOffsetY(-15 * this->cell[i][j].getMapHeight());
+            }
+            if(this->cell[i][j].getMapType() == 2 || this->cell[i][j].getMapType() == 3 || this->cell[i][j].getMapType() == 4 || this->cell[i][j].getMapType() == 5 || this->cell[i][j].getMapType() == 8 || this->cell[i][j].getMapType() == 9)
+            {
+                this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + -15);
+            }
+            if(this->cell[i][j].getMapType() == 10)
+            {
+                this->cell[i][j].setOffsetX(this->cell[i][j].getOffsetX() + -1);
+            }
+            if(this->cell[i][j].getMapType() == 11)
+            {
+                this->cell[i][j].setOffsetX(this->cell[i][j].getOffsetX() + 1);
+            }
+            if(this->cell[i][j].getMapType() == 13)
+            {
+                this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + 1);
+            }
 
+            // test
+            //            if(this->cell[i][j].getMapType() != MAPTYPE_FLAT) this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() - 100);
+        }
+    }
     return ;
-}
-
-double Map::smooth(double x)
-{
-    return 3 * pow(x, 2) - 2 * pow(x, 3);
 }
 
 void Map::init(int MapJudge)
@@ -1106,31 +1148,34 @@ void Map::init(int MapJudge)
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
             this->cell[i][j].Num = 0;
-            this->cell[i][j].Explored=true;
+            this->cell[i][j].Explored = true;
             //改地图可见度在这里
-            this->cell[i][j].Visible=true;
-            this->cell[i][j].setMapHeight(MAPHEIGHT_EMPTY);
+            this->cell[i][j].Visible = true;
         }
     }
-    generateLandforms();
-    generateCenter();
-    generateResources();
-    generateResource();
-    GenerateTerrain();
-    GenerateType();
+    //    generateLandforms();    // 在草地中生成小片沙漠
+    //    generateCenter();       // 生成市镇中心及附近资源
+    //    generateResources();    // 生成片状资源
+    //    generateResource();     // 生成独立资源
+    GenerateTerrain();      // 元胞自动机生成地图高度
+    GenerateType();         // 通过高度差计算调用的地图块资源
+    CalOffset();            // 计算偏移量
 
     for(int i = 0; i < 72; i++)
     {
         for(int j = 0; j < 72; j++)
         {
+            this->cell[i][j].setMapPattern(0);
             if(this->cell[i][j].getMapType() != 0 && this->cell[i][j].getMapType() != 1)
             {
-                this->cell[i][j].Num = this->cell[i][j].getMapPattern() * 15 + this->cell[i][j].getMapType();
+                this->cell[i][j].Num = (this->cell[i][j].getMapPattern() + 1) * 15 + this->cell[i][j].getMapType();
             }
             else if(this->cell[i][j].getMapType() == 1)
             {
                 // 设置平地全部为草地
                 this->cell[i][j].Num = MAPPATTERN_GRASS;
+                // 测试时设置平地全部为沙漠，便于调试
+                //                this->cell[i][j].Num = MAPPATTERN_DESERT;
             }
             else if(this->cell[i][j].getMapType() == 0)
             {
@@ -1150,7 +1195,7 @@ void Map::init(int MapJudge)
                 for (int j = 0; j < MAP_U; j++)
                 {
                     //                    outMapFile << Gamemap[i][j] << "\n";
-                    outMapFile << this->cell[i][j].getMapHeight() << " ";
+                    outMapFile << this->cell[i][j].getMapHeight() << ' ';
                 }
                 outMapFile << "\n";
             }
@@ -1171,26 +1216,19 @@ void Map::init(int MapJudge)
         {
             QTextStream in(&inputGameFile);
             int j = 0, i = 0;
-            //            for (int T = 0; i < MAP_L * MAP_U; T++)
-            //            {
-            //                QString line = in.readLine();
-            //                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-            //                j++;
-            //                if(j >= MAP_U)
-            //                {
-            //                    j = 0;
-            //                    i++;
-            //                }
-            //                if(i >= MAP_L)
-            //                {
-            //                    break;
-            //                }
-            //            }
-            for(int i = 0; i < 72; i++)
+            for (int T = 0; i < MAP_L * MAP_U; T++)
             {
-                for(int j = 0; j < 72; j++)
+                QString line = in.readLine();
+                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
+                j++;
+                if(j >= MAP_U)
                 {
-                    this->cell[i][j].setMapHeight(Gamemap[i][j]);
+                    j = 0;
+                    i++;
+                }
+                if(i >= MAP_L)
+                {
+                    break;
                 }
             }
             inputGameFile.close();
@@ -1209,26 +1247,19 @@ void Map::init(int MapJudge)
         {
             QTextStream in(&inputGameFile);
             int j = 0, i = 0;
-            //            for (int T = 0; i < MAP_L * MAP_U; T++)
-            //            {
-            //                QString line = in.readLine();
-            //                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-            //                j++;
-            //                if(j >= MAP_U)
-            //                {
-            //                    j = 0;
-            //                    i++;
-            //                }
-            //                if(i >= MAP_L)
-            //                {
-            //                    break;
-            //                }
-            //            }
-            for(int i = 0; i < 72; i++)
+            for (int T = 0; i < MAP_L * MAP_U; T++)
             {
-                for(int j = 0; j < 72; j++)
+                QString line = in.readLine();
+                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
+                j++;
+                if(j >= MAP_U)
                 {
-                    this->cell[i][j].setMapHeight(Gamemap[i][j]);
+                    j = 0;
+                    i++;
+                }
+                if(i >= MAP_L)
+                {
+                    break;
                 }
             }
             inputGameFile.close();

@@ -90,16 +90,17 @@
 #define MAPTYPE_A0_UPTOD 13     // A0角（向下方凸起）
 
 /********** 地图块高度 **********/
-#define MAPHEIGHT_EMPTY 0   // 未定义高度
-#define MAPHEIGHT_FLAT 2    // 地形高度
-#define MAPHEIGHT_MAX 4     // 最高地形高度
+#define MAPHEIGHT_FLAT 0        // 地形高度
+#define MAPHEIGHT_MAX 5         // 最高地形高度
+#define MAPHEIGHT_PERCENT 60    // 生成概率，范围0~100
+#define MAPHEIGHT_OPTCOUNT 20   // 生成高度时的优化次数，范围要求>=5
 
 /********** 地图块样式 **********/
 #define MAPPATTERN_EMPTY 0      // 未定义样式
-#define MAPPATTERN_GRASS 1      // 草原
-#define MAPPATTERN_DESERT 2     // 沙漠
-#define MAPPATTERN_OCEAN 3      // 海洋/河流
-#define MAPPATTERN_SHOAL 4      // 浅滩（河流中可行走部分）
+#define MAPPATTERN_GRASS 0      // 草原
+#define MAPPATTERN_DESERT 1     // 沙漠
+#define MAPPATTERN_OCEAN 2      // 海洋/河流
+#define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
 
 
 /********** DebugText栏颜色 **********/
