@@ -6,7 +6,7 @@ std::list<ImageResource>* Army::Stand[4][8];
 std::list<ImageResource>* Army::Attack[4][8];
 std::list<ImageResource>* Army::Die[4][8];
 
-std::string Army::ArmyName[4]={"Archer","Axeman","Clubman","Scout"};
+std::string Army::ArmyName[4]={"Clubman","Axeman","Archer","Scout"};
 
 Army::Army()
 {
@@ -19,7 +19,7 @@ Army::Army(double DR,double UR,int type)
     this->type = type;
     this->Blood=1;
     setAttribute();
-    this->Angle=rand()%8;
+    this->Angle=0;
     this->DR=DR;
     this->UR=UR;
     this->BlockDR=DR/BLOCKSIDELENGTH;
@@ -49,15 +49,46 @@ Army::Army(double DR,double UR,int type)
 
 void Army::nextframe()
 {
-    qDebug()<<"Army缺少nextframe";
+    if(isDie())
+    {
+        if( !isDying() ) setPreDie();
+        else if(!get_isActionEnd() ) nowres++;
+    }
+    else
+    {
+        nowres++;
+        if(nowres==nowlist->end())
+        {
+            nowres=nowlist->begin();
+            //读到最后回到最初
+        }
 
+        updateMove();
+    }
 
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
 }
 
 void Army::setNowRes()
 {
-    qDebug()<<"Army缺少setNowRes";
-
+    switch (this->nowstate) {
+    case 0:
+        nowlist=this->Stand[this->type][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_WALK:
+        nowlist=this->Walk[this->type][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_ATTACK:
+        nowlist=this->Attack[this->type][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_DIE:
+        nowlist=this->Die[this->type][this->Angle];
+        break;
+    default:
+        break;
+    }
+    nowres = nowlist->begin();
 }
 
 /***********************************************************/
@@ -165,20 +196,20 @@ void Army::setAttribute()
 
         break;
 
-    case AT_SWORDSMAN:  //短剑兵,可升级3次
-        upgradable = true;
-        armyClass = ARMY_INFANTRY;
-        attackType = ATTACKTYPE_CLOSE;
+//    case AT_SWORDSMAN:  //短剑兵,可升级3次
+//        upgradable = true;
+//        armyClass = ARMY_INFANTRY;
+//        attackType = ATTACKTYPE_CLOSE;
 
-        MaxBlood_change = new int[4]{ BLOOD_SHORTSWORDSMAN1,BLOOD_SHORTSWORDSMAN2,BLOOD_SHORTSWORDSMAN3,BLOOD_SHORTSWORDSMAN4 };
-        speed_change = new double[4]{ SPEED_SHORTSWORDSMAN1,SPEED_SHORTSWORDSMAN2,SPEED_SHORTSWORDSMAN3,SPEED_SHORTSWORDSMAN4 };
-        vision_change = new int[4]{ VISION_SHORTSWORDSMAN1,VISION_SHORTSWORDSMAN2,VISION_SHORTSWORDSMAN3,VISION_SHORTSWORDSMAN4 };
-        atk_change  = new int[4]{ATK_SHORTSWORSMAN1,ATK_SHORTSWORSMAN2,ATK_SHORTSWORSMAN3,ATK_SHORTSWORSMAN4};
-        dis_Attack_change  = new double[4]{DIS_SHORTSWORDSMAN1 , DIS_SHORTSWORDSMAN2,DIS_SHORTSWORDSMAN3,DIS_SHORTSWORDSMAN4};
-        inter_Attack_change = new double[4]{ INTERVAL_SHORTSWORDSMAN1,INTERVAL_SHORTSWORDSMAN2,INTERVAL_SHORTSWORDSMAN3,INTERVAL_SHORTSWORDSMAN4 };
-        defence_close_change  = new int[4]{ DEFCLOSE_SHORTSWORSMAN1,DEFCLOSE_SHORTSWORSMAN2,DEFCLOSE_SHORTSWORSMAN3,DEFCLOSE_SHORTSWORSMAN4 };
-        defence_shoot_change  = new int[4]{ DEFSHOOT_SHORTSWORSMAN1,DEFSHOOT_SHORTSWORSMAN2,DEFSHOOT_SHORTSWORSMAN3,DEFSHOOT_SHORTSWORSMAN4 };
-        break;
+//        MaxBlood_change = new int[4]{ BLOOD_SHORTSWORDSMAN1,BLOOD_SHORTSWORDSMAN2,BLOOD_SHORTSWORDSMAN3,BLOOD_SHORTSWORDSMAN4 };
+//        speed_change = new double[4]{ SPEED_SHORTSWORDSMAN1,SPEED_SHORTSWORDSMAN2,SPEED_SHORTSWORDSMAN3,SPEED_SHORTSWORDSMAN4 };
+//        vision_change = new int[4]{ VISION_SHORTSWORDSMAN1,VISION_SHORTSWORDSMAN2,VISION_SHORTSWORDSMAN3,VISION_SHORTSWORDSMAN4 };
+//        atk_change  = new int[4]{ATK_SHORTSWORSMAN1,ATK_SHORTSWORSMAN2,ATK_SHORTSWORSMAN3,ATK_SHORTSWORSMAN4};
+//        dis_Attack_change  = new double[4]{DIS_SHORTSWORDSMAN1 , DIS_SHORTSWORDSMAN2,DIS_SHORTSWORDSMAN3,DIS_SHORTSWORDSMAN4};
+//        inter_Attack_change = new double[4]{ INTERVAL_SHORTSWORDSMAN1,INTERVAL_SHORTSWORDSMAN2,INTERVAL_SHORTSWORDSMAN3,INTERVAL_SHORTSWORDSMAN4 };
+//        defence_close_change  = new int[4]{ DEFCLOSE_SHORTSWORSMAN1,DEFCLOSE_SHORTSWORSMAN2,DEFCLOSE_SHORTSWORSMAN3,DEFCLOSE_SHORTSWORSMAN4 };
+//        defence_shoot_change  = new int[4]{ DEFSHOOT_SHORTSWORSMAN1,DEFSHOOT_SHORTSWORSMAN2,DEFSHOOT_SHORTSWORSMAN3,DEFSHOOT_SHORTSWORSMAN4 };
+//        break;
 
     case AT_SLINGER:    //投石者
         upgradable = false;

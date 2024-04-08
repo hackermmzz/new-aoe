@@ -31,11 +31,12 @@ void Core::gameUpdate()
                 }
                 (*humaniter)->setPreStateIsIdle();
             }
-            interactionList->conduct_Attacked(*humaniter);
+
 
             if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd()) humaniter = player[playerIndx]->deleteHuman(humaniter);
             else
             {
+                interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
 
@@ -105,8 +106,16 @@ void Core::gameUpdate()
     std::list<StaticRes*>::iterator SRiter=theMap->staticres.begin();
     while(SRiter!=theMap->staticres.end())
     {
-        (*SRiter)->nextframe();
-        SRiter++;
+        if((*SRiter)->is_Surplus())
+        {
+            (*SRiter)->nextframe();
+            SRiter++;
+        }
+        else
+        {
+            interactionList->eraseObject(*SRiter);
+            SRiter = theMap->deleteStaticRes(SRiter);
+        }
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
@@ -178,6 +187,19 @@ void Core::manageMouseEvent()
 //后续编写，用于处理AI指令
 void Core::manageOrder()
 {
+    static bool once = true;
+    static bool second = true;
+    if(once && player[0]->human.size())
+    {
+        once = false;
+        interactionList->addRelation(*(player[0]->human.begin()) , 30*BLOCKSIDELENGTH , 25*BLOCKSIDELENGTH  , CoreEven_CreatBuilding, true, BUILDING_CENTER);
+    }
+
+    if(second && player[0]->build.size())
+    {
+        second = false;
+        interactionList->addRelation(*(player[0]->build.begin()),CoreEven_BuildingAct , BUILDING_CENTER_CREATEFARMER);
+    }
 
 }
 

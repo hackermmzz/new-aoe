@@ -103,6 +103,27 @@ void GameWidget::paintEvent(QPaintEvent *)
     //绘制列表清空
     drawlist.clear();
 
+    //地图资源相关 树木石块等
+    std::list<StaticRes*> *sr=&mainwidget->map->staticres;
+    if(!sr->empty())
+    {
+        std::list<StaticRes*>::iterator sriter=sr->begin();
+        while(sriter!=sr->end())
+        {
+            insert((*sriter),&drawlist);
+            sriter++;
+        }
+    }
+    std::list<Animal *> *ar=&mainwidget->map->animal;
+    if(!ar->empty())
+    {
+        std::list<Animal *>::iterator ariter=ar->begin();
+        while(ariter!=ar->end())
+        {
+            insert((*ariter),&drawlist);
+            ariter++;
+        }
+    }
 
     //玩家的建筑部分 人物部分
     for(int i=0;i<MAXPLAYER;i++)
@@ -135,29 +156,6 @@ void GameWidget::paintEvent(QPaintEvent *)
             misiter++;
         }
     }
-
-    //地图资源相关 树木石块等
-    std::list<StaticRes*> *sr=&mainwidget->map->staticres;
-    if(!sr->empty())
-    {
-        std::list<StaticRes*>::iterator sriter=sr->begin();
-        while(sriter!=sr->end())
-        {
-            insert((*sriter),&drawlist);
-            sriter++;
-        }
-    }
-    std::list<Animal *> *ar=&mainwidget->map->animal;
-    if(!ar->empty())
-    {
-        std::list<Animal *>::iterator ariter=ar->begin();
-        while(ariter!=ar->end())
-        {
-            insert((*ariter),&drawlist);
-            ariter++;
-        }
-    }
-
 
     //drawlist正常绘制
     if(!drawlist.empty())

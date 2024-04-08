@@ -26,6 +26,7 @@ struct relation_Object
 
     //构造函数
     relation_Object() {isExist = false; goalObject = NULL;}
+    relation_Object( int evenClass );
     relation_Object( Coordinate* goal , int eventClass);
     relation_Object(double DR_goal , double UR_goal , int eventClass );
 

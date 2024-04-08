@@ -43,9 +43,12 @@ public:
     Animal();
     Animal(int Num,double DR,double UR);
   /**********************虚函数**************************/
+    void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
+    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
     void nextframe();
     int getSort();
     void setNowRes();
+    double getDis_attack(){ return dis_Attack*BlockSizeLen; }
 
     /***************指针强制转化****************/
     //若要将Animal类指针转化为父类指针,务必用以下函数!

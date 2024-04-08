@@ -56,15 +56,24 @@ Farmer::Farmer(double DR, double UR)
 
 void Farmer::nextframe()
 {
-    updateState();
-    nowres++;
-    if(nowres==nowlist->end())
+    if(isDie())
     {
-        nowres=nowlist->begin();
-        //读到最后回到最初
+        if( !isDying() ) setPreDie();
+        else if(!get_isActionEnd() ) nowres++;
+    }
+    else
+    {
+        updateState();
+        nowres++;
+        if(nowres==nowlist->end())
+        {
+            nowres=nowlist->begin();
+            //读到最后回到最初
+        }
+
+        updateMove();
     }
 
-    updateMove();
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
 }
@@ -91,6 +100,10 @@ void Farmer::setNowRes()
         break;
     case MOVEOBJECT_STATE_WORK:
         nowlist=this->Work[this->state][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_DIE:
+        nowlist = this->Die[this->state][this->Angle];
+        break;
     default:
         break;
     }

@@ -38,7 +38,7 @@ private:
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     void initDetailList();
-    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR){}
+    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR){ return true;}
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/

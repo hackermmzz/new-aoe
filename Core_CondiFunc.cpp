@@ -2,6 +2,14 @@
 
 //****************************************************************************************
 //relation_Object结构体 内部函数
+relation_Object::relation_Object( int evenClass )
+{
+    isExist = true;
+    goalObject = NULL;
+    relationAct = evenClass;
+    sort = -1;
+    init_AlterOb();
+}
 
 relation_Object::relation_Object( Coordinate* goal , int eventClass)
 {

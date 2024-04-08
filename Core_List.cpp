@@ -60,7 +60,7 @@ bool Core_List::addRelation( Coordinate * object1, double DR , double UR, int ev
         }
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         else if(eventType == CoreEven_CreatBuilding && \
-                is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR)) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
+                is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR)) /*&& player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type)*/ )
             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
     }
 
@@ -74,7 +74,7 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
         ((Building*)object1)->setAction(actNum);
-        relate_AllObject[object1] = relation_Object(NULL,evenType);
+        relate_AllObject[object1] = relation_Object(evenType);
 
         return true;
     }
@@ -120,7 +120,6 @@ void Core_List::manageRelationList()
 //                }
 //            }
 
-            qDebug()<<object1<<8;
             //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
             {
@@ -135,12 +134,10 @@ void Core_List::manageRelationList()
                 }
             }
 
-            qDebug()<<object1<<9;
             recordCondition = &thisDetailEven.chageCondition[nowPhaseNum];
             //判断是否需要切换当前阶段
             if( nowPhaseNum < thisDetailEven.phaseAmount && recordCondition->condition(object1,thisRelation , recordCondition->variableArgu,recordCondition->isNegation))
                 nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
-            qDebug()<<object1<<10;
 
             //实际执行行动
             if(nowPhaseNum == exePhaseNum)  //nowphase变化后，防止提前行动。变化后的行动在下一帧开始做
@@ -152,9 +149,7 @@ void Core_List::manageRelationList()
                         else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
                         break;
                     case CoreDetail_Attack:
-                        qDebug()<<object1<<11;
                         object_Attack(object1,object2);
-                        qDebug()<<object1<<12;
                         break;
                     case CoreDetail_Gather:
                         object_Gather(object1,object2);
@@ -242,7 +237,7 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
 void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>& building)
 {
     int type = relation.resourceBuildingType;
-    double dis, dis_opti , dr = relation.DR_goal , ur =relation.UR_goal;
+    double dis, dis_opti = relation.distance_Record , dr = relation.DR_goal , ur =relation.UR_goal;
     Building* judeBuild, *optimum = NULL;
 
     list<Building*>::iterator iterNow = building.begin() , iterEnd = building.end();
@@ -250,10 +245,10 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
     while( iterNow != iterEnd )
     {
         judeBuild = *iterNow;
-        if(judeBuild->getNum() == BUILDING_CENTER || judeBuild->getNum() == type)
+        if( judeBuild->isFinish() &&(judeBuild->getNum() == BUILDING_CENTER || judeBuild->getNum() == type))
         {
             dis = calculateManhattanDistance(dr,ur,judeBuild->getDR(),judeBuild->getUR());
-            if(dis < relation.distance_Record)
+            if(dis < dis_opti)
             {
                 optimum = judeBuild;
                 dis_opti =dis;
@@ -313,7 +308,6 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
         //非祭司,是普通的伤害计算公式
         /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
 
-        qDebug()<<55;
         if(attacker->is_missileAttack())
         {
             if(object1->get_isActionImageToPhaseFromEnd(PhaseFromEnd_Attack_ThrowMissile))
@@ -324,7 +318,6 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
             calculateDamage = true;
             if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
         }
-        qDebug()<<66;
     }
     else if(missile!=NULL && missile->is_HitTarget() && attackee!=NULL )
     {
@@ -344,9 +337,11 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
+        qDebug()<<(attacker->getATK())<<(attackee->getDEF(attacker->get_AttackType()));
         damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
+        qDebug()<<damage;
     }
 }
 
@@ -383,7 +378,6 @@ void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& rel
         if(object1->getSort() == SORT_FARMER)
         {
             Farmer* worker = (Farmer*) object1;
-            qDebug()<<relation.alterOb;
             if(relation.alterOb == NULL) worker->setPreStand();
             else
             {

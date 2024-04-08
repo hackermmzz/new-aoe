@@ -109,10 +109,12 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
     player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
     player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+
+    player[0]->addArmy(AT_SCOUT, 30*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
 //    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
 
     map->addAnimal(ANIMAL_TREE , 40 , 50);
-//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
     map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
 
     map->addStaticRes(NUM_STATICRES_Bush , 50,65);
@@ -188,6 +190,14 @@ void MainWidget::initAnimal()
     for(int num=0;num<5;num++)
     {
         if(num==ANIMAL_TREE)
+        {
+            Animal::allocateStand(num,0);
+            Animal::allocateDie(num,0);
+            loadResource(Animal::getAnimalName(num),Animal::getStand(num,0));
+            loadResource(Animal::getAnimalcarcassname(num),Animal::getDie(num,0));
+            continue;
+        }
+        else if(num == ANIMAL_FOREST)
         {
             Animal::allocateStand(num,0);
             Animal::allocateDie(num,0);

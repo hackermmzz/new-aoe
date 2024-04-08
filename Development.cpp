@@ -106,7 +106,7 @@ int Development::get_level( int sort, int type )
         {
         case AT_CLUBMAN:    return level_Clubman;
 
-        case AT_SWORDSMAN:  return level_ShortSwordsman;
+//        case AT_SWORDSMAN:  return level_ShortSwordsman;
 
         default:
             break;
@@ -143,6 +143,7 @@ void Development::init_DevelopLab()
         //造村民
         newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
                                        0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
+        newNode->setCreatObjectAfterAction(SORT_FARMER );
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
 

@@ -15,8 +15,8 @@ public:
 
     SelectWidget *sel = nullptr;
 
-private:
     Map* theMap;    //地图信息
+private:
     Player** player;    //player信息
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
     MouseEvent *mouseEvent; //记录当前鼠标事件

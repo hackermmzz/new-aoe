@@ -526,23 +526,23 @@
 #define ARMY_SHIP 7
 
 /********** 兵种类别 **********/
-#define AT_CLUBMAN 11
-#define AT_SWORDSMAN 12
-#define AT_SLINGER 13
+#define AT_CLUBMAN 0
+//#define AT_SWORDSMAN 1
+#define AT_SLINGER 1
 
-#define AT_HOPLITE 21
+//#define AT_HOPLITE 3
 
-#define AT_BOWMAN 31
-#define AT_IMPROVED 32
-#define AT_CHARIOTARCHER 33
-#define AT_HORSE 34
-#define AT_ELEPHENTARCHER 35
+#define AT_BOWMAN 2
+//#define AT_IMPROVED 5
+//#define AT_CHARIOTARCHER 6
+//#define AT_HORSE 7
+//#define AT_ELEPHENTARCHER 8
 
-#define AT_SCOUT 41
-#define AT_CAVALRY 42
-#define AT_CAMEL 43
-#define AT_CHARIOT 44
-#define AT_ELEPHENT 45
+#define AT_SCOUT 3
+//#define AT_CAVALRY 10
+//#define AT_CAMEL 11
+//#define AT_CHARIOT 12
+//#define AT_ELEPHENT 13
 
 /********** 祭祀 **********/
 #define AT_PRIEST 51
