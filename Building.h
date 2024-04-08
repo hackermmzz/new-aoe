@@ -17,6 +17,7 @@ public:
     int getPlayerRepresent(){ return playerRepresent; }
     void setNowRes();
     void nextframe();
+    void init_Blood();
 
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
@@ -84,14 +85,8 @@ public:
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
     bool isFinish(){return this->Percent>=100;}
-    double getCnt()
-    {
-        return this->Cnt;
-    }
-    double getPercent()
-    {
-        return this->Percent;
-    }
+    double getCnt(){return this->Cnt;}
+    double getPercent() {return this->Percent;}
 
     double get_retio_Build(){ return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;}
 
@@ -101,8 +96,6 @@ public:
     bool is_ActionFinish(){ return actPercent>=100; }
     void update_Action(){ actPercent += ratio_Action; }
     void update_Build();
-    void finishBuild(){ playerScience->upgradeDevelop(Num); }
-    void finishAct(){playerScience->upgradeDevelop(Num , actNum);}
 private:
     static std::list<ImageResource> *build[4];
     //建设list

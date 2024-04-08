@@ -137,17 +137,78 @@ void Development::init_DevelopLab()
     conditionDevelop* newNode;
 
     //市镇中心
-    developLab[BUILDING_CENTER].buildCon = NULL;
-    //new分配空间在结构体内析构
-    newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
-                                   0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
-    developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
-    developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
-    newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_UPGRADE,\
-                                   0, BUILDING_CENTER_UPGRADE_FOOD);
-    developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].setHead(newNode);
+    {
+        developLab[BUILDING_CENTER].buildCon = new conditionDevelop( CIVILIZATION_IRONAGE , BUILDING_CENTER , TIME_BUILD_CENTER );
+        //new分配空间在结构体内析构
+        //造村民
+        newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
+                                       0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
+        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
+        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
+
+        //升级时代
+        newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_UPGRADE,\
+                                       0, BUILDING_CENTER_UPGRADE_FOOD);
+        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].setHead(newNode);
+        /** 缺少石器时代两个建筑的前置条件*/
+    }
+
 
     //房屋
     developLab[BUILDING_HOME].buildCon =new conditionDevelop( CIVILIZATION_STONEAGE , BUILDING_HOME , TIME_BUILD_HOME , BUILD_HOUSE_WOOD );
 
+    //仓库
+    {
+        developLab[BUILDING_STOCK].buildCon = new conditionDevelop( CIVILIZATION_STONEAGE , BUILDING_STOCK , TIME_BUILD_STOCK , BUILD_STOCK_WOOD );
+    }
+
+
+    //谷仓
+    {
+         developLab[BUILDING_GRANARY].buildCon = new conditionDevelop( CIVILIZATION_STONEAGE , BUILDING_GRANARY , TIME_BUILD_GRANARY , BUILD_GRANARY_WOOD );
+
+         //研发、升级箭塔
+         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_ARROWTOWER , 0 , BUILDING_GRANARY_ARROWTOWER_FOOD );
+         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].setHead(newNode);
+    }
+
+    //兵营
+
+    //市场
+    {
+        developLab[BUILDING_MARKET].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILD_MARKET , BUILD_MARKET_WOOD );
+
+        //升级伐木
+        {
+            newNode = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_CUTTING ,\
+                                            BUILDING_MARKET_WOOD_UPGRADE_WOOD , BUILDING_MARKET_WOOD_UPGRADE_FOOD);
+            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_WOOD_UPGRADE].setHead(newNode);
+        }
+
+
+        //升级挖石头
+        {
+            newNode = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_DIGGINGSOTNE ,\
+                                            0, BUILDING_MARKET_STONE_UPGRADE_FOOD , BUILDING_MARKET_STONE_UPGRADE_STONE);
+            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_STONE_UPGRADE].setHead(newNode);
+        }
+
+
+        //升级农田
+        {
+            newNode = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_FARM ,\
+                                            BUILDING_MARKET_FARM_UPGRADE_WOOD , BUILDING_MARKET_FARM_UPGRADE_FOOD);
+            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_FARM_UPGRADE].setHead(newNode);
+        }
+    }
+
+    //马厩
+
+    //靶场
+
+    //箭塔
+    developLab[BUILDING_ARROWTOWER].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_ARROWTOWER , TIME_BUILD_ARROWTOWER ,0 ,0 , BUILD_ARROWTOWER_STONE );
+    developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
+
+    //城墙
 }

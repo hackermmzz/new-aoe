@@ -53,8 +53,8 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
 
     setDetailPointAttrb_FormBlock();
 
-
     this->Percent=Percent;
+    init_Blood();
     setNowRes();
 
     this->imageX=this->nowres->pix.width()/2.0;
@@ -84,6 +84,7 @@ void Building::update_Build()
 {
     double ratio = get_retio_Build();
     if(Percent<100) Percent+=ratio;
+    if(Percent>100) Percent = 100;
     Blood+=ratio/100;
 
     if(Blood>1) Blood = 1;
@@ -104,9 +105,12 @@ void Building::setNowRes()
 
 void Building::nextframe()
 {
-
     setNowRes();
-    if(Percent<100) advance(nowres , Percent/25);
+    if(Percent<100)
+    {
+        nowres = nowlist->begin();
+        advance(nowres , (int)(Percent/25));
+    }
     else
     {
         nowres++;
@@ -115,4 +119,11 @@ void Building::nextframe()
 
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
+}
+
+void Building::init_Blood()
+{
+//    MaxBlood = 600;
+    if(Percent == 100) Blood = 1;
+    else Blood = 1.0/(double)MaxBlood;
 }

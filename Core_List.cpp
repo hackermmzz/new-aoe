@@ -410,20 +410,9 @@ void Core_List::object_FinishAction(Coordinate* object1)
     object_FinishAction_Absolute(object1);
 //    if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding && 是农田)
     if(relate_AllObject[object1].relationAct == CoreEven_BuildingAct)
-    {
-        Building* buiOb = NULL;
-        object1->printer_ToBuilding((void**)&buiOb);
-        if(buiOb!=NULL)
-        {
-
-        }
-    }
+        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);
     else if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding )
-    {
-        Building* buiOb = NULL;
-        relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buiOb);
-        if(buiOb!=NULL) buiOb->finishBuild();
-    }
+        player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
     else if(relate_AllObject[object1].relationAct == CoreEven_MissileAttack)
     {
         Missile* misOb = NULL;

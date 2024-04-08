@@ -193,7 +193,7 @@ bool condition_UniObjectPercent(  Coordinate* object1, relation_Object& relation
     if(operate == OPERATECON_OBJECT1) judge = object1;
     else if(operate == OPERATECON_OBJECT2) judge = relation.goalObject;
 
-    if(relationAct == CoreEven_FixBuilding) return isNegation^((Building*)judge)->isFullHp();
+    if(relationAct == CoreEven_FixBuilding) return isNegation^(((Building*)judge)->isFullHp()&&((Building*)judge)->isFinish());
     else if(relationAct == CoreEven_BuildingAct) return isNegation^((Building*)judge)->is_ActionFinish();
 
     return isNegation^true;

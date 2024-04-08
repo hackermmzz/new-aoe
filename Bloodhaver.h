@@ -23,6 +23,8 @@ public:
                                              else return 0;}
     virtual double getDis_attack(){ return dis_Attack; }
     virtual int get_AttackType(){ return attackType; }
+
+    virtual void init_Blood(){ Blood = 1; }
     /*********以上虚函数************/
 
     //判断死亡

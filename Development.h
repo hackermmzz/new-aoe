@@ -37,8 +37,11 @@ public:
 
     void init_DevelopLab();
 
-    void upgradeDevelop(int buildingType){ developLab[buildingType].buildCon->unlock = true; }
-    void upgradeDevelop(int buildingType , int buildact){}
+    void finishAction(int buildingType){ developLab[buildingType].finishBuild(); }
+    void finishAction(int buildingType , int buildact){}
+
+    bool isNeedCreatObjectAfterAction( int buildType , int actNum , int& creatObjectSort , int& creatObjectNum )
+        { return developLab[buildType].actCon[actNum].nowExecuteNode->isNeedCreatObject(creatObjectSort,creatObjectNum); }
 private:
     //研发工艺带来的数值加成
     double rate_FarmerMove = 0;
