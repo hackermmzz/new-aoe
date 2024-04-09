@@ -29,7 +29,6 @@ extern int Stone[5][5][5];
 extern int g_frame;
 extern QTextBrowser* g_DebugText;
 extern int ProcessDataWork;
-
 extern map<string, list<QPixmap>> resMap;
 extern map<string, QSound*> SoundMap;
 
@@ -79,12 +78,15 @@ struct tagHuman
 
 struct tagGame
 {
-    tagBuilding *building;
-    int building_n;
-    tagHuman *human;
-    int human_n;
-    tagResource *resource;
-    int resource_n;
+//    tagBuilding *building;
+//    int building_n;
+    list<tagBuilding> buildings;
+//    tagHuman *human;
+//    int human_n;
+    list<tagHuman> humans;
+//    tagResource *resource;
+//    int resource_n;
+    list<tagResource> resources;
     int GameFrame;
     int civilizationStage;
     int Wood;

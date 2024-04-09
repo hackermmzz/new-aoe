@@ -79,6 +79,23 @@ void Core::gameUpdate()
     interactionList->manageRelationList();
 }
 
+void Core::infoShare(){
+    Player* self=player[0];
+    AIGame.Human_MaxNum=self->getMaxHumanNum();
+    AIGame.Gold=self->getGold();
+    AIGame.Stone=self->getStone();
+    AIGame.Meat=self->getFood();
+    AIGame.Wood=self->getWood();
+    AIGame.civilizationStage=self->getCiv();
+    AIGame.GameFrame=g_frame;
+    AIGame.humans.clear();
+    for(Human* human:self->human){
+        tagHuman taghuman;
+        taghuman.SN=human->getglobalNum();
+        AIGame.humans.push_back(taghuman);
+    }
+}
+
 //处理鼠标事件
 void Core::manageMouseEvent()
 {

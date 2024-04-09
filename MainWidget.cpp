@@ -2,6 +2,8 @@
 #include "ui_MainWidget.h"
 
 int g_globalNum=1;
+int g_frame=0;
+
 std::map<int,Coordinate*> g_Object;
 std::queue<instruction> instructions;   ///AI返回的指令队列
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
@@ -104,8 +106,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->addBuilding(BUILDING_CENTER, 10, 10);
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-
     core = new Core(map,player,memorymap,mouseEvent);
+    ///AI线程开始
     AI *ai = new AI();
     ai->start();
 
@@ -512,9 +514,11 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
 void MainWidget::FrameUpdate()
 {
     gameframe++;
+    g_frame=gameframe;
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
+    core->infoShare();
     emit mapmove();
     return;
 }

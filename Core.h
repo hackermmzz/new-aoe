@@ -12,7 +12,7 @@ public:
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
     void gameUpdate();
-
+    void infoShare();   ///将游戏信息同步给AIGame
     SelectWidget *sel = nullptr;
 
 private:
