@@ -103,21 +103,21 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initmap();
 
     // 添加资源测试
-    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
-    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
-    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
-    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
-    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
-//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
+//    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
+    player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
+//    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+//    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
+//    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
+//    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+////    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
 
-    map->addAnimal(ANIMAL_TREE , 40 , 50);
-//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
-    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
+//    map->addAnimal(ANIMAL_TREE , 40 , 50);
+////    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+//    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
 
-    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
-    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
-    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
+//    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
+//    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
+//    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
 
 
     core = new Core(map,player,memorymap,mouseEvent);

@@ -64,14 +64,19 @@ private:
     int CheckNeighborHigher(int x, int y, int currentCalHeight);
     int CheckNeighborType(int x, int y, int selectType);
     bool CheckBorder(int x, int y, int currentCalHeight);
-    void GenerateTerrain();     // 用于生成地形高度（Block高度）
+    bool GenerateTerrain();     // 用于生成地形高度（Block高度）
     void GenerateType();        // 依据高度生成地形图Block种类
     void CalOffset();           // 计算每个Block的偏移量
     void InitFaultHandle();     // 初始化错误处理
     void InitCell(int Num, bool isExplored, bool isVisible);
     void GenerateMapTxt(int MapJudge);
 
+    double tranL(double BlockL);
+    double tranU(double BlockU);
+
     short m_heightMap[80][80];
+    int Gamemap[MAP_L][MAP_U];  // 地图资源二维数组
+    bool mapFlag[MAP_L][MAP_U]; // 地图标识二维数组，0为可放置，1为不可放置
 
 };
 
