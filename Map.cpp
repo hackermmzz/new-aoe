@@ -797,38 +797,45 @@ bool Map::addAnimal(int Num, double DR, double UR) {
  * 返回值：生成成功返回true。
  */
 bool Map::loadResource() {
-    addAnimal(ANIMAL_GAZELLE,36*BLOCKSIDELENGTH,36*BLOCKSIDELENGTH);
-    addAnimal(1,0*BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2,72*BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2);
-    //    for(int i = 0; i < MAP_U; i++)
-    //    {
-    //        for(int j = 0; j < MAP_L; j++)
-    //        {
-    //            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 大象
-    //            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 狮子
-    //            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
-    //            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
-    //            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 瞪羚
-    //            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i)+BLOCKSIDELENGTH/2, tranU(j)+BLOCKSIDELENGTH/2); // 浆果
-    //            else if(Gamemap[i][j] == 1) addAnimal(0, i, j); // 树
-    //            else if(Gamemap[i][j] == 11) addAnimal(0, i, j);
-    //            /*
-    //                种类：
-    //                0为空地；
-    //                1为树木；
-    //                2为浆果；
-    //                3为瞪羚；
-    //                4为石头；
-    //                5为金矿；
-    //                6为狮子；
-    //                7为大象；
-    //                9为主营；
-    //                10为箭塔废墟；
-    //                11为树林。
-    //            */
-    //            Gamemap[i][j] = 0;  // :)
-    //            mapFlag[i][j] = 0;
-    //        }
-    //    }
+    for(int i = 0; i < MAP_U; i++)
+    {
+        for(int j = 0; j < MAP_L; j++)
+        {
+            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapType() != MAPTYPE_FLAT) continue;
+            int tOffsetX = this->cell[i][j].getOffsetX(), tOffsetY = this->cell[i][j].getOffsetY();
+            if(this->cell[i][j].getMapHeight() != 0) tOffsetX -= BLOCKSIDELENGTH / 2 * this->cell[i][j].getMapHeight() - BLOCKSIDELENGTH / 2;
+            if(this->cell[i][j].getMapHeight() != 0) tOffsetY += BLOCKSIDELENGTH * (this->cell[i][j].getMapHeight());
+//            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
+
+            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
+            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
+            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
+            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
+            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j)+BLOCKSIDELENGTH / 2 + tOffsetY); // 瞪羚
+            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH / 2 + tOffsetY); // 浆果
+            else if(Gamemap[i][j] == 1) {
+                addAnimal(0, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH/2 + tOffsetY); // 树
+            }
+            else if(Gamemap[i][j] == 11) addAnimal(0, tranL(i) + BLOCKSIDELENGTH/2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH/2 + tOffsetY);
+            //                else if(Gamemap[i][j] == 9) player[0]->addBuilding(BUILDING_CENTER, 10, 10);  // 不能在这里生成市镇中心
+            /*
+                    种类：
+                    0为空地；
+                    1为树木；
+                    2为浆果；
+                    3为瞪羚；
+                    4为石头；
+                    5为金矿；
+                    6为狮子；
+                    7为大象；
+                    9为主营；
+                    10为箭塔废墟；
+                    11为树林。
+                */
+            Gamemap[i][j] = 0;  // :)
+            mapFlag[i][j] = 0;
+        }
+    }
     return true;
 }
 
@@ -895,9 +902,10 @@ bool Map::CheckBorder(int x, int y, int currentCalHeight) {
  * 函数：Map::GenerateTerrain；
  * 参数：无；
  * 内容：*细胞自动机*逐层生成地形高度；
- * 返回值：空。
+ * 返回值：是否生成成功。
  */
-void Map::GenerateTerrain() {
+bool Map::GenerateTerrain() {
+    memset(m_heightMap, 0, sizeof(m_heightMap));
     srand(time(NULL));
     for(int height = MAPHEIGHT_FLAT + 1; height < MAPHEIGHT_PERCENT; height ++) {
         // 每层微调生成概率
@@ -925,8 +933,8 @@ void Map::GenerateTerrain() {
             }
 
         if(height == 1) {
-            for(int i = 0; i < 20; i ++) {
-                for(int j = 0; j < 20; j ++) {
+            for(int i = MAP_L / 2 - 7; i < MAP_L / 2 + 8; i ++) {
+                for(int j = MAP_U / 2 - 7; j < MAP_U / 2 + 8; j ++) {
                     m_heightMap[i][j] = 0;
                 }
             }
@@ -939,19 +947,21 @@ void Map::GenerateTerrain() {
                     int count = CheckNeighborHigher(i, j, height);
                     if(m_heightMap[i][j] == height && count < 4) m_heightMap[i][j] --;
                     else if(m_heightMap[i][j] == height - 1 && count >= 5) m_heightMap[i][j] ++;
+                    if(m_heightMap[i][j] > 5 || m_heightMap[i][j] < 0) {
+                        qDebug() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap[i][j];
+                        return false;
+                    }
                 }
-            if(optCounter == MAPHEIGHT_OPTCOUNT - 10)
+            if(optCounter == MAPHEIGHT_OPTCOUNT / 2)
                 for(int i = 2; i < 78; i ++)
                     for(int j = 2; j < 78; j ++) {
                         int count = CheckNeighborHigher(i, j, height);
                         if(m_heightMap[i][j] == height - 1 && count >= 2) {
                             if(m_heightMap[i - 1][j - 1] == height && m_heightMap[i + 1][j + 1] == height) {
-                                //                                qDebug() << "修改" << i << ',' << j << "处";
                                 m_heightMap[i - 1][j - 1] --;
                                 m_heightMap[i + 1][j + 1] --;
                             }
                             if(m_heightMap[i - 1][j + 1] == height && m_heightMap[i + 1][j - 1] == height) {
-                                //                                qDebug() << "修改" << i << ',' << j << "处";
                                 m_heightMap[i - 1][j + 1] --;
                                 m_heightMap[i + 1][j - 1] --;
                             }
@@ -960,10 +970,20 @@ void Map::GenerateTerrain() {
         }
     }
 
-    // 取中心高度值存入cell以防止地图边界资源生成断裂
+    for(int i = 2; i < 78; i ++) {
+        for(int j = 2; j < 78; j ++) {
+            if(m_heightMap[i][j] > 5 || m_heightMap[i][j] < 0) {
+                qDebug() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap;
+                return false;
+            }
+        }
+    }
+
+    // 取中心高度值存入cell
     for(int i = 4; i < 76; i ++)
         for(int j = 4; j < 76; j ++)
             this->cell[i - 4][j - 4].setMapHeight(m_heightMap[i][j]);
+    return true;
 }
 
 /*
@@ -1094,7 +1114,7 @@ void Map::GenerateType() {
         }
     }
 
-    // 特殊处理
+    // 特殊处理（直接处理cell）
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U; j ++) {
 
@@ -1134,21 +1154,23 @@ void Map::CalOffset() {
             {
                 this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + -15);
             }
-            if(this->cell[i][j].getMapType() == 10)
-            {
-                this->cell[i][j].setOffsetX(this->cell[i][j].getOffsetX() + -1);
+
+            // 修整边界
+            if(this->cell[i][j].getMapType() == 10) {
+                int t = this->cell[i][j].getOffsetX();
+                this->cell[i][j].setOffsetX(t - 1);
             }
-            if(this->cell[i][j].getMapType() == 11)
-            {
-                this->cell[i][j].setOffsetX(this->cell[i][j].getOffsetX() + 1);
+            if(this->cell[i][j].getMapType() == 11) {
+                int t = this->cell[i][j].getOffsetX();
+                this->cell[i][j].setOffsetX(t + 1);
             }
-            if(this->cell[i][j].getMapType() == 13)
-            {
-                this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + 1);
+            if(this->cell[i][j].getMapType() == 13) {
+                int t = this->cell[i][j].getOffsetY();
+                this->cell[i][j].setOffsetY(t + 1);
             }
 
             // test
-            //            if(this->cell[i][j].getMapType() != MAPTYPE_FLAT) this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() - 100);
+            // if(this->cell[i][j].getMapType() != MAPTYPE_FLAT) this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() - 100);
         }
     }
     return ;
@@ -1179,9 +1201,9 @@ void Map::InitFaultHandle() {
             }
             else if(this->cell[i][j].getMapType() == 0)
             {
-                qDebug() << "第" << i << "行第" << j <<"列的地块MapType未定义！";
+                qDebug() << "Map::InitFaultHandle() ERROR：第" << i << "行第" << j <<"列的地块MapType未定义！";
             }
-            if(this->cell[i][j].Num >= 29) qDebug() << "cell[" << i << "][" << j << "].Num >= 29";
+            if(this->cell[i][j].Num >= 29) qDebug() << "Map::InitFaultHandle() ERROR：cell[" << i << "][" << j << "].Num >= 29";
         }
     }
 }
@@ -1222,6 +1244,17 @@ void Map::GenerateMapTxt(int MapJudge) {
                 {
                     //                    outMapFile << Gamemap[i][j] << "\n";
                     outMapFile << this->cell[i][j].getMapHeight() << ' ';
+                }
+                outMapFile << "\n";
+            }
+            outMapFile << "\n";
+            outMapFile << "\n";
+            outMapFile << "\n";
+            for (int i = 0; i < 80; i++)
+            {
+                for (int j = 0; j < 80; j++)
+                {
+                    outMapFile << m_heightMap[i][j] << ' ';
                 }
                 outMapFile << "\n";
             }
@@ -1295,6 +1328,20 @@ void Map::GenerateMapTxt(int MapJudge) {
     }
 }
 
+double Map::tranL(double BlockL)
+{
+    double L;
+    L = BlockL * BLOCKSIDELENGTH;
+    return L;
+}
+
+double Map::tranU(double BlockU)
+{
+    double U;
+    U = BlockU * BLOCKSIDELENGTH;
+    return U;
+}
+
 /*
  * 函数：Map::init；
  * 参数：无；
@@ -1303,14 +1350,15 @@ void Map::GenerateMapTxt(int MapJudge) {
  */
 void Map::init(int MapJudge) {
     InitCell(0, true, true);    // 第二个参数修改为false时可令地图全部可见
-//    generateLandforms();        // 在草地中生成小片沙漠
-//    generateCenter();           // 生成市镇中心及附近资源
-//    generateResources();        // 生成片状资源
-//    generateResource();         // 生成独立资源
-    GenerateTerrain();          // 元胞自动机生成地图高度
+    // 资源绘制在MainWidget里完成
+    while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
     CalOffset();                // 计算偏移量
     InitFaultHandle();          // 抛出地图生成中的错误
+//    generateLandforms();        // 在草地中生成小片沙漠
+    generateCenter();           // 生成市镇中心及附近资源
+    generateResources();        // 生成片状资源
+    generateResource();         // 生成独立资源
     GenerateMapTxt(MapJudge);   // 生成地图文件
 }
 

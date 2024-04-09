@@ -20,8 +20,6 @@ extern int MidX;
 extern int MidY;
 extern int MAP_LSide[2];
 extern int MAP_USide[2];
-extern int Gamemap[MAP_L][MAP_U]; // 地图二维数组
-extern bool mapFlag[MAP_L][MAP_U]; // 地图标识二维数组，0为可放置，1为不可放置
 extern int Forest[3][15][15];
 extern int Food[5][5][5];
 extern int Stone[5][5][5];
