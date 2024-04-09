@@ -36,7 +36,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 //        }
 //    }
 
-    for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 5; i++)
+    for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 6; i++)
     {
         x2=x1;
         y2=y1;
@@ -92,6 +92,8 @@ void GameWidget::paintEvent(QPaintEvent *)
                     painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
                 }
             }
+            //test
+//            if(mainwidget->map->cell[x2][y2].getOffsetX() != 0 || mainwidget->map->cell[x2][y2].getOffsetY() != 0) qDebug() << x2 << ' ' << y2 << ' ' << mainwidget->map->cell[x2][y2].getOffsetX() << ' ' << mainwidget->map->cell[x2][y2].getOffsetY();
             x2++;
             y2++;
         }
