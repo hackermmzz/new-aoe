@@ -7,13 +7,11 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
     this->player = player;
     this->memorymap = memorymap;
     this->mouseEvent = mouseEvent;
-    this->ai=new AI();
     this->interactionList = new Core_List( this->theMap , this->player );
 }
 
 void Core::gameUpdate()
 {
-    ai->run();
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
         std::list<Human *>::iterator humaniter=player[playerIndx]->human.begin() , iterEnd = player[playerIndx]->human.end();
@@ -81,12 +79,6 @@ void Core::gameUpdate()
 }
 
 void Core::infoShare(){
-    while(true){
-        ///等待ai发送完当前帧的所有指令
-        if(!ai->AIlock){
-            break;
-        }
-    }
     Player* self=player[0];
     AIGame.Human_MaxNum=self->getMaxHumanNum();
     AIGame.Gold=self->getGold();
@@ -99,8 +91,8 @@ void Core::infoShare(){
     for(Human* human:self->human){
         tagHuman taghuman;
         taghuman.SN=human->getglobalNum();
-        taghuman.L0=human->getDR();
-        taghuman.U0=human->getUR();
+        taghuman.L=human->getDR();
+        taghuman.U=human->getUR();
         taghuman.BlockL=human->getBlockDR();
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();

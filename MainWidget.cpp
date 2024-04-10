@@ -107,7 +107,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
     core = new Core(map,player,memorymap,mouseEvent);
-
+    ai=new AI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 }
@@ -121,7 +121,7 @@ MainWidget::~MainWidget()
     deleteFarmer();
     deleteBuilding();
     deleteArmy();
-    delete core->ai;
+    delete ai;
     delete core;
 }
 
@@ -513,9 +513,11 @@ void MainWidget::FrameUpdate()
 {
     gameframe++;
     g_frame=gameframe;
+    ai->run();///AI进程开始
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
+    while(ai->AIlock){};///等待AI进程结束
     core->infoShare();
     emit mapmove();
     return;
