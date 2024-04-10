@@ -17,7 +17,7 @@
 #include <queue>
 #include <QButtonGroup>
 #include <QMessageBox>
-#include "AI.h"
+
 #include <windows.h>
 #include <unordered_set>
 #include <SelectWidget.h>
@@ -57,7 +57,6 @@ public:
     }
 
     Core *core;
-
     bool eventFilter(QObject *watched, QEvent *event);
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态

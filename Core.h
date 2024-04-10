@@ -2,7 +2,7 @@
 #define CORE_H
 
 #include <Core_List.h>
-
+#include "AI.h"
 
 class SelectWidget;
 class Core
@@ -14,6 +14,7 @@ public:
     void gameUpdate();
     void infoShare();   ///将游戏信息同步给AIGame
     SelectWidget *sel = nullptr;
+    AI* ai;
 
 private:
     Map* theMap;    //地图信息

@@ -17,15 +17,15 @@ public:
         return ACTION_SUCCESS;
     }
 
-    AI();
     bool AIstop=false;
+    bool AIlock=false;
+    AI();
     void processData();
     void run() override{
-        while(!AIstop){
             if(AIGame.GameFrame>10)
                 processData();
         }
-    }
+
 };
 
 #endif // AI_H
