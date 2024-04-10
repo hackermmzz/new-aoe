@@ -21,8 +21,6 @@ extern int MidX;
 extern int MidY;
 extern int MAP_LSide[2];
 extern int MAP_USide[2];
-extern int Gamemap[MAP_L][MAP_U]; // 地图二维数组
-extern bool mapFlag[MAP_L][MAP_U]; // 地图标识二维数组，0为可放置，1为不可放置
 extern int Forest[3][15][15];
 extern int Food[5][5][5];
 extern int Stone[5][5][5];
@@ -237,16 +235,29 @@ struct Point {
 struct conditionDevelop
 {
     int civilization;
-    int sort_building;
+    int sort_building;  //所属建筑
 
-    int need_Wood;
-    int need_Food;
-    int need_Stone;
-    int need_Gold;
+    double times_second;
 
+    bool unlock = false;    //表示是否执行过一次
 
+    bool isCreatObjectAction = false; //行动结束后是否需要创建对象
+    int creatObjectSort = -1;   //需要创建对象的类sort
+    int creatObjectNum = -1;    //需要创建对象的类中的Num
+
+    //记录前置条件
+    list<conditionDevelop*> preCondition;
+
+    //本行动对应的下一项行动
+    conditionDevelop* nextDevAction = NULL;
+
+    //需要的物资
+    int need_Wood ,need_Food ,need_Stone , need_Gold;
+
+    //**********************************************************
+    //构造器 ， 创建conditionDevelop实例相关
     conditionDevelop(){ }
-    conditionDevelop( int civilization , int sort_building,int need_Wood,int need_Food, int need_Stone,int need_Gold )
+    conditionDevelop( int civilization , int sort_building, double needTimes ,  int need_Wood = 0, int need_Food = 0, int need_Stone = 0 , int need_Gold = 0 )
     {
         this->civilization = civilization;
         this->sort_building = sort_building;
@@ -254,9 +265,125 @@ struct conditionDevelop
         this->need_Food = need_Food;
         this->need_Stone = need_Stone;
         this->need_Gold = need_Gold;
+        this->times_second = needTimes;
     }
 
+    //添加该行动的前置行动
+    void addPreCondition(conditionDevelop* con_need){ preCondition.push_back(con_need);  }
+
+    //添加行动结束后创建对象
+    void setCreatObjectAfterAction(int creatSort)
+    {
+        isCreatObjectAction = true;
+        creatObjectSort = creatSort;
+    }
+    void setCreatObjectAfterAction( int creatSort , int creatNum )
+    {
+        setCreatObjectAfterAction(creatSort);
+        creatObjectNum = creatNum;
+    }
+
+    //**********************************************************
+    //判断行动是否能进行
+    //判断资源是否满足行动需要
     bool executable( int wood,int food,int stone,int gold ) { return wood>=need_Wood && food>=need_Food && stone>=need_Stone && gold>=need_Gold; }
+
+    //判断当前时代、已完成的建筑行动，是否解锁当前行动
+    bool isShowable( int nowcivilization )
+    {
+        if(civilization>nowcivilization) return false;
+
+        for(list<conditionDevelop*>::iterator iter = preCondition.begin(); iter!= preCondition.end(); iter++)
+            if(!(*iter)->unlock) return false;
+
+        return true;
+    }
+
+    //**********************************************************
+    //行动结束后相关操作
+    void finishAct(){ unlock = true; }
+
+    //获取是否需要创建对象
+    bool isNeedCreatObject( int& creatSort , int& creatNum )
+    {
+        creatSort = creatObjectSort;
+        creatNum = creatObjectNum;
+        return isCreatObjectAction;
+    }
+
+};
+
+struct st_upgradeLab{
+    conditionDevelop *headAct = NULL , *nowExecuteNode = NULL , *endNode = NULL;
+    int haveFinishedPhaseNum = 0;
+
+    st_upgradeLab(){}
+    ~st_upgradeLab()
+    {
+        while(headAct!=endNode)
+        {
+            nowExecuteNode = headAct;
+            headAct = headAct->nextDevAction;
+            delete nowExecuteNode;
+        }
+        delete endNode;
+    }
+
+    void setHead(conditionDevelop* head) { endNode = nowExecuteNode = headAct= head; }
+
+    void push_back( conditionDevelop* node )
+    {
+        endNode->nextDevAction = node;
+        endNode = node;
+    }
+
+    //设置建筑的行动没有下一个行动，但该行动可以重复地执行
+    void endNodeAsOver(){ endNode->nextDevAction = endNode; }
+
+    //切换
+    void shift()
+    {
+        if(nowExecuteNode!=NULL)
+        {
+            haveFinishedPhaseNum++;
+            nowExecuteNode = nowExecuteNode->nextDevAction;
+        }
+    }
+
+    //当前行动是否可在SelectWidget中显示
+    bool isShowAble( int nowcivilization )
+    {
+        if(nowExecuteNode == NULL) return false;
+        else return nowExecuteNode->isShowable(nowcivilization);
+    }
+
+    //当前行动是否可执行
+    bool executable( int nowcivilization,int wood,int food,int stone,int gold ){ return isShowAble(nowcivilization) && nowExecuteNode->executable(wood , food, stone,gold) ; }
+
+    /**
+    *考虑加入错误码，以判断错误类型
+    */
+};
+
+struct st_buildAction
+{
+    //建筑的建造条件
+    conditionDevelop* buildCon = NULL;
+
+    //存储该建筑拥有哪些行动。第一键值为行动标号，第二键值为对应的行动表，行动表为链表，存储了执行条件
+    map<int , st_upgradeLab> actCon;
+
+    st_buildAction(){}
+    ~st_buildAction()
+    {
+        if(buildCon!=NULL)
+        {
+            delete buildCon;
+            buildCon = NULL;
+        }
+    }
+
+    void finishBuild(){ buildCon->finishAct();}
 };
 
 struct instruction{

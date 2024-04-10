@@ -19,8 +19,9 @@ public:
     */
 
     /*********关系表控制***********/
-    bool addRelation( Coordinate * object1, Coordinate * object2, int eventType , bool respond = true);
-    bool addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond = true);
+    bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
+    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1); //建造
+    bool addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //这个删除，就很鸡肋，有智障的感觉  //但指令有手动取消的行动，故需保留
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
@@ -37,18 +38,20 @@ private:
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     void initDetailList();
+    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR){}
+    Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/
     void manageRelation_deleteGoalOb( Coordinate* goalObject );
     void manageRelation_updateMassage( Coordinate* );
     void findResourceBuiding( relation_Object& , list<Building*>&);
 
-
     /************控制行动************/
     void object_Move(Coordinate * object , double DR , double UR);  //控制移动
     void object_Attack(Coordinate* , Coordinate* ); //控制因object1影响object2血量
     void object_Gather(Coordinate* , Coordinate* ); //控制采集
     void object_ResourceChange( Coordinate* , relation_Object& );
+    void object_RatioChange( Coordinate* , relation_Object& );  //控制完成度变化
     void object_FinishAction_Absolute(Coordinate*);
     void object_FinishAction(Coordinate*);
 

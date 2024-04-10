@@ -15,10 +15,14 @@ public:
     int getSort();
     int getMaxBlood(){ return BuildingMaxBlood[Num]; }
     int getPlayerRepresent(){ return playerRepresent; }
+    void setNowRes();
+    void nextframe();
+    void init_Blood();
 
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
+    void printer_ToBuilding(void** ptr){ *ptr = this; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
@@ -80,18 +84,18 @@ public:
     //设置隶属player
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
-    bool isFinish()
-    {
-        return this->Percent>=100;
-    }
-    double getCnt()
-    {
-        return this->Cnt;
-    }
-    double getPercent()
-    {
-        return this->Percent;
-    }
+    bool isFinish(){return this->Percent>=100;}
+    double getCnt(){return this->Cnt;}
+    double getPercent() {return this->Percent;}
+
+    double get_retio_Build(){ return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;}
+
+    void setAction( int actNum);
+    double get_retio_Action(){ return 100.0/playerScience->get_actTime(Num , actNum)/FRAMES_PER_SECOND; }
+
+    bool is_ActionFinish(){ return actPercent>=100; }
+    void update_Action(){ actPercent += ratio_Action; }
+    void update_Build();
 private:
     static std::list<ImageResource> *build[4];
     //建设list
@@ -103,6 +107,8 @@ private:
 
     double Percent = 0;
     //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图
+
+    double ratio_Action;
 
     int Finish=0;//0为未完成 1为完成
 
