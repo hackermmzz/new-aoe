@@ -33,7 +33,11 @@ void AI::processData(){
            step2=(step2-1)>=0?step2-1:3;
            HumanMove(human2,X[step2],Y[step2]);
         }
+        if(human.SN==human1){
+//            qDebug()<<"AI.cpp::"<<human.NowState;
+        }
     }
+
 
 
 

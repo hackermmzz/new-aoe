@@ -6,6 +6,7 @@
 class AI:public QThread
 {
 public:
+/*##########INTERFACE BEGINS HERE##########*/
     int HumanMove(int SN, int L0, int U0)
     {
         Coordinate* self=g_Object[SN];
@@ -16,7 +17,7 @@ public:
         instructions.push(instruction(1,self,Point({L0,U0})));
         return ACTION_SUCCESS;
     }
-
+/*###########INTERFACE ENDS HERE###########*/
     bool AIstop=false;
     bool AIlock=false;
     AI();

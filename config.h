@@ -209,6 +209,7 @@
  * 10代表正在前往攻击的状态
  * 11代表人物遇到障碍物停止移动的状态
  * 12代表种地
+ * 13代表正在采集肉的状态
  * 后续补充
  */
 #define HUMAN_STATE_IDLE 0
@@ -224,6 +225,7 @@
 #define HUMAN_STATE_GOTO_ATTACK 10
 #define HUMAN_STATE_STOP 11
 #define HUMAN_STATE_FARMING 12
+#define HUMAN_STATE_BUTCHERING 13
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1

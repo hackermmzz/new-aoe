@@ -131,12 +131,7 @@ void Core::infoShare(){
         taghuman.BlockL=human->getBlockDR();
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();
-        int state;
-        if(human->isWalking()){
-            taghuman.NowState=1;
-        }else{
-            taghuman.NowState=0;
-        }
+        taghuman.NowState=interactionList->getNowPhaseNum(human);
         AIGame.humans.push_back(taghuman);
     }
 

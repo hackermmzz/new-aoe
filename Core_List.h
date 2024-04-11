@@ -25,7 +25,8 @@ public:
     void suspendRelation(Coordinate * object);  //这个删除，就很鸡肋，有智障的感觉  //但指令有手动取消的行动，故需保留
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
-
+    /************关系表获取************/
+    int getNowPhaseNum(Coordinate* object);
     /************管理诱发行动************/
     void conduct_Attacked(Coordinate*);
 
