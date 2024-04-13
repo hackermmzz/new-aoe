@@ -26,7 +26,8 @@ public:
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
     /************关系表获取************/
-    int getNowPhaseNum(Coordinate* object);
+    int getNowPhaseNum(Coordinate* object); //获取当前object的行动阶段，用于将信息传递给AIGame
+    int getObjectSN(Coordinate* object);   //获取当前object的目标SN，用于将信息传递给AIGame
     /************管理诱发行动************/
     void conduct_Attacked(Coordinate*);
 

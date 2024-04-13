@@ -35,6 +35,9 @@ void AI::processData(){
         }
         if(human.SN==human1){
 //            qDebug()<<"AI.cpp::"<<human.NowState;
+//            qDebug()<<"AI::obSN:"<<human.WorkObjectSN;
+//            qDebug()<<"AI::ResourceSORT:"<<human.ResourceSort;
+//            qDebug()<<"AI::Resource:"<<human.Resource;
         }
     }
 

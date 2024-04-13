@@ -126,14 +126,35 @@ void Core::infoShare(){
     for(Human* human:self->human){
         tagHuman taghuman;
         taghuman.SN=human->getglobalNum();
+        taghuman.Blood=human->getBlood();
         taghuman.L=human->getDR();
         taghuman.U=human->getUR();
         taghuman.BlockL=human->getBlockDR();
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
+        if(taghuman.NowState==HUMAN_STATE_IDLE){
+            taghuman.WorkObjectSN=-1;
+        }else{
+            taghuman.WorkObjectSN=interactionList->getObjectSN(human);
+        }
+        taghuman.L0=human->getDR0();
+        taghuman.U0=human->getUR0();
+        if(human->getSort()==SORT_FARMER){
+            Farmer* farmer=static_cast<Farmer*> (human);
+            taghuman.Resource=farmer->getResourceNowHave();
+            if(taghuman.Resource==0){
+                taghuman.ResourceSort=-1;
+            }else{
+                taghuman.ResourceSort=farmer->getResourceSort();
+            }
+        }else{
+            taghuman.ResourceSort=-1;
+            taghuman.Resource=0;
+        }
         AIGame.humans.push_back(taghuman);
     }
+
 
 }
 

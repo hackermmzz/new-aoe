@@ -271,7 +271,7 @@ void Core_List::eraseObject(Coordinate* eraseOb)
 }
 
 int Core_List::getNowPhaseNum(Coordinate* object){
-    ///获取当前object的行动状态，用于将信息传递给AIGame
+    ///获取当前object的行动阶段，用于将信息传递给AIGame
     relation_Object& thisRelation=relate_AllObject[object];
     if(!thisRelation.isExist||thisRelation.relationAct==CoreEven_JustMoveTo){
         return HUMAN_STATE_IDLE;
@@ -314,6 +314,13 @@ int Core_List::getNowPhaseNum(Coordinate* object){
         }
     }
     return -1;
+}
+
+int Core_List::getObjectSN(Coordinate* object){
+    relation_Object& thisRelation=relate_AllObject[object];
+    if(thisRelation.isExist){
+        return thisRelation.goalObject->getglobalNum();
+    }
 }
 //****************************************************************************************
 //通用的控制对象行动函数
