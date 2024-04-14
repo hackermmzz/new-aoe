@@ -2,6 +2,7 @@
 #define GLOBALVARIATE_H
 
 #include <map>
+#include <queue>
 #include <QPixmap>
 #include <QString>
 #include <list>
@@ -26,7 +27,6 @@ extern int Stone[5][5][5];
 extern int g_frame;
 extern QTextBrowser* g_DebugText;
 extern int ProcessDataWork;
-
 extern map<string, list<QPixmap>> resMap;
 extern map<string, QSound*> SoundMap;
 
@@ -76,12 +76,15 @@ struct tagHuman
 
 struct tagGame
 {
-    tagBuilding *building;
-    int building_n;
-    tagHuman *human;
-    int human_n;
-    tagResource *resource;
-    int resource_n;
+//    tagBuilding *building;
+//    int building_n;
+    list<tagBuilding> buildings;
+//    tagHuman *human;
+//    int human_n;
+    list<tagHuman> humans;
+//    tagResource *resource;
+//    int resource_n;
+    list<tagResource> resources;
     int GameFrame;
     int civilizationStage;
     int Wood;
@@ -383,6 +386,26 @@ struct st_buildAction
     void finishBuild(){ buildCon->finishAct();}
 };
 
+struct instruction{
+    ///用于存储ai发出的指令信息
+    /// @param type 指令类型
+    /// @param option 对应类型下的操作
+    /// type 0:终止对象self的动作
+    /// type 1:命令村民self走向指定坐标L0，U0
+    /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
+    /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
+    /// type 4:对建筑self发出命令option
+    int type;
+    Coordinate* self;
+    Coordinate* obj;
+    int option;
+    Point destination;
+    instruction(int type,Coordinate* self,Coordinate* obj,int option,Point destination);
+    instruction(int type,Coordinate* self,Point destination);
+    instruction(int type,Coordinate* self,int option);
+};
+
+extern std::queue<instruction> instructions;    ///ai返回的指令队列
 
 
 /*

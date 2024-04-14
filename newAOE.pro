@@ -49,7 +49,8 @@ SOURCES += \
     Bloodhaver.cpp \
     Missile.cpp \
     Core_CondiFunc.cpp \
-    Core_List.cpp
+    Core_List.cpp \
+    AI.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -76,7 +77,8 @@ HEADERS += \
     Bloodhaver.h \
     Missile.h \
     Core_CondiFunc.h \
-    Core_List.h
+    Core_List.h \
+    AI.h
 
 FORMS += \
         MainWidget.ui \

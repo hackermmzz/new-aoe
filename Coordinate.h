@@ -45,6 +45,14 @@ public:
     {
         return this->UR;
     }
+    int getBlockDR()
+    {
+        return this->BlockDR;
+    }
+    int getBlockUR()
+    {
+        return this->BlockUR;
+    }
     double getimageX()
     {
         return this->imageX;
