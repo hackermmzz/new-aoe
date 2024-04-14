@@ -2,7 +2,10 @@
 #include "ui_MainWidget.h"
 
 int g_globalNum=1;
+int g_frame=0;
+
 std::map<int,Coordinate*> g_Object;
+std::queue<instruction> instructions;   ///AI返回的指令队列
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -103,6 +106,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initmap();
 
     // 添加资源测试
+    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
+//    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
     player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
 //    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
@@ -121,7 +127,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
 
     core = new Core(map,player,memorymap,mouseEvent);
-
+    ai=new AI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 }
@@ -136,6 +142,7 @@ MainWidget::~MainWidget()
     deleteFarmer();
     deleteBuilding();
     deleteArmy();
+    delete ai;
     deleteMissile();
     delete core;
 }
@@ -561,9 +568,13 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
 void MainWidget::FrameUpdate()
 {
     gameframe++;
+    g_frame=gameframe;
+    ai->run();///AI进程开始
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
+    while(ai->AIlock){};///等待AI进程结束
+    core->infoShare();
     emit mapmove();
     return;
 }

@@ -7,7 +7,6 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
     this->player = player;
     this->memorymap = memorymap;
     this->mouseEvent = mouseEvent;
-
     this->interactionList = new Core_List( this->theMap , this->player );
 }
 
@@ -114,6 +113,51 @@ void Core::gameUpdate()
     interactionList->manageRelationList();
 }
 
+void Core::infoShare(){
+    Player* self=player[0];
+    AIGame.Human_MaxNum=self->getMaxHumanNum();
+    AIGame.Gold=self->getGold();
+    AIGame.Stone=self->getStone();
+    AIGame.Meat=self->getFood();
+    AIGame.Wood=self->getWood();
+    AIGame.civilizationStage=self->getCiv();
+    AIGame.GameFrame=g_frame;
+    AIGame.humans.clear();
+    for(Human* human:self->human){
+        tagHuman taghuman;
+        taghuman.SN=human->getglobalNum();
+        taghuman.Blood=human->getBlood();
+        taghuman.L=human->getDR();
+        taghuman.U=human->getUR();
+        taghuman.BlockL=human->getBlockDR();
+        taghuman.BlockU=human->getBlockUR();
+        taghuman.Blood=human->getBlood();
+        taghuman.NowState=interactionList->getNowPhaseNum(human);
+        if(taghuman.NowState==HUMAN_STATE_IDLE){
+            taghuman.WorkObjectSN=-1;
+        }else{
+            taghuman.WorkObjectSN=interactionList->getObjectSN(human);
+        }
+        taghuman.L0=human->getDR0();
+        taghuman.U0=human->getUR0();
+        if(human->getSort()==SORT_FARMER){
+            Farmer* farmer=static_cast<Farmer*> (human);
+            taghuman.Resource=farmer->getResourceNowHave();
+            if(taghuman.Resource==0){
+                taghuman.ResourceSort=-1;
+            }else{
+                taghuman.ResourceSort=farmer->getResourceSort();
+            }
+        }else{
+            taghuman.ResourceSort=-1;
+            taghuman.Resource=0;
+        }
+        AIGame.humans.push_back(taghuman);
+    }
+
+
+}
+
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
@@ -178,6 +222,23 @@ void Core::manageMouseEvent()
 //后续编写，用于处理AI指令
 void Core::manageOrder()
 {
-
+    while(!instructions.empty()){
+        instruction cur=instructions.front();
+        instructions.pop();
+        Coordinate* self=cur.self;
+        switch (cur.type) {
+        case 0:{    /// type 0:终止对象self的动作
+            interactionList->suspendRelation(self);
+            break;
+        }
+        case 1:{    /// type 1:命令村民self走向指定坐标L0，U0
+            Point des=cur.destination;
+            interactionList->addRelation(self,des.x,des.y,CoreEven_JustMoveTo);
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 

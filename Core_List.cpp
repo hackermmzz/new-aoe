@@ -270,6 +270,58 @@ void Core_List::eraseObject(Coordinate* eraseOb)
     manageRelation_deleteGoalOb(eraseOb);
 }
 
+int Core_List::getNowPhaseNum(Coordinate* object){
+    ///获取当前object的行动阶段，用于将信息传递给AIGame
+    relation_Object& thisRelation=relate_AllObject[object];
+    if(!thisRelation.isExist||thisRelation.relationAct==CoreEven_JustMoveTo){
+        return HUMAN_STATE_IDLE;
+    }
+    int& nowPhaseNum = thisRelation.nowPhaseNum;
+    //detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
+    Coordinate* obj=relate_AllObject[object].goalObject;
+    if(nowPhaseNum==0){
+        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
+            return HUMAN_STATE_GOTO_ATTACK;
+        }else{
+            return HUMAN_STATE_GOTO_OBJECT;
+        }
+    }else if(nowPhaseNum==1||nowPhaseNum==2){
+        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
+            return HUMAN_STATE_ATTACKING;
+        }else{
+            return HUMAN_STATE_CUTTING;
+        }
+    }else if(nowPhaseNum==3||nowPhaseNum==4||nowPhaseNum==8||nowPhaseNum==9){
+        return HUMAN_STATE_GOTO_RESOURCE;
+    }else if(nowPhaseNum==5||nowPhaseNum==10||nowPhaseNum==11){
+        return HUMAN_STATE_GOTO_OBJECT;
+    }else if(nowPhaseNum==6||nowPhaseNum==7){
+        ///资源采集
+        if(obj->getSort()==SORT_STATICRES){
+            if(obj->getNum()==0){
+                return HUMAN_STATE_GATHERING;
+            }else if(obj->getNum()==1){
+                return HUMAN_STATE_DIGGING_STONE;
+            }else if(obj->getNum()==2){
+                return HUMAN_STATE_DIGGING_GOLD;
+            }
+        }else if(obj->getSort()==SORT_ANIMAL){
+            if(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST){
+                return HUMAN_STATE_CUTTING;
+            }else{
+                return HUMAN_STATE_BUTCHERING;
+            }
+        }
+    }
+    return -1;
+}
+
+int Core_List::getObjectSN(Coordinate* object){
+    relation_Object& thisRelation=relate_AllObject[object];
+    if(thisRelation.isExist){
+        return thisRelation.goalObject->getglobalNum();
+    }
+}
 //****************************************************************************************
 //通用的控制对象行动函数
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
