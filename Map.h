@@ -63,6 +63,7 @@ public:
 private:
     int CheckNeighborHigher(int x, int y, int currentCalHeight);
     int CheckNeighborType(int x, int y, int selectType);
+    int CheckNeighborForest(int x, int y, int forestCell[][FOREST_GENERATE_U]);
     bool CheckBorder(int x, int y, int currentCalHeight);
     bool GenerateTerrain();     // 用于生成地形高度（Block高度）
     void GenerateType();        // 依据高度生成地形图Block种类

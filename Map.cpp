@@ -51,39 +51,57 @@ void Map::generateResources() {
     int flag = 0;
 
     // 在45 * 45边缘生成两片森林
-    for(int T = 0; T < ForestMAX; T++)
-    {
+    for(int T = 0; T < ForestMAX; T ++) {
         flag = 0;
-        for (int i = MAP_L / 2 - 25; i <= MAP_L / 2 + 10; i++)
-        {
-            for (int j = MAP_U / 2 - 25; j <= MAP_U / 2 + 10; j++)
-            {
-                if(flag == 1) break;
-                if(i >= MAP_L / 2 - 24 && i <= MAP_L / 2 + 9 && j >= MAP_U / 2 - 24 && j <= MAP_U / 2 + 9) continue;
-                if(rand() % 1000 == 0 && mapFlag[i][j] != 1 && mapFlag[i + 7][j + 7] != 1 && mapFlag[i + 14][j + 14] != 1 && mapFlag[i][j + 14] != 1 && mapFlag[i + 14][j] != 1 && mapFlag[i + 3][j + 3] != 1 && mapFlag[i + 10][j + 10] != 1 && mapFlag[i + 3][j + 10] != 1 && mapFlag[i + 10][j + 3] != 1)
-                {
-                    flag = 1;
-                    int ForestFlag = rand() % 3;
+        int beginL = 0, beginU = 0;
+        if(T) beginL = MAP_L / 2 - 25, beginU = MAP_U / 2 - 25;
+        else beginL = MAP_L / 2 + 5, beginU = MAP_U / 2 + 5;
 
-                    int ti = 0;
-                    for(int I = i; I < i + 15; I++)
-                    {
-                        int tj = 0;
-                        for(int J = j; J < j + 15; J++)
-                        {
-                            mapFlag[I][J] = true;
-                            if(Forest[ForestFlag][ti][tj] == 1)
-                            {
-                                Gamemap[I][J] = 11;
+        // 初始化即将生成的森林
+        int forestCell[FOREST_GENERATE_L][FOREST_GENERATE_U];
+
+        // 树木数量计数
+        int forestTreeCount = 0;
+
+        // 如果树木数量到达目标值，则产生；否则重新生成
+        while(forestTreeCount < FOREST_COUNT_MIN) {
+            // 重置森林数组
+            memset(forestCell, 0, sizeof(forestCell));
+            forestTreeCount = 0;
+            // 随机树木生成
+            for(int fi = 0; fi < FOREST_GENERATE_L; fi ++)
+                for(int fj = 0; fj < FOREST_GENERATE_U; fj ++)
+                    if(rand() % 100 < FOREST_GENERATE_PERCENT) {
+                        forestCell[fi][fj] = 1;
+                        forestTreeCount ++;
+                    }
+            // 细胞自动机优化
+            for(int T = 0; T < FOREST_GENERATE_OPTCOUNTER; T ++) {
+                for(int fi = 0; fi < FOREST_GENERATE_L; fi ++) {
+                    for(int fj = 0; fj < FOREST_GENERATE_U; fj ++) {
+                        int forestCount = CheckNeighborForest(fi, fj, forestCell);
+                        if(forestCell[fi][fj] == 1) {
+                            if(forestCount < 4) {
+                                forestCell[fi][fj] = 0;
+                                forestTreeCount --;
                             }
-                            tj++;
                         }
-                        ti++;
+                        else if(forestCount >= 5) {
+                            forestCell[fi][fj] = 1;
+                            forestTreeCount ++;
+                        }
                     }
                 }
             }
-            if(flag == 1) break;
-            if(flag == 0 && i == MAP_L / 2 + 10) i = MAP_L / 2 - 25;
+        }
+        // 将生成的数组放置到对应地图坐标
+        for(int i = beginL; i < beginL + FOREST_GENERATE_L; i ++) {
+            for(int j = beginU; j < beginU + FOREST_GENERATE_U; j ++) {
+                if(forestCell[i - beginL][j - beginU] == 1) {
+                    mapFlag[i][j] = true;
+                    Gamemap[i][j] = 11;
+                }
+            }
         }
     }
 
@@ -875,6 +893,26 @@ int Map::CheckNeighborType(int x, int y, int selectType) {
         int tx = x + dx[i], ty = y + dy[i];
         if(tx < 0 || ty < 0 || tx > 71 || ty > 71) continue;
         if(this->cell[tx][ty].getMapType() == selectType) count ++;
+    }
+    return count;
+}
+
+/*
+ * 函数：Map::CheckNeighborForest；
+ * 参数：x——x坐标；y——y坐标；
+ *      forestCell[][FOREST_GENERATE_U]——临时森林数组；
+ * 内容：计算block(x, y)周围8个block里可能生成树木的数量；
+ * 返回值：返回可能生成树木的数量。
+ */
+int Map::CheckNeighborForest(int x, int y, int forestCell[][FOREST_GENERATE_U])
+{
+    int count = 0;
+    int dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+    int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+    for(int i = 0; i < 8; i ++) {
+        int tx = x + dx[i], ty = y + dy[i];
+        if(tx < 0 || ty < 0 || tx > FOREST_GENERATE_L || ty > FOREST_GENERATE_U) continue;
+        if(forestCell[tx][ty] == 1) count ++;
     }
     return count;
 }
