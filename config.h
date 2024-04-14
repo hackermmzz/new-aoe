@@ -56,6 +56,11 @@
 #define ANIMAL_SPEED sqrt(7)
 #define RESPATH ":/new/prefix1/res"
 #define ForestMAX 2
+#define FOREST_GENERATE_L 15
+#define FOREST_GENERATE_U 30
+#define FOREST_GENERATE_PERCENT 45  // 生成森林时出现空地的概率
+#define FOREST_GENERATE_OPTCOUNTER 5
+#define FOREST_COUNT_MIN 150
 #define TREEMAX 40
 #define BLOCKPIXEL_X (65 - showLine)
 #define BLOCKPIXEL_Y (33 - showLine)
