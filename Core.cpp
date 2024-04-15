@@ -155,6 +155,67 @@ void Core::infoShare(){
         AIGame.humans.push_back(taghuman);
     }
 
+    AIGame.resources.clear();
+    for(Animal* animal:theMap->animal){
+        tagResource resource;
+        resource.SN=animal->getglobalNum();
+        switch(animal->getNum()){
+        case ANIMAL_ELEPHANT:
+            resource.Type=RESOURCE_ELEPHANT;
+            resource.ProductSort=HUMAN_STOCKFOOD;
+            break;
+        case ANIMAL_GAZELLE:
+            resource.Type=RESOURCE_GAZELLE;
+            resource.ProductSort=HUMAN_STOCKFOOD;
+            break;
+        case ANIMAL_LION:
+            resource.Type=RESOURCE_LION;
+            resource.ProductSort=HUMAN_STOCKFOOD;
+            break;
+        case ANIMAL_TREE:
+            resource.Type=RESOURCE_TREE;
+            resource.ProductSort=HUMAN_WOOD;
+            break;
+        case ANIMAL_FOREST:
+            resource.Type=RESOURCE_TREE;
+            resource.ProductSort=HUMAN_WOOD;
+            break;
+        default:
+            resource.Type=-1;
+            resource.ProductSort=-1;
+        }
+        resource.BlockL=animal->getBlockDR();
+        resource.BlockU=animal->getBlockUR();
+        resource.L=animal->getDR();
+        resource.U=animal->getUR();
+        resource.Blood=animal->getBlood();
+        resource.Cnt=animal->get_Cnt();
+        AIGame.resources.push_back(resource);
+    }
+    for(StaticRes* staticRes: theMap->staticres){
+        tagResource resource;
+        resource.SN=staticRes->getglobalNum();
+        resource.L=staticRes->getDR();
+        resource.U=staticRes->getUR();
+        resource.BlockL=staticRes->getBlockDR();
+        resource.BlockU=staticRes->getBlockUR();
+        switch(staticRes->getNum()){
+        case 0:
+            resource.Type=RESOURCE_BUSH;
+            resource.ProductSort=HUMAN_STOCKFOOD;
+            break;
+        case 1:
+            resource.Type=RESOURCE_STONE;
+            resource.ProductSort=HUMAN_STONE;
+            break;
+        default:
+            resource.Type=-1;
+            resource.ProductSort=-1;
+        }
+        resource.Cnt=staticRes->get_Cnt();
+        resource.Blood=-1;
+        AIGame.resources.push_back(resource);
+    }
 
 }
 
@@ -231,11 +292,43 @@ void Core::manageOrder()
             interactionList->suspendRelation(self);
             break;
         }
-        case 1:{    /// type 1:命令村民self走向指定坐标L0，U0
-            Point des=cur.destination;
-            interactionList->addRelation(self,des.x,des.y,CoreEven_JustMoveTo);
+        case 1:{    /// type 1:命令村民self走向指定坐标L，U
+            interactionList->addRelation(self,cur.L,cur.U,CoreEven_JustMoveTo);
             break;
         }
+        case 2:{    /// type 2:命令村民self将工作目标设为obj
+            Coordinate* obj=cur.obj;
+            switch(self->getSort()){
+            case SORT_FARMER:
+                switch (obj->getSort()){
+                case SORT_STATICRES:
+                case SORT_ANIMAL:
+                    interactionList->addRelation(self,obj,CoreEven_Gather);
+                    break;
+                case SORT_BUILDING:
+                    interactionList->addRelation(self,obj,CoreEven_FixBuilding);
+                default:
+                    break;
+                }
+                break;
+            case SORT_ARMY:
+                switch (obj->getSort()){
+                case SORT_ANIMAL:
+                    interactionList->addRelation(self,obj,CoreEven_Attacking );
+                    break;
+                default:
+                    break;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        case 3:{
+            break;
+        }
+
+
         default:
             break;
         }

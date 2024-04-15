@@ -399,9 +399,11 @@ struct instruction{
     Coordinate* self;
     Coordinate* obj;
     int option;
-    Point destination;
-    instruction(int type,Coordinate* self,Coordinate* obj,int option,Point destination);
-    instruction(int type,Coordinate* self,Point destination);
+    int BL,BU;
+    double L,U;
+    instruction(int type,Coordinate* self,Coordinate* obj);
+    instruction(int type,Coordinate* self,int BL,int BU);
+    instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
 
