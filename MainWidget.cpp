@@ -6,6 +6,7 @@ int g_frame=0;
 
 std::map<int,Coordinate*> g_Object;
 std::queue<instruction> instructions;   ///AI返回的指令队列
+bool AIfinished=true;   ///AI线程锁
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -135,6 +136,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 // MainWidget析构函数
 MainWidget::~MainWidget()
 {
+    ai->exit(0);
+    delete ai;
     delete ui;
     deleteBlock();
     deleteAnimal();
@@ -142,7 +145,6 @@ MainWidget::~MainWidget()
     deleteFarmer();
     deleteBuilding();
     deleteArmy();
-    delete ai;
     deleteMissile();
     delete core;
 }
@@ -569,12 +571,15 @@ void MainWidget::FrameUpdate()
 {
     gameframe++;
     g_frame=gameframe;
-    ai->run();///AI进程开始
+    if(AIfinished){
+        ai->start();///AI进程开始
+    }
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
-    while(ai->AIlock){};///等待AI进程结束
-    core->infoShare();
+    if(AIfinished){
+        core->infoShare();
+    }
     emit mapmove();
     return;
 }

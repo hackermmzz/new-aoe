@@ -478,17 +478,23 @@ void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirro
     ur = ur_mirror+ur_deta/total*dis;
 }
 
-instruction::instruction(int type,Coordinate* self,Coordinate* obj,int option,Point destination){
+instruction::instruction(int type,Coordinate* self,Coordinate* obj){
     this->type=type;
     this->self=self;
     this->obj=obj;
     this->option=option;
-    this->destination=destination;
 }
-instruction::instruction(int type,Coordinate* self,Point destination){
+instruction::instruction(int type,Coordinate* self,int BL,int BU){
     this->type=type;
     this->self=self;
-    this->destination=destination;
+    this->BL=BL;
+    this->BU=BU;
+}
+instruction::instruction(int type,Coordinate* self,double L,double U){
+    this->type=type;
+    this->self=self;
+    this->L=L;
+    this->U=U;
 }
 instruction::instruction(int type,Coordinate* self,int option){
     this->type=type;
