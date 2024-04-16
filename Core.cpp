@@ -109,7 +109,7 @@ void Core::gameUpdate()
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
-    manageOrder();
+    if(AIfinished) { manageOrder();}
     interactionList->manageRelationList();
 }
 

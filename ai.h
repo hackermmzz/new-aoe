@@ -23,20 +23,19 @@ public:
         if(!isHuman(self))
             return ACTION_INVALID_SN;
         if(obj->getSort()!=SORT_ANIMAL&&obj->getSort()!=SORT_STATICRES){
-//            qDebug()<<obj<<":"<<obj->getSort();
             return ACTION_INVALID_OBSN;
         }
         instructions.push(instruction(2,self,obj));
         return ACTION_SUCCESS;
     }
 /*###########INTERFACE ENDS HERE###########*/
-    bool AIstop=false;
-    bool AIlock=false;
     AI();
     void processData();
     void run() override{
-            if(AIGame.GameFrame>10)
-                processData();
+        if(AIGame.GameFrame>10&&AIfinished){
+            qDebug()<<g_frame<<":"<<"调用AI";
+            processData();
+        }
         }
 private:
     bool isHuman(Coordinate* self){

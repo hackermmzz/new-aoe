@@ -3,14 +3,14 @@
 bool ismove=false;
 int human1=-1;
 int human2=-1;
-int mid=36*BLOCKSIDELENGTH;
+double mid=36*BLOCKSIDELENGTH;
 double X[4]={mid-100,mid+100,mid+100,mid-100};
 double Y[4]={mid-100,mid-100,mid+100,mid+100};
 int step1=0;
 int step2=3;
 
 void AI::processData(){
-    AIlock=true;
+    AIfinished=false;
 /*##########YOUR CODE BEGINS HERE##########*/
     for(tagHuman human:AIGame.humans){
         if(human1==-1){
@@ -24,6 +24,7 @@ void AI::processData(){
            break;
         }
     }
+    sleep(5);
     for(tagHuman human:AIGame.humans){
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
@@ -43,10 +44,10 @@ void AI::processData(){
     }
 
 
-
-
+    qDebug()<<AIGame.GameFrame;
+    qDebug()<<"#############";
 /*###########YOUR CODE ENDS HERE###########*/
-    AIlock=false;
+    AIfinished=true;
 }
 AI::AI(){
     ;
