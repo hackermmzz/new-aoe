@@ -109,6 +109,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
     player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
     player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+    player[0]->addArmy(AT_BOWMAN , 20*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
 
     player[0]->addArmy(AT_SCOUT, 30*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
 //    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
