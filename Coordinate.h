@@ -26,6 +26,8 @@ public:
 
     virtual void resetCoreAttribute(){}
 
+    virtual void setAction( int actNum){ this->actNum = actNum; }
+    virtual void ActNumToActName(){ actName = actNum; }
     /***************指针强制转化****************/
     //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
     virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
@@ -44,6 +46,14 @@ public:
     double getUR()
     {
         return this->UR;
+    }
+    int getBlockDR()
+    {
+        return this->BlockDR;
+    }
+    int getBlockUR()
+    {
+        return this->BlockUR;
     }
     double getimageX()
     {
@@ -82,42 +92,18 @@ public:
 
 /*****************act获取***************/
 //需要协商，act位置
-    double getActPercent()
-    {
-        return this->actPercent;
-    }
-    double getActSpeed()
-    {
-        return this->actSpeed;
-    }
-    void setActName(int actName)
-    {
-        this->actName = actName;
-    }
-    int getActName()
-    {
-        return this->actName;
-    }
-    void setActSpeed(double actSpeed)
-    {
-        this->actSpeed = actSpeed;
-    }
-    void setActPercent(double actPercent)
-    {
-        this->actPercent = actPercent;
-    }
-    void updatePercent()
-    {
-        this->setActPercent(actPercent + actSpeed);
-    }
-    int getActNum()
-    {
-        return this->actNum;
-    }
-    void setActNum(int actNum)
-    {
-        this->actNum = actNum;
-    }
+
+    double getActPercent() {return this->actPercent;}
+    double getActSpeed(){ return this->actSpeed;}
+    void setActName(int actName){this->actName = actName;}
+    int getActName(){return this->actName;}
+    void setActSpeed(double actSpeed){ this->actSpeed = actSpeed;}
+    void setActPercent(double actPercent){this->actPercent = actPercent;}
+//    void updatePercent(){this->setActPercent(actPercent + actSpeed);}
+    int getActNum(){ return this->actNum;}
+    void setActNum(int actNum){this->actNum = actNum;}
+
+    void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; actPercent = 0; }
 /*****************act获取***************/
 
 protected:

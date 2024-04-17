@@ -56,6 +56,11 @@
 #define ANIMAL_SPEED sqrt(7)
 #define RESPATH ":/new/prefix1/res"
 #define ForestMAX 2
+#define FOREST_GENERATE_L 15
+#define FOREST_GENERATE_U 30
+#define FOREST_GENERATE_PERCENT 45  // 生成森林时出现空地的概率
+#define FOREST_GENERATE_OPTCOUNTER 5
+#define FOREST_COUNT_MIN 150
 #define TREEMAX 40
 #define BLOCKPIXEL_X (65 - showLine)
 #define BLOCKPIXEL_Y (33 - showLine)
@@ -209,6 +214,7 @@
  * 10代表正在前往攻击的状态
  * 11代表人物遇到障碍物停止移动的状态
  * 12代表种地
+ * 13代表正在采集肉的状态
  * 后续补充
  */
 #define HUMAN_STATE_IDLE 0
@@ -224,6 +230,7 @@
 #define HUMAN_STATE_GOTO_ATTACK 10
 #define HUMAN_STATE_STOP 11
 #define HUMAN_STATE_FARMING 12
+#define HUMAN_STATE_BUTCHERING 13
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1

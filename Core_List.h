@@ -20,12 +20,16 @@ public:
 
     /*********关系表控制***********/
     bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1); //建造
+    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
+    bool addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     bool addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
-    void suspendRelation(Coordinate * object);  //这个删除，就很鸡肋，有智障的感觉  //但指令有手动取消的行动，故需保留
+    void suspendRelation(Coordinate * object);  //指令手动停止
+    void eraseRelation(Coordinate* object){ relate_AllObject[object].isExist = false; } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
-
+    /************关系表获取************/
+    int getNowPhaseNum(Coordinate* object); //获取当前object的行动阶段，用于将信息传递给AIGame
+    int getObjectSN(Coordinate* object);   //获取当前object的目标SN，用于将信息传递给AIGame
     /************管理诱发行动************/
     void conduct_Attacked(Coordinate*);
 

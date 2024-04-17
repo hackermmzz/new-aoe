@@ -37,24 +37,14 @@ public:
     std::list<Missile*> missile;
 
     //***************************************************************
-    //控制资源
+    //player独有的游戏进度记录
+
+    //***控制资源****
     //获取资源持有数量
-    int getWood()
-    {
-        return this->wood;
-    }
-    int getFood()
-    {
-        return this->food;
-    }
-    int getStone()
-    {
-        return this->stone;
-    }
-    int getGold()
-    {
-        return this->gold;
-    }
+    int getWood(){return this->wood;}
+    int getFood(){return this->food;}
+    int getStone(){return this->stone;}
+    int getGold(){return this->gold;}
 
     void setWood(int wood){this->wood = wood;}
     void setFood(int food){this->food = food;}
@@ -62,14 +52,28 @@ public:
     void setGold(int gold){this->gold = gold;}
     //更改资源数量
     void changeResource( int resourceSort , int num , bool negative = false);
+    void changeResource(int wood,int food,int stone,int gold, bool negative = false);
+
+    void changeResource_byBuild(int buildNum);
+    void changeResource_byBuildAction(Building* actBuild , int buildact);
+
+    //***人口记录****
+    //获取人口上限
+    int getMaxHumanNum(){return this->maxHumanNum;}
+    //设置人口上限
+    void setMaxHumanNum(int num){this->maxHumanNum = num;}
 
    /*建筑行动相关********************************************/
     //判断是否可建筑
     bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
+    bool get_isBuildActionAble( Building* actBuild,int actNum ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,civilization,wood,food,stone,gold); }
+    void back_Resource_TS( Building* actBuild );
 
     void finishBuild( Building* buildBuilding ){playerScience->finishAction(buildBuilding->getNum());}
     void enforcementAction( Building* actBuild );
    /*以上建筑行动相关********************************************/
+
+
 
 
     //获取科技树
@@ -109,14 +113,8 @@ public:
     {
         this->score = score;
     }
-    int getMaxHumanNum()
-    {
-        return this->maxHumanNum;
-    }
-    void setMaxHumanNum(int num)
-    {
-        this->maxHumanNum = num;
-    }
+
+
     void setCheatMaxHumanNum(bool flag)
     {
         this->cheatMaxHumanNum = flag;
@@ -141,7 +139,7 @@ private:
     int civilization=1;
 
     //人口容量
-    int maxHumanNum=0;
+    int maxHumanNum=0;  //人口上限
 
     //所拥有的四个资源
     int wood=200;

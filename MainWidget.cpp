@@ -2,7 +2,10 @@
 #include "ui_MainWidget.h"
 
 int g_globalNum=1;
+int g_frame=0;
+
 std::map<int,Coordinate*> g_Object;
+std::queue<instruction> instructions;   ///AI返回的指令队列
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -45,7 +48,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
 
-    SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
+    sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);
     sel->show();
 
@@ -103,28 +106,44 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initmap();
 
     // 添加资源测试
-    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
     player[0]->addBuilding(BUILDING_CENTER, 10, 10);
+//    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
-    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
-    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
-    player[0]->addArmy(AT_BOWMAN , 20*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
 
-    player[0]->addArmy(AT_SCOUT, 30*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
-//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
+//    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
+//    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
+//    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+//    player[0]->addArmy(AT_BOWMAN , 20*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
 
-    map->addAnimal(ANIMAL_TREE , 40 , 50);
-    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
-    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
+//    player[0]->addArmy(AT_SCOUT, 30*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
+////    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
 
-    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
-    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
-    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
+//    map->addAnimal(ANIMAL_TREE , 40 , 50);
+//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+//    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
+
+//    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
+    player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
+//    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+//    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
+//    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
+//    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+////    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
+
+//    map->addAnimal(ANIMAL_TREE , 40 , 50);
+////    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+//    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
+
+
+//    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
+//    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
+//    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
 
 
     core = new Core(map,player,memorymap,mouseEvent);
+    sel->setCore(core);
 
+    ai=new AI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 }
@@ -139,6 +158,7 @@ MainWidget::~MainWidget()
     deleteFarmer();
     deleteBuilding();
     deleteArmy();
+    delete ai;
     deleteMissile();
     delete core;
 }
@@ -568,13 +588,33 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
     return QWidget::eventFilter(watched,event);
 }
 
+void MainWidget::showPlayerResource(int playerRepresent)
+{
+    int wood,food,stone,gold;
+    core->getPlayerNowResource(playerRepresent,wood,food,stone,gold);
+    ui->resWood->setText(QString::number(wood));
+    ui->resFood->setText(QString::number(food));
+    ui->resStone->setText(QString::number(stone));
+    ui->resGold->setText(QString::number(gold));
+}
+
+void MainWidget::statusUpdate()
+{
+    showPlayerResource(0);
+}
+
 // 游戏帧更新
 void MainWidget::FrameUpdate()
 {
     gameframe++;
+    g_frame=gameframe;
+    ai->run();///AI进程开始
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
+    statusUpdate();
+    while(ai->AIlock){};///等待AI进程结束
+    core->infoShare();
     emit mapmove();
     return;
 }

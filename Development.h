@@ -27,13 +27,19 @@ public:
 
     int get_addition_ResourceSort( int resourceSort );
 
+    //获取建筑是否可以建造
     bool get_isBuildingAble( int buildingNum , int wood ,int food , int stone ,int gold )
         { return developLab[buildingNum].buildCon->executable(wood , food ,stone ,gold); }
+    bool get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold )
+        { return developLab[buildingNum].actCon[actNum].executable(civilization,wood,food,stone,gold); }
 
+    //获取建造/行动的消耗（时间、资源等）
+    void get_Resource_Consume( int buildNum ,int& wood,int& food,int& stone,int& gold ){ developLab[buildNum].buildCon->get_needResource(wood,food,stone,gold); }
+    void get_Resource_Consume( int buildNum , int actNum ,int& wood,int& food,int& stone,int& gold  ){ developLab[buildNum].actCon[actNum].get_needResource(wood,food,stone,gold);}
+    //获取时间
     double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
+    double get_actTime( int buildingNum, int actNum ){ return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
-    double get_actTime( int buildingNum, int actNum )
-        { return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
     void init_DevelopLab();
 

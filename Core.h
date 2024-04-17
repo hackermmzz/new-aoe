@@ -3,19 +3,35 @@
 
 #include <Core_List.h>
 
-
 class SelectWidget;
 class Core
 {
 
 public:
+    SelectWidget *sel = nullptr;
+    Map* theMap;    //地图信息
+
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
     void gameUpdate();
+    void infoShare();   ///将游戏信息同步给AIGame
 
-    SelectWidget *sel = nullptr;
+    void getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold );
+    bool get_IsBuildAble(int playerRepresent,int buildNum){ return player[playerRepresent]->get_isBuildingAble(buildNum); }
 
-    Map* theMap;    //地图信息
+    bool get_IsObjectFree(Coordinate* object){ return interactionList->isObject_Free(object); }
+    bool get_IsActionNow( Coordinate* object ){ return !interactionList->isObject_Free(object); }
+
+    /************添加/删除表************/
+    bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true){ return interactionList->addRelation(object1,object2,eventType,respond); }
+     //建造
+    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,DR,UR,eventType,respond,type); }
+    bool addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,BlockDR,BlockUR,eventType,respond,type); }
+    //建筑行动 actpercent
+    bool addRelation( Coordinate* object1, int evenType , int actNum){ return interactionList->addRelation(object1,evenType,actNum); }
+    //指令手动停止
+    void suspendRelation(Coordinate * object){ interactionList->suspendRelation(object); }
+    /************添加/删除表************/
 private:
     Player** player;    //player信息
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问

@@ -60,8 +60,32 @@ bool Core_List::addRelation( Coordinate * object1, double DR , double UR, int ev
         }
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         else if(eventType == CoreEven_CreatBuilding && \
-                is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR)) /*&& player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type)*/ )
-            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
+                is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR)) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
+        {
+             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
+             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
+        }
+    }
+
+    return false;
+}
+
+bool Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
+{
+    if(object1 == NULL) return false;
+
+    if(relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
+
+    if(! relate_AllObject[object1].isExist )
+    {
+        //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
+        if(eventType == CoreEven_CreatBuilding && \
+                is_BuildingCanBuild(type , BlockDR, BlockUR) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
+        {
+            player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
+            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
+        }
+
     }
 
     return false;
@@ -73,17 +97,30 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
-        ((Building*)object1)->setAction(actNum);
-        relate_AllObject[object1] = relation_Object(evenType);
-
-        return true;
+        Building* buildOb = NULL;
+        object1->printer_ToBuilding((void**)&buildOb);
+        if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
+        {
+            player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
+            buildOb->setAction(actNum);
+            relate_AllObject[object1] = relation_Object(evenType);
+            return true;
+        }
     }
     return false;
 }
 
 void Core_List::suspendRelation(Coordinate * object)
 {
-    if(relate_AllObject[object].isExist) relate_AllObject[object].isExist = false;
+    if(relate_AllObject[object].isExist)
+    {
+        Building* buildOb = NULL;
+        object->printer_ToBuilding((void**)&buildOb);
+        if(buildOb!=NULL) player[buildOb->getPlayerRepresent()]->back_Resource_TS(buildOb); //返还资源
+        object->initAction();  //行动全部重置
+
+        relate_AllObject[object].isExist = false;
+    }
 }
 
 void Core_List::manageRelationList()
@@ -261,10 +298,62 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
 
 void Core_List::eraseObject(Coordinate* eraseOb)
 {
-    suspendRelation(eraseOb);
+    eraseRelation(eraseOb);
     manageRelation_deleteGoalOb(eraseOb);
 }
 
+int Core_List::getNowPhaseNum(Coordinate* object){
+    ///获取当前object的行动阶段，用于将信息传递给AIGame
+    relation_Object& thisRelation=relate_AllObject[object];
+    if(!thisRelation.isExist||thisRelation.relationAct==CoreEven_JustMoveTo){
+        return HUMAN_STATE_IDLE;
+    }
+    int& nowPhaseNum = thisRelation.nowPhaseNum;
+    //detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
+    Coordinate* obj=relate_AllObject[object].goalObject;
+    if(nowPhaseNum==0){
+        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
+            return HUMAN_STATE_GOTO_ATTACK;
+        }else{
+            return HUMAN_STATE_GOTO_OBJECT;
+        }
+    }else if(nowPhaseNum==1||nowPhaseNum==2){
+        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
+            return HUMAN_STATE_ATTACKING;
+        }else{
+            return HUMAN_STATE_CUTTING;
+        }
+    }else if(nowPhaseNum==3||nowPhaseNum==4||nowPhaseNum==8||nowPhaseNum==9){
+        return HUMAN_STATE_GOTO_RESOURCE;
+    }else if(nowPhaseNum==5||nowPhaseNum==10||nowPhaseNum==11){
+        return HUMAN_STATE_GOTO_OBJECT;
+    }else if(nowPhaseNum==6||nowPhaseNum==7){
+        ///资源采集
+        if(obj->getSort()==SORT_STATICRES){
+            if(obj->getNum()==0){
+                return HUMAN_STATE_GATHERING;
+            }else if(obj->getNum()==1){
+                return HUMAN_STATE_DIGGING_STONE;
+            }else if(obj->getNum()==2){
+                return HUMAN_STATE_DIGGING_GOLD;
+            }
+        }else if(obj->getSort()==SORT_ANIMAL){
+            if(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST){
+                return HUMAN_STATE_CUTTING;
+            }else{
+                return HUMAN_STATE_BUTCHERING;
+            }
+        }
+    }
+    return -1;
+}
+
+int Core_List::getObjectSN(Coordinate* object){
+    relation_Object& thisRelation=relate_AllObject[object];
+    if(thisRelation.isExist){
+        return thisRelation.goalObject->getglobalNum();
+    }
+}
 //****************************************************************************************
 //通用的控制对象行动函数
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
@@ -410,18 +499,22 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 
 void Core_List::object_FinishAction(Coordinate* object1)
 {
-    object_FinishAction_Absolute(object1);
 //    if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding && 是农田)
     if(relate_AllObject[object1].relationAct == CoreEven_BuildingAct)
-        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);
-    else if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding )
+        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);  //进行建筑行动的结果处理
+    else if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding && relate_AllObject[object1].goalObject!=NULL )
+    {
         player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+        relate_AllObject[object1].goalObject->initAction();
+    }
     else if(relate_AllObject[object1].relationAct == CoreEven_MissileAttack)
     {
         Missile* misOb = NULL;
         object1->printer_ToMissile((void**)&misOb);
         if(misOb!=NULL) misOb->needDelete();
     }
+
+    object_FinishAction_Absolute(object1);
 }
 
 //****************************************************************************************

@@ -2,6 +2,7 @@
 #define GLOBALVARIATE_H
 
 #include <map>
+#include <queue>
 #include <QPixmap>
 #include <QString>
 #include <list>
@@ -20,15 +21,12 @@ extern int MidX;
 extern int MidY;
 extern int MAP_LSide[2];
 extern int MAP_USide[2];
-extern int Gamemap[MAP_L][MAP_U]; // 地图二维数组
-extern bool mapFlag[MAP_L][MAP_U]; // 地图标识二维数组，0为可放置，1为不可放置
 extern int Forest[3][15][15];
 extern int Food[5][5][5];
 extern int Stone[5][5][5];
 extern int g_frame;
 extern QTextBrowser* g_DebugText;
 extern int ProcessDataWork;
-
 extern map<string, list<QPixmap>> resMap;
 extern map<string, QSound*> SoundMap;
 
@@ -78,12 +76,15 @@ struct tagHuman
 
 struct tagGame
 {
-    tagBuilding *building;
-    int building_n;
-    tagHuman *human;
-    int human_n;
-    tagResource *resource;
-    int resource_n;
+//    tagBuilding *building;
+//    int building_n;
+    list<tagBuilding> buildings;
+//    tagHuman *human;
+//    int human_n;
+    list<tagHuman> humans;
+//    tagResource *resource;
+//    int resource_n;
+    list<tagResource> resources;
     int GameFrame;
     int civilizationStage;
     int Wood;
@@ -286,6 +287,7 @@ struct conditionDevelop
     //判断行动是否能进行
     //判断资源是否满足行动需要
     bool executable( int wood,int food,int stone,int gold ) { return wood>=need_Wood && food>=need_Food && stone>=need_Stone && gold>=need_Gold; }
+    void get_needResource( int& wood, int& food ,int& stone, int& gold ){ wood = need_Wood, food = need_Food,stone = need_Stone, gold = need_Gold; }
 
     //判断当前时代、已完成的建筑行动，是否解锁当前行动
     bool isShowable( int nowcivilization )
@@ -359,6 +361,13 @@ struct st_upgradeLab{
     //当前行动是否可执行
     bool executable( int nowcivilization,int wood,int food,int stone,int gold ){ return isShowAble(nowcivilization) && nowExecuteNode->executable(wood , food, stone,gold) ; }
 
+    //获取需要的资源
+    void get_needResource( int& wood, int& food ,int& stone, int& gold )
+    {
+        if(nowExecuteNode!=NULL)
+            nowExecuteNode->get_needResource(wood,food,stone,gold);
+        else wood = 0,food =0 ,stone = 0,gold = 0;
+    }
     /**
     *考虑加入错误码，以判断错误类型
     */
@@ -385,6 +394,26 @@ struct st_buildAction
     void finishBuild(){ buildCon->finishAct();}
 };
 
+struct instruction{
+    ///用于存储ai发出的指令信息
+    /// @param type 指令类型
+    /// @param option 对应类型下的操作
+    /// type 0:终止对象self的动作
+    /// type 1:命令村民self走向指定坐标L0，U0
+    /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
+    /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
+    /// type 4:对建筑self发出命令option
+    int type;
+    Coordinate* self;
+    Coordinate* obj;
+    int option;
+    Point destination;
+    instruction(int type,Coordinate* self,Coordinate* obj,int option,Point destination);
+    instruction(int type,Coordinate* self,Point destination);
+    instruction(int type,Coordinate* self,int option);
+};
+
+extern std::queue<instruction> instructions;    ///ai返回的指令队列
 
 
 /*

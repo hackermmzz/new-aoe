@@ -14,13 +14,14 @@
 #include <queue>
 #include <QButtonGroup>
 #include <QMessageBox>
-//#include "AI.h"
+
 #include <windows.h>
 #include <unordered_set>
 #include <SelectWidget.h>
 //#include <AboutDialog.h>
 //#include <Option.h>
 #include <Core.h>
+#include "AI.h"
 #include <ActWidget.h>
 
 namespace Ui {
@@ -57,14 +58,17 @@ public:
         return acts[num];
     }
 
-    Core *core;
+    void statusUpdate();
+    void showPlayerResource(int playerRepresent);
 
+    SelectWidget *sel;
+    Core *core;
+    AI* ai;
     bool eventFilter(QObject *watched, QEvent *event);
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
     MouseEvent *mouseEvent=new MouseEvent();
-
 
 private slots:
     void FrameUpdate();
