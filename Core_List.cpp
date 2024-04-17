@@ -318,8 +318,10 @@ int Core_List::getNowPhaseNum(Coordinate* object){
 
 int Core_List::getObjectSN(Coordinate* object){
     relation_Object& thisRelation=relate_AllObject[object];
-    if(thisRelation.isExist){
+    if(thisRelation.isExist&&thisRelation.goalObject!=nullptr){
         return thisRelation.goalObject->getglobalNum();
+    }else{
+        return -1;
     }
 }
 //****************************************************************************************

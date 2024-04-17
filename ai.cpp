@@ -3,14 +3,14 @@
 bool ismove=false;
 int human1=-1;
 int human2=-1;
-int mid=36*BLOCKSIDELENGTH;
-int X[4]={mid-100,mid+100,mid+100,mid-100};
-int Y[4]={mid-100,mid-100,mid+100,mid+100};
+double mid=36*BLOCKSIDELENGTH;
+double X[4]={mid-100,mid+100,mid+100,mid-100};
+double Y[4]={mid-100,mid-100,mid+100,mid+100};
 int step1=0;
 int step2=3;
 
 void AI::processData(){
-    AIlock=true;
+    AIfinished=false;
 /*##########YOUR CODE BEGINS HERE##########*/
     for(tagHuman human:AIGame.humans){
         if(human1==-1){
@@ -24,16 +24,18 @@ void AI::processData(){
            break;
         }
     }
+    sleep(5);
     for(tagHuman human:AIGame.humans){
-        if(human.SN==human1&&abs(human.L-X[step1])<3&&abs(human.U-Y[step1])<3){
-           step1=(step1+1)%4;
-           HumanMove(human1,X[step1],Y[step1]);
-        }
-        if(human.SN==human2&&abs(human.L-X[step2])<3&&abs(human.U-Y[step2])<3){
-           step2=(step2-1)>=0?step2-1:3;
-           HumanMove(human2,X[step2],Y[step2]);
-        }
-        if(human.SN==human1){
+        if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
+            int sn=-1;
+            double dis=99999;
+            for(tagResource res:AIGame.resources){
+                if(countdistance(mid,mid,res.L,res.U)<dis){
+                    sn=res.SN;
+                    dis=countdistance(mid,mid,res.L,res.U);
+                }
+            }
+            HumanAction(human.SN,sn);
 //            qDebug()<<"AI.cpp::"<<human.NowState;
 //            qDebug()<<"AI::obSN:"<<human.WorkObjectSN;
 //            qDebug()<<"AI::ResourceSORT:"<<human.ResourceSort;
@@ -42,10 +44,10 @@ void AI::processData(){
     }
 
 
-
-
+    qDebug()<<AIGame.GameFrame;
+    qDebug()<<"#############";
 /*###########YOUR CODE ENDS HERE###########*/
-    AIlock=false;
+    AIfinished=true;
 }
 AI::AI(){
     ;
