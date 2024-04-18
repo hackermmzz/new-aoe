@@ -217,6 +217,26 @@ void Core::infoShare(){
         AIGame.resources.push_back(resource);
     }
 
+    AIGame.buildings.clear();
+    for(Building* build:self->build){
+        tagBuilding building;
+        building.SN=build->getglobalNum();
+        building.BlockL=build->getBlockDR();
+        building.BlockU=build->getBlockUR();
+        building.Blood=build->getBlood();
+        building.MaxBlood=build->getMaxBlood();
+        building.Percent=build->getPercent();
+        building.Project=build->getActNum();
+        building.ProjectPercent=build->getActPercent();
+        if(build->getSort()==SORT_FARM){
+            building.Type=BUILDING_FARM;
+            building.Cnt=build->getCnt();
+        }else{
+            building.Type=build->getNum();
+            building.Cnt=-1;
+        }
+        AIGame.buildings.push_back(building);
+    }
 }
 
 //处理鼠标事件
@@ -324,10 +344,13 @@ void Core::manageOrder()
                 break;
             }
         }
-        case 3:{
+        case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
+            //interactionList->addRelation(self,BLOCKSIDELENGTH*cur.BL,BLOCKSIDELENGTH*cur.BU,CoreEven_CreatBuilding,0,cur.option);
             break;
         }
+        case 4:{
 
+        }
 
         default:
             break;

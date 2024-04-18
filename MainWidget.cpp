@@ -572,14 +572,12 @@ void MainWidget::FrameUpdate()
     gameframe++;
     g_frame=gameframe;
     if(AIfinished){
-        ai->start();///AI进程开始
+        core->infoShare();
+        ai->start();///AI 线程开始
     }
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
-    core->gameUpdate();
-    if(AIfinished){
-        core->infoShare();
-    }
+    core->gameUpdate(); 
     emit mapmove();
     return;
 }

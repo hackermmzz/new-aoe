@@ -402,7 +402,7 @@ struct instruction{
     int BL,BU;
     double L,U;
     instruction(int type,Coordinate* self,Coordinate* obj);
-    instruction(int type,Coordinate* self,int BL,int BU);
+    instruction(int type,Coordinate* self,int BL,int BU,int option);
     instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
