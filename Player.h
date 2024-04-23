@@ -5,6 +5,7 @@
 #include <Farmer.h>
 #include <Army.h>
 #include <Building.h>
+#include <Building_Resource.h>
 
 class Player
 {

@@ -12,8 +12,8 @@ public:
     Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
 
   /**********************虚函数**************************/
-    int getSort();
-    int getMaxBlood(){ return BuildingMaxBlood[Num]; }
+    int getSort(){return SORT_BUILDING;}
+    int getMaxBlood(){ return MaxBlood; }
     int getPlayerRepresent(){ return playerRepresent; }
 
     void nextframe();
@@ -86,21 +86,23 @@ public:
     //设置隶属player
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
+    void setFundation();
+
     bool isFinish(){return this->Percent>=100;}
     double getPercent() {return this->Percent;}
 
-    double getCnt(){return this->Cnt;}
+//    double getCnt(){return this->Cnt;}
 
 
-private:
+protected:
   /********************静态资源**************************/
     static std::list<ImageResource> *build[4];//建设list
 
-    static std::list<ImageResource> *built[3][7]; //建设完成的list
+    static std::list<ImageResource> *built[3][10]; //建设完成的list
 
     static std::string Buildingname[4];
-    static std::string Builtname[3][7];
-    static std::string BuildDisplayName[7];
+    static std::string Builtname[3][10];
+    static std::string BuildDisplayName[10];
   /********************静态资源**************************/
 
     //所属阵营
@@ -120,12 +122,12 @@ private:
 
     int Finish=0;//0为未完成 1为完成
 
-    int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
+//    int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
     int actNames[ACT_WINDOW_NUM_FREE] = {0};
     int actStatus[ACT_WINDOW_NUM_FREE] = {0};
 
     //需要优化，考虑农田直接抽一个类
-    double Cnt;
+//    double Cnt;
 
     //存储建筑行动的预扣资源：
     int wood_TS = 0;

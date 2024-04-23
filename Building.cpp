@@ -2,15 +2,14 @@
 
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
-std::list<ImageResource>* Building::built[3][7];
+std::list<ImageResource>* Building::built[3][10];
 
 std::string Building::Buildingname[4]={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
-std::string Building::Builtname[3][7]={
-                                        {},
-                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower"},
-                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower"}
+std::string Building::Builtname[3][10]={{},
+                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range"},
+                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range"}
                                       };
-std::string Building::BuildDisplayName[7]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔"};
+std::string Building::BuildDisplayName[10]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场"};
 
 /********************静态资源**************************/
 
@@ -30,9 +29,10 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
     this->visible=1;
     this->imageH=(BlockDR-BlockUR)*BLOCKSIDELENGTH;
     this->Percent=Percent;
-    init_Blood();
-
     setAttribute();
+    init_Blood();
+    setFundation();
+
     setDetailPointAttrb_FormBlock();
     setNowRes();
 
@@ -46,14 +46,6 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
 
 
 /********************虚函数**************************/
-/**********获取*************/
-int Building::getSort()
-{
-    if(Num!=BUILDING_FARM)
-    return SORT_BUILDING;
-    else return SORT_FARM;
-}
-
 
 /**********设置*************/
 void Building::setAction( int actNum)
@@ -77,8 +69,8 @@ void Building::ActNumToActName()
 void Building::setNowRes()
 {
     std::list<ImageResource>* tempNowlist = NULL;
-    if(Percent<100) tempNowlist = build[Foundation];
-    else tempNowlist = built[civ][Num];
+    if(Percent<100) tempNowlist = Building::build[Foundation];
+    else tempNowlist = Building::built[civ][Num];
 
     if(tempNowlist != nowlist)
     {
@@ -91,30 +83,54 @@ void Building::setAttribute()
 {
     //根据房屋种类设置相关信息
     switch (Num) {
+    case BUILDING_CENTER:
+        MaxBlood = BLOOD_BUILD_CENTER;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
     case BUILDING_HOME:
+        MaxBlood = BLOOD_BUILD_HOUSE;
         Foundation=FOUNDATION_SMALL;
         break;
+    case BUILDING_STOCK:
+        MaxBlood = BLOOD_BUILD_STOCK;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
+    case BUILDING_GRANARY:
+        MaxBlood = BLOOD_BUILD_GRANARY;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
+    case BUILDING_ARMYCAMP:
+        MaxBlood = BLOOD_BUILD_ARMYCAMP;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
+    case BUILDING_MARKET:
+        MaxBlood = BLOOD_BUILD_MARKET;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
+    case BUILDING_RANGE:
+        MaxBlood = BLOOD_BUILD_RANGE;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
+    case BUILDING_STABLE:
+        MaxBlood = BLOOD_BUILD_STABLE;
+        Foundation = FOUNDATION_MIDDLE;
+        break;
     case BUILDING_ARROWTOWER:
+        MaxBlood = BLOOD_BUILD_ARROWTOWER;
         Foundation=FOUNDATION_SMALL;
+        atk = ATK_BUILD_ARROWTOWER;
+        defence_shoot = DEFSHOOT_BUILD_ARROWTOWER;
+        attackType = ATTACKTYPE_SHOOT;
         type_Missile = Missile_Arrow;
+        break;
+
+    case BUILDING_WALL:
+        MaxBlood = BLOOD_BUILD_WALL;
+        Foundation = FOUNDATION_SMALL;
+        defence_shoot = DEFSHOOT_BUILD_WALL;
         break;
     default:
         Foundation=FOUNDATION_MIDDLE;
-        break;
-    }
-
-    //设置地基大小
-    switch (Foundation) {
-    case FOUNDATION_SMALL:
-        BlockSizeLen = SIZELEN_SMALL;
-        break;
-    case FOUNDATION_MIDDLE:
-        BlockSizeLen = SIZELEN_MIDDLE;
-        break;
-    case FOUNDATION_BIG:
-        BlockSizeLen = SIZELEN_BIG;
-        break;
-    default:
         break;
     }
 }
@@ -140,12 +156,12 @@ void Building::nextframe()
 
 void Building::init_Blood()
 {
-//    MaxBlood = 600;
     if(Percent == 100) Blood = 1;
-    else Blood = 1.0/(double)MaxBlood;
+    else Blood = 1.0/(double)getMaxBlood();
 }
 
 /********************虚函数**************************/
+
 
 void Building::update_Build()
 {
@@ -155,5 +171,23 @@ void Building::update_Build()
     Blood+=ratio/100;
 
     if(Blood>1) Blood = 1;
+}
+
+void Building::setFundation()
+{
+    //设置地基大小
+    switch (Foundation) {
+    case FOUNDATION_SMALL:
+        BlockSizeLen = SIZELEN_SMALL;
+        break;
+    case FOUNDATION_MIDDLE:
+        BlockSizeLen = SIZELEN_MIDDLE;
+        break;
+    case FOUNDATION_BIG:
+        BlockSizeLen = SIZELEN_BIG;
+        break;
+    default:
+        break;
+    }
 }
 

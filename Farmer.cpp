@@ -149,6 +149,9 @@ void Farmer::updateState()
         if(interactNum == NUM_STATICRES_Bush) setState(2);
         else setState(3);
         break;
+    case SORT_Building_Resource:
+        if(interactNum == BUILDING_FARM) setState(5);
+        break;
     default:
         setState(0);
         break;

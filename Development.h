@@ -9,8 +9,6 @@ class Development
 public:
     Development();
 
-    int get_level( int sort, int type );
-
     double get_rate_Move(int sort,int type);
     double get_rate_Blood(int sort , int type);
     int get_addition_Blood( int sort , int type );
@@ -40,11 +38,14 @@ public:
     double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
     double get_actTime( int buildingNum, int actNum ){ return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
+    //获取升级次数/当前等级
+    int getActLevel( int buildType , int actType ){ return developLab[buildType].actCon[actType].getPhaseTimes(); }
+
 
     void init_DevelopLab();
 
     void finishAction(int buildingType){ developLab[buildingType].finishBuild(); }
-    void finishAction(int buildingType , int buildact){}
+    void finishAction(int buildingType , int buildact){developLab[buildingType].finishAction(buildact);}
 
     bool isNeedCreatObjectAfterAction( int buildType , int actNum , int& creatObjectSort , int& creatObjectNum )
         { return developLab[buildType].actCon[actNum].nowExecuteNode->isNeedCreatObject(creatObjectSort,creatObjectNum); }
@@ -69,11 +70,6 @@ private:
     bool wheel = false;
     int wall = 0;
     int arrowTown = 0;
-    int level_Clubman = 0;
-    int level_ShortSwordsman = 0;
-
-    int level_Wall = 0;
-    int level_ArrowTower = 0;
 
     map< int , st_buildAction > developLab;
 };

@@ -289,7 +289,7 @@ void SelectWidget::refreshActs()
     else
     {
         int type = nowobject->getSort();//获取当前对象类型
-        if(type == SORT_BUILDING)//建筑
+        if(type == SORT_BUILDING|| type == SORT_Building_Resource)//建筑
         {
             Building *objBuilding = (Building *)nowobject;
             int num = objBuilding->getNum();//获取建筑种类
@@ -326,11 +326,16 @@ void SelectWidget::refreshActs()
                 }
                 else if(objBuilding->getNum() == BUILDING_FARM)
                 {
-                    if(objBuilding->getCnt() > 0)//农场可以产出时显示
+                    //需要优化
+                    Building_Resource* farm = (Building_Resource*) objBuilding;
+
+//                    qDebug()<<(farm->get_Cnt());
+                    if(farm->get_Cnt()>0)
                     {
-                        ui->objText->setText(QString::number((int)(objBuilding->getCnt())));
+                        ui->objText->setText(QString::number((int)(farm->get_Cnt())));
                         ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
                     }
+
                 }
             }
             else//如果建筑建造未完成
@@ -450,6 +455,7 @@ void SelectWidget::refreshActs()
             this->update();
             this->show();
         }
+
     }
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {

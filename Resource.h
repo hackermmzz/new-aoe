@@ -8,6 +8,13 @@ class Resource
 public:
     Resource();
 
+   /****************虚函数********************/
+    virtual void printer_ToResource(void** ptr){ *ptr = this; }
+    virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
+    virtual void printer_ToBuilding_Resource(void** ptr){ *ptr = NULL; }
+
+    virtual bool isFarmerGatherable( void* farmer ){return true; }
+   /****************虚函数********************/
     bool get_Gatherable(){return gatherable;}
     int get_ResourceSort(){ return resourceSort; }
     int get_Cnt(){ return (int)Cnt; }

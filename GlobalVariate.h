@@ -13,7 +13,7 @@
 
 using namespace std;
 class Coordinate;
-
+extern bool AIfinished;
 extern int g_globalNum;
 extern std::map<int,Coordinate*> g_Object;
 
@@ -239,7 +239,7 @@ struct conditionDevelop
 
     double times_second;
 
-    bool unlock = false;    //表示是否执行过一次
+    int acttimes = 0;    //表示执行的此时
 
     bool isCreatObjectAction = false; //行动结束后是否需要创建对象
     int creatObjectSort = -1;   //需要创建对象的类sort
@@ -295,14 +295,14 @@ struct conditionDevelop
         if(civilization>nowcivilization) return false;
 
         for(list<conditionDevelop*>::iterator iter = preCondition.begin(); iter!= preCondition.end(); iter++)
-            if(!(*iter)->unlock) return false;
+            if(!(*iter)->acttimes) return false;
 
         return true;
     }
 
     //**********************************************************
     //行动结束后相关操作
-    void finishAct(){ unlock = true; }
+    void finishAct(){ acttimes++; }
 
     //获取是否需要创建对象
     bool isNeedCreatObject( int& creatSort , int& creatNum )
@@ -311,7 +311,6 @@ struct conditionDevelop
         creatNum = creatObjectNum;
         return isCreatObjectAction;
     }
-
 };
 
 struct st_upgradeLab{
@@ -361,6 +360,8 @@ struct st_upgradeLab{
     //当前行动是否可执行
     bool executable( int nowcivilization,int wood,int food,int stone,int gold ){ return isShowAble(nowcivilization) && nowExecuteNode->executable(wood , food, stone,gold) ; }
 
+    //获取当前行动列表执行过几轮（一个链node算一轮）
+    int getPhaseTimes(){return this->haveFinishedPhaseNum;}
     //获取需要的资源
     void get_needResource( int& wood, int& food ,int& stone, int& gold )
     {
@@ -392,6 +393,11 @@ struct st_buildAction
     }
 
     void finishBuild(){ buildCon->finishAct();}
+    void finishAction(int actNum)
+    {
+        actCon[actNum].nowExecuteNode->finishAct();
+        actCon[actNum].shift();
+    }
 };
 
 struct instruction{
@@ -407,9 +413,11 @@ struct instruction{
     Coordinate* self;
     Coordinate* obj;
     int option;
-    Point destination;
-    instruction(int type,Coordinate* self,Coordinate* obj,int option,Point destination);
-    instruction(int type,Coordinate* self,Point destination);
+    int BL,BU;
+    double L,U;
+    instruction(int type,Coordinate* self,Coordinate* obj);
+    instruction(int type,Coordinate* self,int BL,int BU);
+    instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
 

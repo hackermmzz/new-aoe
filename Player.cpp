@@ -30,7 +30,10 @@ Player::~Player()
 //添加实例对象
 Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
 {
-    Building *newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization , percent);
+    Building *newbuilding = NULL;
+    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,this->civilization , percent);
+    else newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization , percent);
+
     newbuilding->setPlayerScience(playerScience);
     newbuilding->setPlayerRepresent(represent);
     build.push_back(newbuilding);

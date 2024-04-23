@@ -36,6 +36,7 @@ public:
     virtual void printer_ToBloodHaver(void** ptr){ *ptr = NULL; }   //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
     virtual void printer_ToResource(void** ptr){ *ptr = NULL; }     //传入ptr为Resource类指针的地址,需要强制转换为（void**）
     virtual void printer_ToBuilding(void** ptr){ *ptr = NULL; }
+    virtual void printer_ToBuilding_Resource(void **ptr){ *ptr = NULL; }
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
