@@ -428,12 +428,12 @@ void SelectWidget::widgetAct(int num)
     doActs(actName);
 }
 
-void SelectWidget::aiAct(int acter, int actName)
+int SelectWidget::aiAct(int actName,Coordinate* self)
 {
-    doActs(actName);
+    return doActs(actName,self);
 }
 
-int SelectWidget::doActs(int actName)
+int SelectWidget::doActs(int actName,Coordinate* nowobject)
 {
     if(nowobject == NULL) return ACTION_INVALID_ACTION;
     if(actName == ACT_BUILD){

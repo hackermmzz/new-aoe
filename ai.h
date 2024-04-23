@@ -114,7 +114,7 @@ public:
             foodcost=BUILDING_CENTER_UPGRADE_FOOD;
             break;
         case BUILDING_GRANARY_ARROWTOWER:
-            if(self->getNum()!=BUILDING_GRANARY){
+            if(self->getNum()!=BUILDING_GRANARY||AIGame.civilizationStage<CIVILIZATION_TOOLAGE){
                 return ACTION_INVALID_ACTION;
             }
             foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
@@ -152,6 +152,7 @@ public:
         if(AIGame.Wood<=woodcost||AIGame.Meat<=foodcost||AIGame.Stone<=stonecost){
             return ACTION_INVALID_RESOURCE;
         }
+        instructions.push(instruction(4,self,Action));
     }
 /*###########INTERFACE ENDS HERE###########*/
     AI();

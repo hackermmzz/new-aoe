@@ -345,10 +345,42 @@ void Core::manageOrder()
             }
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            //interactionList->addRelation(self,BLOCKSIDELENGTH*cur.BL,BLOCKSIDELENGTH*cur.BU,CoreEven_CreatBuilding,0,cur.option);
+//            interactionList->addRelation(self,BLOCKSIDELENGTH*cur.BL,BLOCKSIDELENGTH*cur.BU,CoreEven_CreatBuilding,0,cur.option);
             break;
         }
-        case 4:{
+        case 4:{    ///type 4:命令建筑self进行option工作
+
+//            int foodcost=0;
+//            int woodcost=0;
+//            int stonecost=0;
+//            switch (cur.option) {
+//            case BUILDING_CENTER_CREATEFARMER:
+//                foodcost=BUILDING_CENTER_CREATEFARMER_FOOD;
+//                break;
+//            case BUILDING_CENTER_UPGRADE:
+//                foodcost=BUILDING_CENTER_UPGRADE_FOOD;
+//                break;
+//            case BUILDING_GRANARY_ARROWTOWER:
+//                foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
+//                break;
+//            case BUILDING_MARKET_WOOD_UPGRADE:
+//                foodcost=BUILDING_MARKET_WOOD_UPGRADE_FOOD;
+//                woodcost=BUILDING_MARKET_WOOD_UPGRADE_WOOD;
+//                break;
+//            case BUILDING_MARKET_STONE_UPGRADE:
+//                foodcost=BUILDING_MARKET_STONE_UPGRADE_FOOD;
+//                stonecost=BUILDING_MARKET_STONE_UPGRADE_STONE;
+//                break;
+//            case BUILDING_MARKET_FARM_UPGRADE:
+//                foodcost=BUILDING_MARKET_FARM_UPGRADE_FOOD;
+//                woodcost=BUILDING_MARKET_FARM_UPGRADE_WOOD;
+//                break;
+//            case BUILDING_CANCEL:
+//                break;
+//            default:
+//                break;
+//            }
+
 
         }
 
