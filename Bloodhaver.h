@@ -46,6 +46,7 @@ public:
     void underAttack(){ gotAttack = true; }
 
     //获取血量
+    double getBloodPercent(){ return Blood; }
     int getBlood(){ return (int)( Blood*getMaxBlood() ); }
     //获取“复仇”目标
     Coordinate* getAvangeObject(){ return avangeObject; }

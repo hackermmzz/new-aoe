@@ -43,8 +43,29 @@ double Development::get_rate_Attack( int sort , int type , int armyClass , int a
 //攻击力加成
 int Development::get_addition_Attack( int sort , int type , int armyClass , int attackType )
 {
+    int level = 0;
     int addition = 0;
-    if(attackType == ATTACKTYPE_CLOSE) addition += attack_close;
+    if(attackType == ATTACKTYPE_CLOSE)
+    {
+        level = getActLevel(BUILDING_STOCK,BUILDING_STOCK_UPGRADE_USETOOL);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_STOCK_UPGRADE_USETOOL_ADDITION_ATKCLOSE;
+        default:
+            break;
+        }
+    }
+    if(sort == SORT_ARMY && type == AT_SLINGER)
+    {
+        level = getActLevel(BUILDING_MARKET,BUILDING_MARKET_STONE_UPGRADE);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_MARKET_STONE_UPGRADE_ADDITION_SILNGERATK;
+        default:
+            break;
+        }
+
+    }
 
     return addition;
 }
@@ -78,71 +99,99 @@ double Development::get_rate_Defence( int sort , int type , int armyClass , int 
 int Development::get_addition_Defence( int sort , int type , int armyClass , int attackType_got )
 {
     double addition = 0;
+    int level = 0;
 
     if( sort == SORT_ARMY )
     {
-        if(attackType_got == ATTACKTYPE_ANIMAL||ATTACKTYPE_CLOSE)
-        {
+//        if(attackType_got == ATTACKTYPE_ANIMAL||ATTACKTYPE_CLOSE)
+//        {
 
-            if(armyClass == ARMY_INFANTRY) addition+= defence_infantry;
-            else if(armyClass == ARMY_ARCHER) addition+=defence_archer;
-            else if(armyClass == ARMY_RIDER) addition+= defence_rider;
+//            if(armyClass == ARMY_INFANTRY) addition+= defence_infantry;
+//            else if(armyClass == ARMY_ARCHER) addition+=defence_archer;
+//            else if(armyClass == ARMY_RIDER) addition+= defence_rider;
+//        }
+//        else if(attackType_got == ATTACKTYPE_SHOOT)
+//        {
+//            if(armyClass == ARMY_INFANTRY) addition+= specialDefence_toShoot;
+
+//        }
+
+        if(attackType_got == ATTACKTYPE_ANIMAL || attackType_got == ATTACKTYPE_CLOSE)
+        {
+            if(armyClass == ARMY_INFANTRY)
+            {
+                level = getActLevel(BUILDING_STOCK , BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY);
+
+
+            }
+
         }
         else if(attackType_got == ATTACKTYPE_SHOOT)
         {
-            if(armyClass == ARMY_INFANTRY) addition+= specialDefence_toShoot;
+
 
         }
+
+
     }
     return addition;
 }
 
 /***************************************************************/
-int Development::get_level( int sort, int type )
+//采集携带量加成
+int Development::get_addition_ResourceSort( int resourceSort )
 {
-    if( sort == SORT_ARMY )
+    int addition = 0;
+    int level = 0;
+    if(resourceSort == HUMAN_WOOD)  //对搬运wood加成
     {
-        switch(type)
-        {
-        case AT_CLUBMAN:    return level_Clubman;
-
-        case AT_SWORDSMAN:  return level_ShortSwordsman;
-
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_WOOD_UPGRADE);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_MARKET_WOOD_UPGRADE_ADDITION_CARRY;
         default:
             break;
         }
     }
-    else if( sort == SORT_BUILDING )
+    else if(resourceSort == HUMAN_STONE)    //对搬运stone加成
     {
-        if(type == BUILDING_ARROWTOWER) return level_ArrowTower;
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_STONE_UPGRADE);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_MARKET_STONE_UPGRADE_ADDITION_CARRY;
+        default:
+            break;
+        }
     }
-
-    return 0;
-}
-
-
-int Development::get_addition_ResourceSort( int resourceSort )
-{
-    int addition = 0;
-    if(resourceSort == HUMAN_WOOD) addition = capacity_wood;
-    else if(resourceSort == HUMAN_STONE) addition = capacity_stone;
-    else if(resourceSort == HUMAN_GOLD) addition = capacity_gold;
+    else if(resourceSort == HUMAN_GOLD)     //对搬运gold加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_GOLD_UPGRADE);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_MARKET_GOLD_UPGRADE_ADDITION_CARRY;
+        default:
+            break;
+        }
+    }
 
     return addition;
 }
 
 
+/***************************************************************/
+//初始化develop科技树
 void Development::init_DevelopLab()
 {
     conditionDevelop* newNode;
 
     //市镇中心
     {
-        developLab[BUILDING_CENTER].buildCon = new conditionDevelop( CIVILIZATION_IRONAGE , BUILDING_CENTER , TIME_BUILD_CENTER );
+        developLab[BUILDING_CENTER].buildCon = new conditionDevelop( CIVILIZATION_IRONAGE , BUILDING_CENTER , TIME_BUILD_CENTER, BUILD_CENTER_WOOD );
         //new分配空间在结构体内析构
         //造村民
         newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
                                        0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
+        newNode->setCreatObjectAfterAction(SORT_FARMER );
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
 
@@ -160,6 +209,22 @@ void Development::init_DevelopLab()
     //仓库
     {
         developLab[BUILDING_STOCK].buildCon = new conditionDevelop( CIVILIZATION_STONEAGE , BUILDING_STOCK , TIME_BUILD_STOCK , BUILD_STOCK_WOOD );
+
+        //升级工具利用
+        newNode = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_STOCK , TIME_BUILDING_STOCK_UPGRADE_USETOOL , \
+                                        0 ,BUILDING_STOCK_UPGRADE_USETOOL_FOOD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_USETOOL].setHead(newNode);
+        //升级步兵护甲
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE  , BUILDING_STOCK , TIME_BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY,\
+                                       0, BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_FOOD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY].setHead(newNode);
+        //升级弓兵护甲
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_STOCK , TIME_BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER , \
+                                       0, BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_FOOD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER].setHead(newNode);
+        //升级骑兵护甲
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_STOCK , TIME_BUILDING_STOCK_UPGRADE_DEFENSE_RIDER , \
+                                       0 , BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_FOOD);
     }
 
 
@@ -170,13 +235,35 @@ void Development::init_DevelopLab()
          //研发、升级箭塔
          newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_ARROWTOWER , 0 , BUILDING_GRANARY_ARROWTOWER_FOOD );
          developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].setHead(newNode);
+         //研发城墙
+         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_WALL , 0 , BUILDING_GRANARY_RESEARCH_WALL_FOOD);
+         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].setHead(newNode);
     }
 
     //兵营
+    {
+        developLab[BUILDING_ARMYCAMP].buildCon = new conditionDevelop( CIVILIZATION_STONEAGE , BUILDING_ARMYCAMP , TIME_BUILD_ARMYCAMP , BUILD_ARMYCAMP_WOOD );
+
+        //造棍棒兵
+        newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_ARMYCAMP , TIME_BUILDING_ARMYCAMP_CREATE_CLUBMAN , 0 , BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD);
+        newNode->setCreatObjectAfterAction(SORT_ARMY , AT_CLUBMAN);
+        developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_CREATE_CLUBMAN].setHead(newNode);
+        developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_CREATE_CLUBMAN].endNodeAsOver();
+        //升级棍棒兵为斧头兵
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_ARMYCAMP , TIME_BUILDING_ARMYCAMP_UPGRADE_CLUBMAN , 0 , BUILDING_ARMYCAMP_UPGRADE_CLUBMAN_FOOD);
+        developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_UPGRADE_CLUBMAN].setHead(newNode);
+        //造投石兵
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_ARMYCAMP , TIME_BUILDING_ARMYCAMP_CREATE_SLINGER ,\
+                                       0 , BUILDING_ARMYCAMP_CREATE_SLINGER_FOOD , BUILDING_ARMYCAMP_CREATE_SLINGER_STONE);
+        newNode->setCreatObjectAfterAction(SORT_ARMY,AT_SLINGER);
+        developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_CREATE_SLINGER].setHead(newNode);
+        developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_CREATE_SLINGER].endNodeAsOver();
+    }
 
     //市场
     {
         developLab[BUILDING_MARKET].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILD_MARKET , BUILD_MARKET_WOOD );
+        developLab[BUILDING_MARKET].buildCon->addPreCondition(developLab[BUILDING_GRANARY].buildCon);
 
         //升级伐木
         {
@@ -193,6 +280,13 @@ void Development::init_DevelopLab()
             developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_STONE_UPGRADE].setHead(newNode);
         }
 
+        //升级金矿采集
+        {
+            newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_GOLD, \
+                                           BUILDING_MARKET_GOLD_UPGRADE_WOOD , BUILDING_MARKET_GOLD_UPGRADE_FOOD);
+            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_GOLD_UPGRADE].setHead(newNode);
+        }
+
 
         //升级农田
         {
@@ -203,12 +297,40 @@ void Development::init_DevelopLab()
     }
 
     //马厩
+    {
+        developLab[BUILDING_STABLE].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_STABLE , TIME_BUILD_STABLE , BUILD_STABLE_WOOD );
+        developLab[BUILDING_STABLE].buildCon->addPreCondition(developLab[BUILDING_ARMYCAMP].buildCon);
+
+        //造侦察骑兵
+        newNode = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_STABLE , TIME_BUILDING_STABLE_CREATE_SCOUT , 0 ,BUILDING_STABLE_CREATE_SCOUT_FOOD );
+        newNode->setCreatObjectAfterAction(SORT_ARMY , AT_SCOUT);
+        developLab[BUILDING_STABLE].actCon[BUILDING_STABLE_CREATE_SCOUT].setHead(newNode);
+        developLab[BUILDING_STABLE].actCon[BUILDING_STABLE_CREATE_SCOUT].endNodeAsOver();
+    }
 
     //靶场
+    {
+        developLab[BUILDING_RANGE].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_RANGE , TIME_BUILD_RANGE , BUILD_RANGE_WOOD);
+        developLab[BUILDING_STABLE].buildCon->addPreCondition(developLab[BUILDING_ARMYCAMP].buildCon);
+
+
+        //造弓箭手
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_RANGE , TIME_BUILDING_RANGE_CREATE_BOWMAN ,\
+                                       BUILDING_RANGE_CREATE_BOWMAN_WOOD , BUILDING_RANGE_CREATE_BOWMAN_FOOD);
+        newNode->setCreatObjectAfterAction(SORT_ARMY,AT_BOWMAN);
+        developLab[BUILDING_RANGE].actCon[BUILDING_RANGE_CREATE_BOWMAN].setHead(newNode);
+        developLab[BUILDING_RANGE].actCon[BUILDING_RANGE_CREATE_BOWMAN].endNodeAsOver();
+    }
+
+    //农田
+    developLab[BUILDING_FARM].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_FARM , TIME_BUILD_FARM , BUILD_FARM_WOOD);
+    developLab[BUILDING_FARM].buildCon->addPreCondition(developLab[BUILDING_MARKET].buildCon);
 
     //箭塔
     developLab[BUILDING_ARROWTOWER].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_ARROWTOWER , TIME_BUILD_ARROWTOWER ,0 ,0 , BUILD_ARROWTOWER_STONE );
     developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
 
     //城墙
+    developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
+    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
 }

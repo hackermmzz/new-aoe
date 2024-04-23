@@ -49,7 +49,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
 
-    SelectWidget *sel = new SelectWidget(this); // 设置左下角窗口
+    sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);
     sel->show();
 
@@ -110,6 +110,23 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->addBuilding(BUILDING_CENTER, 10, 10);
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+
+    Building* temp = player[0]->addBuilding(BUILDING_FARM , 20,20,100);
+    qDebug()<<temp;
+
+
+//    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
+//    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
+//    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
+//    player[0]->addArmy(AT_BOWMAN , 20*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
+
+//    player[0]->addArmy(AT_SCOUT, 30*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
+//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
+
+//    map->addAnimal(ANIMAL_TREE , 40 , 50);
+//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+//    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
+
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
     player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
 //    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
@@ -122,12 +139,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 ////    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
 //    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
 
+    player[0]->addBuilding(BUILDING_ARMYCAMP , 35 , 30,100);
+
 //    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
 //    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
 //    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
 
 
     core = new Core(map,player,memorymap,mouseEvent);
+    sel->setCore(core);
+
     ai=new AI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
@@ -183,7 +204,7 @@ void MainWidget::initBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<7;j++)
+        for(int j=0;j<10;j++)
         {
             Building::allocatebuilt(i,j);
             loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));
@@ -197,6 +218,14 @@ void MainWidget::initAnimal()
     for(int num=0;num<5;num++)
     {
         if(num==ANIMAL_TREE)
+        {
+            Animal::allocateStand(num,0);
+            Animal::allocateDie(num,0);
+            loadResource(Animal::getAnimalName(num),Animal::getStand(num,0));
+            loadResource(Animal::getAnimalcarcassname(num),Animal::getDie(num,0));
+            continue;
+        }
+        else if(num == ANIMAL_FOREST)
         {
             Animal::allocateStand(num,0);
             Animal::allocateDie(num,0);
@@ -344,31 +373,34 @@ void MainWidget::initArmy()
     // Stand Walk Die
     for(int statei=0;statei<4;statei++)
     {
-        for(int i=0;i<=4;i++)
+        for(int level = 0 ; level<2;level++)
         {
-            Army::allocateWalk(statei,i);
-            Army::allocateStand(statei,i);
-            Army::allocateDie(statei,i);
-            Army::allocateDisappear(statei,i);
-            Army::allocateAttack(statei,i);
-            loadResource(Army::getArmyName(statei)+"_Attack_"+direction[i],Army::getAttack(statei,i));
-            loadResource(Army::getArmyName(statei)+"_Work_"+direction[i],Army::getDisappear(statei,i));
-            loadResource(Army::getArmyName(statei)+"_Stand_"+direction[i],Army::getStand(statei,i));
-            loadResource(Army::getArmyName(statei)+"_Walk_"+direction[i],Army::getWalk(statei,i));
-            loadResource(Army::getArmyName(statei)+"_Die_"+direction[i],Army::getDie(statei,i));
-        }
-        for(int i=5;i<8;i++)
-        {
-            Army::allocateWalk(statei,i);
-            Army::allocateStand(statei,i);
-            Army::allocateDie(statei,i);
-            Army::allocateDisappear(statei,i);
-            Army::allocateAttack(statei,i);
-            flipResource(Army::getAttack(statei,8-i),Army::getAttack(statei,i));
-            flipResource(Army::getDisappear(statei,8-i),Army::getDisappear(statei,i));
-            flipResource(Army::getWalk(statei,8-i),Army::getWalk(statei,i));
-            flipResource(Army::getStand(statei,8-i),Army::getStand(statei,i));
-            flipResource(Army::getDie(statei,8-i),Army::getDie(statei,i));
+            for(int i=0;i<=4;i++)
+            {
+                Army::allocateWalk(statei,level,i);
+                Army::allocateStand(statei,level,i);
+                Army::allocateDie(statei,level,i);
+                Army::allocateDisappear(statei,level,i);
+                Army::allocateAttack(statei,level,i);
+                loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(statei,level,i));
+            }
+            for(int i=5;i<8;i++)
+            {
+                Army::allocateWalk(statei,level,i);
+                Army::allocateStand(statei,level,i);
+                Army::allocateDie(statei,level,i);
+                Army::allocateDisappear(statei,level,i);
+                Army::allocateAttack(statei,level,i);
+                flipResource(Army::getAttack(statei,level,8-i),Army::getAttack(statei,level,i));
+                flipResource(Army::getDisappear(statei,level,8-i),Army::getDisappear(statei,level,i));
+                flipResource(Army::getWalk(statei,level,8-i),Army::getWalk(statei,level,i));
+                flipResource(Army::getStand(statei,level,8-i),Army::getStand(statei,level,i));
+                flipResource(Army::getDie(statei,level,8-i),Army::getDie(statei,level,i));
+            }
         }
     }
 
@@ -405,7 +437,7 @@ void MainWidget::deleteBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<7;j++)
+        for(int j=0;j<10;j++)
         {
             Building::deallocatebuilt(i,j);
         }
@@ -521,13 +553,16 @@ void MainWidget::deleteArmy()
     // 清理素材资源
     for(int statei = 0; statei < 4; statei++)
     {
-        for(int i = 0; i < 8; i++)
+        for(int level = 0 ;level<2;level++)
         {
-            Army::deallocateWalk(statei, i);
-            Army::deallocateStand(statei, i);
-            Army::deallocateDie(statei, i);
-            Army::deallocateAttack(statei, i);
-            Army::deallocateDisappear(statei, i);
+            for(int i = 0; i < 8; i++)
+            {
+                Army::deallocateWalk(statei,level, i);
+                Army::deallocateStand(statei,level, i);
+                Army::deallocateDie(statei,level, i);
+                Army::deallocateAttack(statei,level, i);
+                Army::deallocateDisappear(statei,level, i);
+            }
         }
     }
 }
@@ -566,17 +601,35 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
     return QWidget::eventFilter(watched,event);
 }
 
+void MainWidget::showPlayerResource(int playerRepresent)
+{
+    int wood,food,stone,gold;
+    core->getPlayerNowResource(playerRepresent,wood,food,stone,gold);
+    ui->resWood->setText(QString::number(wood));
+    ui->resFood->setText(QString::number(food));
+    ui->resStone->setText(QString::number(stone));
+    ui->resGold->setText(QString::number(gold));
+}
+
+void MainWidget::statusUpdate()
+{
+    showPlayerResource(0);
+}
+
 // 游戏帧更新
 void MainWidget::FrameUpdate()
 {
     gameframe++;
     g_frame=gameframe;
-    if(AIfinished){
+    if(AIfinished)
+    {
         ai->start();///AI进程开始
     }
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
+    statusUpdate();
+
     if(AIfinished){
         core->infoShare();
     }

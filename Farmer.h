@@ -10,14 +10,11 @@ public:
     Farmer(double DR,double UR);
 
   /**********************虚函数**************************/
-    void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     void nextframe();
     void setNowRes();
     int getSort();
     double getDis_attack();
     int get_AttackType();
-
-    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
 
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
     /***************指针强制转化****************/

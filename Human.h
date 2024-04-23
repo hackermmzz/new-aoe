@@ -20,6 +20,9 @@ public:
 
     int getDEF(int attackType_got);
 
+    void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
+    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
+
     /***************指针强制转化****************/
     //若要将Human类指针转化为父类指针,务必用以下函数!
     void printer_ToHuman(void** ptr){ *ptr = this; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）

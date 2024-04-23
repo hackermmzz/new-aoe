@@ -34,83 +34,66 @@ public:
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
-    int getArmyClass(){ return armyClass; }
 
-    static std::string getArmyName(int index) {
-        if (index >= 0 && index < 4) {
-            return ArmyName[index];
+
+  /********************静态函数**************************/
+    static std::string getArmyName(int num , int level) {
+        if (num >= 0 && num < 4) {
+            return ArmyName[num][level];
         }
         return "";
     }
-    static std::list<ImageResource>* getDisappear(int i, int j) {
-        return Disappear[i][j];
+    static std::list<ImageResource>* getDisappear(int num, int level, int angle) { return Disappear[num][level][angle]; }
+    static std::list<ImageResource>* getWalk(int num, int level, int angle) { return Walk[num][level][angle];}
+    static std::list<ImageResource>* getStand(int num, int level, int angle) {return Stand[num][level][angle];}
+    static std::list<ImageResource>* getAttack(int num, int level, int angle) {return Attack[num][level][angle];}
+    static std::list<ImageResource>* getDie(int num, int level, int angle) {return Die[num][level][angle];}
+    static void setDisappear(int num, int level, int angle, std::list<ImageResource>* newValue) {Disappear[num][level][angle] = newValue;}
+    static void setWalk(int num, int level, int angle, std::list<ImageResource>* newValue) {Walk[num][level][angle] = newValue;}
+    static void setStand(int num, int level, int angle, std::list<ImageResource>* newValue) { Stand[num][level][angle] = newValue;}
+    static void setAttack(int num, int level, int angle, std::list<ImageResource>* newValue) {Attack[num][level][angle] = newValue;}
+    static void setDie(int num, int level, int angle, std::list<ImageResource>* newValue) { Die[num][level][angle] = newValue;}
+    static void allocateDisappear(int num, int level, int angle) { Disappear[num][level][angle] = new std::list<ImageResource>;}
+    static void allocateWalk(int num, int level, int angle) { Walk[num][level][angle]= new std::list<ImageResource>;}
+    static void allocateStand(int num, int level, int angle) { Stand[num][level][angle] = new std::list<ImageResource>;}
+    static void allocateAttack(int num, int level, int angle) {Attack[num][level][angle] = new std::list<ImageResource>;  }
+    static void allocateDie(int num, int level, int angle) { Die[num][level][angle] = new std::list<ImageResource>;}
+    static void deallocateDisappear(int num, int level, int angle)
+    {
+        delete Disappear[num][level][angle];
+        Disappear[num][level][angle] = nullptr;
     }
-    static std::list<ImageResource>* getWalk(int i, int j) {
-        return Walk[i][j];
+    static void deallocateWalk(int num, int level, int angle)
+    {
+        delete Walk[num][level][angle];
+        Walk[num][level][angle] = nullptr;
     }
-    static std::list<ImageResource>* getStand(int i, int j) {
-        return Stand[i][j];
+    static void deallocateStand(int num, int level, int angle)
+    {
+        delete Stand[num][level][angle];
+        Stand[num][level][angle] = nullptr;
     }
-    static std::list<ImageResource>* getAttack(int i, int j) {
-        return Attack[i][j];
+    static void deallocateAttack(int num, int level, int angle)
+    {
+        delete Attack[num][level][angle];
+        Attack[num][level][angle] = nullptr;
     }
-    static std::list<ImageResource>* getDie(int i, int j) {
-        return Die[i][j];
+    static void deallocateDie(int num, int level, int angle)
+    {
+        delete Die[num][level][angle];
+        Die[num][level][angle] = nullptr;
     }
-    static void setDisappear(int i, int j, std::list<ImageResource>* newValue) {
-        Disappear[i][j] = newValue;
-    }
-    static void setWalk(int i, int j, std::list<ImageResource>* newValue) {
-        Walk[i][j] = newValue;
-    }
-    static void setStand(int i, int j, std::list<ImageResource>* newValue) {
-        Stand[i][j] = newValue;
-    }
-    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {
-        Attack[i][j] = newValue;
-    }
-    static void setDie(int i, int j, std::list<ImageResource>* newValue) {
-        Die[i][j] = newValue;
-    }
-    static void allocateDisappear(int i, int j) {
-        Disappear[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateWalk(int i, int j) {
-        Walk[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateStand(int i, int j) {
-        Stand[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateAttack(int i, int j) {
-        Attack[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateDie(int i, int j) {
-        Die[i][j] = new std::list<ImageResource>;
-    }
-    static void deallocateDisappear(int i, int j) {
-        delete Disappear[i][j];
-        Disappear[i][j] = nullptr;
-    }
-    static void deallocateWalk(int i, int j) {
-        delete Walk[i][j];
-        Walk[i][j] = nullptr;
-    }
-    static void deallocateStand(int i, int j) {
-        delete Stand[i][j];
-        Stand[i][j] = nullptr;
-    }
-    static void deallocateAttack(int i, int j) {
-        delete Attack[i][j];
-        Attack[i][j] = nullptr;
-    }
-    static void deallocateDie(int i, int j) {
-        delete Die[i][j];
-        Die[i][j] = nullptr;
-    }
+  /********************以上静态函数**************************/
+
+
+    int getArmyClass(){ return armyClass; }
+    int getLevel();
 
 private:
     int armyClass;
-    bool upgradable;
+    bool upgradable = false;
+    int dependBuildNum;
+    int dependBuildAct;
 
     /*****************/
     //该部分数组存储可升级的兵种的属性,下标0表示初始兵种,下标又即升级次数
@@ -127,18 +110,14 @@ private:
     /*****************/
 
 
-    static std::list<ImageResource> *Walk[4][8];
-
-    static std::list<ImageResource> *Stand[4][8];
-
-    static std::list<ImageResource> *Attack[4][8];
-
-    static std::list<ImageResource> *Die[4][8];
-
-    static std::list<ImageResource> *Disappear[4][8];
-
-    static std::string ArmyName[4];
-
+    /*************静态成员************/
+    static std::list<ImageResource> *Walk[4][2][8];
+    static std::list<ImageResource> *Stand[4][2][8];
+    static std::list<ImageResource> *Attack[4][2][8];
+    static std::list<ImageResource> *Die[4][2][8];
+    static std::list<ImageResource> *Disappear[4][2][8];
+    static std::string ArmyName[4][2];
+    /*************静态成员************/
 
 };
 

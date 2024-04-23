@@ -58,6 +58,10 @@ public:
         return acts[num];
     }
 
+    void statusUpdate();
+    void showPlayerResource(int playerRepresent);
+
+    SelectWidget *sel;
     Core *core;
     AI* ai;
     bool eventFilter(QObject *watched, QEvent *event);
@@ -65,7 +69,6 @@ public:
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
     MouseEvent *mouseEvent=new MouseEvent();
-
 
 private slots:
     void FrameUpdate();

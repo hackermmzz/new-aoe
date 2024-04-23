@@ -50,7 +50,8 @@ SOURCES += \
     Missile.cpp \
     Core_CondiFunc.cpp \
     Core_List.cpp \
-    AI.cpp
+    AI.cpp \
+    Building_Resource.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -78,7 +79,8 @@ HEADERS += \
     Missile.h \
     Core_CondiFunc.h \
     Core_List.h \
-    AI.h
+    AI.h \
+    Building_Resource.h
 
 FORMS += \
         MainWidget.ui \
