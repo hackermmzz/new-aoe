@@ -93,10 +93,14 @@ bool Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int
 
 bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
+    qDebug()<<"in addingrelation";
     if(object1 == NULL) return false;
+
+    qDebug()<<relate_AllObject[object1].isExist;
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
+        qDebug()<<"in if";
         Building* buildOb = NULL;
         object1->printer_ToBuilding((void**)&buildOb);
         if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
@@ -320,7 +324,9 @@ int Core_List::getNowPhaseNum(Coordinate* object){
     }else if(nowPhaseNum==1||nowPhaseNum==2){
         if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
             return HUMAN_STATE_ATTACKING;
-        }else{
+        }else if(obj->getSort()==SORT_BUILDING){
+            return HUMAN_STATE_BUILDING;
+        }else if((obj->getSort()==SORT_ANIMAL)&&(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST)){
             return HUMAN_STATE_CUTTING;
         }
     }else if(nowPhaseNum==3||nowPhaseNum==4||nowPhaseNum==8||nowPhaseNum==9){

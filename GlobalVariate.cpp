@@ -482,13 +482,13 @@ instruction::instruction(int type,Coordinate* self,Coordinate* obj){
     this->type=type;
     this->self=self;
     this->obj=obj;
-    this->option=option;
 }
-instruction::instruction(int type,Coordinate* self,int BL,int BU){
+instruction::instruction(int type,Coordinate* self,int BL,int BU,int option){
     this->type=type;
     this->self=self;
     this->BL=BL;
     this->BU=BU;
+    this->option=option;
 }
 instruction::instruction(int type,Coordinate* self,double L,double U){
     this->type=type;
