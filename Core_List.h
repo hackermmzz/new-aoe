@@ -20,9 +20,11 @@ public:
 
     /*********关系表控制***********/
     bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1); //建造
+    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
+    bool addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     bool addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
-    void suspendRelation(Coordinate * object);  //这个删除，就很鸡肋，有智障的感觉  //但指令有手动取消的行动，故需保留
+    void suspendRelation(Coordinate * object);  //指令手动停止
+    void eraseRelation(Coordinate* object){ relate_AllObject[object].isExist = false; } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
     /************关系表获取************/
@@ -40,7 +42,7 @@ private:
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     void initDetailList();
-    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR){}
+    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR){ return true;}
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/

@@ -151,7 +151,7 @@ void Map::generateResources() {
             if(flag == 1) break;
         }
         if(flag == 1) break;
-        if(flag == 0 && i == MAP_L / 2 + 10) i = MAP_L / 2 - 10;
+//        if(flag == 0 && i == MAP_L / 2 + 10) i = MAP_L / 2 - 10;
     }
 
     // 在39 * 39边缘生成一堆石头
@@ -199,7 +199,7 @@ void Map::generateResources() {
             }
         }
         if(flag == 1) break;
-        if(flag == 0 && i == MAP_L / 2 + 19) i = MAP_L / 2 - 19;
+//        if(flag == 0 && i == MAP_L / 2 + 19) i = MAP_L / 2 - 19;
     }
 
     // 在61 * 61边缘生成一堆石头
@@ -247,7 +247,7 @@ void Map::generateResources() {
             }
         }
         if(flag == 1) break;
-        if(flag == 0 && i == MAP_L / 2 + 30) i = MAP_L / 2 - 30;
+//        if(flag == 0 && i == MAP_L / 2 + 30) i = MAP_L / 2 - 30;
     }
 
     // 在27 * 27边缘生成一堆瞪铃
@@ -295,7 +295,7 @@ void Map::generateResources() {
             }
         }
         if(flag == 1) break;
-        if(flag == 0 && i == MAP_L / 2 + 13) i = MAP_L / 2 - 13;
+//        if(flag == 0 && i == MAP_L / 2 + 13) i = MAP_L / 2 - 13;
     }
 
 }

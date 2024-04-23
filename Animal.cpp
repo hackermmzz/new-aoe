@@ -31,13 +31,13 @@ Animal::Animal(int Num, double DR, double UR)
     this->PreviousDR=DR;
     this->PreviousUR=UR;
     this->visible = 0;
-    setSideLenth();
 
     this->Angle = 0;
     
     //以下根据Num种类特判
     if( this->Num == ANIMAL_LION ) 
     {
+        atk = 2;
         this->Friendly = FRIENDLY_ENEMY;
         this->MaxCnt = CNT_LION;
         resourceSort = HUMAN_STOCKFOOD;
@@ -55,6 +55,8 @@ Animal::Animal(int Num, double DR, double UR)
     }
     else if( this->Num == ANIMAL_ELEPHANT )
     {
+        atk = 10;
+        BlockSizeLen = SIZELEN_SMALL;
         Friendly = FRIENDLY_FENCY;
         this->MaxCnt = CNT_ELEPHANT;
         resourceSort = HUMAN_STOCKFOOD;
@@ -74,6 +76,7 @@ Animal::Animal(int Num, double DR, double UR)
     else if( this->Num == ANIMAL_FOREST )
     {
         this->Angle = 0;
+        BlockSizeLen = SIZELEN_SMALL;
         this->MaxCnt = CNT_FOREST;
         resourceSort = HUMAN_WOOD;
         this->MaxBlood = BLOOD_FOREST;
@@ -81,6 +84,7 @@ Animal::Animal(int Num, double DR, double UR)
         moveAble = false;
     }
 
+    setSideLenth();
     this->Cnt = this->MaxCnt;
     this->gatherable = false;
     this->Blood = 1;
@@ -96,7 +100,6 @@ Animal::Animal(int Num, double DR, double UR)
     this->globalNum=g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-
 }
 
 void Animal::nextframe()
@@ -141,6 +144,7 @@ void Animal::setNowRes()
         else  nowlist=this->Walk[this->Num][this->Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
+//        qDebug()<<"attacking";
         nowlist=this->Attack[this->Num][this->Angle];
         break;
     case MOVEOBJECT_STATE_DIE:

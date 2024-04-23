@@ -30,11 +30,12 @@ void Core::gameUpdate()
                 }
                 (*humaniter)->setPreStateIsIdle();
             }
-            interactionList->conduct_Attacked(*humaniter);
+
 
             if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd()) humaniter = player[playerIndx]->deleteHuman(humaniter);
             else
             {
+                interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
 
@@ -84,7 +85,7 @@ void Core::gameUpdate()
                 (*animaliter)->setNowState((*animaliter)->getPreState());
                 if((*animaliter)->isDying())
                 {
-                    interactionList->suspendRelation(*animaliter);
+                    interactionList->eraseRelation(*animaliter);
                 }
                 (*animaliter)->setPreStateIsIdle();
             }
@@ -104,8 +105,16 @@ void Core::gameUpdate()
     std::list<StaticRes*>::iterator SRiter=theMap->staticres.begin();
     while(SRiter!=theMap->staticres.end())
     {
-        (*SRiter)->nextframe();
-        SRiter++;
+        if((*SRiter)->is_Surplus())
+        {
+            (*SRiter)->nextframe();
+            SRiter++;
+        }
+        else
+        {
+            interactionList->eraseObject(*SRiter);
+            SRiter = theMap->deleteStaticRes(SRiter);
+        }
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
@@ -219,6 +228,14 @@ void Core::infoShare(){
 
 }
 
+void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold )
+{
+    wood = player[playerRepresent]->getWood();
+    food = player[playerRepresent]->getFood();
+    stone = player[playerRepresent]->getStone();
+    gold = player[playerRepresent]->getGold();
+}
+
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
@@ -251,8 +268,13 @@ void Core::manageMouseEvent()
                         case SORT_ANIMAL:
                             interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
                             break;
+                        case SORT_Building_Resource:
+                            if(((Building_Resource*)nowobject)->get_Gatherable()) interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
+                            else interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            break;
                         case SORT_BUILDING:
                             interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            break;
                         default:
                             break;
                     }
@@ -283,6 +305,20 @@ void Core::manageMouseEvent()
 //后续编写，用于处理AI指令
 void Core::manageOrder()
 {
+//    static bool once = true;
+//    static bool second = true;
+//    if(once && player[0]->human.size())
+//    {
+//        once = false;
+//        interactionList->addRelation(*(player[0]->human.begin()) , 30*BLOCKSIDELENGTH , 25*BLOCKSIDELENGTH  , CoreEven_CreatBuilding, true, BUILDING_CENTER);
+//    }
+
+//    if(second && player[0]->build.size())
+//    {
+//        second = false;
+//        interactionList->addRelation(*(player[0]->build.begin()),CoreEven_BuildingAct , BUILDING_CENTER_CREATEFARMER);
+//    }
+
     while(!instructions.empty()){
         instruction cur=instructions.front();
         instructions.pop();
