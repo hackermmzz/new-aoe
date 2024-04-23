@@ -473,12 +473,12 @@ void SelectWidget::widgetAct(int num)
     doActs(actName);
 }
 
-void SelectWidget::aiAct(int acter, int actName)
+int SelectWidget::aiAct(int actName,Coordinate* self)
 {
-    doActs(actName);
+    return doActs(actName,self);
 }
 
-int SelectWidget::doActs(int actName)
+int SelectWidget::doActs(int actName,Coordinate* nowobject)
 {
     //修改，判断是否可行动逻辑
 

@@ -118,7 +118,10 @@ void Core::gameUpdate()
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
-    if(AIfinished) { manageOrder();}
+    if(AIfinished&&INSfinshed==false) {
+        manageOrder();
+        INSfinshed=true;
+    }
     interactionList->manageRelationList();
 }
 
@@ -226,6 +229,26 @@ void Core::infoShare(){
         AIGame.resources.push_back(resource);
     }
 
+    AIGame.buildings.clear();
+    for(Building* build:self->build){
+        tagBuilding building;
+        building.SN=build->getglobalNum();
+        building.BlockL=build->getBlockDR();
+        building.BlockU=build->getBlockUR();
+        building.Blood=build->getBlood();
+        building.MaxBlood=build->getMaxBlood();
+        building.Percent=build->getPercent();
+        building.Project=build->getActNum();
+        building.ProjectPercent=build->getActPercent();
+//        if(build->getSort()==SORT_FARM){
+//            building.Type=BUILDING_FARM;
+//            building.Cnt=build->getCnt();
+//        }else{
+            building.Type=build->getNum();
+            building.Cnt=-1;
+//        }
+        AIGame.buildings.push_back(building);
+    }
 }
 
 void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold )
@@ -359,11 +382,46 @@ void Core::manageOrder()
             default:
                 break;
             }
-        }
-        case 3:{
             break;
         }
-
+        case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
+            interactionList->addRelation(self,cur.BL,cur.BU,CoreEven_CreatBuilding,0,cur.option);
+            break;
+        }
+        case 4:{    ///type 4:命令建筑self进行option工作
+            interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
+//            int foodcost=0;
+//            int woodcost=0;
+//            int stonecost=0;
+//            switch (cur.option) {
+//            case BUILDING_CENTER_CREATEFARMER:
+//                foodcost=BUILDING_CENTER_CREATEFARMER_FOOD;
+//                break;
+//            case BUILDING_CENTER_UPGRADE:
+//                foodcost=BUILDING_CENTER_UPGRADE_FOOD;
+//                break;
+//            case BUILDING_GRANARY_ARROWTOWER:
+//                foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
+//                break;
+//            case BUILDING_MARKET_WOOD_UPGRADE:
+//                foodcost=BUILDING_MARKET_WOOD_UPGRADE_FOOD;
+//                woodcost=BUILDING_MARKET_WOOD_UPGRADE_WOOD;
+//                break;
+//            case BUILDING_MARKET_STONE_UPGRADE:
+//                foodcost=BUILDING_MARKET_STONE_UPGRADE_FOOD;
+//                stonecost=BUILDING_MARKET_STONE_UPGRADE_STONE;
+//                break;
+//            case BUILDING_MARKET_FARM_UPGRADE:
+//                foodcost=BUILDING_MARKET_FARM_UPGRADE_FOOD;
+//                woodcost=BUILDING_MARKET_FARM_UPGRADE_WOOD;
+//                break;
+//            case BUILDING_CANCEL:
+//                break;
+//            default:
+//                break;
+//            }
+            break;
+        }
 
         default:
             break;

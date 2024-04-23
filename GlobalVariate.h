@@ -14,6 +14,7 @@
 using namespace std;
 class Coordinate;
 extern bool AIfinished;
+extern bool INSfinshed;
 extern int g_globalNum;
 extern std::map<int,Coordinate*> g_Object;
 
@@ -416,7 +417,7 @@ struct instruction{
     int BL,BU;
     double L,U;
     instruction(int type,Coordinate* self,Coordinate* obj);
-    instruction(int type,Coordinate* self,int BL,int BU);
+    instruction(int type,Coordinate* self,int BL,int BU,int option);
     instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
