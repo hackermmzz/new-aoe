@@ -23,6 +23,8 @@ public:
     void drawActs();
     int doActs(int actName,Coordinate* nowobject=::nowobject);
     void actionUpdate();
+
+    void setCore( Core* core ){ this->core = core; }
 private:
     Ui::SelectWidget *ui;
 //    Building * objBuilding;
@@ -39,7 +41,7 @@ private:
     bool isStockBuilt = false;
     bool isMarketBuilt = false;
 
-    Core_List* corelist = NULL;
+    Core* core = NULL;
 
 public slots:
     void widgetAct(int num);
@@ -47,7 +49,7 @@ public slots:
     void timeUpdate();
     void frameUpdate();
     void initActs();
-    Building *getBuild(int BlockL, int BlockU, int num);
+    void getBuild(int BlockL, int BlockU, int num);
 signals:
     void sendBuildMode(int buildMode);
 };

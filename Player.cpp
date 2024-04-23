@@ -30,7 +30,10 @@ Player::~Player()
 //添加实例对象
 Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
 {
-    Building *newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization , percent);
+    Building *newbuilding = NULL;
+    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,this->civilization , percent);
+    else newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization , percent);
+
     newbuilding->setPlayerScience(playerScience);
     newbuilding->setPlayerRepresent(represent);
     build.push_back(newbuilding);
@@ -134,15 +137,43 @@ void Player::changeResource( int resourceSort , int num  , bool negative)
     }
 }
 
+void Player::changeResource(int wood,int food,int stone,int gold, bool negative)
+{
+    if(negative) wood*=-1,food*=-1,stone*=-1,gold*=-1;//negative为true说明进行扣除资源操作
+
+    this->wood +=wood;
+    this->food+=food;
+    this->stone+=stone;
+    this->gold+=gold;
+}
+
+void Player::changeResource_byBuild(int buildNum)
+{
+    int wood,food,stone,gold;
+
+    playerScience->get_Resource_Consume(buildNum,wood,food,stone,gold);
+    changeResource(wood,food,stone,gold,true);
+}
+
+void Player::changeResource_byBuildAction(Building* actbuilding , int buildact)
+{
+    int wood = 0,food = 0,stone = 0,gold = 0;
+
+    playerScience->get_Resource_Consume(actbuilding->getNum(),buildact,wood,food,stone,gold);
+    changeResource(wood,food,stone,gold,true);
+    actbuilding->set_Resource_TS(wood,food,stone,gold);
+}
+
 //***************************************************************
 //控制建筑行动
 void Player::enforcementAction( Building* actBuild )
 {
-    bool isNeedCreatObject = false;
+    bool isNeedCreatObject = false; //是否需要创建对象
     int creatObjectSort , creatObjectNum;
 
     isNeedCreatObject = playerScience->isNeedCreatObjectAfterAction(actBuild->getNum() , actBuild->getActNum() , creatObjectSort , creatObjectNum);
     playerScience->finishAction(actBuild->getNum() ,actBuild->getActNum());
+    actBuild->init_Resouce_TS();    //重置行动建筑的返还资源
 
     if(isNeedCreatObject)
     {
@@ -150,4 +181,13 @@ void Player::enforcementAction( Building* actBuild )
         if(creatObjectSort == SORT_FARMER) addFarmer(actBuild->getDR() , actBuild->getUR());
         else if(creatObjectSort == SORT_ARMY) addArmy(creatObjectNum , actBuild->getDR() , actBuild->getUR());
     }
+}
+
+void Player::back_Resource_TS( Building* actBuild )
+{
+    //player的资源加上建筑行动手动取消返回的资源
+    int wood,food,stone,gold;
+    actBuild->get_Resouce_TS(wood,food,stone,gold);
+    this->changeResource(wood,food,stone,gold);
+    actBuild->init_Resouce_TS();
 }

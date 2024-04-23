@@ -12,13 +12,17 @@ public:
     Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
 
   /**********************虚函数**************************/
-    int getSort();
-    int getMaxBlood(){ return BuildingMaxBlood[Num]; }
+    int getSort(){return SORT_BUILDING;}
+    int getMaxBlood(){ return MaxBlood; }
     int getPlayerRepresent(){ return playerRepresent; }
-    void setNowRes();
+
     void nextframe();
     void init_Blood();
 
+    void setAttribute();
+    void setNowRes();
+    void setAction( int actNum );
+    void ActNumToActName();
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
@@ -26,32 +30,15 @@ public:
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
-    static std::list<ImageResource>* getBuild(int i) {
-        return build[i];
-    }
-    static std::list<ImageResource>* getBuilt(int i,int j) {
-        return built[i][j];
-    }
-    static std::string getBuildingname(int index)
-    {
-        return Buildingname[index];
-    }
-    static std::string getBuiltname(int index1,int index2)
-    {
-        return Builtname[index1][index2];
-    }
-    static std::string getDisplayName(int num)
-    {
-        return BuildDisplayName[num];
-    }
-    static void allocatebuild(int i)
-    {
-        build[i]=new std::list<ImageResource>;
-    }
-    static void allocatebuilt(int i,int j)
-    {
-        built[i][j]=new std::list<ImageResource>;
-    }
+
+  /********************静态函数**************************/
+    static std::list<ImageResource>* getBuild(int i) {return build[i];}
+    static std::list<ImageResource>* getBuilt(int i,int j) { return built[i][j]; }
+    static std::string getBuildingname(int index){return Buildingname[index];}
+    static std::string getBuiltname(int index1,int index2){return Builtname[index1][index2];}
+    static std::string getDisplayName(int num){return BuildDisplayName[num];}
+    static void allocatebuild(int i){ build[i]=new std::list<ImageResource>;}
+    static void allocatebuilt(int i,int j){built[i][j]=new std::list<ImageResource>;}
     static void deallocatebuild(int i) {
         delete build[i];
         build[i] = nullptr;
@@ -60,57 +47,69 @@ public:
         delete built[i][j];
         built[i][j] = nullptr;
     }
+  /********************静态函数**************************/
 
-    int getActNames(int num)
-    {
-        return actNames[num];
-    }
 
-    void setActNames(int num, int name)
-    {
-        this->actNames[num] = name;
-    }
-    int getActStatus(int num)
-    {
-        return actStatus[num];
-    }
-    void setActStatus(int num, int status)
-    {
-        this->actStatus[num] = status;
-    }
+
+  /********************action相关**************************/
+    int getActNames(int num){return actNames[num];}
+
+    void setActNames(int num, int name){this->actNames[num] = name;}
+    int getActStatus(int num){return actStatus[num];}
+    void setActStatus(int num, int status){this->actStatus[num] = status;}
+
+
+    /*************控制建筑行为****************/
+    double get_retio_Build(){ return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;}
+    double get_retio_Action(){ return 100.0/playerScience->get_actTime(Num , actNum)/FRAMES_PER_SECOND; }
+
+    bool is_ActionFinish(){ return actPercent>=100; }
+    void update_Action(){ actPercent += actSpeed; }
+    void update_Build();
+    /*************控制建筑行为****************/
+
+    /*************建筑行为对player资源的改变****************/
+    //初始化暂存（建筑行动预计消耗的资源）资源
+    void init_Resouce_TS(){ wood_TS = 0; food_TS = 0; stone_TS = 0; gold_TS = 0; }
+
+    //设置当前建筑行动的暂存资源
+    void set_Resource_TS( int wood, int food, int stone ,int gold ){ wood_TS = wood,food_TS = food, stone_TS = stone, gold_TS = gold; }
+
+    //取消建筑行动，返还暂存资源
+    void get_Resouce_TS( int& wood, int& food , int& stone , int& gold ){ wood = wood_TS , food = food_TS, stone = stone_TS, gold = gold_TS; }
+    /*************建筑行为对player资源的改变****************/
+
+ /********************action相关**************************/
 
     //设置科技，用于计算科技提升
     void setPlayerScience(Development* science){ this->playerScience = science; }
     //设置隶属player
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
+    void setFundation();
+
     bool isFinish(){return this->Percent>=100;}
-    double getCnt(){return this->Cnt;}
     double getPercent() {return this->Percent;}
 
-    double get_retio_Build(){ return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;}
+//    double getCnt(){return this->Cnt;}
 
-    void setAction( int actNum);
-    double get_retio_Action(){ return 100.0/playerScience->get_actTime(Num , actNum)/FRAMES_PER_SECOND; }
 
-    bool is_ActionFinish(){ return actPercent>=100; }
-    void update_Action(){ actPercent += ratio_Action; }
-    void update_Build();
-private:
-    static std::list<ImageResource> *build[4];
-    //建设list
+protected:
+  /********************静态资源**************************/
+    static std::list<ImageResource> *build[4];//建设list
 
-    static std::list<ImageResource> *built[3][7];
-    //建设完成的list
+    static std::list<ImageResource> *built[3][10]; //建设完成的list
 
+    static std::string Buildingname[4];
+    static std::string Builtname[3][10];
+    static std::string BuildDisplayName[10];
+  /********************静态资源**************************/
+
+    //所属阵营
     int playerRepresent;
 
-    double Percent = 0;
-    //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图
-
-    double ratio_Action;
-
-    int Finish=0;//0为未完成 1为完成
+    //所属阵营的科技树
+    Development* playerScience = NULL;
 
     int civ;
     //建筑所处时代 来确定不同时代建筑有何变化 ？时代要不要用player类下的
@@ -118,18 +117,23 @@ private:
     int Foundation;
     //地基类型
 
-    Development* playerScience = NULL;
+    double Percent = 0;
+    //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图
 
-    static std::string Buildingname[4];
-    static std::string Builtname[3][7];
-    static std::string BuildDisplayName[7];
+    int Finish=0;//0为未完成 1为完成
 
-    int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
+//    int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
     int actNames[ACT_WINDOW_NUM_FREE] = {0};
     int actStatus[ACT_WINDOW_NUM_FREE] = {0};
 
     //需要优化，考虑农田直接抽一个类
-    double Cnt;
+//    double Cnt;
+
+    //存储建筑行动的预扣资源：
+    int wood_TS = 0;
+    int food_TS = 0;
+    int stone_TS = 0;
+    int gold_TS = 0;
 };
 
 #endif // BUILDING_H

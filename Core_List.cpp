@@ -61,7 +61,31 @@ bool Core_List::addRelation( Coordinate * object1, double DR , double UR, int ev
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         else if(eventType == CoreEven_CreatBuilding && \
                 is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR)) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
-            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
+        {
+             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
+             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
+        }
+    }
+
+    return false;
+}
+
+bool Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
+{
+    if(object1 == NULL) return false;
+
+    if(relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
+
+    if(! relate_AllObject[object1].isExist )
+    {
+        //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
+        if(eventType == CoreEven_CreatBuilding && \
+                is_BuildingCanBuild(type , BlockDR, BlockUR) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
+        {
+            player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
+            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
+        }
+
     }
 
     return false;
@@ -73,17 +97,30 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
-        ((Building*)object1)->setAction(actNum);
-        relate_AllObject[object1] = relation_Object(NULL,evenType);
-
-        return true;
+        Building* buildOb = NULL;
+        object1->printer_ToBuilding((void**)&buildOb);
+        if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
+        {
+            player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
+            buildOb->setAction(actNum);
+            relate_AllObject[object1] = relation_Object(evenType);
+            return true;
+        }
     }
     return false;
 }
 
 void Core_List::suspendRelation(Coordinate * object)
 {
-    if(relate_AllObject[object].isExist) relate_AllObject[object].isExist = false;
+    if(relate_AllObject[object].isExist)
+    {
+        Building* buildOb = NULL;
+        object->printer_ToBuilding((void**)&buildOb);
+        if(buildOb!=NULL) player[buildOb->getPlayerRepresent()]->back_Resource_TS(buildOb); //返还资源
+        object->initAction();  //行动全部重置
+
+        relate_AllObject[object].isExist = false;
+    }
 }
 
 void Core_List::manageRelationList()
@@ -120,7 +157,6 @@ void Core_List::manageRelationList()
 //                }
 //            }
 
-            qDebug()<<object1<<8;
             //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
             {
@@ -135,12 +171,10 @@ void Core_List::manageRelationList()
                 }
             }
 
-            qDebug()<<object1<<9;
             recordCondition = &thisDetailEven.chageCondition[nowPhaseNum];
             //判断是否需要切换当前阶段
             if( nowPhaseNum < thisDetailEven.phaseAmount && recordCondition->condition(object1,thisRelation , recordCondition->variableArgu,recordCondition->isNegation))
                 nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
-            qDebug()<<object1<<10;
 
             //实际执行行动
             if(nowPhaseNum == exePhaseNum)  //nowphase变化后，防止提前行动。变化后的行动在下一帧开始做
@@ -152,9 +186,7 @@ void Core_List::manageRelationList()
                         else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
                         break;
                     case CoreDetail_Attack:
-                        qDebug()<<object1<<11;
                         object_Attack(object1,object2);
-                        qDebug()<<object1<<12;
                         break;
                     case CoreDetail_Gather:
                         object_Gather(object1,object2);
@@ -242,7 +274,7 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
 void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>& building)
 {
     int type = relation.resourceBuildingType;
-    double dis, dis_opti , dr = relation.DR_goal , ur =relation.UR_goal;
+    double dis, dis_opti = relation.distance_Record , dr = relation.DR_goal , ur =relation.UR_goal;
     Building* judeBuild, *optimum = NULL;
 
     list<Building*>::iterator iterNow = building.begin() , iterEnd = building.end();
@@ -250,10 +282,10 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
     while( iterNow != iterEnd )
     {
         judeBuild = *iterNow;
-        if(judeBuild->getNum() == BUILDING_CENTER || judeBuild->getNum() == type)
+        if( judeBuild->isFinish() &&(judeBuild->getNum() == BUILDING_CENTER || judeBuild->getNum() == type))
         {
             dis = calculateManhattanDistance(dr,ur,judeBuild->getDR(),judeBuild->getUR());
-            if(dis < relation.distance_Record)
+            if(dis < dis_opti)
             {
                 optimum = judeBuild;
                 dis_opti =dis;
@@ -266,7 +298,7 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
 
 void Core_List::eraseObject(Coordinate* eraseOb)
 {
-    suspendRelation(eraseOb);
+    eraseRelation(eraseOb);
     manageRelation_deleteGoalOb(eraseOb);
 }
 
@@ -367,7 +399,6 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
         //非祭司,是普通的伤害计算公式
         /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
 
-        qDebug()<<55;
         if(attacker->is_missileAttack())
         {
             if(object1->get_isActionImageToPhaseFromEnd(PhaseFromEnd_Attack_ThrowMissile))
@@ -378,7 +409,6 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
             calculateDamage = true;
             if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
         }
-        qDebug()<<66;
     }
     else if(missile!=NULL && missile->is_HitTarget() && attackee!=NULL )
     {
@@ -398,9 +428,11 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
+        qDebug()<<(attacker->getATK())<<(attackee->getDEF(attacker->get_AttackType()));
         damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
+        qDebug()<<damage;
     }
 }
 
@@ -421,7 +453,7 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
                 gatherer->update_resourceClear();
             }
 
-            if(gatherer->get_isActionEnd())
+            if( res->isFarmerGatherable(gatherer) && gatherer->get_isActionEnd())
             {
                 res->updateCnt_byGather(gatherer->get_quantityGather());
                 gatherer->update_addResource();
@@ -437,7 +469,6 @@ void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& rel
         if(object1->getSort() == SORT_FARMER)
         {
             Farmer* worker = (Farmer*) object1;
-            qDebug()<<relation.alterOb;
             if(relation.alterOb == NULL) worker->setPreStand();
             else
             {
@@ -470,18 +501,34 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 
 void Core_List::object_FinishAction(Coordinate* object1)
 {
-    object_FinishAction_Absolute(object1);
-//    if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding && 是农田)
-    if(relate_AllObject[object1].relationAct == CoreEven_BuildingAct)
-        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);
-    else if(relate_AllObject[object1].relationAct == CoreEven_FixBuilding )
-        player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
-    else if(relate_AllObject[object1].relationAct == CoreEven_MissileAttack)
-    {
-        Missile* misOb = NULL;
+    Missile* misOb = NULL;
+    object1->initAction();
+
+    switch(relate_AllObject[object1].relationAct){
+    case CoreEven_FixBuilding:
+        if( relate_AllObject[object1].goalObject!=NULL )
+        {
+            player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+            relate_AllObject[object1].goalObject->initAction();
+            if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
+            {
+                 addRelation(object1 , relate_AllObject[object1].goalObject ,CoreEven_Gather);
+                 return;
+            }
+        }
+        break;
+    case CoreEven_BuildingAct:
+        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);  //进行建筑行动的结果处理
+        break;
+    case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
         if(misOb!=NULL) misOb->needDelete();
+        break;
+    default:
+        break;
     }
+
+    object_FinishAction_Absolute(object1);
 }
 
 //****************************************************************************************
@@ -729,42 +776,45 @@ void Core_List::initDetailList()
 
     //行动：采集**************************************
     {
-        phaseList = new int[12]{ /*0前往攻击目标*/CoreDetail_Move ,/*1攻击*/CoreDetail_Attack ,       /*2*/CoreDetail_JumpPhase ,\
-                               /*3前往资源建筑*/CoreDetail_Move ,  /*4资源放置*/CoreDetail_ResourceIn, /*5前往资源*/CoreDetail_Move,\
-                               /*6采集*/CoreDetail_Gather, /*资源被采集完毕，需要判断村民携带资源*/  /*7*/CoreDetail_JumpPhase ,\
-                               /*8前往资源建筑*/CoreDetail_Move ,  /*9资源放置*/CoreDetail_ResourceIn,/*10前往资源原位置*/CoreDetail_Move ,\
-                               /*11*/ CoreDetail_JumpPhase};
-        conditionList = new conditionF[12]{ \
-                /*0*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
-                /*2*/conditionF(condition_AllTrue) ,                                /*3*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
-                /*4*/conditionF(condition_Object1_EmptyBackpack),                   /*5*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
-                /*6*/conditionF(condition_Object1_FullBackpack) , \
-                /*7*/conditionF(condition_AllTrue),                                 /*8*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK),\
-                /*9*/conditionF(condition_Object1_EmptyBackpack),                   /*10*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
-                /*11*/conditionF(condition_AllTrue)};
+        phaseList = new int[13]{/*0判断是否需要攻击*/ CoreDetail_JumpPhase, \
+                               /*1前往攻击目标*/CoreDetail_Move ,/*2攻击*/CoreDetail_Attack , /*3*/CoreDetail_JumpPhase ,\
+                               /*4前往资源建筑*/CoreDetail_Move ,  /*5资源放置*/CoreDetail_ResourceIn, /*6前往资源*/CoreDetail_Move,\
+                               /*7采集*/CoreDetail_Gather, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/CoreDetail_JumpPhase ,\
+                               /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move ,\
+                               /*12*/ CoreDetail_JumpPhase};
+        conditionList = new conditionF[13]{ conditionF( condition_AllTrue), \
+                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
+                /*3*/conditionF(condition_AllTrue) ,                                /*4*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
+                /*5*/conditionF(condition_Object1_EmptyBackpack),                   /*6*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
+                /*7*/conditionF(condition_Object1_FullBackpack) , \
+                /*8*/conditionF(condition_AllTrue),                                 /*9*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK),\
+                /*10*/conditionF(condition_Object1_EmptyBackpack),                   /*11*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
+                /*12*/conditionF(condition_AllTrue)};
 
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
 
-        relation_Event_static[CoreEven_Gather] = detail_EventPhase(12 , phaseList, conditionList/*,forcedInterrupCondition*/);
-        //设置循环，0->1，攻击猎物直至可采集
+        relation_Event_static[CoreEven_Gather] = detail_EventPhase(13 , phaseList, conditionList/*,forcedInterrupCondition*/);
+        //设置循环，1->2，攻击猎物直至可采集
         overCondition.push_back(conditionF(condition_Object2CanbeGather));
-        relation_Event_static[CoreEven_Gather].setLoop(0,1,overCondition);
+        relation_Event_static[CoreEven_Gather].setLoop(1,2,overCondition);
         overCondition.clear();
-        //设置循环，3->6，持续采集，目标无资源不可采集
+        //设置循环，4->7，持续采集，目标无资源不可采集
         overCondition.push_back(conditionF(condition_Object2CanbeGather,OPERATECON_OBJECT2,true));
-        relation_Event_static[CoreEven_Gather].setLoop(3,6,overCondition);
+        relation_Event_static[CoreEven_Gather].setLoop(4,7,overCondition);
         overCondition.clear();
 
-        //设置循环，8->11，用于最后一次返回资源建筑，若身上无资源，则直接停止
+        //设置循环，9->12，用于最后一次返回资源建筑，若身上无资源，则直接停止
         overCondition.push_back(conditionF(condition_Object1_EmptyBackpack));
-        relation_Event_static[CoreEven_Gather].setLoop(8,11,overCondition);
+        relation_Event_static[CoreEven_Gather].setLoop(9,12,overCondition);
         overCondition.clear();
 
+        //行动起始，判断是否可直接采集
+        relation_Event_static[CoreEven_Gather].setJump(0,2);
         //猎物可采集后，跳转至前往资源
-        relation_Event_static[CoreEven_Gather].setJump(2,5);
+        relation_Event_static[CoreEven_Gather].setJump(3,6);
         //资源被采集完毕后，若身上无资源，则直接停止
-        relation_Event_static[CoreEven_Gather].setJump(7 , 11);
+        relation_Event_static[CoreEven_Gather].setJump(8 , 12);
 
         delete phaseList;
         delete conditionList;

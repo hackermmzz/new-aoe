@@ -1,12 +1,18 @@
 ﻿#include "Army.h"
 
-std::list<ImageResource>* Army::Walk[4][8];
-std::list<ImageResource>* Army::Disappear[4][8];
-std::list<ImageResource>* Army::Stand[4][8];
-std::list<ImageResource>* Army::Attack[4][8];
-std::list<ImageResource>* Army::Die[4][8];
+//【num】【level】【angel】
+std::list<ImageResource>* Army::Walk[4][2][8];
+std::list<ImageResource>* Army::Disappear[4][2][8];
+std::list<ImageResource>* Army::Stand[4][2][8];
+std::list<ImageResource>* Army::Attack[4][2][8];
+std::list<ImageResource>* Army::Die[4][2][8];
 
-std::string Army::ArmyName[4]={"Archer","Axeman","Clubman","Scout"};
+//【num】[level]
+std::string Army::ArmyName[4][2]={{"Clubman","Axeman"},
+                                  {"Clubman","Clubman"},
+                                  {"Archer","Archer"},
+                                  {"Scout","Scout"}
+                                 };
 
 Army::Army()
 {
@@ -19,7 +25,7 @@ Army::Army(double DR,double UR,int type)
     this->type = type;
     this->Blood=1;
     setAttribute();
-    this->Angle=rand()%8;
+    this->Angle=0;
     this->DR=DR;
     this->UR=UR;
     this->BlockDR=DR/BLOCKSIDELENGTH;
@@ -49,15 +55,46 @@ Army::Army(double DR,double UR,int type)
 
 void Army::nextframe()
 {
-    qDebug()<<"Army缺少nextframe";
+    if(isDie())
+    {
+        if( !isDying() ) setPreDie();
+        else if(!get_isActionEnd() ) nowres++;
+    }
+    else
+    {
+        nowres++;
+        if(nowres==nowlist->end())
+        {
+            nowres=nowlist->begin();
+            //读到最后回到最初
+        }
 
+        updateMove();
+    }
 
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
 }
 
 void Army::setNowRes()
 {
-    qDebug()<<"Army缺少setNowRes";
-
+    switch (this->nowstate) {
+    case MOVEOBJECT_STATE_STAND:
+        nowlist=this->Stand[this->type][getLevel()][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_WALK:
+        nowlist=this->Walk[this->type][getLevel()][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_ATTACK:
+        nowlist=this->Attack[this->type][getLevel()][this->Angle];
+        break;
+    case MOVEOBJECT_STATE_DIE:
+        nowlist=this->Die[this->type][getLevel()][this->Angle];
+        break;
+    default:
+        break;
+    }
+    nowres = nowlist->begin();
 }
 
 /***********************************************************/
@@ -67,7 +104,7 @@ double Army::getSpeed()
 {
     double moveSpeed;
 
-    if( upgradable ) moveSpeed = speed_change[ playerScience->get_level(getSort(),type) ];
+    if( upgradable ) moveSpeed = speed_change[getLevel()];
     else moveSpeed = speed;
 
     return moveSpeed*playerScience->get_rate_Move(getSort(),type);
@@ -78,7 +115,7 @@ int Army::getMaxBlood()
 {
     int realmBlood;
 
-    if(upgradable) realmBlood = MaxBlood_change[playerScience->get_level(getSort(),type)];
+    if(upgradable) realmBlood = MaxBlood_change[getLevel()];
     else realmBlood = MaxBlood;
 
     return  realmBlood*playerScience->get_rate_Blood(getSort(),type)+playerScience->get_addition_Blood(getSort(),type);
@@ -88,7 +125,7 @@ int Army::getMaxBlood()
 int Army::getVision()
 {
     int realVision;
-    if(upgradable) realVision = vision_change[playerScience->get_level(getSort(),type)];
+    if(upgradable) realVision = vision_change[getLevel()];
     else realVision = vision;
 
     return realVision;
@@ -100,7 +137,7 @@ int Army::getATK()
     int atkValue;//用于存储初始攻击力
 
     //赋值初始攻击力,依据兵种是否能升级,划分两类赋值方式
-    if(upgradable) atkValue = atk_change[playerScience->get_level(getSort(),type)];
+    if(upgradable) atkValue = atk_change[getLevel()];
     else atkValue = atk;
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
@@ -116,12 +153,12 @@ int Army::getDEF(int attackType_got)
     //赋值defValue;根据attackType_got即收到的伤害类型,选择相应的防御类型:肉盾防御或投射防御.若为祭司转化或(投石车?等)无伤害减免
     if(attackType_got == ATTACKTYPE_CLOSE || attackType_got == ATTACKTYPE_ANIMAL)
     {
-        if(upgradable) defValue = defence_close_change[playerScience->get_level(getSort(),type)];
+        if(upgradable) defValue = defence_close_change[getLevel()];
         else defValue = defence_close;
     }
     else if(attackType_got == ATTACKTYPE_SHOOT)
     {
-        if(upgradable) defValue = defence_shoot_change[playerScience->get_level(getSort(),type)];
+        if(upgradable) defValue = defence_shoot_change[getLevel()];
         else defValue = defence_shoot;
     }
 
@@ -135,7 +172,7 @@ double Army::getDis_attack()
 {
     double dis;
 
-    if(upgradable) dis = dis_Attack_change[playerScience->get_level(getSort(),type)];
+    if(upgradable) dis = dis_Attack_change[getLevel()];
     else dis = dis_Attack;
 
     if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
@@ -151,6 +188,8 @@ void Army::setAttribute()
     switch (type) {
     case AT_CLUBMAN:        //棍棒兵,可升级1次
         upgradable = true;
+        dependBuildNum = BUILDING_ARMYCAMP;
+        dependBuildAct = BUILDING_ARMYCAMP_UPGRADE_CLUBMAN;
         armyClass = ARMY_INFANTRY;
         attackType = ATTACKTYPE_CLOSE;
 
@@ -165,23 +204,24 @@ void Army::setAttribute()
 
         break;
 
-    case AT_SWORDSMAN:  //短剑兵,可升级3次
-        upgradable = true;
-        armyClass = ARMY_INFANTRY;
-        attackType = ATTACKTYPE_CLOSE;
+//    case AT_SWORDSMAN:  //短剑兵,可升级3次
+//        upgradable = true;
+//        armyClass = ARMY_INFANTRY;
+//        attackType = ATTACKTYPE_CLOSE;
 
-        MaxBlood_change = new int[4]{ BLOOD_SHORTSWORDSMAN1,BLOOD_SHORTSWORDSMAN2,BLOOD_SHORTSWORDSMAN3,BLOOD_SHORTSWORDSMAN4 };
-        speed_change = new double[4]{ SPEED_SHORTSWORDSMAN1,SPEED_SHORTSWORDSMAN2,SPEED_SHORTSWORDSMAN3,SPEED_SHORTSWORDSMAN4 };
-        vision_change = new int[4]{ VISION_SHORTSWORDSMAN1,VISION_SHORTSWORDSMAN2,VISION_SHORTSWORDSMAN3,VISION_SHORTSWORDSMAN4 };
-        atk_change  = new int[4]{ATK_SHORTSWORSMAN1,ATK_SHORTSWORSMAN2,ATK_SHORTSWORSMAN3,ATK_SHORTSWORSMAN4};
-        dis_Attack_change  = new double[4]{DIS_SHORTSWORDSMAN1 , DIS_SHORTSWORDSMAN2,DIS_SHORTSWORDSMAN3,DIS_SHORTSWORDSMAN4};
-        inter_Attack_change = new double[4]{ INTERVAL_SHORTSWORDSMAN1,INTERVAL_SHORTSWORDSMAN2,INTERVAL_SHORTSWORDSMAN3,INTERVAL_SHORTSWORDSMAN4 };
-        defence_close_change  = new int[4]{ DEFCLOSE_SHORTSWORSMAN1,DEFCLOSE_SHORTSWORSMAN2,DEFCLOSE_SHORTSWORSMAN3,DEFCLOSE_SHORTSWORSMAN4 };
-        defence_shoot_change  = new int[4]{ DEFSHOOT_SHORTSWORSMAN1,DEFSHOOT_SHORTSWORSMAN2,DEFSHOOT_SHORTSWORSMAN3,DEFSHOOT_SHORTSWORSMAN4 };
-        break;
+//        MaxBlood_change = new int[4]{ BLOOD_SHORTSWORDSMAN1,BLOOD_SHORTSWORDSMAN2,BLOOD_SHORTSWORDSMAN3,BLOOD_SHORTSWORDSMAN4 };
+//        speed_change = new double[4]{ SPEED_SHORTSWORDSMAN1,SPEED_SHORTSWORDSMAN2,SPEED_SHORTSWORDSMAN3,SPEED_SHORTSWORDSMAN4 };
+//        vision_change = new int[4]{ VISION_SHORTSWORDSMAN1,VISION_SHORTSWORDSMAN2,VISION_SHORTSWORDSMAN3,VISION_SHORTSWORDSMAN4 };
+//        atk_change  = new int[4]{ATK_SHORTSWORSMAN1,ATK_SHORTSWORSMAN2,ATK_SHORTSWORSMAN3,ATK_SHORTSWORSMAN4};
+//        dis_Attack_change  = new double[4]{DIS_SHORTSWORDSMAN1 , DIS_SHORTSWORDSMAN2,DIS_SHORTSWORDSMAN3,DIS_SHORTSWORDSMAN4};
+//        inter_Attack_change = new double[4]{ INTERVAL_SHORTSWORDSMAN1,INTERVAL_SHORTSWORDSMAN2,INTERVAL_SHORTSWORDSMAN3,INTERVAL_SHORTSWORDSMAN4 };
+//        defence_close_change  = new int[4]{ DEFCLOSE_SHORTSWORSMAN1,DEFCLOSE_SHORTSWORSMAN2,DEFCLOSE_SHORTSWORSMAN3,DEFCLOSE_SHORTSWORSMAN4 };
+//        defence_shoot_change  = new int[4]{ DEFSHOOT_SHORTSWORSMAN1,DEFSHOOT_SHORTSWORSMAN2,DEFSHOOT_SHORTSWORSMAN3,DEFSHOOT_SHORTSWORSMAN4 };
+//        break;
 
     case AT_SLINGER:    //投石者
         upgradable = false;
+        dependBuildNum = BUILDING_ARMYCAMP;
         armyClass = ARMY_INFANTRY;
         attackType = ATTACKTYPE_SHOOT;
 
@@ -197,6 +237,7 @@ void Army::setAttribute()
 
     case AT_BOWMAN:     //弓箭手
         upgradable = false;
+        dependBuildNum = BUILDING_RANGE;
         armyClass = ARMY_ARCHER;
         attackType = ATTACKTYPE_SHOOT;
 
@@ -214,6 +255,7 @@ void Army::setAttribute()
 
     case AT_SCOUT:      //侦察骑兵
         upgradable = false;
+        dependBuildNum = BUILDING_STABLE;
         armyClass = ARMY_RIDER;
         attackType = ATTACKTYPE_CLOSE;
 
@@ -233,6 +275,12 @@ void Army::setAttribute()
 
 }
 
+
+int Army::getLevel()
+{
+    if(upgradable) return playerScience->getActLevel(dependBuildNum , dependBuildAct);
+    else return 0;
+}
 
 /*************************析构**********************************/
 Army::~Army()
