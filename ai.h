@@ -90,6 +90,7 @@ public:
             return ACTION_INVALID_LOCATION;
         }
         instructions.push(instruction(3,self,BlockL,BlockU,BuildingNum));
+        return ACTION_SUCCESS;
     }
 
     int BuildingAction(int SN,int Action){
@@ -102,7 +103,7 @@ public:
         int stonecost=-1;
         switch (Action) {
         case BUILDING_CENTER_CREATEFARMER:
-            if(self->getNum()!=BUILDING_GRANARY){
+            if(self->getNum()!=BUILDING_CENTER){
                 return ACTION_INVALID_ACTION;
             }
             foodcost=BUILDING_CENTER_CREATEFARMER_FOOD;
@@ -153,22 +154,23 @@ public:
             return ACTION_INVALID_RESOURCE;
         }
         instructions.push(instruction(4,self,Action));
+        return ACTION_SUCCESS;
     }
 /*###########INTERFACE ENDS HERE###########*/
     AI();
     void processData();
     void run() override{
-        if(AIGame.GameFrame>10&&AIfinished){
-            qDebug()<<g_frame<<":"<<"调用AI";
+        if(AIGame.GameFrame>10&&AIfinished&&INSfinshed){
             processData();
+            INSfinshed=false;
         }
-        }
+    }
 private:
     bool isHuman(Coordinate* self){
         return (self!=nullptr&&(self->getSort()==SORT_FARMER||self->getSort()==SORT_ARMY));
     }
     bool isBuilding(Coordinate* self){
-        return (self!=nullptr&&(self->getSort()==SORT_FARM||self->getSort()==SORT_BUILDING));
+        return (self!=nullptr&&(self->getSort()==SORT_BUILDING));
     }
 };
 

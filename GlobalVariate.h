@@ -14,6 +14,7 @@
 using namespace std;
 class Coordinate;
 extern bool AIfinished;
+extern bool INSfinshed;
 extern int g_globalNum;
 extern std::map<int,Coordinate*> g_Object;
 

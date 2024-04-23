@@ -118,7 +118,10 @@ void Core::gameUpdate()
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
-    if(AIfinished) { manageOrder();}
+    if(AIfinished&&INSfinshed==false) {
+        manageOrder();
+        INSfinshed=true;
+    }
     interactionList->manageRelationList();
 }
 
@@ -237,13 +240,13 @@ void Core::infoShare(){
         building.Percent=build->getPercent();
         building.Project=build->getActNum();
         building.ProjectPercent=build->getActPercent();
-        if(build->getSort()==SORT_FARM){
-            building.Type=BUILDING_FARM;
-            building.Cnt=build->getCnt();
-        }else{
+//        if(build->getSort()==SORT_FARM){
+//            building.Type=BUILDING_FARM;
+//            building.Cnt=build->getCnt();
+//        }else{
             building.Type=build->getNum();
             building.Cnt=-1;
-        }
+//        }
         AIGame.buildings.push_back(building);
     }
 }
@@ -379,13 +382,14 @@ void Core::manageOrder()
             default:
                 break;
             }
+            break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-//            interactionList->addRelation(self,BLOCKSIDELENGTH*cur.BL,BLOCKSIDELENGTH*cur.BU,CoreEven_CreatBuilding,0,cur.option);
+            interactionList->addRelation(self,cur.BL,cur.BU,CoreEven_CreatBuilding,0,cur.option);
             break;
         }
         case 4:{    ///type 4:命令建筑self进行option工作
-
+            interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
 //            int foodcost=0;
 //            int woodcost=0;
 //            int stonecost=0;
@@ -416,8 +420,7 @@ void Core::manageOrder()
 //            default:
 //                break;
 //            }
-
-
+            break;
         }
 
         default:
