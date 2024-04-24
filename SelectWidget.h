@@ -43,6 +43,8 @@ private:
 
     Core* core = NULL;
 
+    void manageBuildBottom(int position, int actNum , int buildingNum );
+
 public slots:
     void widgetAct(int num);
     void aiAct(int acter, int actName);

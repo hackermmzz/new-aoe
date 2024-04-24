@@ -53,7 +53,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     sel->move(20, 810);
     sel->show();
 
-    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8};
+    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8 , ui->interact9 , ui->interact10};
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         acts[i] = acts_[i];
@@ -71,6 +71,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(ui->interact6,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
     connect(ui->interact7,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
     connect(ui->interact8,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact9,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact10,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
     connect(ui->Game,SIGNAL(sendView(int,int,int)),sel,SLOT(getBuild(int,int,int)));
     connect(sel,SIGNAL(sendBuildMode(int)),ui->Game,SLOT(setBuildMode(int)));
     // 设定游戏计时器

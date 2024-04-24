@@ -239,7 +239,7 @@ struct conditionDevelop
 
     double times_second;
 
-    int acttimes = 0;    //表示执行的此时
+    int acttimes = 0;    //表示执行的此数
 
     bool isCreatObjectAction = false; //行动结束后是否需要创建对象
     int creatObjectSort = -1;   //需要创建对象的类sort
@@ -311,6 +311,8 @@ struct conditionDevelop
         creatNum = creatObjectNum;
         return isCreatObjectAction;
     }
+
+    int getActTimes(){ return acttimes; }
 };
 
 struct st_upgradeLab{

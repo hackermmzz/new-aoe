@@ -20,8 +20,11 @@ Building::Building()
 
 }
 
-Building::Building(int Num, int BlockDR, int BlockUR,int civ,int Percent)
+Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playerScience, int playerRepresent,int Percent)
 {
+    this->playerScience = playerScience;
+    this->playerRepresent = playerRepresent;
+
     this->Num=Num;
     this->BlockDR=BlockDR;
     this->BlockUR=BlockUR;

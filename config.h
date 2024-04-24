@@ -452,7 +452,7 @@
 #define ACT_BUILD_MARKET 14
 #define ACT_BUILD_ARROWTOWER 15
 #define ACT_NULL 0
-#define ACT_WINDOW_NUM_FREE 8
+#define ACT_WINDOW_NUM_FREE 10
 
 /********** 对象视野 **********/
 //建筑的视野搬至建筑属性相关

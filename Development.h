@@ -23,9 +23,13 @@ public:
 
     double get_rate_HitTarget(){ return 1+rate_hitTarget; }
 
+    /**************资源相关**************/
     int get_addition_ResourceSort( int resourceSort );
+    int get_addition_MaxCnt( int sort , int type );
 
     //获取建筑是否可以建造
+    //对于建筑建造判断，先判断是否显示，再判断是否能执行
+    bool get_isBuildingShowAble(int buildingNum , int civilization){ return developLab[buildingNum].buildCon->isShowable(civilization); }
     bool get_isBuildingAble( int buildingNum , int wood ,int food , int stone ,int gold )
         { return developLab[buildingNum].buildCon->executable(wood , food ,stone ,gold); }
     bool get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold )
@@ -40,7 +44,7 @@ public:
 
     //获取升级次数/当前等级
     int getActLevel( int buildType , int actType ){ return developLab[buildType].actCon[actType].getPhaseTimes(); }
-
+    int getBuildTimes( int buildType ){ return developLab[buildType].buildCon->getActTimes(); }
 
     void init_DevelopLab();
 
@@ -54,22 +58,6 @@ private:
     double rate_FarmerMove = 0;
     double rate_FarmerBlood = 0;
     double rate_hitTarget = 0;
-    int attack_close = 0;
-    int defence_infantry = 0;
-    int defence_archer = 0;
-    int defence_rider = 0;
-    int specialDefence_toShoot = 0;
-    //采集加成
-    int capacity_wood = 0;
-    int capacity_stone = 0;
-    int capacity_gold = 0;
-    int capacity_farm = 0;
-    int dis_shoot = 0;
-
-    //研发工艺，解锁或升级兵种、建筑
-    bool wheel = false;
-    int wall = 0;
-    int arrowTown = 0;
 
     map< int , st_buildAction > developLab;
 };

@@ -142,6 +142,9 @@ void SelectWidget::refreshActs()
 
     //留的问题：
     //updateActs里面setActStatus的一系列判断条件都也要写到(复制，两个地方都要有，updateActs更新建筑的action,actionStatus数组要用于手操按钮游玩时判定是否可以执行行动)doActs的对应行动里面(用于拒绝ai无效命令)
+    bool isBuild ,isBuildingAct;
+    int buildType , buildingActType;
+
     if(nowobject != NULL)
     {
         if(nowobject->getActSpeed() > 0) ui->objText->setText(QString::number((int)(nowobject->getActPercent())) + "%");//如果有进行中的任务则显示进度
@@ -151,116 +154,83 @@ void SelectWidget::refreshActs()
         ui->objHp->setText("");
     }//行动的进度
 
-
     //人口当前数量、建筑情况等，直接遍历
     //计算一些参数
     std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin(), buildItTemp = buildIt;
     std::list<Human *>::iterator humanIt = mainPtr->player[0]->human.begin(), humanItTemp = humanIt;
-    isGranaryBuilt = false, isMarketBuilt = false, isStockBuilt = false;
-    human_num = 0, build_hold_human_num = 0;
-    for(humanItTemp = mainPtr->player[0]->human.begin(); humanItTemp != mainPtr->player[0]->human.end(); humanItTemp++)
-    {
-        human_num++;//当前人口
-    }
-    for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
-    {
-        if((*buildItTemp)->getNum() == BUILDING_HOME && (*buildItTemp)->isFinish()){
-            build_hold_human_num+=HOUSE_HUMAN_NUM;
-        }
-        else if((*buildItTemp)->getNum() == BUILDING_CENTER)
-        {
-            build_hold_human_num+=HOUSE_HUMAN_NUM;//计算人口上限
-        }
-        if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish())//建成谷仓
-        {
-            isGranaryBuilt = true;
-        }
-        if((*buildIt)->getNum() == BUILDING_MARKET && (*buildIt)->isFinish())//建成市场
-        {
-            isMarketBuilt = true;
-        }
-        if((*buildIt)->getNum() == BUILDING_STOCK && (*buildIt)->isFinish())
-        {
-            isStockBuilt = true;
-        }
-    }
 
-    //设置人口上限
-    mainPtr->player[0]->setMaxHumanNum(build_hold_human_num);
+    //当前人口
+    human_num = mainPtr->player[0]->getHumanNum();
+    //当前人口上限
+    build_hold_human_num =  mainPtr->player[0]->getMaxHumanNum();
 
+    //建成谷仓
+    isGranaryBuilt = mainPtr->player[0]->get_isBuildingHaveBuild(BUILDING_GRANARY);
+    //建成市场
+    isMarketBuilt = mainPtr->player[0]->get_isBuildingHaveBuild(BUILDING_MARKET);
+    isStockBuilt = mainPtr->player[0]->get_isBuildingHaveBuild(BUILDING_STOCK);
 
 
     //先进行行动状态更新(根据actions决定actionStatus数组)
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
-        switch(actions[i])//根据actions数组的值（行动类别）判断可用性
+        isBuild = false, isBuildingAct = false;
+
+        switch (actions[i])//根据actions数组的值（行动类别）判断可用性
         {
+            //建造
             case ACT_BUILD_ARROWTOWER:
-                if(mainPtr->player[0]->getStone() < BUILD_ARROWTOWER_STONE || !mainPtr->player[0]->getArrowTowerUnlocked())
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuild = true;
+                buildType = BUILDING_ARROWTOWER;
                 break;
             case ACT_BUILD_FARM:
-                if(mainPtr->player[0]->getWood() < BUILD_FARM_WOOD || !isMarketBuilt)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuild = true;
+                buildType = BUILDING_FARM;
                 break;
             case ACT_BUILD_GRANARY:
-                if(mainPtr->player[0]->getWood() < BUILD_GRANARY_WOOD)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuild = true;
+                buildType = BUILDING_GRANARY;
                 break;
             case ACT_BUILD_HOUSE:
-                if(mainPtr->player[0]->getWood() < BUILD_HOUSE_WOOD)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuild = true;
+                buildType = BUILDING_HOME;
                 break;
             case ACT_BUILD_MARKET:
-                if(mainPtr->player[0]->getWood() < BUILD_MARKET_WOOD)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuild = true;
+                buildType = BUILDING_MARKET;
                 break;
             case ACT_BUILD_STOCK:
-                if(mainPtr->player[0]->getWood() < BUILD_STOCK_WOOD)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuild = true;
+                buildType = BUILDING_STOCK;
                 break;
+
+            //建筑行动
             case ACT_CREATEFARMER:
-                if(mainPtr->player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD || human_num >= mainPtr->player[0]->getMaxHumanNum())
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuildingAct = true;
+                buildType = BUILDING_CENTER;
+                buildingActType = BUILDING_CENTER_CREATEFARMER;
                 break;
             case ACT_UPGRADE_AGE:
-                if(mainPtr->player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD || !isGranaryBuilt || !isStockBuilt)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuildingAct = true;
+                buildType = BUILDING_CENTER;
+                buildingActType = BUILDING_CENTER_UPGRADE;
                 break;
             case ACT_UPGRADE_FARM:
-                if(mainPtr->player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD || mainPtr->player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuildingAct = true;
+                buildType = BUILDING_MARKET;
+                buildingActType = BUILDING_MARKET_FARM_UPGRADE;
                 break;
             case ACT_UPGRADE_STONE:
-                if(mainPtr->player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || mainPtr->player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuildingAct = true;
+                buildType = BUILDING_MARKET;
+                buildingActType = BUILDING_MARKET_STONE_UPGRADE;
                 break;
             case ACT_UPGRADE_WOOD:
-                if(mainPtr->player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || mainPtr->player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD)
-                {
-                    actionStatus[i] = ACT_STATUS_DISABLED;
-                }
+                isBuildingAct = true;
+                buildType = BUILDING_MARKET;
+                buildingActType = BUILDING_MARKET_WOOD_UPGRADE;
                 break;
+
             case ACT_NULL:
                 actionStatus[i] = ACT_STATUS_DISABLED;
                 break;
@@ -268,7 +238,101 @@ void SelectWidget::refreshActs()
                 actionStatus[i] = ACT_STATUS_ENABLED;
                 break;
         }
+
+        if(isBuild)
+        {
+            if(!mainPtr->player[0]->get_isBuildingShowAble(buildType) || !mainPtr->player[0]->get_isBuildingAble(buildType))
+                actionStatus[i] = ACT_STATUS_DISABLED;
+        }
+
+        if(isBuildingAct)
+        {
+            if(!mainPtr->player[0]->get_isBuildActionAble(buildType , buildingActType))
+                actionStatus[i] = ACT_STATUS_DISABLED;
+        }
+
+
+//        switch(actions[i])//根据actions数组的值（行动类别）判断可用性
+//        {
+//            case ACT_BUILD_ARROWTOWER:
+//                if(mainPtr->player[0]->getStone() < BUILD_ARROWTOWER_STONE || !mainPtr->player[0]->getArrowTowerUnlocked())
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_BUILD_FARM:
+//                if(mainPtr->player[0]->getWood() < BUILD_FARM_WOOD || !isMarketBuilt)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_BUILD_GRANARY:
+//                if(mainPtr->player[0]->getWood() < BUILD_GRANARY_WOOD)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_BUILD_HOUSE:
+//                if(mainPtr->player[0]->getWood() < BUILD_HOUSE_WOOD)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_BUILD_MARKET:
+//                if(mainPtr->player[0]->getWood() < BUILD_MARKET_WOOD)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_BUILD_STOCK:
+//                if(mainPtr->player[0]->getWood() < BUILD_STOCK_WOOD)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+
+
+//            case ACT_CREATEFARMER:
+//                if(mainPtr->player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD || human_num >= mainPtr->player[0]->getMaxHumanNum())
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_UPGRADE_AGE:
+//                if(mainPtr->player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD || !isGranaryBuilt || !isStockBuilt)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_UPGRADE_FARM:
+//                if(mainPtr->player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD || mainPtr->player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_UPGRADE_STONE:
+//                if(mainPtr->player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || mainPtr->player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_UPGRADE_WOOD:
+//                if(mainPtr->player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || mainPtr->player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD)
+//                {
+//                    actionStatus[i] = ACT_STATUS_DISABLED;
+//                }
+//                break;
+//            case ACT_NULL:
+//                actionStatus[i] = ACT_STATUS_DISABLED;
+//                break;
+//            case ACT_BUILD_CANCEL:
+//                actionStatus[i] = ACT_STATUS_ENABLED;
+//                break;
+//        }
+
     }
+
+
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         mainPtr->getActs(i)->setStatus(actionStatus[i]);//应用行动状态,mainPtr->getActs(i)即获取第i个按钮窗口
@@ -292,11 +356,15 @@ void SelectWidget::refreshActs()
         if(type == SORT_BUILDING|| type == SORT_Building_Resource)//建筑
         {
             Building *objBuilding = (Building *)nowobject;
-            int num = objBuilding->getNum();//获取建筑种类
-            ui->objName->setText(QString::fromStdString(objBuilding->getDisplayName(num)));//设置显示名称
-            if(mainPtr->player[0]->getCiv() == CIVILIZATION_STONEAGE) ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(CIVILIZATION_STONEAGE, num)].front().scaled(110,110));
-            else if(mainPtr->player[0]->getCiv() == CIVILIZATION_TOOLAGE) ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(CIVILIZATION_TOOLAGE, num)].front().scaled(110,110));
+            buildType = objBuilding->getNum();//获取建筑种类
+            ui->objName->setText(QString::fromStdString(objBuilding->getDisplayName(buildType)));//设置显示名称
+
             //根据不同时代设置不同的图标
+            ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType)].front().scaled(110,110));
+//            if(mainPtr->player[0]->getCiv() == CIVILIZATION_STONEAGE) ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(CIVILIZATION_STONEAGE, buildType)].front().scaled(110,110));
+//            else if(mainPtr->player[0]->getCiv() == CIVILIZATION_TOOLAGE) ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(CIVILIZATION_TOOLAGE, buildType)].front().scaled(110,110));
+
+
             if(objBuilding->getActSpeed() != 0)
             {
                 ui->objIconSmall->setPixmap(resMap["SmallIcon_Sandglass"].front());//如果在行动中，在进度条百分比旁显示一个沙漏小图标
@@ -305,10 +373,14 @@ void SelectWidget::refreshActs()
             {
                 ui->objIconSmall->setPixmap(QPixmap());
             }
+
+            //设置hp
             ui->objHp->setText(QString::number(objBuilding->getBlood()) + "/" + QString::number(objBuilding->getMaxBlood()));
+
             //同步行动状态至窗口
             if(objBuilding->isFinish())
             {
+                //统一根据内置行动数组设置
                 for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
                 {
                     actions[i] = objBuilding->getActNames(i);
@@ -319,6 +391,8 @@ void SelectWidget::refreshActs()
                     }
                     else mainPtr->getActs(i)->hide();
                 }
+
+                //详细设置
                 if(objBuilding->getNum() == BUILDING_HOME)
                 {
                     ui->objText->setText(QString::number(human_num) + "/" + QString::number(build_hold_human_num));
@@ -326,17 +400,15 @@ void SelectWidget::refreshActs()
                 }
                 else if(objBuilding->getNum() == BUILDING_FARM)
                 {
-                    //需要优化
                     Building_Resource* farm = (Building_Resource*) objBuilding;
 
-//                    qDebug()<<(farm->get_Cnt());
                     if(farm->get_Cnt()>0)
                     {
                         ui->objText->setText(QString::number((int)(farm->get_Cnt())));
                         ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
                     }
-
                 }
+
             }
             else//如果建筑建造未完成
             {
@@ -370,9 +442,12 @@ void SelectWidget::refreshActs()
             QString name = QString::fromStdString(objFarmer->getDisplayName(num));
             ui->objName->setText(name);
             ui->objIcon->setPixmap(resMap["Button_Village"].front().scaled(110,110));
-            if(objFarmer->getResourceSort() == 1) ui->objIconSmall->setPixmap(resMap["Icon_Wood"].front());
-            else if(objFarmer->getResourceSort() == 2 || objFarmer->getResourceSort() == 5) ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
-            else if(objFarmer->getResourceSort() == 3) ui->objIconSmall->setPixmap(resMap["Icon_Stone"].front());
+            if(objFarmer->getResourceSort() == HUMAN_WOOD) ui->objIconSmall->setPixmap(resMap["Icon_Wood"].front());
+            else if(objFarmer->getResourceSort() == HUMAN_GRANARYFOOD || objFarmer->getResourceSort() == HUMAN_STOCKFOOD)
+                ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
+            else if(objFarmer->getResourceSort() == HUMAN_STONE) ui->objIconSmall->setPixmap(resMap["Icon_Stone"].front());
+
+            //如果当前村民没有资源
             if(objFarmer->getResourceNowHave() == 0)
             {
                 ui->objIconSmall->setPixmap(QPixmap());
@@ -382,14 +457,15 @@ void SelectWidget::refreshActs()
             {
                 ui->objText->setText(QString::number((int)(objFarmer->getResourceNowHave())));
             }
+            //设置血量
             ui->objHp->setText(QString::number(objFarmer->getBlood()) + "/" + QString::number(objFarmer->getMaxBlood()));
             this->update();
             this->show();
 
         }
-        else if(type == SORT_TREEFOREST)//树
-        {
-            Animal *objAnimal = (Animal *)(nowobject);
+//        else if(type == SORT_TREEFOREST)//树
+//        {
+//            Animal *objAnimal = (Animal *)(nowobject);
 //            if(objAnimal->get_Cnt() <= 0) receiveselectNum(0);
 //            else
 //            {
@@ -404,8 +480,7 @@ void SelectWidget::refreshActs()
 //                this->update();
 //                this->show();
 //            }
-
-        }
+//        }
         else if(type == SORT_ANIMAL)//动物
         {
             Animal *objAnimal = (Animal *)(nowobject);
@@ -414,7 +489,6 @@ void SelectWidget::refreshActs()
             if(objAnimal->getNum() == 1)//瞪羚
             {
                 ui->objIcon->setPixmap(resMap["Button_Gazelle"].front().scaled(110,110));
-
             }
             else if(objAnimal->getNum() == 2)//大象
             {
@@ -461,7 +535,6 @@ void SelectWidget::refreshActs()
     {
         mainPtr->getActs(i)->update();
     }
-
 }
 
 void SelectWidget::widgetAct(int num)
@@ -478,27 +551,34 @@ void SelectWidget::aiAct(int acter, int actName)
     doActs(actName);
 }
 
+void SelectWidget::manageBuildBottom( int position, int actNum , int buildingNum )
+{
+    if(mainPtr->player[0]->get_isBuildingShowAble(buildingNum))
+    {
+        actions[position] = actNum;
+        if(mainPtr->player[0]->get_isBuildingAble(buildingNum)) actionStatus[position] = ACT_STATUS_ENABLED;
+        else actionStatus[position] = ACT_STATUS_DISABLED;
+    }
+    else actions[position] = ACT_NULL;
+}
+
 int SelectWidget::doActs(int actName)
 {
     //修改，判断是否可行动逻辑
-
-
     if(nowobject == NULL) return ACTION_INVALID_ACTION;
-    if(actName == ACT_BUILD){
 
-        actions[0] = ACT_BUILD_HOUSE;
-        actions[1] = ACT_BUILD_GRANARY;
-        actions[2] = ACT_BUILD_STOCK;
-        actions[3] = ACT_BUILD_CANCEL;
+    //建筑的按钮位置
+    if(actName == ACT_BUILD)
+    {
 
-        actionStatus[0] = ACT_STATUS_DISABLED;
-        actionStatus[1] = ACT_STATUS_DISABLED;
-        actionStatus[2] = ACT_STATUS_DISABLED;
+        manageBuildBottom( 0 , ACT_BUILD_HOUSE , BUILDING_HOME );
+        manageBuildBottom( 1 , ACT_BUILD_GRANARY , BUILDING_GRANARY );
+        manageBuildBottom( 2 , ACT_BUILD_STOCK , BUILDING_STOCK);
+        manageBuildBottom( 3 , ACT_BUILD_MARKET , BUILDING_MARKET);
+        manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
 
-        if(core->get_IsBuildAble(0,BUILDING_HOME)) actionStatus[0] = ACT_STATUS_ENABLED;
-        if(core->get_IsBuildAble(0,BUILDING_GRANARY)) actionStatus[1] = ACT_STATUS_ENABLED;
-        if(core->get_IsBuildAble(0,BUILDING_STOCK)) actionStatus[2] = ACT_STATUS_ENABLED;
-
+        actions[9] = ACT_BUILD_CANCEL;
+        actionStatus[9] = ACT_STATUS_ENABLED;
 
 //        if(mainPtr->player[0]->getWood() < BUILD_HOUSE_WOOD)
 //        {
@@ -513,50 +593,47 @@ int SelectWidget::doActs(int actName)
 //            actionStatus[2] = ACT_STATUS_DISABLED;
 //        }
 
-        if(mainPtr->player[0]->getCiv() == CIVILIZATION_TOOLAGE)
-        {
+//        if(mainPtr->player[0]->getCiv() == CIVILIZATION_TOOLAGE)
+//        {
             //设置按钮位置
-            mainPtr->getActs(3)->setPix(resMap["Button_Farm"].front().scaled(80,80));
-            mainPtr->getActs(3)->show();
-            actions[3] = ACT_BUILD_FARM;
-            mainPtr->getActs(4)->setPix(resMap["Button_Market"].front().scaled(80,80));
-            mainPtr->getActs(4)->show();
-            actions[4] = ACT_BUILD_MARKET;
-            mainPtr->getActs(5)->setPix(resMap["Button_ArrowTower"].front().scaled(80,80));
-            mainPtr->getActs(5)->show();
-            actions[5] = ACT_BUILD_ARROWTOWER;
-            mainPtr->getActs(6)->setPix(resMap["Exit"].front().scaled(80,80));
-            mainPtr->getActs(6)->show();
-            actions[6] = ACT_BUILD_CANCEL;
-
-
-            std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
-            bool isGranaryBuilt = false, isMarketBuilt = false;
-            for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
-            {
-                if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish())//建成谷仓
-                {
-                    isGranaryBuilt = true;
-                }
-                if((*buildIt)->getNum() == BUILDING_MARKET && (*buildIt)->isFinish())//建成市场
-                {
-                    isMarketBuilt = true;
-                }
-            }
-            if(!isGranaryBuilt || mainPtr->player[0]->getWood() < BUILD_MARKET_WOOD)
-            {
-                actionStatus[4] = ACT_STATUS_DISABLED;
-            }
-            if(!isMarketBuilt || mainPtr->player[0]->getWood() < BUILD_FARM_WOOD)
-            {
-                actionStatus[3] = ACT_STATUS_DISABLED;
-            }
-            if(!mainPtr->player[0]->getArrowTowerUnlocked() || mainPtr->player[0]->getStone() < BUILD_ARROWTOWER_STONE)
-            {
-                actionStatus[5] = ACT_STATUS_DISABLED;
-            }
-        }
-
+//            mainPtr->getActs(3)->setPix(resMap["Button_Farm"].front().scaled(80,80));
+//            mainPtr->getActs(3)->show();
+//            actions[3] = ACT_BUILD_FARM;
+//            mainPtr->getActs(4)->setPix(resMap["Button_Market"].front().scaled(80,80));
+//            mainPtr->getActs(4)->show();
+//            actions[4] = ACT_BUILD_MARKET;
+//            mainPtr->getActs(5)->setPix(resMap["Button_ArrowTower"].front().scaled(80,80));
+//            mainPtr->getActs(5)->show();
+//            actions[5] = ACT_BUILD_ARROWTOWER;
+//            mainPtr->getActs(6)->setPix(resMap["Exit"].front().scaled(80,80));
+//            mainPtr->getActs(6)->show();
+//            actions[6] = ACT_BUILD_CANCEL;
+//            std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
+//            bool isGranaryBuilt = false, isMarketBuilt = false;
+//            for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
+//            {
+//                if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish())//建成谷仓
+//                {
+//                    isGranaryBuilt = true;
+//                }
+//                if((*buildIt)->getNum() == BUILDING_MARKET && (*buildIt)->isFinish())//建成市场
+//                {
+//                    isMarketBuilt = true;
+//                }
+//            }
+//            if(!isGranaryBuilt || mainPtr->player[0]->getWood() < BUILD_MARKET_WOOD)
+//            {
+//                actionStatus[4] = ACT_STATUS_DISABLED;
+//            }
+//            if(!isMarketBuilt || mainPtr->player[0]->getWood() < BUILD_FARM_WOOD)
+//            {
+//                actionStatus[3] = ACT_STATUS_DISABLED;
+//            }
+//            if(!mainPtr->player[0]->getArrowTowerUnlocked() || mainPtr->player[0]->getStone() < BUILD_ARROWTOWER_STONE)
+//            {
+//                actionStatus[5] = ACT_STATUS_DISABLED;
+//            }
+//        }
     }
     else if(actName == ACT_BUILD_HOUSE){
         emit sendBuildMode(BUILDING_HOME);
@@ -591,7 +668,8 @@ int SelectWidget::doActs(int actName)
     else if(actName == ACT_BUILD_CANCEL)
     {
         QApplication::restoreOverrideCursor();
-        emit sendBuildMode(0);
+//        emit sendBuildMode(-1);
+        initActs();
     }
     else if(actName == ACT_CREATEFARMER){
 //        if(mainPtr->player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD) return ACTION_INVALID_RESOURCE;
@@ -869,6 +947,8 @@ void SelectWidget::drawActs()
         else if(actions[i] == ACT_BUILD_MARKET) pix = resMap["Button_Market"].front().scaled(80,80);
         else if(actions[i] == ACT_BUILD_STOCK) pix = resMap["Button_Stock"].front().scaled(80,80);
         mainPtr->getActs(i)->setPix(pix);
+
+        //设置actions[i]为NULL,等于隐藏
         if(actions[i] != ACT_NULL) mainPtr->getActs(i)->show();
         else mainPtr->getActs(i)->hide();
         mainPtr->getActs(i)->update();

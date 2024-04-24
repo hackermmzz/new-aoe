@@ -60,18 +60,24 @@ public:
 
     //***人口记录****
     //获取人口上限
-    int getMaxHumanNum(){return this->maxHumanNum;}
-    //设置人口上限
-    void setMaxHumanNum(int num){this->maxHumanNum = num;}
+    int getMaxHumanNum(){return (homeNum+centerNum)*HOUSE_HUMAN_NUM;}
+    //获取当前人口
+    int getHumanNum(){ return this->humanNum; }
 
    /*建筑行动相关********************************************/
     //判断是否可建筑
+    //判断建筑是否可建造分两步，先判断建筑建造是否能显示，再判断资源是否足够
+    bool get_isBuildingShowAble(int buildNum ){ return playerScience->get_isBuildingShowAble(buildNum , civilization); }
     bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
+    //判断建筑行动是否能进行的函数中，内含了判断行动是否能显示。
     bool get_isBuildActionAble( Building* actBuild,int actNum ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,civilization,wood,food,stone,gold); }
-    void back_Resource_TS( Building* actBuild );
+    bool get_isBuildActionAble(int buildType , int actNum){ return playerScience->get_isBuildActionAble(buildType , actNum , civilization , wood , food , stone , gold); }
 
+    void back_Resource_TS( Building* actBuild );
     void finishBuild( Building* buildBuilding ){playerScience->finishAction(buildBuilding->getNum());}
     void enforcementAction( Building* actBuild );
+
+    bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }
    /*以上建筑行动相关********************************************/
 
 
@@ -140,7 +146,12 @@ private:
     int civilization=1;
 
     //人口容量
-    int maxHumanNum=0;  //人口上限
+//    int maxHumanNum=0;  //人口上限
+    int humanNum = 0;   //当前人口数量
+
+    //home数量，用于计算当前最大人口
+    int homeNum = 0;
+    int centerNum = 1;
 
     //所拥有的四个资源
     int wood=200;
@@ -156,6 +167,11 @@ private:
     bool marketResearch[3] = {false};
     bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
+
+
+    //增加人口，考虑未来可能有政府中心兵营兵种人口减半，故留函数接口以重写
+    void humanNumIncrease(Human* newHuman){ humanNum++; }
+    void humanNumDecrease(Human* delHuman){ humanNum--; }
 };
 
 #endif // PLAYER_H

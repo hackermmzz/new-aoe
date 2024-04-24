@@ -9,7 +9,7 @@ class Building:public Coordinate,public BloodHaver
 {
 public:
     Building();
-    Building(int Num, int BlockDR, int BlockUR, int civ, int Percent=100);
+    Building(int Num, int BlockDR, int BlockUR, int civ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER , int Percent=100);
 
   /**********************虚函数**************************/
     int getSort(){return SORT_BUILDING;}
@@ -81,6 +81,7 @@ public:
 
  /********************action相关**************************/
 
+    //以下两设置，用于转化时使用
     //设置科技，用于计算科技提升
     void setPlayerScience(Development* science){ this->playerScience = science; }
     //设置隶属player
@@ -90,9 +91,6 @@ public:
 
     bool isFinish(){return this->Percent>=100;}
     double getPercent() {return this->Percent;}
-
-//    double getCnt(){return this->Cnt;}
-
 
 protected:
   /********************静态资源**************************/
