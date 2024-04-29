@@ -84,6 +84,9 @@ public:
     {
         return this->Num;
     }
+    int getVisibile(){
+        return this->visible;
+    }
 
     double get_BlockSizeLen(){ return BlockSizeLen; }
     double get_SideLen(){return SideLength;}

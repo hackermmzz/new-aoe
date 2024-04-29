@@ -93,14 +93,10 @@ bool Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int
 
 bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
-    qDebug()<<"in addingrelation";
     if(object1 == NULL) return false;
-
     qDebug()<<relate_AllObject[object1].isExist;
-
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
-        qDebug()<<"in if";
         Building* buildOb = NULL;
         object1->printer_ToBuilding((void**)&buildOb);
         if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))

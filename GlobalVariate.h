@@ -74,6 +74,10 @@ struct tagHuman
     int ResourceSort;
     int Resource;
 };
+struct tagBlock{
+    bool explored=false;
+    int height=0;
+};
 
 struct tagGame
 {
@@ -86,6 +90,7 @@ struct tagGame
 //    tagResource *resource;
 //    int resource_n;
     list<tagResource> resources;
+    tagBlock blocks[MAP_L][MAP_U];
     int GameFrame;
     int civilizationStage;
     int Wood;

@@ -161,7 +161,9 @@ public:
     void processData();
     void run() override{
         if(AIGame.GameFrame>10&&AIfinished&&INSfinshed){
+            AIfinished=false;
             processData();
+            AIfinished=true;
             INSfinshed=false;
         }
     }
