@@ -8,8 +8,11 @@ Missile::Missile()
 
 }
 
-Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee)
+Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee, Development* playerScience, int playerRepresent)
 {
+    //划分玩家阵营
+    this->playerScience = playerScience;
+    this->playerRepresent = playerRepresent;
     recordAttacker(attacker);
     this->Num = type;
     this->DR = attacker->getDR();

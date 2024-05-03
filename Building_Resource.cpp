@@ -38,15 +38,6 @@ void Building_Resource::setAttribute()
 }
 
 /**********************虚函数**************************/
-
-void Building_Resource::setMaxCnt()
-{
-    if(Num == BUILDING_FARM)
-    {
-        MaxCnt = CNT_BUILD_FARM;
-    }
-}
-
 bool Building_Resource::isGathererAsLandlord(Coordinate* gatherer)
 {
     //无主农田，设置地主

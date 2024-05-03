@@ -97,7 +97,10 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
     qDebug()<<relate_AllObject[object1].isExist;
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
+<<<<<<< HEAD
+=======
         qDebug()<<"addrelate";
+>>>>>>> 48d66e8f0aea65b57f4f07e7f47b9425543cdeeb
         Building* buildOb = NULL;
         object1->printer_ToBuilding((void**)&buildOb);
         if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))

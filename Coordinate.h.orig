@@ -40,6 +40,56 @@ public:
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
+<<<<<<< HEAD
+    double getDR()
+    {
+        return this->DR;
+    }
+    double getUR()
+    {
+        return this->UR;
+    }
+    int getBlockDR()
+    {
+        return this->BlockDR;
+    }
+    int getBlockUR()
+    {
+        return this->BlockUR;
+    }
+    double getimageX()
+    {
+        return this->imageX;
+    }
+    double getimageY()
+    {
+        return this->imageY;
+    }
+    double getSideLength()
+    {
+        return this->SideLength;
+    }
+    int getimageH()
+    {
+        return this->imageH;
+    }
+    std::list<ImageResource>::iterator getNowRes()
+    {
+        return this->nowres;
+    }
+    int getglobalNum()
+    {
+        return this->globalNum;
+    }
+    int getNum()
+    {
+        return this->Num;
+    }
+    int getVisibile(){
+        return this->visible;
+    }
+=======
+
     //获取坐标
     double getDR(){return this->DR;}
     double getUR(){return this->UR;}
@@ -56,6 +106,7 @@ public:
     //创建对象相关信息
     int getglobalNum(){return this->globalNum;}
     int getNum(){return this->Num;}
+>>>>>>> 48d66e8f0aea65b57f4f07e7f47b9425543cdeeb
 
     double get_BlockSizeLen(){ return BlockSizeLen; }
     double get_SideLen(){return SideLength;}

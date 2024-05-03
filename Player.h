@@ -14,6 +14,15 @@ public:
     Player(int);
     ~Player();
 
+
+    //***************************************************************
+    //建筑池子
+    std::list<Building *> build;
+    //人口池子
+    std::list<Human *> human;
+    //当前所属飞行物
+    std::list<Missile*> missile;
+
     //***************************************************************
     //添加对象
     Building* addBuilding(int Num,int BlockDR,int BlockUR , double percent = 0);
@@ -29,16 +38,13 @@ public:
 
     //删除missile的投掷者
     void deleteMissile_Attacker( Coordinate* attacker );
-    //***************************************************************
-    //建筑池子
-    std::list<Building *> build;
-    //人口池子
-    std::list<Human *> human;
-    //当前所属飞行物
-    std::list<Missile*> missile;
+
 
     //***************************************************************
     //player独有的游戏进度记录
+
+    int getCiv(){ return playerScience->get_civilization(); }
+    void setCiv(int civ){playerScience->set_civilization(civ);}
 
     //***控制资源****
     //获取资源持有数量
@@ -47,6 +53,7 @@ public:
     int getStone(){return this->stone;}
     int getGold(){return this->gold;}
 
+    //设置初始资源
     void setWood(int wood){this->wood = wood;}
     void setFood(int food){this->food = food;}
     void setStone(int stone){this->stone = stone;}
@@ -60,20 +67,30 @@ public:
 
     //***人口记录****
     //获取人口上限
-    int getMaxHumanNum(){return this->maxHumanNum;}
-    //设置人口上限
-    void setMaxHumanNum(int num){this->maxHumanNum = num;}
+    int getMaxHumanNum(){return playerScience->get_homeNum()*HOUSE_HUMAN_NUM;}
+    //获取当前人口
+    int getHumanNum(){ return playerScience->get_humanNum(); }
 
    /*建筑行动相关********************************************/
     //判断是否可建筑
+    //判断建筑是否可建造分两步，先判断建筑建造是否能显示，再判断资源是否足够
+    bool get_isBuildingShowAble(int buildNum ){ return playerScience->get_isBuildingShowAble(buildNum , getCiv()); }
     bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
-    bool get_isBuildActionAble( Building* actBuild,int actNum ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,civilization,wood,food,stone,gold); }
-    void back_Resource_TS( Building* actBuild );
+    //判断建筑行动是否能进行的函数中，内含了判断行动是否能显示。
+    bool get_isBuildActionAble( Building* actBuild,int actNum ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,getCiv(),wood,food,stone,gold); }
+    bool get_isBuildActionAble(int buildType , int actNum){ return playerScience->get_isBuildActionAble(buildType , actNum , getCiv() , wood , food , stone , gold); }
+    bool get_isBuildActionShowAble( int buildNum , int actNum ){ return playerScience->get_isBuildActionShowAble(buildNum,actNum,getCiv());}
 
+    bool get_buildActLevel( int buildNum , int actNum ){ return playerScience->getActLevel(buildNum , actNum); }
+
+    void back_Resource_TS( Building* actBuild );
     void finishBuild( Building* buildBuilding ){playerScience->finishAction(buildBuilding->getNum());}
     void enforcementAction( Building* actBuild );
-   /*以上建筑行动相关********************************************/
 
+    bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }
+
+    int get_civiBuild_Times( int civilization ){ return playerScience->get_civiBuild_Times(civilization); }
+   /*以上建筑行动相关********************************************/
 
 
 
@@ -82,14 +99,8 @@ public:
     {
         return this->marketResearch;
     }
-    void setCiv(int civ)
-    {
-        this->civilization = civ;
-    }
-    int getCiv()
-    {
-        return this->civilization;
-    }
+
+
     bool getArrowTowerUnlocked()
     {
         return this->isArrowTowerUnlocked;
@@ -137,10 +148,11 @@ private:
     int represent;  //player阵营
 
     //当前文明
-    int civilization=1;
+//    int civilization=1;
 
     //人口容量
-    int maxHumanNum=0;  //人口上限
+//    int maxHumanNum=0;  //人口上限
+
 
     //所拥有的四个资源
     int wood=200;
@@ -156,6 +168,11 @@ private:
     bool marketResearch[3] = {false};
     bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
+
+
+    //增加人口，考虑未来可能有政府中心兵营兵种人口减半，故留函数接口以重写
+    void humanNumIncrease(Human* newHuman){ playerScience->addHumanNum(); }
+    void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
 };
 
 #endif // PLAYER_H

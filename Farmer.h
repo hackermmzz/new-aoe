@@ -7,7 +7,7 @@ class Farmer:public Human
 {
 public:
     Farmer();
-    Farmer(double DR,double UR);
+    Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
 
   /**********************虚函数**************************/
     void nextframe();
