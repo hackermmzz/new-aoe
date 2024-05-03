@@ -7,6 +7,7 @@ int g_frame=0;
 std::map<int,Coordinate*> g_Object;
 std::queue<instruction> instructions;   ///AI返回的指令队列
 bool AIfinished=true;   ///AI线程锁
+bool INSfinshed=true;
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -649,17 +650,13 @@ void MainWidget::FrameUpdate()
 {
     gameframe++;
     g_frame=gameframe;
-    if(AIfinished)
-    {
-        ai->start();///AI进程开始
-    }
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
     statusUpdate();
-
     if(AIfinished){
         core->infoShare();
+        ai->start();///AI 线程开始
     }
     emit mapmove();
     return;

@@ -604,9 +604,9 @@ void SelectWidget::widgetAct(int num)
     doActs(actName);
 }
 
-void SelectWidget::aiAct(int acter, int actName)
+int SelectWidget::aiAct(int actName,Coordinate* self)
 {
-    doActs(actName);
+    return doActs(actName,self);
 }
 
 void SelectWidget::manageBuildBottom( int position, int actNum , int buildingNum )
@@ -620,7 +620,7 @@ void SelectWidget::manageBuildBottom( int position, int actNum , int buildingNum
     else actions[position] = ACT_NULL;
 }
 
-int SelectWidget::doActs(int actName)
+int SelectWidget::doActs(int actName,Coordinate* nowobject)
 {
     //修改，判断是否可行动逻辑
     if(nowobject == NULL) return ACTION_INVALID_ACTION;

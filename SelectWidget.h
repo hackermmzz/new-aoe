@@ -21,7 +21,7 @@ public:
     void updateActs();
 
     void drawActs();
-    int doActs(int actName);
+    int doActs(int actName,Coordinate* nowobject=::nowobject);
     void actionUpdate();
 
     void setCore( Core* core ){ this->core = core; }
@@ -47,7 +47,7 @@ private:
 
 public slots:
     void widgetAct(int num);
-    void aiAct(int acter, int actName);
+    int  aiAct(int actName,Coordinate* self);
     void timeUpdate();
     void frameUpdate();
     void initActs();

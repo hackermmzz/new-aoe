@@ -309,6 +309,7 @@ void Development::init_DevelopLab()
         //升级骑兵护甲
         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_STOCK , TIME_BUILDING_STOCK_UPGRADE_DEFENSE_RIDER , \
                                        0 , BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_FOOD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_RIDER].setHead(newNode);
     }
 
 

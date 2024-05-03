@@ -1,5 +1,5 @@
 #include "AI.h"
-
+#include <random>
 bool ismove=false;
 int human1=-1;
 int human2=-1;
@@ -12,6 +12,7 @@ int step2=3;
 void AI::processData(){
     AIfinished=false;
 /*##########YOUR CODE BEGINS HERE##########*/
+    qDebug()<<"#####begin#####";
     for(tagHuman human:AIGame.humans){
         if(human1==-1){
            human1=human.SN;
@@ -20,11 +21,10 @@ void AI::processData(){
         }
         if(human2==-1&&human.SN!=human1){
            human2=human.SN;
-           HumanMove(human2,X[step2],Y[step2]);
            break;
         }
     }
-    sleep(5);
+
     for(tagHuman human:AIGame.humans){
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
@@ -36,16 +36,27 @@ void AI::processData(){
                 }
             }
             HumanAction(human.SN,sn);
-//            qDebug()<<"AI.cpp::"<<human.NowState;
-//            qDebug()<<"AI::obSN:"<<human.WorkObjectSN;
-//            qDebug()<<"AI::ResourceSORT:"<<human.ResourceSort;
-//            qDebug()<<"AI::Resource:"<<human.Resource;
+        }else if(human.SN==human2){
+            qDebug()<<"human2:"<<human.NowState;
+            if(human.NowState==HUMAN_STATE_IDLE){
+                static int x= 20;
+                static int y= 20;
+                qDebug()<<"Build:"<<x<<" "<<y<<" "<<HumanBuild(human.SN,BUILDING_HOME,x,y);
+                x+=10;
+                y+=10;
+            }
         }
     }
 
-
 //    qDebug()<<AIGame.GameFrame;
 //    qDebug()<<"#############";
+    for(tagBuilding building:AIGame.buildings){
+        if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
+            qDebug()<<"Build:"<<building.Percent<<":"<<BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
+        }
+    }
+    sleep(5);
+    qDebug()<<"#####end#####";
 /*###########YOUR CODE ENDS HERE###########*/
     AIfinished=true;
 }
