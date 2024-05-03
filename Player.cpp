@@ -31,10 +31,12 @@ Player::~Player()
 Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
 {
     Building *newbuilding = NULL;
-    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,this->civilization , playerScience , represent , percent);
-    else newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization , playerScience , represent , percent);
+    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
+    else newbuilding=new Building(Num,BlockDR,BlockUR, getCiv(), playerScience , represent , percent);
 
-    if(newbuilding->getNum() == BUILDING_HOME) homeNum++;
+    if(newbuilding->getNum() == BUILDING_HOME) playerScience->addHome();
+    else if(newbuilding->getNum() != BUILDING_CENTER) playerScience->add_civiBuildNum(newbuilding->getNum());
+
     build.push_back(newbuilding);
     return newbuilding;
 }
@@ -92,8 +94,10 @@ list<Human*>::iterator Player::deleteHuman( list<Human*>::iterator iterDele )
 
 list<Building*>::iterator Player::deleteBuilding( list<Building*>::iterator iterDele )
 {
-    if((*iterDele)->getNum() == BUILDING_HOME) homeNum--;
-    else if((*iterDele)->getNum() == BUILDING_CENTER) centerNum--;
+    if((*iterDele)->getNum() == BUILDING_HOME) playerScience->subHome();
+    else if((*iterDele)->getNum() == BUILDING_CENTER) playerScience->subCenter();
+    else playerScience->sub_civiBuildNum((*iterDele)->getNum());
+
     delete *iterDele;
     return build.erase(iterDele);
 }
@@ -172,6 +176,7 @@ void Player::enforcementAction( Building* actBuild )
     int creatObjectSort , creatObjectNum;
 
     isNeedCreatObject = playerScience->isNeedCreatObjectAfterAction(actBuild->getNum() , actBuild->getActNum() , creatObjectSort , creatObjectNum);
+    qDebug()<<"actend"<<(actBuild->getActNum());
     playerScience->finishAction(actBuild->getNum() ,actBuild->getActNum());
     actBuild->init_Resouce_TS();    //重置行动建筑的返还资源
 

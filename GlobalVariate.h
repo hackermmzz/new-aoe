@@ -312,6 +312,8 @@ struct conditionDevelop
         return isCreatObjectAction;
     }
 
+    bool isNeedCreatObject(){ return isCreatObjectAction; }
+
     int getActTimes(){ return acttimes; }
 };
 
@@ -345,10 +347,12 @@ struct st_upgradeLab{
     //切换
     void shift()
     {
+        qDebug()<<"over";
         if(nowExecuteNode!=NULL)
         {
             haveFinishedPhaseNum++;
             nowExecuteNode = nowExecuteNode->nextDevAction;
+            qDebug()<<"nowexc"<<nowExecuteNode;
         }
     }
 
@@ -374,6 +378,11 @@ struct st_upgradeLab{
     /**
     *考虑加入错误码，以判断错误类型
     */
+
+    bool isNeedCreatObject(){
+        if(nowExecuteNode!=NULL) return nowExecuteNode->isNeedCreatObject();
+        else return false;
+    }
 };
 
 struct st_buildAction

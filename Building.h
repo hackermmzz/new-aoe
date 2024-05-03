@@ -47,17 +47,18 @@ public:
         delete built[i][j];
         built[i][j] = nullptr;
     }
+
+    static void setActNames(int buildNum , int num, int name){ actNames[buildNum][num] = name; }
   /********************静态函数**************************/
 
 
 
   /********************action相关**************************/
-    int getActNames(int num){return actNames[num];}
+    int getActNames(int num){return actNames[this->Num][num];}
 
-    void setActNames(int num, int name){this->actNames[num] = name;}
     int getActStatus(int num){return actStatus[num];}
+    void setActStatus(int wood = 0 , int food = 0 , int stone = 0 , int gold = 0);
     void setActStatus(int num, int status){this->actStatus[num] = status;}
-
 
     /*************控制建筑行为****************/
     double get_retio_Build(){ return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;}
@@ -92,6 +93,8 @@ public:
     bool isFinish(){return this->Percent>=100;}
     double getPercent() {return this->Percent;}
 
+    int get_civilization(){ return playerScience->get_civilization(); }
+
 protected:
   /********************静态资源**************************/
     static std::list<ImageResource> *build[4];//建设list
@@ -101,6 +104,8 @@ protected:
     static std::string Buildingname[4];
     static std::string Builtname[3][10];
     static std::string BuildDisplayName[10];
+
+    static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
   /********************静态资源**************************/
 
     //所属阵营
@@ -121,11 +126,8 @@ protected:
     int Finish=0;//0为未完成 1为完成
 
 //    int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
-    int actNames[ACT_WINDOW_NUM_FREE] = {0};
-    int actStatus[ACT_WINDOW_NUM_FREE] = {0};
 
-    //需要优化，考虑农田直接抽一个类
-//    double Cnt;
+    int actStatus[ACT_WINDOW_NUM_FREE];
 
     //存储建筑行动的预扣资源：
     int wood_TS = 0;

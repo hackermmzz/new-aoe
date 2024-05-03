@@ -154,6 +154,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     ai=new AI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+
+    player[0]->setCiv(CIVILIZATION_TOOLAGE);
+    player[0]->changeResource(2000,2000,2000,2000);
 }
 
 // MainWidget析构函数
@@ -212,6 +215,29 @@ void MainWidget::initBuilding()
             loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));
         }
     }
+
+    //市镇中心
+    Building::setActNames(BUILDING_CENTER , 0 , ACT_CREATEFARMER);
+    Building::setActNames(BUILDING_CENTER , 1 , ACT_UPGRADE_AGE);
+    //谷仓
+    Building::setActNames(BUILDING_GRANARY , 0 , ACT_RESEARCH_WALL);
+    Building::setActNames(BUILDING_GRANARY , 1 , ACT_UPGRADE_TOWERBUILD);
+    //仓库
+    Building::setActNames(BUILDING_STOCK , 0 , ACT_STOCK_UPGRADE_USETOOL);
+    Building::setActNames(BUILDING_STOCK , 1 , ACT_STOCK_UPGRADE_DEFENSE_INFANTRY);
+    Building::setActNames(BUILDING_STOCK , 2 , ACT_STOCK_UPGRADE_DEFENSE_ARCHER);
+    Building::setActNames(BUILDING_STOCK , 3 , ACT_STOCK_UPGRADE_DEFENSE_RIDER);
+    //市场
+    Building::setActNames(BUILDING_MARKET , 0 , ACT_UPGRADE_WOOD);
+    Building::setActNames(BUILDING_MARKET , 1 , ACT_UPGRADE_STONE);
+    Building::setActNames(BUILDING_MARKET , 2 , ACT_UPGRADE_FARM);
+    Building::setActNames(BUILDING_MARKET , 3 , ACT_UPGRADE_GOLD);
+    //军队
+    Building::setActNames(BUILDING_ARMYCAMP , 0 , ACT_ARMYCAMP_CREATE_CLUBMAN);
+    Building::setActNames(BUILDING_ARMYCAMP , 5 , ACT_ARMYCAMP_UPGRADE_CLUBMAN);
+    Building::setActNames(BUILDING_ARMYCAMP , 3 , ACT_ARMYCAMP_CREATE_SLINGER);
+    Building::setActNames(BUILDING_RANGE , 0 , ACT_RANGE_CREATE_BOWMAN);
+    Building::setActNames(BUILDING_STABLE , 0 , ACT_STABLE_CREATE_SCOUT);
 }
 
 // 初始化动物

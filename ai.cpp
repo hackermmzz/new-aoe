@@ -44,8 +44,8 @@ void AI::processData(){
     }
 
 
-    qDebug()<<AIGame.GameFrame;
-    qDebug()<<"#############";
+//    qDebug()<<AIGame.GameFrame;
+//    qDebug()<<"#############";
 /*###########YOUR CODE ENDS HERE###########*/
     AIfinished=true;
 }

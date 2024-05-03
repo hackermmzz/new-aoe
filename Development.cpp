@@ -227,6 +227,41 @@ int Development::get_addition_MaxCnt( int sort , int type )
     return addition;
 }
 
+
+//int Development::get_civiBuild_Times( int civilization )
+//{
+//    int times = 0;
+
+//    for(map< int , st_buildAction >::iterator iter = developLab.begin(); iter!= developLab.end() ; iter++)
+//        if(iter->second.buildCon->civilization == civilization)
+//            times+=iter->second.buildCon->getActTimes();
+
+//    return times;
+//}
+
+void Development::finishAction(int buildingType , int buildact)
+{
+    if(buildingType == BUILDING_CENTER && buildact == BUILDING_CENTER_UPGRADE) civiChange();
+
+    developLab[buildingType].finishAction(buildact);
+}
+
+bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold )
+{
+    //如果需要创建人口，判断是否有容量添加人
+    if(developLab[buildingNum].actCon[actNum].isNeedCreatObject() && !get_isHumanHaveSpace()) return false;
+
+    return developLab[buildingNum].actCon[actNum].executable(civilization,wood,food,stone,gold);
+}
+
+void Development::set_civilization( int civ )
+{
+    civilization = civ;
+    while(developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode!=NULL && developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode->civilization<civilization)
+    {
+        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].shift();
+    }
+}
 /***************************************************************/
 //初始化develop科技树
 void Development::init_DevelopLab()
@@ -360,7 +395,7 @@ void Development::init_DevelopLab()
     //靶场
     {
         developLab[BUILDING_RANGE].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_RANGE , TIME_BUILD_RANGE , BUILD_RANGE_WOOD);
-        developLab[BUILDING_STABLE].buildCon->addPreCondition(developLab[BUILDING_ARMYCAMP].buildCon);
+        developLab[BUILDING_RANGE].buildCon->addPreCondition(developLab[BUILDING_ARMYCAMP].buildCon);
 
 
         //造弓箭手

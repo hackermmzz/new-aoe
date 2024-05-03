@@ -77,6 +77,8 @@ public:
     int getActNum(){ return this->actNum;}
     void setActNum(int actNum){this->actNum = actNum;}
 
+    int ActNameToActNum(int actName);
+
     //重置行动record
     void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; actPercent = 0; }
 /*****************act获取***************/

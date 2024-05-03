@@ -9,6 +9,8 @@ public:
 /*##########INTERFACE BEGINS HERE##########*/
     int HumanMove(int SN, double L0, double U0){
         Coordinate* self=g_Object[SN];
+//        self->setActSpeed();
+//        g_Object[SN]->setActSpeed();
         if(!isHuman(self))
             return ACTION_INVALID_SN;
         if(L0 > 2575 || L0 < 0||U0 > 2575 || U0 < 0)
@@ -33,7 +35,7 @@ public:
     void processData();
     void run() override{
         if(AIGame.GameFrame>10&&AIfinished){
-            qDebug()<<g_frame<<":"<<"调用AI";
+//            qDebug()<<g_frame<<":"<<"调用AI";
             processData();
         }
         }

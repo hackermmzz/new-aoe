@@ -11,6 +11,8 @@ std::string Building::Builtname[3][10]={{},
                                       };
 std::string Building::BuildDisplayName[10]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场"};
 
+int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
+
 /********************静态资源**************************/
 
 
@@ -65,7 +67,39 @@ void Building::ActNumToActName()
     if(Num == BUILDING_CENTER)
     {
         if(actNum == BUILDING_CENTER_CREATEFARMER) actName = ACT_CREATEFARMER;
-
+        else if(actNum == BUILDING_CENTER_UPGRADE) actName = ACT_UPGRADE_AGE;
+    }
+    else if( Num == BUILDING_GRANARY)
+    {
+        if(actNum == BUILDING_GRANARY_ARROWTOWER) actName = ACT_UPGRADE_TOWERBUILD;
+    }
+    else if(Num == BUILDING_STOCK)
+    {
+        if(actNum == BUILDING_STOCK_UPGRADE_USETOOL) actName = ACT_STOCK_UPGRADE_USETOOL;
+        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY) actName = ACT_STOCK_UPGRADE_DEFENSE_INFANTRY;
+        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER) actName = ACT_STOCK_UPGRADE_DEFENSE_ARCHER;
+        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_RIDER) actName = ACT_STOCK_UPGRADE_DEFENSE_RIDER;
+    }
+    else if(Num == BUILDING_ARMYCAMP)
+    {
+        if(actNum == BUILDING_ARMYCAMP_CREATE_CLUBMAN) actName = ACT_ARMYCAMP_CREATE_CLUBMAN;
+        else if(actNum == BUILDING_ARMYCAMP_UPGRADE_CLUBMAN) actName = ACT_ARMYCAMP_UPGRADE_CLUBMAN;
+        else if(actNum == BUILDING_ARMYCAMP_CREATE_SLINGER) actName = ACT_ARMYCAMP_CREATE_SLINGER;
+    }
+    else if(Num == BUILDING_MARKET)
+    {
+        if(actNum == BUILDING_MARKET_WOOD_UPGRADE) actName = ACT_UPGRADE_WOOD;
+        else if(actNum == BUILDING_MARKET_STONE_UPGRADE) actName = ACT_UPGRADE_STONE;
+        else if(actNum == BUILDING_MARKET_FARM_UPGRADE) actName = ACT_UPGRADE_FARM;
+        else if(actNum == BUILDING_MARKET_GOLD_UPGRADE) actName = ACT_UPGRADE_GOLD;
+    }
+    else if( Num == BUILDING_RANGE)
+    {
+        if(actNum == BUILDING_RANGE_CREATE_BOWMAN) actName = ACT_RANGE_CREATE_BOWMAN;
+    }
+    else if(Num == BUILDING_STABLE)
+    {
+        if(actNum == BUILDING_STABLE_CREATE_SCOUT) actName =ACT_STABLE_CREATE_SCOUT;
     }
 }
 
@@ -73,7 +107,7 @@ void Building::setNowRes()
 {
     std::list<ImageResource>* tempNowlist = NULL;
     if(Percent<100) tempNowlist = Building::build[Foundation];
-    else tempNowlist = Building::built[civ][Num];
+    else tempNowlist = Building::built[get_civilization()][Num];
 
     if(tempNowlist != nowlist)
     {
@@ -194,3 +228,18 @@ void Building::setFundation()
     }
 }
 
+
+void Building::setActStatus(int wood , int food , int stone , int gold)
+{
+    int actionName, actionNumber;
+
+    for(int position = 0 ; position<ACT_WINDOW_NUM_FREE;position++)
+    {
+        actionName = getActNames(position);
+        actionNumber = ActNameToActNum(actionName);
+
+        if(actionNumber>-1 && !playerScience->get_isBuildActionAble(Num , actionNumber , get_civilization(),wood,food,stone,gold))
+            actStatus[position] = ACT_STATUS_DISABLED;
+        else actStatus[position] = ACT_STATUS_ENABLED;
+    }
+}

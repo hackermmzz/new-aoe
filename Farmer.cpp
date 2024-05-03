@@ -125,7 +125,6 @@ double Farmer::getDis_attack()
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
-
 }
 
 int Farmer::get_AttackType()
