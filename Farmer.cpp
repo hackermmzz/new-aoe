@@ -16,15 +16,18 @@ Farmer::Farmer()
 
 }
 
-Farmer::Farmer(double DR, double UR)
+Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent )
 {
+    this->playerScience = playerScience;
+    this->playerRepresent = playerRepresent;
+
     this->Blood=1;
     this->MaxBlood=BLOOD_FARMER;
     speed = HUMAN_SPEED;
     this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
 
-    this->Angle=rand()%8;
+    this->Angle=0;
     this->state=HUMAN_STATE_IDLE;
     this->resource=0;
     this->DR=DR;
@@ -122,7 +125,6 @@ double Farmer::getDis_attack()
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
-
 }
 
 int Farmer::get_AttackType()

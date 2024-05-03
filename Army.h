@@ -7,7 +7,7 @@ class Army : public Human
 {
 public:
     Army();
-    Army(double DR,double UR,int type);
+    Army(double DR,double UR,int type , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
     ~Army();
 
   /**********************虚函数**************************/

@@ -8,7 +8,8 @@ class Building_Resource : public Building,public Resource
 {
 public:
     Building_Resource(){}
-    Building_Resource(int Num, int BlockDR, int BlockUR, int civ ,int Percent=100):Building(Num,BlockDR,BlockUR,civ,Percent){
+    Building_Resource(int Num, int BlockDR, int BlockUR, int civ , Development* playerScience = NULL, int playerRepresent = MAXPLAYER ,int Percent=100)\
+                    :Building(Num,BlockDR,BlockUR,civ,playerScience,playerRepresent,Percent){
         setAttribute();
         init_Blood();
         setFundation();
@@ -32,9 +33,8 @@ public:
   /********************以上虚函数**************************/
     bool isGathererAsLandlord(Coordinate* gatherer);
 
-
 private:
-    void setMaxCnt();
+    void setMaxCnt(){ if(Num == BUILDING_FARM)  MaxCnt = CNT_BUILD_FARM+playerScience->get_addition_MaxCnt(getSort(),Num);}
 
     void initGatherer(){ gatherer = NULL; }
     void setGatherer( Coordinate* gatherer){ this->gatherer = gatherer; }

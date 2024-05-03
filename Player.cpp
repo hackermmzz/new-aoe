@@ -31,40 +31,40 @@ Player::~Player()
 Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
 {
     Building *newbuilding = NULL;
-    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,this->civilization , percent);
-    else newbuilding=new Building(Num,BlockDR,BlockUR,this->civilization , percent);
+    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
+    else newbuilding=new Building(Num,BlockDR,BlockUR, getCiv(), playerScience , represent , percent);
 
-    newbuilding->setPlayerScience(playerScience);
-    newbuilding->setPlayerRepresent(represent);
+    if(newbuilding->getNum() == BUILDING_HOME) playerScience->addHome();
+    else if(newbuilding->getNum() != BUILDING_CENTER) playerScience->add_civiBuildNum(newbuilding->getNum());
+
     build.push_back(newbuilding);
     return newbuilding;
 }
 
 int Player::addHuman(int Num, double DR, double UR)
 {
-    Human *newhuman=new Human(Num,DR,UR);
-    newhuman->setPlayerScience(playerScience);
-    newhuman->setPlayerRepresent(represent);
+    Human *newhuman=new Human(Num,DR,UR , playerScience , represent);
+
     human.push_back(newhuman);
+    humanNumIncrease(newhuman);
     return 0;
 }
 
 Army* Player::addArmy(int Num , double DR , double UR)
 {
-    Army *newArmy = new Army(DR , UR, Num);
-    newArmy->setPlayerScience(playerScience);
-    newArmy->setPlayerRepresent(represent);
-    human.push_back(newArmy);
+    Army *newArmy = new Army(DR , UR, Num ,  playerScience , represent);
 
+    human.push_back(newArmy);
+    humanNumIncrease(newArmy);
     return newArmy;
 }
 
 int Player::addFarmer(double DR, double UR)
 {
-    Farmer *newfarmer=new Farmer(DR,UR);
-    newfarmer->setPlayerScience(playerScience);
-    newfarmer->setPlayerRepresent(represent);
+    Farmer *newfarmer=new Farmer(DR,UR , playerScience , represent);
+
     human.push_back(newfarmer);
+    humanNumIncrease(newfarmer);
     return 0;
 }
 
@@ -76,9 +76,8 @@ Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee )
     attacker->printer_ToBloodHaver((void**)&aterOb);
     if(aterOb!=NULL)
     {
-        newMissile = new Missile(aterOb->get_type_Missile(), attacker , attackee);
-        newMissile->setPlayerScience(playerScience);
-        newMissile->setPlayerRepresent(represent);
+        newMissile = new Missile(aterOb->get_type_Missile(), attacker , attackee, playerScience , represent);
+
         missile.push_back(newMissile);
     }
 
@@ -88,12 +87,17 @@ Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee )
 //删除实例对象
 list<Human*>::iterator Player::deleteHuman( list<Human*>::iterator iterDele )
 {
+    humanNumDecrease(*iterDele);
     delete *iterDele;
     return human.erase(iterDele);
 }
 
 list<Building*>::iterator Player::deleteBuilding( list<Building*>::iterator iterDele )
 {
+    if((*iterDele)->getNum() == BUILDING_HOME) playerScience->subHome();
+    else if((*iterDele)->getNum() == BUILDING_CENTER) playerScience->subCenter();
+    else playerScience->sub_civiBuildNum((*iterDele)->getNum());
+
     delete *iterDele;
     return build.erase(iterDele);
 }
@@ -172,6 +176,7 @@ void Player::enforcementAction( Building* actBuild )
     int creatObjectSort , creatObjectNum;
 
     isNeedCreatObject = playerScience->isNeedCreatObjectAfterAction(actBuild->getNum() , actBuild->getActNum() , creatObjectSort , creatObjectNum);
+    qDebug()<<"actend"<<(actBuild->getActNum());
     playerScience->finishAction(actBuild->getNum() ,actBuild->getActNum());
     actBuild->init_Resouce_TS();    //重置行动建筑的返还资源
 

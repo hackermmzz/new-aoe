@@ -9,7 +9,7 @@ class Human:public MoveObject,public BloodHaver
 {
 public:
     Human();
-    Human(int Num,double DR,double UR);
+    Human(int Num,double DR,double UR,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
 
   /**********************虚函数**************************/
     void nextframe();
@@ -30,6 +30,7 @@ public:
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
+    //转化时使用
     void setPlayerScience( Development* science ){ this->playerScience = science; }
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 

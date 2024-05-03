@@ -213,6 +213,26 @@
     <string/>
    </property>
   </widget>
+  <widget class="ActWidget" name="interact9" native="true">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>900</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="ActWidget" name="interact10" native="true">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>900</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

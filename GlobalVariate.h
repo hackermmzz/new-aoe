@@ -240,7 +240,7 @@ struct conditionDevelop
 
     double times_second;
 
-    int acttimes = 0;    //表示执行的此时
+    int acttimes = 0;    //表示执行的此数
 
     bool isCreatObjectAction = false; //行动结束后是否需要创建对象
     int creatObjectSort = -1;   //需要创建对象的类sort
@@ -312,6 +312,10 @@ struct conditionDevelop
         creatNum = creatObjectNum;
         return isCreatObjectAction;
     }
+
+    bool isNeedCreatObject(){ return isCreatObjectAction; }
+
+    int getActTimes(){ return acttimes; }
 };
 
 struct st_upgradeLab{
@@ -344,10 +348,12 @@ struct st_upgradeLab{
     //切换
     void shift()
     {
+        qDebug()<<"over";
         if(nowExecuteNode!=NULL)
         {
             haveFinishedPhaseNum++;
             nowExecuteNode = nowExecuteNode->nextDevAction;
+            qDebug()<<"nowexc"<<nowExecuteNode;
         }
     }
 
@@ -373,6 +379,11 @@ struct st_upgradeLab{
     /**
     *考虑加入错误码，以判断错误类型
     */
+
+    bool isNeedCreatObject(){
+        if(nowExecuteNode!=NULL) return nowExecuteNode->isNeedCreatObject();
+        else return false;
+    }
 };
 
 struct st_buildAction

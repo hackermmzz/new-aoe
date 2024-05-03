@@ -5,8 +5,10 @@ Human::Human()
 
 }
 
-Human::Human(int Num, double DR, double UR)
+Human::Human(int Num, double DR, double UR,Development* playerScience, int playerRepresent)
 {
+    this->playerScience = playerScience;
+    this->playerRepresent = playerRepresent;
     this->Num=Num;
     this->DR=DR;
     this->UR=UR;
