@@ -100,7 +100,7 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
-        qDebug()<<"in if";
+        qDebug()<<"addrelate";
         Building* buildOb = NULL;
         object1->printer_ToBuilding((void**)&buildOb);
         if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
@@ -108,6 +108,7 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
             player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
             buildOb->setAction(actNum);
             relate_AllObject[object1] = relation_Object(evenType);
+            qDebug()<<"success";
             return true;
         }
     }
@@ -434,11 +435,11 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
-        qDebug()<<(attacker->getATK())<<(attackee->getDEF(attacker->get_AttackType()));
+//        qDebug()<<(attacker->getATK())<<(attackee->getDEF(attacker->get_AttackType()));
         damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
-        qDebug()<<damage;
+//        qDebug()<<damage;
     }
 }
 
@@ -508,8 +509,10 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
-    object1->initAction();
 
+
+    qDebug()<<"ending";
+    qDebug()<<relate_AllObject[object1].relationAct;
     switch(relate_AllObject[object1].relationAct){
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
@@ -518,6 +521,7 @@ void Core_List::object_FinishAction(Coordinate* object1)
             relate_AllObject[object1].goalObject->initAction();
             if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
             {
+                 object1->initAction();
                  addRelation(object1 , relate_AllObject[object1].goalObject ,CoreEven_Gather);
                  return;
             }
@@ -525,6 +529,7 @@ void Core_List::object_FinishAction(Coordinate* object1)
         break;
     case CoreEven_BuildingAct:
         player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);  //进行建筑行动的结果处理
+        qDebug()<<"end";
         break;
     case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
@@ -534,6 +539,7 @@ void Core_List::object_FinishAction(Coordinate* object1)
         break;
     }
 
+    object1->initAction();
     object_FinishAction_Absolute(object1);
 }
 

@@ -11,7 +11,7 @@ class Missile : public MoveObject
 {
 public:
     Missile();
-    Missile(int type, Coordinate* attacker , Coordinate* attackee);
+    Missile(int type, Coordinate* attacker , Coordinate* attackee ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
 
   /**********************虚函数**************************/
     int calculateAngle(double nextDR, double nextUR);
@@ -56,12 +56,14 @@ public:
 
     //命中目标
     void hitTarget(){haveHitTarget = true;}
-    void setPlayerScience(Development* science){ playerScience = science; }
 
-    void needDelete(){ taskEnd = true; }
+    //转化时使用
+    void setPlayerScience(Development* science){ playerScience = science; }
     //记录隶属的player阵营
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
+
+    void needDelete(){ taskEnd = true; }
     void set_attackerDie(){ isAttackerDie = true; }
 
 

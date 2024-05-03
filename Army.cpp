@@ -19,8 +19,11 @@ Army::Army()
 
 }
 
-Army::Army(double DR,double UR,int type)
+Army::Army(double DR,double UR,int type , Development* playerScience, int playerRepresent)
 {
+    this->playerScience = playerScience;
+    this->playerRepresent = playerRepresent;
+
     //type可视为army的state
     this->type = type;
     this->Blood=1;

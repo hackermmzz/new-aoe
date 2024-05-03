@@ -40,55 +40,28 @@ public:
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
-    double getDR()
-    {
-        return this->DR;
-    }
-    double getUR()
-    {
-        return this->UR;
-    }
-    int getBlockDR()
-    {
-        return this->BlockDR;
-    }
-    int getBlockUR()
-    {
-        return this->BlockUR;
-    }
-    double getimageX()
-    {
-        return this->imageX;
-    }
-    double getimageY()
-    {
-        return this->imageY;
-    }
-    double getSideLength()
-    {
-        return this->SideLength;
-    }
-    int getimageH()
-    {
-        return this->imageH;
-    }
-    std::list<ImageResource>::iterator getNowRes()
-    {
-        return this->nowres;
-    }
-    int getglobalNum()
-    {
-        return this->globalNum;
-    }
-    int getNum()
-    {
-        return this->Num;
-    }
+
+    //获取坐标
+    double getDR(){return this->DR;}
+    double getUR(){return this->UR;}
+    int getBlockDR(){return this->BlockDR;}
+    int getBlockUR(){return this->BlockUR;}
+
+    //image资源相关信息
+    double getimageX(){return this->imageX;}
+    double getimageY(){return this->imageY;}
+    double getSideLength(){return this->SideLength;}
+    int getimageH(){return this->imageH;}
+    std::list<ImageResource>::iterator getNowRes(){return this->nowres;}
+
+    //创建对象相关信息
+    int getglobalNum(){return this->globalNum;}
+    int getNum(){return this->Num;}
 
     double get_BlockSizeLen(){ return BlockSizeLen; }
     double get_SideLen(){return SideLength;}
 
-
+    //设置当前交互对象
     void set_interAct(int interSort , int interNum){ interactSort = interSort ; interactNum = interNum; }
 
 /*****************act获取***************/
@@ -104,6 +77,9 @@ public:
     int getActNum(){ return this->actNum;}
     void setActNum(int actNum){this->actNum = actNum;}
 
+    int ActNameToActNum(int actName);
+
+    //重置行动record
     void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; actPercent = 0; }
 /*****************act获取***************/
 

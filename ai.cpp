@@ -48,6 +48,8 @@ void AI::processData(){
         }
     }
 
+//    qDebug()<<AIGame.GameFrame;
+//    qDebug()<<"#############";
     for(tagBuilding building:AIGame.buildings){
         if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
             qDebug()<<"Build:"<<building.Percent<<":"<<BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
