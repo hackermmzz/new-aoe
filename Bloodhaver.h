@@ -16,8 +16,8 @@ public:
     virtual bool isAttacking(){ return false;}
     virtual int getMaxBlood(){ return MaxBlood; }
 
-    virtual int getATK(){ return atk; }
-    virtual int get_add_specialAttack(Coordinate* attackee ){ return 0; }
+    virtual int getATK(){ return atk+ get_add_specialAttack(); }
+    virtual int get_add_specialAttack(){ return 0; }
     virtual int getDEF(int attackType_got){  if(attackType_got == ATTACKTYPE_CLOSE) return defence_close;
                                              else if(attackType_got == ATTACKTYPE_SHOOT) return defence_shoot;
                                              else return 0;}
@@ -28,6 +28,16 @@ public:
 
     //判断本攻击单位的攻击方式是否需要投掷物
     virtual bool is_missileAttack(){ return type_Missile != -1; }
+
+    //用于显示的属性
+    virtual int showATK_Basic(){ getATK()+get_add_specialAttack();}
+    virtual int showATK_Addition(){ return 0; }
+    virtual int showDEF_Close(){ return defence_close; }
+    virtual int showDEF_Close_Addition(){ return 0; }
+    virtual int showDEF_Shoot(){ return defence_shoot; }
+    virtual int showDEF_Shoot_Addition(){ return 0; }
+
+
     /*********以上虚函数************/
 
     //判断死亡
@@ -67,7 +77,7 @@ protected:
     int MaxBlood = 100;
 
     //攻击相关
-    Coordinate* attackObject = NULL;    //攻击目标
+    Coordinate* attackObject = NULL;    //攻击目标 该指针很危险，需改进
     bool gotAttack = false;
     Coordinate* avangeObject = NULL;    //受到攻击的来源
     double DR_avange=0,UR_avange=0;     //攻击来源的位置

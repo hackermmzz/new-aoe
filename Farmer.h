@@ -15,6 +15,7 @@ public:
     int getSort();
     double getDis_attack();
     int get_AttackType();
+    int get_add_specialAttack();
 
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
     /***************指针强制转化****************/
@@ -179,10 +180,10 @@ private:
     double resource;
     //当前资源携带量
 
-    int resource_Max = 50;
+    int resource_Max = 10;
     //最大资源携带量
 
-    double quantity_GatherOnce = 2;
+    double quantity_GatherOnce = 0.2;
 
     int resourceSort;
     //指示所携带资源的类型

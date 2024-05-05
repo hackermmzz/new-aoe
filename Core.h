@@ -22,6 +22,8 @@ public:
     bool get_IsObjectFree(Coordinate* object){ return interactionList->isObject_Free(object); }
     bool get_IsActionNow( Coordinate* object ){ return !interactionList->isObject_Free(object); }
 
+    void deleteOb_setNowobNULL(Coordinate* deOb){ if(deOb == nowobject) nowobject = NULL; }
+
     /************添加/删除表************/
     bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true){ return interactionList->addRelation(object1,object2,eventType,respond); }
      //建造

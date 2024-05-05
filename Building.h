@@ -9,10 +9,12 @@ class Building:public Coordinate,public BloodHaver
 {
 public:
     Building();
-    Building(int Num, int BlockDR, int BlockUR, int civ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER , int Percent=100);
+    Building(int Num, int BlockDR, int BlockUR, int civ = CIVILIZATION_STONEAGE,Development* playerScience = NULL, int playerRepresent = MAXPLAYER , int Percent=100);
 
   /**********************虚函数**************************/
     int getSort(){return SORT_BUILDING;}
+    bool isPlayerControl(){ return true; }
+
     int getMaxBlood(){ return MaxBlood; }
     int getPlayerRepresent(){ return playerRepresent; }
 
@@ -93,7 +95,8 @@ public:
     bool isFinish(){return this->Percent>=100;}
     double getPercent() {return this->Percent;}
 
-    int get_civilization(){ return playerScience->get_civilization(); }
+    int get_civilization(){ if(playerScience == NULL) return CIVILIZATION_STONEAGE;
+                            else return playerScience->get_civilization();}
 
 protected:
   /********************静态资源**************************/

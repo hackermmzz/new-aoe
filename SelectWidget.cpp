@@ -29,7 +29,12 @@ void SelectWidget::paintEvent(QPaintEvent *event)
         painter.fillRect(QRect(0, 0, 270, 170), QBrush(QColor(Qt::black)));
         if(true){
             painter.drawRect(130, 90, 120, 20);
-            if(true)
+
+            BloodHaver* bloodobject = NULL;
+            Animal* animalObject = NULL;
+            nowobject->printer_ToBloodHaver((void**)&bloodobject);
+            nowobject->printer_ToAnimal((void**)&animalObject);
+            if(bloodobject!=NULL && animalObject == NULL || animalObject!=NULL && !animalObject->get_Gatherable())
             {//如果有血条的对象，绘制血条
                 int StartX = 130, StartY = 110;
                 int percent = 0;
@@ -37,9 +42,7 @@ void SelectWidget::paintEvent(QPaintEvent *event)
 //                else if(nowobject->getSort() == SORT_FARMER) percent = ((Farmer *)nowobject)->getBlood() * ((Farmer *)nowobject)->getMaxBlood();
 
                 //修改percent
-                BloodHaver* bloodobject = NULL;
-                nowobject->printer_ToBloodHaver((void**)&bloodobject);
-                if(bloodobject!=NULL) percent = bloodobject->getBloodPercent()*100;
+                percent = bloodobject->getBloodPercent()*100;
 
                 if(percent > 100) percent = 100;
                 painter.fillRect(QRect(117 + StartX, StartY, 3, 20), QBrush(QColor(0, 255, 0)));
@@ -576,12 +579,8 @@ void SelectWidget::refreshActs()
                 break;
             }
 
-            //死亡后，不显示血量 会有红色条——如何修改？
-            if(objAnimal->isDie())
-            {
-                 ui->objHp->setText(""); //原代码意思是当动物死亡后变为收集的资源时，不显示血条，现在可能有新的设计
-                 ui->objHp->hide();
-            }
+            //死亡后，不显示血量
+            if(objAnimal->isDie()) ui->objHp->setText(""); //原代码意思是当动物死亡后变为收集的资源时，不显示血条，现在可能有新的设计
             else ui->objHp->setText(QString::number(objAnimal->getBlood()) + "/" + QString::number(objAnimal->getMaxBlood()));
 
             this->update();
@@ -633,6 +632,7 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
         manageBuildBottom( 1 , ACT_BUILD_GRANARY , BUILDING_GRANARY );
         manageBuildBottom( 2 , ACT_BUILD_STOCK , BUILDING_STOCK);
         manageBuildBottom( 3 , ACT_BUILD_MARKET , BUILDING_MARKET);
+        manageBuildBottom( 4 , ACT_BUILD_ARROWTOWER , BUILDING_ARROWTOWER );
         manageBuildBottom( 5 , ACT_BUILD_ARMYCAMP , BUILDING_ARMYCAMP );
         manageBuildBottom( 6 , ACT_BUILD_RANGE , BUILDING_RANGE );
         manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
@@ -1257,7 +1257,7 @@ void SelectWidget::actionUpdate()
 //                    debugText("blue"," 已完成技术升级:箭塔建造");
                     //                    ui->DebugTextBrowser->insertHtml(COLOR_BLUE(getShowTime() + " 已完成技术升级:箭塔建造"));
                     //                    ui->DebugTextBrowser->insertPlainText("\n");
-                    mainPtr->player[0]->setArrowTowerUnlocked(true);
+//                    mainPtr->player[0]->setArrowTowerUnlocked(true);
 //                    mainPtr->player[0]->setStartScores(START_UPGRADE_ARROWTOWER);
 //                    (*it)->setActName(ACT_NULL);
 //                    (*it)->setActNum(0);
@@ -1349,16 +1349,17 @@ void SelectWidget::actionUpdate()
 void SelectWidget::getBuild(int BlockL, int BlockU, int num)
 {
 //    num++;
-    if(BlockL < 0 || BlockL > 71 || BlockU < 0 || BlockU > 71)
-    {
+//    if(BlockL < 0 || BlockL > 71 || BlockU < 0 || BlockU > 71)
+//    {
 //        debugText("red", " 建造失败,选中位置越界");
 //        return nullptr;//位置越界
-    }
-    if(!((num >= 1 && num <= 2) || (num >= 4 && num <= 7)))
-    {
+//    }
+//    if(!((num >= 1 && num <= 2) || (num >= 4 && num <= 7)))
+//    {
 //        debugText("red", " 建造失败,建筑类型不存在");
 //        return nullptr;//BuildingNum不存在
-    }
+//    }
+
 //    if(!map->cell[BlockL][BlockU].Explored)
 //    {
 //        debugText("red", " 建造失败,选中位置未被探索");

@@ -5,6 +5,8 @@
 #include <config.h>
 #include <StaticRes.h>
 #include <Animal.h>
+#include <Player.h>
+#include <cstring>
 
 class Map
 {
@@ -28,7 +30,9 @@ public:
     void generateLandforms();
 
     void loadfindPathMap();
-    void clearfindPathMap();
+    bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
+
+    void setPlayer(Player** player){ this->player = player; }
 
     int addStaticRes(int Num,double DR,double UR);
 
@@ -75,9 +79,17 @@ private:
     double tranL(double BlockL);
     double tranU(double BlockU);
 
+    //寻路障碍地图
+    void clearfindPathMap(){memset(findPathMap,0,sizeof(findPathMap));}
+    void clearBarrierMap(){ memset(barrierMap ,0 , sizeof(barrierMap)); }
+    void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
+
+    Player** player;
     short m_heightMap[80][80];
     int Gamemap[MAP_L][MAP_U];  // 地图资源二维数组
-    bool mapFlag[MAP_L][MAP_U]; // 地图标识二维数组，0为可放置，1为不可放置
+    bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
+
+    int barrierMap[MAP_L][MAP_U];
 
 };
 

@@ -186,9 +186,14 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
         if(buildMode >= 0){
             int hoverDR = (tranDR(event->x(), event->y()) + DR) / BLOCKSIDELENGTH;
             int hoverUR = (tranUR(event->x(), event->y()) + UR) / BLOCKSIDELENGTH;
-            if(buildMode == 1 || buildMode == 3 || buildMode == 4 || buildMode == 5)
+            if(buildMode == BUILDING_GRANARY || buildMode == BUILDING_STOCK || buildMode == BUILDING_MARKET || buildMode == BUILDING_FARM\
+                 || buildMode == BUILDING_ARMYCAMP || buildMode == BUILDING_RANGE || buildMode == BUILDING_STABLE)
             {
                 hoverDR--;
+                hoverUR--;
+            }
+            if(buildMode == BUILDING_HOME || buildMode == BUILDING_ARROWTOWER)
+            {
                 hoverUR--;
             }
             emit sendView(hoverDR, hoverUR, buildMode);
