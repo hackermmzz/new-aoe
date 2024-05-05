@@ -151,7 +151,7 @@ void Map::generateResources() {
             if(flag == 1) break;
         }
         if(flag == 1) break;
-//        if(flag == 0 && i == MAP_L / 2 + 10) i = MAP_L / 2 - 10;
+        if(flag == 0 && i == MAP_L / 2 + 10) i = MAP_L / 2 - 10;
     }
 
     // 在39 * 39边缘生成一堆石头
@@ -199,7 +199,7 @@ void Map::generateResources() {
             }
         }
         if(flag == 1) break;
-//        if(flag == 0 && i == MAP_L / 2 + 19) i = MAP_L / 2 - 19;
+        if(flag == 0 && i == MAP_L / 2 + 19) i = MAP_L / 2 - 19;
     }
 
     // 在61 * 61边缘生成一堆石头
@@ -247,7 +247,7 @@ void Map::generateResources() {
             }
         }
         if(flag == 1) break;
-//        if(flag == 0 && i == MAP_L / 2 + 30) i = MAP_L / 2 - 30;
+        if(flag == 0 && i == MAP_L / 2 + 30) i = MAP_L / 2 - 30;
     }
 
     // 在27 * 27边缘生成一堆瞪铃
@@ -295,7 +295,7 @@ void Map::generateResources() {
             }
         }
         if(flag == 1) break;
-//        if(flag == 0 && i == MAP_L / 2 + 13) i = MAP_L / 2 - 13;
+        if(flag == 0 && i == MAP_L / 2 + 13) i = MAP_L / 2 - 13;
     }
 
 }
@@ -490,6 +490,7 @@ void Map::generateCenter() {
 
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
+    player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
     for(int i = MAP_L / 2 - 2; i <= MAP_L / 2 + 2; i++)
     {
         for(int j = MAP_U / 2 - 2; j <= MAP_U / 2 + 2; j++)
@@ -694,94 +695,118 @@ void Map::generateLandforms() {
 void Map::loadfindPathMap() {
 
     clearfindPathMap();
-    //    for (int i = 0; i < MAP_L; ++i)
-    //    {
-    //        for (int j = 0; j < MAP_U; ++j)
-    //        {
-    //            if(cell[i][j].Explored==false)
-    //            {
-    //                findPathMap[i][j]=1;
-    //            }
-    //        }
-    //    }
-    //    for(int i=0;i<MAXPLAYER;i++)
-    //    {
-    //        if(!player[i]->build.empty())
-    //        {
-    //            std::list<Building *>::iterator iter=player[i]->build.begin();
-    //            while(iter!=player[i]->build.end())
-    //            {
-    //                if((*iter)->isMiddleFoundation())
-    //                {
-    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
-    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+2]=1;
-    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
-    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
-    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+2]=1;
-    //                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()]=1;
-    //                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+1]=1;
-    //                    findPathMap[(*iter)->getBlockL()+2][(*iter)->getBlockU()+2]=1;
-    //                }
-    //                else if((*iter)->isSmallFoundation())
-    //                {
-    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-    //                    findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
-    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
-    //                    findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
-    //                }
-    //                iter++;
-    //            }
-    //        }
-    //        //        if(!player[i]->human.empty())
-    //        //        {
-    //        //            std::list<Human *>::iterator iter=player[i]->human.begin();
-    //        //            while(iter!=player[i]->human.end())
-    //        //            {
-    //        //                CollisionObject.push_back((*ite));
-    //        //                iter++;
-    //        //            }
-    //        //        }
-    //    }
-    //    if(!map->coores.empty())
-    //    {
-    //        std::list<Coores *>::iterator iter=map->coores.begin();
-    //        while(iter!=map->coores.end())
-    //        {
-    //            if((*iter)->isBlockres())
-    //            {
-    //                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-    //                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()+1]=1;
-    //                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()]=1;
-    //                findPathMap[(*iter)->getBlockL()+1][(*iter)->getBlockU()+1]=1;
-    //            }
-    //            iter++;
-    //        }
-    //    }
-    //    if(!map->animal.empty())
-    //    {
-    //        std::list<Animal *>::iterator iter=map->animal.begin();
-    //        while(iter!=map->animal.end())
-    //        {
-    //            Animal *animal=(Animal *)(*iter);
-    //            if(animal->isTree())
-    //            {
-    //                findPathMap[(*iter)->getBlockL()][(*iter)->getBlockU()]=1;
-    //            }
-    //            iter++;
-    //        }
-    //    }
-}
+    clearBarrierMap();
 
-void Map::clearfindPathMap() {
     for (int i = 0; i < MAP_L; ++i)
     {
         for (int j = 0; j < MAP_U; ++j)
         {
-            findPathMap[i][j] = 0;
+            if(cell[i][j].Explored==false)
+            {
+                findPathMap[i][j]=1;
+            }
+        }
+    }
+
+    for(int i=0;i<MAXPLAYER;i++)
+    {
+        //设置建筑为障碍
+        if(!player[i]->build.empty())
+        {
+            std::list<Building *>::iterator iter=player[i]->build.begin() , iterend = player[i]->build.end();
+            while(iter!=iterend)
+            {
+                setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
+                iter++;
+            }
+        }
+        //设置人为障碍物
+        if(!player[i]->human.empty())
+        {
+            std::list<Human *>::iterator iter=player[i]->human.begin(), iterend = player[i]->human.end();
+            while(iter!=iterend)
+            {
+//                CollisionObject.push_back((*ite));
+                setBarrier((*iter)->getBlockDR(),(*iter)->getBlockUR(),(*iter)->get_BlockSizeLen());
+                iter++;
+            }
+        }
+    }
+
+    //设置不可移动资源为障碍物
+    if(!staticres.empty())
+    {
+        std::list<StaticRes *>::iterator iter=staticres.begin() , iterend = staticres.end();
+        while(iter!=iterend)
+        {
+            setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
+            iter++;
+        }
+    }
+
+    //设置动物为障碍物
+    if(!animal.empty())
+    {
+        std::list<Animal *>::iterator iter=animal.begin(),iterend = animal.end();
+        while(iter!=iterend)
+        {
+            if((*iter)->isTree()) setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
+            iter++;
         }
     }
 }
+
+//设置障碍物
+void Map::setBarrier(int blockDR,int blockUR , int blockSideLen )
+{
+    int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
+
+    for(int i = blockDR; i<bDRR; i++)
+        for(int j = blockUR;j<bURU;j++) barrierMap[i][j] = 1;
+
+    return;
+}
+
+bool Map::isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen )
+{
+/**
+传入：
+blockDR:起始BlockDR；
+blockUR:起始BlockUR；
+&bDR_barrier: 返回第一个找到的障碍物点BlockDR；
+&bUR_barrier: 返回第一个找到的障碍物点的BlockUR；
+blockSideLen: 返回查找的边大小；
+返回：
+true：指定范围内有障碍物；
+false：指定范围内无障碍物；
+*/
+    int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
+    bDR_barrier = bUR_barrier = -1;
+
+    for(int i = blockDR; i<bDRR; i++)
+        for(int j = blockUR;j<bURU;j++)
+        {
+            if(barrierMap[i][j] == 1)
+            {
+                bDR_barrier = i;
+                bUR_barrier = j;
+
+                return true;
+            }
+        }
+
+    return false;
+}
+
+//void Map::clearfindPathMap() {
+//    for (int i = 0; i < MAP_L; ++i)
+//    {
+//        for (int j = 0; j < MAP_U; ++j)
+//        {
+//            findPathMap[i][j] = 0;
+//        }
+//    }
+//}
 
 int Map::addStaticRes(int Num, double DR, double UR) {
     StaticRes *newstaticres=new StaticRes(Num,DR,UR);

@@ -18,10 +18,21 @@ bool Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eve
 
     if(! relate_AllObject[object1].isExist )
     {
-        object1->set_interAct(object2->getSort() , object2->getNum());
-        relate_AllObject[object1] = relation_Object(object2 , eventType);
-        relate_AllObject[object1].respondConduct = respond;
+        //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
+        bool isSameReprensent;
+        if(object1->isPlayerControl() && object2->isPlayerControl()) isSameReprensent = object1->getPlayerRepresent() == object2->getPlayerRepresent();
+        else isSameReprensent = false;
 
+        if(object2->getSort() == SORT_BUILDING || object2->getSort() == SORT_Building_Resource)
+            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent , ((Building*)object2)->isFinish());
+        else
+            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent);
+
+        //加入行动交互表
+        relate_AllObject[object1] = relation_Object(object2 , eventType);
+        relate_AllObject[object1].respondConduct = respond; //是否可由addrelation更改行动
+
+        //根据行动类型，设置需要的额外属性
         switch (eventType)
         {
             case CoreEven_Gather:
@@ -298,6 +309,67 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
     if(optimum!=NULL) relation.set_AlterOb(optimum , dis_opti);
 }
 
+//判断是否可以建造建筑（需要优化，错误码）
+bool Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
+{
+    bool answer = true;;
+    int DRL = -1,DRR = -1,URD = -1, URU = -1;    //记录边界
+    Building* tempBuild = NULL;
+
+    //预创建
+    if(buildtype == BUILDING_FARM)
+    {
+        Building_Resource* tempBuild_resource = new Building_Resource(buildtype,BlockDR,BlockUR);
+        tempBuild = tempBuild_resource;
+    }
+    else tempBuild = new Building(buildtype,BlockDR,BlockUR);
+
+    DRL = tempBuild->getBlockDR();
+    DRR = tempBuild->getBlockDR()+tempBuild->get_BlockSizeLen();
+    URD = tempBuild->getBlockUR();
+    URU = tempBuild->getBlockUR()+tempBuild->get_BlockSizeLen();
+
+    if(DRL<0 || DRR>71 || URD<0 || URU>71)
+    {
+        //        debugText("red", " 建造失败,选中位置越界");
+        qDebug()<<"overBorder";
+        answer = false;
+    }
+
+    if( tempBuild->isIncorrect_Num() )
+    {
+        //        debugText("red", " 建造失败,建筑类型不存在");
+        qDebug()<<"numIncorrect";
+        answer = false;
+    }
+
+    if( !theMap->cell[DRL][URD].Explored )
+    {
+        //        debugText("red", " 建造失败,选中位置未被探索");
+        qDebug()<<"explored";
+        answer = false;
+    }
+
+    //如果以上限制均未触发，判断是否有重叠
+    if(answer)
+    {
+        int bDR_ba,bUR_ba;
+        if(theMap->isBarrier(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
+        {
+//            debugText("red"," 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠");
+            qDebug()<<"overlap"<<bDR_ba<<bUR_ba;
+            answer = false;
+        }
+
+    }
+
+    //*************结束******************
+    delete tempBuild;
+
+    if(answer) return true;
+    else return false;
+}
+
 void Core_List::eraseObject(Coordinate* eraseOb)
 {
     eraseRelation(eraseOb);
@@ -375,7 +447,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
         start.y = tranBlockUR(moveObject->getUR());
         destination.x = tranBlockDR(moveObject->getDR0());
         destination.y = tranBlockUR(moveObject->getUR0());
-        theMap->loadfindPathMap();
+//        theMap->loadfindPathMap();
         moveObject->setPath(findPath(theMap->findPathMap , theMap , start , destination));
     }
 
@@ -400,18 +472,20 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     if(attackee != NULL && attacker!=NULL)  //若指针均非空
     {
         if(!attacker->isAttacking()) attacker->setPreAttack();
-        //非祭司,是普通的伤害计算公式
-        /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
-
-        if(attacker->is_missileAttack())
+        else
         {
-            if(object1->get_isActionImageToPhaseFromEnd(PhaseFromEnd_Attack_ThrowMissile))
-                addRelation( creatMissile(object1 , object2) , object2 , CoreEven_MissileAttack , false);
-        }
-        else if(object1->get_isActionEnd())
-        {
-            calculateDamage = true;
-            if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
+            //非祭司,是普通的伤害计算公式
+            /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
+            if( attacker->is_missileAttack())
+            {
+                if( object1->get_isActionImageToPhaseFromEnd(PhaseFromEnd_Attack_ThrowMissile))
+                    addRelation( creatMissile(object1 , object2) , object2 , CoreEven_MissileAttack , false);
+            }
+            else if( object1->get_isActionEnd())
+            {
+                calculateDamage = true;
+                if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
+            }
         }
     }
     else if(missile!=NULL && missile->is_HitTarget() && attackee!=NULL )

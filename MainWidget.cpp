@@ -90,8 +90,13 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 游戏帧数初始化
     gameframe = 0;
 
+    // 玩家开辟空间
+    for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
+
     // 新建map对象并初始化
     map = new Map;
+    //为map添加player指针
+    map->setPlayer(player);
     map->init(MapJudge);
 
     // 内存图开辟空间
@@ -100,22 +105,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
         memorymap[i] = new int[MEMORYCOLUMN];
     }
 
-    // 玩家开辟空间
-    for(int i = 0; i < MAXPLAYER; i++)
-    {
-        player[i] = new Player(i);
-    }
-
     // 向地图中添加资源
     initmap();
 
     // 添加资源测试
-    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
+//    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
-    Building* temp = player[0]->addBuilding(BUILDING_FARM , 20,20,100);
-    qDebug()<<temp;
+//    Building* temp = player[0]->addBuilding(BUILDING_FARM , 20,20,100);
+//    qDebug()<<temp;
 
 
 //    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
@@ -131,18 +130,18 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 //    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
 
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
-    player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
+//    player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
 //    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 //    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
 //    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
 //    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
-////    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
+//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
 
 //    map->addAnimal(ANIMAL_TREE , 40 , 50);
-////    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
+//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
 //    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
 
-    player[0]->addBuilding(BUILDING_ARMYCAMP , 35 , 30,100);
+//    player[0]->addBuilding(BUILDING_ARMYCAMP , 35 , 30,100);
 
 //    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
 //    map->addStaticRes(NUM_STATICRES_Stone , 40,55);

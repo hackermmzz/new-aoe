@@ -15,6 +15,7 @@ public:
   /**********************虚函数**************************/
     virtual void nextframe();
     virtual int getSort();
+    virtual bool isPlayerControl(){ return false; }
 
     virtual bool get_isActionEnd(){ return true; }
     virtual bool get_isActionImageToPhaseFromEnd(int phaseFormEnd){ return true; }
@@ -38,6 +39,7 @@ public:
     virtual void printer_ToBuilding(void** ptr){ *ptr = NULL; }
     virtual void printer_ToBuilding_Resource(void **ptr){ *ptr = NULL; }
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
+    virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
     //获取坐标
@@ -56,25 +58,25 @@ public:
     //创建对象相关信息
     int getglobalNum(){return this->globalNum;}
     int getNum(){return this->Num;}
+    bool isIncorrect_Num(){ return incorrectNum; }  //判断当前Num在该类下是否正确
 
     double get_BlockSizeLen(){ return BlockSizeLen; }
     double get_SideLen(){return SideLength;}
 
     //设置当前交互对象
-    void set_interAct(int interSort , int interNum){ interactSort = interSort ; interactNum = interNum; }
+    void set_interAct(int interSort , int interNum , bool interRepresent = false , bool interBui_builtUp=false)
+        { interactSort = interSort ; interactNum = interNum; interact_sameRepresent = interRepresent; interactBui_builtUp = interBui_builtUp; }
 
 /*****************act获取***************/
-//需要协商，act位置
-
     double getActPercent() {return this->actPercent;}
     double getActSpeed(){ return this->actSpeed;}
-    void setActName(int actName){this->actName = actName;}
+//    void setActName(int actName){this->actName = actName;}
     int getActName(){return this->actName;}
-    void setActSpeed(double actSpeed){ this->actSpeed = actSpeed;}
+//    void setActSpeed(double actSpeed){ this->actSpeed = actSpeed;}
     void setActPercent(double actPercent){this->actPercent = actPercent;}
 //    void updatePercent(){this->setActPercent(actPercent + actSpeed);}
     int getActNum(){ return this->actNum;}
-    void setActNum(int actNum){this->actNum = actNum;}
+//    void setActNum(int actNum){this->actNum = actNum;}
 
     int ActNameToActNum(int actName);
 
@@ -88,9 +90,13 @@ protected:
     //比如building类下Num==0为小房子
     //在不同的类有着不同的含义
 
+    bool incorrectNum = false;
+
     //此时此刻交互对象的类别和Num
     int interactSort = -1;
     int interactNum = -1;
+    bool interactBui_builtUp = false;
+    bool interact_sameRepresent = false;
 
     double DR;//当前物体中心所在的坐标位置
     double UR;//在块类中该坐标即为正中心

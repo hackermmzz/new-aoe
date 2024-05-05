@@ -82,6 +82,7 @@ public:
     bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
 
+
     void beginRun(){ changeToRun = true; }
 
     void calculateDiretionArray(stack<Point>& path);
