@@ -163,6 +163,7 @@ void Core::infoShare(){
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
+        taghuman.Sort=human->getSort();
         if(taghuman.NowState==HUMAN_STATE_IDLE){
             taghuman.WorkObjectSN=-1;
         }else{

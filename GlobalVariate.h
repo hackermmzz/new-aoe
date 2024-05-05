@@ -73,6 +73,7 @@ struct tagHuman
     int SN;
     int ResourceSort;
     int Resource;
+    int Sort;
 };
 struct tagBlock{
     bool explored=false;
