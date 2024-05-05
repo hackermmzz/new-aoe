@@ -32,7 +32,11 @@ void Core::gameUpdate()
             }
 
 
-            if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd()) humaniter = player[playerIndx]->deleteHuman(humaniter);
+            if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd())
+            {
+                deleteOb_setNowobNULL(*humaniter);
+                humaniter = player[playerIndx]->deleteHuman(humaniter);
+            }
             else
             {
                 interactionList->conduct_Attacked(*humaniter);
@@ -50,6 +54,7 @@ void Core::gameUpdate()
             {
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
                 interactionList->eraseObject(*builditer);
+                deleteOb_setNowobNULL(*builditer);
                 builditer= player[playerIndx]->deleteBuilding(builditer);
             }
             else
@@ -98,6 +103,7 @@ void Core::gameUpdate()
         else
         {
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
+            deleteOb_setNowobNULL(*animaliter);
             animaliter = theMap->deleteAnimal(animaliter);
         }
     }
@@ -113,6 +119,7 @@ void Core::gameUpdate()
         else
         {
             interactionList->eraseObject(*SRiter);
+            deleteOb_setNowobNULL(*SRiter);
             SRiter = theMap->deleteStaticRes(SRiter);
         }
     }
@@ -122,6 +129,8 @@ void Core::gameUpdate()
         manageOrder();
         INSfinshed=true;
     }
+
+    theMap->loadfindPathMap();//更新寻路用障碍表
     interactionList->manageRelationList();
 }
 

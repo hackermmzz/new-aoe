@@ -23,6 +23,7 @@ private:
      */
     
     bool moveAble = true;
+    int treeState = 0;
 
     //以下为图片资源
     static std::list<ImageResource> *Walk[5][8];
@@ -55,17 +56,17 @@ public:
 
     void printer_ToResource(void** ptr){ *ptr = dynamic_cast<Resource*>(this); }    //传入ptr为Resource类指针的地址
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
-
+    void printer_ToAnimal(void** ptr){ *ptr = this; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
     static std::string getAnimalName(int index)
     {
-            return Animalname[index];
+        return Animalname[index];
     }
     static std::string getAnimalcarcassname(int index)
     {
-            return Animalcarcassname[index];
+        return Animalcarcassname[index];
     }
     static std::string getAnimalDisplayName(int index)
     {
@@ -137,7 +138,7 @@ public:
         Run[i][j] = nullptr;
     }
 
-    bool isTree(){ return moveAble;}
+    bool isTree(){ return !moveAble;}
     int get_Friendly(){ return Friendly; }
 };
 

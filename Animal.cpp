@@ -32,7 +32,7 @@ Animal::Animal(int Num, double DR, double UR)
     this->PreviousUR=UR;
     this->visible = 0;
 
-    this->Angle = 0;
+    this->Angle = rand()%8;
     
     //以下根据Num种类特判
     if( this->Num == ANIMAL_LION ) 
@@ -72,6 +72,7 @@ Animal::Animal(int Num, double DR, double UR)
         this->MaxBlood = BLOOD_TREE;
         speed = 0;
         moveAble = false;
+        treeState = rand()%Stand[this->Num][this->Angle]->size();
     }
     else if( this->Num == ANIMAL_FOREST )
     {
@@ -82,7 +83,9 @@ Animal::Animal(int Num, double DR, double UR)
         this->MaxBlood = BLOOD_FOREST;
         speed = 0;
         moveAble = false;
+        treeState = rand()%Stand[this->Num][this->Angle]->size();
     }
+    else incorrectNum = true;
 
     setSideLenth();
     this->Cnt = this->MaxCnt;
@@ -134,25 +137,38 @@ int Animal::getSort()
 
 void Animal::setNowRes()
 {
-
-    switch (this->nowstate) {
-    case 0:
-        nowlist=this->Stand[this->Num][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_WALK:
-        if(changeToRun) nowlist=this->Run[this->Num][this->Angle];
-        else  nowlist=this->Walk[this->Num][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_ATTACK:
-//        qDebug()<<"attacking";
-        nowlist=this->Attack[this->Num][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_DIE:
-        nowlist=this->Die[this->Num][this->Angle];
-        break;
-    default:
-        break;
+    if(isTree())
+    {
+        if(nowstate == MOVEOBJECT_STATE_DIE)
+        {
+            nowlist=this->Die[this->Num][this->Angle];
+            this->nowres = nowlist->begin();
+        }
+        else
+        {
+            nowlist=this->Stand[this->Num][this->Angle];
+            nowres = next(nowlist->begin(),treeState);
+        }
+    }else
+    {
+        switch (this->nowstate) {
+        case 0:
+            nowlist=this->Stand[this->Num][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_WALK:
+            if(changeToRun) nowlist=this->Run[this->Num][this->Angle];
+            else  nowlist=this->Walk[this->Num][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_ATTACK:
+    //        qDebug()<<"attacking";
+            nowlist=this->Attack[this->Num][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_DIE:
+            nowlist=this->Die[this->Num][this->Angle];
+            break;
+        default:
+            break;
+        }
+        this->nowres = nowlist->begin();
     }
-
-    this->nowres = nowlist->begin();
 }

@@ -66,8 +66,8 @@ public:
     void changeResource_byBuildAction(Building* actBuild , int buildact);
 
     //***人口记录****
-    //获取人口上限
-    int getMaxHumanNum(){return playerScience->get_homeNum()*HOUSE_HUMAN_NUM;}
+    //获取人口上限(可达到的)，最高50
+    int getMaxHumanNum(){return playerScience->getHumanNumCanReach();}
     //获取当前人口
     int getHumanNum(){ return playerScience->get_humanNum(); }
 
@@ -89,34 +89,35 @@ public:
 
     bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }
 
+    //获取某时代建筑的当前数目（除了home）
     int get_civiBuild_Times( int civilization ){ return playerScience->get_civiBuild_Times(civilization); }
    /*以上建筑行动相关********************************************/
 
 
 
     //获取科技树
-    bool *getmarketResearch()
-    {
-        return this->marketResearch;
-    }
+//    bool *getmarketResearch()
+//    {
+//        return this->marketResearch;
+//    }
 
 
-    bool getArrowTowerUnlocked()
-    {
-        return this->isArrowTowerUnlocked;
-    }
-    void setArrowTowerUnlocked(bool flag)
-    {
-        this->isArrowTowerUnlocked = flag;
-    }
-    bool getMarketResearch(int num)
-    {
-        return marketResearch[num];
-    }
-    void setMarketResearch(int num, bool flag)
-    {
-        this->marketResearch[num] = flag;
-    }
+//    bool getArrowTowerUnlocked()
+//    {
+//        return this->isArrowTowerUnlocked;
+//    }
+//    void setArrowTowerUnlocked(bool flag)
+//    {
+//        this->isArrowTowerUnlocked = flag;
+//    }
+//    bool getMarketResearch(int num)
+//    {
+//        return marketResearch[num];
+//    }
+//    void setMarketResearch(int num, bool flag)
+//    {
+//        this->marketResearch[num] = flag;
+//    }
     int getScore()
     {
         return this->score;
@@ -127,14 +128,14 @@ public:
     }
 
 
-    void setCheatMaxHumanNum(bool flag)
-    {
-        this->cheatMaxHumanNum = flag;
-    }
-    bool getCheatMaxHumanNum()
-    {
-        return this->cheatMaxHumanNum;
-    }
+//    void setCheatMaxHumanNum(bool flag)
+//    {
+//        this->cheatMaxHumanNum = flag;
+//    }
+//    bool getCheatMaxHumanNum()
+//    {
+//        return this->cheatMaxHumanNum;
+//    }
     void setStartScores(int type)
     {
         this->startScores[type] = true;
@@ -166,7 +167,7 @@ private:
 
     bool isArrowTowerUnlocked = false;
     bool marketResearch[3] = {false};
-    bool cheatMaxHumanNum=false;
+//    bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
 
 
