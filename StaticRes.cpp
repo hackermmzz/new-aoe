@@ -64,6 +64,7 @@ void StaticRes::setAttribute()
         BlockSizeLen = SIZELEN_SMALL;
         break;
     default:
+        incorrectNum = true;
         break;
     }
     setSideLenth();
@@ -72,9 +73,11 @@ void StaticRes::setAttribute()
 
 void StaticRes::setNowRes()
 {
+    int listLen;
     nowlist = staticResource[Num];
+    listLen = nowlist->size();
 
-    nowres = nowlist->begin();
+    nowres = next(nowlist->begin(), rand()%listLen);
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
     this->imageH=DR-UR;

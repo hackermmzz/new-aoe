@@ -81,25 +81,29 @@ void Missile::calculateDMove()
 int Missile::calculateAngle(double nextDR, double nextUR)
 {
     //角度设置有问题，需要修改
-    int tempAngle = 0;
-    double dDR =round( nextDR - DR) , dUR = round(nextUR - UR);
-    double sita;
+    int tempAngle = 0 , partNum = 32;
+    double dDR =nextDR - DR , dUR = nextUR - UR , sita = atan2(dUR,dDR) , gama , neta;
+    const double pi = 3.1415926 ;
+    double halfPi = pi/2, quarterPi = pi/4 , circle = 2*pi;
 
-    if(dUR>0)
+    if(sita>0)
     {
-        if(dDR == 0) tempAngle = 27;
-        sita = atan(dUR/dDR);
-        sita = ( sita<0 ? sita+1.57 : sita);
-        tempAngle = 35 - round(5.096*sita);
-        tempAngle = tempAngle>31?tempAngle-32:tempAngle;
+        gama = circle;
+
+        neta = sita - halfPi;
+        if(neta<0) gama -= sita*0.5;
+        else gama -= quarterPi+ neta*1.5;
     }
     else
     {
-        if(dDR == 0)tempAngle = 11;
-        sita = atan(-dUR/dDR);
-        sita = ( sita<0 ? sita+1.57 : sita);
-        tempAngle = 3 + round(5.096*sita);
+        sita *=-1;
+        neta = sita-halfPi;
+        if(neta<0) gama = sita*1.5;
+        else gama = halfPi + quarterPi + neta*0.5;
     }
+
+    tempAngle = 3 + round( gama* partNum / circle );
+    if(tempAngle>31) tempAngle-=32;
 
     return tempAngle;
 }

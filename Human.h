@@ -13,16 +13,22 @@ public:
 
   /**********************虚函数**************************/
     void nextframe();
-    double getSpeed(){ return speed*playerScience->get_rate_Move(getSort(),type); }
-    int getMaxBlood(){ return MaxBlood*playerScience->get_rate_Blood(getSort(),type)+ playerScience->get_addition_Blood(getSort(),type); }
-    int getPlayerRepresent(){ return playerRepresent; }
-    int getATK(){ return (int)(atk*playerScience->get_rate_Attack(getSort(),type,ARMY_INFANTRY,get_AttackType())) + playerScience->get_addition_Attack(getSort(),type,ARMY_INFANTRY,get_AttackType()); }
+    bool isPlayerControl(){ return true; }
 
+    double getSpeed(){ return speed*playerScience->get_rate_Move(getSort(),Num); }
+    int getMaxBlood(){ return MaxBlood*playerScience->get_rate_Blood(getSort(),Num)+\
+                        playerScience->get_addition_Blood(getSort(),Num); }
+    int getPlayerRepresent(){ return playerRepresent; }
+    int getATK(){ return (int)(atk*playerScience->get_rate_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType())) \
+                 +get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); }
     int getDEF(int attackType_got);
 
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
 
+
+    //用于显示的属性
+    int showATK_Addition(){ return  playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); }
     /***************指针强制转化****************/
     //若要将Human类指针转化为父类指针,务必用以下函数!
     void printer_ToHuman(void** ptr){ *ptr = this; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
@@ -34,12 +40,12 @@ public:
     void setPlayerScience( Development* science ){ this->playerScience = science; }
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
-    int getType(){ return type; }
+//    int getType(){ return type; }
 
 
 protected:
     Development* playerScience = NULL;
-    int type = 0;
+//    int type = 0;
     int playerRepresent;
 };
 

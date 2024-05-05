@@ -27,7 +27,7 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
     this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
 
-    this->Angle=0;
+    this->Angle=rand()%8;
     this->state=HUMAN_STATE_IDLE;
     this->resource=0;
     this->DR=DR;
@@ -75,6 +75,7 @@ void Farmer::nextframe()
         }
 
         updateMove();
+        setNowRes();
     }
 
     this->imageX=this->nowres->pix.width()/2.0;
@@ -88,30 +89,34 @@ int Farmer::getSort()
 
 void Farmer::setNowRes()
 {
+    std::list<ImageResource> *templist = NULL;
     switch (this->nowstate) {
     case MOVEOBJECT_STATE_STAND:
-        nowlist=this->Stand[this->state][this->Angle];
+        templist=this->Stand[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
         if(get_MatchingOfResourceAndCarry() && resource != 0 && (resourceSort!=HUMAN_GRANARYFOOD||state == FARMER_FARMER ))
-            nowlist = this->Carry[this->resourceSort][this->Angle];
+            templist = this->Carry[this->resourceSort][this->Angle];
         else
-            nowlist=this->Walk[this->state][this->Angle];
+            templist=this->Walk[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
-        nowlist=this->Attack[this->state][this->Angle];
+        templist=this->Attack[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WORK:
-        nowlist=this->Work[this->state][this->Angle];
+        templist=this->Work[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
-        nowlist = this->Die[this->state][this->Angle];
+        templist = this->Die[this->state][this->Angle];
         break;
     default:
         break;
     }
-
-    nowres = nowlist->begin();
+    if(templist!=nowlist)
+    {
+        nowlist = templist;
+        nowres = nowlist->begin();
+    }
 }
 
 double Farmer::getDis_attack()
@@ -122,19 +127,25 @@ double Farmer::getDis_attack()
     else dis = 0;
 
     if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
-    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
+    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(), Num , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
 }
 
 int Farmer::get_AttackType()
 {
-    if(attackObject != NULL && attackObject->getSort() == SORT_ANIMAL)
+    if(interactSort== SORT_ANIMAL)
     {
-        if(attackObject->getNum() == ANIMAL_TREE || attackObject->getNum() == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
+        if(interactNum == ANIMAL_TREE || interactNum == ANIMAL_FOREST) return ATTACKTYPE_CLOSE_TOTREE;
         else return ATTACKTYPE_SHOOT;
     }
     return ATTACKTYPE_CLOSE;
+}
+
+int Farmer::get_add_specialAttack()
+{
+    if(interactSort == SORT_ANIMAL) return 1;
+    else return 0;
 }
 
 void Farmer::updateState()
@@ -152,7 +163,11 @@ void Farmer::updateState()
         else setState(3);
         break;
     case SORT_Building_Resource:
-        if(interactNum == BUILDING_FARM) setState(5);
+        if(interactBui_builtUp)
+        {
+            if(interactNum == BUILDING_FARM) setState(5);
+        }
+        else setState(6);
         break;
     default:
         setState(0);

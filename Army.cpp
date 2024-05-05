@@ -19,16 +19,15 @@ Army::Army()
 
 }
 
-Army::Army(double DR,double UR,int type , Development* playerScience, int playerRepresent)
+Army::Army(double DR,double UR,int Num , Development* playerScience, int playerRepresent)
 {
     this->playerScience = playerScience;
     this->playerRepresent = playerRepresent;
 
-    //type可视为army的state
-    this->type = type;
+    this->Num = Num;
     this->Blood=1;
     setAttribute();
-    this->Angle=0;
+    this->Angle=rand()%8;
     this->DR=DR;
     this->UR=UR;
     this->BlockDR=DR/BLOCKSIDELENGTH;
@@ -73,6 +72,7 @@ void Army::nextframe()
         }
 
         updateMove();
+        setNowRes();
     }
 
     this->imageX=this->nowres->pix.width()/2.0;
@@ -81,23 +81,29 @@ void Army::nextframe()
 
 void Army::setNowRes()
 {
+    std::list<ImageResource> *templist = NULL;
+
     switch (this->nowstate) {
     case MOVEOBJECT_STATE_STAND:
-        nowlist=this->Stand[this->type][getLevel()][this->Angle];
+        templist =this->Stand[this->Num][getLevel()][this->Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
-        nowlist=this->Walk[this->type][getLevel()][this->Angle];
+        templist =this->Walk[this->Num][getLevel()][this->Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
-        nowlist=this->Attack[this->type][getLevel()][this->Angle];
+        templist =this->Attack[this->Num][getLevel()][this->Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
-        nowlist=this->Die[this->type][getLevel()][this->Angle];
+        templist =this->Die[this->Num][getLevel()][this->Angle];
         break;
     default:
         break;
     }
-    nowres = nowlist->begin();
+    if(templist!= nowlist)
+    {
+        nowlist = templist;
+        nowres = nowlist->begin();
+    }
 }
 
 /***********************************************************/
@@ -110,7 +116,7 @@ double Army::getSpeed()
     if( upgradable ) moveSpeed = speed_change[getLevel()];
     else moveSpeed = speed;
 
-    return moveSpeed*playerScience->get_rate_Move(getSort(),type);
+    return moveSpeed*playerScience->get_rate_Move(getSort(),Num);
 }
 
 //血量
@@ -121,7 +127,7 @@ int Army::getMaxBlood()
     if(upgradable) realmBlood = MaxBlood_change[getLevel()];
     else realmBlood = MaxBlood;
 
-    return  realmBlood*playerScience->get_rate_Blood(getSort(),type)+playerScience->get_addition_Blood(getSort(),type);
+    return  realmBlood*playerScience->get_rate_Blood(getSort(),Num)+playerScience->get_addition_Blood(getSort(),Num);
 }
 
 //视野
@@ -144,8 +150,8 @@ int Army::getATK()
     else atkValue = atk;
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
-    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType())) + \
-            playerScience->get_rate_Attack(getSort(),type,armyClass,get_AttackType());
+    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType())) + \
+             get_add_specialAttack() + playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType());
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力
@@ -166,8 +172,39 @@ int Army::getDEF(int attackType_got)
     }
 
     //在defValue的基础上,计算player及科技带来的 加成,并返回
-    return (int)( defValue*playerScience->get_rate_Defence(getSort(),type,armyClass,attackType_got) ) + \
-            playerScience->get_addition_Defence(getSort(),type,armyClass,attackType_got);
+    return (int)( defValue*playerScience->get_rate_Defence(getSort(),Num,armyClass,attackType_got) ) + \
+            playerScience->get_addition_Defence(getSort(),Num,armyClass,attackType_got);
+}
+
+int Army::showATK_Basic()
+{
+    int atkValue;//用于存储初始攻击力
+
+    //赋值初始攻击力,依据兵种是否能升级,划分两类赋值方式
+    if(upgradable) atkValue = atk_change[getLevel()];
+    else atkValue = atk;
+
+    return atkValue+get_add_specialAttack();
+}
+
+int Army::showDEF_Close()
+{
+    int defValue = 0;
+
+    if(upgradable) defValue = defence_close_change[getLevel()];
+    else defValue = defence_close;
+
+    return defValue;
+}
+
+int Army::showDEF_Shoot()
+{
+    int defValue = 0;
+
+    if(upgradable) defValue = defence_shoot_change[getLevel()];
+    else defValue = defence_shoot;
+
+    return defValue;
 }
 
 //攻击距离
@@ -179,7 +216,7 @@ double Army::getDis_attack()
     else dis = dis_Attack;
 
     if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
-    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),type,armyClass,get_AttackType() ) )*BLOCKSIDELENGTH;
+    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
 }
@@ -188,7 +225,7 @@ double Army::getDis_attack()
 void Army::setAttribute()
 {
     //设置军队属性
-    switch (type) {
+    switch (Num) {
     case AT_CLUBMAN:        //棍棒兵,可升级1次
         upgradable = true;
         dependBuildNum = BUILDING_ARMYCAMP;
@@ -273,6 +310,7 @@ void Army::setAttribute()
         break;
 
     default:
+        incorrectNum = true;
         break;
     }
 

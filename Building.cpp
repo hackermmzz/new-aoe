@@ -167,6 +167,7 @@ void Building::setAttribute()
         defence_shoot = DEFSHOOT_BUILD_WALL;
         break;
     default:
+        incorrectNum = true;
         Foundation=FOUNDATION_MIDDLE;
         break;
     }

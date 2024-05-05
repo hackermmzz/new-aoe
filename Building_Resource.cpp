@@ -25,6 +25,15 @@ void Building_Resource::nextframe()
 
 void Building_Resource::setAttribute()
 {
+/**
+设置产生资源的建筑的各属性：
+１最大血量
+２地基大小
+３产生资源类型
+４当前是否可采集（是）
+５最大资源量
+６当前资源量
+*/
     if(Num == BUILDING_FARM)
     {
         MaxBlood = BLOOD_BUILD_FARM;
@@ -33,6 +42,7 @@ void Building_Resource::setAttribute()
         gatherable = false;
         setMaxCnt();
     }
+    else incorrectNum = true;
 //    qDebug()<<MaxCnt;
     Cnt = MaxCnt;
 }
@@ -49,4 +59,13 @@ bool Building_Resource::isGathererAsLandlord(Coordinate* gatherer)
 
     //返回传入采集者是否是地主
     return gatherer == this->gatherer;
+}
+
+void Building_Resource::setMaxCnt()
+{
+    if(Num == BUILDING_FARM)
+    {
+        if(playerScience == NULL) MaxCnt = CNT_BUILD_FARM;
+        else MaxCnt = CNT_BUILD_FARM+playerScience->get_addition_MaxCnt(getSort(),Num);
+    }
 }

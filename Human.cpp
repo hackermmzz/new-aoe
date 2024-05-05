@@ -28,5 +28,6 @@ int Human::getDEF(int attackType_got)
     if( attackType_got == ATTACKTYPE_CLOSE||attackType_got == ATTACKTYPE_ANIMAL ) def = defence_close;
     else if(attackType_got == ATTACKTYPE_SHOOT ) def = defence_shoot;
 
-    return (int)(def * playerScience->get_rate_Defence(getSort(),type,ARMY_INFANTRY , attackType_got) ) + playerScience->get_addition_Defence(getSort() , type , ARMY_INFANTRY , attackType_got);
+    return (int)(def * playerScience->get_rate_Defence(getSort(),Num,ARMY_INFANTRY , attackType_got) ) +\
+            playerScience->get_addition_Defence(getSort() , Num , ARMY_INFANTRY , attackType_got);
 }
