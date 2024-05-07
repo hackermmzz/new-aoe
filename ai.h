@@ -2,6 +2,7 @@
 #define AI_H
 #include "GlobalVariate.h"
 #include "Coordinate.h"
+#include "Building.h"
 
 class AI:public QThread
 {
@@ -27,13 +28,18 @@ public:
         if(obj->getSort()!=SORT_ANIMAL&&obj->getSort()!=SORT_STATICRES){
             return ACTION_INVALID_OBSN;
         }
+        if(self->getSort()!=SORT_FARMER){
+            if(obj->getSort()==SORT_STATICRES||isAnimalTree(obj)){
+                return ACTION_INVALID_OBSN;
+            }
+        }
         instructions.push(instruction(2,self,obj));
         return ACTION_SUCCESS;
     }
 
     int HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         Coordinate* self=g_Object[SN];
-        if(!isHuman(self)){
+        if(!isHuman(self)||self->getSort()!=SORT_FARMER){
             return ACTION_INVALID_SN;
         }
         int woodcost=-1;
@@ -68,7 +74,7 @@ public:
                 return ACTION_INVALID_BUILDINGNUM;
             }
             woodcost=BUILD_MARKET_WOOD;
-            size=4;
+            size=3;
             break;
         case BUILDING_ARROWTOWER:
             stonecost=BUILD_ARROWTOWER_STONE;
@@ -79,6 +85,26 @@ public:
                 return ACTION_INVALID_BUILDINGNUM;
             }
             woodcost=BUILD_FARM_WOOD;
+            size=3;
+            break;
+        case BUILDING_ARMYCAMP:
+            woodcost=BUILD_ARMYCAMP_WOOD;
+            size=3;
+            break;
+        case BUILDING_STABLE:
+            woodcost=BUILD_STABLE_WOOD;
+            size=3;
+            break;
+        case BUILDING_RANGE:
+            woodcost=BUILD_RANGE_WOOD;
+            size=3;
+            break;
+        case BUILDING_WALL:
+            stonecost=BUILD_WALL_STONE;
+            size=2;
+            break;
+        case BUILDING_CENTER:
+            woodcost=BUILD_CENTER_WOOD;
             size=3;
             break;
         default:
@@ -100,58 +126,114 @@ public:
         if(!isBuilding(self)){
             return ACTION_INVALID_SN;
         }
+        Building* building=dynamic_cast<Building*>(self);
+        if(building->getActSpeed()>0){
+            return ACTION_INVALID_ACTION;
+        }
         int foodcost=-1;
         int woodcost=-1;
         int stonecost=-1;
-        switch (Action) {
-        case BUILDING_CENTER_CREATEFARMER:
-            if(self->getNum()!=BUILDING_CENTER){
-                return ACTION_INVALID_ACTION;
-            }
-            foodcost=BUILDING_CENTER_CREATEFARMER_FOOD;
-            break;
-        case BUILDING_CENTER_UPGRADE:
-            if(self->getNum()!=BUILDING_CENTER){
-                return ACTION_INVALID_ACTION;
-            }
-            foodcost=BUILDING_CENTER_UPGRADE_FOOD;
-            break;
-        case BUILDING_GRANARY_ARROWTOWER:
-            if(self->getNum()!=BUILDING_GRANARY||AIGame.civilizationStage<CIVILIZATION_TOOLAGE){
-                return ACTION_INVALID_ACTION;
-            }
-            foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
-            break;
-        case BUILDING_MARKET_WOOD_UPGRADE:
-            if(self->getNum()!=BUILDING_MARKET){
-                return ACTION_INVALID_ACTION;
-            }
-            foodcost=BUILDING_MARKET_WOOD_UPGRADE_FOOD;
-            woodcost=BUILDING_MARKET_WOOD_UPGRADE_WOOD;
-            break;
-        case BUILDING_MARKET_STONE_UPGRADE:
-            if(self->getNum()!=BUILDING_MARKET){
-                return ACTION_INVALID_ACTION;
-            }
-            foodcost=BUILDING_MARKET_STONE_UPGRADE_FOOD;
-            stonecost=BUILDING_MARKET_STONE_UPGRADE_STONE;
-            break;
-        case BUILDING_MARKET_FARM_UPGRADE:
-            if(self->getNum()!=BUILDING_MARKET){
-                return ACTION_INVALID_ACTION;
-            }
-            foodcost=BUILDING_MARKET_FARM_UPGRADE_FOOD;
-            woodcost=BUILDING_MARKET_FARM_UPGRADE_WOOD;
-            break;
-        case BUILDING_CANCEL:
-            if(self->getNum()!=BUILDING_MARKET||self->getNum()!=BUILDING_GRANARY
-                    ||self->getNum()!=BUILDING_CENTER||self->getNum()!=BUILDING_GRANARY)
-                return ACTION_INVALID_ACTION;
-            break;
-        default:
-            return ACTION_INVALID_ACTION;
-            break;
+        if(Action==BUILDING_CANCEL){
+            instructions.push(instruction(0,self,0));
+            return ACTION_SUCCESS;
         }
+        if(self->getNum()==BUILDING_CENTER){
+            switch (Action) {
+            case BUILDING_CENTER_CREATEFARMER:
+                foodcost=BUILDING_CENTER_CREATEFARMER_FOOD;
+                break;
+            case BUILDING_CENTER_UPGRADE:
+                foodcost=BUILDING_CENTER_UPGRADE_FOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+
+        }else if(self->getNum()==BUILDING_GRANARY){
+            switch (Action) {
+            case BUILDING_GRANARY_ARROWTOWER:
+                if(AIGame.civilizationStage<CIVILIZATION_TOOLAGE){
+                    return ACTION_INVALID_ACTION;
+                }
+                foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+
+        }else if(self->getNum()==BUILDING_MARKET){
+            switch(Action){
+            case BUILDING_MARKET_WOOD_UPGRADE:
+                foodcost=BUILDING_MARKET_WOOD_UPGRADE_FOOD;
+                woodcost=BUILDING_MARKET_WOOD_UPGRADE_WOOD;
+                break;
+            case BUILDING_MARKET_STONE_UPGRADE:
+                foodcost=BUILDING_MARKET_STONE_UPGRADE_FOOD;
+                stonecost=BUILDING_MARKET_STONE_UPGRADE_STONE;
+                break;
+            case BUILDING_MARKET_FARM_UPGRADE:
+                foodcost=BUILDING_MARKET_FARM_UPGRADE_FOOD;
+                woodcost=BUILDING_MARKET_FARM_UPGRADE_WOOD;
+                break;
+            case BUILDING_MARKET_GOLD_UPGRADE:
+                foodcost=BUILDING_MARKET_GOLD_UPGRADE_FOOD;
+                woodcost=BUILDING_MARKET_GOLD_UPGRADE_WOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+
+        }else if(self->getNum()==BUILDING_STOCK){
+            switch (Action) {
+            case BUILDING_STOCK_UPGRADE_USETOOL:
+                foodcost=BUILDING_STOCK_UPGRADE_USETOOL_FOOD;
+                break;
+            case BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY:
+                foodcost=BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_FOOD;
+                break;
+            case BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER:
+                foodcost=BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_FOOD;
+                break;
+            case BUILDING_STOCK_UPGRADE_DEFENSE_RIDER:
+                foodcost=BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_FOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+        }else if(self->getNum()==BUILDING_ARMYCAMP){
+            switch (Action) {
+            case BUILDING_ARMYCAMP_CREATE_CLUBMAN:
+                foodcost=BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD;
+                break;
+            case BUILDING_ARMYCAMP_CREATE_SLINGER:
+                foodcost=BUILDING_ARMYCAMP_CREATE_SLINGER_FOOD;
+                stonecost=BUILDING_ARMYCAMP_CREATE_SLINGER_STONE;
+                break;
+            case BUILDING_ARMYCAMP_UPGRADE_CLUBMAN:
+                foodcost=BUILDING_ARMYCAMP_UPGRADE_CLUBMAN_FOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+        }else if(self->getNum()==BUILDING_RANGE){
+            switch (Action) {
+            case BUILDING_RANGE_CREATE_BOWMAN:
+                foodcost=BUILDING_RANGE_CREATE_BOWMAN_FOOD;
+                woodcost=BUILDING_RANGE_CREATE_BOWMAN_WOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+        }else if(self->getNum()==BUILDING_STABLE){
+            switch (Action) {
+            case BUILDING_STABLE_CREATE_SCOUT:
+                foodcost=BUILDING_STABLE_CREATE_SCOUT_FOOD;
+                break;
+            default:
+                return ACTION_INVALID_ACTION;
+            }
+        }
+
         if(AIGame.Wood<=woodcost||AIGame.Meat<=foodcost||AIGame.Stone<=stonecost){
             return ACTION_INVALID_RESOURCE;
         }
@@ -163,7 +245,9 @@ public:
     void processData();
     void run() override{
         if(AIGame.GameFrame>10&&AIfinished&&INSfinshed){
+            AIfinished=false;
             processData();
+            AIfinished=true;
             INSfinshed=false;
         }
     }
@@ -173,6 +257,9 @@ private:
     }
     bool isBuilding(Coordinate* self){
         return (self!=nullptr&&(self->getSort()==SORT_BUILDING));
+    }
+    bool isAnimalTree(Coordinate* self){
+        return self->getSort()==SORT_ANIMAL&&(self->getNum()==ANIMAL_FOREST||self->getNum()==ANIMAL_TREE);
     }
 };
 
