@@ -126,10 +126,10 @@ public:
         if(!isBuilding(self)){
             return ACTION_INVALID_SN;
         }
-//        Building* building=dynamic_cast<Building*>(self);
-//        if(!building->is_ActionFinish()){
-//            return ACTION_INVALID_ACTION;
-//        }
+        Building* building=dynamic_cast<Building*>(self);
+        if(building->getActSpeed()>0){
+            return ACTION_INVALID_ACTION;
+        }
         int foodcost=-1;
         int woodcost=-1;
         int stonecost=-1;
