@@ -136,6 +136,15 @@ void Core::gameUpdate()
 
 void Core::infoShare(){
     Player* self=player[0];
+    for(int i=0;i<MAP_L;i++){
+        for(int j=0;j<MAP_U;j++){
+            if(!AIGame.blocks[i][j].explored&&theMap->cell[i][j].Explored){
+                AIGame.blocks[i][j].height=theMap->cell[i][j].getMapHeight();
+                AIGame.blocks[i][j].explored=true;
+            }
+        }
+    }
+
     AIGame.Human_MaxNum=self->getMaxHumanNum();
     AIGame.Gold=self->getGold();
     AIGame.Stone=self->getStone();
@@ -154,6 +163,7 @@ void Core::infoShare(){
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
+        taghuman.Sort=human->getSort();
         if(taghuman.NowState==HUMAN_STATE_IDLE){
             taghuman.WorkObjectSN=-1;
         }else{
@@ -399,36 +409,6 @@ void Core::manageOrder()
         }
         case 4:{    ///type 4:命令建筑self进行option工作
             interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
-//            int foodcost=0;
-//            int woodcost=0;
-//            int stonecost=0;
-//            switch (cur.option) {
-//            case BUILDING_CENTER_CREATEFARMER:
-//                foodcost=BUILDING_CENTER_CREATEFARMER_FOOD;
-//                break;
-//            case BUILDING_CENTER_UPGRADE:
-//                foodcost=BUILDING_CENTER_UPGRADE_FOOD;
-//                break;
-//            case BUILDING_GRANARY_ARROWTOWER:
-//                foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
-//                break;
-//            case BUILDING_MARKET_WOOD_UPGRADE:
-//                foodcost=BUILDING_MARKET_WOOD_UPGRADE_FOOD;
-//                woodcost=BUILDING_MARKET_WOOD_UPGRADE_WOOD;
-//                break;
-//            case BUILDING_MARKET_STONE_UPGRADE:
-//                foodcost=BUILDING_MARKET_STONE_UPGRADE_FOOD;
-//                stonecost=BUILDING_MARKET_STONE_UPGRADE_STONE;
-//                break;
-//            case BUILDING_MARKET_FARM_UPGRADE:
-//                foodcost=BUILDING_MARKET_FARM_UPGRADE_FOOD;
-//                woodcost=BUILDING_MARKET_FARM_UPGRADE_WOOD;
-//                break;
-//            case BUILDING_CANCEL:
-//                break;
-//            default:
-//                break;
-//            }
             break;
         }
 
