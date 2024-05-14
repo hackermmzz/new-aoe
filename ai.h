@@ -1,5 +1,7 @@
 #ifndef AI_H
 #define AI_H
+#include <QMutex>
+#include "assert.h"
 #include "GlobalVariate.h"
 #include "Coordinate.h"
 #include "Building.h"
@@ -244,14 +246,21 @@ public:
     AI();
     void processData();
     void run() override{
+        if(!trylock()) return;  ///如果锁未被释放，则直接返回
         if(AIGame.GameFrame>10&&AIfinished&&INSfinshed){
-            AIfinished=false;
             processData();
-            AIfinished=true;
             INSfinshed=false;
         }
+        unlock();
+    }
+    bool trylock(){
+        return aiLock.tryLock();
+    }
+    void unlock(){
+        aiLock.unlock();
     }
 private:
+    QMutex aiLock;
     bool isHuman(Coordinate* self){
         return (self!=nullptr&&(self->getSort()==SORT_FARMER||self->getSort()==SORT_ARMY));
     }

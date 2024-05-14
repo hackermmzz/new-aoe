@@ -653,10 +653,8 @@ void MainWidget::FrameUpdate()
     ui->Game->update();
     core->gameUpdate();
     statusUpdate();
-    if(AIfinished){
-        core->infoShare();
-        ai->start();///AI 线程开始
-    }
+    core->infoShare();
+    ai->start();///AI线程尝试开始
     emit mapmove();
     return;
 }

@@ -82,14 +82,8 @@ struct tagBlock{
 
 struct tagGame
 {
-//    tagBuilding *building;
-//    int building_n;
     list<tagBuilding> buildings;
-//    tagHuman *human;
-//    int human_n;
     list<tagHuman> humans;
-//    tagResource *resource;
-//    int resource_n;
     list<tagResource> resources;
     tagBlock blocks[MAP_L][MAP_U];
     int GameFrame;

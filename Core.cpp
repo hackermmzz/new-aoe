@@ -125,6 +125,7 @@ void Core::gameUpdate()
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
+
     if(AIfinished&&INSfinshed==false) {
         manageOrder();
         INSfinshed=true;
