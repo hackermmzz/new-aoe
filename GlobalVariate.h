@@ -230,6 +230,15 @@ struct ImageResource
 struct Point {
     int x;
     int y;
+
+    Point(){}
+    Point( int x , int y ){ this->x = x,this->y = y; }
+    Point( const Point& board ){ x = board.x , y = board.y; }
+
+    Point operator +(const Point& ps ) { return Point(x+ps.x , y+ps.y); }
+    Point operator -(const Point& ps){ return Point(x - ps.x, y-ps.y); }
+    bool operator ==(const Point& ps)const { return ps.x == x && ps.y == y; }
+    bool operator < (const Point& ps)const { return x<ps.x&& y<ps.y; }
 };
 
 
@@ -462,6 +471,8 @@ int calculateManhattanDistance(int x1, int y1, int x2, int y2);
 double calculateManhattanDistance(double x1, double y1, double x2, double y2);
 
 void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirror , double dis);
+
+double trans_BlockPointToDetailCenter( int p );
 
 
 #endif // GLOBALVARIATE_H

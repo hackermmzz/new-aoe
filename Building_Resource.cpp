@@ -43,7 +43,6 @@ void Building_Resource::setAttribute()
         setMaxCnt();
     }
     else incorrectNum = true;
-//    qDebug()<<MaxCnt;
     Cnt = MaxCnt;
 }
 

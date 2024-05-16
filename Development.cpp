@@ -413,7 +413,7 @@ void Development::init_DevelopLab()
 
     //箭塔
     developLab[BUILDING_ARROWTOWER].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_ARROWTOWER , TIME_BUILD_ARROWTOWER ,0 ,0 , BUILD_ARROWTOWER_STONE );
-    developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
+//    developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
 
     //城墙
     developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);

@@ -17,13 +17,16 @@ public:
     virtual int getSort();
     virtual bool isPlayerControl(){ return false; }
 
+    virtual bool isMonitorObject(Coordinate* judOb){ return false; }
+
+
     virtual bool get_isActionEnd(){ return true; }
-    virtual bool get_isActionImageToPhaseFromEnd(int phaseFormEnd){ return true; }
 
     virtual int getPlayerRepresent(){ return MAXPLAYER; }
 
     virtual void setAttribute(){ }
     virtual void setNowRes(){ }
+    virtual int getVision(){ return vision; }
 
     virtual void resetCoreAttribute(){}
 
@@ -49,6 +52,9 @@ public:
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
 
+    //获取中心点块坐标
+    Point getBlockPosition(){ return Point(BlockDR+BlockSizeLen/2,BlockUR+BlockSizeLen/2); }
+
     //image资源相关信息
     double getimageX(){return this->imageX;}
     double getimageY(){return this->imageY;}
@@ -62,7 +68,7 @@ public:
     bool isIncorrect_Num(){ return incorrectNum; }  //判断当前Num在该类下是否正确
 
     double get_BlockSizeLen(){ return BlockSizeLen; }
-    double get_SideLen(){return SideLength;}
+//    double get_SideLen(){return SideLength;}
 
     //设置当前交互对象
     void set_interAct(int interSort , int interNum , bool interRepresent = false , bool interBui_builtUp=false)
@@ -107,6 +113,8 @@ protected:
     int BlockUR;
     //对象所在的区块
 
+    int vision = 0; //视野
+
     double imageX;//该物体的长宽（即占地面积）
     double imageY;//需要根据占地大小来就算确切的绘制偏移量
 
@@ -132,6 +140,22 @@ protected:
 
     std::list<ImageResource>::iterator nowres;
     std::list<ImageResource> *nowlist=NULL;
+    int nowres_step = 0;
+    int nowres_changeRecord = 0;
+
+    void initNowresTimer(){ nowres_changeRecord = 0; }
+    bool isNowresShift(){
+        if(nowres_step == nowres_changeRecord)
+        {
+            nowres_changeRecord = 0;
+            return true;
+        }
+        else
+        {
+            nowres_changeRecord++;
+            return false;
+        }
+    }
 
     void setDetailPointAttrb_FormBlock()
     {
@@ -140,6 +164,8 @@ protected:
         setSideLenth();
     }
     void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
+
+
 
     /*****************act获取***************/
     double actPercent = 0;

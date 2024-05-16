@@ -5,6 +5,86 @@
 #include <Map.h>
 #include <Player.h>
 
+struct pathNode{
+    static int cost_stra,cost_bias; //cost标准
+    static std::map<Point , int> costLab;  //根据点之间位置，获得cost_total
+    static Point goalPoint;     //记录终点
+    Point position; //当前点
+    int cost_predict = 0 , cost_total = 0;
+
+    pathNode* preNode = NULL;   //记录前驱点
+
+    pathNode(){}
+    pathNode( Point newPoint );
+    ~pathNode(){ }
+
+    //设置总目标点，每次寻路前需要调用
+    static void setGoalPoint( int x,int y){goalPoint.x = x; goalPoint.y = y;}
+
+    //计算预期cost
+    void calCost_predict(){ cost_predict = calculateManhattanDistance(goalPoint.x , goalPoint.y ,position.x , position.y) *10;}
+//                countdistance(goalPoint.x , goalPoint.y ,position.x , position.y)  }
+
+    //获取总cost
+    int getCost() const{ return cost_predict + cost_total; }
+
+    //添加后续点，并返回后续点
+    pathNode* pushNode( pathNode* nextNode );
+
+    //获取输出
+    Point toPoint(){ return position; }
+
+    bool operator <(const pathNode& __x) const{ return getCost()<__x.getCost(); }
+    bool operator >(const pathNode& __x) const{ return getCost()>__x.getCost(); }
+};
+
+struct treeNode
+{
+    pathNode* value;
+    treeNode* father = NULL, *lchild = NULL, *rchild = NULL;
+
+    treeNode(){}
+//    treeNode(Point newPoint){value = new pathNode(newPoint);}
+    treeNode( pathNode* newNode ){ value = newNode; }
+    ~treeNode(){  }
+
+    bool operator <(const treeNode& __x)const{ return *value<*(__x.value); }
+    bool operator >(const treeNode& __x)const{ return *value>*(__x.value); }
+};
+
+struct lessHeap
+{
+    treeNode* head = NULL, *cacheNode = NULL;
+    int nodeNum = 0;
+
+    lessHeap(){}
+    ~lessHeap();
+
+    void clear();
+
+    //返回堆顶最小元素
+    treeNode* top(){ return  head; }
+
+    //删除头节点，并且调整小根堆
+    void pop();
+
+    //增加节点
+//    void addNode(Point newPoint);
+    void addNode( pathNode* newNode );
+
+    //小根堆上浮操作
+    void floatUp( treeNode* obNode );
+
+    //小根堆下沉操作
+    void downChange();
+
+private:
+    void push_back();
+    //节点交换，限一个父节点一个孩子节点
+    void nodeChange( treeNode* __x , treeNode* __y  );
+//    void swapNode( treeNode* __x, treeNode* __y );
+};
+
 struct relation_Object
 {
     bool isExist , isUseAlterGoal=false;
@@ -23,6 +103,9 @@ struct relation_Object
 
     bool needResourceBuilding = false;
     bool respondConduct = false;
+
+    //行动无用指标，当如移动长时间不实际进行时增加，当达到一定限度时被认为行动无用，强制结束行动
+    int useless_norm = 0;
 
     //构造函数
     relation_Object() {isExist = false; goalObject = NULL;}
@@ -50,6 +133,9 @@ struct relation_Object
     void set_ExecutionTime(int times){ times_Execution = times; }
     void excutionOnce(){ if(times_Execution>0) times_Execution--; }
     bool is_ExecutionOver(){ return times_Execution == 0; }
+
+    void useless(){ useless_norm ++; }
+    void useOnce(){ useless_norm = 0; }
 };
 
 struct conditionF
@@ -78,7 +164,7 @@ struct detail_EventPhase
     int phaseList[CoreDetailLinkMaxNum];      //core中，由此值指示进入函数
     conditionF chageCondition[CoreDetailLinkMaxNum-2];   //切换phase的判断条件
     map<int,int> changeLinkedList;  //关系链，
-//    list<conditionF>forcedInterrupCondition;//细节控制的强制中止条件
+    list<conditionF>forcedInterrupCondition;//细节控制的强制中止条件
 
     map< int , list<conditionF> > loopOverCondition;  //loop的中止条件
     /**
@@ -89,7 +175,7 @@ struct detail_EventPhase
 
     //构造函数
     detail_EventPhase();
-    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList /*, list< conditionF >forcedInterrupCondition */);
+    detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition );
 
     bool setLoop( int loopBeginPhase , int loopEndPhase , list<conditionF>overCondition );
 
@@ -131,6 +217,9 @@ bool condition_Object1_FullBackpack( Coordinate* , relation_Object& , int& ,bool
 bool condition_ObjectNearby( Coordinate* , relation_Object& , int& ,bool);
 //object目标能被采集
 bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int& ,bool);
+
+//取消判断无效的行动
+bool condition_UselessAction(Coordinate* , relation_Object& , int& ,bool);
 //****************************************************************************************
 
 

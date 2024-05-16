@@ -12,7 +12,7 @@ int step2=3;
 void AI::processData(){
     AIfinished=false;
 /*##########YOUR CODE BEGINS HERE##########*/
-    qDebug()<<"#####begin#####";
+//    qDebug()<<"#####begin#####";
     for(tagHuman human:AIGame.humans){
         if(human1==-1){
            human1=human.SN;
@@ -37,11 +37,11 @@ void AI::processData(){
             }
             HumanAction(human.SN,sn);
         }else if(human.SN==human2){
-            qDebug()<<"human2:"<<human.NowState;
+//            qDebug()<<"human2:"<<human.NowState;
             if(human.NowState==HUMAN_STATE_IDLE){
                 static int x= 20;
                 static int y= 20;
-                qDebug()<<"Build:"<<x<<" "<<y<<" "<<HumanBuild(human.SN,BUILDING_HOME,x,y);
+//                qDebug()<<"Build:"<<x<<" "<<y<<" "<<HumanBuild(human.SN,BUILDING_HOME,x,y);
                 x+=10;
                 y+=10;
             }
@@ -52,11 +52,11 @@ void AI::processData(){
 //    qDebug()<<"#############";
     for(tagBuilding building:AIGame.buildings){
         if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
-            qDebug()<<"Build:"<<building.Percent<<":"<<BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
+//            qDebug()<<"Build:"<<building.Percent<<":"<<BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
         }
     }
     sleep(5);
-    qDebug()<<"#####end#####";
+//    qDebug()<<"#####end#####";
 /*###########YOUR CODE ENDS HERE###########*/
     AIfinished=true;
 }

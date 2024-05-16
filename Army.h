@@ -21,6 +21,11 @@ public:
     int getMaxBlood();
     int getVision();
 
+    bool isMonitorObject(Coordinate* judOb)
+    {
+        return judOb->isPlayerControl() && judOb->getPlayerRepresent()!= getPlayerRepresent();
+    }
+
     int getATK();
     int getDEF(int attackType_got);
     double getDis_attack();

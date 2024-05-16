@@ -159,6 +159,10 @@ void Building::setAttribute()
         defence_shoot = DEFSHOOT_BUILD_ARROWTOWER;
         attackType = ATTACKTYPE_SHOOT;
         type_Missile = Missile_Arrow;
+        missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
+        dis_Attack = DIS_ARROWTOWER;
+
+        isAttackable = true;
         break;
 
     case BUILDING_WALL:
@@ -185,7 +189,13 @@ void Building::nextframe()
     else
     {
         nowres++;
-        if(nowres==nowlist->end())  nowres=nowlist->begin(); //读到最后回到最初
+        if(nowres==nowlist->end())
+        {
+            nowres=nowlist->begin(); //读到最后回到最初
+            initAttack_perCircle();
+        }
+
+        if(defencing) missionThrowTimer = missionThrowTimer == missionThrowStep? 0: missionThrowTimer+1;
     }
 
     this->imageX=this->nowres->pix.width()/2.0;

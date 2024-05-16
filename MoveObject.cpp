@@ -211,8 +211,11 @@ void MoveObject::updateMove()
     }
     else
     {
+//        if(getSort() == SORT_FARMER) qDebug()<<"farmermoveF"<<PredictedDR<<PredictedUR<<DR<<UR;
         VDR=0;
         VUR=0;
+        PredictedDR = DR;
+        PredictedUR = UR;
     }
     this->BlockDR=DR/BLOCKSIDELENGTH;
     this->BlockUR=UR/BLOCKSIDELENGTH;

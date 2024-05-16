@@ -478,6 +478,11 @@ void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirro
     ur = ur_mirror+ur_deta/total*dis;
 }
 
+double trans_BlockPointToDetailCenter( int p )
+{
+    return (p+0.5)*BLOCKSIDELENGTH;
+}
+
 instruction::instruction(int type,Coordinate* self,Coordinate* obj){
     this->type=type;
     this->self=self;

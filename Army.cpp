@@ -43,6 +43,7 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     this->DR0=DR;
     this->UR0=UR;
     this->nowstate=MOVEOBJECT_STATE_STAND;
+    isAttackable = true;
 
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
@@ -60,15 +61,19 @@ void Army::nextframe()
     if(isDie())
     {
         if( !isDying() ) setPreDie();
-        else if(!get_isActionEnd() ) nowres++;
+        else if(!get_isActionEnd() && isNowresShift() ) nowres++;
     }
     else
     {
-        nowres++;
-        if(nowres==nowlist->end())
+        if(isNowresShift())
         {
-            nowres=nowlist->begin();
-            //读到最后回到最初
+            nowres++;
+            if(nowres==nowlist->end())
+            {
+                nowres=nowlist->begin();
+                //读到最后回到最初
+                initAttack_perCircle();
+            }
         }
 
         updateMove();
@@ -103,6 +108,8 @@ void Army::setNowRes()
     {
         nowlist = templist;
         nowres = nowlist->begin();
+        initAttack_perCircle();
+        initNowresTimer();
     }
 }
 
@@ -215,7 +222,7 @@ double Army::getDis_attack()
     if(upgradable) dis = dis_Attack_change[getLevel()];
     else dis = dis_Attack;
 
-    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
+    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0;
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
@@ -291,6 +298,7 @@ void Army::setAttribute()
         defence_shoot = DEFSHOOT_BOWMAN;
 
         type_Missile = Missile_Arrow;
+        phaseFromEnd_MissionAttack = THROWMISSION_ARCHER;
         break;
 
     case AT_SCOUT:      //侦察骑兵

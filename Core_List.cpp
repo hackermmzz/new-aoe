@@ -104,14 +104,10 @@ bool Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int
 
 bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
-    qDebug()<<"in addingrelation";
     if(object1 == NULL) return false;
-
-    qDebug()<<relate_AllObject[object1].isExist;
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
-        qDebug()<<"addrelate";
         Building* buildOb = NULL;
         object1->printer_ToBuilding((void**)&buildOb);
         if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
@@ -119,7 +115,6 @@ bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
             player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
             buildOb->setAction(actNum);
             relate_AllObject[object1] = relation_Object(evenType);
-            qDebug()<<"success";
             return true;
         }
     }
@@ -143,7 +138,7 @@ void Core_List::manageRelationList()
 {
     Coordinate* object1;
     Coordinate* object2;
-//    list<conditionF> forcedInterrupCondition;
+    list<conditionF> forcedInterrupCondition;
 
 
     map<Coordinate* , relation_Object>::iterator iter = relate_AllObject.begin();
@@ -163,15 +158,15 @@ void Core_List::manageRelationList()
             conditionF* recordCondition;
 
             //该部分为强制中止行动部分代码
-//            forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
-//            for(list<conditionF>::iterator iter_list = forcedInterrupCondition.begin();iter_list!=forcedInterrupCondition.end();iter_list++)
-//            {
-//                if( iter_list->condition( object1,thisRelation,iter_list->variableArgu,iter_list->isNegation ) )
-//                {
-//                    thisRelation.nowPhaseNum = thisDetailEven.phaseInterrup;
-//                    break;
-//                }
-//            }
+            forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
+            for(list<conditionF>::iterator iter_list = forcedInterrupCondition.begin();iter_list!=forcedInterrupCondition.end();iter_list++)
+            {
+                if( iter_list->condition( object1,thisRelation,iter_list->variableArgu,iter_list->isNegation ) )
+                {
+                    thisRelation.nowPhaseNum = thisDetailEven.phaseInterrup;
+                    break;
+                }
+            }
 
             //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
@@ -364,6 +359,11 @@ bool Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
             answer = false;
         }
 
+        if(!theMap->isFlat(tempBuild))
+        {
+            qDebug()<<"isnt flat";
+            answer = false;
+        }
     }
 
     //*************结束******************
@@ -439,22 +439,44 @@ int Core_List::getObjectSN(Coordinate* object){
 //通用的控制对象行动函数
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
 {
-    MoveObject* moveObject = (MoveObject*)object;
-    if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
-    {
-//        qDebug()<<object->getSort();
-        Point start,destination;
-        if(!moveObject->isWalking()) moveObject->setPreWalk();
-        moveObject->setdestination(DR, UR);
-        start.x = tranBlockDR(moveObject->getDR());
-        start.y = tranBlockUR(moveObject->getUR());
-        destination.x = tranBlockDR(moveObject->getDR0());
-        destination.y = tranBlockUR(moveObject->getUR0());
-//        theMap->loadfindPathMap();
-        moveObject->setPath(findPath(theMap->findPathMap , theMap , start , destination));
-    }
+    MoveObject* moveObject = NULL;
+    object->printer_ToMoveObject((void**)&moveObject);
 
-    if(!moveObject->isWalking()) moveObject->setPreWalk();
+    if(moveObject!=NULL)
+    {
+        if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
+        {
+            //设置起点与目标点
+            Point start = Point(tranBlockDR(moveObject->getDR()),tranBlockUR(moveObject->getUR()));
+            Point destination = Point(tranBlockDR(DR),tranBlockUR(UR));
+            stack<Point> path;
+            moveObject->setdestination(DR, UR);
+
+            theMap->loadfindPathMap(moveObject);
+            theMap->findPathMap[destination.x][destination.y] = 0;
+
+            if(moveObject->getSort() == SORT_MISSILE) path.push(destination);
+            else path = findPath(theMap->findPathMap , theMap , start , destination);
+
+//            moveObject->setPath(stack<Point>());
+            moveObject->setPath(path);
+
+            qDebug()<<path.size();
+        }
+
+//        if(moveObject->getPath().size())
+//        {
+            relate_AllObject[object].useOnce();
+            if(!moveObject->isWalking()) moveObject->setPreWalk();
+//        }
+//        else
+//        {
+//            if(moveObject->isStand()) moveObject->setPreStand();
+//            relate_AllObject[object].useless();
+//        }
+    }
+    else relate_AllObject[object].useless();
+
 }
 
 void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
@@ -472,21 +494,29 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     //判断obect1是否为投射物
     object1->printer_ToMissile((void**)&missile);
 
-    if(attackee != NULL && attacker!=NULL)  //若指针均非空
+//    qDebug()<<"attacking";
+    if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
     {
+//        qDebug()<<"isattacking"<<(attacker->isAttacking());
         if(!attacker->isAttacking()) attacker->setPreAttack();
         else
         {
+
             //非祭司,是普通的伤害计算公式
             /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
             if( attacker->is_missileAttack())
             {
-                if( object1->get_isActionImageToPhaseFromEnd(PhaseFromEnd_Attack_ThrowMissile))
+//                qDebug()<<"ismissile"<<(attacker->is_missileThrow() );
+                if( attacker->is_missileThrow() )
+                {
                     addRelation( creatMissile(object1 , object2) , object2 , CoreEven_MissileAttack , false);
+                    attacker->haveAttack();
+                }
             }
-            else if( object1->get_isActionEnd())
+            else if( attacker->is_attackHit())
             {
                 calculateDamage = true;
+                attacker->haveAttack();
                 if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
             }
         }
@@ -574,8 +604,11 @@ void Core_List::object_RatioChange( Coordinate* object1, relation_Object& relati
 void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 {
     MoveObject* moOb = NULL;
+    Building* buiOb = NULL;
     object1->printer_ToMoveObject((void**)&moOb);
+    object1->printer_ToBuilding((void**)&buiOb);
     if(moOb!=NULL) moOb->setPreStand();
+    if(buiOb!=NULL) buiOb->init_BuildAttackAct();
 
     suspendRelation(object1);
 }
@@ -583,10 +616,9 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
-
-
-    qDebug()<<"ending";
-    qDebug()<<relate_AllObject[object1].relationAct;
+    vector<Point> Block_Free;
+//    qDebug()<<"ending";
+//    qDebug()<<relate_AllObject[object1].relationAct;
     switch(relate_AllObject[object1].relationAct){
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
@@ -602,8 +634,9 @@ void Core_List::object_FinishAction(Coordinate* object1)
         }
         break;
     case CoreEven_BuildingAct:
-        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1);  //进行建筑行动的结果处理
-        qDebug()<<"end";
+        Block_Free = theMap->findBlock_Free(object1);
+        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1,Block_Free);  //进行建筑行动的结果处理
+//        qDebug()<<"end";
         break;
     case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
@@ -646,6 +679,8 @@ void Core_List::conduct_Attacked(Coordinate* object)
                         if(addRelation(object,dr,ur,CoreEven_JustMoveTo,false)) ((MoveObject*)object)->beginRun();
                         break;
                     case FRIENDLY_ENEMY:
+                        if(attacker!=NULL && addRelation(object,attacker,CoreEven_Attacking,false)) ((MoveObject*)object)->beginRun();
+                        break;
                     case FRIENDLY_FENCY:
                         if(attacker!=NULL) addRelation(object,attacker,CoreEven_Attacking,false);
                         break;
@@ -674,128 +709,217 @@ void Core_List::conduct_Attacked(Coordinate* object)
 
 //**************************************************************
 //寻路相关
-bool Core_List::isValidPoint(const int (&map)[MAP_L][MAP_U], const Point &p)
-{
-    int rows = MAP_L;
-    int cols = MAP_U;
-    return (p.x >= 0 && p.x < rows && p.y >= 0 && p.y < cols);
-}
+//bool Core_List::isValidPoint(const int (&map)[MAP_L][MAP_U], const Point &p)
+//{
+//    int rows = MAP_L;
+//    int cols = MAP_U;
+//    return (p.x >= 0 && p.x < rows && p.y >= 0 && p.y < cols);
+//}
 
-vector<Point> Core_List::getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point &p)
-{
-    vector<Point> adjacentPoints;
+//vector<Point> Core_List::getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point &p)
+//{
+//    vector<Point> adjacentPoints;
 
-    // 八个相邻正方向的偏移量
-    int dx[] = { -1, 1, 0, 0, -1, -1, 1, 1 };
-    int dy[] = { 0, 0, -1, 1, -1, 1, -1, 1 };
+//    // 八个相邻正方向的偏移量
+//    int dx[] = { -1, 1, 0, 0, -1, -1, 1, 1 };
+//    int dy[] = { 0, 0, -1, 1, -1, 1, -1, 1 };
 
-    for (int i = 0; i < 8; i++) {
-        int newX = p.x + dx[i];
-        int newY = p.y + dy[i];
-        Point newPoint = { newX, newY };
-        if (isValidPoint(map, newPoint) && map[newX][newY] != 1) {
-            if(abs(dx[i])+abs(dy[i])==2)
-            {
-                if(map[newX][p.y]!=1&&map[p.x][newY]!=1)
-                {
-                    adjacentPoints.push_back(newPoint);
-                }
-            }
-            else adjacentPoints.push_back(newPoint);
-        }
-    }
-    return adjacentPoints;
-}
+//    for (int i = 0; i < 8; i++) {
+//        int newX = p.x + dx[i];
+//        int newY = p.y + dy[i];
+//        Point newPoint = { newX, newY };
+//        if (isValidPoint(map, newPoint) && map[newX][newY] != 1) {
+//            if(abs(dx[i])+abs(dy[i])==2)
+//            {
+//                if(map[newX][p.y]!=1&&map[p.x][newY]!=1)
+//                {
+//                    adjacentPoints.push_back(newPoint);
+//                }
+//            }
+//            else adjacentPoints.push_back(newPoint);
+//        }
+//    }
+//    return adjacentPoints;
+//}
 
 stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination)
 {
-    int rows = 72;
-    int cols = 72;
+    static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1) , Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
 
-    // 记录已访问的点
-    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+    stack<Point> path;
+    Point nextPoint, nowPoint;
+    pathNode* newPathNode = NULL , *findPathNode = NULL, *nowBestPathNode;
+    stack<pathNode*> lab_needDele;
+    lessHeap* nodeQue = new lessHeap();
+    bool meetGoal = false;
 
-    // 使用map记录每个点的前驱点，以便回溯路径
-    vector<vector<Point>> prev(rows, vector<Point>(cols));
+    initMap_HaveJud();
+    pathNode::setGoalPoint(destination.x,destination.y);    //设置寻路目标点
 
-    // 使用queue保存路径
-    queue<Point> q;
+    //当前所在格子是否需要加入队列？ 当前加入
+    haveJud_Map_Move(start);
 
-    // 广度优先搜索
-    q.push(start);
-    visited[start.x][start.y] = true;
+    newPathNode = new pathNode(start);
+    lab_needDele.push(newPathNode);
+    nodeQue->addNode(newPathNode);
 
-    while (!q.empty()) {
-        Point current = q.front();
-        q.pop();
-
-        // 找到目标点，回溯路径
-        if (current.x == destination.x && current.y == destination.y) {
-            stack<Point> pathStack;
-            while (!(current.x == start.x && current.y == start.y)) {
-                pathStack.push(current);
-                current = prev[current.x][current.y];
-            }
-            return pathStack;
-        }
-
-        vector<Point> adjacentPoints = getAdjacentPoints(findPathMap, current);
-        for (const Point& next : adjacentPoints) {
-            if (!visited[next.x][next.y]) {
-                visited[next.x][next.y] = true;
-                q.push(next);
-                prev[next.x][next.y] = current;
-            }
-        }
+    if( start == destination)
+    {
+        meetGoal = true;
+        findPathNode = newPathNode;
     }
 
-    return findPathAlternative(map->intmap,start,destination);
-}
+    while( nodeQue->top())    //nowBestPathNode记录当前节点
+    {
+        nowBestPathNode = nodeQue->top()->value;
+        nodeQue->pop();
+        nowPoint = nowBestPathNode->position;    //当前nowBestPathNode记录点的坐标
 
-stack<Point> Core_List::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point &start, const Point &destination)
-{
-    int rows = 72;
-    int cols = 72;
+        for(int i = 0; i<8;i++)
+        {
+            if(meetGoal) break;
 
-    // 记录已访问的点
-    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+            nextPoint = nowPoint + dire[i];
+            if(nextPoint.x<= 0 || nextPoint.y <= 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
 
-    // 使用map记录每个点的前驱点，以便回溯路径
-    vector<vector<Point>> prev(rows, vector<Point>(cols));
+            //斜线方向，多判断马脚操作
+            //  if( i<4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y]||findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])\|| i>=4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y])) //判断直线方向
 
-    // 使用queue保存路径
-    queue<Point> q;
+            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] || i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y]) ))
+            {
+                //创建新节点
+                newPathNode = new pathNode( nextPoint );
+                haveJud_Map_Move(nextPoint);
+                lab_needDele.push(newPathNode);
 
-    // 广度优先搜索
-    q.push(start);
-    visited[start.x][start.y] = true;
+                //为新节点增加前驱点信息,然后添加新节点到小根堆
+                nodeQue->addNode(nowBestPathNode->pushNode(newPathNode));
 
-    while (!q.empty()) {
-        Point current = q.front();
-        q.pop();
-
-        // 找到目标点，回溯路径
-        if (current.x == destination.x && current.y == destination.y) {
-            stack<Point> pathStack;
-            while (!(current.x == start.x && current.y == start.y)) {
-                pathStack.push(current);
-                current = prev[current.x][current.y];
-            }
-            return pathStack;
-        }
-
-        vector<Point> adjacentPoints = getAdjacentPoints(map, current);
-        for (const Point& next : adjacentPoints) {
-            if (!visited[next.x][next.y]) {
-                visited[next.x][next.y] = true;
-                q.push(next);
-                prev[next.x][next.y] = current;
+                if( nextPoint == destination)
+                {
+                    meetGoal = true;
+                    findPathNode = newPathNode;
+                    break;
+                }
             }
         }
+
+        if(meetGoal) break;
     }
 
-    return stack<Point>();
+    if(meetGoal)
+    {
+        while(findPathNode!=NULL)
+        {
+            path.push(findPathNode->position);
+            findPathNode = findPathNode->preNode;
+        }
+        path.pop();
+    }
+
+    //释放动态空间
+    while(lab_needDele.size())
+    {
+        delete lab_needDele.top();
+        lab_needDele.pop();
+    }
+    delete nodeQue;
+
+
+//    qDebug()<<meetGoal<<path.size();
+    return path;
 }
+
+
+//stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination)
+//{
+//    int rows = 72;
+//    int cols = 72;
+
+//    // 记录已访问的点
+//    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+
+//    // 使用map记录每个点的前驱点，以便回溯路径
+//    vector<vector<Point>> prev(rows, vector<Point>(cols));
+
+//    // 使用queue保存路径
+//    queue<Point> q;
+
+//    // 广度优先搜索
+//    q.push(start);
+//    visited[start.x][start.y] = true;
+
+//    while (!q.empty()) {
+//        Point current = q.front();
+//        q.pop();
+
+//        // 找到目标点，回溯路径
+//        if (current.x == destination.x && current.y == destination.y) {
+//            stack<Point> pathStack;
+//            while (!(current.x == start.x && current.y == start.y)) {
+//                pathStack.push(current);
+//                current = prev[current.x][current.y];
+//            }
+//            return pathStack;
+//        }
+
+//        vector<Point> adjacentPoints = getAdjacentPoints(findPathMap, current);
+//        for (const Point& next : adjacentPoints) {
+//            if (!visited[next.x][next.y]) {
+//                visited[next.x][next.y] = true;
+//                q.push(next);
+//                prev[next.x][next.y] = current;
+//            }
+//        }
+//    }
+
+//    return findPathAlternative(map->intmap,start,destination);
+//}
+
+//stack<Point> Core_List::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point &start, const Point &destination)
+//{
+//    int rows = 72;
+//    int cols = 72;
+
+//    // 记录已访问的点
+//    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+
+//    // 使用map记录每个点的前驱点，以便回溯路径
+//    vector<vector<Point>> prev(rows, vector<Point>(cols));
+
+//    // 使用queue保存路径
+//    queue<Point> q;
+
+//    // 广度优先搜索
+//    q.push(start);
+//    visited[start.x][start.y] = true;
+
+//    while (!q.empty()) {
+//        Point current = q.front();
+//        q.pop();
+
+//        // 找到目标点，回溯路径
+//        if (current.x == destination.x && current.y == destination.y) {
+//            stack<Point> pathStack;
+//            while (!(current.x == start.x && current.y == start.y)) {
+//                pathStack.push(current);
+//                current = prev[current.x][current.y];
+//            }
+//            return pathStack;
+//        }
+
+//        vector<Point> adjacentPoints = getAdjacentPoints(map, current);
+//        for (const Point& next : adjacentPoints) {
+//            if (!visited[next.x][next.y]) {
+//                visited[next.x][next.y] = true;
+//                q.push(next);
+//                prev[next.x][next.y] = current;
+//            }
+//        }
+//    }
+
+//    return stack<Point>();
+//}
 
 
 //*************************************************************
@@ -824,7 +948,7 @@ void Core_List::initDetailList()
 {
     int *phaseList;
     conditionF* conditionList;
-//    list<conditionF>forcedInterrupCondition;
+    list<conditionF>forcedInterrupCondition;
     list<conditionF>overCondition;
 
     //添加静态表
@@ -834,12 +958,13 @@ void Core_List::initDetailList()
         conditionList = new ( conditionF )( conditionF(condition_ObjectNearby) );
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList/* , forcedInterrupCondition*/ );
+        relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
         relation_Event_static[CoreEven_JustMoveTo].setEnd_Absolute();
         delete phaseList;
         delete conditionList;
-//        forcedInterrupCondition.clear();
+        forcedInterrupCondition.clear();
     }
 
 
@@ -848,14 +973,15 @@ void Core_List::initDetailList()
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
         conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList /*, forcedInterrupCondition*/ );
+        relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList , forcedInterrupCondition );
         overCondition.push_back(conditionF( condition_UniObjectDie, OPERATECON_OBJECT2 ));
         relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);   //向前跳转使用setLoop
 
         delete phaseList;
         delete conditionList;
-//        forcedInterrupCondition.clear();
+        forcedInterrupCondition.clear();
         overCondition.clear();
     }
 
@@ -879,8 +1005,9 @@ void Core_List::initDetailList()
 
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_Gather] = detail_EventPhase(13 , phaseList, conditionList/*,forcedInterrupCondition*/);
+        relation_Event_static[CoreEven_Gather] = detail_EventPhase(13 , phaseList, conditionList,forcedInterrupCondition);
         //设置循环，1->2，攻击猎物直至可采集
         overCondition.push_back(conditionF(condition_Object2CanbeGather));
         relation_Event_static[CoreEven_Gather].setLoop(1,2,overCondition);
@@ -904,7 +1031,7 @@ void Core_List::initDetailList()
 
         delete phaseList;
         delete conditionList;
-//        forcedInterrupCondition.clear();
+        forcedInterrupCondition.clear();
         overCondition.clear();
     }
 
@@ -913,11 +1040,13 @@ void Core_List::initDetailList()
     {
         phaseList = new int[2]{CoreDetail_Move , CoreDetail_UpdateRatio };
         conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby , OPERATECON_NEAR_WORK ) , conditionF( condition_UniObjectPercent , OPERATECON_OBJECT2 ) };
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2 , phaseList , conditionList);
+        relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
 
         delete phaseList;
         delete conditionList;
+        forcedInterrupCondition.clear();
     }
 
 
@@ -926,7 +1055,7 @@ void Core_List::initDetailList()
         phaseList = new int(CoreDetail_UpdateRatio);
         conditionList = new (conditionF)( conditionF(condition_UniObjectPercent , OPERATECON_OBJECT1));
 
-        relation_Event_static[CoreEven_BuildingAct] = detail_EventPhase(1 , phaseList , conditionList);
+        relation_Event_static[CoreEven_BuildingAct] = detail_EventPhase(1 , phaseList , conditionList,forcedInterrupCondition);
 
         delete phaseList;
         delete conditionList;
@@ -937,7 +1066,7 @@ void Core_List::initDetailList()
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
         conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby, OPERATECON_NEAR_MISSILE ) , conditionF( condition_TimesFalse ) };
 
-        relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2 , phaseList , conditionList);
+        relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
 
         delete phaseList;
         delete conditionList;

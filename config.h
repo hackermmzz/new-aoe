@@ -53,7 +53,7 @@
 #define GAMEWIDGET_MIDBLOCKL 22
 #define GAMEWIDGET_MIDBLOCKU 0
 #define HUMAN_SPEED sqrt(5)
-#define ANIMAL_SPEED sqrt(7)
+#define ANIMAL_SPEED sqrt(10)
 #define RESPATH ":/new/prefix1/res"
 #define ForestMAX 2
 #define FOREST_GENERATE_L 15
@@ -626,11 +626,16 @@
 #define OPERATECON_TIMES 00001
 #define OPERATE_TIMEMAX 10
 
+#define OPERATECON_TIMES_USELESSACT_MOVE 250
+
 
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
 #define DISTANCE_HIT_TARGET 4
+
+//箭塔攻击距离
+#define DIS_ARROWTOWER 7
 
 /********** 占地边长-块坐标常量 **********/
 #define SIZELEN_SINGEL 1
@@ -818,7 +823,12 @@
 #define FRIENDLY_ENEMY 2
 #define FRIENDLY_FENCY 3
 
-#define PhaseFromEnd_Attack_ThrowMissile 25
+
+/********** 飞行物投掷判断 **********/
+#define THROWMISSION_FARMER 25
+#define THROWMISSION_ARCHER 4
+
+#define THROWMISSION_ARROWTOWN_TIMER 30
 
 /********** 飞行物类别 **********/
 #define Missile_Spear 0
@@ -827,5 +837,10 @@
 /********** 飞行物属性 **********/
 #define Missile_Speed_Spear (4*HUMAN_SPEED)
 #define Missile_Speed_Arrow (4*HUMAN_SPEED)
+
+/********** 设置多少帧切换一次nowres **********/
+#define NOWRES_TIMER_FARMER 1
+#define NOWRES_TIMER_LION 1
+#define NOWRES_TIMER_ELEPHANT 1
 
 #endif // CONFIG_H
