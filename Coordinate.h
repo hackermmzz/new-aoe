@@ -45,7 +45,6 @@ public:
     virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
-
     //获取坐标
     double getDR(){return this->DR;}
     double getUR(){return this->UR;}
