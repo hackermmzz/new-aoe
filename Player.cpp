@@ -170,21 +170,26 @@ void Player::changeResource_byBuildAction(Building* actbuilding , int buildact)
 
 //***************************************************************
 //控制建筑行动
-void Player::enforcementAction( Building* actBuild )
+void Player::enforcementAction( Building* actBuild, vector<Point>Block_free  )
 {
     bool isNeedCreatObject = false; //是否需要创建对象
     int creatObjectSort , creatObjectNum;
+    Point block;
 
     isNeedCreatObject = playerScience->isNeedCreatObjectAfterAction(actBuild->getNum() , actBuild->getActNum() , creatObjectSort , creatObjectNum);
-    qDebug()<<"actend"<<(actBuild->getActNum());
+    block.x = actBuild->getBlockDR();
+    block.y = actBuild->getBlockUR();
+//    qDebug()<<"actend"<<(actBuild->getActNum());
     playerScience->finishAction(actBuild->getNum() ,actBuild->getActNum());
     actBuild->init_Resouce_TS();    //重置行动建筑的返还资源
 
     if(isNeedCreatObject)
     {
         //需要优化，添加建筑周围随机位置生成，且避开障碍物
-        if(creatObjectSort == SORT_FARMER) addFarmer(actBuild->getDR() , actBuild->getUR());
-        else if(creatObjectSort == SORT_ARMY) addArmy(creatObjectNum , actBuild->getDR() , actBuild->getUR());
+        if(Block_free.size()) block = Block_free[ rand()%Block_free.size() ];
+
+        if(creatObjectSort == SORT_FARMER) addFarmer(trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
+        else if(creatObjectSort == SORT_ARMY) addArmy(creatObjectNum , trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
     }
 }
 

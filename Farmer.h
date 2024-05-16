@@ -18,6 +18,7 @@ public:
     int get_add_specialAttack();
 
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
+
     /***************指针强制转化****************/
     //若要将Farmer类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){*ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址

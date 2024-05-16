@@ -26,6 +26,9 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
     speed = HUMAN_SPEED;
     this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
+    phaseFromEnd_MissionAttack = THROWMISSION_FARMER;
+
+    nowres_step = NOWRES_TIMER_FARMER;
 
     this->Angle=rand()%8;
     this->state=HUMAN_STATE_IDLE;
@@ -46,6 +49,7 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
     this->UR0=UR;
     this->nowstate=MOVEOBJECT_STATE_STAND;
 
+    isAttackable = true;
     type_Missile = Missile_Spear;
 //    this->Angle=0;
     setNowRes();
@@ -62,16 +66,20 @@ void Farmer::nextframe()
     if(isDie())
     {
         if( !isDying() ) setPreDie();
-        else if(!get_isActionEnd() ) nowres++;
+        else if(!get_isActionEnd() && isNowresShift()) nowres++;
     }
     else
     {
         updateState();
-        nowres++;
-        if(nowres==nowlist->end())
+        if(isNowresShift())
         {
-            nowres=nowlist->begin();
-            //读到最后回到最初
+            nowres++;
+            if(nowres==nowlist->end())
+            {
+                nowres=nowlist->begin();
+                initAttack_perCircle();
+                //读到最后回到最初
+            }
         }
 
         updateMove();
@@ -112,10 +120,12 @@ void Farmer::setNowRes()
     default:
         break;
     }
-    if(templist!=nowlist)
+    if(templist!=nowlist && templist)
     {
         nowlist = templist;
         nowres = nowlist->begin();
+        initNowresTimer();
+        initAttack_perCircle();
     }
 }
 
@@ -126,7 +136,7 @@ double Farmer::getDis_attack()
     if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
     else dis = 0;
 
-    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE;
+    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0 ;
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(), Num , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;

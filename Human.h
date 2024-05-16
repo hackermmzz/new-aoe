@@ -26,7 +26,9 @@ public:
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
 
+    bool is_missileThrow(){ return isAttacking() && this->nowres == prev(nowlist->end(),phaseFromEnd_MissionAttack) && attack_OneCircle; }
 
+    bool is_attackHit(){ return get_isActionEnd() && attack_OneCircle;  }
     //用于显示的属性
     int showATK_Addition(){ return  playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); }
     /***************指针强制转化****************/
@@ -47,6 +49,8 @@ protected:
     Development* playerScience = NULL;
 //    int type = 0;
     int playerRepresent;
+
+    int phaseFromEnd_MissionAttack = 0;
 };
 
 #endif // HUMAN_H

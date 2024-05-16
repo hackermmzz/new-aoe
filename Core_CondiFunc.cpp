@@ -1,6 +1,187 @@
 #include "Core_CondiFunc.h"
 
 //****************************************************************************************
+//寻路用结构体
+Point pathNode::goalPoint = Point(0,0);
+int pathNode::cost_stra = 10,pathNode::cost_bias = 14;
+std::map<Point , int> pathNode::costLab = {\
+    {Point(0,1),pathNode::cost_stra} , {Point(1,0),pathNode::cost_stra} , {Point(-1,0),pathNode::cost_stra} , {Point(0,-1),pathNode::cost_stra},\
+    {Point(1,1),pathNode::cost_bias} , {Point(1,-1),pathNode::cost_bias} , {Point(-1,-1),pathNode::cost_bias} , {Point(-1,1),pathNode::cost_bias},\
+};
+
+pathNode::pathNode( Point newPoint )
+{
+    /**
+     要求： 创建新结点前，必须保证已使用静态函数setGoal，设置了全局目标点
+    */
+    position.x = newPoint.x;
+    position.y = newPoint.y;
+    calCost_predict();
+}
+
+//添加后续点
+pathNode* pathNode::pushNode( pathNode* nextNode )
+{
+    nextNode->preNode = this;
+    nextNode->cost_total = cost_total;
+    nextNode->cost_total += costLab[ nextNode->position - this->position ];
+
+    return nextNode;
+}
+
+//小根堆
+lessHeap::~lessHeap()
+{
+    if(cacheNode!=NULL)
+    {
+        delete cacheNode;
+        cacheNode = NULL;
+    }
+
+    clear();
+}
+
+void lessHeap::clear()
+{
+    if(head == NULL) return;
+    stack<treeNode*> dire;
+    treeNode* dele;
+    dire.push( head );
+
+    while(dire.size())
+    {
+        dele = dire.top();
+        dire.pop();
+        if(dele->lchild) dire.push(dele->lchild);
+        if(dele->rchild) dire.push(dele->rchild);
+        delete dele;
+        nodeNum--;
+    }
+}
+
+void lessHeap::pop()
+{
+    if(head == NULL) return;
+    if(nodeNum == 1)
+    {
+        delete head;
+        head = NULL;
+        nodeNum = 0;
+        return;
+    }
+    treeNode* iter = head , *endPosi = head;
+    stack<bool> dire;   //0表左儿子，1表右儿子
+    int deep = nodeNum-1;
+//    int number = nodeNum;
+
+    while(deep)
+    {
+        dire.push((bool)((deep-1)%2));
+        deep=(deep-1)/2;
+    }
+    while(dire.size()>0)
+    {
+        if(dire.top()) endPosi = endPosi->rchild;
+        else endPosi = endPosi->lchild;
+        dire.pop();
+    }
+    //节点关系变更
+    nodeChange(endPosi,iter);
+
+    if(endPosi->father->lchild == endPosi) endPosi->father->lchild = NULL;
+    else if(endPosi->father->rchild == endPosi) endPosi->father->rchild = NULL;
+    //删除原头节点
+    delete endPosi;
+    nodeNum--;
+
+    downChange();
+    return;
+}
+
+void lessHeap::addNode( pathNode* newNode )
+{
+    cacheNode = new treeNode(newNode);
+    push_back();
+    floatUp(cacheNode);
+    cacheNode = NULL;
+}
+
+void lessHeap::floatUp( treeNode* obNode )
+{
+    //上浮操作
+    if(obNode)
+    {
+        while(obNode->father)
+        {
+            if(!(*obNode<*(obNode->father)))break;
+            nodeChange(obNode->father,obNode);
+            obNode = obNode->father;
+        }
+    }
+}
+
+void lessHeap::downChange()
+{
+    //下沉操作
+    treeNode* obNode = head , *minNode;
+    if(obNode == NULL) return;
+
+    while(obNode->lchild || obNode->rchild)
+    {
+        minNode = obNode;
+        if( obNode->lchild && *(obNode->lchild)<*minNode)minNode = obNode->lchild;
+        if( obNode->rchild && *(obNode->rchild)<*minNode)minNode = obNode->rchild;
+
+        if(obNode == minNode) break;
+
+        nodeChange(obNode,minNode);
+        obNode = minNode;
+    }
+    return;
+}
+
+void lessHeap::push_back()
+{
+    //将cacheNode加入树的尾部
+    if(head == NULL)
+    {
+        head = cacheNode;
+        nodeNum = 1;
+    }
+    else
+    {
+        stack<bool> dire , lan;   //0表左儿子，1表右儿子
+        treeNode* addPosi = head;
+        int deep = nodeNum;
+
+        while(deep)
+        {
+            dire.push((bool)((deep-1)%2));
+            deep = (deep-1)/2;
+        }
+
+        lan = dire;
+        while(dire.size()>1)
+        {
+            if(dire.top()) addPosi = addPosi->rchild;
+            else addPosi = addPosi->lchild;
+            dire.pop();
+        }
+        cacheNode->father = addPosi;    //设置父结点
+        //设置左右孩子结点
+        if(dire.top()) addPosi->rchild = cacheNode;
+        else addPosi->lchild = cacheNode;
+        nodeNum++;
+    }
+}
+
+void lessHeap::nodeChange( treeNode* __x , treeNode* __y )
+{
+    swap( __x->value,__y->value );
+}
+
+
+//****************************************************************************************
 //relation_Object结构体 内部函数
 relation_Object::relation_Object( int evenClass )
 {
@@ -116,7 +297,7 @@ detail_EventPhase::detail_EventPhase()
     phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd;
 }
 
-detail_EventPhase::detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList/* , list< conditionF >forcedInterrupCondition*/ )
+detail_EventPhase::detail_EventPhase( int phaseAmount , int* theList, conditionF* conditionList , list< conditionF >forcedInterrupCondition )
 {
     /** ********************************************************
      *构造函数
@@ -129,7 +310,7 @@ detail_EventPhase::detail_EventPhase( int phaseAmount , int* theList, conditionF
         chageCondition[i] = conditionList[i];
         changeLinkedList[i] = i+1;
     }
-//    this->forcedInterrupCondition = forcedInterrupCondition;
+    this->forcedInterrupCondition = forcedInterrupCondition;
 
     phaseList[phaseAmount] = CoreDetail_NormalEnd;//中止细节操作
     phaseList[phaseInterrup] = CoreDetail_AbsoluteEnd;  //强制中止
@@ -306,4 +487,10 @@ bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation
     }
 
     return isNegation^false;
+}
+
+//取消判断无效的行动
+bool condition_UselessAction(Coordinate* object1, relation_Object& relation, int& operate , bool isNegation)
+{
+    return (relation.useless_norm>operate)^isNegation;
 }

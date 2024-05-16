@@ -691,22 +691,9 @@ void Map::generateLandforms() {
     }
     return ;
 }
-
-void Map::loadfindPathMap() {
-
-    clearfindPathMap();
+void Map::loadBarrierMap()
+{
     clearBarrierMap();
-
-    for (int i = 0; i < MAP_L; ++i)
-    {
-        for (int j = 0; j < MAP_U; ++j)
-        {
-            if(cell[i][j].Explored==false)
-            {
-                findPathMap[i][j]=1;
-            }
-        }
-    }
 
     for(int i=0;i<MAXPLAYER;i++)
     {
@@ -750,8 +737,23 @@ void Map::loadfindPathMap() {
         std::list<Animal *>::iterator iter=animal.begin(),iterend = animal.end();
         while(iter!=iterend)
         {
-            if((*iter)->isTree()) setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
+            /*if((*iter)->isTree()) */setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
             iter++;
+        }
+    }
+}
+
+void Map::loadfindPathMap(MoveObject* moveOb)
+{
+    bool studentPlayer = moveOb->getPlayerRepresent() == 0;
+
+    clearfindPathMap();
+
+    for (int i = 0; i < MAP_L; ++i)
+    {
+        for (int j = 0; j < MAP_U; ++j)
+        {
+            if( barrierMap[i][j] || studentPlayer && !cell[i][j].Explored) findPathMap[i][j] = 1;
         }
     }
 }
@@ -796,6 +798,135 @@ false：指定范围内无障碍物；
         }
 
     return false;
+}
+
+bool Map::isFlat(Coordinate* judOb)
+{
+    int blockDR = judOb->getBlockDR(),blockUR = judOb->getBlockUR() , blockSideLen = judOb->get_BlockSizeLen();
+    int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
+    int maxHight = cell[blockDR][blockUR].getMapHeight(),minHight = maxHight,tempHight;
+
+    for(int x = blockDR; x<sideR; x++)
+    {
+        for(int y = blockUR; y<sideU;y++)
+        {
+            tempHight = cell[x][y].getMapHeight();
+            if(tempHight<minHight) minHight = tempHight;
+            else if(tempHight>maxHight) maxHight= tempHight;
+        }
+    }
+
+    if(maxHight==minHight) return true;
+    return false;
+}
+
+//该函数调用必须在barrierMap数组更新后
+vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
+{
+    int blockDR = object->getBlockDR(),blockUR = object->getBlockUR() , blockSideLen = object->get_BlockSizeLen();
+    int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
+    int bDRL = max(0,blockDR-disLen) , bURD = max(0,blockUR - disLen) , bDRR = min(blockDR+blockSideLen+disLen , MAP_L) , bURU = min(blockUR+blockSideLen+disLen,MAP_U);
+    vector<Point> Block_Free;
+    Point tempPoint;
+
+    //在给定范围内找寻没有障碍物的格子
+    for(int x = bDRL; x<bDRR; x++)
+    {
+        for(int y = bURD; y<bURU;y++)
+        {
+            if(x>=blockDR && x<sideR && y>=blockUR && y<sideU) continue;
+
+            if(!barrierMap[x][y])
+            {
+                tempPoint.x = x;
+                tempPoint.y = y;
+                Block_Free.push_back(tempPoint);
+            }
+        }
+    }
+
+    //如果一次找寻后为空,再次查询
+    while(Block_Free.empty())
+    {
+        bDRL = max(0,bDRL-1);
+        bURD = max(0,bURD-1);
+        bDRR = min(bDRR+1, MAP_L);
+        bURU = min(bURU+1 , MAP_U);
+
+        if(bDRL == 0 && bURD == 0 && bDRR == MAP_L && bURU == MAP_U)
+        {
+            qDebug()<<"findFalse";
+            break;
+        }
+
+        //查找边界是否有无障碍空位
+        for(int x = bDRL; x<bDRR;x++)
+        {
+            if(!barrierMap[x][bURD])
+            {
+                tempPoint.x = x;
+                tempPoint.y = bURD;
+                Block_Free.push_back(tempPoint);
+            }
+            if(!barrierMap[x][bURU-1])
+            {
+                tempPoint.x = x;
+                tempPoint.y = bURU-1;
+                Block_Free.push_back(tempPoint);
+            }
+        }
+
+        for(int y = bURD+1; y<bURU;y++)
+        {
+            if(!barrierMap[bDRL][y])
+            {
+                tempPoint.x = bDRL;
+                tempPoint.y = y;
+                Block_Free.push_back(tempPoint);
+            }
+            if(!barrierMap[bDRR-1][y])
+            {
+                tempPoint.x = bDRR-1;
+                tempPoint.y = y;
+                Block_Free.push_back(tempPoint);
+            }
+        }
+    }
+
+    return Block_Free;
+}
+
+vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
+{
+    int vision = object->getVision()-1;
+    Point position = object->getBlockPosition();
+    int mx = position.x + vision, my = position.y+vision;
+    int lx = position.x-vision, ly = position.y-vision;
+    vector<Point> blockLab;
+
+    for(int x = lx; x<=mx;x++)
+    {
+        for(int y = ly; y<=my; y++)
+        {
+            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
+            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
+
+            blockLab.push_back(Point( x,y ));
+        }
+    }
+
+    return blockLab;
+}
+
+void Map::add_Map_Vision( Coordinate* object )
+{
+    vector<Point> blockLab = get_ObjectVisionBlock(object);
+    int size = blockLab.size();
+
+    for(int i = 0 ;i<size ; i++)
+        map_Vision[blockLab[i].x][blockLab[i].y].push_back(object);
+
+    return;
 }
 
 //void Map::clearfindPathMap() {
