@@ -12,6 +12,7 @@ class Missile : public MoveObject
 public:
     Missile();
     Missile(int type, Coordinate* attacker , Coordinate* attackee ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
+    ~Missile(){ if(AttackerRecord) delete AttackerRecord; }
 
   /**********************虚函数**************************/
     int calculateAngle(double nextDR, double nextUR);

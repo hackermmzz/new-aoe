@@ -28,6 +28,8 @@ public:
 
     //判断本攻击单位的攻击方式是否需要投掷物
     virtual bool is_missileAttack(){ return type_Missile != -1; }
+    virtual bool is_missileThrow(){ return false; }
+    virtual bool is_attackHit(){ return false; }
 
     //用于显示的属性
     virtual int showATK_Basic(){ getATK()+get_add_specialAttack();}
@@ -46,6 +48,7 @@ public:
     bool isFullHp(){ return Blood >= 1; }
     //判断是否受到了攻击
     bool isGotAttack(){ return gotAttack; }
+    bool canAttack(){ return isAttackable; }
 
     //设置攻击目标
     void setAttackObject(Coordinate* attackObject){ this->attackObject = attackObject; }
@@ -72,6 +75,8 @@ public:
 
     void initAvengeObject(){ avangeObject = NULL; gotAttack = false; }
 
+    void haveAttack(){ attack_OneCircle = false; }
+
 protected:
     double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
     int MaxBlood = 100;
@@ -82,10 +87,14 @@ protected:
     Coordinate* avangeObject = NULL;    //受到攻击的来源
     double DR_avange=0,UR_avange=0;     //攻击来源的位置
 
+
+    bool isAttackable = false;
     int attackType = ATTACKTYPE_CANTATTACK;     //攻击类型
     int atk = 0;    //攻击力
     double dis_Attack = DISTANCE_ATTACK_CLOSE;  //攻击距离
     int type_Missile = -1;
+
+    bool attack_OneCircle = true;   //用于限制计算重复攻击
 
     //需细化，特攻表
     std::map<int , int> lab_SpecialAttack;
@@ -94,6 +103,8 @@ protected:
     double inter_Attack = 0; //攻击间隔
     int defence_close = 0;  //肉搏防御
     int defence_shoot = 0;  //投射防御
+
+    void initAttack_perCircle(){ attack_OneCircle = true; }
 };
 
 #endif // BLOODHAVER_H

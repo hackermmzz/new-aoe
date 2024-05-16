@@ -85,7 +85,7 @@ public:
 
     void back_Resource_TS( Building* actBuild );
     void finishBuild( Building* buildBuilding ){playerScience->finishAction(buildBuilding->getNum());}
-    void enforcementAction( Building* actBuild );
+    void enforcementAction( Building* actBuild , vector<Point>Block_free );
 
     bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }
 
