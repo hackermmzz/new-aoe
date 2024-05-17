@@ -44,6 +44,9 @@ Animal::Animal(int Num, double DR, double UR)
         this->MaxBlood = BLOOD_LION;
         speed = ANIMAL_SPEED;
         attackType = ATTACKTYPE_ANIMAL;
+        isAttackable = true;
+
+        nowres_step = NOWRES_TIMER_LION;
     }
     else if( this->Num == ANIMAL_GAZELLE )
     {
@@ -56,13 +59,16 @@ Animal::Animal(int Num, double DR, double UR)
     else if( this->Num == ANIMAL_ELEPHANT )
     {
         atk = 10;
-        BlockSizeLen = SIZELEN_SMALL;
+//        BlockSizeLen = SIZELEN_SMALL;
         Friendly = FRIENDLY_FENCY;
         this->MaxCnt = CNT_ELEPHANT;
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_ELEPHANT;
         speed = ANIMAL_SPEED;
         attackType = ATTACKTYPE_ANIMAL;
+        isAttackable = true;
+
+        nowres_step = NOWRES_TIMER_ELEPHANT;
     }
     else if( this->Num == ANIMAL_TREE )
     {
@@ -114,14 +120,22 @@ void Animal::nextframe()
              setPreDie();
              changeToGatherAble();  //死亡后，设置资源为可采集
         }
-        else if(!get_isActionEnd() ) nowres++;
+        else if(!get_isActionEnd() && isNowresShift()) nowres++;
     }
     else
     {
         if(Num!=ANIMAL_TREE && Num!=ANIMAL_FOREST)
         {
-            this->nowres++;
-            if(this->nowres==nowlist->end())nowres=nowlist->begin();
+
+            if(isNowresShift())
+            {
+                this->nowres++;
+                if(this->nowres==nowlist->end())
+                {
+                    nowres=nowlist->begin();
+                    initAttack_perCircle();
+                }
+            }
 
             updateMove();
         }
@@ -137,6 +151,8 @@ int Animal::getSort()
 
 void Animal::setNowRes()
 {
+    std::list<ImageResource> *templist = NULL;
+
     if(isTree())
     {
         if(nowstate == MOVEOBJECT_STATE_DIE)
@@ -153,22 +169,29 @@ void Animal::setNowRes()
     {
         switch (this->nowstate) {
         case 0:
-            nowlist=this->Stand[this->Num][this->Angle];
+            templist=this->Stand[this->Num][this->Angle];
             break;
         case MOVEOBJECT_STATE_WALK:
-            if(changeToRun) nowlist=this->Run[this->Num][this->Angle];
-            else  nowlist=this->Walk[this->Num][this->Angle];
+            if(changeToRun) templist=this->Run[this->Num][this->Angle];
+            else  templist=this->Walk[this->Num][this->Angle];
             break;
         case MOVEOBJECT_STATE_ATTACK:
-    //        qDebug()<<"attacking";
-            nowlist=this->Attack[this->Num][this->Angle];
+            templist=this->Attack[this->Num][this->Angle];
             break;
         case MOVEOBJECT_STATE_DIE:
-            nowlist=this->Die[this->Num][this->Angle];
+            templist=this->Die[this->Num][this->Angle];
             break;
         default:
             break;
         }
-        this->nowres = nowlist->begin();
+//        this->nowres = nowlist->begin();
+
+        if(templist!=nowlist && templist)
+        {
+            nowlist = templist;
+            nowres = nowlist->begin();
+            initNowresTimer();
+            initAttack_perCircle();
+        }
     }
 }

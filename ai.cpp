@@ -41,14 +41,13 @@ void AI::processData(){
             }
             qDebug()<<"Human1:"<<HumanAction(human.SN,sn);
         }else if(human.SN==human2){
-            qDebug()<<"human2:"<<human.NowState;
+//            qDebug()<<"human2:"<<human.NowState;
             if(human.NowState==HUMAN_STATE_IDLE){
                 static int x= 20;
                 static int y= 20;
                 if(x<75&&y<75){
                     qDebug()<<"Build:"<<x<<" "<<y<<" "<<HumanBuild(human.SN,BUILDING_HOME,x,y);
                 }
-
                 x+=10;
                 y+=10;
             }

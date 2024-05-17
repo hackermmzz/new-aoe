@@ -9,8 +9,6 @@ protected:
     double speed;   //移动速度
     bool changeToRun = false;
 
-    int vision; //视野
-
     int Angle;
     //规定 从下顺时针分别为0 1 2 3 4 5 6 7
 
@@ -67,9 +65,8 @@ public:
   /**********************虚函数**************************/
     virtual int calculateAngle(double nextDR, double nextUR);
     virtual double getSpeed(){ return speed; }
-    virtual int getVision(){ return vision; }
     bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
-    bool get_isActionImageToPhaseFromEnd(int phaseFormEnd){ return this->nowres == prev(nowlist->end(),phaseFormEnd); }
+
     void resetCoreAttribute(){ changeToRun = false; }
 
     virtual void updateMove();
@@ -81,6 +78,7 @@ public:
     bool isWalking(){return this->nowstate==MOVEOBJECT_STATE_WALK;}
     bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
+    bool isStand(){return this->nowstate == MOVEOBJECT_STATE_STAND;}
 
 
     void beginRun(){ changeToRun = true; }

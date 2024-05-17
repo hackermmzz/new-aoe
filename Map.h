@@ -29,8 +29,38 @@ public:
     // 生成不同地貌
     void generateLandforms();
 
-    void loadfindPathMap();
+    void loadfindPathMap(MoveObject* moveOb);
+    void loadBarrierMap();
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
+    bool isFlat(Coordinate* judOb);
+    vector<Point> findBlock_Free(Coordinate* object , int disLen = 1);
+
+    //用于查找Object视野范围内的格子，返回格子的列表容器
+    vector<Point> get_ObjectVisionBlock(Coordinate* object);
+
+    void init_Map_Vision(){
+        for(int x = 0; x<MAP_L;x++)
+            for(int y = 0 ; y<MAP_U;y++) map_Vision[x][y].clear();
+    }
+    void init_Map_Object(){
+        for(int x = 0; x<MAP_L;x++)
+            for(int y = 0 ; y<MAP_U;y++) map_Object[x][y].clear();
+    }
+    void init_Map_UseToMonitor(){
+        for(int x = 0; x<MAP_L;x++)
+            for(int y = 0 ; y<MAP_U;y++) {
+                map_Object[x][y].clear();
+                map_Vision[x][y].clear();
+            }
+    }
+
+    void add_Map_Vision( Coordinate* object );
+    void add_Map_Object( Coordinate* object ){
+        for(int x = object->getBlockDR(); x<object->getBlockDR()+object->get_BlockSizeLen(); x++ )
+            for(int y = object->getBlockUR(); y<object->getBlockUR()+object->get_BlockSizeLen(); y++)
+                map_Object[x][y].push_back(object);
+    }
+
 
     void setPlayer(Player** player){ this->player = player; }
 
@@ -62,7 +92,12 @@ public:
     std::list<StaticRes *> staticres={};
     std::list<Animal *> animal={};
 //    std::list<Ruin *> ruin={};
+
+
     int findPathMap[72][72];
+    //用于记录需要监视视野的Ob的视野格子和各Ob所在位置的地图
+    vector<Coordinate*> map_Vision[MAP_L][MAP_U];
+    vector<Coordinate*> map_Object[MAP_L][MAP_U];
 
 private:
     int CheckNeighborHigher(int x, int y, int currentCalHeight);
@@ -90,7 +125,6 @@ private:
     bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
 
     int barrierMap[MAP_L][MAP_U];
-
 };
 
 #endif // MAP_H

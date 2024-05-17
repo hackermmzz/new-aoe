@@ -12,6 +12,8 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
 
 void Core::gameUpdate()
 {
+    theMap->init_Map_UseToMonitor();
+
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
         std::list<Human *>::iterator humaniter=player[playerIndx]->human.begin() , humaniterEnd = player[playerIndx]->human.end();
@@ -39,6 +41,11 @@ void Core::gameUpdate()
             }
             else
             {
+                theMap->add_Map_Object(*humaniter);
+
+                if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
+                    theMap->add_Map_Vision(*humaniter);
+
                 interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
@@ -59,6 +66,11 @@ void Core::gameUpdate()
             }
             else
             {
+                theMap->add_Map_Object(*builditer);
+
+                if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
+                    theMap->add_Map_Vision(*builditer);
+
                 (*builditer)->nextframe();
                 builditer++;
             }
@@ -98,6 +110,11 @@ void Core::gameUpdate()
             (*animaliter)->nextframe();
             (*animaliter)->updateLU();
 
+            if(!(*animaliter)->isDie() \
+               && ((*animaliter)->getNum() == ANIMAL_GAZELLE ||(*animaliter)->getNum() == ANIMAL_LION) && get_IsObjectFree(*animaliter) )
+                theMap->add_Map_Vision(*animaliter);
+            theMap->add_Map_Object(*animaliter);
+
             animaliter++;
         }
         else
@@ -113,6 +130,8 @@ void Core::gameUpdate()
     {
         if((*SRiter)->is_Surplus())
         {
+            theMap->add_Map_Object(*SRiter);
+
             (*SRiter)->nextframe();
             SRiter++;
         }
@@ -131,7 +150,7 @@ void Core::gameUpdate()
         INSfinshed=true;
     }
 
-    theMap->loadfindPathMap();//更新寻路用障碍表
+    theMap->loadBarrierMap();//更新寻路用障碍表
     interactionList->manageRelationList();
 }
 
@@ -294,7 +313,7 @@ void Core::manageMouseEvent()
     {
         if( object_click== NULL )
         {
-            if( nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY )
+            if( (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY) && nowobject->getPlayerRepresent() == 0)
             {
                 interactionList->addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
             }
@@ -305,6 +324,7 @@ void Core::manageMouseEvent()
             switch(nowobject->getSort())
             {
                 case SORT_FARMER:
+                    if(nowobject->getPlayerRepresent() != 0) break;
                     switch (object_click->getSort())
                     {
                         case SORT_STATICRES:
@@ -324,6 +344,7 @@ void Core::manageMouseEvent()
                     break;
 
                 case SORT_ARMY:
+                    if(nowobject->getPlayerRepresent() != 0) break;
                     switch (object_click->getSort())
                     {
                         case SORT_ANIMAL:
@@ -334,6 +355,19 @@ void Core::manageMouseEvent()
                     }
                     break;
 
+                case SORT_BUILDING:
+                    if(nowobject->getPlayerRepresent() != 0 || nowobject->getNum()!= BUILDING_ARROWTOWER) break;
+
+                    switch (object_click->getSort())
+                    {
+                        case SORT_ANIMAL:
+                            qDebug()<<"arrowatk"<<(interactionList->addRelation(nowobject , object_click , CoreEven_Attacking ));
+                            break;
+                        default:
+                            break;
+                    }
+
+                    break;
                 case SORT_ANIMAL:
                     if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 

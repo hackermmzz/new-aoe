@@ -18,13 +18,31 @@ public:
     int getMaxBlood(){ return MaxBlood; }
     int getPlayerRepresent(){ return playerRepresent; }
 
+    bool isMonitorObject(Coordinate* judOb)
+    {
+        if(Num == BUILDING_ARROWTOWER)
+            return judOb->isPlayerControl() && judOb->getPlayerRepresent()!= getPlayerRepresent();
+
+        return false;
+    }
+
     void nextframe();
     void init_Blood();
+    void setPreAttack(){ defencing = true; missionThrowTimer = 0; }
+    bool isAttacking(){ return defencing; }
+    double getDis_attack()
+    {
+        if(getNum() == BUILDING_ARROWTOWER)
+            return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType() ) )*BLOCKSIDELENGTH;
+        else return 0;
+    }
 
     void setAttribute();
     void setNowRes();
     void setAction( int actNum );
     void ActNumToActName();
+
+    bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
@@ -98,6 +116,8 @@ public:
     int get_civilization(){ if(playerScience == NULL) return CIVILIZATION_STONEAGE;
                             else return playerScience->get_civilization();}
 
+    void init_BuildAttackAct(){ defencing = false; missionThrowTimer = 0; }
+
 protected:
   /********************静态资源**************************/
     static std::list<ImageResource> *build[4];//建设list
@@ -110,6 +130,10 @@ protected:
 
     static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
   /********************静态资源**************************/
+
+    bool defencing = false;
+    int missionThrowTimer = 0;
+    int missionThrowStep = 0;
 
     //所属阵营
     int playerRepresent;

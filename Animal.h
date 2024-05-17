@@ -46,11 +46,19 @@ public:
   /**********************虚函数**************************/
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
+    bool isMonitorObject(Coordinate* judOb){
+        int judNum = judOb->getNum(),judSort = judOb->getSort();
+        if(Num == ANIMAL_LION) return judSort == SORT_ARMY||judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_GAZELLE);
+        if(Num == ANIMAL_GAZELLE) return judSort == SORT_ARMY||judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_LION);
+        return false;
+    }
+
     void nextframe();
     int getSort();
     void setNowRes();
-    double getDis_attack(){ return dis_Attack*BlockSizeLen; }
+    double getDis_attack(){ return dis_Attack + (attackObject->getSideLength())/2.0; }
 
+    bool is_attackHit(){ return get_isActionEnd() && attack_OneCircle; }
     /***************指针强制转化****************/
     //若要将Animal类指针转化为父类指针,务必用以下函数!
 
