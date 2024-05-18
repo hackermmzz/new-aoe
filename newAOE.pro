@@ -51,7 +51,9 @@ SOURCES += \
     Core_CondiFunc.cpp \
     Core_List.cpp \
     AI.cpp \
-    Building_Resource.cpp
+    Building_Resource.cpp \
+    UsrAI.cpp \
+    EnemyAI.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -80,7 +82,9 @@ HEADERS += \
     Core_CondiFunc.h \
     Core_List.h \
     AI.h \
-    Building_Resource.h
+    Building_Resource.h \
+    UsrAI.h \
+    EnemyAI.h
 
 FORMS += \
         MainWidget.ui \

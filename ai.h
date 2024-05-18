@@ -259,7 +259,7 @@ public:
     void unlock(){
         aiLock.unlock();
     }
-private:
+protected:
     QMutex aiLock;
     bool isHuman(Coordinate* self){
         return (self!=nullptr&&(self->getSort()==SORT_FARMER||self->getSort()==SORT_ARMY));
