@@ -53,6 +53,7 @@ public:
         return false;
     }
 
+    QString getChineseName(){ return QString::fromStdString(getAnimalDisplayName(Num)); }
     void nextframe();
     int getSort();
     void setNowRes();

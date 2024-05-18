@@ -80,15 +80,17 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
     timer->start(40);
-    //    connect(timer,&QTimer::timeout,this,&MainWidget::setShowTimeFrame);
     showTimer=new QTimer(this);
     showTimer->setTimerType(Qt::PreciseTimer);
     showTimer->start(1000);
+
+    //时间增加
     connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
+
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
     // 游戏帧数初始化
-    gameframe = 0;
+    gameframe = 0;    
 
     // 玩家开辟空间
     for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
@@ -107,6 +109,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 向地图中添加资源
     initmap();
+
+
 
     // 添加资源测试
 //    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
@@ -157,6 +161,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     player[0]->changeResource(2000,2000,2000,2000);
+
+    debugText("blue"," 游戏开始");
 }
 
 // MainWidget析构函数
@@ -647,8 +653,12 @@ void MainWidget::statusUpdate()
 // 游戏帧更新
 void MainWidget::FrameUpdate()
 {
+    //打印debug栏
+    respond_DebugMessage();
+
     gameframe++;
     g_frame=gameframe;
+
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
@@ -660,3 +670,41 @@ void MainWidget::FrameUpdate()
     emit mapmove();
     return;
 }
+
+
+
+//***********************************************************************
+//输出提示框
+void MainWidget::respond_DebugMessage()
+{
+    while(!debugMassagePackage.empty())
+    {
+        debugText(debugMassagePackage.front().color,debugMassagePackage.front().content);
+        debugMassagePackage.pop();
+    }
+}
+
+void MainWidget::debugText(const QString& color, const QString& content)
+{
+    if (color == "blue")
+    {
+        ui->DebugTexter->insertHtml(COLOR_BLUE(sel->getShowTime() + content));
+    }
+    else if (color == "red")
+    {
+        ui->DebugTexter->insertHtml(COLOR_RED(sel->getShowTime() + content));
+    }
+    else if (color == "green")
+    {
+        ui->DebugTexter->insertHtml(COLOR_GREEN(sel->getShowTime() + content));
+    }
+    ui->DebugTexter->insertPlainText("\n");
+    QScrollBar *bar = ui->DebugTexter->verticalScrollBar();
+    bar->setValue(bar->maximum());
+}
+
+void MainWidget::clearDebugText()
+{
+    ui->DebugTexter->clear();
+}
+

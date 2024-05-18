@@ -6,7 +6,6 @@
 class SelectWidget;
 class Core
 {
-
 public:
     SelectWidget *sel = nullptr;
     Map* theMap;    //地图信息
@@ -46,8 +45,11 @@ private:
     void manageOrder();     //指令添加
 
 //signals:
+
 //    void clickOnObject();
     //点击对象时触发
+
+
 };
 
 #endif // CORE_H

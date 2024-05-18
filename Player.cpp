@@ -45,6 +45,8 @@ int Player::addHuman(int Num, double DR, double UR)
 {
     Human *newhuman=new Human(Num,DR,UR , playerScience , represent);
 
+    call_debugText("blue"," 产生了新的"+newhuman->getChineseName()+"(编号:" + QString::number(newhuman->getglobalNum()) + ")");
+
     human.push_back(newhuman);
     humanNumIncrease(newhuman);
     return 0;
@@ -53,6 +55,7 @@ int Player::addHuman(int Num, double DR, double UR)
 Army* Player::addArmy(int Num , double DR , double UR)
 {
     Army *newArmy = new Army(DR , UR, Num ,  playerScience , represent);
+    call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")");
 
     human.push_back(newArmy);
     humanNumIncrease(newArmy);
@@ -62,6 +65,7 @@ Army* Player::addArmy(int Num , double DR , double UR)
 int Player::addFarmer(double DR, double UR)
 {
     Farmer *newfarmer=new Farmer(DR,UR , playerScience , represent);
+    call_debugText("blue"," 产生了新的村民(编号:" + QString::number(newfarmer->getglobalNum()) + ")");
 
     human.push_back(newfarmer);
     humanNumIncrease(newfarmer);

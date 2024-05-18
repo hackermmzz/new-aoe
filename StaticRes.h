@@ -22,6 +22,8 @@ public:
     void nextframe();
     int getSort(){return SORT_STATICRES;}
 
+    QString getChineseName(){ QString::fromStdString(getStaticResDisplayName(Num)); }
+
     void setAttribute();
     void setNowRes();
     /***************指针强制转化****************/

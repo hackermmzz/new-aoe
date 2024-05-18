@@ -84,7 +84,11 @@ public:
     bool get_buildActLevel( int buildNum , int actNum ){ return playerScience->getActLevel(buildNum , actNum); }
 
     void back_Resource_TS( Building* actBuild );
-    void finishBuild( Building* buildBuilding ){playerScience->finishAction(buildBuilding->getNum());}
+    void finishBuild( Building* buildBuilding ){
+        playerScience->finishAction(buildBuilding->getNum());
+        buildBuilding->recordConstruct();
+        call_debugText("blue"," "+buildBuilding->getChineseName()+"(编号:"+QString::number(buildBuilding->getglobalNum())+")建造完毕");
+    }
     void enforcementAction( Building* actBuild , vector<Point>Block_free );
 
     bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }

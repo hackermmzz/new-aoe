@@ -27,6 +27,7 @@ void Core::gameUpdate()
                 (*humaniter)->setNowState((*humaniter)->getPreState());
                 if((*humaniter)->isDying())
                 {
+                    call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡");
                     interactionList->eraseObject(*humaniter);
                     player[playerIndx]->deleteMissile_Attacker(*humaniter);
                 }
@@ -57,8 +58,13 @@ void Core::gameUpdate()
         while(builditer!= builditerEnd)
         {
             interactionList->conduct_Attacked(*builditer);
-            if((*builditer)->isDie())
+            if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
+                if(!(*builditer)->isDie())
+                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成");
+                else
+                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁");
+
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
                 interactionList->eraseObject(*builditer);
                 deleteOb_setNowobNULL(*builditer);
@@ -102,10 +108,16 @@ void Core::gameUpdate()
                 (*animaliter)->setNowState((*animaliter)->getPreState());
                 if((*animaliter)->isDying())
                 {
+                    if(!(*animaliter)->isTree())
+                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡");
+
                     interactionList->eraseRelation(*animaliter);
                 }
                 (*animaliter)->setPreStateIsIdle();
             }
+
+            if((*animaliter)->isTree())
+                (*animaliter)->initAvengeObject();
             interactionList->conduct_Attacked(*animaliter);
             (*animaliter)->nextframe();
             (*animaliter)->updateLU();
@@ -119,6 +131,7 @@ void Core::gameUpdate()
         }
         else
         {
+            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成");
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
             animaliter = theMap->deleteAnimal(animaliter);
@@ -137,6 +150,8 @@ void Core::gameUpdate()
         }
         else
         {
+            call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成");
+
             interactionList->eraseObject(*SRiter);
             deleteOb_setNowobNULL(*SRiter);
             SRiter = theMap->deleteStaticRes(SRiter);
