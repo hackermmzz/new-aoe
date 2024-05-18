@@ -32,6 +32,8 @@ public:
 
     virtual void setAction( int actNum){ this->actNum = actNum; }
     virtual void ActNumToActName(){ actName = actNum; }
+
+    virtual QString getChineseName(){ return ""; }
     /***************指针强制转化****************/
     //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
     virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）

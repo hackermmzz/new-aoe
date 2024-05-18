@@ -106,7 +106,7 @@ Animal::Animal(int Num, double DR, double UR)
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
 
-    this->globalNum=g_globalNum;
+    this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 }

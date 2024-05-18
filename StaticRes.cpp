@@ -34,7 +34,7 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     setAttribute();
     setDetailPointAttrb_FormBlock();
 
-    this->globalNum=g_globalNum;
+    this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 }

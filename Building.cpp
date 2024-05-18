@@ -43,7 +43,7 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playe
 
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
-    this->globalNum=10000+g_globalNum;
+    this->globalNum=10000*SORT_BUILDING+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 }

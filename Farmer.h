@@ -16,7 +16,7 @@ public:
     double getDis_attack();
     int get_AttackType();
     int get_add_specialAttack();
-
+    QString getChineseName(){ return "村民"; }
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
 
     /***************指针强制转化****************/
