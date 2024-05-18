@@ -145,10 +145,7 @@ void Core::gameUpdate()
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
 
-    if(AIfinished&&INSfinshed==false) {
-        manageOrder();
-        INSfinshed=true;
-    }
+    manageOrder();
 
     theMap->loadBarrierMap();//更新寻路用障碍表
     interactionList->manageRelationList();
@@ -395,10 +392,10 @@ void Core::manageOrder()
 //        second = false;
 //        interactionList->addRelation(*(player[0]->build.begin()),CoreEven_BuildingAct , BUILDING_CENTER_CREATEFARMER);
 //    }
-
-    while(!instructions.empty()){
-        instruction cur=instructions.front();
-        instructions.pop();
+    UsrIns.lock.lock();
+    while(!UsrIns.instructions.empty()){
+        instruction cur=UsrIns.instructions.front();
+        UsrIns.instructions.pop();
         Coordinate* self=cur.self;
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
@@ -451,5 +448,6 @@ void Core::manageOrder()
             break;
         }
     }
+    UsrIns.lock.unlock();
 }
 

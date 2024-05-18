@@ -441,9 +441,12 @@ struct instruction{
     instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
-
-extern std::queue<instruction> instructions;    ///ai返回的指令队列
-
+struct ins{
+    std::queue<instruction> instructions;
+    QMutex lock;
+};
+extern ins EnemyIns;
+extern ins UsrIns;
 
 /*
  * 0是成功

@@ -6,6 +6,7 @@ class UsrAI:public AI
 {
 public:
     UsrAI();
+    void processData() override;
 };
 
 #endif // USRAI_H

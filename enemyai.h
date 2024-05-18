@@ -6,6 +6,7 @@ class EnemyAI:public AI
 {
 public:
     EnemyAI();
+    void processData() override;
 };
 
 #endif // ENEMYAI_H
