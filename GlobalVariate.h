@@ -37,6 +37,20 @@ extern Coordinate *nowobject;
 //当前选中对象
 //出于gamewidget和core均需要获取当前访问对象
 
+struct st_DebugMassage{
+    QString color;
+    QString content;
+    st_DebugMassage(){}
+    st_DebugMassage( QString color, QString content)
+    {
+        this->color = color;
+        this->content = content;
+    }
+};
+
+extern std::queue<st_DebugMassage>debugMassagePackage;
+
+
 struct tagBuilding
 {
     int BlockL,BlockU;
@@ -479,6 +493,8 @@ double calculateManhattanDistance(double x1, double y1, double x2, double y2);
 void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirror , double dis);
 
 double trans_BlockPointToDetailCenter( int p );
+
+void call_debugText(QString color, QString content);
 
 
 #endif // GLOBALVARIATE_H

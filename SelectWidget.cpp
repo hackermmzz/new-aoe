@@ -20,6 +20,22 @@ SelectWidget::~SelectWidget()
     delete ui;
 }
 
+//时间相关
+QString SelectWidget::getShowTime()
+{
+    QString minute ,second,millSecond;
+    //分钟
+    if(elapsedSec / 60 < 10) minute = "0" + QString::number(elapsedSec / 60);
+    else minute = QString::number(elapsedSec / 60);
+    //秒
+    if(elapsedSec % 60 < 10) second = "0" + QString::number(elapsedSec % 60);
+    else second = QString::number(elapsedSec % 60);
+    //毫秒
+    if(elapsedFrame < 10) millSecond = "0" + QString::number(elapsedFrame);
+    else millSecond = QString::number(elapsedFrame);
+    return (minute + ":" + second + ":" + millSecond);
+}
+
 void SelectWidget::paintEvent(QPaintEvent *event)
 {
     if(nowobject != NULL)
@@ -67,8 +83,15 @@ void SelectWidget::timeUpdate()
     elapsedSec++;
 }
 
+void SelectWidget::setShowTimeFrame()
+{
+    elapsedFrame += 4;
+    if(elapsedFrame >= 100) elapsedFrame = 0;
+}
+
 void SelectWidget::frameUpdate()
 {
+    setShowTimeFrame(); //帧记录更新
     refreshActs();
     updateActs();
     actionUpdate();

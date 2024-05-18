@@ -10,6 +10,7 @@ public:
     Core_List(Map* theMap, Player* player[]);
     ~Core_List(){}
 
+
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
     *用于：判断对象是否处于空闲

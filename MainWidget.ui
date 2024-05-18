@@ -233,6 +233,16 @@
     </rect>
    </property>
   </widget>
+  <widget class="QTextBrowser" name="DebugTexter">
+   <property name="geometry">
+    <rect>
+     <x>1440</x>
+     <y>0</y>
+     <width>480</width>
+     <height>1000</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

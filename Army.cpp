@@ -14,6 +14,12 @@ std::string Army::ArmyName[4][2]={{"Clubman","Axeman"},
                                   {"Scout","Scout"}
                                  };
 
+std::string Army::ArmyDisplayName[4][2]={{"棍棒兵","刀斧兵"},
+                                         {"投石兵","投石兵"},
+                                         {"弓箭手","弓箭手"},
+                                         {"侦察骑兵","侦察骑兵"}
+                                        };
+
 Army::Army()
 {
 
@@ -49,7 +55,7 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
     this->imageH=DR-UR;
-    this->globalNum=g_globalNum;
+    this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 
