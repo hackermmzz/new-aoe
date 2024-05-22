@@ -447,6 +447,8 @@ void Core::manageOrder()
         default:
             break;
         }
+        cur.ret=666;
+        AIGame.ins_ret.insert(make_pair(cur.id,cur));
     }
     UsrIns.lock.unlock();
 }

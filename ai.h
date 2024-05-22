@@ -17,6 +17,12 @@ public:
     int HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU);
 
     int BuildingAction(int SN,int Action);
+
+    instruction getInsRet(int id);
+
+    void printInsRet(int id);
+
+    void clearInsRet();
 /*###########INTERFACE ENDS HERE###########*/
 
     AI(){}
@@ -38,13 +44,17 @@ public:
 protected:
     QMutex aiLock;
     int id;
-    void AddToIns(instruction ins){
+    int AddToIns(instruction ins){
         if(id==0){
             UsrIns.lock.lock();
+            ins.id=UsrIns.g_id;
+            UsrIns.g_id++;
             UsrIns.instructions.push(ins);
             UsrIns.lock.unlock();
+            return ins.id;
         }else if(id==1){
 
+            return -1;
         }
     }
     bool isHuman(Coordinate* self){

@@ -10,11 +10,23 @@ double X[4]={mid-100,mid+100,mid+100,mid-100};
 double Y[4]={mid-100,mid-100,mid+100,mid+100};
 int step1=0;
 int step2=3;
+vector<int> ins_id;
 
 void UsrAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
     qDebug()<<"#####begin#####";
-    sleep(5);
+    sleep(2);
+    auto it = ins_id.begin();
+    while (it != ins_id.end()) {
+        instruction tmp=getInsRet(*it);
+        if (tmp.isExist()) {
+            printInsRet(*it);
+            it = ins_id.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    sleep(2);
     for(tagHuman human:AIGame.humans){
         if(human1==-1){
            human1=human.SN;
@@ -39,14 +51,14 @@ void UsrAI::processData(){
                     dis=countdistance(mid,mid,res.L,res.U);
                 }
             }
-            qDebug()<<"Human1:"<<HumanAction(human.SN,sn);
+            ins_id.push_back(HumanAction(human.SN,sn));
         }else if(human.SN==human2){
 //            qDebug()<<"human2:"<<human.NowState;
             if(human.NowState==HUMAN_STATE_IDLE){
                 static int x= 20;
                 static int y= 20;
                 if(x<75&&y<75){
-                    qDebug()<<"Build:"<<x<<" "<<y<<" "<<HumanBuild(human.SN,BUILDING_HOME,x,y);
+                    ins_id.push_back(HumanBuild(human.SN,BUILDING_HOME,x,y));
                 }
                 x+=10;
                 y+=10;
@@ -60,16 +72,16 @@ void UsrAI::processData(){
                     dis=countdistance(mid,mid,res.L,res.U);
                 }
             }
-            qDebug()<<"Human3:"<<HumanAction(human.SN,sn);
+            ins_id.push_back(HumanAction(human.SN,sn));
         }
     }
 
     for(tagBuilding building:AIGame.buildings){
         if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
-            qDebug()<<"BUILDING_CENTER:"<<BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
+            ins_id.push_back(BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER));
         }
         else if(building.Type==BUILDING_ARMYCAMP&&building.Project==ACT_NULL&&building.Percent==100){
-            qDebug()<<"BUILDING_ARMYCAMP:"<<BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN);
+            ins_id.push_back(BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN));
         }
     }
 

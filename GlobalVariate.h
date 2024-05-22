@@ -80,11 +80,13 @@ struct tagBlock{
     int height=0;
 };
 
+struct instruction;
 struct tagGame
 {
     list<tagBuilding> buildings;
     list<tagHuman> humans;
     list<tagResource> resources;
+    map<int,instruction> ins_ret;
     tagBlock blocks[MAP_L][MAP_U];
     int GameFrame;
     int civilizationStage;
@@ -93,17 +95,6 @@ struct tagGame
     int Stone;
     int Gold;
     int Human_MaxNum;
-};
-
-struct tagAction
-{
-    int A; // 操作种类
-    int SN;
-    int Action;
-    double L0, U0;
-    int BlockL, BlockU;
-    int BuildingNum;
-    int obSN;
 };
 
 struct MouseEvent
@@ -117,10 +108,7 @@ struct MouseEvent
 
 };
 
-extern std::map<int, tagAction> g_AiAction;
-
 extern tagGame AIGame;
-extern tagGame *p_AIGame;
 
 extern std::string direction[5];
 
@@ -430,18 +418,25 @@ struct instruction{
     /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
     /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
     /// type 4:对建筑self发出命令option
+    int ret=-1;
     int type;
+    int id;
     Coordinate* self;
     Coordinate* obj;
     int option;
     int BL,BU;
     double L,U;
+    bool isExist(){
+        return type!=-1;
+    }
+    instruction(){ type=-1; }
     instruction(int type,Coordinate* self,Coordinate* obj);
     instruction(int type,Coordinate* self,int BL,int BU,int option);
     instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
 struct ins{
+    int g_id=0;
     std::queue<instruction> instructions;
     QMutex lock;
 };

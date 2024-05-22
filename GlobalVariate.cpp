@@ -12,12 +12,11 @@ map<string, QSound*> SoundMap;
 
 std::list<Coordinate*> drawlist;
 
-std::map<int, tagAction> g_AiAction;
 
 Coordinate *nowobject=NULL;
 
 tagGame AIGame;
-tagGame *p_AIGame = &AIGame;
+
 int ProcessDataWork = 0;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};

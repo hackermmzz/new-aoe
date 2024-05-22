@@ -7,9 +7,8 @@ int AI::HumanMove(int SN, double L0, double U0){
     if(!isHuman(self))
         return ACTION_INVALID_SN;
     if(L0 > 2575 || L0 < 0||U0 > 2575 || U0 < 0)
-        return ACTION_INVALID_LOCATION;
-    AddToIns(instruction(1,self,L0,U0));
-    return ACTION_SUCCESS;
+        return ACTION_INVALID_LOCATION;    
+    return AddToIns(instruction(1,self,L0,U0));
 }
 
 int AI::HumanAction(int SN,int obSN){
@@ -25,8 +24,7 @@ int AI::HumanAction(int SN,int obSN){
             return ACTION_INVALID_OBSN;
         }
     }
-    AddToIns(instruction(2,self,obj));
-    return ACTION_SUCCESS;
+    return AddToIns(instruction(2,self,obj));
 }
 
 int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
@@ -109,8 +107,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
     if(BlockL<0||BlockU<0||BlockL+size>=72||BlockU+size>=72){
         return ACTION_INVALID_LOCATION;
     }
-    AddToIns(instruction(3,self,BlockL,BlockU,BuildingNum));
-    return ACTION_SUCCESS;
+    return AddToIns(instruction(3,self,BlockL,BlockU,BuildingNum));
 }
 
 int AI::BuildingAction(int SN,int Action){
@@ -229,6 +226,47 @@ int AI::BuildingAction(int SN,int Action){
     if(AIGame.Wood<=woodcost||AIGame.Meat<=foodcost||AIGame.Stone<=stonecost){
         return ACTION_INVALID_RESOURCE;
     }
-    AddToIns(instruction(4,self,Action));
-    return ACTION_SUCCESS;
+    return AddToIns(instruction(4,self,Action));
 }
+
+instruction AI::getInsRet(int id){
+    if(this->id==0){
+        if(AIGame.ins_ret.find(id)==AIGame.ins_ret.end()){
+            return instruction();
+        }else{
+            return AIGame.ins_ret[id];
+        }
+    }else if(this->id==1){
+        return instruction();
+    }
+}
+
+void AI::printInsRet(int id){
+    instruction tmp=getInsRet(id);
+    if(!tmp.isExist()){
+        qDebug()<<"ins:"<<id<<" Not Found!";
+        return;
+    }
+    if(tmp.type==1){
+        qDebug()<<"ins:"<<id
+               <<"\n   HumanMove("<<tmp.self->getglobalNum()<<","<<tmp.L<<","<<tmp.U
+              <<")\n   return "<<tmp.ret;
+    }else if(tmp.type==2){
+        qDebug()<<"ins:"<<id
+               <<"\n   HumanAct("<<tmp.self->getglobalNum()<<","<<tmp.obj->getglobalNum()
+              <<")\n   return "<<tmp.ret;
+    }else if(tmp.type==3){
+        qDebug()<<"ins:"<<id
+               <<"\n   HumanBuild("<<tmp.self->getglobalNum()<<","<<tmp.BL<<","<<tmp.BU<<","<<tmp.option
+              <<")\n   return "<<tmp.ret;
+    }else if(tmp.type==4){
+        qDebug()<<"ins:"<<id
+               <<"\n   BuildingAct("<<tmp.self->getglobalNum()<<","<<tmp.option
+              <<")\n   return "<<tmp.ret;
+    }
+}
+
+void clearInsRet(){
+    AIGame.ins_ret.clear();
+}
+
