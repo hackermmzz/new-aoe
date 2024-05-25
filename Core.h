@@ -14,7 +14,7 @@ public:
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
     void gameUpdate();
-    void infoShare();   ///将游戏信息同步给AIGame
+    void infoShare(int playerID);   ///将游戏信息同步给AIGame
 
     void getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold );
     bool get_IsBuildAble(int playerRepresent,int buildNum){ return player[playerRepresent]->get_isBuildingAble(buildNum); }

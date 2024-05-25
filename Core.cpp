@@ -151,8 +151,8 @@ void Core::gameUpdate()
     interactionList->manageRelationList();
 }
 
-void Core::infoShare(){
-    Player* self=player[0];
+void Core::infoShare(int playerID){
+    Player* self=player[playerID];
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
             if(!AIGame.blocks[i][j].explored&&theMap->cell[i][j].Explored){
@@ -169,9 +169,10 @@ void Core::infoShare(){
     AIGame.Wood=self->getWood();
     AIGame.civilizationStage=self->getCiv();
     AIGame.GameFrame=g_frame;
-    AIGame.humans.clear();
+    AIGame.farmers.clear();
     for(Human* human:self->human){
         tagHuman taghuman;
+        taghuman.Owner=playerID;
         taghuman.SN=human->getglobalNum();
         taghuman.Blood=human->getBlood();
         taghuman.L=human->getDR();
@@ -180,8 +181,7 @@ void Core::infoShare(){
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
-        taghuman.Sort=human->getSort();
-        if(taghuman.NowState==HUMAN_STATE_IDLE){
+        if(human->getSort()==HUMAN_STATE_IDLE){
             taghuman.WorkObjectSN=-1;
         }else{
             taghuman.WorkObjectSN=interactionList->getObjectSN(human);
@@ -190,17 +190,22 @@ void Core::infoShare(){
         taghuman.U0=human->getUR0();
         if(human->getSort()==SORT_FARMER){
             Farmer* farmer=static_cast<Farmer*> (human);
-            taghuman.Resource=farmer->getResourceNowHave();
-            if(taghuman.Resource==0){
-                taghuman.ResourceSort=-1;
+            tagFarmer tagfarmer;
+            tagfarmer.cast_from(taghuman);
+            tagfarmer.Resource=farmer->getResourceNowHave();
+            if(tagfarmer.Resource==0){
+                tagfarmer.ResourceSort=-1;
             }else{
-                taghuman.ResourceSort=farmer->getResourceSort();
+                tagfarmer.ResourceSort=farmer->getResourceSort();
             }
-        }else{
-            taghuman.ResourceSort=-1;
-            taghuman.Resource=0;
+            AIGame.farmers.push_back(tagfarmer);
+        }else if(human->getSort()==SORT_ARMY){
+            Army* army=static_cast<Army*> (human);
+            tagArmy tagarmy;
+            tagarmy.cast_from(taghuman);
+            tagarmy.Sort=army->getNum();
+            AIGame.armies.push_back(tagarmy);
         }
-        AIGame.humans.push_back(taghuman);
     }
 
     AIGame.resources.clear();

@@ -41,7 +41,6 @@ struct tagBuilding
 {
     int BlockL,BlockU;
     int Type;
-    int Foundation;
     int SN;
     int Blood;
     int MaxBlood;
@@ -61,19 +60,39 @@ struct tagResource
     int Cnt;
     int Blood;
 };
-
 struct tagHuman
 {
     double L,U;
     int BlockL,BlockU;
-    double L0,U0;
+    double L0,U0;   // 目的地
     int NowState;
     int WorkObjectSN;
     int Blood;
     int SN;
+    int Owner;
+    void cast_from(tagHuman taghuman){
+        this->L=taghuman.L;
+        this->U=taghuman.U;
+        this->BlockL=taghuman.BlockL;
+        this->BlockU=taghuman.BlockU;
+        this->L0=taghuman.L0;
+        this->U0=taghuman.U0;
+        this->NowState=taghuman.NowState;
+        this->WorkObjectSN=taghuman.WorkObjectSN;
+        this->Blood=taghuman.Blood;
+        this->SN=taghuman.SN;
+        this->Owner=taghuman.Owner;
+    }
+};
+struct tagFarmer:public tagHuman
+{
     int ResourceSort;
     int Resource;
-    int Sort;
+};
+
+struct tagArmy:public tagHuman
+{
+    int Sort;   //军队种类
 };
 struct tagBlock{
     bool explored=false;
@@ -84,7 +103,11 @@ struct instruction;
 struct tagGame
 {
     list<tagBuilding> buildings;
-    list<tagHuman> humans;
+    list<tagFarmer> farmers;
+    list<tagArmy> armies;
+    list<tagBuilding> enemy_buildings;
+    list<tagFarmer> enemy_farmers;
+    list<tagArmy> enemy_armies;
     list<tagResource> resources;
     map<int,instruction> ins_ret;
     tagBlock blocks[MAP_L][MAP_U];

@@ -27,7 +27,7 @@ void UsrAI::processData(){
         }
     }
     sleep(2);
-    for(tagHuman human:AIGame.humans){
+    for(tagFarmer human:AIGame.farmers){
         if(human1==-1){
            human1=human.SN;
            break;
@@ -36,12 +36,12 @@ void UsrAI::processData(){
            human2=human.SN;
            break;
         }
-        if(human3==-1&&human.Sort==SORT_ARMY){
-            human3=human.SN;
-            break;
-        }
+//        if(human3==-1&&human.Sort==SORT_ARMY){
+//            human3=human.SN;
+//            break;
+//        }
     }
-    for(tagHuman human:AIGame.humans){
+    for(tagFarmer human:AIGame.farmers){
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
