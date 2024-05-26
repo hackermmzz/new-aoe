@@ -48,6 +48,13 @@ struct tagBuilding
     int Project;
     int ProjectPercent;
     int Cnt;
+    int Owner;
+    tagBuilding toEnemy(){
+        this->Cnt=-1;
+        this->Project=-1;
+        this->ProjectPercent=-1;
+        return *this;
+    }
 };
 
 struct tagResource
@@ -88,11 +95,22 @@ struct tagFarmer:public tagHuman
 {
     int ResourceSort;
     int Resource;
+    tagFarmer toEnemy(){
+        Resource=-1;
+        L0=-1.0;
+        U0=-1.0;
+        return *this;
+    }
 };
 
 struct tagArmy:public tagHuman
 {
     int Sort;   //军队种类
+    tagArmy toEnemy(){
+        L0=-1.0;
+        U0=-1.0;
+        return *this;
+    }
 };
 struct tagBlock{
     bool explored=false;
@@ -131,7 +149,7 @@ struct MouseEvent
 
 };
 
-extern tagGame AIGame;
+extern tagGame AIGame[NOWPLAYER];
 
 extern std::string direction[5];
 

@@ -10,6 +10,10 @@ class AI:public QThread
 {
 public:
 /*##########INTERFACE BEGINS HERE##########*/
+    tagGame GameInfo(){
+        return AIGame[id];
+    }
+
     int HumanMove(int SN, double L0, double U0);
 
     int HumanAction(int SN,int obSN);
@@ -30,7 +34,7 @@ public:
     virtual void processData(){}
     void run() override{
         if(!trylock()) return;  ///如果锁未被释放，则直接返回
-        if(AIGame.GameFrame>10){
+        if(AIGame[id].GameFrame>10){
             processData();
         }
         unlock();

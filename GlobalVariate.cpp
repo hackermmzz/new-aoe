@@ -15,7 +15,7 @@ std::list<Coordinate*> drawlist;
 
 Coordinate *nowobject=NULL;
 
-tagGame AIGame;
+tagGame AIGame[2];
 
 int ProcessDataWork = 0;
 

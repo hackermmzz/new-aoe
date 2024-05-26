@@ -37,7 +37,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
     int size=0;
     bool granny=false;
     bool market=false;
-    for(tagBuilding building:AIGame.buildings){
+    for(tagBuilding building:AIGame[id].buildings){
         if(building.Type==BUILDING_GRANARY){
             granny=true;
         }
@@ -60,7 +60,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         size=3;
         break;
     case BUILDING_MARKET:
-        if(AIGame.civilizationStage<CIVILIZATION_TOOLAGE||!granny){
+        if(AIGame[id].civilizationStage<CIVILIZATION_TOOLAGE||!granny){
             return ACTION_INVALID_BUILDINGNUM;
         }
         woodcost=BUILD_MARKET_WOOD;
@@ -71,7 +71,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         size=2;
         break;
     case BUILDING_FARM:
-        if(AIGame.civilizationStage<CIVILIZATION_TOOLAGE||!market){
+        if(AIGame[id].civilizationStage<CIVILIZATION_TOOLAGE||!market){
             return ACTION_INVALID_BUILDINGNUM;
         }
         woodcost=BUILD_FARM_WOOD;
@@ -101,7 +101,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         return ACTION_INVALID_BUILDINGNUM;
         break;
     }
-    if(AIGame.Wood<woodcost||AIGame.Stone<stonecost){
+    if(AIGame[id].Wood<woodcost||AIGame[id].Stone<stonecost){
         return ACTION_INVALID_RESOURCE;
     }
     if(BlockL<0||BlockU<0||BlockL+size>=72||BlockU+size>=72){
@@ -141,7 +141,7 @@ int AI::BuildingAction(int SN,int Action){
     }else if(self->getNum()==BUILDING_GRANARY){
         switch (Action) {
         case BUILDING_GRANARY_ARROWTOWER:
-            if(AIGame.civilizationStage<CIVILIZATION_TOOLAGE){
+            if(AIGame[id].civilizationStage<CIVILIZATION_TOOLAGE){
                 return ACTION_INVALID_ACTION;
             }
             foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
@@ -223,21 +223,17 @@ int AI::BuildingAction(int SN,int Action){
         }
     }
 
-    if(AIGame.Wood<=woodcost||AIGame.Meat<=foodcost||AIGame.Stone<=stonecost){
+    if(AIGame[id].Wood<=woodcost||AIGame[id].Meat<=foodcost||AIGame[id].Stone<=stonecost){
         return ACTION_INVALID_RESOURCE;
     }
     return AddToIns(instruction(4,self,Action));
 }
 
-instruction AI::getInsRet(int id){
-    if(this->id==0){
-        if(AIGame.ins_ret.find(id)==AIGame.ins_ret.end()){
-            return instruction();
-        }else{
-            return AIGame.ins_ret[id];
-        }
-    }else if(this->id==1){
+instruction AI::getInsRet(int ins_id){
+    if(AIGame[id].ins_ret.find(ins_id)==AIGame[id].ins_ret.end()){
         return instruction();
+    }else{
+        return AIGame[id].ins_ret[ins_id];
     }
 }
 
@@ -266,7 +262,7 @@ void AI::printInsRet(int id){
     }
 }
 
-void clearInsRet(){
-    AIGame.ins_ret.clear();
+void AI::clearInsRet(){
+    AIGame[id].ins_ret.clear();
 }
 

@@ -43,7 +43,7 @@ private:
 
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
-    void manageOrder();     //指令添加
+    void manageOrder(int id);     //指令添加
 
 //signals:
 //    void clickOnObject();
