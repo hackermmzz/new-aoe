@@ -181,6 +181,17 @@ MainWidget::~MainWidget()
     delete core;
 }
 
+void MainWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    QPixmap pix;
+    pix=resMap["Interface"].front();
+    painter.drawPixmap(0,0,1440,45,pix);
+    pix=resMap["Interface"].back();
+    painter.drawPixmap(0,GAME_HEIGHT - 203.5,1440,203.5,pix);
+
+}
+
 // 初始化地图
 MainWidget::initmap()
 {
@@ -188,7 +199,6 @@ MainWidget::initmap()
     {
         return 0;
     }
-
 }
 
 // 初始化区块

@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>191</width>
+     <width>131</width>
      <height>31</height>
     </rect>
    </property>
@@ -46,24 +46,27 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="objIconSmall">
+  <widget class="QLabel" name="objIconSmall_ATK">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>60</y>
-     <width>41</width>
-     <height>41</height>
+     <x>140</x>
+     <y>20</y>
+     <width>31</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="objText">
+  <widget class="QLabel" name="objText_ATK">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>60</y>
+     <x>180</x>
+     <y>20</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -85,6 +88,42 @@
      <x>140</x>
      <y>130</y>
      <width>121</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>13</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="objIconSmall">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>50</y>
+     <width>31</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="objText">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>50</y>
+     <width>101</width>
      <height>31</height>
     </rect>
    </property>

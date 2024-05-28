@@ -13,6 +13,7 @@ SelectWidget::SelectWidget(QWidget *parent) :
     ui->objHp->setPalette(pe);
     ui->objName->setPalette(pe);
     ui->objText->setPalette(pe);//设置白色字体
+    ui->objText_ATK->setPalette(pe);
 }
 
 SelectWidget::~SelectWidget()
@@ -194,9 +195,12 @@ void SelectWidget::refreshActs()
     {
         if(nowobject->getActSpeed() > 0) ui->objText->setText(QString::number((int)(nowobject->getActPercent())) + "%");//如果有进行中的任务则显示进度
         else ui->objText->setText("");
+
         ui->objIcon->setPixmap(QPixmap());
         ui->objIconSmall->setPixmap(QPixmap());
         ui->objHp->setText("");
+        ui->objText_ATK->setText("");
+        ui->objIconSmall_ATK->setPixmap(QPixmap());
     }//行动的进度
 
     //人口当前数量、建筑情况等，直接遍历
@@ -403,7 +407,9 @@ void SelectWidget::refreshActs()
         ui->objIcon->setPixmap(QPixmap());
         ui->objName->setText("");
         ui->objText->setText("");
+        ui->objText_ATK->setText("");
         ui->objIconSmall->setPixmap(QPixmap());
+        ui->objIconSmall_ATK->setPixmap(QPixmap());
         this->hide();
         this->update();
     }
@@ -520,12 +526,17 @@ void SelectWidget::refreshActs()
             this->show();
         }
         else if(type == SORT_FARMER)//村民
-        {
+        { //objIconSmall_ATK objText_ATK用于展示攻击力 objIconSmall objText表示携带资源或者防御
             Farmer *objFarmer = (Farmer *)(nowobject);
             int num = objFarmer->getState();//获取工作状态并显示对应名称
             QString name = QString::fromStdString(objFarmer->getDisplayName(num));
             ui->objName->setText(name);
             ui->objIcon->setPixmap(resMap["Button_Village"].front().scaled(110,110));
+
+            ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(30, 30));
+            if(objFarmer->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()));
+            else ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()) + "+" + QString::number(objFarmer->showATK_Addition())); // 显示攻击力（基础+额外）
+
             if(objFarmer->getResourceSort() == HUMAN_WOOD) ui->objIconSmall->setPixmap(resMap["Icon_Wood"].front());
             else if(objFarmer->getResourceSort() == HUMAN_GRANARYFOOD || objFarmer->getResourceSort() == HUMAN_STOCKFOOD)
                 ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
