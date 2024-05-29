@@ -27,6 +27,7 @@ void Core::gameUpdate()
                 (*humaniter)->setNowState((*humaniter)->getPreState());
                 if((*humaniter)->isDying())
                 {
+                    call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡");
                     interactionList->eraseObject(*humaniter);
                     player[playerIndx]->deleteMissile_Attacker(*humaniter);
                 }
@@ -75,7 +76,7 @@ void Core::gameUpdate()
                             double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
                             if(leftOffsetPercent > 1) leftOffsetPercent = 1;
                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
-                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
                         }
                         // 右高左低：
                         else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
@@ -83,7 +84,7 @@ void Core::gameUpdate()
                             double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
                             if(rightOffsetPercent > 1) rightOffsetPercent = 1;
                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
-                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
                         }
                         // 下高上低：
                         else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
@@ -91,7 +92,7 @@ void Core::gameUpdate()
                             double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
                             if(downOffsetPercent > 1) downOffsetPercent = 1;
                             (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
-                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
                         }
                         // 上高下低：
                         else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
@@ -99,7 +100,7 @@ void Core::gameUpdate()
                             double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
                             if(upOffsetPercent > 1) upOffsetPercent = 1;
                             (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
-                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                         }
                     }
                     // 平地
@@ -113,8 +114,13 @@ void Core::gameUpdate()
         while(builditer!= builditerEnd)
         {
             interactionList->conduct_Attacked(*builditer);
-            if((*builditer)->isDie())
+            if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
+                if(!(*builditer)->isDie())
+                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成");
+                else
+                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁");
+
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
                 interactionList->eraseObject(*builditer);
                 deleteOb_setNowobNULL(*builditer);
@@ -158,10 +164,16 @@ void Core::gameUpdate()
                 (*animaliter)->setNowState((*animaliter)->getPreState());
                 if((*animaliter)->isDying())
                 {
+                    if(!(*animaliter)->isTree())
+                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡");
+
                     interactionList->eraseRelation(*animaliter);
                 }
                 (*animaliter)->setPreStateIsIdle();
             }
+
+            if((*animaliter)->isTree())
+                (*animaliter)->initAvengeObject();
             interactionList->conduct_Attacked(*animaliter);
             (*animaliter)->nextframe();
             (*animaliter)->updateLU();
@@ -175,6 +187,7 @@ void Core::gameUpdate()
         }
         else
         {
+            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成");
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
             animaliter = theMap->deleteAnimal(animaliter);
@@ -193,6 +206,8 @@ void Core::gameUpdate()
         }
         else
         {
+            call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成");
+
             interactionList->eraseObject(*SRiter);
             deleteOb_setNowobNULL(*SRiter);
             SRiter = theMap->deleteStaticRes(SRiter);

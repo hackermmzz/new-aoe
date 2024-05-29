@@ -2,8 +2,6 @@
 #include "ui_GameWidget.h"
 #include "Map.h"
 
-#include <QDateTime>
-
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GameWidget)
@@ -166,10 +164,8 @@ void GameWidget::paintEvent(QPaintEvent *)
     if(!drawlist.empty())
     {
         std::list<Coordinate *>::iterator iter=drawlist.begin();
-        qDebug() << QDateTime::currentDateTime();
         while(iter!=drawlist.end())
         {
-            if((*iter)->getMapHeightOffsetY() != 0) qDebug() << (*iter)->getBlockDR() << ' ' << (*iter)->getBlockUR() << ' ' << (*iter)->getMapHeightOffsetY();
             painter.drawPixmap(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR) - (*iter)->getimageX(),
                                (*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR) + (*iter)->getMapHeightOffsetY(),
                                (*iter)->getNowRes()->pix.width(),

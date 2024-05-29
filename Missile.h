@@ -96,6 +96,7 @@ private:
 
     bool isAOE; //是否具有喷溅伤害
     bool haveHitTarget = false;
+    //是否需要强制命中选中目标，即如果路劲上有其他可攻击到的敌人，是否中断飞行物移动直接结算
     bool isMandatoryArrive;
 
     bool taskEnd = false;

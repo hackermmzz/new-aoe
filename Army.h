@@ -26,6 +26,8 @@ public:
         return judOb->isPlayerControl() && judOb->getPlayerRepresent()!= getPlayerRepresent();
     }
 
+    QString getChineseName(){ return QString::fromStdString(getArmyDisplayNum(Num,getLevel())); }
+
     int getATK();
     int getDEF(int attackType_got);
     double getDis_attack();
@@ -51,11 +53,20 @@ public:
 
   /********************静态函数**************************/
     static std::string getArmyName(int num , int level) {
-        if (num >= 0 && num < 4) {
+        if (num >= 0 && num < 4 && level>=0&& level<2) {
             return ArmyName[num][level];
         }
         return "";
     }
+
+    static std::string getArmyDisplayNum(int num , int level) {
+        if (num >= 0 && num < 4&& level>=0&& level<2) {
+            return ArmyDisplayName[num][level];
+        }
+        return "";
+    }
+
+
     static std::list<ImageResource>* getDisappear(int num, int level, int angle) { return Disappear[num][level][angle]; }
     static std::list<ImageResource>* getWalk(int num, int level, int angle) { return Walk[num][level][angle];}
     static std::list<ImageResource>* getStand(int num, int level, int angle) {return Stand[num][level][angle];}
@@ -130,6 +141,7 @@ private:
     static std::list<ImageResource> *Die[4][2][8];
     static std::list<ImageResource> *Disappear[4][2][8];
     static std::string ArmyName[4][2];
+    static std::string ArmyDisplayName[4][2];
     /*************静态成员************/
 
 };

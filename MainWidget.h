@@ -37,7 +37,7 @@ public:
     ~MainWidget();
 
     initmap();
-
+    void paintEvent(QPaintEvent *);
     void initBlock();
     void initBuilding();
     void initAnimal();
@@ -53,6 +53,21 @@ public:
     void deleteFarmer();
     void deleteArmy();
     void deleteMissile();
+
+    //判断胜利
+//    void judgeVictory();
+
+
+    //**********************************************************
+    //输出框
+
+    void respond_DebugMessage();
+    void debugText(const QString& color,const QString& content);
+    void clearDebugText();
+
+
+    //**********************************************************
+
     ActWidget* getActs(int num)
     {
         return acts[num];

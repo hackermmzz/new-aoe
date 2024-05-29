@@ -25,6 +25,10 @@ public:
     void actionUpdate();
 
     void setCore( Core* core ){ this->core = core; }
+
+    //获取debug窗口显示时间
+    QString getShowTime();
+
 private:
     Ui::SelectWidget *ui;
 //    Building * objBuilding;
@@ -34,7 +38,11 @@ private:
     int actions[ACT_WINDOW_NUM_FREE] = {0};
     int actionStatus[ACT_WINDOW_NUM_FREE] = {0};
     MainWidget *mainPtr;
+
+    //时间秒与帧
     int elapsedSec = 0;
+    int elapsedFrame = 0;
+
     int human_num = 0;
     int build_hold_human_num = 0;
     bool isGranaryBuilt = false;
@@ -44,7 +52,7 @@ private:
     Core* core = NULL;
 
     void manageBuildBottom(int position, int actNum , int buildingNum );
-
+    void setShowTimeFrame();
 public slots:
     void widgetAct(int num);
     int  aiAct(int actName,Coordinate* self);
