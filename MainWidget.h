@@ -37,7 +37,7 @@ public:
     ~MainWidget();
 
     initmap();
-
+    void paintEvent(QPaintEvent *);
     void initBlock();
     void initBuilding();
     void initAnimal();
