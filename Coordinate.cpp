@@ -15,6 +15,16 @@ int Coordinate::getSort()
     return SORT_COORDINATE;
 }
 
+int Coordinate::getMapHeightOffsetY()
+{
+    return MapHeightOffsetY;
+}
+
+void Coordinate::setMapHeightOffsetY(int m_MapHeightOffsetY)
+{
+    MapHeightOffsetY = m_MapHeightOffsetY;
+}
+
 int Coordinate::ActNameToActNum(int actName)
 {
     /**

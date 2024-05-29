@@ -50,6 +50,62 @@ void Core::gameUpdate()
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
 
+                if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
+                {
+                    // 更新人物Y轴偏移（伪三维）
+                    int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
+
+                    // 斜坡
+                    if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
+                    {
+                        if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
+                        {
+                            qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
+                            qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
+                        }
+
+                        // 判断mapType以确定上升方向
+                        int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
+                        pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
+                        pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+
+                        // 左高右低：
+                        if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
+                        {
+                            double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
+                            if(leftOffsetPercent > 1) leftOffsetPercent = 1;
+                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
+                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                        }
+                        // 右高左低：
+                        else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
+                        {
+                            double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
+                            if(rightOffsetPercent > 1) rightOffsetPercent = 1;
+                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
+                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                        }
+                        // 下高上低：
+                        else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
+                        {
+                            double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
+                            if(downOffsetPercent > 1) downOffsetPercent = 1;
+                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
+                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                        }
+                        // 上高下低：
+                        else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
+                        {
+                            double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
+                            if(upOffsetPercent > 1) upOffsetPercent = 1;
+                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
+                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                        }
+                    }
+                    // 平地
+                    else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+                }
+
                 humaniter++;
             }
         }

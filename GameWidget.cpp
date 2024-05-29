@@ -1,5 +1,8 @@
 ﻿#include "GameWidget.h"
 #include "ui_GameWidget.h"
+#include "Map.h"
+
+#include <QDateTime>
 
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
@@ -163,9 +166,15 @@ void GameWidget::paintEvent(QPaintEvent *)
     if(!drawlist.empty())
     {
         std::list<Coordinate *>::iterator iter=drawlist.begin();
+        qDebug() << QDateTime::currentDateTime();
         while(iter!=drawlist.end())
         {
-            painter.drawPixmap(tranX((*iter)->getDR()-DR,(*iter)->getUR()-UR)-(*iter)->getimageX(),(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR),(*iter)->getNowRes()->pix.width(),(*iter)->getNowRes()->pix.height(),(*iter)->getNowRes()->pix);
+            if((*iter)->getMapHeightOffsetY() != 0) qDebug() << (*iter)->getBlockDR() << ' ' << (*iter)->getBlockUR() << ' ' << (*iter)->getMapHeightOffsetY();
+            painter.drawPixmap(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR) - (*iter)->getimageX(),
+                               (*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR) + (*iter)->getMapHeightOffsetY(),
+                               (*iter)->getNowRes()->pix.width(),
+                               (*iter)->getNowRes()->pix.height(),
+                               (*iter)->getNowRes()->pix);
             drawmemory(tranX((*iter)->getDR()-DR,(*iter)->getUR()-UR)-(*iter)->getimageX(),(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR),(*(*iter)->getNowRes()),(*iter)->getglobalNum());
             iter++;
         }
