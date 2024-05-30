@@ -486,7 +486,7 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content)
 {
-    debugMassagePackage.push(st_DebugMassage( color,content));
+    debugMassagePackage.push(st_DebugMassage(color, content));
 }
 //*************************************************************
 
