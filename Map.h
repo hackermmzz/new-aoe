@@ -29,6 +29,9 @@ public:
     // 生成不同地貌
     void generateLandforms();
 
+    // 判断地图块是否为斜坡
+    bool isSlope(int BlockDR, int BlockUR);
+
     void loadfindPathMap(MoveObject* moveOb);
     void loadBarrierMap();
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
@@ -94,7 +97,8 @@ public:
 //    std::list<Ruin *> ruin={};
 
 
-    int findPathMap[72][72];
+    int findPathMap[MAP_L][MAP_U];
+
     //用于记录需要监视视野的Ob的视野格子和各Ob所在位置的地图
     vector<Coordinate*> map_Vision[MAP_L][MAP_U];
     vector<Coordinate*> map_Object[MAP_L][MAP_U];

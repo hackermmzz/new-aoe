@@ -111,10 +111,12 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initmap();
 
 
-
     // 添加资源测试
 //    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
 //    Building* temp = player[0]->addBuilding(BUILDING_FARM , 20,20,100);
@@ -161,7 +163,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     player[0]->changeResource(2000,2000,2000,2000);
-
     debugText("blue"," 游戏开始");
 }
 
@@ -680,7 +681,6 @@ void MainWidget::FrameUpdate()
     emit mapmove();
     return;
 }
-
 
 
 //***********************************************************************
