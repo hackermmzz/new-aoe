@@ -691,6 +691,20 @@ void Map::generateLandforms() {
     }
     return ;
 }
+
+/*
+ * 函数：Map::isSlope；
+ * 参数：BlockDR，BlockUR——BlockX，BlockY；
+ * 内容：判断地图块是否为斜坡；
+ * 返回值：是/否。
+ */
+bool Map::isSlope(int BlockDR, int BlockUR)
+{
+    if(this->cell[BlockDR][BlockUR].getMapType() == MAPTYPE_FLAT ||
+       this->cell[BlockDR][BlockUR].getMapType() == MAPTYPE_EMPTY) return false;
+    return true;
+}
+
 void Map::loadBarrierMap()
 {
     clearBarrierMap();
@@ -1342,23 +1356,26 @@ void Map::CalOffset() {
             // 偏移
             if(this->cell[i][j].getMapHeight() > 0)
             {
-                this->cell[i][j].setOffsetY(-15 * this->cell[i][j].getMapHeight());
+                this->cell[i][j].setOffsetY(DRAW_OFFSET * this->cell[i][j].getMapHeight());
             }
             if(this->cell[i][j].getMapType() == 2 || this->cell[i][j].getMapType() == 3 || this->cell[i][j].getMapType() == 4 || this->cell[i][j].getMapType() == 5 || this->cell[i][j].getMapType() == 8 || this->cell[i][j].getMapType() == 9)
             {
-                this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + -15);
+                this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + DRAW_OFFSET);
             }
 
             // 修整边界
-            if(this->cell[i][j].getMapType() == 10) {
+            if(this->cell[i][j].getMapType() == 10)
+            {
                 int t = this->cell[i][j].getOffsetX();
                 this->cell[i][j].setOffsetX(t - 1);
             }
-            if(this->cell[i][j].getMapType() == 11) {
+            if(this->cell[i][j].getMapType() == 11)
+            {
                 int t = this->cell[i][j].getOffsetX();
                 this->cell[i][j].setOffsetX(t + 1);
             }
-            if(this->cell[i][j].getMapType() == 13) {
+            if(this->cell[i][j].getMapType() == 13)
+            {
                 int t = this->cell[i][j].getOffsetY();
                 this->cell[i][j].setOffsetY(t + 1);
             }
@@ -1373,7 +1390,7 @@ void Map::CalOffset() {
 /*
  * 函数：Map::InitFaultHandle；
  * 参数：无；
- * 内容：抛出地图生成中的错误；
+ * 内容：确认地图块样式，并在 debug 模式下输出地图生成中的错误；
  * 返回值：空。
  */
 void Map::InitFaultHandle() {
@@ -1391,7 +1408,7 @@ void Map::InitFaultHandle() {
                 // 设置平地全部为草地
                 this->cell[i][j].Num = MAPPATTERN_GRASS;
                 // 测试时设置平地全部为沙漠，便于调试
-                //                this->cell[i][j].Num = MAPPATTERN_DESERT;
+                // this->cell[i][j].Num = MAPPATTERN_DESERT;
             }
             else if(this->cell[i][j].getMapType() == 0)
             {
