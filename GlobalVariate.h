@@ -10,6 +10,7 @@
 #include <config.h>
 #include <QTextBrowser>
 #include <QDebug>
+#include <QMutex>
 
 using namespace std;
 class Coordinate;
@@ -137,6 +138,7 @@ struct tagGame
     int Gold;
     int Human_MaxNum;
 };
+extern QMutex tagGamelocks[NOWPLAYER];
 
 struct MouseEvent
 {

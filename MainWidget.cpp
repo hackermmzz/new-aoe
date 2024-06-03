@@ -655,9 +655,7 @@ void MainWidget::FrameUpdate()
     ui->Game->update();
     core->gameUpdate();
     statusUpdate();
-    if(!UsrAi->isRunning()){
-        core->infoShare(0);
-    }
+    core->infoShare(0);
     UsrAi->start();///AI线程尝试开始
     EnemyAi->start();
     emit mapmove();

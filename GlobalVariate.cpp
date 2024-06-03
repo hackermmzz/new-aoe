@@ -16,6 +16,7 @@ std::list<Coordinate*> drawlist;
 Coordinate *nowobject=NULL;
 
 tagGame AIGame[2];
+QMutex tagGamelocks[NOWPLAYER];
 
 int ProcessDataWork = 0;
 

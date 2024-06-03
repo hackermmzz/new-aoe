@@ -153,6 +153,9 @@ void Core::gameUpdate()
 
 void Core::infoShare(int playerID){
     Player* self=player[playerID];
+    if(!tagGamelocks[playerID].tryLock()){
+        return;
+    }
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
             if(!AIGame[playerID].blocks[i][j].explored&&theMap->cell[i][j].Explored){
@@ -203,7 +206,11 @@ void Core::infoShare(int playerID){
                 if(i==playerID){
                     continue;
                 }else{
+                    if(!tagGamelocks[playerID].tryLock()){
+                        continue;
+                    }
                     AIGame[i].enemy_farmers.push_back(tagfarmer.toEnemy());
+                    tagGamelocks[playerID].unlock();
                 }
             }
         }else if(human->getSort()==SORT_ARMY){
@@ -216,7 +223,11 @@ void Core::infoShare(int playerID){
                 if(i==playerID){
                     continue;
                 }else{
+                    if(!tagGamelocks[playerID].tryLock()){
+                        continue;
+                    }
                     AIGame[i].enemy_armies.push_back(tagarmy.toEnemy());
+                    tagGamelocks[playerID].unlock();
                 }
             }
         }
@@ -308,10 +319,15 @@ void Core::infoShare(int playerID){
             if(i==playerID){
                 continue;
             }else{
+                if(!tagGamelocks[playerID].try_lock()){
+                    continue;
+                }
                 AIGame[i].enemy_buildings.push_back(building.toEnemy());
+                tagGamelocks[playerID].unlock();
             }
         }
     }
+    tagGamelocks[playerID].unlock();
 }
 
 void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold )

@@ -11,6 +11,7 @@ class AI:public QThread
 public:
 /*##########INTERFACE BEGINS HERE##########*/
     tagGame GameInfo(){
+        QMutexLocker locker(&tagGamelocks[id]);
         return AIGame[id];
     }
 
