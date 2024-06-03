@@ -10,6 +10,7 @@
 #include <config.h>
 #include <QTextBrowser>
 #include <QDebug>
+#include <QMutex>
 
 using namespace std;
 class Coordinate;
@@ -55,7 +56,6 @@ struct tagBuilding
 {
     int BlockL,BlockU;
     int Type;
-    int Foundation;
     int SN;
     int Blood;
     int MaxBlood;
@@ -63,6 +63,13 @@ struct tagBuilding
     int Project;
     int ProjectPercent;
     int Cnt;
+    int Owner;
+    tagBuilding toEnemy(){
+        this->Cnt=-1;
+        this->Project=-1;
+        this->ProjectPercent=-1;
+        return *this;
+    }
 };
 
 struct tagResource
@@ -75,36 +82,67 @@ struct tagResource
     int Cnt;
     int Blood;
 };
-
 struct tagHuman
 {
     double L,U;
     int BlockL,BlockU;
-    double L0,U0;
+    double L0,U0;   // 目的地
     int NowState;
     int WorkObjectSN;
     int Blood;
     int SN;
+    int Owner;
+    void cast_from(tagHuman taghuman){
+        this->L=taghuman.L;
+        this->U=taghuman.U;
+        this->BlockL=taghuman.BlockL;
+        this->BlockU=taghuman.BlockU;
+        this->L0=taghuman.L0;
+        this->U0=taghuman.U0;
+        this->NowState=taghuman.NowState;
+        this->WorkObjectSN=taghuman.WorkObjectSN;
+        this->Blood=taghuman.Blood;
+        this->SN=taghuman.SN;
+        this->Owner=taghuman.Owner;
+    }
+};
+struct tagFarmer:public tagHuman
+{
     int ResourceSort;
     int Resource;
-    int Sort;
+    tagFarmer toEnemy(){
+        Resource=-1;
+        L0=-1.0;
+        U0=-1.0;
+        return *this;
+    }
+};
+
+struct tagArmy:public tagHuman
+{
+    int Sort;   //军队种类
+    tagArmy toEnemy(){
+        L0=-1.0;
+        U0=-1.0;
+        return *this;
+    }
 };
 struct tagBlock{
     bool explored=false;
     int height=0;
 };
 
+struct instruction;
 struct tagGame
 {
-//    tagBuilding *building;
-//    int building_n;
     list<tagBuilding> buildings;
-//    tagHuman *human;
-//    int human_n;
-    list<tagHuman> humans;
-//    tagResource *resource;
-//    int resource_n;
+    list<tagFarmer> farmers;
+    list<tagArmy> armies;
+    list<tagBuilding> enemy_buildings;
+    list<tagFarmer> enemy_farmers;
+    list<tagArmy> enemy_armies;
     list<tagResource> resources;
+    map<int,instruction> ins_ret;
     tagBlock blocks[MAP_L][MAP_U];
     int GameFrame;
     int civilizationStage;
@@ -114,17 +152,7 @@ struct tagGame
     int Gold;
     int Human_MaxNum;
 };
-
-struct tagAction
-{
-    int A; // 操作种类
-    int SN;
-    int Action;
-    double L0, U0;
-    int BlockL, BlockU;
-    int BuildingNum;
-    int obSN;
-};
+extern QMutex tagGamelocks[NOWPLAYER];
 
 struct MouseEvent
 {
@@ -137,10 +165,7 @@ struct MouseEvent
 
 };
 
-extern std::map<int, tagAction> g_AiAction;
-
-extern tagGame AIGame;
-extern tagGame *p_AIGame;
+extern tagGame AIGame[NOWPLAYER];
 
 extern std::string direction[5];
 
@@ -450,20 +475,30 @@ struct instruction{
     /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
     /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
     /// type 4:对建筑self发出命令option
+    int ret=-1;
     int type;
+    int id;
     Coordinate* self;
     Coordinate* obj;
     int option;
     int BL,BU;
     double L,U;
+    bool isExist(){
+        return type!=-1;
+    }
+    instruction(){ type=-1; }
     instruction(int type,Coordinate* self,Coordinate* obj);
     instruction(int type,Coordinate* self,int BL,int BU,int option);
     instruction(int type,Coordinate* self,double L,double U);
     instruction(int type,Coordinate* self,int option);
 };
-
-extern std::queue<instruction> instructions;    ///ai返回的指令队列
-
+struct ins{
+    int g_id=0;
+    std::queue<instruction> instructions;
+    QMutex lock;
+};
+extern ins EnemyIns;
+extern ins UsrIns;
 
 /*
  * 0是成功

@@ -5,9 +5,8 @@ int g_globalNum=1;
 int g_frame=0;
 
 std::map<int,Coordinate*> g_Object;
-std::queue<instruction> instructions;   ///AI返回的指令队列
-bool AIfinished=true;   ///AI线程锁
-bool INSfinshed=true;
+ins UsrIns; //Usr的指令列表
+ins EnemyIns;   //敌方的指令列表
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -157,7 +156,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
 
-    ai=new AI();
+    UsrAi=new UsrAI();
+    EnemyAi=new EnemyAI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
@@ -169,8 +169,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 // MainWidget析构函数
 MainWidget::~MainWidget()
 {
-    ai->exit(0);
-    delete ai;
+    UsrAi->exit(0);
+    EnemyAi->exit(0);
+    delete UsrAi;
+    delete EnemyAi;
     delete ui;
     deleteBlock();
     deleteAnimal();
@@ -674,10 +676,9 @@ void MainWidget::FrameUpdate()
     ui->Game->update();
     core->gameUpdate();
     statusUpdate();
-    if(AIfinished){
-        core->infoShare();
-        ai->start();///AI 线程开始
-    }
+    core->infoShare(0);
+    UsrAi->start();///AI线程尝试开始
+    EnemyAi->start();
     emit mapmove();
     return;
 }
