@@ -375,7 +375,7 @@ void Core::manageMouseEvent()
                     switch (object_click->getSort())
                     {
                         case SORT_ANIMAL:
-                            qDebug()<<"arrowatk"<<(interactionList->addRelation(nowobject , object_click , CoreEven_Attacking ));
+                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
                             break;
                         default:
                             break;

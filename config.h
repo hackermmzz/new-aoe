@@ -377,12 +377,19 @@
 #define HUMAN_GRANARYFOOD 5
 
 
-/********** 动作返回编号 **********/
+/********** AI函数 **********/
+//函数编号
+#define FUC_BUILDINGACTION 1
+#define FUC_HUMANMOVE 2
+#define FUC_HUMANACTION 3
+#define FUC_HUMANBUILD 4
+
+/********** 动作返回编号及action错误码 **********/
 /*
  * 0是成功
  * -1是SN不存在
  * -2是Action不存在
- * -3是位置超界
+ * -3是指定位置超界
  * -4是obSN不存在
  * -5是BuildingNum不存在
  * -6是资源不足
@@ -394,6 +401,39 @@
 #define ACTION_INVALID_OBSN -4
 #define ACTION_INVALID_BUILDINGNUM -5
 #define ACTION_INVALID_RESOURCE -6
+
+//控制对象被删除
+#define ACTION_INVALID_NULLWORKER -80
+//目标对象已被删除
+#define ACTION_INVALID_NULLGOALOBJECT -81
+
+//对象已有必须手动取消的任务，不空闲
+#define ACTION_INVALID_ISNTFREE -82
+
+//BuildingAction
+//建筑还在建造过程中
+#define ACTION_INVALID_BUILDACT_NEEDBUILT -11
+
+//建筑行动未解锁，或该行动只能进行有限次且已达上限
+#define ACTION_INVALID_BUILDACT_LOCK -13
+//造人行动，已达人口上限
+#define ACTION_INVALID_BUILDACT_MAXHUMAN -14
+
+//HumanMove
+
+//HumanAction
+
+//HumanBuild
+//建筑位置有高度差
+#define ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH -41
+//建筑位置加上建筑宽度，超出边界
+#define ACTION_INVALID_HUMANBUILD_OVERBORDER -42
+//建筑位置未被探索
+#define ACTION_INVALID_HUMANBUILD_UNEXPLORE -43
+//建筑位置与其他物体有重叠冲突
+#define ACTION_INVALID_HUMANBUILD_OVERLAP -44
+//建筑未解锁，未达成建筑条件
+#define ACTION_INVALID_HUMANBUILD_LOCK -45
 
 /********** 资源种类 **********/
 /*
