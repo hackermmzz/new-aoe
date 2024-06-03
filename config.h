@@ -43,6 +43,7 @@
 #define STONE 10                        //石头资源数量
 #define gen5 sqrt(5)
 #define MAXPLAYER 8
+#define NOWPLAYER 2
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度
 #define GAMEWIDGET_WIDTH 1440
@@ -107,6 +108,8 @@
 #define MAPPATTERN_OCEAN 2      // 海洋/河流
 #define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
 
+/********** 地图块绘制偏移量 **********/
+#define DRAW_OFFSET -15
 
 /********** DebugText栏颜色 **********/
 #define COLOR_RED(STRING) QString("<font color=red>%1</font><font color=black> </font>").arg(STRING)

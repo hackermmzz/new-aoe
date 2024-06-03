@@ -12,13 +12,13 @@ map<string, QSound*> SoundMap;
 
 std::list<Coordinate*> drawlist;
 
-std::map<int, tagAction> g_AiAction;
 
 Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 
-tagGame AIGame;
-tagGame *p_AIGame = &AIGame;
+tagGame AIGame[2];
+QMutex tagGamelocks[NOWPLAYER];
+
 int ProcessDataWork = 0;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
@@ -486,7 +486,7 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content)
 {
-    debugMassagePackage.push(st_DebugMassage( color,content));
+    debugMassagePackage.push(st_DebugMassage(color, content));
 }
 //*************************************************************
 

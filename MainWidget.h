@@ -21,7 +21,8 @@
 //#include <AboutDialog.h>
 //#include <Option.h>
 #include <Core.h>
-#include "AI.h"
+#include "UsrAI.h"
+#include "EnemyAI.h"
 #include <ActWidget.h>
 
 namespace Ui {
@@ -37,7 +38,7 @@ public:
     ~MainWidget();
 
     initmap();
-
+    void paintEvent(QPaintEvent *);
     void initBlock();
     void initBuilding();
     void initAnimal();
@@ -78,7 +79,7 @@ public:
 
     SelectWidget *sel;
     Core *core;
-    AI* ai;
+    AI* UsrAi,*EnemyAi;
     bool eventFilter(QObject *watched, QEvent *event);
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态

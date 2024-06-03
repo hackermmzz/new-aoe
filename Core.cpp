@@ -51,6 +51,62 @@ void Core::gameUpdate()
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
 
+                if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
+                {
+                    // 更新人物Y轴偏移（伪三维）
+                    int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
+
+                    // 斜坡
+                    if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
+                    {
+                        if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
+                        {
+                            qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
+                            qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
+                        }
+
+                        // 判断mapType以确定上升方向
+                        int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
+                        pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
+                        pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+
+                        // 左高右低：
+                        if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
+                        {
+                            double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
+                            if(leftOffsetPercent > 1) leftOffsetPercent = 1;
+                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
+//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                        }
+                        // 右高左低：
+                        else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
+                        {
+                            double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
+                            if(rightOffsetPercent > 1) rightOffsetPercent = 1;
+                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
+//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                        }
+                        // 下高上低：
+                        else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
+                        {
+                            double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
+                            if(downOffsetPercent > 1) downOffsetPercent = 1;
+                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
+//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                        }
+                        // 上高下低：
+                        else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
+                        {
+                            double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
+                            if(upOffsetPercent > 1) upOffsetPercent = 1;
+                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
+//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                        }
+                    }
+                    // 平地
+                    else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+                }
+
                 humaniter++;
             }
         }
@@ -159,36 +215,38 @@ void Core::gameUpdate()
     }
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
-    if(AIfinished&&INSfinshed==false) {
-        manageOrder();
-        INSfinshed=true;
-    }
+
+    manageOrder(0);
 
     theMap->loadBarrierMap();//更新寻路用障碍表
     interactionList->manageRelationList();
 }
 
-void Core::infoShare(){
-    Player* self=player[0];
+void Core::infoShare(int playerID){
+    Player* self=player[playerID];
+    if(!tagGamelocks[playerID].tryLock()){
+        return;
+    }
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
-            if(!AIGame.blocks[i][j].explored&&theMap->cell[i][j].Explored){
-                AIGame.blocks[i][j].height=theMap->cell[i][j].getMapHeight();
-                AIGame.blocks[i][j].explored=true;
+            if(!AIGame[playerID].blocks[i][j].explored&&theMap->cell[i][j].Explored){
+                AIGame[playerID].blocks[i][j].height=theMap->cell[i][j].getMapHeight();
+                AIGame[playerID].blocks[i][j].explored=true;
             }
         }
     }
 
-    AIGame.Human_MaxNum=self->getMaxHumanNum();
-    AIGame.Gold=self->getGold();
-    AIGame.Stone=self->getStone();
-    AIGame.Meat=self->getFood();
-    AIGame.Wood=self->getWood();
-    AIGame.civilizationStage=self->getCiv();
-    AIGame.GameFrame=g_frame;
-    AIGame.humans.clear();
+    AIGame[playerID].Human_MaxNum=self->getMaxHumanNum();
+    AIGame[playerID].Gold=self->getGold();
+    AIGame[playerID].Stone=self->getStone();
+    AIGame[playerID].Meat=self->getFood();
+    AIGame[playerID].Wood=self->getWood();
+    AIGame[playerID].civilizationStage=self->getCiv();
+    AIGame[playerID].GameFrame=g_frame;
+    AIGame[playerID].farmers.clear();
     for(Human* human:self->human){
         tagHuman taghuman;
+        taghuman.Owner=playerID;
         taghuman.SN=human->getglobalNum();
         taghuman.Blood=human->getBlood();
         taghuman.L=human->getDR();
@@ -197,8 +255,7 @@ void Core::infoShare(){
         taghuman.BlockU=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
-        taghuman.Sort=human->getSort();
-        if(taghuman.NowState==HUMAN_STATE_IDLE){
+        if(human->getSort()==HUMAN_STATE_IDLE){
             taghuman.WorkObjectSN=-1;
         }else{
             taghuman.WorkObjectSN=interactionList->getObjectSN(human);
@@ -207,20 +264,47 @@ void Core::infoShare(){
         taghuman.U0=human->getUR0();
         if(human->getSort()==SORT_FARMER){
             Farmer* farmer=static_cast<Farmer*> (human);
-            taghuman.Resource=farmer->getResourceNowHave();
-            if(taghuman.Resource==0){
-                taghuman.ResourceSort=-1;
+            tagFarmer tagfarmer;
+            tagfarmer.cast_from(taghuman);
+            tagfarmer.Resource=farmer->getResourceNowHave();
+            if(tagfarmer.Resource==0){
+                tagfarmer.ResourceSort=-1;
             }else{
-                taghuman.ResourceSort=farmer->getResourceSort();
+                tagfarmer.ResourceSort=farmer->getResourceSort();
             }
-        }else{
-            taghuman.ResourceSort=-1;
-            taghuman.Resource=0;
+            AIGame[playerID].farmers.push_back(tagfarmer);
+            for(int i=0;i<NOWPLAYER;i++){
+                if(i==playerID){
+                    continue;
+                }else{
+                    if(!tagGamelocks[playerID].tryLock()){
+                        continue;
+                    }
+                    AIGame[i].enemy_farmers.push_back(tagfarmer.toEnemy());
+                    tagGamelocks[playerID].unlock();
+                }
+            }
+        }else if(human->getSort()==SORT_ARMY){
+            Army* army=static_cast<Army*> (human);
+            tagArmy tagarmy;
+            tagarmy.cast_from(taghuman);
+            tagarmy.Sort=army->getNum();
+            AIGame[playerID].armies.push_back(tagarmy);
+            for(int i=0;i<NOWPLAYER;i++){
+                if(i==playerID){
+                    continue;
+                }else{
+                    if(!tagGamelocks[playerID].tryLock()){
+                        continue;
+                    }
+                    AIGame[i].enemy_armies.push_back(tagarmy.toEnemy());
+                    tagGamelocks[playerID].unlock();
+                }
+            }
         }
-        AIGame.humans.push_back(taghuman);
     }
 
-    AIGame.resources.clear();
+    AIGame[playerID].resources.clear();
     for(Animal* animal:theMap->animal){
         tagResource resource;
         resource.SN=animal->getglobalNum();
@@ -255,7 +339,7 @@ void Core::infoShare(){
         resource.U=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
-        AIGame.resources.push_back(resource);
+        AIGame[playerID].resources.push_back(resource);
     }
     for(StaticRes* staticRes: theMap->staticres){
         tagResource resource;
@@ -279,10 +363,10 @@ void Core::infoShare(){
         }
         resource.Cnt=staticRes->get_Cnt();
         resource.Blood=-1;
-        AIGame.resources.push_back(resource);
+        AIGame[playerID].resources.push_back(resource);
     }
 
-    AIGame.buildings.clear();
+    AIGame[playerID].buildings.clear();
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
@@ -293,6 +377,7 @@ void Core::infoShare(){
         building.Percent=build->getPercent();
         building.Project=build->getActNum();
         building.ProjectPercent=build->getActPercent();
+        building.Owner=playerID;
 //        if(build->getSort()==SORT_FARM){
 //            building.Type=BUILDING_FARM;
 //            building.Cnt=build->getCnt();
@@ -300,8 +385,20 @@ void Core::infoShare(){
             building.Type=build->getNum();
             building.Cnt=-1;
 //        }
-        AIGame.buildings.push_back(building);
+        AIGame[playerID].buildings.push_back(building);
+        for(int i=0;i<NOWPLAYER;i++){
+            if(i==playerID){
+                continue;
+            }else{
+                if(!tagGamelocks[playerID].try_lock()){
+                    continue;
+                }
+                AIGame[i].enemy_buildings.push_back(building.toEnemy());
+                tagGamelocks[playerID].unlock();
+            }
+        }
     }
+    tagGamelocks[playerID].unlock();
 }
 
 void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold )
@@ -394,7 +491,7 @@ void Core::manageMouseEvent()
     }
 }
 //后续编写，用于处理AI指令
-void Core::manageOrder()
+void Core::manageOrder(int id)
 {
 //    static bool once = true;
 //    static bool second = true;
@@ -409,10 +506,16 @@ void Core::manageOrder()
 //        second = false;
 //        interactionList->addRelation(*(player[0]->build.begin()),CoreEven_BuildingAct , BUILDING_CENTER_CREATEFARMER);
 //    }
-
-    while(!instructions.empty()){
-        instruction cur=instructions.front();
-        instructions.pop();
+    ins* NowIns;
+    if(id==0){
+        NowIns=&UsrIns;
+    }else{
+        NowIns=&EnemyIns;
+    }
+    NowIns->lock.lock();
+    while(!NowIns->instructions.empty()){
+        instruction cur=NowIns->instructions.front();
+        NowIns->instructions.pop();
         Coordinate* self=cur.self;
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
@@ -464,6 +567,9 @@ void Core::manageOrder()
         default:
             break;
         }
+        cur.ret=666;
+        AIGame[id].ins_ret.insert(make_pair(cur.id,cur));
     }
+    NowIns->lock.unlock();
 }
 

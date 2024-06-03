@@ -5,9 +5,8 @@ int g_globalNum=1;
 int g_frame=0;
 
 std::map<int,Coordinate*> g_Object;
-std::queue<instruction> instructions;   ///AI返回的指令队列
-bool AIfinished=true;   ///AI线程锁
-bool INSfinshed=true;
+ins UsrIns; //Usr的指令列表
+ins EnemyIns;   //敌方的指令列表
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -111,10 +110,12 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initmap();
 
 
-
     // 添加资源测试
 //    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
 //    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
+    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
     player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
 
 //    Building* temp = player[0]->addBuilding(BUILDING_FARM , 20,20,100);
@@ -155,21 +156,23 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
 
-    ai=new AI();
+    UsrAi=new UsrAI();
+    EnemyAi=new EnemyAI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     player[0]->changeResource(2000,2000,2000,2000);
-
     debugText("blue"," 游戏开始");
 }
 
 // MainWidget析构函数
 MainWidget::~MainWidget()
 {
-    ai->exit(0);
-    delete ai;
+    UsrAi->exit(0);
+    EnemyAi->exit(0);
+    delete UsrAi;
+    delete EnemyAi;
     delete ui;
     deleteBlock();
     deleteAnimal();
@@ -181,6 +184,17 @@ MainWidget::~MainWidget()
     delete core;
 }
 
+void MainWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    QPixmap pix;
+    pix=resMap["Interface"].front();
+    painter.drawPixmap(0,0,1440,45,pix);
+    pix=resMap["Interface"].back();
+    painter.drawPixmap(0,GAME_HEIGHT - 203.5,1440,203.5,pix);
+
+}
+
 // 初始化地图
 MainWidget::initmap()
 {
@@ -188,7 +202,6 @@ MainWidget::initmap()
     {
         return 0;
     }
-
 }
 
 // 初始化区块
@@ -663,14 +676,12 @@ void MainWidget::FrameUpdate()
     ui->Game->update();
     core->gameUpdate();
     statusUpdate();
-    if(AIfinished){
-        core->infoShare();
-        ai->start();///AI 线程开始
-    }
+    core->infoShare(0);
+    UsrAi->start();///AI线程尝试开始
+    EnemyAi->start();
     emit mapmove();
     return;
 }
-
 
 
 //***********************************************************************
