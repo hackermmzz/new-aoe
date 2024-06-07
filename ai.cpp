@@ -37,7 +37,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
     int size=0;
     bool granny=false;
     bool market=false;
-    for(tagBuilding building:AIGame[id].buildings){
+    for(tagBuilding building:getGameInfo().buildings){
         if(building.Type==BUILDING_GRANARY){
             granny=true;
         }
@@ -60,7 +60,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         size=3;
         break;
     case BUILDING_MARKET:
-        if(AIGame[id].civilizationStage<CIVILIZATION_TOOLAGE||!granny){
+        if(getGameInfo().civilizationStage<CIVILIZATION_TOOLAGE||!granny){
             return ACTION_INVALID_BUILDINGNUM;
         }
         woodcost=BUILD_MARKET_WOOD;
@@ -71,7 +71,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         size=2;
         break;
     case BUILDING_FARM:
-        if(AIGame[id].civilizationStage<CIVILIZATION_TOOLAGE||!market){
+        if(getGameInfo().civilizationStage<CIVILIZATION_TOOLAGE||!market){
             return ACTION_INVALID_BUILDINGNUM;
         }
         woodcost=BUILD_FARM_WOOD;
@@ -101,7 +101,7 @@ int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
         return ACTION_INVALID_BUILDINGNUM;
         break;
     }
-    if(AIGame[id].Wood<woodcost||AIGame[id].Stone<stonecost){
+    if(getGameInfo().Wood<woodcost||getGameInfo().Stone<stonecost){
         return ACTION_INVALID_RESOURCE;
     }
     if(BlockL<0||BlockU<0||BlockL+size>=72||BlockU+size>=72){
@@ -123,8 +123,7 @@ int AI::BuildingAction(int SN,int Action){
     int woodcost=-1;
     int stonecost=-1;
     if(Action==BUILDING_CANCEL){
-        UsrIns.instructions.push(instruction(0,self,0));
-        return ACTION_SUCCESS;
+        return AddToIns(instruction(0,self,0));
     }
     if(self->getNum()==BUILDING_CENTER){
         switch (Action) {
@@ -141,7 +140,7 @@ int AI::BuildingAction(int SN,int Action){
     }else if(self->getNum()==BUILDING_GRANARY){
         switch (Action) {
         case BUILDING_GRANARY_ARROWTOWER:
-            if(AIGame[id].civilizationStage<CIVILIZATION_TOOLAGE){
+            if(getGameInfo().civilizationStage<CIVILIZATION_TOOLAGE){
                 return ACTION_INVALID_ACTION;
             }
             foodcost=BUILDING_GRANARY_ARROWTOWER_FOOD;
@@ -223,17 +222,17 @@ int AI::BuildingAction(int SN,int Action){
         }
     }
 
-    if(AIGame[id].Wood<=woodcost||AIGame[id].Meat<=foodcost||AIGame[id].Stone<=stonecost){
+    if(getGameInfo().Wood<=woodcost||getGameInfo().Meat<=foodcost||getGameInfo().Stone<=stonecost){
         return ACTION_INVALID_RESOURCE;
     }
     return AddToIns(instruction(4,self,Action));
 }
 
 instruction AI::getInsRet(int ins_id){
-    if(AIGame[id].ins_ret.find(ins_id)==AIGame[id].ins_ret.end()){
+    if(getGameInfo().ins_ret.find(ins_id)==getGameInfo().ins_ret.end()){
         return instruction();
     }else{
-        return AIGame[id].ins_ret[ins_id];
+        return getGameInfo().ins_ret[ins_id];
     }
 }
 
@@ -263,6 +262,6 @@ void AI::printInsRet(int id){
 }
 
 void AI::clearInsRet(){
-    AIGame[id].ins_ret.clear();
+
 }
 

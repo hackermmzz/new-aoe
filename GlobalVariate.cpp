@@ -15,9 +15,6 @@ std::list<Coordinate*> drawlist;
 
 Coordinate *nowobject=NULL;
 
-tagGame AIGame[2];
-QMutex tagGamelocks[NOWPLAYER];
-
 int ProcessDataWork = 0;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};

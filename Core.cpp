@@ -1,5 +1,24 @@
 #include "SelectWidget.h"
 #include "Core.h"
+extern tagGame tagUsrGame;
+extern QMutex tagUsrGameLock;
+extern ins UsrIns;
+
+void lockTagGame(int id){
+    if(id==0){
+        tagUsrGameLock.lock();
+    }else{
+
+    }
+}
+
+void unlockTagGame(int id){
+    if(id==0){
+        tagUsrGameLock.unlock();
+    }else{
+
+    }
+}
 
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
@@ -153,26 +172,36 @@ void Core::gameUpdate()
 
 void Core::infoShare(int playerID){
     Player* self=player[playerID];
-    if(!tagGamelocks[playerID].tryLock()){
+    tagGame* tagAIGame;
+    QMutex tagAIGameLock;
+    if(playerID==0){
+        tagAIGame=&tagUsrGame;
+    }else{
+        /**
+          Todo:其他玩家初始化
+          */
+    }
+    //如果AI线程正在读取tagGame数据，则直接
+    if(!tagAIGameLock.tryLock()){
         return;
     }
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
-            if(!AIGame[playerID].blocks[i][j].explored&&theMap->cell[i][j].Explored){
-                AIGame[playerID].blocks[i][j].height=theMap->cell[i][j].getMapHeight();
-                AIGame[playerID].blocks[i][j].explored=true;
+            if(!tagAIGame->blocks[i][j].explored&&theMap->cell[i][j].Explored){
+                tagAIGame->blocks[i][j].height=theMap->cell[i][j].getMapHeight();
+                tagAIGame->blocks[i][j].explored=true;
             }
         }
     }
 
-    AIGame[playerID].Human_MaxNum=self->getMaxHumanNum();
-    AIGame[playerID].Gold=self->getGold();
-    AIGame[playerID].Stone=self->getStone();
-    AIGame[playerID].Meat=self->getFood();
-    AIGame[playerID].Wood=self->getWood();
-    AIGame[playerID].civilizationStage=self->getCiv();
-    AIGame[playerID].GameFrame=g_frame;
-    AIGame[playerID].farmers.clear();
+    tagAIGame->Human_MaxNum=self->getMaxHumanNum();
+    tagAIGame->Gold=self->getGold();
+    tagAIGame->Stone=self->getStone();
+    tagAIGame->Meat=self->getFood();
+    tagAIGame->Wood=self->getWood();
+    tagAIGame->civilizationStage=self->getCiv();
+    tagAIGame->GameFrame=g_frame;
+    tagAIGame->farmers.clear();
     for(Human* human:self->human){
         tagHuman taghuman;
         taghuman.Owner=playerID;
@@ -201,39 +230,40 @@ void Core::infoShare(int playerID){
             }else{
                 tagfarmer.ResourceSort=farmer->getResourceSort();
             }
-            AIGame[playerID].farmers.push_back(tagfarmer);
-            for(int i=0;i<NOWPLAYER;i++){
-                if(i==playerID){
-                    continue;
-                }else{
-                    if(!tagGamelocks[playerID].tryLock()){
-                        continue;
-                    }
-                    AIGame[i].enemy_farmers.push_back(tagfarmer.toEnemy());
-                    tagGamelocks[playerID].unlock();
-                }
-            }
+            tagAIGame->farmers.push_back(tagfarmer);
+            //Todo:同步跟新其他ai的信息
+//            for(int i=0;i<NOWPLAYER;i++){
+//                if(i==playerID){
+//                    continue;
+//                }else{
+//                    if(!tagGamelocks[playerID].tryLock()){
+//                        continue;
+//                    }
+//                    AIGame[i].enemy_farmers.push_back(tagfarmer.toEnemy());
+//                    tagGamelocks[playerID].unlock();
+//                }
+//            }
         }else if(human->getSort()==SORT_ARMY){
             Army* army=static_cast<Army*> (human);
             tagArmy tagarmy;
             tagarmy.cast_from(taghuman);
             tagarmy.Sort=army->getNum();
-            AIGame[playerID].armies.push_back(tagarmy);
-            for(int i=0;i<NOWPLAYER;i++){
-                if(i==playerID){
-                    continue;
-                }else{
-                    if(!tagGamelocks[playerID].tryLock()){
-                        continue;
-                    }
-                    AIGame[i].enemy_armies.push_back(tagarmy.toEnemy());
-                    tagGamelocks[playerID].unlock();
-                }
-            }
+            tagAIGame->armies.push_back(tagarmy);
+//            for(int i=0;i<NOWPLAYER;i++){
+//                if(i==playerID){
+//                    continue;
+//                }else{
+//                    if(!tagGamelocks[playerID].tryLock()){
+//                        continue;
+//                    }
+//                    AIGame[i].enemy_armies.push_back(tagarmy.toEnemy());
+//                    tagGamelocks[playerID].unlock();
+//                }
+//            }
         }
     }
 
-    AIGame[playerID].resources.clear();
+    tagAIGame->resources.clear();
     for(Animal* animal:theMap->animal){
         tagResource resource;
         resource.SN=animal->getglobalNum();
@@ -268,7 +298,7 @@ void Core::infoShare(int playerID){
         resource.U=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
-        AIGame[playerID].resources.push_back(resource);
+        tagAIGame->resources.push_back(resource);
     }
     for(StaticRes* staticRes: theMap->staticres){
         tagResource resource;
@@ -292,10 +322,10 @@ void Core::infoShare(int playerID){
         }
         resource.Cnt=staticRes->get_Cnt();
         resource.Blood=-1;
-        AIGame[playerID].resources.push_back(resource);
+        tagAIGame->resources.push_back(resource);
     }
 
-    AIGame[playerID].buildings.clear();
+    tagAIGame->buildings.clear();
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
@@ -314,20 +344,20 @@ void Core::infoShare(int playerID){
             building.Type=build->getNum();
             building.Cnt=-1;
 //        }
-        AIGame[playerID].buildings.push_back(building);
-        for(int i=0;i<NOWPLAYER;i++){
-            if(i==playerID){
-                continue;
-            }else{
-                if(!tagGamelocks[playerID].try_lock()){
-                    continue;
-                }
-                AIGame[i].enemy_buildings.push_back(building.toEnemy());
-                tagGamelocks[playerID].unlock();
-            }
-        }
+        tagAIGame->buildings.push_back(building);
+//        for(int i=0;i<NOWPLAYER;i++){
+//            if(i==playerID){
+//                continue;
+//            }else{
+//                if(!tagGamelocks[playerID].try_lock()){
+//                    continue;
+//                }
+//                AIGame[i].enemy_buildings.push_back(building.toEnemy());
+//                tagGamelocks[playerID].unlock();
+//            }
+//        }
     }
-    tagGamelocks[playerID].unlock();
+    tagAIGameLock.unlock();
 }
 
 void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold )
@@ -436,10 +466,12 @@ void Core::manageOrder(int id)
 //        interactionList->addRelation(*(player[0]->build.begin()),CoreEven_BuildingAct , BUILDING_CENTER_CREATEFARMER);
 //    }
     ins* NowIns;
+    tagGame* tagAIGame;
     if(id==0){
         NowIns=&UsrIns;
+        tagAIGame=&tagUsrGame;
     }else{
-        NowIns=&EnemyIns;
+//        NowIns=&EnemyIns;
     }
     NowIns->lock.lock();
     while(!NowIns->instructions.empty()){
@@ -492,13 +524,16 @@ void Core::manageOrder(int id)
             interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
             break;
         }
-
         default:
             break;
         }
         cur.ret=666;
-        AIGame[id].ins_ret.insert(make_pair(cur.id,cur));
+        lockTagGame(id);
+        tagAIGame->ins_ret.insert(make_pair(cur.id,cur));
+        unlockTagGame(id);
     }
     NowIns->lock.unlock();
 }
+
+
 

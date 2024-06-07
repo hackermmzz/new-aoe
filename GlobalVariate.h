@@ -138,7 +138,6 @@ struct tagGame
     int Gold;
     int Human_MaxNum;
 };
-extern QMutex tagGamelocks[NOWPLAYER];
 
 struct MouseEvent
 {
@@ -151,7 +150,6 @@ struct MouseEvent
 
 };
 
-extern tagGame AIGame[NOWPLAYER];
 
 extern std::string direction[5];
 
@@ -483,8 +481,7 @@ struct ins{
     std::queue<instruction> instructions;
     QMutex lock;
 };
-extern ins EnemyIns;
-extern ins UsrIns;
+
 
 /*
  * 0是成功

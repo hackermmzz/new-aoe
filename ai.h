@@ -10,10 +10,10 @@ class AI:public QThread
 {
 public:
 /*##########INTERFACE BEGINS HERE##########*/
-    tagGame GameInfo(){
-        QMutexLocker locker(&tagGamelocks[id]);
-        return AIGame[id];
-    }
+    virtual tagGame getGameInfo();
+//        QMutexLocker locker(&tagGamelocks[id]);
+//        return AIGame[id];
+
 
     int HumanMove(int SN, double L0, double U0);
 
@@ -29,13 +29,10 @@ public:
 
     void clearInsRet();
 /*###########INTERFACE ENDS HERE###########*/
-
-    AI(){}
-    ~AI(){}
     virtual void processData(){}
     void run() override{
         if(!trylock()) return;  ///如果锁未被释放，则直接返回
-        if(AIGame[id].GameFrame>10){
+        if(g_frame>10){
             processData();
         }
         unlock();
@@ -49,18 +46,7 @@ public:
 protected:
     QMutex aiLock;
     int id;
-    int AddToIns(instruction ins){
-        if(id==0){
-            UsrIns.lock.lock();
-            ins.id=UsrIns.g_id;
-            UsrIns.g_id++;
-            UsrIns.instructions.push(ins);
-            UsrIns.lock.unlock();
-            return ins.id;
-        }else if(id==1){
-
-            return -1;
-        }
+    virtual int AddToIns(instruction ins){
     }
     bool isHuman(Coordinate* self){
         return (self!=nullptr&&(self->getSort()==SORT_FARMER||self->getSort()==SORT_ARMY));

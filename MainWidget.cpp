@@ -5,8 +5,6 @@ int g_globalNum=1;
 int g_frame=0;
 
 std::map<int,Coordinate*> g_Object;
-ins UsrIns; //Usr的指令列表
-ins EnemyIns;   //敌方的指令列表
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
@@ -151,7 +149,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     sel->setCore(core);
 
     UsrAi=new UsrAI();
-    EnemyAi=new EnemyAI();
+//    EnemyAi=new EnemyAI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
@@ -163,9 +161,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 MainWidget::~MainWidget()
 {
     UsrAi->exit(0);
-    EnemyAi->exit(0);
+//    EnemyAi->exit(0);
     delete UsrAi;
-    delete EnemyAi;
+//    delete EnemyAi;
     delete ui;
     deleteBlock();
     deleteAnimal();
@@ -657,7 +655,7 @@ void MainWidget::FrameUpdate()
     statusUpdate();
     core->infoShare(0);
     UsrAi->start();///AI线程尝试开始
-    EnemyAi->start();
+//    EnemyAi->start();
     emit mapmove();
     return;
 }

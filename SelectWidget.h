@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <MainWidget.h>
 #include <Core.h>
+
 class MainWidget;
 namespace Ui {
 class SelectWidget;
