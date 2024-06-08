@@ -20,10 +20,10 @@ public:
     */
 
     /*********关系表控制***********/
-    bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
-    bool addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
-    bool addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
+    int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
+    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
+    int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
+    int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止
     void eraseRelation(Coordinate* object){ relate_AllObject[object].isExist = false; } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
@@ -46,7 +46,7 @@ private:
     bool map_HaveJud[MAP_L][MAP_U];
 
     void initDetailList();
-    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
+    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/

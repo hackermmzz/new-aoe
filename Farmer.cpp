@@ -27,6 +27,7 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
     this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
     phaseFromEnd_MissionAttack = THROWMISSION_FARMER;
+    vision = VISION_FARMER;
 
     nowres_step = NOWRES_TIMER_FARMER;
 

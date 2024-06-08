@@ -246,11 +246,14 @@ void Development::finishAction(int buildingType , int buildact)
     developLab[buildingType].finishAction(buildact);
 }
 
-bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold )
+bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold , int* oper )
 {
     //如果需要创建人口，判断是否有容量添加人
-    if(developLab[buildingNum].actCon[actNum].isNeedCreatObject() && !get_isHumanHaveSpace()) return false;
-
+    if(developLab[buildingNum].actCon[actNum].isNeedCreatObject() && !get_isHumanHaveSpace())
+    {
+        if(oper !=NULL) *oper = 1;
+        return false;
+    }
     return developLab[buildingNum].actCon[actNum].executable(civilization,wood,food,stone,gold);
 }
 
