@@ -913,8 +913,11 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
     int vision = object->getVision()-1;
-    Point position = object->getBlockPosition();
-    int mx = position.x + vision, my = position.y+vision;
+    int blockSidelen = object->get_BlockSizeLen()-1;
+    Point position;
+    position.x = object->getBlockDR();
+    position.y = object->getBlockUR();
+    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
     int lx = position.x-vision, ly = position.y-vision;
     vector<Point> blockLab;
 
@@ -952,6 +955,155 @@ void Map::add_Map_Vision( Coordinate* object )
 //        }
 //    }
 //}
+
+//更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
+void Map::reset_resMap_AI()
+{
+    int siz;
+    int sort,Num;
+    Animal* animalPrinter = NULL;
+    StaticRes* stResPrinter = NULL;
+    for(int x = 0;x<MAP_L;x++)
+    {
+        for(int y = 0 ; y<MAP_U;y++)
+        {
+            if(!resMap_AI[x][y].explore)
+            {
+                resMap_AI[x][y].explore = true;
+                resMap_AI[x][y].high = cell[x][y].getMapHeight();
+            }
+
+            siz = map_Object[x][y].size();
+            resMap_AI[x][y].clear_r();  //清除资源信息
+
+            //重新设置资源信息
+            for(int z = 0; z<siz; z++)
+            {
+                sort = map_Object[x][y][z]->getSort();
+                Num = map_Object[x][y][z]->getNum();
+
+                if(sort == SORT_ANIMAL)
+                {
+                    switch (Num) {
+                    case ANIMAL_GAZELLE:
+                        resMap_AI[x][y].type = RESOURCE_GAZELLE;
+                        break;
+                    case ANIMAL_LION:
+                        resMap_AI[x][y].type = RESOURCE_LION;
+                        break;
+                    case ANIMAL_ELEPHANT:
+                        resMap_AI[x][y].type = RESOURCE_ELEPHANT;
+                        break;
+                    case ANIMAL_TREE:
+                    case ANIMAL_FOREST:
+                        resMap_AI[x][y].type = RESOURCE_TREE;
+                        break;
+                    default:
+                        break;
+                    }
+
+                    map_Object[x][y][z]->printer_ToAnimal((void**)&animalPrinter);
+
+                    resMap_AI[x][y].fundation = animalPrinter->get_BlockSizeLen();
+                    resMap_AI[x][y].SN = animalPrinter->getglobalNum();
+                    resMap_AI[x][y].ResType = animalPrinter->get_ResourceSort();
+                    resMap_AI[x][y].remain = animalPrinter->get_Cnt();
+                }
+                else if(sort == SORT_STATICRES)
+                {
+                    switch (Num) {
+                    case NUM_STATICRES_Bush:
+                        resMap_AI[x][y].type = RESOURCE_BUSH;
+                        break;
+                    case NUM_STATICRES_Stone:
+                        resMap_AI[x][y].type = RESOURCE_STONE;
+                        break;
+                    default:
+                        break;
+                    }
+
+                    map_Object[x][y][z]->printer_ToStaticRes((void**)&stResPrinter);
+
+                    resMap_AI[x][y].fundation = stResPrinter->get_BlockSizeLen();
+                    resMap_AI[x][y].SN = stResPrinter->getglobalNum();
+                    resMap_AI[x][y].ResType = stResPrinter->get_ResourceSort();
+                    resMap_AI[x][y].remain = stResPrinter->get_Cnt();
+                }
+            }
+        }
+
+    }
+
+    reset_resMap_ForUserAndEnemy();
+    return;
+}
+
+void Map::reset_resMap_ForUserAndEnemy()
+{
+    for(int x = 0; x<MAP_L;x++)
+        for(int y = 0 ; y<MAP_U;y++)
+        {
+            if(cell[x][y].Explored) resMap_UserAI[x][y] = resMap_EnemyAI[x][y] = resMap_AI[x][y];
+            else resMap_EnemyAI[x][y] = resMap_AI[x][y];
+        }
+
+    return;
+}
+
+//更新用户视野
+void Map::reset_CellExplore(Coordinate* eye)
+{
+    /**
+    * 输入：用户的控制对象，如Human、Building
+    * 操作：根据用户输入的对象，设置视野内格子为已探索
+    */
+    vector<Point> blockLab = get_ObjectVisionBlock(eye);
+    int size = blockLab.size();
+
+    for(int i = 0 ; i<size; i++)
+    {
+        if(!cell[blockLab[i].x][blockLab[i].y].Explored)
+            cell[blockLab[i].x][blockLab[i].y].Explored = true;
+
+        if(!cell[blockLab[i].x][blockLab[i].y].Visible)
+        {
+            blockLab_Visible.push(blockLab[i]);
+            cell[blockLab[i].x][blockLab[i].y].Visible = true;
+        }
+    }
+
+    return ;
+}
+
+void Map::clear_CellVisible()
+{
+    while(blockLab_Visible.size())
+    {
+        cell[blockLab_Visible.top().x][blockLab_Visible.top().y].Visible = false;
+        blockLab_Visible.pop();
+    }
+
+    return;
+}
+
+//用于更新每个object可见性与是否在已探索格子
+void Map::reset_ObjectExploreAndVisible()
+{
+    int size;
+    for(int x = 0 ; x<MAP_L;x++)
+    {
+        for(int y = 0 ; y<MAP_U;y++)
+        {
+            size = map_Object[x][y].size();
+            for(int z = 0; z<size;z++)
+            {
+                map_Object[x][y][z]->setExplored(cell[x][y].Explored);
+                map_Object[x][y][z]->setvisible(cell[x][y].Visible);
+            }
+        }
+    }
+    return;
+}
 
 int Map::addStaticRes(int Num, double DR, double UR) {
     StaticRes *newstaticres=new StaticRes(Num,DR,UR);
@@ -1430,9 +1582,9 @@ void Map::InitFaultHandle() {
 void Map::InitCell(int Num, bool isExplored, bool isVisible) {
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U;j ++) {
-            this->cell[i][j].Num = 0;
-            this->cell[i][j].Explored = true;
-            this->cell[i][j].Visible = true;    // 地图可见度
+            this->cell[i][j].Num = Num;
+            this->cell[i][j].Explored = isExplored;
+            this->cell[i][j].Visible = isVisible;    // 地图可见度
         }
     }
 }
@@ -1560,7 +1712,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为false时可令地图全部可见
+    InitCell(0, false, false);    // 第二个参数修改为false时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源

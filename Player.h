@@ -77,8 +77,8 @@ public:
     bool get_isBuildingShowAble(int buildNum ){ return playerScience->get_isBuildingShowAble(buildNum , getCiv()); }
     bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
     //判断建筑行动是否能进行的函数中，内含了判断行动是否能显示。
-    bool get_isBuildActionAble( Building* actBuild,int actNum ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,getCiv(),wood,food,stone,gold); }
-    bool get_isBuildActionAble(int buildType , int actNum){ return playerScience->get_isBuildActionAble(buildType , actNum , getCiv() , wood , food , stone , gold); }
+    bool get_isBuildActionAble( Building* actBuild,int actNum, int* oper = NULL ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,getCiv(),wood,food,stone,gold, oper); }
+    bool get_isBuildActionAble(int buildType , int actNum, int* oper = NULL){ return playerScience->get_isBuildActionAble(buildType , actNum , getCiv() , wood , food , stone , gold , oper); }
     bool get_isBuildActionShowAble( int buildNum , int actNum ){ return playerScience->get_isBuildActionShowAble(buildNum,actNum,getCiv());}
 
     bool get_buildActLevel( int buildNum , int actNum ){ return playerScience->getActLevel(buildNum , actNum); }

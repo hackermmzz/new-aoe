@@ -154,6 +154,37 @@ struct tagGame
 };
 extern QMutex tagGamelocks[NOWPLAYER];
 
+struct tagMap
+{
+    bool explore;
+    int high;
+
+    //该位置资源信息
+    int type;       //资源种类（浆果、树等）
+    int ResType;    //采集获得的资源种类（食物、木头等） human_WOOD...
+    int fundation;  //该资源占地图大小
+    int SN;
+    int remain;     //剩余资源量
+
+    //*********************************
+    tagMap(){ clear(); }
+    void clear()
+    {
+        explore = false;
+        high = -1;
+        clear_r();
+    }
+
+    void clear_r()
+    {
+        type = -1;
+        ResType = -1;
+        fundation = -1;
+        SN = -1;
+        remain = -1;
+    }
+};
+
 struct MouseEvent
 {
     int memoryMapX;
@@ -285,7 +316,6 @@ struct Point {
     bool operator ==(const Point& ps)const { return ps.x == x && ps.y == y; }
     bool operator < (const Point& ps)const { return x<ps.x&& y<ps.y; }
 };
-
 
 struct conditionDevelop
 {

@@ -12,8 +12,10 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
 
 void Core::gameUpdate()
 {
+    theMap->clear_CellVisible();
     theMap->init_Map_UseToMonitor();
 
+    //player管理的各个ob更新状态
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
         std::list<Human *>::iterator humaniter=player[playerIndx]->human.begin() , humaniterEnd = player[playerIndx]->human.end();
@@ -43,6 +45,8 @@ void Core::gameUpdate()
             else
             {
                 theMap->add_Map_Object(*humaniter);
+                //更新视野
+                if(playerIndx == 0) theMap->reset_CellExplore(*humaniter);
 
                 if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
                     theMap->add_Map_Vision(*humaniter);
@@ -129,10 +133,11 @@ void Core::gameUpdate()
             else
             {
                 theMap->add_Map_Object(*builditer);
+                //更新视野 用户控制的对象
+                if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
                 if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
                     theMap->add_Map_Vision(*builditer);
-
                 (*builditer)->nextframe();
                 builditer++;
             }
@@ -214,12 +219,18 @@ void Core::gameUpdate()
         }
     }
 
+    //更新AI用的资源表，该资源表是User/Enemy的通用模板
+    theMap->reset_resMap_AI();
+
+    theMap->reset_ObjectExploreAndVisible();
+
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
 
     manageOrder(0);
 
     theMap->loadBarrierMap();//更新寻路用障碍表
     interactionList->manageRelationList();
+
 }
 
 void Core::infoShare(int playerID){

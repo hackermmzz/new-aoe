@@ -113,7 +113,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<StaticRes*>::iterator sriter=sr->begin();
         while(sriter!=sr->end())
         {
-            insert((*sriter),&drawlist);
+            if((*sriter)->getexplored())
+                insert((*sriter),&drawlist);
             sriter++;
         }
     }
@@ -123,7 +124,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<Animal *>::iterator ariter=ar->begin();
         while(ariter!=ar->end())
         {
-            insert((*ariter),&drawlist);
+            if((*ariter)->getexplored())
+                insert((*ariter),&drawlist);
             ariter++;
         }
     }
@@ -136,7 +138,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!b->empty()&&biter!=b->end())
         {
             Coordinate *p=*biter;
-            insert(p,&drawlist);
+            if((*biter)->getvisible())
+                insert(p,&drawlist);
             biter++;
         }
 
@@ -145,7 +148,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!h->empty()&&hiter!=h->end())
         {
             Coordinate *p=*hiter;
-            insert(p,&drawlist);
+            if((*hiter)->getvisible())
+                insert(p,&drawlist);
             hiter++;
         }
 

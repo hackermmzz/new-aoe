@@ -90,6 +90,8 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     return ACTION_INVALID_ISNTFREE;
 }
 
+
+//添加
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -120,6 +122,7 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
     return ACTION_INVALID_ISNTFREE;
 }
 
+//添加building行动
 int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -127,13 +130,21 @@ int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
         Building* buildOb = NULL;
+        int oper = 0;
         object1->printer_ToBuilding((void**)&buildOb);
 
-        if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionShowAble(buildOb,actNum))
+        if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionShowAble(buildOb->getNum(),actNum))
             return ACTION_INVALID_BUILDACT_LOCK;
 
-        if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
-            return ACTION_INVALID_RESOURCE;
+        //判断行动是否可进行，是否可进行主要受资源数量限制，对于产人行动，还受当前人口数量限制。
+        if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum,&oper))
+        {
+            /** oper == 1 说明是由于人口上限
+             *  oper == 0 说明是由于资源数量
+            */
+            if(oper == 1) return ACTION_INVALID_BUILDACT_MAXHUMAN;
+            else if(oper == 0) return ACTION_INVALID_RESOURCE;
+        }
 
         player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
         buildOb->setAction(actNum);
@@ -484,7 +495,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 //            moveObject->setPath(stack<Point>());
             moveObject->setPath(path);
 
-            qDebug()<<path.size();
+//            qDebug()<<path.size();
         }
 
 //        if(moveObject->getPath().size())
