@@ -123,34 +123,42 @@ void Building::setAttribute()
     case BUILDING_CENTER:
         MaxBlood = BLOOD_BUILD_CENTER;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_CENTER;
         break;
     case BUILDING_HOME:
         MaxBlood = BLOOD_BUILD_HOUSE;
         Foundation=FOUNDATION_SMALL;
+        vision = VISION_HOME;
         break;
     case BUILDING_STOCK:
         MaxBlood = BLOOD_BUILD_STOCK;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_STOCK;
         break;
     case BUILDING_GRANARY:
         MaxBlood = BLOOD_BUILD_GRANARY;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_GRANARY;
         break;
     case BUILDING_ARMYCAMP:
         MaxBlood = BLOOD_BUILD_ARMYCAMP;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_ARMYCAMP;
         break;
     case BUILDING_MARKET:
         MaxBlood = BLOOD_BUILD_MARKET;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_MARKET;
         break;
     case BUILDING_RANGE:
         MaxBlood = BLOOD_BUILD_RANGE;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_RANGE;
         break;
     case BUILDING_STABLE:
         MaxBlood = BLOOD_BUILD_STABLE;
         Foundation = FOUNDATION_MIDDLE;
+        vision = VISION_STABLE;
         break;
     case BUILDING_ARROWTOWER:
         MaxBlood = BLOOD_BUILD_ARROWTOWER;
@@ -161,6 +169,7 @@ void Building::setAttribute()
         type_Missile = Missile_Arrow;
         missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
         dis_Attack = DIS_ARROWTOWER;
+        vision = VISION_ARROWTOWER;
 
         isAttackable = true;
         break;

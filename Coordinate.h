@@ -45,6 +45,7 @@ public:
     virtual void printer_ToBuilding_Resource(void **ptr){ *ptr = NULL; }
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
     virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
+    virtual void printer_ToStaticRes(void**ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
     //获取坐标
@@ -52,6 +53,11 @@ public:
     double getUR(){return this->UR;}
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
+
+    void setExplored(int explored){ this->explored = explored; }
+    void setvisible( int visible  ){ this->visible = visible; }
+    int getexplored(){ return explored; }
+    int getvisible(){ return visible; }
 
     //获取中心点块坐标
     Point getBlockPosition(){ return Point(BlockDR+BlockSizeLen/2,BlockUR+BlockSizeLen/2); }

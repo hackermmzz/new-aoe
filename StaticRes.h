@@ -29,6 +29,7 @@ public:
     /***************指针强制转化****************/
     //若要将StaticRes类指针转化为父类指针,务必用以下函数!
     void printer_ToResource(void** ptr){ *ptr = dynamic_cast<Resource*>(this); }    //传入ptr为Resource类指针的地址
+    void printer_ToStaticRes(void**ptr){ *ptr = this; }
 
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
