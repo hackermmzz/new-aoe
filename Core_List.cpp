@@ -40,6 +40,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
                 relate_AllObject[object1].set_ResourceBuildingType();
             case CoreEven_Attacking:
                 relate_AllObject[object1].init_AttackAb(object1);
+                ((MoveObject*)object1)->beginRun();
                 break;
             default:
                 break;
@@ -89,7 +90,6 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
 
     return ACTION_INVALID_ISNTFREE;
 }
-
 
 //添加
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
@@ -641,6 +641,7 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
     Building* buiOb = NULL;
     object1->printer_ToMoveObject((void**)&moOb);
     object1->printer_ToBuilding((void**)&buiOb);
+    object1->resetCoreAttribute();
     if(moOb!=NULL) moOb->setPreStand();
     if(buiOb!=NULL) buiOb->init_BuildAttackAct();
 
@@ -709,6 +710,7 @@ void Core_List::conduct_Attacked(Coordinate* object)
         //设置攻击者坐标
         attackee->get_AvangeObject_Position(dr,ur);
 
+        //根据受攻击者的类别分别处理
         if( !relate_AllObject[object].isExist || relate_AllObject[object].respondConduct )
         {
             if(object->getSort() == SORT_ANIMAL)
@@ -721,8 +723,6 @@ void Core_List::conduct_Attacked(Coordinate* object)
                         if(addRelation(object,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS) ((MoveObject*)object)->beginRun();
                         break;
                     case FRIENDLY_ENEMY:
-                        if(attacker!=NULL && addRelation(object,attacker,CoreEven_Attacking,false)== ACTION_SUCCESS) ((MoveObject*)object)->beginRun();
-                        break;
                     case FRIENDLY_FENCY:
                         if(attacker!=NULL) addRelation(object,attacker,CoreEven_Attacking,false);
                         break;
@@ -734,12 +734,13 @@ void Core_List::conduct_Attacked(Coordinate* object)
             {
                     if(attacker!=NULL)
                     {
-                        if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking,false);
+                        if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking);
                         else
                         {
+                            //受到敌对ai的攻击，逃命
                             calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
                             suspendRelation(object);
-                            addRelation(object,dr,ur,CoreEven_JustMoveTo,false);
+                            addRelation(object,dr,ur,CoreEven_JustMoveTo);
                         }
                     }
             }
@@ -748,6 +749,68 @@ void Core_List::conduct_Attacked(Coordinate* object)
     }
 
     attackee->initAvengeObject();
+}
+
+void Core_List::manageMontorAct()
+{
+    //满足添加进入relation的对象表。第一个键值为正在监视的object，第二个键值为离其最近的监视中的object
+    map< Coordinate* , Coordinate* >pendingLab;
+    Coordinate* ob_m,*ob_ed;
+    map< Coordinate* , Coordinate* >::iterator iter , itere;
+    double dr,ur;
+
+    int size_ob,size_vision;
+
+    for(int x = 0; x<MAP_L;x++)
+        for(int y = 0 ; y<MAP_U;y++)
+        {
+            size_ob = theMap->map_Object[x][y].size();
+            size_vision = theMap->map_Vision[x][y].size();
+            if(!size_vision) continue;
+            if(!size_ob) continue;
+
+            for(int i = 0 ; i<size_vision;i++)
+            {
+                for(int j = 0 ;j<size_ob;j++)
+                {
+                    ob_m = theMap->map_Vision[x][y][i];
+                    ob_ed = theMap->map_Object[x][y][j];
+                    if(ob_m == ob_ed) continue;
+
+                    if(ob_m->isMonitorObject(ob_ed))
+                    {
+                        if(pendingLab[ob_m] == NULL) pendingLab[ob_m] = ob_ed;
+                        else if( ob_m->getDis_E_Detail(ob_ed) < ob_m->getDis_E_Detail(pendingLab[ob_m]) )
+                            pendingLab[ob_m] = ob_ed;
+                    }
+                }
+            }
+        }
+
+    iter = pendingLab.begin();
+    itere = pendingLab.end();
+
+    while(iter!=itere)
+    {
+        ob_m = iter->first;
+        ob_ed = iter->second;
+
+        if(ob_ed)
+        {
+            if(ob_m->getSort() == SORT_ANIMAL && ob_m->getNum() == ANIMAL_GAZELLE)
+            {
+                dr = ob_ed->getDR();
+                ur = ob_ed->getUR();
+                calMirrorPoint(dr,ur,ob_m->getDR(),ob_m->getUR(),3.5*BLOCKSIDELENGTH);
+                suspendRelation(ob_m);
+                if(addRelation(ob_m,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS) ((MoveObject*)ob_m)->beginRun();
+            }
+            else addRelation(ob_m , ob_ed , CoreEven_Attacking);
+        }
+        iter++;
+    }
+
+    return;
 }
 
 //**************************************************************
@@ -1014,7 +1077,7 @@ void Core_List::initDetailList()
     //行动: 攻击**************************************
     {
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
         forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 

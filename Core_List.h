@@ -32,7 +32,8 @@ public:
     int getNowPhaseNum(Coordinate* object); //获取当前object的行动阶段，用于将信息传递给AIGame
     int getObjectSN(Coordinate* object);   //获取当前object的目标SN，用于将信息传递给AIGame
     /************管理诱发行动************/
-    void conduct_Attacked(Coordinate*);
+    void conduct_Attacked(Coordinate*);  //受到攻击而诱发
+    void manageMontorAct(); //添加监视的object的相应行动
 
 private:
     Map* theMap;    //地图信息
