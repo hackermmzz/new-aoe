@@ -12,8 +12,8 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
 
 void Core::gameUpdate()
 {
-    theMap->clear_CellVisible();
-    theMap->init_Map_UseToMonitor();
+    theMap->clear_CellVisible();     //清空上一帧的视野
+    theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
     //player管理的各个ob更新状态
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
@@ -222,11 +222,14 @@ void Core::gameUpdate()
     //更新AI用的资源表，该资源表是User/Enemy的通用模板
     theMap->reset_resMap_AI();
 
-    theMap->reset_ObjectExploreAndVisible();
+    theMap->reset_ObjectExploreAndVisible();    //刷新视野并处理区域探索结果
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
 
     manageOrder(0);
+
+    //对正在监视的Object，进行行动处理
+    interactionList->manageMontorAct();
 
     theMap->loadBarrierMap();//更新寻路用障碍表
     interactionList->manageRelationList();
@@ -583,4 +586,3 @@ void Core::manageOrder(int id)
     }
     NowIns->lock.unlock();
 }
-
