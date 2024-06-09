@@ -62,6 +62,14 @@ public:
     //获取中心点块坐标
     Point getBlockPosition(){ return Point(BlockDR+BlockSizeLen/2,BlockUR+BlockSizeLen/2); }
 
+    //获取两点间欧几里得距离
+    double getDis_E_Detail(Coordinate* __x){
+        return countdistance(DR ,UR , __x->getDR() , __x->getUR());
+    }
+    double getDis_E_Detail(Coordinate& __x){
+        return countdistance(DR ,UR , __x.getDR() , __x.getUR());
+    }
+
     // 获取地图块高度导致的偏移量
     int getMapHeightOffsetY();
     void setMapHeightOffsetY(int m_MapHeightOffsetY);
