@@ -109,50 +109,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 向地图中添加资源
     initmap();
 
-
-    // 添加资源测试
-//    player[0]->addBuilding(BUILDING_CENTER, 10, 10);
-//    player[0]->addBuilding(BUILDING_CENTER, 33, 33);
-    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-
-//    Building* temp = player[0]->addBuilding(BUILDING_FARM , 20,20,100);
-//    qDebug()<<temp;
-
-
-//    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
-//    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
-//    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
-//    player[0]->addArmy(AT_BOWMAN , 20*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
-
-//    player[0]->addArmy(AT_SCOUT, 30*BLOCKSIDELENGTH , 40*BLOCKSIDELENGTH);
-//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
-
-//    map->addAnimal(ANIMAL_TREE , 40 , 50);
-//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
-//    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
-
-//    player[0]->addBuilding(BUILDING_CENTER, 33, 33 , 100);
-//    player[0]->addBuilding(BUILDING_CENTER, MAP_L / 2 - 1, MAP_U / 2 - 1, 100);
-//    player[0]->addFarmer(25*BLOCKSIDELENGTH,25*BLOCKSIDELENGTH);
-//    player[0]->addBuilding(BUILDING_STOCK, 40 , 40 ,100);
-//    player[0]->addBuilding(BUILDING_GRANARY , 50 , 50 , 100);
-//    player[0]->addBuilding(BUILDING_MARKET , 60 ,60 , 100);
-//    player[0]->addBuilding(BUILDING_FARM , 20 , 20 , 100);
-
-//    map->addAnimal(ANIMAL_TREE , 40 , 50);
-//    map->addAnimal(ANIMAL_FOREST , 50*BLOCKSIDELENGTH , 60*BLOCKSIDELENGTH);
-//    map->addAnimal(ANIMAL_ELEPHANT , 20*BLOCKSIDELENGTH,20*BLOCKSIDELENGTH);
-
-//    player[0]->addBuilding(BUILDING_ARMYCAMP , 35 , 30,100);
-
-//    map->addStaticRes(NUM_STATICRES_Bush , 50,65);
-//    map->addStaticRes(NUM_STATICRES_Stone , 40,55);
-//    map->addStaticRes(NUM_STATICRES_GoldOre , 30,45);
-
-
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
 
@@ -161,8 +117,11 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
+    //设置user初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
+    //设置user初始资源
     player[0]->changeResource(2000,2000,2000,2000);
+
     debugText("blue"," 游戏开始");
 }
 
@@ -424,29 +383,51 @@ void MainWidget::initArmy()
         {
             for(int i=0;i<=4;i++)
             {
-                Army::allocateWalk(statei,level,i);
-                Army::allocateStand(statei,level,i);
-                Army::allocateDie(statei,level,i);
-                Army::allocateDisappear(statei,level,i);
-                Army::allocateAttack(statei,level,i);
-                loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(statei,level,i));
+                Army::allocateWalk(0,statei,level,i);
+                Army::allocateStand(0,statei,level,i);
+                Army::allocateDie(0,statei,level,i);
+                Army::allocateDisappear(0,statei,level,i);
+                Army::allocateAttack(0,statei,level,i);
+                loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(0,statei,level,i));
+
+                Army::allocateWalk(1,statei,level,i);
+                Army::allocateStand(1,statei,level,i);
+                Army::allocateDie(1,statei,level,i);
+                Army::allocateDisappear(1,statei,level,i);
+                Army::allocateAttack(1,statei,level,i);
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(1,statei,level,i));
             }
             for(int i=5;i<8;i++)
             {
-                Army::allocateWalk(statei,level,i);
-                Army::allocateStand(statei,level,i);
-                Army::allocateDie(statei,level,i);
-                Army::allocateDisappear(statei,level,i);
-                Army::allocateAttack(statei,level,i);
-                flipResource(Army::getAttack(statei,level,8-i),Army::getAttack(statei,level,i));
-                flipResource(Army::getDisappear(statei,level,8-i),Army::getDisappear(statei,level,i));
-                flipResource(Army::getWalk(statei,level,8-i),Army::getWalk(statei,level,i));
-                flipResource(Army::getStand(statei,level,8-i),Army::getStand(statei,level,i));
-                flipResource(Army::getDie(statei,level,8-i),Army::getDie(statei,level,i));
+                Army::allocateWalk(0,statei,level,i);
+                Army::allocateStand(0,statei,level,i);
+                Army::allocateDie(0,statei,level,i);
+                Army::allocateDisappear(0,statei,level,i);
+                Army::allocateAttack(0,statei,level,i);
+                flipResource(Army::getAttack(0,statei,level,8-i),Army::getAttack(0,statei,level,i));
+                flipResource(Army::getDisappear(0,statei,level,8-i),Army::getDisappear(0,statei,level,i));
+                flipResource(Army::getWalk(0,statei,level,8-i),Army::getWalk(0,statei,level,i));
+                flipResource(Army::getStand(0,statei,level,8-i),Army::getStand(0,statei,level,i));
+                flipResource(Army::getDie(0,statei,level,8-i),Army::getDie(0,statei,level,i));
+
+                Army::allocateWalk(1,statei,level,i);
+                Army::allocateStand(1,statei,level,i);
+                Army::allocateDie(1,statei,level,i);
+                Army::allocateDisappear(1,statei,level,i);
+                Army::allocateAttack(1,statei,level,i);
+                flipResource(Army::getAttack(1,statei,level,8-i),Army::getAttack(1,statei,level,i));
+                flipResource(Army::getDisappear(1,statei,level,8-i),Army::getDisappear(1,statei,level,i));
+                flipResource(Army::getWalk(1,statei,level,8-i),Army::getWalk(1,statei,level,i));
+                flipResource(Army::getStand(1,statei,level,8-i),Army::getStand(1,statei,level,i));
+                flipResource(Army::getDie(1,statei,level,8-i),Army::getDie(1,statei,level,i));
             }
         }
     }
@@ -604,11 +585,15 @@ void MainWidget::deleteArmy()
         {
             for(int i = 0; i < 8; i++)
             {
-                Army::deallocateWalk(statei,level, i);
-                Army::deallocateStand(statei,level, i);
-                Army::deallocateDie(statei,level, i);
-                Army::deallocateAttack(statei,level, i);
-                Army::deallocateDisappear(statei,level, i);
+                for(int re = 0 ; re <NOWPLAYER; re++)
+                {
+                    Army::deallocateWalk(re, statei,level, i);
+                    Army::deallocateStand(re, statei,level, i);
+                    Army::deallocateDie(re , statei,level, i);
+                    Army::deallocateAttack(re , statei,level, i);
+                    Army::deallocateDisappear(re , statei,level, i);
+
+                }
             }
         }
     }

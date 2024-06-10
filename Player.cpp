@@ -34,9 +34,6 @@ Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent
     if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
     else newbuilding=new Building(Num,BlockDR,BlockUR, getCiv(), playerScience , represent , percent);
 
-    if(newbuilding->getNum() == BUILDING_HOME) playerScience->addHome();
-    else if(newbuilding->getNum() != BUILDING_CENTER) playerScience->add_civiBuildNum(newbuilding->getNum());
-
     build.push_back(newbuilding);
     return newbuilding;
 }
@@ -98,9 +95,16 @@ list<Human*>::iterator Player::deleteHuman( list<Human*>::iterator iterDele )
 
 list<Building*>::iterator Player::deleteBuilding( list<Building*>::iterator iterDele )
 {
-    if((*iterDele)->getNum() == BUILDING_HOME) playerScience->subHome();
+    //删除的是HOME
+    if((*iterDele)->getNum() == BUILDING_HOME)
+    {
+        if((*iterDele)->isConstructed())
+            playerScience->subHome();
+    }
+    //删除的是市镇中心
     else if((*iterDele)->getNum() == BUILDING_CENTER) playerScience->subCenter();
-    else playerScience->sub_civiBuildNum((*iterDele)->getNum());
+    //删除的是其余有时代特征的建筑
+    else if((*iterDele)->getNum() != BUILDING_FARM) playerScience->sub_civiBuildNum((*iterDele)->getNum());
 
     delete *iterDele;
     return build.erase(iterDele);
@@ -112,7 +116,7 @@ list<Missile*>::iterator Player::deleteMissile( list<Missile*>::iterator iterDel
     return missile.erase(iterDele);
 }
 
-//删除missile投掷者（其已死亡，原指针被delete），改为使用投资者记录
+//删除missile投掷者（其已死亡，原指针被delete），改为使用投掷者的记录
 void Player::deleteMissile_Attacker( Coordinate* attacker )
 {
     for(list<Missile*>::iterator iter = missile.begin();iter!=missile.end();iter++)
@@ -176,22 +180,33 @@ void Player::changeResource_byBuildAction(Building* actbuilding , int buildact)
 //控制建筑行动
 void Player::enforcementAction( Building* actBuild, vector<Point>Block_free  )
 {
+    /**
+    *   传入： actBuild 指向进行行动的建筑的指针
+    *         Block_free 对于需要进行造人操作的行动，建筑周围无障碍物的可添加人的格子lab
+    *
+    */
+
     bool isNeedCreatObject = false; //是否需要创建对象
-    int creatObjectSort , creatObjectNum;
+    int creatObjectSort , creatObjectNum;   //需创建对象的Sort和具体Num
     Point block;
 
+    //查科技树表，以判断当前建筑的行动是否需要造人
     isNeedCreatObject = playerScience->isNeedCreatObjectAfterAction(actBuild->getNum() , actBuild->getActNum() , creatObjectSort , creatObjectNum);
+
+    //block暂存行动建筑的左顶点格子
     block.x = actBuild->getBlockDR();
     block.y = actBuild->getBlockUR();
-//    qDebug()<<"actend"<<(actBuild->getActNum());
+
+    //建筑行动结束，处理其带来的不需要创建对象的影响
     playerScience->finishAction(actBuild->getNum() ,actBuild->getActNum());
     actBuild->init_Resouce_TS();    //重置行动建筑的返还资源
 
-    if(isNeedCreatObject)
+    if(isNeedCreatObject)   //如果该行动需要造人
     {
-        //需要优化，添加建筑周围随机位置生成，且避开障碍物
+        //对block_free中的点进行随机取点
         if(Block_free.size()) block = Block_free[ rand()%Block_free.size() ];
 
+        //创建相应对象
         if(creatObjectSort == SORT_FARMER) addFarmer(trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
         else if(creatObjectSort == SORT_ARMY) addArmy(creatObjectNum , trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
     }
