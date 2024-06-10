@@ -92,7 +92,7 @@ public:
 
         if(buildBuilding->getNum() == BUILDING_HOME) playerScience->addHome();  //建造建筑是Home，记录并增加人口上限
         else if(buildBuilding->getNum() != BUILDING_CENTER && buildBuilding->getNum()!= BUILDING_FARM)  //建造建筑不是Home、市镇中心、农田，则其具有时代特性，记录
-\           playerScience->add_civiBuildNum(buildBuilding->getNum());
+              playerScience->add_civiBuildNum(buildBuilding->getNum());
 
         call_debugText("blue"," "+buildBuilding->getChineseName()+"(编号:"+QString::number(buildBuilding->getglobalNum())+")建造完毕");
     }
