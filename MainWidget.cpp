@@ -424,29 +424,51 @@ void MainWidget::initArmy()
         {
             for(int i=0;i<=4;i++)
             {
-                Army::allocateWalk(statei,level,i);
-                Army::allocateStand(statei,level,i);
-                Army::allocateDie(statei,level,i);
-                Army::allocateDisappear(statei,level,i);
-                Army::allocateAttack(statei,level,i);
-                loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(statei,level,i));
+                Army::allocateWalk(0,statei,level,i);
+                Army::allocateStand(0,statei,level,i);
+                Army::allocateDie(0,statei,level,i);
+                Army::allocateDisappear(0,statei,level,i);
+                Army::allocateAttack(0,statei,level,i);
+                loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(0,statei,level,i));
+
+                Army::allocateWalk(1,statei,level,i);
+                Army::allocateStand(1,statei,level,i);
+                Army::allocateDie(1,statei,level,i);
+                Army::allocateDisappear(1,statei,level,i);
+                Army::allocateAttack(1,statei,level,i);
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(1,statei,level,i));
             }
             for(int i=5;i<8;i++)
             {
-                Army::allocateWalk(statei,level,i);
-                Army::allocateStand(statei,level,i);
-                Army::allocateDie(statei,level,i);
-                Army::allocateDisappear(statei,level,i);
-                Army::allocateAttack(statei,level,i);
-                flipResource(Army::getAttack(statei,level,8-i),Army::getAttack(statei,level,i));
-                flipResource(Army::getDisappear(statei,level,8-i),Army::getDisappear(statei,level,i));
-                flipResource(Army::getWalk(statei,level,8-i),Army::getWalk(statei,level,i));
-                flipResource(Army::getStand(statei,level,8-i),Army::getStand(statei,level,i));
-                flipResource(Army::getDie(statei,level,8-i),Army::getDie(statei,level,i));
+                Army::allocateWalk(0,statei,level,i);
+                Army::allocateStand(0,statei,level,i);
+                Army::allocateDie(0,statei,level,i);
+                Army::allocateDisappear(0,statei,level,i);
+                Army::allocateAttack(0,statei,level,i);
+                flipResource(Army::getAttack(0,statei,level,8-i),Army::getAttack(0,statei,level,i));
+                flipResource(Army::getDisappear(0,statei,level,8-i),Army::getDisappear(0,statei,level,i));
+                flipResource(Army::getWalk(0,statei,level,8-i),Army::getWalk(0,statei,level,i));
+                flipResource(Army::getStand(0,statei,level,8-i),Army::getStand(0,statei,level,i));
+                flipResource(Army::getDie(0,statei,level,8-i),Army::getDie(0,statei,level,i));
+
+                Army::allocateWalk(1,statei,level,i);
+                Army::allocateStand(1,statei,level,i);
+                Army::allocateDie(1,statei,level,i);
+                Army::allocateDisappear(1,statei,level,i);
+                Army::allocateAttack(1,statei,level,i);
+                flipResource(Army::getAttack(1,statei,level,8-i),Army::getAttack(1,statei,level,i));
+                flipResource(Army::getDisappear(1,statei,level,8-i),Army::getDisappear(1,statei,level,i));
+                flipResource(Army::getWalk(1,statei,level,8-i),Army::getWalk(1,statei,level,i));
+                flipResource(Army::getStand(1,statei,level,8-i),Army::getStand(1,statei,level,i));
+                flipResource(Army::getDie(1,statei,level,8-i),Army::getDie(1,statei,level,i));
             }
         }
     }
@@ -604,11 +626,15 @@ void MainWidget::deleteArmy()
         {
             for(int i = 0; i < 8; i++)
             {
-                Army::deallocateWalk(statei,level, i);
-                Army::deallocateStand(statei,level, i);
-                Army::deallocateDie(statei,level, i);
-                Army::deallocateAttack(statei,level, i);
-                Army::deallocateDisappear(statei,level, i);
+                for(int re = 0 ; re <NOWPLAYER; re++)
+                {
+                    Army::deallocateWalk(re, statei,level, i);
+                    Army::deallocateStand(re, statei,level, i);
+                    Army::deallocateDie(re , statei,level, i);
+                    Army::deallocateAttack(re , statei,level, i);
+                    Army::deallocateDisappear(re , statei,level, i);
+
+                }
             }
         }
     }

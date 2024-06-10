@@ -66,51 +66,58 @@ public:
         return "";
     }
 
+    //获取图像资源数组
+    static std::list<ImageResource>* getDisappear(int represent, int num, int level, int angle) { return Disappear[represent][num][level][angle]; }
+    static std::list<ImageResource>* getWalk(int represent, int num, int level, int angle) { return Walk[represent][num][level][angle];}
+    static std::list<ImageResource>* getStand(int represent, int num, int level, int angle) {return Stand[represent][num][level][angle];}
+    static std::list<ImageResource>* getAttack( int represent, int num, int level, int angle) {return Attack[represent][num][level][angle];}
+    static std::list<ImageResource>* getDie(int represent, int num, int level, int angle) {return Die[represent][num][level][angle];}
 
-    static std::list<ImageResource>* getDisappear(int num, int level, int angle) { return Disappear[num][level][angle]; }
-    static std::list<ImageResource>* getWalk(int num, int level, int angle) { return Walk[num][level][angle];}
-    static std::list<ImageResource>* getStand(int num, int level, int angle) {return Stand[num][level][angle];}
-    static std::list<ImageResource>* getAttack(int num, int level, int angle) {return Attack[num][level][angle];}
-    static std::list<ImageResource>* getDie(int num, int level, int angle) {return Die[num][level][angle];}
-    static void setDisappear(int num, int level, int angle, std::list<ImageResource>* newValue) {Disappear[num][level][angle] = newValue;}
-    static void setWalk(int num, int level, int angle, std::list<ImageResource>* newValue) {Walk[num][level][angle] = newValue;}
-    static void setStand(int num, int level, int angle, std::list<ImageResource>* newValue) { Stand[num][level][angle] = newValue;}
-    static void setAttack(int num, int level, int angle, std::list<ImageResource>* newValue) {Attack[num][level][angle] = newValue;}
-    static void setDie(int num, int level, int angle, std::list<ImageResource>* newValue) { Die[num][level][angle] = newValue;}
-    static void allocateDisappear(int num, int level, int angle) { Disappear[num][level][angle] = new std::list<ImageResource>;}
-    static void allocateWalk(int num, int level, int angle) { Walk[num][level][angle]= new std::list<ImageResource>;}
-    static void allocateStand(int num, int level, int angle) { Stand[num][level][angle] = new std::list<ImageResource>;}
-    static void allocateAttack(int num, int level, int angle) {Attack[num][level][angle] = new std::list<ImageResource>;  }
-    static void allocateDie(int num, int level, int angle) { Die[num][level][angle] = new std::list<ImageResource>;}
-    static void deallocateDisappear(int num, int level, int angle)
+    //设置图像资源
+    static void setDisappear(int represent, int num, int level, int angle, std::list<ImageResource>* newValue) {Disappear[represent][num][level][angle] = newValue;}
+    static void setWalk( int represent, int num, int level, int angle, std::list<ImageResource>* newValue) {Walk[represent][num][level][angle] = newValue;}
+    static void setStand(int represent, int num, int level, int angle, std::list<ImageResource>* newValue) { Stand[represent][num][level][angle] = newValue;}
+    static void setAttack(int represent,int num, int level, int angle, std::list<ImageResource>* newValue) {Attack[represent][num][level][angle] = newValue;}
+    static void setDie(int represent, int num, int level, int angle, std::list<ImageResource>* newValue) { Die[represent][num][level][angle] = newValue;}
+
+    //为图像资源数组开辟空间
+    static void allocateDisappear(int represent, int num, int level, int angle) { Disappear[represent][num][level][angle] = new std::list<ImageResource>;}
+    static void allocateWalk(int represent, int num, int level, int angle) { Walk[represent][num][level][angle]= new std::list<ImageResource>;}
+    static void allocateStand(int represent, int num, int level, int angle) { Stand[represent][num][level][angle] = new std::list<ImageResource>;}
+    static void allocateAttack(int represent, int num, int level, int angle) {Attack[represent][num][level][angle] = new std::list<ImageResource>;  }
+    static void allocateDie(int represent, int num, int level, int angle) { Die[represent][num][level][angle] = new std::list<ImageResource>;}
+
+    //释放图像资源数组
+    static void deallocateDisappear(int represent, int num, int level, int angle)
     {
-        delete Disappear[num][level][angle];
-        Disappear[num][level][angle] = nullptr;
+        delete Disappear[represent][num][level][angle];
+        Disappear[represent][num][level][angle] = nullptr;
     }
-    static void deallocateWalk(int num, int level, int angle)
+    static void deallocateWalk(int represent, int num, int level, int angle)
     {
-        delete Walk[num][level][angle];
-        Walk[num][level][angle] = nullptr;
+        delete Walk[represent][num][level][angle];
+        Walk[represent][num][level][angle] = nullptr;
     }
-    static void deallocateStand(int num, int level, int angle)
+    static void deallocateStand(int represent, int num, int level, int angle)
     {
-        delete Stand[num][level][angle];
-        Stand[num][level][angle] = nullptr;
+        delete Stand[represent][num][level][angle];
+        Stand[represent][num][level][angle] = nullptr;
     }
-    static void deallocateAttack(int num, int level, int angle)
+    static void deallocateAttack(int represent, int num, int level, int angle)
     {
-        delete Attack[num][level][angle];
-        Attack[num][level][angle] = nullptr;
+        delete Attack[represent][num][level][angle];
+        Attack[represent][num][level][angle] = nullptr;
     }
-    static void deallocateDie(int num, int level, int angle)
+    static void deallocateDie(int represent, int num, int level, int angle)
     {
-        delete Die[num][level][angle];
-        Die[num][level][angle] = nullptr;
+        delete Die[represent][num][level][angle];
+        Die[represent][num][level][angle] = nullptr;
     }
   /********************以上静态函数**************************/
 
-
+    //获取士兵的部队种类 如步兵、骑兵、弓兵等
     int getArmyClass(){ return armyClass; }
+    //获取士兵等级
     int getLevel();
 
 private:
@@ -135,11 +142,11 @@ private:
 
 
     /*************静态成员************/
-    static std::list<ImageResource> *Walk[4][2][8];
-    static std::list<ImageResource> *Stand[4][2][8];
-    static std::list<ImageResource> *Attack[4][2][8];
-    static std::list<ImageResource> *Die[4][2][8];
-    static std::list<ImageResource> *Disappear[4][2][8];
+    static std::list<ImageResource> *Walk[NOWPLAYER][4][2][8];
+    static std::list<ImageResource> *Stand[NOWPLAYER][4][2][8];
+    static std::list<ImageResource> *Attack[NOWPLAYER][4][2][8];
+    static std::list<ImageResource> *Die[NOWPLAYER][4][2][8];
+    static std::list<ImageResource> *Disappear[NOWPLAYER][4][2][8];
     static std::string ArmyName[4][2];
     static std::string ArmyDisplayName[4][2];
     /*************静态成员************/
