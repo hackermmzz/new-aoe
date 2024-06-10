@@ -3,11 +3,11 @@
 
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
-    this->theMap = theMap;
-    this->player = player;
-    this->memorymap = memorymap;
-    this->mouseEvent = mouseEvent;
-    this->interactionList = new Core_List( this->theMap , this->player );
+    this->theMap = theMap;  //mainWidget的map对象
+    this->player = player;  //所有player的数组
+    this->memorymap = memorymap;    //内存图
+    this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
+    this->interactionList = new Core_List( this->theMap , this->player );   //本类中管理的对象交互动态表
 }
 
 void Core::gameUpdate()
@@ -22,15 +22,21 @@ void Core::gameUpdate()
         list<Building*>::iterator builditer = player[playerIndx]->build.begin() , builditerEnd = player[playerIndx]->build.end();
         list<Missile*>::iterator missileiter = player[playerIndx]->missile.begin() , missileiterEnd = player[playerIndx]->missile.end();
 
+        //更新human子类的状态
         while(humaniter!=humaniterEnd)
         {       
+            //如果当前对象需要变换行动状态，如从采集浆果->移动
             if((*humaniter)->needTranState())
             {
                 (*humaniter)->setNowState((*humaniter)->getPreState());
+
+                //需要变化的行动为“死亡”，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
                     call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡");
+                    //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
+                    //如果Missle的投出者是该ob，则让该missle使用投出者记录
                     player[playerIndx]->deleteMissile_Attacker(*humaniter);
                 }
                 (*humaniter)->setPreStateIsIdle();
