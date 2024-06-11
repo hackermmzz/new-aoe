@@ -3,17 +3,13 @@
 #include <QMutex>
 #include "assert.h"
 #include "GlobalVariate.h"
-#include "Coordinate.h"
 #include "Building.h"
 
 class AI:public QThread
 {
 public:
 /*##########INTERFACE BEGINS HERE##########*/
-    virtual tagGame getGameInfo();
-//        QMutexLocker locker(&tagGamelocks[id]);
-//        return AIGame[id];
-
+    virtual tagGame* getGameInfo()=0;
 
     int HumanMove(int SN, double L0, double U0);
 
@@ -27,9 +23,9 @@ public:
 
     void printInsRet(int id);
 
-    void clearInsRet();
+    virtual void clearInsRet()=0;
 /*###########INTERFACE ENDS HERE###########*/
-    virtual void processData(){}
+    virtual void processData()=0;
     void run() override{
         if(!trylock()) return;  ///如果锁未被释放，则直接返回
         if(g_frame>10){
@@ -43,19 +39,20 @@ public:
     void unlock(){
         aiLock.unlock();
     }
+    AI(){;}
+    ~AI(){;}
 protected:
     QMutex aiLock;
     int id;
     virtual int AddToIns(instruction ins){
     }
-    bool isHuman(Coordinate* self){
-        return (self!=nullptr&&(self->getSort()==SORT_FARMER||self->getSort()==SORT_ARMY));
+private:
+    bool isHuman(int SN){
+        int type=SN/10000;
+        return g_Object[SN]&&(type==SORT_ARMY||type==SORT_FARMER);
     }
-    bool isBuilding(Coordinate* self){
-        return (self!=nullptr&&(self->getSort()==SORT_BUILDING));
-    }
-    bool isAnimalTree(Coordinate* self){
-        return self->getSort()==SORT_ANIMAL&&(self->getNum()==ANIMAL_FOREST||self->getNum()==ANIMAL_TREE);
+    bool isBuilding(int SN){
+        return g_Object[SN]&&SN/10000==SORT_BUILDING;
     }
 };
 

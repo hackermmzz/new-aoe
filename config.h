@@ -43,7 +43,7 @@
 #define STONE 10                        //石头资源数量
 #define gen5 sqrt(5)
 #define MAXPLAYER 8
-#define NOWPLAYER 2
+#define NOWPLAYER 1
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度
 #define GAMEWIDGET_WIDTH 1440

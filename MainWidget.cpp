@@ -39,7 +39,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initAnimal();
     initStaticResource();
     initFarmer();
+    qDebug()<<"init"<<endl;
     initArmy();
+    qDebug()<<"finish"<<endl;
     initMissile();
 
     // 设置当前窗口属性
@@ -659,7 +661,7 @@ void MainWidget::FrameUpdate()
     ui->Game->update();
     core->gameUpdate();
     statusUpdate();
-    core->infoShare(0);
+    core->infoShare();
     UsrAi->start();///AI线程尝试开始
 //    EnemyAi->start();
     emit mapmove();
