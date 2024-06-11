@@ -1,52 +1,42 @@
 #include "SelectWidget.h"
 #include "Core.h"
-extern tagGame tagUsrGame;
-extern QMutex tagUsrGameLock;
-extern ins UsrIns;
-
-void lockTagGame(int id){
-    if(id==0){
-        tagUsrGameLock.lock();
-    }else{
-
-    }
-}
-
-void unlockTagGame(int id){
-    if(id==0){
-        tagUsrGameLock.unlock();
-    }else{
-
-    }
-}
 
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
-    this->theMap = theMap;
-    this->player = player;
-    this->memorymap = memorymap;
-    this->mouseEvent = mouseEvent;
-    this->interactionList = new Core_List( this->theMap , this->player );
+    this->theMap = theMap;  //mainWidget的map对象
+    this->player = player;  //所有player的数组
+    this->memorymap = memorymap;    //内存图
+    this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
+    this->interactionList = new Core_List( this->theMap , this->player );   //本类中管理的对象交互动态表
 }
 
 void Core::gameUpdate()
 {
-    theMap->init_Map_UseToMonitor();
+    theMap->clear_CellVisible();     //清空上一帧的视野
+    theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
+    //player管理的各个ob更新状态
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
         std::list<Human *>::iterator humaniter=player[playerIndx]->human.begin() , humaniterEnd = player[playerIndx]->human.end();
         list<Building*>::iterator builditer = player[playerIndx]->build.begin() , builditerEnd = player[playerIndx]->build.end();
         list<Missile*>::iterator missileiter = player[playerIndx]->missile.begin() , missileiterEnd = player[playerIndx]->missile.end();
 
+        //更新human子类的状态
         while(humaniter!=humaniterEnd)
         {       
+            //如果当前对象需要变换行动状态，如从采集浆果->移动
             if((*humaniter)->needTranState())
             {
                 (*humaniter)->setNowState((*humaniter)->getPreState());
+
+                //需要变化的行动为“死亡”，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
+                    call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡");
+                    //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
+                    //如果Missle的投出者是该ob，则让该missle使用投出者记录
                     player[playerIndx]->deleteMissile_Attacker(*humaniter);
                 }
                 (*humaniter)->setPreStateIsIdle();
@@ -61,6 +51,8 @@ void Core::gameUpdate()
             else
             {
                 theMap->add_Map_Object(*humaniter);
+                //更新视野
+                if(playerIndx == 0) theMap->reset_CellExplore(*humaniter);
 
                 if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
                     theMap->add_Map_Vision(*humaniter);
@@ -69,6 +61,62 @@ void Core::gameUpdate()
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
 
+                if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
+                {
+                    // 更新人物Y轴偏移（伪三维）
+                    int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
+
+                    // 斜坡
+                    if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
+                    {
+                        if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
+                        {
+                            qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
+                            qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
+                        }
+
+                        // 判断mapType以确定上升方向
+                        int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
+                        pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
+                        pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+
+                        // 左高右低：
+                        if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
+                        {
+                            double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
+                            if(leftOffsetPercent > 1) leftOffsetPercent = 1;
+                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
+//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                        }
+                        // 右高左低：
+                        else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
+                        {
+                            double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
+                            if(rightOffsetPercent > 1) rightOffsetPercent = 1;
+                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
+//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                        }
+                        // 下高上低：
+                        else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
+                        {
+                            double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
+                            if(downOffsetPercent > 1) downOffsetPercent = 1;
+                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
+//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                        }
+                        // 上高下低：
+                        else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
+                        {
+                            double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
+                            if(upOffsetPercent > 1) upOffsetPercent = 1;
+                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
+//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                        }
+                    }
+                    // 平地
+                    else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+                }
+
                 humaniter++;
             }
         }
@@ -76,8 +124,13 @@ void Core::gameUpdate()
         while(builditer!= builditerEnd)
         {
             interactionList->conduct_Attacked(*builditer);
-            if((*builditer)->isDie())
+            if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
+                if(!(*builditer)->isDie())
+                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成");
+                else
+                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁");
+
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
                 interactionList->eraseObject(*builditer);
                 deleteOb_setNowobNULL(*builditer);
@@ -86,10 +139,11 @@ void Core::gameUpdate()
             else
             {
                 theMap->add_Map_Object(*builditer);
+                //更新视野 用户控制的对象
+                if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
                 if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
                     theMap->add_Map_Vision(*builditer);
-
                 (*builditer)->nextframe();
                 builditer++;
             }
@@ -121,10 +175,16 @@ void Core::gameUpdate()
                 (*animaliter)->setNowState((*animaliter)->getPreState());
                 if((*animaliter)->isDying())
                 {
+                    if(!(*animaliter)->isTree())
+                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡");
+
                     interactionList->eraseRelation(*animaliter);
                 }
                 (*animaliter)->setPreStateIsIdle();
             }
+
+            if((*animaliter)->isTree())
+                (*animaliter)->initAvengeObject();
             interactionList->conduct_Attacked(*animaliter);
             (*animaliter)->nextframe();
             (*animaliter)->updateLU();
@@ -138,6 +198,7 @@ void Core::gameUpdate()
         }
         else
         {
+            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成");
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
             animaliter = theMap->deleteAnimal(animaliter);
@@ -156,18 +217,29 @@ void Core::gameUpdate()
         }
         else
         {
+            call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成");
+
             interactionList->eraseObject(*SRiter);
             deleteOb_setNowobNULL(*SRiter);
             SRiter = theMap->deleteStaticRes(SRiter);
         }
     }
 
+    //更新AI用的资源表，该资源表是User/Enemy的通用模板
+    theMap->reset_resMap_AI();
+
+    theMap->reset_ObjectExploreAndVisible();    //刷新视野并处理区域探索结果
+
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
 
     manageOrder(0);
 
+    //对正在监视的Object，进行行动处理
+    interactionList->manageMontorAct();
+
     theMap->loadBarrierMap();//更新寻路用障碍表
     interactionList->manageRelationList();
+
 }
 
 void Core::infoShare(int playerID){
@@ -263,7 +335,7 @@ void Core::infoShare(int playerID){
         }
     }
 
-    tagAIGame->resources.clear();
+    AIGame[playerID].resources.clear();
     for(Animal* animal:theMap->animal){
         tagResource resource;
         resource.SN=animal->getglobalNum();
@@ -431,7 +503,7 @@ void Core::manageMouseEvent()
                     switch (object_click->getSort())
                     {
                         case SORT_ANIMAL:
-                            qDebug()<<"arrowatk"<<(interactionList->addRelation(nowobject , object_click , CoreEven_Attacking ));
+                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
                             break;
                         default:
                             break;
@@ -534,6 +606,9 @@ void Core::manageOrder(int id)
     }
     NowIns->lock.unlock();
 }
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> f959cb415f8ddd0f7afcb8745459745b43f828b8

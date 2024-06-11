@@ -442,6 +442,9 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
             case OPERATECON_NEAR_ATTACK:
                 dis = relation.disAttack;
                 break;
+            case OPERATECON_NEAR_ATTACK_MOVE:
+                dis = relation.disAttack*0.5;
+                break;
             case OPERATECON_NEAR_WORK:
                 dis = relation.distance_AllowWork;
                 break;

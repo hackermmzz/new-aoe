@@ -1,18 +1,24 @@
 ﻿#include "Army.h"
 
-//【num】【level】【angel】
-std::list<ImageResource>* Army::Walk[4][2][8];
-std::list<ImageResource>* Army::Disappear[4][2][8];
-std::list<ImageResource>* Army::Stand[4][2][8];
-std::list<ImageResource>* Army::Attack[4][2][8];
-std::list<ImageResource>* Army::Die[4][2][8];
+//[playerrepresent][num][leve][angel]
+std::list<ImageResource>* Army::Walk[NOWPLAYER][4][2][8];
+std::list<ImageResource>* Army::Disappear[NOWPLAYER][4][2][8];
+std::list<ImageResource>* Army::Stand[NOWPLAYER][4][2][8];
+std::list<ImageResource>* Army::Attack[NOWPLAYER][4][2][8];
+std::list<ImageResource>* Army::Die[NOWPLAYER][4][2][8];
 
-//【num】[level]
+//[num][level]
 std::string Army::ArmyName[4][2]={{"Clubman","Axeman"},
                                   {"Clubman","Clubman"},
                                   {"Archer","Archer"},
                                   {"Scout","Scout"}
                                  };
+
+std::string Army::ArmyDisplayName[4][2]={{"棍棒兵","刀斧兵"},
+                                         {"投石兵","投石兵"},
+                                         {"弓箭手","弓箭手"},
+                                         {"侦察骑兵","侦察骑兵"}
+                                        };
 
 Army::Army()
 {
@@ -21,6 +27,7 @@ Army::Army()
 
 Army::Army(double DR,double UR,int Num , Development* playerScience, int playerRepresent)
 {
+    //设置科技树和阵营
     this->playerScience = playerScience;
     this->playerRepresent = playerRepresent;
 
@@ -49,10 +56,11 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
     this->imageH=DR-UR;
-    this->globalNum=g_globalNum;
+
+    //设置SN信息
+    this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-
 }
 
 
@@ -90,16 +98,16 @@ void Army::setNowRes()
 
     switch (this->nowstate) {
     case MOVEOBJECT_STATE_STAND:
-        templist =this->Stand[this->Num][getLevel()][this->Angle];
+        templist =this->Stand[playerRepresent][Num][getLevel()][Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
-        templist =this->Walk[this->Num][getLevel()][this->Angle];
+        templist =this->Walk[playerRepresent][Num][getLevel()][Angle];
         break;
     case MOVEOBJECT_STATE_ATTACK:
-        templist =this->Attack[this->Num][getLevel()][this->Angle];
+        templist =this->Attack[playerRepresent][Num][getLevel()][Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
-        templist =this->Die[this->Num][getLevel()][this->Angle];
+        templist =this->Die[playerRepresent][Num][getLevel()][Angle];
         break;
     default:
         break;
@@ -327,6 +335,11 @@ void Army::setAttribute()
 
 int Army::getLevel()
 {
+    /**
+    *   传出：士兵等级
+    *   通过查询player科技树表，得到当前player管控的该种类士兵的等级
+    *   如果该种类士兵无法升级，则默认为0级
+    */
     if(upgradable) return playerScience->getActLevel(dependBuildNum , dependBuildAct);
     else return 0;
 }

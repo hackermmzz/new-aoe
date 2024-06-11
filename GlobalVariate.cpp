@@ -14,6 +14,7 @@ std::list<Coordinate*> drawlist;
 
 
 Coordinate *nowobject=NULL;
+std::queue<st_DebugMassage>debugMassagePackage;
 
 int ProcessDataWork = 0;
 
@@ -479,6 +480,12 @@ double trans_BlockPointToDetailCenter( int p )
 {
     return (p+0.5)*BLOCKSIDELENGTH;
 }
+
+void call_debugText(QString color, QString content)
+{
+    debugMassagePackage.push(st_DebugMassage(color, content));
+}
+//*************************************************************
 
 instruction::instruction(int type,Coordinate* self,Coordinate* obj){
     this->type=type;

@@ -45,6 +45,7 @@ Animal::Animal(int Num, double DR, double UR)
         speed = ANIMAL_SPEED;
         attackType = ATTACKTYPE_ANIMAL;
         isAttackable = true;
+        vision = VISION_LION;
 
         nowres_step = NOWRES_TIMER_LION;
     }
@@ -55,6 +56,8 @@ Animal::Animal(int Num, double DR, double UR)
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_GAZELLE;
         speed = ANIMAL_SPEED;
+
+        vision = VISION_GAZELLE;
     }
     else if( this->Num == ANIMAL_ELEPHANT )
     {
@@ -67,6 +70,7 @@ Animal::Animal(int Num, double DR, double UR)
         speed = ANIMAL_SPEED;
         attackType = ATTACKTYPE_ANIMAL;
         isAttackable = true;
+        vision = VISION_ELEPHANT;
 
         nowres_step = NOWRES_TIMER_ELEPHANT;
     }
@@ -78,6 +82,7 @@ Animal::Animal(int Num, double DR, double UR)
         this->MaxBlood = BLOOD_TREE;
         speed = 0;
         moveAble = false;
+
         treeState = rand()%Stand[this->Num][this->Angle]->size();
     }
     else if( this->Num == ANIMAL_FOREST )
@@ -106,7 +111,7 @@ Animal::Animal(int Num, double DR, double UR)
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
 
-    this->globalNum=g_globalNum;
+    this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 }

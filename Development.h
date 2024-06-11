@@ -84,7 +84,7 @@ public:
     bool get_isBuildingShowAble(int buildingNum , int civilization){ return developLab[buildingNum].buildCon->isShowable(civilization); }
     bool get_isBuildingAble( int buildingNum , int wood ,int food , int stone ,int gold )
         { return developLab[buildingNum].buildCon->executable(wood , food ,stone ,gold); }
-    bool get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold );
+    bool get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold ,  int* oper = NULL );
 
     bool get_isBuildActionShowAble( int buildingNum , int actNum , int civilization ){ return developLab[buildingNum].actCon[actNum].isShowAble(civilization); }
 

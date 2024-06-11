@@ -246,11 +246,14 @@ void Development::finishAction(int buildingType , int buildact)
     developLab[buildingType].finishAction(buildact);
 }
 
-bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold )
+bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civilization ,int wood, int food , int stone, int gold , int* oper )
 {
     //如果需要创建人口，判断是否有容量添加人
-    if(developLab[buildingNum].actCon[actNum].isNeedCreatObject() && !get_isHumanHaveSpace()) return false;
-
+    if(developLab[buildingNum].actCon[actNum].isNeedCreatObject() && !get_isHumanHaveSpace())
+    {
+        if(oper !=NULL) *oper = 1;
+        return false;
+    }
     return developLab[buildingNum].actCon[actNum].executable(civilization,wood,food,stone,gold);
 }
 
@@ -413,7 +416,7 @@ void Development::init_DevelopLab()
 
     //箭塔
     developLab[BUILDING_ARROWTOWER].buildCon = new conditionDevelop( CIVILIZATION_TOOLAGE , BUILDING_ARROWTOWER , TIME_BUILD_ARROWTOWER ,0 ,0 , BUILD_ARROWTOWER_STONE );
-//    developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
+    developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
 
     //城墙
     developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);

@@ -10,6 +10,7 @@ public:
     Core_List(Map* theMap, Player* player[]);
     ~Core_List(){}
 
+
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
     *用于：判断对象是否处于空闲
@@ -19,10 +20,10 @@ public:
     */
 
     /*********关系表控制***********/
-    bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
-    bool addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
-    bool addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
+    int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
+    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
+    int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
+    int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止
     void eraseRelation(Coordinate* object){ relate_AllObject[object].isExist = false; } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
@@ -31,7 +32,8 @@ public:
     int getNowPhaseNum(Coordinate* object); //获取当前object的行动阶段，用于将信息传递给AIGame
     int getObjectSN(Coordinate* object);   //获取当前object的目标SN，用于将信息传递给AIGame
     /************管理诱发行动************/
-    void conduct_Attacked(Coordinate*);
+    void conduct_Attacked(Coordinate*);  //受到攻击而诱发
+    void manageMontorAct(); //添加监视的object的相应行动
 
 private:
     Map* theMap;    //地图信息
@@ -45,7 +47,7 @@ private:
     bool map_HaveJud[MAP_L][MAP_U];
 
     void initDetailList();
-    bool is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
+    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/

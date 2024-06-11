@@ -18,6 +18,8 @@ public:
     int getMaxBlood(){ return MaxBlood; }
     int getPlayerRepresent(){ return playerRepresent; }
 
+    QString getChineseName(){ return QString::fromStdString(getDisplayName(Num)); }
+
     bool isMonitorObject(Coordinate* judOb)
     {
         if(Num == BUILDING_ARROWTOWER)
@@ -111,6 +113,9 @@ public:
     void setFundation();
 
     bool isFinish(){return this->Percent>=100;}
+    bool isConstructed(){ return constructed; }
+    void recordConstruct(){ constructed = true; }
+
     double getPercent() {return this->Percent;}
 
     int get_civilization(){ if(playerScience == NULL) return CIVILIZATION_STONEAGE;
@@ -143,6 +148,7 @@ protected:
 
     int civ;
     //建筑所处时代 来确定不同时代建筑有何变化 ？时代要不要用player类下的
+    bool constructed = false;
 
     int Foundation;
     //地基类型

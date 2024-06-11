@@ -6,7 +6,6 @@
 class SelectWidget;
 class Core
 {
-
 public:
     SelectWidget *sel = nullptr;
     Map* theMap;    //地图信息
@@ -19,18 +18,20 @@ public:
     void getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold );
     bool get_IsBuildAble(int playerRepresent,int buildNum){ return player[playerRepresent]->get_isBuildingAble(buildNum); }
 
+    //获取指定Object是否空闲（不在交互表内）
     bool get_IsObjectFree(Coordinate* object){ return interactionList->isObject_Free(object); }
+    //获取指定Object是否正在行动
     bool get_IsActionNow( Coordinate* object ){ return !interactionList->isObject_Free(object); }
 
+    //如果指定object和全局nowobject指向同一地址，则设置nowobject为NULL
     void deleteOb_setNowobNULL(Coordinate* deOb){ if(deOb == nowobject) nowobject = NULL; }
 
     /************添加/删除表************/
-    bool addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true){ return interactionList->addRelation(object1,object2,eventType,respond); }
-     //建造
-    bool addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,DR,UR,eventType,respond,type); }
-    bool addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,BlockDR,BlockUR,eventType,respond,type); }
+    int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true){ return interactionList->addRelation(object1,object2,eventType,respond); }
+    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,DR,UR,eventType,respond,type); }
+    int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,BlockDR,BlockUR,eventType,respond,type); }
     //建筑行动 actpercent
-    bool addRelation( Coordinate* object1, int evenType , int actNum){ return interactionList->addRelation(object1,evenType,actNum); }
+    int addRelation( Coordinate* object1, int evenType , int actNum){ return interactionList->addRelation(object1,evenType,actNum); }
     //指令手动停止
     void suspendRelation(Coordinate * object){ interactionList->suspendRelation(object); }
     /************添加/删除表************/
@@ -45,9 +46,6 @@ private:
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加
 
-//signals:
-//    void clickOnObject();
-    //点击对象时触发
 };
 
 #endif // CORE_H

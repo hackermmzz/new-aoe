@@ -32,6 +32,8 @@ public:
 
     virtual void setAction( int actNum){ this->actNum = actNum; }
     virtual void ActNumToActName(){ actName = actNum; }
+
+    virtual QString getChineseName(){ return ""; }
     /***************指针强制转化****************/
     //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
     virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
@@ -43,6 +45,7 @@ public:
     virtual void printer_ToBuilding_Resource(void **ptr){ *ptr = NULL; }
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
     virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
+    virtual void printer_ToStaticRes(void**ptr){ *ptr = NULL; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
     //获取坐标
@@ -51,8 +54,25 @@ public:
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
 
+    void setExplored(int explored){ this->explored = explored; }
+    void setvisible( int visible  ){ this->visible = visible; }
+    int getexplored(){ return explored; }
+    int getvisible(){ return visible; }
+
     //获取中心点块坐标
     Point getBlockPosition(){ return Point(BlockDR+BlockSizeLen/2,BlockUR+BlockSizeLen/2); }
+
+    //获取两点间欧几里得距离
+    double getDis_E_Detail(Coordinate* __x){
+        return countdistance(DR ,UR , __x->getDR() , __x->getUR());
+    }
+    double getDis_E_Detail(Coordinate& __x){
+        return countdistance(DR ,UR , __x.getDR() , __x.getUR());
+    }
+
+    // 获取地图块高度导致的偏移量
+    int getMapHeightOffsetY();
+    void setMapHeightOffsetY(int m_MapHeightOffsetY);
 
     //image资源相关信息
     double getimageX(){return this->imageX;}
@@ -108,8 +128,9 @@ protected:
     double UR;//在块类中该坐标即为正中心
     //此LU所指游戏中坐标
 
-    int BlockDR;
-    int BlockUR;
+    // illegal value
+    int BlockDR = INT_MAX;
+    int BlockUR = INT_MAX;
     //对象所在的区块
 
     int vision = 0; //视野
@@ -136,6 +157,8 @@ protected:
 
     int inWindow=0;
     //在游戏窗口内
+
+    int MapHeightOffsetY = 0;    // 地图块高度导致的Y轴方向偏移量
 
     std::list<ImageResource>::iterator nowres;
     std::list<ImageResource> *nowlist=NULL;

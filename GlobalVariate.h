@@ -38,6 +38,20 @@ extern Coordinate *nowobject;
 //当前选中对象
 //出于gamewidget和core均需要获取当前访问对象
 
+struct st_DebugMassage{
+    QString color;
+    QString content;
+    st_DebugMassage(){}
+    st_DebugMassage( QString color, QString content)
+    {
+        this->color = color;
+        this->content = content;
+    }
+};
+
+extern std::queue<st_DebugMassage>debugMassagePackage;
+
+
 struct tagBuilding
 {
     int BlockL,BlockU;
@@ -137,6 +151,37 @@ struct tagGame
     int Stone;
     int Gold;
     int Human_MaxNum;
+};
+
+struct tagMap
+{
+    bool explore;
+    int high;
+
+    //该位置资源信息
+    int type;       //资源种类（浆果、树等）
+    int ResType;    //采集获得的资源种类（食物、木头等） human_WOOD...
+    int fundation;  //该资源占地图大小
+    int SN;
+    int remain;     //剩余资源量
+
+    //*********************************
+    tagMap(){ clear(); }
+    void clear()
+    {
+        explore = false;
+        high = -1;
+        clear_r();
+    }
+
+    void clear_r()
+    {
+        type = -1;
+        ResType = -1;
+        fundation = -1;
+        SN = -1;
+        remain = -1;
+    }
 };
 
 struct MouseEvent
@@ -269,7 +314,6 @@ struct Point {
     bool operator ==(const Point& ps)const { return ps.x == x && ps.y == y; }
     bool operator < (const Point& ps)const { return x<ps.x&& y<ps.y; }
 };
-
 
 struct conditionDevelop
 {
@@ -511,6 +555,8 @@ double calculateManhattanDistance(double x1, double y1, double x2, double y2);
 void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirror , double dis);
 
 double trans_BlockPointToDetailCenter( int p );
+
+void call_debugText(QString color, QString content);
 
 
 #endif // GLOBALVARIATE_H

@@ -10,9 +10,9 @@ Core_List::Core_List(Map* theMap, Player* player[])
 //****************************************************************************************
 //控制动态表
 //对人，命令不必手动中止，直接变更；当建筑正进行升级、造兵等行动，命令变更将被无视，必须手动中止当前命令后再下达新命令。
-bool Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eventType , bool respond)
+int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eventType , bool respond)
 {
-    if(object1 == NULL) return false;
+    if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
     if(relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
 
@@ -40,19 +40,20 @@ bool Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eve
                 relate_AllObject[object1].set_ResourceBuildingType();
             case CoreEven_Attacking:
                 relate_AllObject[object1].init_AttackAb(object1);
+                ((MoveObject*)object1)->beginRun();
                 break;
             default:
                 break;
         }
 
-        return true;
+        return ACTION_SUCCESS;
     }
-    return false;
+    return ACTION_INVALID_ISNTFREE;
 }
 
-bool Core_List::addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond , int type)
+int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond , int type)
 {
-    if(object1 == NULL) return false;
+    if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
     if(relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
 
@@ -67,58 +68,90 @@ bool Core_List::addRelation( Coordinate * object1, double DR , double UR, int ev
             relate_AllObject[object1] = relation_Object(DR , UR , eventType);
             relate_AllObject[object1].respondConduct = respond;
             relate_AllObject[object1].sort = SORT_COORDINATE;
-            return true;
+            return ACTION_SUCCESS;
         }
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
-        else if(eventType == CoreEven_CreatBuilding && \
-                is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR)) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
+        else if(eventType == CoreEven_CreatBuilding)
         {
-             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
-             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
+            int wrongCode;
+            wrongCode = is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR));
+            if(wrongCode<0) return wrongCode;
+
+            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingShowAble(type))
+                return ACTION_INVALID_HUMANBUILD_LOCK;
+
+            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type))
+                return ACTION_INVALID_RESOURCE;
+
+            player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
+            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
         }
     }
 
-    return false;
+    return ACTION_INVALID_ISNTFREE;
 }
 
-bool Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
+//添加
+int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
-    if(object1 == NULL) return false;
+    if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
     if(relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
 
     if(! relate_AllObject[object1].isExist )
     {
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
-        if(eventType == CoreEven_CreatBuilding && \
-                is_BuildingCanBuild(type , BlockDR, BlockUR) && player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type) )
+        if(eventType == CoreEven_CreatBuilding)
         {
+            int wrongCode;
+            wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR);
+            if(wrongCode<0) return wrongCode;
+
+            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingShowAble(type))
+                return ACTION_INVALID_HUMANBUILD_LOCK;
+
+            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type))
+                return ACTION_INVALID_RESOURCE;
+
             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
-        }
 
+        }
     }
 
-    return false;
+    return ACTION_INVALID_ISNTFREE;
 }
 
-bool Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
+//添加building行动
+int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
-    if(object1 == NULL) return false;
+    if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
         Building* buildOb = NULL;
+        int oper = 0;
         object1->printer_ToBuilding((void**)&buildOb);
-        if(player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum))
+
+        if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionShowAble(buildOb->getNum(),actNum))
+            return ACTION_INVALID_BUILDACT_LOCK;
+
+        //判断行动是否可进行，是否可进行主要受资源数量限制，对于产人行动，还受当前人口数量限制。
+        if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb,actNum,&oper))
         {
-            player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
-            buildOb->setAction(actNum);
-            relate_AllObject[object1] = relation_Object(evenType);
-            return true;
+            /** oper == 1 说明是由于人口上限
+             *  oper == 0 说明是由于资源数量
+            */
+            if(oper == 1) return ACTION_INVALID_BUILDACT_MAXHUMAN;
+            else if(oper == 0) return ACTION_INVALID_RESOURCE;
         }
+
+        player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb,actNum);
+        buildOb->setAction(actNum);
+        relate_AllObject[object1] = relation_Object(evenType);
+        return ACTION_SUCCESS;
     }
-    return false;
+    return ACTION_INVALID_ISNTFREE;
 }
 
 void Core_List::suspendRelation(Coordinate * object)
@@ -250,7 +283,7 @@ void Core_List::manageRelation_deleteGoalOb( Coordinate* goalObject )
 
     //遍历整个动态表，删除goalObject
     while(iterNow != iterEnd)
-    {
+    {       
         if(iterNow->second.goalObject == goalObject)
         {
             iterNow->second.update_GoalPoint();
@@ -308,9 +341,9 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
 }
 
 //判断是否可以建造建筑（需要优化，错误码）
-bool Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
+int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
 {
-    bool answer = true;;
+    int answer = ACTION_SUCCESS;
     int DRL = -1,DRR = -1,URD = -1, URU = -1;    //记录边界
     Building* tempBuild = NULL;
 
@@ -329,48 +362,49 @@ bool Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
 
     if(DRL<0 || DRR>71 || URD<0 || URU>71)
     {
-        //        debugText("red", " 建造失败,选中位置越界");
-        qDebug()<<"overBorder";
-        answer = false;
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界");
+//        qDebug()<<"overBorder";
+        answer = ACTION_INVALID_HUMANBUILD_OVERBORDER;
     }
 
     if( tempBuild->isIncorrect_Num() )
     {
-        //        debugText("red", " 建造失败,建筑类型不存在");
-        qDebug()<<"numIncorrect";
-        answer = false;
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,建筑类型不存在");
+//        qDebug()<<"numIncorrect";
+        answer = ACTION_INVALID_BUILDINGNUM;
     }
 
     if( !theMap->cell[DRL][URD].Explored )
     {
-        //        debugText("red", " 建造失败,选中位置未被探索");
-        qDebug()<<"explored";
-        answer = false;
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索");
+//        qDebug()<<"explored";
+        answer = ACTION_INVALID_HUMANBUILD_UNEXPLORE;
     }
 
     //如果以上限制均未触发，判断是否有重叠
-    if(answer)
+    if(answer == 0)
     {
         int bDR_ba,bUR_ba;
         if(theMap->isBarrier(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
         {
-//            debugText("red"," 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠");
-            qDebug()<<"overlap"<<bDR_ba<<bUR_ba;
-            answer = false;
+            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠");
+
+//            qDebug()<<"overlap"<<bDR_ba<<bUR_ba;
+            answer = ACTION_INVALID_HUMANBUILD_OVERLAP;
         }
 
         if(!theMap->isFlat(tempBuild))
         {
-            qDebug()<<"isnt flat";
-            answer = false;
+            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差");
+//            qDebug()<<"isnt flat";
+            answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
         }
     }
 
     //*************结束******************
     delete tempBuild;
 
-    if(answer) return true;
-    else return false;
+    return answer;
 }
 
 void Core_List::eraseObject(Coordinate* eraseOb)
@@ -461,7 +495,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 //            moveObject->setPath(stack<Point>());
             moveObject->setPath(path);
 
-            qDebug()<<path.size();
+//            qDebug()<<path.size();
         }
 
 //        if(moveObject->getPath().size())
@@ -607,6 +641,7 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
     Building* buiOb = NULL;
     object1->printer_ToMoveObject((void**)&moOb);
     object1->printer_ToBuilding((void**)&buiOb);
+    object1->resetCoreAttribute();
     if(moOb!=NULL) moOb->setPreStand();
     if(buiOb!=NULL) buiOb->init_BuildAttackAct();
 
@@ -623,7 +658,8 @@ void Core_List::object_FinishAction(Coordinate* object1)
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
         {
-            player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+            if(!((Building*)relate_AllObject[object1].goalObject)->isConstructed())
+                player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
             relate_AllObject[object1].goalObject->initAction();
             if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
             {
@@ -657,18 +693,26 @@ void Core_List::conduct_Attacked(Coordinate* object)
     double dr,ur;
     Coordinate* attacker = NULL;
     BloodHaver* attackee = NULL;
-    object->printer_ToBloodHaver((void**)&attackee);
+    object->printer_ToBloodHaver((void**)&attackee); 
 
-    if(  !attackee->isDie() && (!relate_AllObject[object].isExist || relate_AllObject[object].respondConduct) )
+    if(attackee != NULL && !attackee->isDie()&& attackee->isGotAttack() )
     {
-        if(attackee != NULL && attackee->isGotAttack())
-        {
-            //判断攻击者是否为空指针
-            attacker=attackee->getAvangeObject();
-            if(attacker!=NULL) attackee->updateAvangeObjectPosition();
-            //设置攻击者坐标
-            attackee->get_AvangeObject_Position(dr,ur);
 
+        //判断攻击者是否为空指针
+        attacker=attackee->getAvangeObject();
+        if(attacker!=NULL)
+        {
+            call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
+                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击");
+
+             attackee->updateAvangeObjectPosition();
+        }
+        //设置攻击者坐标
+        attackee->get_AvangeObject_Position(dr,ur);
+
+        //根据受攻击者的类别分别处理
+        if( !relate_AllObject[object].isExist || relate_AllObject[object].respondConduct )
+        {
             if(object->getSort() == SORT_ANIMAL)
             {
                 switch (((Animal*)object)->get_Friendly())
@@ -676,11 +720,9 @@ void Core_List::conduct_Attacked(Coordinate* object)
                     case FRIENDLY_FRI:
                         calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
                         suspendRelation(object);
-                        if(addRelation(object,dr,ur,CoreEven_JustMoveTo,false)) ((MoveObject*)object)->beginRun();
+                        if(addRelation(object,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS) ((MoveObject*)object)->beginRun();
                         break;
                     case FRIENDLY_ENEMY:
-                        if(attacker!=NULL && addRelation(object,attacker,CoreEven_Attacking,false)) ((MoveObject*)object)->beginRun();
-                        break;
                     case FRIENDLY_FENCY:
                         if(attacker!=NULL) addRelation(object,attacker,CoreEven_Attacking,false);
                         break;
@@ -690,21 +732,85 @@ void Core_List::conduct_Attacked(Coordinate* object)
             }
             else if(object->getSort() == SORT_FARMER)
             {
-//                if(attacker!=NULL)
-//                {
-//                    if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking,false);
-//                    else
-//                    {
-//                        calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
-//                        suspendRelation(object);
-//                        addRelation(object,dr,ur,CoreEven_JustMoveTo,false);
-//                    }
-//                }
+                    if(attacker!=NULL)
+                    {
+                        if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking);
+                        else
+                        {
+                            //受到敌对ai的攻击，逃命
+                            calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
+                            suspendRelation(object);
+                            addRelation(object,dr,ur,CoreEven_JustMoveTo);
+                        }
+                    }
             }
         }
+
     }
 
     attackee->initAvengeObject();
+}
+
+void Core_List::manageMontorAct()
+{
+    //满足添加进入relation的对象表。第一个键值为正在监视的object，第二个键值为离其最近的监视中的object
+    map< Coordinate* , Coordinate* >pendingLab;
+    Coordinate* ob_m,*ob_ed;
+    map< Coordinate* , Coordinate* >::iterator iter , itere;
+    double dr,ur;
+
+    int size_ob,size_vision;
+
+    for(int x = 0; x<MAP_L;x++)
+        for(int y = 0 ; y<MAP_U;y++)
+        {
+            size_ob = theMap->map_Object[x][y].size();
+            size_vision = theMap->map_Vision[x][y].size();
+            if(!size_vision) continue;
+            if(!size_ob) continue;
+
+            for(int i = 0 ; i<size_vision;i++)
+            {
+                for(int j = 0 ;j<size_ob;j++)
+                {
+                    ob_m = theMap->map_Vision[x][y][i];
+                    ob_ed = theMap->map_Object[x][y][j];
+                    if(ob_m == ob_ed) continue;
+
+                    if(ob_m->isMonitorObject(ob_ed))
+                    {
+                        if(pendingLab[ob_m] == NULL) pendingLab[ob_m] = ob_ed;
+                        else if( ob_m->getDis_E_Detail(ob_ed) < ob_m->getDis_E_Detail(pendingLab[ob_m]) )
+                            pendingLab[ob_m] = ob_ed;
+                    }
+                }
+            }
+        }
+
+    iter = pendingLab.begin();
+    itere = pendingLab.end();
+
+    while(iter!=itere)
+    {
+        ob_m = iter->first;
+        ob_ed = iter->second;
+
+        if(ob_ed)
+        {
+            if(ob_m->getSort() == SORT_ANIMAL && ob_m->getNum() == ANIMAL_GAZELLE)
+            {
+                dr = ob_ed->getDR();
+                ur = ob_ed->getUR();
+                calMirrorPoint(dr,ur,ob_m->getDR(),ob_m->getUR(),3.5*BLOCKSIDELENGTH);
+                suspendRelation(ob_m);
+                if(addRelation(ob_m,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS) ((MoveObject*)ob_m)->beginRun();
+            }
+            else addRelation(ob_m , ob_ed , CoreEven_Attacking);
+        }
+        iter++;
+    }
+
+    return;
 }
 
 //**************************************************************
@@ -971,7 +1077,7 @@ void Core_List::initDetailList()
     //行动: 攻击**************************************
     {
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
         forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 

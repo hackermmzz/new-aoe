@@ -1,5 +1,6 @@
 ﻿#include "GameWidget.h"
 #include "ui_GameWidget.h"
+#include "Map.h"
 
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
@@ -112,7 +113,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<StaticRes*>::iterator sriter=sr->begin();
         while(sriter!=sr->end())
         {
-            insert((*sriter),&drawlist);
+            if((*sriter)->getexplored())
+                insert((*sriter),&drawlist);
             sriter++;
         }
     }
@@ -122,7 +124,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<Animal *>::iterator ariter=ar->begin();
         while(ariter!=ar->end())
         {
-            insert((*ariter),&drawlist);
+            if((*ariter)->getexplored())
+                insert((*ariter),&drawlist);
             ariter++;
         }
     }
@@ -135,7 +138,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!b->empty()&&biter!=b->end())
         {
             Coordinate *p=*biter;
-            insert(p,&drawlist);
+            if((*biter)->getvisible())
+                insert(p,&drawlist);
             biter++;
         }
 
@@ -144,7 +148,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!h->empty()&&hiter!=h->end())
         {
             Coordinate *p=*hiter;
-            insert(p,&drawlist);
+            if((*hiter)->getvisible())
+                insert(p,&drawlist);
             hiter++;
         }
 
@@ -165,11 +170,16 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<Coordinate *>::iterator iter=drawlist.begin();
         while(iter!=drawlist.end())
         {
-            painter.drawPixmap(tranX((*iter)->getDR()-DR,(*iter)->getUR()-UR)-(*iter)->getimageX(),(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR),(*iter)->getNowRes()->pix.width(),(*iter)->getNowRes()->pix.height(),(*iter)->getNowRes()->pix);
-            drawmemory(tranX((*iter)->getDR()-DR,(*iter)->getUR()-UR)-(*iter)->getimageX(),(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR),(*(*iter)->getNowRes()),(*iter)->getglobalNum());
+            painter.drawPixmap(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR) - (*iter)->getimageX(),
+                               (*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR) + (*iter)->getMapHeightOffsetY(),
+                               (*iter)->getNowRes()->pix.width(),
+                               (*iter)->getNowRes()->pix.height(),
+                               (*iter)->getNowRes()->pix);
+            drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
+                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + (*iter)->getMapHeightOffsetY(),
+                       (*(*iter)->getNowRes()),(*iter)->getglobalNum());
             iter++;
         }
-
     }
 }
 
@@ -206,8 +216,10 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
         mainwidget->mouseEvent->memoryMapX=event->x()/4;
         mainwidget->mouseEvent->memoryMapY=event->y()/4;
         mainwidget->mouseEvent->mouseEventType=RIGHT_PRESS;
-        mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
-        mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
+        double tDR = tranDR(event->x(),event->y());
+        double tUR = tranUR(event->x(),event->y());
+        mainwidget->mouseEvent->DR = tDR + DR;
+        mainwidget->mouseEvent->UR = tUR + UR;
     }
 }
 
@@ -236,7 +248,7 @@ int GameWidget::tranY(int DR, int UR)
 int GameWidget::tranDR(int X, int Y)
 {
     int DR;
-    DR=X*gen5/4.0+Y*gen5/2.0;
+    DR = X * gen5 / 4.0 + Y * gen5 / 2.0;
     return DR;
 }
 
