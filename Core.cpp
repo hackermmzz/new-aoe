@@ -1,6 +1,7 @@
 #include "SelectWidget.h"
 #include "Core.h"
 
+
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
     this->theMap = theMap;  //mainWidget的map对象
@@ -8,6 +9,8 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
     this->memorymap = memorymap;    //内存图
     this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
     this->interactionList = new Core_List( this->theMap , this->player );   //本类中管理的对象交互动态表
+
+
 }
 
 void Core::gameUpdate()
@@ -242,31 +245,36 @@ void Core::gameUpdate()
 
 }
 
-void Core::infoShare(int playerID){
-    Player* self=player[playerID];
-    if(!tagGamelocks[playerID].tryLock()){
-        return;
+void lockTagGame(int id){
+    if(id==0){
+       tagUsrGameLock.lock();
+    }else{
+       ;
     }
-    for(int i=0;i<MAP_L;i++){
-        for(int j=0;j<MAP_U;j++){
-            if(!AIGame[playerID].blocks[i][j].explored&&theMap->cell[i][j].Explored){
-                AIGame[playerID].blocks[i][j].height=theMap->cell[i][j].getMapHeight();
-                AIGame[playerID].blocks[i][j].explored=true;
-            }
-        }
+}
+void unlockTagGame(int id){
+    if(id==0){
+       tagUsrGameLock.unlock();
+    }else{
+       ;
     }
+}
 
-    AIGame[playerID].Human_MaxNum=self->getMaxHumanNum();
-    AIGame[playerID].Gold=self->getGold();
-    AIGame[playerID].Stone=self->getStone();
-    AIGame[playerID].Meat=self->getFood();
-    AIGame[playerID].Wood=self->getWood();
-    AIGame[playerID].civilizationStage=self->getCiv();
-    AIGame[playerID].GameFrame=g_frame;
-    AIGame[playerID].farmers.clear();
+void Core::updateByPlayer(int id,tagGame* newTagGames[]){
+    Player* self=player[id];
+    tagGame& tagAIGame=*newTagGames[id];
+    //更新基础数据
+    tagAIGame.Human_MaxNum=self->getMaxHumanNum();
+    tagAIGame.Gold=self->getGold();
+    tagAIGame.Stone=self->getStone();
+    tagAIGame.Meat=self->getFood();
+    tagAIGame.Wood=self->getWood();
+    tagAIGame.civilizationStage=self->getCiv();
+    tagAIGame.GameFrame=g_frame;
+    //更新人口数据
     for(Human* human:self->human){
         tagHuman taghuman;
-        taghuman.Owner=playerID;
+        taghuman.Owner=id;
         taghuman.SN=human->getglobalNum();
         taghuman.Blood=human->getBlood();
         taghuman.L=human->getDR();
@@ -292,39 +300,27 @@ void Core::infoShare(int playerID){
             }else{
                 tagfarmer.ResourceSort=farmer->getResourceSort();
             }
-            AIGame[playerID].farmers.push_back(tagfarmer);
+            tagAIGame.farmers.push_back(tagfarmer);
+            //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
-                if(i==playerID){
-                    continue;
-                }else{
-                    if(!tagGamelocks[playerID].tryLock()){
-                        continue;
-                    }
-                    AIGame[i].enemy_farmers.push_back(tagfarmer.toEnemy());
-                    tagGamelocks[playerID].unlock();
-                }
+                if(i==id) {continue;}
+                newTagGames[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
             }
         }else if(human->getSort()==SORT_ARMY){
             Army* army=static_cast<Army*> (human);
             tagArmy tagarmy;
             tagarmy.cast_from(taghuman);
             tagarmy.Sort=army->getNum();
-            AIGame[playerID].armies.push_back(tagarmy);
+            tagAIGame.armies.push_back(tagarmy);
+            //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
-                if(i==playerID){
-                    continue;
-                }else{
-                    if(!tagGamelocks[playerID].tryLock()){
-                        continue;
-                    }
-                    AIGame[i].enemy_armies.push_back(tagarmy.toEnemy());
-                    tagGamelocks[playerID].unlock();
-                }
+                if(i==id) {continue;}
+               newTagGames[i]->enemy_armies.push_back(tagarmy.toEnemy());
             }
         }
     }
 
-    AIGame[playerID].resources.clear();
+    //更新动物数据
     for(Animal* animal:theMap->animal){
         tagResource resource;
         resource.SN=animal->getglobalNum();
@@ -359,8 +355,10 @@ void Core::infoShare(int playerID){
         resource.U=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
-        AIGame[playerID].resources.push_back(resource);
+        tagAIGame.resources.push_back(resource);
     }
+
+    //更新资源数据
     for(StaticRes* staticRes: theMap->staticres){
         tagResource resource;
         resource.SN=staticRes->getglobalNum();
@@ -383,10 +381,10 @@ void Core::infoShare(int playerID){
         }
         resource.Cnt=staticRes->get_Cnt();
         resource.Blood=-1;
-        AIGame[playerID].resources.push_back(resource);
+        tagAIGame.resources.push_back(resource);
     }
 
-    AIGame[playerID].buildings.clear();
+    //跟新建筑数据
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
@@ -397,7 +395,7 @@ void Core::infoShare(int playerID){
         building.Percent=build->getPercent();
         building.Project=build->getActNum();
         building.ProjectPercent=build->getActPercent();
-        building.Owner=playerID;
+        building.Owner=id;
 //        if(build->getSort()==SORT_FARM){
 //            building.Type=BUILDING_FARM;
 //            building.Cnt=build->getCnt();
@@ -405,21 +403,47 @@ void Core::infoShare(int playerID){
             building.Type=build->getNum();
             building.Cnt=-1;
 //        }
-        AIGame[playerID].buildings.push_back(building);
+        tagAIGame.buildings.push_back(building);
         for(int i=0;i<NOWPLAYER;i++){
-            if(i==playerID){
-                continue;
-            }else{
-                if(!tagGamelocks[playerID].try_lock()){
-                    continue;
-                }
-                AIGame[i].enemy_buildings.push_back(building.toEnemy());
-                tagGamelocks[playerID].unlock();
-            }
+            if(i==id){continue;}
+                newTagGames[i]->enemy_buildings.push_back(building.toEnemy());
         }
     }
-    tagGamelocks[playerID].unlock();
+
 }
+
+void updateCommon(tagGame* tagGame){
+    tagGame->armies_n=tagGame->armies.size();
+    tagGame->buildings_n=tagGame->buildings.size();
+    tagGame->farmers_n=tagGame->farmers.size();
+    tagGame->enemy_armies_n=tagGame->enemy_armies.size();
+    tagGame->enemy_buildings_n=tagGame->enemy_buildings.size();
+    tagGame->enemy_farmers_n=tagGame->enemy_farmers.size();
+}
+
+void Core::infoShare(){
+    tagGame* newTagGames[NOWPLAYER];
+    for(int i=0;i<NOWPLAYER;i++){
+        newTagGames[i]=new tagGame();
+    }
+    for(int i=0;i<NOWPLAYER;i++){
+        updateByPlayer(i,newTagGames);
+    }
+    for(int i=0;i<NOWPLAYER;i++){
+        updateCommon(newTagGames[i]);
+    }
+    //更新tagGame*的指向
+    lockTagGame(0);
+    if(tagUsrGame!=NULL){
+        newTagGames[0]->ins_ret=tagUsrGame->ins_ret;
+        delete tagUsrGame;
+    }
+    tagUsrGame=newTagGames[0];
+    unlockTagGame(0);
+
+    return;
+}
+
 
 void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold )
 {
@@ -510,40 +534,32 @@ void Core::manageMouseEvent()
         }
     }
 }
+
+
 //后续编写，用于处理AI指令
 void Core::manageOrder(int id)
 {
-//    static bool once = true;
-//    static bool second = true;
-//    if(once && player[0]->human.size())
-//    {
-//        once = false;
-//        interactionList->addRelation(*(player[0]->human.begin()) , 30*BLOCKSIDELENGTH , 25*BLOCKSIDELENGTH  , CoreEven_CreatBuilding, true, BUILDING_CENTER);
-//    }
-
-//    if(second && player[0]->build.size())
-//    {
-//        second = false;
-//        interactionList->addRelation(*(player[0]->build.begin()),CoreEven_BuildingAct , BUILDING_CENTER_CREATEFARMER);
-//    }
     ins* NowIns;
+    tagGame* tagAIGame;
     if(id==0){
         NowIns=&UsrIns;
+        tagAIGame=tagUsrGame;
     }else{
-        NowIns=&EnemyIns;
+//        NowIns=&EnemyIns;
     }
     NowIns->lock.lock();
     while(!NowIns->instructions.empty()){
         instruction cur=NowIns->instructions.front();
         NowIns->instructions.pop();
         Coordinate* self=cur.self;
+        int ret=0;
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
             interactionList->suspendRelation(self);
             break;
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
-            interactionList->addRelation(self,cur.L,cur.U,CoreEven_JustMoveTo);
+            ret=interactionList->addRelation(self,cur.L,cur.U,CoreEven_JustMoveTo);
             break;
         }
         case 2:{    /// type 2:命令村民self将工作目标设为obj
@@ -553,10 +569,10 @@ void Core::manageOrder(int id)
                 switch (obj->getSort()){
                 case SORT_STATICRES:
                 case SORT_ANIMAL:
-                    interactionList->addRelation(self,obj,CoreEven_Gather);
+                    ret=interactionList->addRelation(self,obj,CoreEven_Gather);
                     break;
                 case SORT_BUILDING:
-                    interactionList->addRelation(self,obj,CoreEven_FixBuilding);
+                    ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
                 default:
                     break;
                 }
@@ -564,7 +580,7 @@ void Core::manageOrder(int id)
             case SORT_ARMY:
                 switch (obj->getSort()){
                 case SORT_ANIMAL:
-                    interactionList->addRelation(self,obj,CoreEven_Attacking );
+                    ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
                     break;
                 default:
                     break;
@@ -576,19 +592,20 @@ void Core::manageOrder(int id)
             break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            interactionList->addRelation(self,cur.BL,cur.BU,CoreEven_CreatBuilding,0,cur.option);
+            ret=interactionList->addRelation(self,cur.BL,cur.BU,CoreEven_CreatBuilding,0,cur.option);
             break;
         }
         case 4:{    ///type 4:命令建筑self进行option工作
-            interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
+            ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
             break;
         }
-
         default:
             break;
         }
-        cur.ret=666;
-        AIGame[id].ins_ret.insert(make_pair(cur.id,cur));
+        cur.ret=ret;
+        lockTagGame(id);
+        tagAIGame->ins_ret.insert(make_pair(cur.id,cur));
+        unlockTagGame(id);
     }
     NowIns->lock.unlock();
 }
