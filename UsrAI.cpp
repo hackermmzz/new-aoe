@@ -1,6 +1,11 @@
 #include "UsrAI.h"
 #include <random>
 #include <fstream>
+
+tagGame* tagUsrGame;
+QMutex tagUsrGameLock;
+ins UsrIns;
+
 bool ismove=false;
 int human1=-1;
 int human2=-1;
@@ -26,8 +31,8 @@ void UsrAI::processData(){
             ++it;
         }
     }
-    sleep(2);
-    for(tagFarmer human:GameInfo().farmers){
+
+    for(tagFarmer human:getGameInfo()->farmers){
         if(human1==-1){
            human1=human.SN;
            break;
@@ -41,11 +46,12 @@ void UsrAI::processData(){
 //            break;
 //        }
     }
-    for(tagFarmer human:GameInfo().farmers){
+    for(tagFarmer human:getGameInfo()->farmers){
+        sleep(0.5);
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
-            for(tagResource res:GameInfo().resources){
+            for(tagResource res:getGameInfo()->resources){
                 if(countdistance(mid,mid,res.L,res.U)<dis){
                     sn=res.SN;
                     dis=countdistance(mid,mid,res.L,res.U);
@@ -66,7 +72,7 @@ void UsrAI::processData(){
         }else if(human.SN==human3&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
-            for(tagResource res:GameInfo().resources){
+            for(tagResource res:getGameInfo()->resources){
                 if(res.ProductSort==HUMAN_STOCKFOOD&&res.Type!=RESOURCE_BUSH&&countdistance(mid,mid,res.L,res.U)<dis){
                     sn=res.SN;
                     dis=countdistance(mid,mid,res.L,res.U);
@@ -76,7 +82,8 @@ void UsrAI::processData(){
         }
     }
 
-    for(tagBuilding building:GameInfo().buildings){
+    for(tagBuilding building:getGameInfo()->buildings){
+        sleep(0.5);
         if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
             ins_id.push_back(BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER));
         }
@@ -90,7 +97,7 @@ void UsrAI::processData(){
     fout.open("map.txt"); // 打开或创建文件以写入数据
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
-            fout<<GameInfo().blocks[i][j].height<<" ";
+            fout<<getGameInfo()->blocks[i][j].height<<" ";
         }
         fout<<endl;
     }
@@ -99,7 +106,4 @@ void UsrAI::processData(){
     qDebug()<<"#####end#####";
 /*###########YOUR CODE ENDS HERE###########*/
 }
-UsrAI::UsrAI()
-{
-    this->id=0;
-}
+

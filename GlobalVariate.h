@@ -135,13 +135,20 @@ struct tagBlock{
 struct instruction;
 struct tagGame
 {
-    list<tagBuilding> buildings;
-    list<tagFarmer> farmers;
-    list<tagArmy> armies;
-    list<tagBuilding> enemy_buildings;
-    list<tagFarmer> enemy_farmers;
-    list<tagArmy> enemy_armies;
-    list<tagResource> resources;
+    vector<tagBuilding> buildings;
+    int buildings_n;
+    vector<tagFarmer> farmers;
+    int farmers_n;
+    vector<tagArmy> armies;
+    int armies_n;
+    vector<tagBuilding> enemy_buildings;
+    int enemy_buildings_n;
+    vector<tagFarmer> enemy_farmers;
+    int enemy_farmers_n;
+    vector<tagArmy> enemy_armies;
+    int enemy_armies_n;
+    vector<tagResource> resources;
+    int resources_n;
     map<int,instruction> ins_ret;
     tagBlock blocks[MAP_L][MAP_U];
     int GameFrame;
@@ -151,8 +158,22 @@ struct tagGame
     int Stone;
     int Gold;
     int Human_MaxNum;
+    ~tagGame(){
+        for (int i = 0; i < MAP_L; ++i) {
+            delete[] blocks[i];
+        }
+        delete[] blocks;
+
+        buildings.clear();
+        farmers.clear();
+        armies.clear();
+        enemy_buildings.clear();
+        enemy_farmers.clear();
+        enemy_armies.clear();
+        resources.clear();
+        ins_ret.clear();
+    }
 };
-extern QMutex tagGamelocks[NOWPLAYER];
 
 struct tagMap
 {
@@ -196,7 +217,6 @@ struct MouseEvent
 
 };
 
-extern tagGame AIGame[NOWPLAYER];
 
 extern std::string direction[5];
 
@@ -525,8 +545,7 @@ struct ins{
     std::queue<instruction> instructions;
     QMutex lock;
 };
-extern ins EnemyIns;
-extern ins UsrIns;
+
 
 /*
  * 0是成功
