@@ -22,7 +22,7 @@
 //#include <Option.h>
 #include <Core.h>
 #include "UsrAI.h"
-//#include "EnemyAI.h"
+#include "EnemyAI.h"
 #include <ActWidget.h>
 
 namespace Ui {
@@ -79,7 +79,7 @@ public:
 
     SelectWidget *sel;
     Core *core;
-    AI* UsrAi;
+    AI* UsrAi,*EnemyAi;
     bool eventFilter(QObject *watched, QEvent *event);
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态

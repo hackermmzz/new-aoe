@@ -432,10 +432,12 @@ void Core::infoShare(){
     for(int i=0;i<NOWPLAYER;i++){
         updateCommon(newTagGames[i]);
     }
-    //更新tagGame的指向
+    //更新tagGame*的指向
     lockTagGame(0);
-    newTagGames[0]->ins_ret=tagUsrGame->ins_ret;
-    delete tagUsrGame;
+    if(tagUsrGame!=NULL){
+        newTagGames[0]->ins_ret=tagUsrGame->ins_ret;
+        delete tagUsrGame;
+    }
     tagUsrGame=newTagGames[0];
     unlockTagGame(0);
 

@@ -39,9 +39,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initAnimal();
     initStaticResource();
     initFarmer();
-    qDebug()<<"init"<<endl;
     initArmy();
-    qDebug()<<"finish"<<endl;
     initMissile();
 
     // 设置当前窗口属性
@@ -129,9 +127,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 MainWidget::~MainWidget()
 {
     UsrAi->exit(0);
-//    EnemyAi->exit(0);
+    EnemyAi->exit(0);
     delete UsrAi;
-//    delete EnemyAi;
+    delete EnemyAi;
     delete ui;
     deleteBlock();
     deleteAnimal();

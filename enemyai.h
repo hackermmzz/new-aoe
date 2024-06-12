@@ -1,16 +1,12 @@
-//#ifndef ENEMYAI_H
-//#define ENEMYAI_H
-//#include "AI.h"
+#ifndef ENEMYAI_H
+#define ENEMYAI_H
+#include "AI.h"
 
-//class EnemyAI:public AI
-//{
-//public:
-//    EnemyAI();
-//    tagGame getGameInfo(){}
-//    void processData() override;
-//    int AddToIns(instruction ins){
+class EnemyAI:public AI
+{
+public:
+    EnemyAI();
+    void processData() override;
+};
 
-//        }
-//};
-
-//#endif // ENEMYAI_H
+#endif // ENEMYAI_H

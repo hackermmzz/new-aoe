@@ -31,7 +31,7 @@ void UsrAI::processData(){
             ++it;
         }
     }
-    sleep(2);
+
     for(tagFarmer human:getGameInfo()->farmers){
         if(human1==-1){
            human1=human.SN;
@@ -47,6 +47,7 @@ void UsrAI::processData(){
 //        }
     }
     for(tagFarmer human:getGameInfo()->farmers){
+        sleep(0.5);
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
@@ -82,6 +83,7 @@ void UsrAI::processData(){
     }
 
     for(tagBuilding building:getGameInfo()->buildings){
+        sleep(0.5);
         if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
             ins_id.push_back(BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER));
         }
