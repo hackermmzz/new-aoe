@@ -432,12 +432,10 @@ struct st_upgradeLab{
     //切换
     void shift()
     {
-        qDebug()<<"over";
         if(nowExecuteNode!=NULL)
         {
             haveFinishedPhaseNum++;
             nowExecuteNode = nowExecuteNode->nextDevAction;
-            qDebug()<<"nowexc"<<nowExecuteNode;
         }
     }
 

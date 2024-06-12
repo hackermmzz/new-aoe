@@ -1,11 +1,11 @@
 ﻿#include "Army.h"
 
 //[playerrepresent][num][leve][angel]
-std::list<ImageResource>* Army::Walk[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Disappear[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Stand[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Attack[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Die[NOWPLAYER][4][2][8];
+std::list<ImageResource>* Army::Walk[2][4][2][8];
+std::list<ImageResource>* Army::Disappear[2][4][2][8];
+std::list<ImageResource>* Army::Stand[2][4][2][8];
+std::list<ImageResource>* Army::Attack[2][4][2][8];
+std::list<ImageResource>* Army::Die[2][4][2][8];
 
 //[num][level]
 std::string Army::ArmyName[4][2]={{"Clubman","Axeman"},
