@@ -41,7 +41,7 @@ private:
     MouseEvent *mouseEvent; //记录当前鼠标事件
     Core_List* interactionList;
     void updateByPlayer(int id,tagGame* newTagGames[]);  //更新tagGame
-
+    void updateCommon(tagGame* tagGame);
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加

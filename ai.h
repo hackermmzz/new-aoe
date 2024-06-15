@@ -9,7 +9,7 @@ class AI:public QThread
 {
 public:
 /*##########INTERFACE BEGINS HERE##########*/
-    virtual tagGame* getGameInfo()=0;
+    virtual tagGame getGameInfo()=0;
 
     int HumanMove(int SN, double L0, double U0);
 

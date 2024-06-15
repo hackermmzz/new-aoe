@@ -1,7 +1,7 @@
 #include "SelectWidget.h"
 #include "Core.h"
 
-
+tagGame* currentTagGames[NOWPLAYER] = { tagUsrGame, tagEnenmyGame };
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
     this->theMap = theMap;  //mainWidget的map对象
@@ -249,14 +249,14 @@ void lockTagGame(int id){
     if(id==0){
        tagUsrGameLock.lock();
     }else{
-       ;
+       tagEnemyGameLock.lock();;
     }
 }
 void unlockTagGame(int id){
     if(id==0){
        tagUsrGameLock.unlock();
     }else{
-       ;
+       tagEnemyGameLock.unlock();
     }
 }
 
@@ -304,7 +304,8 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-                newTagGames[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
+                if(farmer->getvisible()==1)
+                    newTagGames[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
             }
         }else if(human->getSort()==SORT_ARMY){
             Army* army=static_cast<Army*> (human);
@@ -315,7 +316,8 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-               newTagGames[i]->enemy_armies.push_back(tagarmy.toEnemy());
+                if(army->getvisible()==1)
+                    newTagGames[i]->enemy_armies.push_back(tagarmy.toEnemy());
             }
         }
     }
@@ -355,7 +357,8 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
         resource.U=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
-        tagAIGame.resources.push_back(resource);
+        if(id==1||animal->getexplored()==1)
+            tagAIGame.resources.push_back(resource);
     }
 
     //更新资源数据
@@ -381,10 +384,11 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
         }
         resource.Cnt=staticRes->get_Cnt();
         resource.Blood=-1;
-        tagAIGame.resources.push_back(resource);
+        if(id==1||staticRes->getexplored()==1)
+            tagAIGame.resources.push_back(resource);
     }
 
-    //跟新建筑数据
+    //更新建筑数据
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
@@ -406,20 +410,43 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
         tagAIGame.buildings.push_back(building);
         for(int i=0;i<NOWPLAYER;i++){
             if(i==id){continue;}
+            if(build->getexplored()==1)
                 newTagGames[i]->enemy_buildings.push_back(building.toEnemy());
         }
     }
 
 }
-
-void updateCommon(tagGame* tagGame){
+/**
+ *更新tagGame中的数组大小，资源地图
+ */
+void Core::updateCommon(tagGame* tagGame){
     tagGame->armies_n=tagGame->armies.size();
     tagGame->buildings_n=tagGame->buildings.size();
     tagGame->farmers_n=tagGame->farmers.size();
     tagGame->enemy_armies_n=tagGame->enemy_armies.size();
     tagGame->enemy_buildings_n=tagGame->enemy_buildings.size();
     tagGame->enemy_farmers_n=tagGame->enemy_farmers.size();
+    for (int i = 0; i < MAP_L; ++i) {
+        for (int j = 0; j < MAP_U; ++j) {
+            tagGame->map[i][j] = theMap->resMap_UserAI[i][j];
+        }
+    }
 }
+/**
+ *更新tagGame*的指向
+ */
+void updateTagGame(int index, tagGame*& currentTagGame, tagGame* newTagGame) {
+    lockTagGame(index);
+    if(currentTagGame != NULL) {
+        newTagGame->ins_ret = currentTagGame->ins_ret;
+        delete currentTagGame;
+    }
+    currentTagGame = newTagGame;
+    if(index==0) tagUsrGame = currentTagGames[0];
+    if(index==1) tagEnenmyGame = currentTagGames[1];
+    unlockTagGame(index);
+}
+
 
 void Core::infoShare(){
     tagGame* newTagGames[NOWPLAYER];
@@ -433,15 +460,9 @@ void Core::infoShare(){
         updateCommon(newTagGames[i]);
     }
     //更新tagGame*的指向
-    lockTagGame(0);
-    if(tagUsrGame!=NULL){
-        newTagGames[0]->ins_ret=tagUsrGame->ins_ret;
-        delete tagUsrGame;
+    for(int i = 0; i < NOWPLAYER; ++i) {
+        updateTagGame(i, currentTagGames[i], newTagGames[i]);
     }
-    tagUsrGame=newTagGames[0];
-    unlockTagGame(0);
-
-    return;
 }
 
 

@@ -133,48 +133,6 @@ struct tagBlock{
 };
 
 struct instruction;
-struct tagGame
-{
-    vector<tagBuilding> buildings;
-    int buildings_n;
-    vector<tagFarmer> farmers;
-    int farmers_n;
-    vector<tagArmy> armies;
-    int armies_n;
-    vector<tagBuilding> enemy_buildings;
-    int enemy_buildings_n;
-    vector<tagFarmer> enemy_farmers;
-    int enemy_farmers_n;
-    vector<tagArmy> enemy_armies;
-    int enemy_armies_n;
-    vector<tagResource> resources;
-    int resources_n;
-    map<int,instruction> ins_ret;
-    tagBlock blocks[MAP_L][MAP_U];
-    int GameFrame;
-    int civilizationStage;
-    int Wood;
-    int Meat;
-    int Stone;
-    int Gold;
-    int Human_MaxNum;
-    ~tagGame(){
-        for (int i = 0; i < MAP_L; ++i) {
-            delete[] blocks[i];
-        }
-        delete[] blocks;
-
-        buildings.clear();
-        farmers.clear();
-        armies.clear();
-        enemy_buildings.clear();
-        enemy_farmers.clear();
-        enemy_armies.clear();
-        resources.clear();
-        ins_ret.clear();
-    }
-};
-
 struct tagMap
 {
     bool explore;
@@ -205,6 +163,49 @@ struct tagMap
         remain = -1;
     }
 };
+struct tagGame
+{
+    vector<tagBuilding> buildings;
+    int buildings_n;
+    vector<tagFarmer> farmers;
+    int farmers_n;
+    vector<tagArmy> armies;
+    int armies_n;
+    vector<tagBuilding> enemy_buildings;
+    int enemy_buildings_n;
+    vector<tagFarmer> enemy_farmers;
+    int enemy_farmers_n;
+    vector<tagArmy> enemy_armies;
+    int enemy_armies_n;
+    vector<tagResource> resources;
+    int resources_n;
+    map<int,instruction> ins_ret;
+    tagMap map[MAP_L][MAP_U];
+    int GameFrame;
+    int civilizationStage;
+    int Wood;
+    int Meat;
+    int Stone;
+    int Gold;
+    int Human_MaxNum;
+    ~tagGame(){
+        for (int i = 0; i < MAP_L; ++i) {
+            delete[] map[i];
+        }
+        delete[] map;
+
+        buildings.clear();
+        farmers.clear();
+        armies.clear();
+        enemy_buildings.clear();
+        enemy_farmers.clear();
+        enemy_armies.clear();
+        resources.clear();
+        ins_ret.clear();
+    }
+};
+
+
 
 struct MouseEvent
 {

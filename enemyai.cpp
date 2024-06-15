@@ -1,10 +1,10 @@
 #include "EnemyAI.h"
+tagGame* tagEnenmyGame;
+QMutex tagEnemyGameLock;
+ins EnenmyIns;
 
 void EnemyAI::processData(){
+/*##########YOUR CODE BEGINS HERE##########*/
     return;
-}
-
-EnemyAI::EnemyAI()
-{
-    this->id=1;
+/*###########YOUR CODE ENDS HERE###########*/
 }

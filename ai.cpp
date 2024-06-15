@@ -29,10 +29,10 @@ int AI::BuildingAction(int SN,int Action){
 }
 
 instruction AI::getInsRet(int ins_id){
-    if(getGameInfo()->ins_ret.find(ins_id)==getGameInfo()->ins_ret.end()){
+    if(getGameInfo().ins_ret.find(ins_id)==getGameInfo().ins_ret.end()){
         return instruction();
     }else{
-        return getGameInfo()->ins_ret[ins_id];
+        return getGameInfo().ins_ret[ins_id];
     }
 }
 

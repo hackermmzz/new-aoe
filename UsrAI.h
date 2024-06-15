@@ -10,11 +10,15 @@ class UsrAI:public AI
 {
 public:
     UsrAI(){this->id=0;}
-    tagGame* getGameInfo() override{
-        QMutexLocker locker(&tagUsrGameLock);
-        return tagUsrGame;
+    ~UsrAI(){
+        ;
     }
+private:
     void processData() override;
+    tagGame getGameInfo() override{
+        QMutexLocker locker(&tagUsrGameLock);
+        return *tagUsrGame;
+    }
     int AddToIns(instruction ins) override{
         UsrIns.lock.lock();
         ins.id=UsrIns.g_id;
@@ -28,9 +32,7 @@ public:
         tagUsrGame->ins_ret.clear();
         tagUsrGameLock.unlock();
     }
-    ~UsrAI(){
-        ;
-    }
+
 };
 
 #endif // USRAI_H
