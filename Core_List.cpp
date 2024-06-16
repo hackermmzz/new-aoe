@@ -422,6 +422,9 @@ int Core_List::getNowPhaseNum(Coordinate* object){
     int& nowPhaseNum = thisRelation.nowPhaseNum;
     //detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
     Coordinate* obj=relate_AllObject[object].goalObject;
+    if(obj==NULL){
+        return HUMAN_STATE_IDLE;
+    }
     if(nowPhaseNum==0){
         if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
             return HUMAN_STATE_GOTO_ATTACK;

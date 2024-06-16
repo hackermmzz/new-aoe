@@ -28,13 +28,6 @@ int AI::BuildingAction(int SN,int Action){
     return AddToIns(instruction(4,g_Object[SN],Action));
 }
 
-instruction AI::getInsRet(int ins_id){
-    if(getGameInfo()->ins_ret.find(ins_id)==getGameInfo()->ins_ret.end()){
-        return instruction();
-    }else{
-        return getGameInfo()->ins_ret[ins_id];
-    }
-}
 
 void AI::printInsRet(int id){
     instruction tmp=getInsRet(id);
