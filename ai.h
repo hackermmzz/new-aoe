@@ -9,7 +9,6 @@ class AI:public QThread
 {
 public:
 /*##########INTERFACE BEGINS HERE##########*/
-    virtual tagGame* getGameInfo()=0;
 
     int HumanMove(int SN, double L0, double U0);
 
@@ -19,11 +18,10 @@ public:
 
     int BuildingAction(int SN,int Action);
 
-    instruction getInsRet(int id);
+    virtual instruction getInsRet(int id)=0;
 
     void printInsRet(int id);
 
-    virtual void clearInsRet()=0;
 /*###########INTERFACE ENDS HERE###########*/
     virtual void processData()=0;
     void run() override{
@@ -46,6 +44,7 @@ protected:
     int id;
     virtual int AddToIns(instruction ins){
     }
+    virtual void clearInsRet()=0;
 private:
     bool isHuman(int SN){
         int type=SN/10000;
