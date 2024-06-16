@@ -40,8 +40,8 @@ private:
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
     MouseEvent *mouseEvent; //记录当前鼠标事件
     Core_List* interactionList;
-    void updateByPlayer(int id,tagGame* newTagGames[]);  //更新tagGame
-    void updateCommon(tagGame* tagGame);
+    void updateByPlayer(int id,tagInfo* newTagInfos[]);  //更新tagGame
+    void updateCommon(tagInfo* taginfo);
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加

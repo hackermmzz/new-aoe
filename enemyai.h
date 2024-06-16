@@ -2,9 +2,8 @@
 #define ENEMYAI_H
 #include "AI.h"
 
-extern tagGame* tagEnenmyGame;
-extern QMutex tagEnemyGameLock;
-extern ins EnenmyIns;
+extern tagGame tagEnemyGame;
+extern ins EnemyIns;
 
 class EnemyAI:public AI
 {
@@ -15,24 +14,23 @@ public:
     }
 private:
     void processData() override;
-    tagGame getGameInfo() override{
-        QMutexLocker locker(&tagEnemyGameLock);
-        return *tagEnenmyGame;
-    }
     int AddToIns(instruction ins) override{
-        EnenmyIns.lock.lock();
-        ins.id=EnenmyIns.g_id;
-        EnenmyIns.g_id++;
-        EnenmyIns.instructions.push(ins);
-        EnenmyIns.lock.unlock();
+        EnemyIns.lock.lock();
+        ins.id=EnemyIns.g_id;
+        EnemyIns.g_id++;
+        EnemyIns.instructions.push(ins);
+        EnemyIns.lock.unlock();
         return ins.id;
     }
-    void clearInsRet() override{
-        tagEnemyGameLock.lock();
-        tagEnenmyGame->ins_ret.clear();
-        tagEnemyGameLock.unlock();
+    instruction getInsRet(int id){
+        return tagEnemyGame.getInsRet(id);
     }
-
+    void clearInsRet() override{
+        tagEnemyGame.clearInsRet();
+    }
 };
+/*##########DO NOT EDIT ABOVE##########*/
+
+
 
 #endif // ENEMYAI_H

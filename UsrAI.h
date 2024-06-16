@@ -2,8 +2,7 @@
 #define USRAI_H
 #include "AI.h"
 
-extern tagGame* tagUsrGame;
-extern QMutex tagUsrGameLock;
+extern tagGame tagUsrGame;
 extern ins UsrIns;
 
 class UsrAI:public AI
@@ -15,10 +14,6 @@ public:
     }
 private:
     void processData() override;
-    tagGame getGameInfo() override{
-        QMutexLocker locker(&tagUsrGameLock);
-        return *tagUsrGame;
-    }
     int AddToIns(instruction ins) override{
         UsrIns.lock.lock();
         ins.id=UsrIns.g_id;
@@ -27,12 +22,14 @@ private:
         UsrIns.lock.unlock();
         return ins.id;
     }
-    void clearInsRet() override{
-        tagUsrGameLock.lock();
-        tagUsrGame->ins_ret.clear();
-        tagUsrGameLock.unlock();
+    instruction getInsRet(int id){
+        return tagUsrGame.getInsRet(id);
     }
-
+    void clearInsRet() override{
+        tagUsrGame.clearInsRet();
+    }
 };
+/*##########DO NOT EDIT ABOVE##########*/
+
 
 #endif // USRAI_H

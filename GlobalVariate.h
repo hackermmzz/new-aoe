@@ -132,7 +132,37 @@ struct tagBlock{
     int height=0;
 };
 
-struct instruction;
+struct instruction{
+    ///用于存储ai发出的指令信息
+    /// @param type 指令类型
+    /// @param option 对应类型下的操作
+    /// type 0:终止对象self的动作
+    /// type 1:命令村民self走向指定坐标L0，U0
+    /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
+    /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
+    /// type 4:对建筑self发出命令option
+    int ret=-1;
+    int type;
+    int id;
+    Coordinate* self;
+    Coordinate* obj;
+    int option;
+    int BL,BU;
+    double L,U;
+    bool isExist(){
+        return type!=-1;
+    }
+    instruction(){ type=-1; }
+    instruction(int type,Coordinate* self,Coordinate* obj);
+    instruction(int type,Coordinate* self,int BL,int BU,int option);
+    instruction(int type,Coordinate* self,double L,double U);
+    instruction(int type,Coordinate* self,int option);
+};
+struct ins{
+    int g_id=0;
+    std::queue<instruction> instructions;
+    QMutex lock;
+};
 struct tagMap
 {
     bool explore;
@@ -163,7 +193,7 @@ struct tagMap
         remain = -1;
     }
 };
-struct tagGame
+struct tagInfo
 {
     vector<tagBuilding> buildings;
     int buildings_n;
@@ -188,24 +218,138 @@ struct tagGame
     int Stone;
     int Gold;
     int Human_MaxNum;
-    ~tagGame(){
+    ~tagInfo(){
         for (int i = 0; i < MAP_L; ++i) {
             delete[] map[i];
         }
         delete[] map;
-
-        buildings.clear();
-        farmers.clear();
-        armies.clear();
-        enemy_buildings.clear();
-        enemy_farmers.clear();
-        enemy_armies.clear();
-        resources.clear();
-        ins_ret.clear();
     }
 };
 
-
+struct tagGame
+{
+private:
+    tagInfo* Info;
+    QMutex Locker;
+public:
+    update(tagInfo* newinfo){
+        //控制ins_ret的大小小于10，若大于10，则优先删除旧值
+        if(this->Info!=NULL){
+            while(Info->ins_ret.size()>10){
+                Info->ins_ret.erase(Info->ins_ret.begin());
+            }
+        }
+        QMutexLocker locker(&Locker);
+        if(this->Info!=NULL)
+            newinfo->ins_ret=this->Info->ins_ret;
+        delete Info;
+        Info=newinfo;
+    }
+    insertInsRet(int id,instruction ins){
+        QMutexLocker locker(&Locker);
+        this->Info->ins_ret.insert(make_pair(id,ins));
+    }
+    instruction getInsRet(int ins_id){
+        QMutexLocker locker(&Locker);
+        if(this->Info->ins_ret.find(ins_id)==this->Info->ins_ret.end()){
+            return instruction();
+        }else{
+            return this->Info->ins_ret[ins_id];
+        }
+    }
+    int getFood(){
+        QMutexLocker locker(&Locker);
+        return Info->Meat;
+    }
+    int getWood(){
+        QMutexLocker locker(&Locker);
+        return Info->Wood;
+    }
+    int getStone(){
+        QMutexLocker locker(&Locker);
+        return Info->Stone;
+    }
+    int getGold(){
+        QMutexLocker locker(&Locker);
+        return Info->Gold;
+    }
+    tagMap getMap(int L,int U){
+        QMutexLocker locker(&Locker);
+        return Info->map[L][U];
+    }
+    int getGameFrame(){
+        QMutexLocker locker(&Locker);
+        return Info->GameFrame;
+    }
+    int getCivilizationStage(){
+        QMutexLocker locker(&Locker);
+        return Info->civilizationStage;
+    }
+    int getMaxHumanNum(){
+        QMutexLocker locker(&Locker);
+        return Info->Human_MaxNum;
+    }
+    vector<tagFarmer> getFarmers(){
+        QMutexLocker locker(&Locker);
+        return Info->farmers;
+    }
+    int getFarmers_n(){
+        QMutexLocker locker(&Locker);
+        return Info->farmers.size();
+    }
+    vector<tagFarmer> getEnemyFarmers(){
+        QMutexLocker locker(&Locker);
+        return Info->enemy_farmers;
+    }
+    int getEnemyFarmers_n(){
+        QMutexLocker locker(&Locker);
+        return Info->enemy_farmers.size();
+    }
+    vector<tagArmy> getArmies(){
+        QMutexLocker locker(&Locker);
+        return Info->armies;
+    }
+    int getArmies_n(){
+        QMutexLocker locker(&Locker);
+        return Info->armies.size();
+    }
+    vector<tagArmy> getEnemyArmies(){
+        QMutexLocker locker(&Locker);
+        return Info->enemy_armies;
+    }
+    int getEnemyArmies_n(){
+        QMutexLocker locker(&Locker);
+        return Info->enemy_armies.size();
+    }
+    vector<tagBuilding> getBuildings(){
+        QMutexLocker locker(&Locker);
+        return Info->buildings;
+    }
+    int getBuildings_n(){
+        QMutexLocker locker(&Locker);
+        return Info->buildings.size();
+    }
+    vector<tagBuilding> getEnemyBuildings(){
+        QMutexLocker locker(&Locker);
+        return Info->enemy_buildings;
+    }
+    int getEnemyBuildings_n(){
+        QMutexLocker locker(&Locker);
+        return Info->enemy_buildings.size();
+    }
+    vector<tagResource> getResource(){
+        QMutexLocker locker(&Locker);
+        return Info->resources;
+    }
+    int getResource_n(){
+        QMutexLocker locker(&Locker);
+        return Info->resources.size();
+    }
+    void clearInsRet(){
+        QMutexLocker locker(&Locker);
+        Info->ins_ret.clear();
+    }
+};
 
 struct MouseEvent
 {
@@ -517,37 +661,7 @@ struct st_buildAction
     }
 };
 
-struct instruction{
-    ///用于存储ai发出的指令信息
-    /// @param type 指令类型
-    /// @param option 对应类型下的操作
-    /// type 0:终止对象self的动作
-    /// type 1:命令村民self走向指定坐标L0，U0
-    /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
-    /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-    /// type 4:对建筑self发出命令option
-    int ret=-1;
-    int type;
-    int id;
-    Coordinate* self;
-    Coordinate* obj;
-    int option;
-    int BL,BU;
-    double L,U;
-    bool isExist(){
-        return type!=-1;
-    }
-    instruction(){ type=-1; }
-    instruction(int type,Coordinate* self,Coordinate* obj);
-    instruction(int type,Coordinate* self,int BL,int BU,int option);
-    instruction(int type,Coordinate* self,double L,double U);
-    instruction(int type,Coordinate* self,int option);
-};
-struct ins{
-    int g_id=0;
-    std::queue<instruction> instructions;
-    QMutex lock;
-};
+
 
 
 /*
