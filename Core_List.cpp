@@ -508,6 +508,13 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 //            if(moveObject->isStand()) moveObject->setPreStand();
 //            relate_AllObject[object].useless();
 //        }
+
+        if(moveObject->getCrashOb()!=NULL)
+        {
+            //处理碰撞
+
+            moveObject->initCrash();
+        }
     }
     else relate_AllObject[object].useless();
 

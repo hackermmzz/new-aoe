@@ -42,9 +42,13 @@ private:
     Core_List* interactionList;
     void updateByPlayer(int id,tagGame* newTagGames[]);  //更新tagGame
 
+    vector<MoveObject*> moveOb_judCrush;
+
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加
+
+    void judge_Crush();
 
 };
 

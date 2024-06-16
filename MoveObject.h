@@ -55,9 +55,18 @@ protected:
     double VariationDR[8] = {1 / sqrt(2), 0, -1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1};
     double VariationUR[8] = {-1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1, 1 / sqrt(2), 0};
 
+    Coordinate* crashOb = NULL;    //碰撞对象
+
     //stand walk attack die disappear work run
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
+
+    /*********************静态数组***********************/
+    //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
+    //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
+    static vector<Point> jud_Block[1][3][3];
+
+    /*********************静态数组***********************/
     
 public:
     MoveObject();
@@ -79,7 +88,6 @@ public:
     bool isDying(){ return this->nowstate == MOVEOBJECT_STATE_DIE; }
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
     bool isStand(){return this->nowstate == MOVEOBJECT_STATE_STAND;}
-
 
     void beginRun(){ changeToRun = true; }
 
@@ -160,6 +168,8 @@ public:
         this->DR=PredictedDR;
         this->UR=PredictedUR;
     }
+    double get_PredictedDR(){ return PredictedDR; }
+    double get_PredictedUR(){ return PredictedUR; }
 
     bool needTranState()
     {
@@ -240,6 +250,93 @@ public:
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }
+
+    vector<Point> get_JudCrush_Block();
+
+    bool isCrash(Coordinate* judOb);
+
+    Coordinate* getCrashOb(){ return crashOb;}
+    void initCrash(){ crashOb = NULL; }
+
+    /*********************静态函数***********************/
+    static void init_jud_Block( int foundation , int dblockDR, int dblockUR )
+    {
+        Point temp;
+        int slant_Jud = dblockDR & dblockUR;    //有一个为0则值为0
+        int x = dblockDR,y = dblockUR , m = 1+foundation, outrow ,inrow;
+        int lkey = dblockDR+1,rkey = dblockUR+1;
+
+
+        //移动方向水平或竖直
+        if(slant_Jud == 0)
+        {
+            if(dblockDR != 0)
+            {
+                outrow = x<0? -1 : foundation;
+                inrow = outrow - x;
+                for(int i = -1; i<m; i++)
+                {
+                    temp.y = i;
+                    temp.x = outrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                    temp.x = inrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                }
+
+            }
+            else if( dblockUR != 0)
+            {
+                outrow =  y < 0 ?  -1 : foundation;
+                inrow = outrow -y;
+                for(int i = -1; i<m;i++)
+                {
+                    temp.x = i;
+                    temp.y = outrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                    temp.y = inrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                }
+            }
+        }
+        else    //否则为斜向
+        {
+            temp.x = x < 0 ? -1 : foundation;
+
+            for(int i = -1; i < m; i++)
+            {
+                temp.y = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+
+            if(x>0) m--;
+
+            temp.y = y<0 ? -1 : foundation;
+            for(int i = x<0 ? 0 : -1; i<m ; i++)
+            {
+                temp.x = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+
+            temp.x = x<0 ? 0 : foundation -1 ;
+            for(int i = 0 ; i < foundation ; i++)
+            {
+                temp.y = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+
+            if(x>0) m = foundation -1;
+            temp.y = y<0 ? 0 : foundation-1;
+            for(int i = x<0 ? 1 : 0; i<m ; i++)
+            {
+                temp.x = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+        }
+
+        return;
+    }
+
+    /*********************静态函数***********************/
 };
 
 #endif // MOVEOBJECT_H

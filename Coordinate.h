@@ -53,6 +53,7 @@ public:
     double getUR(){return this->UR;}
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
+    double getCrashLength(){ return crashLength; }
 
     void setExplored(int explored){ this->explored = explored; }
     void setvisible( int visible  ){ this->visible = visible; }
@@ -142,6 +143,8 @@ protected:
 
     double SideLength;
     //占地大小转换成游戏内坐标 边长
+
+    double crashLength = 0;
 
     int imageH;//绘制y坐标
     //该物体在平面中的上下位置

@@ -1,5 +1,9 @@
 ﻿#include "MoveObject.h"
 
+//用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
+//如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
+vector<Point> MoveObject::jud_Block[1][3][3];
+
 MoveObject::MoveObject()
 {
 
@@ -221,4 +225,55 @@ void MoveObject::updateMove()
     this->BlockUR=UR/BLOCKSIDELENGTH;
     //更新高度
     this->imageH=DR-UR;
+}
+
+
+vector<Point> MoveObject::get_JudCrush_Block()
+{
+    int dblockDR,dblockUR;
+    double dDR = PredictedDR - DR,dUR = PredictedUR - UR;
+    vector<Point> blockLab;
+    Point nowPosition(BlockDR,BlockUR);
+    if(dDR == 0) dblockDR = 0;
+    else dblockDR = dDR<0 ? -1 : 1;
+
+    if(dUR == 0) dblockUR = 0;
+    else dblockUR = dUR<0 ? -1 : 1;
+
+    if(jud_Block[(int)BlockSizeLen][dblockDR+1][dblockUR+1].empty()) MoveObject::init_jud_Block((int)BlockSizeLen,dblockDR,dblockUR);
+
+    blockLab = jud_Block[(int)BlockSizeLen][dblockDR+1][dblockUR+1];
+
+    for(int i = 0 ; i<blockLab.size();i++) blockLab[i] = blockLab[i]+nowPosition;
+
+    return blockLab;
+}
+
+bool MoveObject::isCrash(Coordinate* judOb)
+{
+    MoveObject* moveOb = NULL;
+    double length = getCrashLength() + judOb->getCrashLength();
+    double dx,dy;
+    judOb->printer_ToMoveObject((void**)&moveOb);
+
+    if(moveOb == NULL || !moveOb->isWalking())
+    {
+        dx = PredictedDR - judOb->getDR();
+        dy = PredictedUR - judOb->getUR();
+    }
+    else
+    {
+        dx = PredictedDR - moveOb->get_PredictedDR();
+        dy = PredictedUR - moveOb->get_PredictedUR();
+    }
+
+    if(dx*dy < length*length)
+    {
+        call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
+                       " 与 " + judOb->getChineseName() + "(编号:" + QString::number(judOb->getglobalNum()) + " 发生碰撞");
+        crashOb = judOb;
+        return true;
+    }
+
+    return false;
 }

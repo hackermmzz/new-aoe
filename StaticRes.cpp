@@ -52,16 +52,19 @@ void StaticRes::setAttribute()
         MaxCnt = CNT_BUSH;
         resourceSort = HUMAN_GRANARYFOOD;
         BlockSizeLen = SIZELEN_SINGEL;
+        crashLength = CRASHBOX_SINGLEOB;
         break;
     case NUM_STATICRES_Stone:
         MaxCnt = CNT_STONE;
         resourceSort = HUMAN_STONE;
         BlockSizeLen = SIZELEN_SMALL;
+        crashLength = CRASHBOX_SMALLBLOCK;
         break;
     case NUM_STATICRES_GoldOre:
         MaxCnt = CNT_GOLDORE;
         resourceSort = HUMAN_GOLD;
         BlockSizeLen = SIZELEN_SMALL;
+        crashLength = CRASHBOX_SMALLBLOCK;
         break;
     default:
         incorrectNum = true;

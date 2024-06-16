@@ -53,16 +53,20 @@ void Core::gameUpdate()
             }
             else
             {
-                theMap->add_Map_Object(*humaniter);
-                //更新视野
-                if(playerIndx == 0) theMap->reset_CellExplore(*humaniter);
-
                 if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
                     theMap->add_Map_Vision(*humaniter);
 
                 interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
+
+                //移动后，记录当前位置
+                theMap->add_Map_Object(*humaniter);
+                //如果正在移动，需要判断碰撞，加入判断碰撞对象表
+                if((*humaniter)->isWalking()) moveOb_judCrush.push_back(*humaniter);
+
+                //更新视野
+                if(playerIndx == 0) theMap->reset_CellExplore(*humaniter);
 
                 if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
                 {
@@ -192,10 +196,15 @@ void Core::gameUpdate()
             (*animaliter)->nextframe();
             (*animaliter)->updateLU();
 
+            //没有死亡的瞪羚和狮子需要监视地图
             if(!(*animaliter)->isDie() \
                && ((*animaliter)->getNum() == ANIMAL_GAZELLE ||(*animaliter)->getNum() == ANIMAL_LION) && get_IsObjectFree(*animaliter) )
                 theMap->add_Map_Vision(*animaliter);
+
+            //移动后，记录当前位置
             theMap->add_Map_Object(*animaliter);
+            //如果正在移动，需要判断碰撞，加入判断碰撞对象表
+            if((*animaliter)->isWalking()) moveOb_judCrush.push_back(*animaliter);
 
             animaliter++;
         }
@@ -232,6 +241,8 @@ void Core::gameUpdate()
     theMap->reset_resMap_AI();
 
     theMap->reset_ObjectExploreAndVisible();    //刷新视野并处理区域探索结果
+
+    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
 
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
 
@@ -608,4 +619,46 @@ void Core::manageOrder(int id)
         unlockTagGame(id);
     }
     NowIns->lock.unlock();
+}
+
+
+//判断moveObject碰撞
+void Core::judge_Crush()
+{
+    /**
+    *   本函数用于判断移动中的MoveObject对象是否发生碰撞
+    *
+    *   函数操作基于moveOb_judCrush、 theMap->map_Object
+    *   调用此函数前务必保证以上两个数组已完成本帧的更新
+    */
+
+    vector<Point> judBlock;
+    int labSize_jud = moveOb_judCrush.size(),labSize,obSize;
+    MoveObject* judOb;
+    Coordinate* barrierOb;
+
+    for(int i = 0 ; i<labSize_jud; i++)
+    {
+        judOb = moveOb_judCrush[i];
+        judBlock = judOb->get_JudCrush_Block();
+
+        labSize = judBlock.size();
+        for(int j = 0 ; j<labSize; j++)
+        {
+            if(judOb->getCrashOb()!=NULL) break;
+            obSize = theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ].size();
+
+            if(obSize == 0) continue;
+            for(int k = 0 ; k < obSize; k++)
+            {
+                barrierOb = theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ][k];
+                if(judOb == barrierOb ) continue;
+
+                //判断碰撞，碰撞箱有重合
+                if(judOb->isCrash(barrierOb)) break;
+            }
+        }
+    }
+
+    moveOb_judCrush.clear();
 }
