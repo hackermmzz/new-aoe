@@ -1,7 +1,6 @@
 #include "SelectWidget.h"
 #include "Core.h"
 
-
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
     this->theMap = theMap;  //mainWidget的map对象
@@ -245,32 +244,19 @@ void Core::gameUpdate()
 
 }
 
-void lockTagGame(int id){
-    if(id==0){
-       tagUsrGameLock.lock();
-    }else{
-       ;
-    }
-}
-void unlockTagGame(int id){
-    if(id==0){
-       tagUsrGameLock.unlock();
-    }else{
-       ;
-    }
-}
 
-void Core::updateByPlayer(int id,tagGame* newTagGames[]){
+
+void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
     Player* self=player[id];
-    tagGame& tagAIGame=*newTagGames[id];
+    tagInfo& taginfo=*newTagInfos[id];
     //更新基础数据
-    tagAIGame.Human_MaxNum=self->getMaxHumanNum();
-    tagAIGame.Gold=self->getGold();
-    tagAIGame.Stone=self->getStone();
-    tagAIGame.Meat=self->getFood();
-    tagAIGame.Wood=self->getWood();
-    tagAIGame.civilizationStage=self->getCiv();
-    tagAIGame.GameFrame=g_frame;
+    taginfo.Human_MaxNum=self->getMaxHumanNum();
+    taginfo.Gold=self->getGold();
+    taginfo.Stone=self->getStone();
+    taginfo.Meat=self->getFood();
+    taginfo.Wood=self->getWood();
+    taginfo.civilizationStage=self->getCiv();
+    taginfo.GameFrame=g_frame;
     //更新人口数据
     for(Human* human:self->human){
         tagHuman taghuman;
@@ -300,22 +286,24 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
             }else{
                 tagfarmer.ResourceSort=farmer->getResourceSort();
             }
-            tagAIGame.farmers.push_back(tagfarmer);
+            taginfo.farmers.push_back(tagfarmer);
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-                newTagGames[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
+                if(farmer->getvisible()==1)
+                    newTagInfos[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
             }
         }else if(human->getSort()==SORT_ARMY){
             Army* army=static_cast<Army*> (human);
             tagArmy tagarmy;
             tagarmy.cast_from(taghuman);
             tagarmy.Sort=army->getNum();
-            tagAIGame.armies.push_back(tagarmy);
+            taginfo.armies.push_back(tagarmy);
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-               newTagGames[i]->enemy_armies.push_back(tagarmy.toEnemy());
+                if(army->getvisible()==1)
+                    newTagInfos[i]->enemy_armies.push_back(tagarmy.toEnemy());
             }
         }
     }
@@ -355,7 +343,8 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
         resource.U=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
-        tagAIGame.resources.push_back(resource);
+        if(id==1||animal->getexplored()==1)
+            taginfo.resources.push_back(resource);
     }
 
     //更新资源数据
@@ -381,10 +370,11 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
         }
         resource.Cnt=staticRes->get_Cnt();
         resource.Blood=-1;
-        tagAIGame.resources.push_back(resource);
+        if(id==1||staticRes->getexplored()==1)
+            taginfo.resources.push_back(resource);
     }
 
-    //跟新建筑数据
+    //更新建筑数据
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
@@ -396,52 +386,72 @@ void Core::updateByPlayer(int id,tagGame* newTagGames[]){
         building.Project=build->getActNum();
         building.ProjectPercent=build->getActPercent();
         building.Owner=id;
-//        if(build->getSort()==SORT_FARM){
-//            building.Type=BUILDING_FARM;
-//            building.Cnt=build->getCnt();
-//        }else{
+        if(build->getSort()==SORT_Building_Resource){
+            building.Type=BUILDING_FARM;
+            Building_Resource* building_resource=static_cast<Building_Resource*> (build);
+            building.Cnt=building_resource->get_Cnt();
+        }else{
             building.Type=build->getNum();
             building.Cnt=-1;
-//        }
-        tagAIGame.buildings.push_back(building);
+        }
+        taginfo.buildings.push_back(building);
         for(int i=0;i<NOWPLAYER;i++){
             if(i==id){continue;}
-                newTagGames[i]->enemy_buildings.push_back(building.toEnemy());
+            if(build->getexplored()==1)
+                newTagInfos[i]->enemy_buildings.push_back(building.toEnemy());
         }
     }
 
 }
-
-void updateCommon(tagGame* tagGame){
-    tagGame->armies_n=tagGame->armies.size();
-    tagGame->buildings_n=tagGame->buildings.size();
-    tagGame->farmers_n=tagGame->farmers.size();
-    tagGame->enemy_armies_n=tagGame->enemy_armies.size();
-    tagGame->enemy_buildings_n=tagGame->enemy_buildings.size();
-    tagGame->enemy_farmers_n=tagGame->enemy_farmers.size();
+/**
+ *更新tagGame中的数组大小，资源地图
+ */
+void Core::updateCommon(tagInfo* taginfo){
+    taginfo->armies_n=taginfo->armies.size();
+    taginfo->buildings_n=taginfo->buildings.size();
+    taginfo->farmers_n=taginfo->farmers.size();
+    taginfo->enemy_armies_n=taginfo->enemy_armies.size();
+    taginfo->enemy_buildings_n=taginfo->enemy_buildings.size();
+    taginfo->enemy_farmers_n=taginfo->enemy_farmers.size();
+    for (int i = 0; i < MAP_L; ++i) {
+        for (int j = 0; j < MAP_U; ++j) {
+            taginfo->map[i][j] = theMap->resMap_UserAI[i][j];
+        }
+    }
 }
+/**
+ *更新tagGame*的指向
+ */
+//void updateTagGame(int index, tagGame*& currentTagGame, tagGame* newTagGame) {
+//    lockTagGame(index);
+//    if(currentTagGame != NULL) {
+//        newTagGame->ins_ret = currentTagGame->ins_ret;
+//        delete currentTagGame;
+//    }
+//    currentTagGame = newTagGame;
+//    if(index==0) tagUsrGame = currentTagGames[0];
+//    if(index==1) tagEnenmyGame = currentTagGames[1];
+//    unlockTagGame(index);
+//}
+
 
 void Core::infoShare(){
-    tagGame* newTagGames[NOWPLAYER];
+    tagInfo* newTagInfos[NOWPLAYER];
     for(int i=0;i<NOWPLAYER;i++){
-        newTagGames[i]=new tagGame();
+        newTagInfos[i]=new tagInfo();
     }
     for(int i=0;i<NOWPLAYER;i++){
-        updateByPlayer(i,newTagGames);
+        updateByPlayer(i,newTagInfos);
     }
     for(int i=0;i<NOWPLAYER;i++){
-        updateCommon(newTagGames[i]);
+        updateCommon(newTagInfos[i]);
     }
     //更新tagGame*的指向
-    lockTagGame(0);
-    if(tagUsrGame!=NULL){
-        newTagGames[0]->ins_ret=tagUsrGame->ins_ret;
-        delete tagUsrGame;
-    }
-    tagUsrGame=newTagGames[0];
-    unlockTagGame(0);
-
-    return;
+//    for(int i = 0; i < NOWPLAYER; ++i) {
+//        updateTagGame(i, currentTagGames[i], newTagInfos[i]);
+//    }
+    tagUsrGame.update(newTagInfos[0]);
+    tagEnemyGame.update(newTagInfos[1]);
 }
 
 
@@ -543,9 +553,10 @@ void Core::manageOrder(int id)
     tagGame* tagAIGame;
     if(id==0){
         NowIns=&UsrIns;
-        tagAIGame=tagUsrGame;
+        tagAIGame=&tagUsrGame;
     }else{
-//        NowIns=&EnemyIns;
+        NowIns=&EnemyIns;
+        tagAIGame=&tagEnemyGame;
     }
     NowIns->lock.lock();
     while(!NowIns->instructions.empty()){
@@ -553,6 +564,12 @@ void Core::manageOrder(int id)
         NowIns->instructions.pop();
         Coordinate* self=cur.self;
         int ret=0;
+        //判断是否是己方对象
+        if(self->getPlayerRepresent()!=id){
+            cur.ret=ACTION_INVALID_SN;
+            tagAIGame->insertInsRet(cur.id,cur);
+            continue;
+        }
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
             interactionList->suspendRelation(self);
@@ -564,6 +581,10 @@ void Core::manageOrder(int id)
         }
         case 2:{    /// type 2:命令村民self将工作目标设为obj
             Coordinate* obj=cur.obj;
+            if(obj==NULL){
+                ret=ACTION_INVALID_OBSN;
+                break;
+            }
             switch(self->getSort()){
             case SORT_FARMER:
                 switch (obj->getSort()){
@@ -603,9 +624,7 @@ void Core::manageOrder(int id)
             break;
         }
         cur.ret=ret;
-        lockTagGame(id);
-        tagAIGame->ins_ret.insert(make_pair(cur.id,cur));
-        unlockTagGame(id);
+        tagAIGame->insertInsRet(cur.id,cur);
     }
     NowIns->lock.unlock();
 }

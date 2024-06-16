@@ -111,7 +111,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     sel->setCore(core);
 
     UsrAi=new UsrAI();
-//    EnemyAi=new EnemyAI();
+    EnemyAi=new EnemyAI();
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
@@ -661,7 +661,7 @@ void MainWidget::FrameUpdate()
     statusUpdate();
     core->infoShare();
     UsrAi->start();///AI线程尝试开始
-//    EnemyAi->start();
+    EnemyAi->start();
     emit mapmove();
     return;
 }

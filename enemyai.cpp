@@ -1,10 +1,15 @@
 #include "EnemyAI.h"
+tagGame tagEnemyGame;
+ins EnemyIns;
+/*##########DO NOT EDIT ABOVE##########*/
+
+
 
 void EnemyAI::processData(){
+/*##########YOUR CODE BEGINS HERE##########*/
+//    qDebug()<<"#####EnemyStart#####";
+//    sleep(0.5);
+//    qDebug()<<"#####EnemyEnd#####";
     return;
-}
-
-EnemyAI::EnemyAI()
-{
-    this->id=1;
+/*###########YOUR CODE ENDS HERE###########*/
 }
