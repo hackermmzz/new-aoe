@@ -1,15 +1,15 @@
 ﻿#include "Army.h"
 
 //[playerrepresent][num][leve][angel]
-std::list<ImageResource>* Army::Walk[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Disappear[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Stand[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Attack[NOWPLAYER][4][2][8];
-std::list<ImageResource>* Army::Die[NOWPLAYER][4][2][8];
+std::list<ImageResource>* Army::Walk[2][4][2][8];
+std::list<ImageResource>* Army::Disappear[2][4][2][8];
+std::list<ImageResource>* Army::Stand[2][4][2][8];
+std::list<ImageResource>* Army::Attack[2][4][2][8];
+std::list<ImageResource>* Army::Die[2][4][2][8];
 
 //[num][level]
 std::string Army::ArmyName[4][2]={{"Clubman","Axeman"},
-                                  {"Clubman","Clubman"},
+                                  {"Slinger","Slinger"},
                                   {"Archer","Archer"},
                                   {"Scout","Scout"}
                                  };
@@ -257,6 +257,8 @@ void Army::setAttribute()
         defence_close_change  = new int[2]{ DEFCLOSE_CLUBMAN1,DEFCLOSE_CLUBMAN2 };
         defence_shoot_change  = new int[2]{ DEFSHOOT_CLUBMAN1,DEFSHOOT_CLUBMAN2 };
 
+        crashLength = CRASHBOX_SINGLEOB;
+
         break;
 
 //    case AT_SWORDSMAN:  //短剑兵,可升级3次
@@ -288,6 +290,10 @@ void Army::setAttribute()
         inter_Attack = INTERVAL_SLINGER;
         defence_close = DEFCLOSE_SLINGER;
         defence_shoot = DEFSHOOT_SLINGER;
+
+        crashLength = CRASHBOX_SINGLEOB;
+
+        type_Missile = Missile_Cobblestone;
         break;
 
     case AT_BOWMAN:     //弓箭手
@@ -304,6 +310,8 @@ void Army::setAttribute()
         inter_Attack = INTERVAL_BOWMAN;
         defence_close = DEFCLOSE_BOWMAN;
         defence_shoot = DEFSHOOT_BOWMAN;
+
+        crashLength = CRASHBOX_SINGLEOB;
 
         type_Missile = Missile_Arrow;
         phaseFromEnd_MissionAttack = THROWMISSION_ARCHER;
@@ -323,6 +331,8 @@ void Army::setAttribute()
         inter_Attack = INTERVAL_SCOUT;
         defence_close = DEFCLOSE_SCOUT;
         defence_shoot = DEFSHOOT_SCOUT;
+
+        crashLength = CRASHBOX_SMALLOB;
         break;
 
     default:

@@ -148,15 +148,16 @@ struct instruction{
     Coordinate* obj;
     int option;
     int BL,BU;
+    int SN = -1,obSN = -1;
     double L,U;
     bool isExist(){
         return type!=-1;
     }
     instruction(){ type=-1; }
-    instruction(int type,Coordinate* self,Coordinate* obj);
-    instruction(int type,Coordinate* self,int BL,int BU,int option);
-    instruction(int type,Coordinate* self,double L,double U);
-    instruction(int type,Coordinate* self,int option);
+    instruction(int type,int SN, int obSN , bool twoCoredinate);
+    instruction(int type,int SN, int BL,int BU,int option);
+    instruction(int type,int SN, double L,double U);
+    instruction(int type,int SN, int option);
 };
 struct ins{
     int g_id=0;
@@ -597,12 +598,10 @@ struct st_upgradeLab{
     //切换
     void shift()
     {
-        qDebug()<<"over";
         if(nowExecuteNode!=NULL)
         {
             haveFinishedPhaseNum++;
             nowExecuteNode = nowExecuteNode->nextDevAction;
-            qDebug()<<"nowexc"<<nowExecuteNode;
         }
     }
 

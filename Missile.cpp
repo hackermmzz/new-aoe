@@ -1,6 +1,6 @@
 #include "Missile.h"
 
-std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" };
+std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" , "Cobblestone"};
 std::list<ImageResource>* Missile::missile[NUMBER_MISSILE];
 
 Missile::Missile()
@@ -40,6 +40,11 @@ void Missile::setAttribute()
         speed = Missile_Speed_Arrow;
         break;
 
+    case Missile_Cobblestone:
+        isAOE = false;
+        isMandatoryArrive = false;
+        speed = Missile_Speed_Cobblestone;
+
     default:
         break;
     }
@@ -60,7 +65,7 @@ void Missile::setNowRes()
     nowlist = missile[Num];
 
     nowres = nowlist->begin();
-    advance(nowres , Angle);
+    advance(nowres , Angle % (nowlist->size()));    //防止越界
 }
 
 void Missile::calculateDMove()

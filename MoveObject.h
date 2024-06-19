@@ -51,13 +51,24 @@ protected:
     int pathI=0;
     //当前进行到路径的哪一步
 
+    bool pathInit = false;
+
     // 单位向量
     double VariationDR[8] = {1 / sqrt(2), 0, -1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1};
     double VariationUR[8] = {-1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1, 1 / sqrt(2), 0};
 
+    Coordinate* crashOb = NULL;    //碰撞对象
+
     //stand walk attack die disappear work run
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
+
+    /*********************静态数组***********************/
+    //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
+    //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
+    static vector<Point> jud_Block[2][3][3];
+
+    /*********************静态数组***********************/
     
 public:
     MoveObject();
@@ -80,75 +91,24 @@ public:
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
     bool isStand(){return this->nowstate == MOVEOBJECT_STATE_STAND;}
 
-
     void beginRun(){ changeToRun = true; }
 
     void calculateDiretionArray(stack<Point>& path);
 
-    void setPath(stack<Point> path)
-    {
-        if(!path.empty())
-        {
-            stack<Point> tempStack;
-            Point bottomElement;
-            while (!path.empty())
-            {
-                bottomElement = path.top();
-                path.pop();
-                tempStack.push(bottomElement);
-            }
-            // 在这里使用 bottomElement，即为堆栈的最底层元素
-            while (!tempStack.empty())
-            {
-                path.push(tempStack.top());
-                tempStack.pop();
-            }
-            this->nextBlockDR0=bottomElement.x;
-            this->nextBlockUR0=bottomElement.y;
-        }
-        this->path=path;
-        resetpathIN();
-        nextBlockDR=BlockDR;
-        nextBlockUR=BlockUR;
-        calculateDiretionArray(path);
-        if(!path.empty())
-        {
-            setNextBlock();
-        }
+    void setPath(stack<Point> path , double goalDR, double goalUR);
 
-    }
+    void setNextBlock();
+
     stack<Point> getPath()
     {
         return this->path;
     }
-    void setNextBlock()
-    {
-        if(pathI==0)
-        {
-            Point p=path.top();
-            this->nextBlockDR=p.x;
-            this->nextBlockUR=p.y;
-            this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
-            this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
-            path.pop();
-        }
-        else
-        {
-            Point p=path.top();
-            int lastBlockDR=nextBlockDR;
-            int lastBlockUR=nextBlockUR;
-            this->nextBlockDR=p.x;
-            this->nextBlockUR=p.y;
-            this->nextDR=DR+(nextBlockDR-lastBlockDR)*BLOCKSIDELENGTH;
-            this->nextUR=UR+(nextBlockUR-lastBlockUR)*BLOCKSIDELENGTH;
-            path.pop();
-        }
 
-    }
     void resetpathIN()
     {
         this->pathI=0;
         this->pathN=0;
+        pathInit = true;
     }
     void GoBackLU()
     {
@@ -160,6 +120,8 @@ public:
         this->DR=PredictedDR;
         this->UR=PredictedUR;
     }
+    double get_PredictedDR(){ return PredictedDR; }
+    double get_PredictedUR(){ return PredictedUR; }
 
     bool needTranState()
     {
@@ -240,6 +202,92 @@ public:
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }
+
+    vector<Point> get_JudCrush_Block();
+
+    bool isCrash(Coordinate* judOb);
+
+    Coordinate* getCrashOb(){ return crashOb;}
+    void initCrash(){ crashOb = NULL; }
+
+    /*********************静态函数***********************/
+    static void init_jud_Block( int foundation , int dblockDR, int dblockUR )
+    {
+        Point temp;
+        int slant_Jud = dblockDR & dblockUR;    //有一个为0则值为0
+        int x = dblockDR,y = dblockUR , m = 1+foundation, outrow ,inrow;
+        int lkey = dblockDR+1,rkey = dblockUR+1;
+
+        //移动方向水平或竖直
+        if(slant_Jud == 0)
+        {
+            if(dblockDR != 0)
+            {
+                outrow = x<0? -1 : foundation;
+                inrow = outrow - x;
+                for(int i = -1; i<m; i++)
+                {
+                    temp.y = i;
+                    temp.x = outrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                    temp.x = inrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                }
+
+            }
+            else if( dblockUR != 0)
+            {
+                outrow =  y < 0 ?  -1 : foundation;
+                inrow = outrow -y;
+                for(int i = -1; i<m;i++)
+                {
+                    temp.x = i;
+                    temp.y = outrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                    temp.y = inrow;
+                    jud_Block[foundation][lkey][rkey].push_back(temp);
+                }
+            }
+        }
+        else    //否则为斜向
+        {
+            temp.x = x < 0 ? -1 : foundation;
+
+            for(int i = -1; i < m; i++)
+            {
+                temp.y = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+
+            if(x>0) m--;
+
+            temp.y = y<0 ? -1 : foundation;
+            for(int i = x<0 ? 0 : -1; i<m ; i++)
+            {
+                temp.x = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+
+            temp.x = x<0 ? 0 : foundation -1 ;
+            for(int i = 0 ; i < foundation ; i++)
+            {
+                temp.y = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+
+            if(x>0) m = foundation -1;
+            temp.y = y<0 ? 0 : foundation-1;
+            for(int i = x<0 ? 1 : 0; i<m ; i++)
+            {
+                temp.x = i;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
+        }
+
+        return;
+    }
+
+    /*********************静态函数***********************/
 };
 
 #endif // MOVEOBJECT_H

@@ -40,6 +40,7 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
     this->BlockUR=UR/BLOCKSIDELENGTH;
 
     setSideLenth();
+    crashLength = CRASHBOX_SINGLEOB;
     this->nextBlockDR=BlockDR;
     this->nextBlockUR=BlockUR;
     this->PredictedDR=DR;

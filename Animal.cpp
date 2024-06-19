@@ -46,6 +46,7 @@ Animal::Animal(int Num, double DR, double UR)
         attackType = ATTACKTYPE_ANIMAL;
         isAttackable = true;
         vision = VISION_LION;
+        crashLength = CRASHBOX_SMALLOB;
 
         nowres_step = NOWRES_TIMER_LION;
     }
@@ -56,6 +57,7 @@ Animal::Animal(int Num, double DR, double UR)
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_GAZELLE;
         speed = ANIMAL_SPEED;
+        crashLength = CRASHBOX_SINGLEOB;
 
         vision = VISION_GAZELLE;
     }
@@ -71,6 +73,7 @@ Animal::Animal(int Num, double DR, double UR)
         attackType = ATTACKTYPE_ANIMAL;
         isAttackable = true;
         vision = VISION_ELEPHANT;
+        crashLength = CRASHBOX_BIGOB;
 
         nowres_step = NOWRES_TIMER_ELEPHANT;
     }
@@ -82,6 +85,7 @@ Animal::Animal(int Num, double DR, double UR)
         this->MaxBlood = BLOOD_TREE;
         speed = 0;
         moveAble = false;
+        crashLength = CRASHBOX_SINGLEBLOCK;
 
         treeState = rand()%Stand[this->Num][this->Angle]->size();
     }
@@ -95,6 +99,7 @@ Animal::Animal(int Num, double DR, double UR)
         speed = 0;
         moveAble = false;
         treeState = rand()%Stand[this->Num][this->Angle]->size();
+        crashLength = CRASHBOX_SMALLBLOCK;
     }
     else incorrectNum = true;
 
