@@ -497,6 +497,8 @@ void Map::generateCenter() {
     player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
     player[0]->addFarmer((MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
 
+//    player[1]->addArmy(AT_CLUBMAN,(MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
+
     for(int i = MAP_L / 2 - 2; i <= MAP_L / 2 + 2; i++)
     {
         for(int j = MAP_U / 2 - 2; j <= MAP_U / 2 + 2; j++)
@@ -1718,7 +1720,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, false, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源

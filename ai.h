@@ -3,7 +3,6 @@
 #include <QMutex>
 #include "assert.h"
 #include "GlobalVariate.h"
-#include "Building.h"
 
 class AI:public QThread
 {

@@ -51,6 +51,8 @@ protected:
     int pathI=0;
     //当前进行到路径的哪一步
 
+    bool pathInit = false;
+
     // 单位向量
     double VariationDR[8] = {1 / sqrt(2), 0, -1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1};
     double VariationUR[8] = {-1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1, 1 / sqrt(2), 0};
@@ -64,7 +66,7 @@ protected:
     /*********************静态数组***********************/
     //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
     //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
-    static vector<Point> jud_Block[1][3][3];
+    static vector<Point> jud_Block[2][3][3];
 
     /*********************静态数组***********************/
     
@@ -93,70 +95,20 @@ public:
 
     void calculateDiretionArray(stack<Point>& path);
 
-    void setPath(stack<Point> path)
-    {
-        if(!path.empty())
-        {
-            stack<Point> tempStack;
-            Point bottomElement;
-            while (!path.empty())
-            {
-                bottomElement = path.top();
-                path.pop();
-                tempStack.push(bottomElement);
-            }
-            // 在这里使用 bottomElement，即为堆栈的最底层元素
-            while (!tempStack.empty())
-            {
-                path.push(tempStack.top());
-                tempStack.pop();
-            }
-            this->nextBlockDR0=bottomElement.x;
-            this->nextBlockUR0=bottomElement.y;
-        }
-        this->path=path;
-        resetpathIN();
-        nextBlockDR=BlockDR;
-        nextBlockUR=BlockUR;
-        calculateDiretionArray(path);
-        if(!path.empty())
-        {
-            setNextBlock();
-        }
+    void setPath(stack<Point> path , double goalDR, double goalUR);
 
-    }
+    void setNextBlock();
+
     stack<Point> getPath()
     {
         return this->path;
     }
-    void setNextBlock()
-    {
-        if(pathI==0)
-        {
-            Point p=path.top();
-            this->nextBlockDR=p.x;
-            this->nextBlockUR=p.y;
-            this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
-            this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
-            path.pop();
-        }
-        else
-        {
-            Point p=path.top();
-            int lastBlockDR=nextBlockDR;
-            int lastBlockUR=nextBlockUR;
-            this->nextBlockDR=p.x;
-            this->nextBlockUR=p.y;
-            this->nextDR=DR+(nextBlockDR-lastBlockDR)*BLOCKSIDELENGTH;
-            this->nextUR=UR+(nextBlockUR-lastBlockUR)*BLOCKSIDELENGTH;
-            path.pop();
-        }
 
-    }
     void resetpathIN()
     {
         this->pathI=0;
         this->pathN=0;
+        pathInit = true;
     }
     void GoBackLU()
     {
@@ -265,7 +217,6 @@ public:
         int slant_Jud = dblockDR & dblockUR;    //有一个为0则值为0
         int x = dblockDR,y = dblockUR , m = 1+foundation, outrow ,inrow;
         int lkey = dblockDR+1,rkey = dblockUR+1;
-
 
         //移动方向水平或竖直
         if(slant_Jud == 0)

@@ -52,12 +52,12 @@ void Core::gameUpdate()
             }
             else
             {
-                if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
-                    theMap->add_Map_Vision(*humaniter);
+//                if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
+//                    theMap->add_Map_Vision(*humaniter);
 
                 interactionList->conduct_Attacked(*humaniter);
-                (*humaniter)->nextframe();
                 (*humaniter)->updateLU();
+                (*humaniter)->nextframe();
 
                 //移动后，记录当前位置
                 theMap->add_Map_Object(*humaniter);
@@ -148,8 +148,8 @@ void Core::gameUpdate()
                 //更新视野 用户控制的对象
                 if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
-                if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
-                    theMap->add_Map_Vision(*builditer);
+//                if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
+//                    theMap->add_Map_Vision(*builditer);
                 (*builditer)->nextframe();
                 builditer++;
             }
@@ -192,8 +192,8 @@ void Core::gameUpdate()
             if((*animaliter)->isTree())
                 (*animaliter)->initAvengeObject();
             interactionList->conduct_Attacked(*animaliter);
-            (*animaliter)->nextframe();
             (*animaliter)->updateLU();
+            (*animaliter)->nextframe();
 
             //没有死亡的瞪羚和狮子需要监视地图
             if(!(*animaliter)->isDie() \
@@ -674,7 +674,7 @@ void Core::judge_Crush()
                 if(judOb == barrierOb ) continue;
 
                 //判断碰撞，碰撞箱有重合
-                if(judOb->isCrash(barrierOb)) break;
+                if(judOb->isCrash(barrierOb))break;
             }
         }
     }

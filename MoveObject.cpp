@@ -2,51 +2,104 @@
 
 //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
 //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
-vector<Point> MoveObject::jud_Block[1][3][3];
+vector<Point> MoveObject::jud_Block[2][3][3];
 
 MoveObject::MoveObject()
 {
 
 }
 
+//*****************************路径相关*********************************
+//路径设置
+void MoveObject::setPath(stack<Point> path , double goalDR, double goalUR)
+{
+    setdestination(goalDR,goalUR);
+    if(!path.empty())
+    {
+//        stack<Point> tempStack;
+//        Point bottomElement;
+//        while (!path.empty())
+//        {
+//            tempStack.push(path.top());
+//            path.pop();
+//        }
+//        bottomElement = tempStack.top();
+//        // 在这里使用 bottomElement，即为堆栈的最底层元素
+//        while (!tempStack.empty())
+//        {
+//            path.push(tempStack.top());
+//            tempStack.pop();
+//        }
+
+//        this->nextBlockDR0=bottomElement.x;
+//        this->nextBlockUR0=bottomElement.y;
+        nextBlockDR0 = transBlock(goalDR);
+        nextBlockUR0 = transBlock(goalUR);
+    }
+    this->path=path;
+    resetpathIN();  //重置path的步数
+    nextBlockDR=BlockDR;
+    nextBlockUR=BlockUR;
+    calculateDiretionArray(path);
+
+    if(!path.empty())
+    {
+        setNextBlock();
+    }
+
+}
+
 void MoveObject::calculateDiretionArray(stack<Point> &path)
 {
+    /**
+    *   dx  dy  值   意义     lk  rk
+    *   1   -1  0   下        2   0
+    *   0   -1  1   左下      1   0
+    *   -1  -1  2   左        0   0
+    *   -1  0   3   左上      0   1
+    *   -1  1   4   上        0   2
+    *   0   1   5   右上      1   2
+    *   1   1   6   右        2   2
+    *   1   0   7   右下      2   1
+    */
+    static int d_lab[3][3] = {\
+        {2 , 3 , 4},\
+        {1 , -1, 5},\
+        {0 , 7 , 6} \
+    };
+
     stack<Point> pathCopy = path;  // 复制一份路径
     this->pathN=0;
-    Point prevPoint;  // 第一个点
-    prevPoint.x=BlockDR;
-    prevPoint.y=BlockUR;
-//    qDebug()<<"prevPoint.x"<<prevPoint.x;
-//    qDebug()<<"prevPoint.y"<<prevPoint.y;
+    Point prevPoint(BlockDR,BlockUR);  // 第一个点
+    int dx,dy;
+    Point currentPoint;
 
     while (!pathCopy.empty()) {
-        Point currentPoint = pathCopy.top();
-//        qDebug()<<"currentPoint.x"<<currentPoint.x;
-//        qDebug()<<"currentPoint.y"<<currentPoint.y;
-        int dx = currentPoint.x - prevPoint.x;
-        int dy = currentPoint.y - prevPoint.y;
+        currentPoint = pathCopy.top();
+
+        dx = currentPoint.x - prevPoint.x;
+        dy = currentPoint.y - prevPoint.y;
+
         // 根据dx和dy计算方向值，并将其添加到方向数组d中
-        if (dx == 1 && dy == -1) {
-            d[pathN] = 0;  // 下
-        } else if (dx == 0 && dy == -1) {
-            d[pathN] = 1;  // 左下
-        } else if (dx == -1 && dy == -1) {
-            d[pathN] = 2;  // 左
-        } else if (dx == -1 && dy == 0) {
-            d[pathN] = 3;  // 左上
-        }else if (dx == -1 && dy == 1) {
-            d[pathN] = 4;  // 上
-        }else if (dx == 0 && dy == 1) {
-            d[pathN] = 5;  // 右上
-        }else if (dx == 1 && dy == 1) {
-            d[pathN] = 6;  // 右
-        }else if (dx == 1 && dy == 0) {
-            d[pathN] = 7;  // 右下
-        }
-//        qDebug()<<"pathN:"<<pathN;
-//        qDebug()<<"dx:"<<dx;
-//        qDebug()<<"dy:"<<dy;
-//        qDebug()<<"d[pathN]:"<<d[pathN];
+//        if (dx == 1 && dy == -1) {
+//            d[pathN] = 0;  // 下
+//        } else if (dx == 0 && dy == -1) {
+//            d[pathN] = 1;  // 左下
+//        } else if (dx == -1 && dy == -1) {
+//            d[pathN] = 2;  // 左
+//        } else if (dx == -1 && dy == 0) {
+//            d[pathN] = 3;  // 左上
+//        }else if (dx == -1 && dy == 1) {
+//            d[pathN] = 4;  // 上
+//        }else if (dx == 0 && dy == 1) {
+//            d[pathN] = 5;  // 右上
+//        }else if (dx == 1 && dy == 1) {
+//            d[pathN] = 6;  // 右
+//        }else if (dx == 1 && dy == 0) {
+//            d[pathN] = 7;  // 右下
+//        }
+        d[pathN] = d_lab[dx+1][dy+1];
+
         prevPoint = currentPoint;
         pathCopy.pop();
         pathN++;
@@ -80,6 +133,56 @@ int MoveObject::calculateAngle(double nextDR, double nextUR)
     }
     //共8个方向
     return flag;
+}
+
+//void MoveObject::setNextBlock()
+//{
+//    if(pathI==0)
+//    {
+//        Point p=path.top();
+//        this->nextBlockDR=p.x;
+//        this->nextBlockUR=p.y;
+//        this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
+//        this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
+//        path.pop();
+//    }
+//    else
+//    {
+//        Point p=path.top();
+//        int lastBlockDR=nextBlockDR;
+//        int lastBlockUR=nextBlockUR;
+//        this->nextBlockDR=p.x;
+//        this->nextBlockUR=p.y;
+//        this->nextDR=DR+(nextBlockDR-lastBlockDR)*BLOCKSIDELENGTH;
+//        this->nextUR=UR+(nextBlockUR-lastBlockUR)*BLOCKSIDELENGTH;
+//        path.pop();
+//    }
+
+//}
+
+void MoveObject::setNextBlock()
+{
+    if(path.size())
+    {
+        Point p = path.top();
+        if(pathInit)
+        {
+            this->nextBlockDR=p.x;
+            this->nextBlockUR=p.y;
+            this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
+            this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
+            path.pop();
+            pathInit = false;
+        }
+        else
+        {
+            nextDR = DR+(p.x - nextBlockDR)*BLOCKSIDELENGTH;
+            nextUR = UR+(p.y - nextBlockUR)*BLOCKSIDELENGTH;
+            this->nextBlockDR=p.x;
+            this->nextBlockUR=p.y;
+            path.pop();
+        }
+    }
 }
 
 void MoveObject::updateMove()
@@ -151,6 +254,7 @@ void MoveObject::updateMove()
                     pathI++;
                     setNextBlock();
                 }
+
             }
             else if(pathI<pathN-1)
             {
@@ -211,7 +315,6 @@ void MoveObject::updateMove()
                 }
             }
         }
-
     }
     else
     {
@@ -227,6 +330,50 @@ void MoveObject::updateMove()
     this->imageH=DR-UR;
 }
 
+//void MoveObject::updateMove()
+//{
+//    double dDR,dUR,dis,ratio;
+
+//    if(isWalking() && (DR!=DR0||UR!=UR0))
+//    {
+//        PreviousDR = DR;
+//        PreviousUR = UR;
+
+//        if(path.empty())
+//        {
+//            nextDR=DR0;
+//            nextUR=UR0;
+//            dDR=nextDR-DR;
+//            dUR=nextUR-UR;
+//            dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
+//            ratio = getSpeed() / static_cast<double>(dis);
+//            VDR = round(dDR * ratio);
+//            VUR = round(dUR * ratio);
+//            if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
+//            {
+//                PredictedDR=nextDR;
+//                PredictedUR=nextUR;
+//            }
+//            else
+//            {
+//                PredictedDR=PreviousDR+VDR;
+//                PredictedUR=PreviousUR+VUR;
+//            }
+
+//        }
+
+//    }
+//    else
+//    {
+//        VDR = 0;
+//        VUR = 0;
+//        PredictedDR = DR;
+//        PredictedUR = UR;
+//    }
+//    BlockDR = transBlock(DR);
+//    BlockUR = transBlock(UR);
+//    imageH = DR-UR;
+//}
 
 vector<Point> MoveObject::get_JudCrush_Block()
 {
@@ -267,7 +414,7 @@ bool MoveObject::isCrash(Coordinate* judOb)
         dy = PredictedUR - moveOb->get_PredictedUR();
     }
 
-    if(dx*dy < length*length)
+    if( fabs(dx)<length && fabs(dy)<length)
     {
         call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
                        " 与 " + judOb->getChineseName() + "(编号:" + QString::number(judOb->getglobalNum()) + " 发生碰撞");

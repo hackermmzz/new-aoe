@@ -91,6 +91,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 玩家开辟空间
     for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
+    player[1]->set_AllTechnology();
+//    player[0]->set_AllTechnology();
 
     // 新建map对象并初始化
     map = new Map;
