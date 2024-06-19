@@ -86,16 +86,7 @@ public:
     //返回建筑行动预扣的资源
     void back_Resource_TS( Building* actBuild );
     //处理建筑行动结束带来的效果
-    void finishBuild( Building* buildBuilding ){
-        playerScience->finishAction(buildBuilding->getNum());   //在科技树中记录建筑已建造，解锁后续科技
-        buildBuilding->recordConstruct();   //标记建筑已建造完成
-
-        if(buildBuilding->getNum() == BUILDING_HOME) playerScience->addHome();  //建造建筑是Home，记录并增加人口上限
-        else if(buildBuilding->getNum() != BUILDING_CENTER && buildBuilding->getNum()!= BUILDING_FARM)  //建造建筑不是Home、市镇中心、农田，则其具有时代特性，记录
-              playerScience->add_civiBuildNum(buildBuilding->getNum());
-
-        call_debugText("blue"," "+buildBuilding->getChineseName()+"(编号:"+QString::number(buildBuilding->getglobalNum())+")建造完毕");
-    }
+    void finishBuild( Building* buildBuilding );
 
     //控制建筑行动
     void enforcementAction( Building* actBuild , vector<Point>Block_free );
@@ -106,6 +97,7 @@ public:
     int get_civiBuild_Times( int civilization ){ return playerScience->get_civiBuild_Times(civilization); }
    /*以上建筑行动相关********************************************/
 
+    void set_AllTechnology(){ playerScience->all_technology_tree(); }
 
 
     //获取科技树

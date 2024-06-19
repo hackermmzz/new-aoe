@@ -422,3 +422,25 @@ void Development::init_DevelopLab()
     developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
     developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
 }
+
+void Development::all_technology_tree()
+{
+    map< int , st_buildAction >::iterator iter = developLab.begin(),itere = developLab.end();
+    map<int , st_upgradeLab>::iterator iter1,iter1e;
+
+    while(iter != itere)
+    {
+        for(iter1 = iter->second.actCon.begin(),iter1e = iter->second.actCon.end(); iter1 != iter1e; iter1++)
+        {
+            while(iter1->second.nowExecuteNode != NULL)
+            {
+                if(iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode )
+                    break;
+
+                iter1->second.shift();
+            }
+        }
+
+        iter++;
+    }
+}

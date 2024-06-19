@@ -487,26 +487,31 @@ void call_debugText(QString color, QString content)
 }
 //*************************************************************
 
-instruction::instruction(int type,Coordinate* self,Coordinate* obj){
+instruction::instruction(int type,int SN, int obSN , bool twoCoredinate){
+    this->SN = SN;
+    this->obSN = obSN;
     this->type=type;
-    this->self=self;
-    this->obj=obj;
+    this->self=g_Object[SN];
+    this->obj=g_Object[obSN];
 }
-instruction::instruction(int type,Coordinate* self,int BL,int BU,int option){
+instruction::instruction(int type,int SN,int BL,int BU,int option){
+    this->SN = SN;
     this->type=type;
-    this->self=self;
+    this->self=g_Object[SN];
     this->BL=BL;
     this->BU=BU;
     this->option=option;
 }
-instruction::instruction(int type,Coordinate* self,double L,double U){
+instruction::instruction(int type,int SN,double L,double U){
+    this->SN = SN;
     this->type=type;
-    this->self=self;
+    this->self=g_Object[SN];
     this->L=L;
     this->U=U;
 }
-instruction::instruction(int type,Coordinate* self,int option){
+instruction::instruction(int type,int SN,int option){
+    this->SN = SN;
     this->type=type;
-    this->self=self;
+    this->self=g_Object[SN];
     this->option=option;
 }

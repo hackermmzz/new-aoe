@@ -101,6 +101,8 @@ public:
     int getBuildTimes( int buildType ){ return developLab[buildType].buildCon->getActTimes(); }
   /*************以上科技树维护与查询**********************/
 
+    void all_technology_tree();
+
 
 private:
     int civilization = CIVILIZATION_STONEAGE;

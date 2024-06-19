@@ -173,7 +173,6 @@ void Core_List::manageRelationList()
     Coordinate* object2;
     list<conditionF> forcedInterrupCondition;
 
-
     map<Coordinate* , relation_Object>::iterator iter = relate_AllObject.begin();
 
     while( iter!= relate_AllObject.end() )
@@ -182,6 +181,7 @@ void Core_List::manageRelationList()
         relation_Object& thisRelation = iter->second;
         if( thisRelation.isExist )
         {
+            //更新object1对应表内信息
             manageRelation_updateMassage(object1);
 
             int& nowPhaseNum = thisRelation.nowPhaseNum;
@@ -272,7 +272,7 @@ void Core_List::manageRelationList()
             iter++;
 
         }
-        else iter = relate_AllObject.erase(iter);
+        else iter = relate_AllObject.erase(iter);   //删表
     }
 
 }
@@ -310,6 +310,7 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
         if(relation.needResourceBuilding) findResourceBuiding( relation ,  player[object1->getPlayerRepresent()]->build);
     }
 
+    relation.reset_Object1Predicted(object1);
     relation.update_GoalPoint();
     relation.update_Attrib_alter();
 }
@@ -487,7 +488,6 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             Point start = Point(tranBlockDR(moveObject->getDR()),tranBlockUR(moveObject->getUR()));
             Point destination = Point(tranBlockDR(DR),tranBlockUR(UR));
             stack<Point> path;
-            moveObject->setdestination(DR, UR);
 
             theMap->loadfindPathMap(moveObject);
             theMap->findPathMap[destination.x][destination.y] = 0;
@@ -496,9 +496,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             else path = findPath(theMap->findPathMap , theMap , start , destination);
 
 //            moveObject->setPath(stack<Point>());
-            moveObject->setPath(path);
-
-//            qDebug()<<path.size();
+            moveObject->setPath(path,DR,UR);
         }
 
 //        if(moveObject->getPath().size())
@@ -511,6 +509,13 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 //            if(moveObject->isStand()) moveObject->setPreStand();
 //            relate_AllObject[object].useless();
 //        }
+
+        if(moveObject->getCrashOb()!=NULL)
+        {
+            //处理碰撞
+
+            moveObject->initCrash();
+        }
     }
     else relate_AllObject[object].useless();
 
@@ -865,7 +870,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     initMap_HaveJud();
     pathNode::setGoalPoint(destination.x,destination.y);    //设置寻路目标点
 
-    //当前所在格子是否需要加入队列？ 当前加入
+    //起始点标记
     haveJud_Map_Move(start);
 
     newPathNode = new pathNode(start);
@@ -923,6 +928,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
             path.push(findPathNode->position);
             findPathNode = findPathNode->preNode;
         }
+        //当前所在格子不加入栈
         path.pop();
     }
 

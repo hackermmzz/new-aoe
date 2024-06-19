@@ -228,12 +228,29 @@ void relation_Object::set_AlterOb(Coordinate* AlterObject , double dis_record)
     update_Attrib_alter();
 }
 
+void relation_Object::reset_Object1Predicted(Coordinate* object1)
+{
+    MoveObject* moveOb = NULL;
+    object1->printer_ToMoveObject((void**)&moveOb);
+    if(moveOb)
+    {
+        DR_Predicted = moveOb->get_PredictedDR();
+        UR_Predicted = moveOb->get_PredictedUR();
+    }
+    else
+    {
+        DR_Predicted = object1->getDR();
+        UR_Predicted = object1->getUR();
+    }
+}
+
 void relation_Object::update_GoalPoint()
 {
     if(goalObject!= NULL)
     {
         DR_goal = goalObject->getDR();
         UR_goal = goalObject->getUR();
+        crashLength_goal = goalObject->getCrashLength();
         set_distance_AllowWork();
     }
 }
@@ -244,6 +261,7 @@ void relation_Object::update_Attrib_alter()
     {
         DR_alter = alterOb->getDR();
         UR_alter = alterOb->getUR();
+        crashLength_alter = alterOb->getCrashLength();
         set_dis_AllowWork_alter();
     }
 }
@@ -412,6 +430,8 @@ bool condition_Object1_FullBackpack( Coordinate* object1 , relation_Object& rela
 bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int& operate , bool isNegation )
 {
     double dr1 = object1->getDR() , ur1 = object1->getUR() ,dr2 , ur2;
+//    double predr = relation.DR_Predicted,preur = relation.UR_Predicted;
+//    double dis_r = object1->getCrashLength();
     double dis = 1e6;
 
     if(operate/OPERATECHANGE == OPERATECON_MOVEALTER)
@@ -431,6 +451,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 
         dr2 = relation.DR_alter;
         ur2 = relation.UR_alter;
+//        dis_r+=relation.crashLength_alter;
     }
     else
     {
@@ -443,7 +464,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
                 dis = relation.disAttack;
                 break;
             case OPERATECON_NEAR_ATTACK_MOVE:
-                dis = relation.disAttack*0.5;
+                dis = relation.disAttack;
                 break;
             case OPERATECON_NEAR_WORK:
                 dis = relation.distance_AllowWork;
@@ -456,6 +477,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
         }
         dr2 = relation.DR_goal;
         ur2 = relation.UR_goal;
+//        dis_r+=relation.crashLength_goal;
     }
 
     //对飞行物的距离判定进行特判
@@ -467,7 +489,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     }
 
     //一般性距离判断（使用曼哈顿距离）
-    if(isNear_Manhattan(dr1 ,ur1 , dr2 , ur2 , dis))
+    if(isNear_Manhattan(dr1 ,ur1 , dr2 , ur2 , dis) /*|| isNear_Manhattan(predr,preur,dr2,ur2,dis_r)*/)
     {
         if(relation.isUseAlterGoal) relation.isUseAlterGoal = false;
         return isNegation^true;

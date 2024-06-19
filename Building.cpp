@@ -230,18 +230,22 @@ void Building::update_Build()
     if(Blood>1) Blood = 1;
 }
 
+//依据fundation设置数据
 void Building::setFundation()
 {
     //设置地基大小
     switch (Foundation) {
     case FOUNDATION_SMALL:
         BlockSizeLen = SIZELEN_SMALL;
+        crashLength = CRASHBOX_SMALL;
         break;
     case FOUNDATION_MIDDLE:
         BlockSizeLen = SIZELEN_MIDDLE;
+        crashLength = CRASHBOX_MIDDLE;
         break;
     case FOUNDATION_BIG:
         BlockSizeLen = SIZELEN_BIG;
+        crashLength = CRASHBOX_BIG;
         break;
     default:
         break;

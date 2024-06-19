@@ -116,6 +116,16 @@
 #define COLOR_BLUE(STRING) QString("<font color=blue>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_GREEN(STRING) QString("<font color=green>%1</font><font color=black> </font>").arg(STRING)
 
+/********** 碰撞箱 **********/
+#define CRASHBOX_SINGLEBLOCK 16.36
+#define CRASHBOX_SMALLBLOCK 34.21
+#define CRASHBOX_SMALL 32.72
+#define CRASHBOX_MIDDLE 50.57
+#define CRASHBOX_BIG 68.42
+#define CRASHBOX_SINGLEOB 5.96
+#define CRASHBOX_SMALLOB 8.925
+#define CRASHBOX_BIGOB 17.7
+
 /********** 建筑种类 **********/
 #define BUILDING_TYPE_MAXNUM 12
 #define BUILDING_HOME 0
@@ -623,7 +633,7 @@
 #define RIGHT_PRESS 2
 
 /********** 同Class中图像资源种类数 **********/
-#define NUMBER_MISSILE 2
+#define NUMBER_MISSILE 3
 
 /********** Core静态表 **********/
 //####关系事件名称
@@ -872,16 +882,19 @@
 /********** 飞行物投掷判断 **********/
 #define THROWMISSION_FARMER 25
 #define THROWMISSION_ARCHER 4
+#define THROWMISSION_SLINGER 10
 
 #define THROWMISSION_ARROWTOWN_TIMER 30
 
 /********** 飞行物类别 **********/
 #define Missile_Spear 0
 #define Missile_Arrow 1
+#define Missile_Cobblestone 2
 
 /********** 飞行物属性 **********/
 #define Missile_Speed_Spear (4*HUMAN_SPEED)
 #define Missile_Speed_Arrow (4*HUMAN_SPEED)
+#define Missile_Speed_Cobblestone (4*HUMAN_SPEED)
 
 /********** 设置多少帧切换一次nowres **********/
 #define NOWRES_TIMER_FARMER 1
