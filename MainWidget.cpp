@@ -108,6 +108,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 向地图中添加资源
     initmap();
+    map->init_Map_Height();
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);

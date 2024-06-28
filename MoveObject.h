@@ -119,6 +119,8 @@ public:
     {
         this->DR=PredictedDR;
         this->UR=PredictedUR;
+        BlockDR = transBlock(DR);
+        BlockUR = transBlock(UR);
     }
     double get_PredictedDR(){ return PredictedDR; }
     double get_PredictedUR(){ return PredictedUR; }
@@ -167,14 +169,8 @@ public:
             this->UR0=UR0;
         }
     }
-    void setPreStand()
-    {
-        this->prestate=0;
-    }
-    void setPreWalk()
-    {
-        this->prestate=1;
-    }
+    void setPreStand(){this->prestate=MOVEOBJECT_STATE_STAND;}
+    void setPreWalk(){this->prestate=MOVEOBJECT_STATE_WALK;}
     void setPreDie(){ this->prestate = MOVEOBJECT_STATE_DIE; }
     void setPreWork(){ this->prestate = MOVEOBJECT_STATE_WORK; }
     void setNowState(int PreState)
@@ -182,22 +178,13 @@ public:
         this->nowstate=PreState;
         this->setNowRes();
     }
-    void setPreStateIsIdle()
-    {
-        this->prestate=-1;
-    }
+    void setPreStateIsIdle(){this->prestate=-1;}
     int getPreState()
     {
         return this->prestate;
     }
-    double getDR0()
-    {
-        return this->DR0;
-    }
-    double getUR0()
-    {
-        return this->UR0;
-    }
+    double getDR0(){return this->DR0;}
+    double getUR0(){return this->UR0;}
 
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }

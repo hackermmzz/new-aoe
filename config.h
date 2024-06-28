@@ -573,6 +573,8 @@
 #define BLOOD_FARMER 25
 #define BLOOD_FOREST 100
 
+#define SPEED_ELEPHANT (0.8 * ANIMAL_SPEED)
+
 
 #define CNT_TREE 75
 #define CNT_GAZELLE 150

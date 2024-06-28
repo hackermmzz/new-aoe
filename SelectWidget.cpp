@@ -579,7 +579,7 @@ void SelectWidget::refreshActs()
         else if(type == SORT_ANIMAL)//动物
         {
             Animal *objAnimal = (Animal *)(nowobject);
-            ui->objName->setText(QString::fromStdString(Animal::getAnimalName(objAnimal->getNum())) );
+            ui->objName->setText(QString::fromStdString(Animal::getAnimalDisplayName(objAnimal->getNum())) );
 
             if(objAnimal->getNum() == 1)//瞪羚
             {
@@ -630,10 +630,8 @@ void SelectWidget::refreshActs()
 
 void SelectWidget::widgetAct(int num)
 {
-    qDebug() << mainPtr->getActs(num)->getStatus();
     if(mainPtr->getActs(num)->getStatus() == ACT_STATUS_DISABLED) return;
     int actName = actions[num];
-    qDebug() << actName;
     doActs(actName);
 }
 
@@ -731,46 +729,55 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
 //        }
     }
     else if(actName == ACT_BUILD_HOUSE){
+        QApplication::restoreOverrideCursor();
         emit sendBuildMode(BUILDING_HOME);
         QCursor my(resMap["House1"].front());
         QApplication::setOverrideCursor(my);
     }
     else if(actName == ACT_BUILD_GRANARY){
+        QApplication::restoreOverrideCursor();
         emit sendBuildMode(BUILDING_GRANARY);
         QCursor my(resMap["Granary"].front());
         QApplication::setOverrideCursor(my);
     }
     else if(actName == ACT_BUILD_STOCK){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["Stock"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_STOCK);
     }
     else if(actName == ACT_BUILD_FARM){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["Farm"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_FARM);
     }
     else if(actName == ACT_BUILD_MARKET){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["Market"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_MARKET);
     }
     else if(actName == ACT_BUILD_ARROWTOWER){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["ArrowTower"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_ARROWTOWER);
     }
     else if(actName == ACT_BUILD_ARMYCAMP){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["ArmyCamp"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_ARMYCAMP);
     }
     else if(actName == ACT_BUILD_RANGE){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["Range"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_RANGE);
     }
     else if(actName == ACT_BUILD_STABLE){
+        QApplication::restoreOverrideCursor();
         QCursor my(resMap["Stable"].front());
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_STABLE);
@@ -778,7 +785,7 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     else if(actName == ACT_BUILD_CANCEL)
     {
         QApplication::restoreOverrideCursor();
-//        emit sendBuildMode(-1);
+        emit sendBuildMode(-1);
         initActs();
     }
     else if(actName == ACT_CREATEFARMER){

@@ -171,7 +171,6 @@ void MoveObject::setNextBlock()
             this->nextBlockUR=p.y;
             this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
             this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
-            path.pop();
             pathInit = false;
         }
         else
@@ -180,8 +179,8 @@ void MoveObject::setNextBlock()
             nextUR = UR+(p.y - nextBlockUR)*BLOCKSIDELENGTH;
             this->nextBlockDR=p.x;
             this->nextBlockUR=p.y;
-            path.pop();
         }
+        path.pop();
     }
 }
 
@@ -333,6 +332,8 @@ void MoveObject::updateMove()
 //void MoveObject::updateMove()
 //{
 //    double dDR,dUR,dis,ratio;
+//    int dx,dy;
+//    int tempAngle;
 
 //    if(isWalking() && (DR!=DR0||UR!=UR0))
 //    {
@@ -360,8 +361,54 @@ void MoveObject::updateMove()
 //                PredictedUR=PreviousUR+VUR;
 //            }
 
-//        }
+//            tempAngle = calculateAngle(nextDR,nextUR);
+//            if(tempAngle != Angle)
+//            {
+//                Angle = tempAngle;
+//                setNowRes();
+//            }
 
+//        }
+//        else
+//        {
+//            dDR = nextDR - DR;
+//            dUR = nextUR - UR;
+//            if(dDR>0) dx = 1;
+//            else if(dDR<0) dx = -1;
+//            else dx = 0;
+
+//            if(dUR > 0) dy = 1;
+//            else if(dUR < 0) dy = -1;
+//            else dy = 0;
+
+
+
+
+//            if(Angle != d[pathI])
+//            {
+//                Angle=d[pathI];
+//                setNowRes();
+//            }
+
+//            VDR=VariationDR[Angle]*getSpeed();
+//            VUR=VariationUR[Angle]*getSpeed();
+
+//            if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
+//            {
+//                PredictedDR=nextDR;
+//                PredictedUR=nextUR;
+//            }
+//            else
+//            {
+//                PredictedDR=PreviousDR+VDR;
+//                PredictedUR=PreviousUR+VUR;
+//            }
+//            if(fabs(nextDR-DR)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(nextUR-UR)<DISTANCE_Manhattan_MoveEndNEAR)
+//            {
+//                setNextBlock();
+//                pathI++;
+//            }
+//        }
 //    }
 //    else
 //    {
@@ -370,8 +417,6 @@ void MoveObject::updateMove()
 //        PredictedDR = DR;
 //        PredictedUR = UR;
 //    }
-//    BlockDR = transBlock(DR);
-//    BlockUR = transBlock(UR);
 //    imageH = DR-UR;
 //}
 

@@ -324,8 +324,8 @@ void Development::init_DevelopLab()
          newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_ARROWTOWER , 0 , BUILDING_GRANARY_ARROWTOWER_FOOD );
          developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].setHead(newNode);
          //研发城墙
-         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_WALL , 0 , BUILDING_GRANARY_RESEARCH_WALL_FOOD);
-         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].setHead(newNode);
+//         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_WALL , 0 , BUILDING_GRANARY_RESEARCH_WALL_FOOD);
+//         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].setHead(newNode);
     }
 
     //兵营
@@ -369,11 +369,11 @@ void Development::init_DevelopLab()
         }
 
         //升级金矿采集
-        {
-            newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_GOLD, \
-                                           BUILDING_MARKET_GOLD_UPGRADE_WOOD , BUILDING_MARKET_GOLD_UPGRADE_FOOD);
-            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_GOLD_UPGRADE].setHead(newNode);
-        }
+//        {
+//            newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_GOLD, \
+//                                           BUILDING_MARKET_GOLD_UPGRADE_WOOD , BUILDING_MARKET_GOLD_UPGRADE_FOOD);
+//            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_GOLD_UPGRADE].setHead(newNode);
+//        }
 
 
         //升级农田
@@ -419,8 +419,8 @@ void Development::init_DevelopLab()
     developLab[BUILDING_ARROWTOWER].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
 
     //城墙
-    developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
-    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
+//    developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
+//    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
 }
 
 void Development::all_technology_tree()

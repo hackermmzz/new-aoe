@@ -60,17 +60,14 @@ public:
             }
     }
 
+    void init_Map_Height();
+
     void add_Map_Vision( Coordinate* object );
     void add_Map_Object( Coordinate* object ){
         for(int x = object->getBlockDR(); x<object->getBlockDR()+object->get_BlockSizeLen(); x++ )
             for(int y = object->getBlockUR(); y<object->getBlockUR()+object->get_BlockSizeLen(); y++)
                 map_Object[x][y].push_back(object);
     }
-
-    //更新用于AI的资源状况表
-    void reset_resMap_AI();
-    //传入player阵营，若是用户，传出已探索地图部分的地图资源信息，若是Enemy，传回完整的资源地图
-    void reset_resMap_ForUserAndEnemy();
 
     //更新用户视野状况
     void reset_CellExplore(Coordinate* eye);
@@ -117,8 +114,20 @@ public:
     vector<Coordinate*> map_Vision[MAP_L][MAP_U];   //对需要实时监视的ob所能看到的格子，填入ob相应的coordinate  实时监视是指瞪羚逃跑、狮子索敌等
     vector<Coordinate*> map_Object[MAP_L][MAP_U];   //对ob所在位置——有体积size，填入相应的coordinate
 
+    //>=0为高度， = -1表示其为坡
+    int map_Height[MAP_L][MAP_U];
+
+
+    /*************  取消使用，待删除   ***********************/
+    //后续若需要给出障碍物地图，则修改该部分并启用
+
     tagMap resMap_UserAI[MAP_L][MAP_U];
     tagMap resMap_EnemyAI[MAP_L][MAP_U];
+    //更新用于AI的资源状况表
+    void reset_resMap_AI();
+    //传入player阵营，若是用户，传出已探索地图部分的地图资源信息，若是Enemy，传回完整的资源地图
+    void reset_resMap_ForUserAndEnemy();
+    /************************************/
 
 private:
     int CheckNeighborHigher(int x, int y, int currentCalHeight);

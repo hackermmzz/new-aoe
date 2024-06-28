@@ -30,6 +30,7 @@ void Core::gameUpdate()
             //如果当前对象需要变换行动状态，如从采集浆果->移动
             if((*humaniter)->needTranState())
             {
+
                 (*humaniter)->setNowState((*humaniter)->getPreState());
 
                 //需要变化的行动为“死亡”，在交互行动表中将其删除
@@ -246,6 +247,7 @@ void Core::gameUpdate()
     if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
 
     manageOrder(0);
+    manageOrder(1);
 
     //对正在监视的Object，进行行动处理
     interactionList->manageMontorAct();
@@ -254,7 +256,6 @@ void Core::gameUpdate()
     interactionList->manageRelationList();
 
 }
-
 
 
 void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
@@ -426,7 +427,7 @@ void Core::updateCommon(tagInfo* taginfo){
     taginfo->enemy_farmers_n=taginfo->enemy_farmers.size();
     for (int i = 0; i < MAP_L; ++i) {
         for (int j = 0; j < MAP_U; ++j) {
-            taginfo->map[i][j] = theMap->resMap_UserAI[i][j];
+            taginfo->theMap[i][j] = theMap->map_Height[i][j];
         }
     }
 }
@@ -481,7 +482,6 @@ void Core::manageMouseEvent()
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
         nowobject=object_click;
-//        emit clickOnObject();
         sel->initActs();
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;
     }
@@ -489,10 +489,9 @@ void Core::manageMouseEvent()
     {
         if( object_click== NULL )
         {
-            if( (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY) && nowobject->getPlayerRepresent() == 0)
-            {
+            if( (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY)\
+                    && nowobject->getPlayerRepresent() == 0)
                 interactionList->addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
-            }
             mouseEvent->mouseEventType=NULL_MOUSEEVENT;
         }
         else
@@ -508,11 +507,26 @@ void Core::manageMouseEvent()
                             interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
                             break;
                         case SORT_Building_Resource:
-                            if(((Building_Resource*)nowobject)->get_Gatherable()) interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
-                            else interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            else
+                            {
+                                if(((Building_Resource*)nowobject)->get_Gatherable())
+                                    interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
+                                else
+                                    interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            }
                             break;
                         case SORT_BUILDING:
-                            interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            else
+                                interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            break;
+                        case SORT_ARMY:
+                        case SORT_FARMER:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:
                             break;
@@ -524,6 +538,7 @@ void Core::manageMouseEvent()
                     switch (object_click->getSort())
                     {
                         case SORT_ANIMAL:
+
                             interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
                             break;
                         default:
