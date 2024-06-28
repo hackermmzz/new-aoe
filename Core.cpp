@@ -1,6 +1,11 @@
 #include "SelectWidget.h"
 #include "Core.h"
 
+tagInfo Buffer0[2];
+tagInfo Buffer1[2];
+int buff=0;
+tagInfo* currentBuff;
+
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
     this->theMap = theMap;  //mainWidget的map对象
@@ -258,9 +263,9 @@ void Core::gameUpdate()
 }
 
 
-void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
+void Core::updateByPlayer(int id){
     Player* self=player[id];
-    tagInfo& taginfo=*newTagInfos[id];
+    tagInfo& taginfo = currentBuff[id];
     //更新基础数据
     taginfo.Human_MaxNum=self->getMaxHumanNum();
     taginfo.Gold=self->getGold();
@@ -275,10 +280,10 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
         taghuman.Owner=id;
         taghuman.SN=human->getglobalNum();
         taghuman.Blood=human->getBlood();
-        taghuman.L=human->getDR();
-        taghuman.U=human->getUR();
-        taghuman.BlockL=human->getBlockDR();
-        taghuman.BlockU=human->getBlockUR();
+        taghuman.DR=human->getDR();
+        taghuman.UR=human->getUR();
+        taghuman.BlockDR=human->getBlockDR();
+        taghuman.BlockUR=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
         if(human->getSort()==HUMAN_STATE_IDLE){
@@ -302,8 +307,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-                if(farmer->getvisible()==1)
-                    newTagInfos[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
+                if(farmer->getvisible()==1||i!=0)
+                    currentBuff[i].enemy_farmers.push_back(tagfarmer.toEnemy());
             }
         }else if(human->getSort()==SORT_ARMY){
             Army* army=static_cast<Army*> (human);
@@ -314,8 +319,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-                if(army->getvisible()==1)
-                    newTagInfos[i]->enemy_armies.push_back(tagarmy.toEnemy());
+                if(army->getvisible()==1||i!=0)
+                    currentBuff[i].enemy_armies.push_back(tagarmy.toEnemy());
             }
         }
     }
@@ -349,10 +354,10 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
             resource.Type=-1;
             resource.ProductSort=-1;
         }
-        resource.BlockL=animal->getBlockDR();
-        resource.BlockU=animal->getBlockUR();
-        resource.L=animal->getDR();
-        resource.U=animal->getUR();
+        resource.BlockDR=animal->getBlockDR();
+        resource.BlockUR=animal->getBlockUR();
+        resource.DR=animal->getDR();
+        resource.UR=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
         if(id==1||animal->getexplored()==1)
@@ -363,10 +368,10 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
     for(StaticRes* staticRes: theMap->staticres){
         tagResource resource;
         resource.SN=staticRes->getglobalNum();
-        resource.L=staticRes->getDR();
-        resource.U=staticRes->getUR();
-        resource.BlockL=staticRes->getBlockDR();
-        resource.BlockU=staticRes->getBlockUR();
+        resource.DR=staticRes->getDR();
+        resource.UR=staticRes->getUR();
+        resource.BlockDR=staticRes->getBlockDR();
+        resource.BlockUR=staticRes->getBlockUR();
         switch(staticRes->getNum()){
         case 0:
             resource.Type=RESOURCE_BUSH;
@@ -390,8 +395,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
-        building.BlockL=build->getBlockDR();
-        building.BlockU=build->getBlockUR();
+        building.BlockDR=build->getBlockDR();
+        building.BlockUR=build->getBlockUR();
         building.Blood=build->getBlood();
         building.MaxBlood=build->getMaxBlood();
         building.Percent=build->getPercent();
@@ -409,8 +414,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
         taginfo.buildings.push_back(building);
         for(int i=0;i<NOWPLAYER;i++){
             if(i==id){continue;}
-            if(build->getexplored()==1)
-                newTagInfos[i]->enemy_buildings.push_back(building.toEnemy());
+            if(build->getexplored()==1||i!=0)
+                currentBuff[i].enemy_buildings.push_back(building.toEnemy());
         }
     }
 
@@ -431,39 +436,23 @@ void Core::updateCommon(tagInfo* taginfo){
         }
     }
 }
-/**
- *更新tagGame*的指向
- */
-//void updateTagGame(int index, tagGame*& currentTagGame, tagGame* newTagGame) {
-//    lockTagGame(index);
-//    if(currentTagGame != NULL) {
-//        newTagGame->ins_ret = currentTagGame->ins_ret;
-//        delete currentTagGame;
-//    }
-//    currentTagGame = newTagGame;
-//    if(index==0) tagUsrGame = currentTagGames[0];
-//    if(index==1) tagEnenmyGame = currentTagGames[1];
-//    unlockTagGame(index);
-//}
 
 
 void Core::infoShare(){
-    tagInfo* newTagInfos[NOWPLAYER];
+    currentBuff=(buff == 0) ? Buffer0 : Buffer1;
     for(int i=0;i<NOWPLAYER;i++){
-        newTagInfos[i]=new tagInfo();
+        currentBuff[i].clear();
     }
     for(int i=0;i<NOWPLAYER;i++){
-        updateByPlayer(i,newTagInfos);
+        updateByPlayer(i);
     }
     for(int i=0;i<NOWPLAYER;i++){
-        updateCommon(newTagInfos[i]);
+        updateCommon(&currentBuff[i]);
     }
-    //更新tagGame*的指向
-//    for(int i = 0; i < NOWPLAYER; ++i) {
-//        updateTagGame(i, currentTagGames[i], newTagInfos[i]);
-//    }
-    tagUsrGame.update(newTagInfos[0]);
-    tagEnemyGame.update(newTagInfos[1]);
+
+    tagUsrGame.update(&currentBuff[0]);
+    tagEnemyGame.update(&currentBuff[1]);
+    buff=1-buff;    //轮换缓存
 }
 
 
@@ -602,7 +591,7 @@ void Core::manageOrder(int id)
             break;
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
-            ret=interactionList->addRelation(self,cur.L,cur.U,CoreEven_JustMoveTo);
+            ret=interactionList->addRelation(self,cur.DR,cur.UR,CoreEven_JustMoveTo);
             break;
         }
         case 2:{    /// type 2:命令村民self将工作目标设为obj
@@ -639,7 +628,7 @@ void Core::manageOrder(int id)
             break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            ret=interactionList->addRelation(self,cur.BL,cur.BU,CoreEven_CreatBuilding,0,cur.option);
+            ret=interactionList->addRelation(self,cur.BlockDR,cur.BlockUR,CoreEven_CreatBuilding,0,cur.option);
             break;
         }
         case 4:{    ///type 4:命令建筑self进行option工作
