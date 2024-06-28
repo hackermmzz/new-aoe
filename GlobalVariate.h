@@ -211,7 +211,8 @@ struct tagInfo
     vector<tagResource> resources;
     int resources_n;
     map<int,instruction> ins_ret;
-    tagMap map[MAP_L][MAP_U];
+//    tagMap map[MAP_L][MAP_U];
+    int theMap[MAP_L][MAP_U];   //地图高度
     int GameFrame;
     int civilizationStage;
     int Wood;
@@ -220,10 +221,10 @@ struct tagInfo
     int Gold;
     int Human_MaxNum;
     ~tagInfo(){
-        for (int i = 0; i < MAP_L; ++i) {
-            delete[] map[i];
-        }
-        delete[] map;
+//        for (int i = 0; i < MAP_L; ++i) {
+//            delete[] map[i];
+//        }
+//        delete[] map;
     }
 };
 
@@ -274,9 +275,13 @@ public:
         QMutexLocker locker(&Locker);
         return Info->Gold;
     }
-    tagMap getMap(int L,int U){
+    int getMapHeight(int L,int U){
+        /**
+         * 输入:地图位置
+         * 返回:地图高度
+        */
         QMutexLocker locker(&Locker);
-        return Info->map[L][U];
+        return Info->theMap[L][U];
     }
     int getGameFrame(){
         QMutexLocker locker(&Locker);

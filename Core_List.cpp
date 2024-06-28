@@ -133,6 +133,8 @@ int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
         int oper = 0;
         object1->printer_ToBuilding((void**)&buildOb);
 
+        if(!buildOb->isFinish()) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+
         if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionShowAble(buildOb->getNum(),actNum))
             return ACTION_INVALID_BUILDACT_LOCK;
 
@@ -341,7 +343,7 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
     if(optimum!=NULL) relation.set_AlterOb(optimum , dis_opti);
 }
 
-//判断是否可以建造建筑（需要优化，错误码）
+//判断是否可以建造建筑
 int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
 {
     int answer = ACTION_SUCCESS;
@@ -364,21 +366,18 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
     if(DRL<0 || DRR>71 || URD<0 || URU>71)
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界");
-//        qDebug()<<"overBorder";
         answer = ACTION_INVALID_HUMANBUILD_OVERBORDER;
     }
 
     if( tempBuild->isIncorrect_Num() )
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,建筑类型不存在");
-//        qDebug()<<"numIncorrect";
         answer = ACTION_INVALID_BUILDINGNUM;
     }
 
     if( !theMap->cell[DRL][URD].Explored )
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索");
-//        qDebug()<<"explored";
         answer = ACTION_INVALID_HUMANBUILD_UNEXPLORE;
     }
 
@@ -389,15 +388,12 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
         if(theMap->isBarrier(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
         {
             call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠");
-
-//            qDebug()<<"overlap"<<bDR_ba<<bUR_ba;
             answer = ACTION_INVALID_HUMANBUILD_OVERLAP;
         }
 
         if(!theMap->isFlat(tempBuild))
         {
             call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差");
-//            qDebug()<<"isnt flat";
             answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
         }
     }
@@ -529,26 +525,19 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     BloodHaver* attackee = NULL;    //受攻击者
     Missile* missile = NULL;
 
-    //攻击者指针赋值(object1强制转换)
-    object1->printer_ToBloodHaver((void**)&attacker);
-    //受攻击者指针赋值(object2强制转换)
-    object2->printer_ToBloodHaver((void**)&attackee);
-    //判断obect1是否为投射物
-    object1->printer_ToMissile((void**)&missile);
+    object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
+    object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
+    object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
 
-//    qDebug()<<"attacking";
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
     {
-//        qDebug()<<"isattacking"<<(attacker->isAttacking());
         if(!attacker->isAttacking()) attacker->setPreAttack();
         else
         {
-
             //非祭司,是普通的伤害计算公式
             /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
             if( attacker->is_missileAttack())
             {
-//                qDebug()<<"ismissile"<<(attacker->is_missileThrow() );
                 if( attacker->is_missileThrow() )
                 {
                     addRelation( creatMissile(object1 , object2) , object2 , CoreEven_MissileAttack , false);
@@ -581,11 +570,9 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
-//        qDebug()<<(attacker->getATK())<<(attackee->getDEF(attacker->get_AttackType()));
         damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
-//        qDebug()<<damage;
     }
 }
 

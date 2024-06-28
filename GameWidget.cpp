@@ -220,6 +220,12 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
         double tUR = tranUR(event->x(),event->y());
         mainwidget->mouseEvent->DR = tDR + DR;
         mainwidget->mouseEvent->UR = tUR + UR;
+
+        if(buildMode >= 0)
+        {
+            buildMode = -1;
+            QApplication::restoreOverrideCursor();
+        }
     }
 }
 
