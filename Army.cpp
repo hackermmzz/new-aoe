@@ -166,7 +166,7 @@ int Army::getATK()
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
     return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType())) + \
-             get_add_specialAttack() + playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType());
+             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力
