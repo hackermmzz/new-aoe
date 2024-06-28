@@ -34,7 +34,12 @@ public:
     void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
 
-
+    int getBlockDR(){
+        return BlockDR;
+    }
+    int getBlockUR(){
+        return BlockUR;
+    }
 
 private slots:
     void movemap();
