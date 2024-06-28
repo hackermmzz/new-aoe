@@ -38,7 +38,7 @@ public:
 
     //用于显示的战斗属性
     int showATK_Basic();
-    int showATK_Addition(){return playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType());}
+    int showATK_Addition(){return playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());}
 
     int showDEF_Close();
     int showDEF_Shoot();
