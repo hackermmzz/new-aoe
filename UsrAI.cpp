@@ -33,6 +33,9 @@ void UsrAI::processData(){
         }
     }
 
+//    for(tagResource res:tagUsrGame.getResource()){
+//        qDebug()<<res.Type<<" "<<res.BlockL<<" "<<res.BlockU;
+//    }
     for(tagFarmer human:tagUsrGame.getFarmers()){
         if(human1==-1){
            human1=human.SN;
@@ -60,7 +63,7 @@ void UsrAI::processData(){
             }
             ins_id.push_back(HumanAction(human.SN,sn));
         }else if(human.SN==human2){
-            qDebug()<<"human2:"<<human.NowState;
+            qDebug()<<"human2:"<<human.NowState<<" "<<human.BlockL;
             if(human.NowState==HUMAN_STATE_IDLE){
                 static int x= 20;
                 static int y= 20;

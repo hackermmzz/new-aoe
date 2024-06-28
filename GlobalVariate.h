@@ -211,7 +211,6 @@ struct tagInfo
     vector<tagResource> resources;
     int resources_n;
     map<int,instruction> ins_ret;
-//    tagMap map[MAP_L][MAP_U];
     int theMap[MAP_L][MAP_U];   //地图高度
     int GameFrame;
     int civilizationStage;
@@ -220,11 +219,17 @@ struct tagInfo
     int Stone;
     int Gold;
     int Human_MaxNum;
+    void clear(){
+        buildings.clear();
+        farmers.clear();
+        armies.clear();
+        enemy_buildings.clear();
+        enemy_farmers.clear();
+        enemy_armies.clear();
+        resources.clear();
+        ins_ret.clear();
+    }
     ~tagInfo(){
-//        for (int i = 0; i < MAP_L; ++i) {
-//            delete[] map[i];
-//        }
-//        delete[] map;
     }
 };
 
@@ -241,10 +246,9 @@ public:
                 Info->ins_ret.erase(Info->ins_ret.begin());
             }
         }
-        QMutexLocker locker(&Locker);
         if(this->Info!=NULL)
             newinfo->ins_ret=this->Info->ins_ret;
-        delete Info;
+        QMutexLocker locker(&Locker);
         Info=newinfo;
     }
     insertInsRet(int id,instruction ins){

@@ -1,6 +1,11 @@
 #include "SelectWidget.h"
 #include "Core.h"
 
+tagInfo Buffer0[2];
+tagInfo Buffer1[2];
+int buff=0;
+tagInfo* currentBuff;
+
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
     this->theMap = theMap;  //mainWidget的map对象
@@ -258,9 +263,9 @@ void Core::gameUpdate()
 }
 
 
-void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
+void Core::updateByPlayer(int id){
     Player* self=player[id];
-    tagInfo& taginfo=*newTagInfos[id];
+    tagInfo& taginfo = currentBuff[id];
     //更新基础数据
     taginfo.Human_MaxNum=self->getMaxHumanNum();
     taginfo.Gold=self->getGold();
@@ -302,8 +307,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-                if(farmer->getvisible()==1)
-                    newTagInfos[i]->enemy_farmers.push_back(tagfarmer.toEnemy());
+                if(farmer->getvisible()==1||i!=0)
+                    currentBuff[i].enemy_farmers.push_back(tagfarmer.toEnemy());
             }
         }else if(human->getSort()==SORT_ARMY){
             Army* army=static_cast<Army*> (human);
@@ -314,8 +319,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++){
                 if(i==id) {continue;}
-                if(army->getvisible()==1)
-                    newTagInfos[i]->enemy_armies.push_back(tagarmy.toEnemy());
+                if(army->getvisible()==1||i!=0)
+                    currentBuff[i].enemy_armies.push_back(tagarmy.toEnemy());
             }
         }
     }
@@ -409,8 +414,8 @@ void Core::updateByPlayer(int id,tagInfo* newTagInfos[]){
         taginfo.buildings.push_back(building);
         for(int i=0;i<NOWPLAYER;i++){
             if(i==id){continue;}
-            if(build->getexplored()==1)
-                newTagInfos[i]->enemy_buildings.push_back(building.toEnemy());
+            if(build->getexplored()==1||i!=0)
+                currentBuff[i].enemy_buildings.push_back(building.toEnemy());
         }
     }
 
@@ -431,39 +436,23 @@ void Core::updateCommon(tagInfo* taginfo){
         }
     }
 }
-/**
- *更新tagGame*的指向
- */
-//void updateTagGame(int index, tagGame*& currentTagGame, tagGame* newTagGame) {
-//    lockTagGame(index);
-//    if(currentTagGame != NULL) {
-//        newTagGame->ins_ret = currentTagGame->ins_ret;
-//        delete currentTagGame;
-//    }
-//    currentTagGame = newTagGame;
-//    if(index==0) tagUsrGame = currentTagGames[0];
-//    if(index==1) tagEnenmyGame = currentTagGames[1];
-//    unlockTagGame(index);
-//}
 
 
 void Core::infoShare(){
-    tagInfo* newTagInfos[NOWPLAYER];
+    currentBuff=(buff == 0) ? Buffer0 : Buffer1;
     for(int i=0;i<NOWPLAYER;i++){
-        newTagInfos[i]=new tagInfo();
+        currentBuff[i].clear();
     }
     for(int i=0;i<NOWPLAYER;i++){
-        updateByPlayer(i,newTagInfos);
+        updateByPlayer(i);
     }
     for(int i=0;i<NOWPLAYER;i++){
-        updateCommon(newTagInfos[i]);
+        updateCommon(&currentBuff[i]);
     }
-    //更新tagGame*的指向
-//    for(int i = 0; i < NOWPLAYER; ++i) {
-//        updateTagGame(i, currentTagGames[i], newTagInfos[i]);
-//    }
-    tagUsrGame.update(newTagInfos[0]);
-    tagEnemyGame.update(newTagInfos[1]);
+
+    tagUsrGame.update(&currentBuff[0]);
+    tagEnemyGame.update(&currentBuff[1]);
+    buff=1-buff;    //轮换缓存
 }
 
 
