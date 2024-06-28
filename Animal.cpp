@@ -1,5 +1,4 @@
 ﻿#include "Animal.h"
-#include <QDebug>
 
  //以下为图片资源
 std::string Animal::Animalname[5]={"Tree","Gazelle","Elephant","Lion","Forest"};
@@ -69,7 +68,7 @@ Animal::Animal(int Num, double DR, double UR)
         this->MaxCnt = CNT_ELEPHANT;
         resourceSort = HUMAN_STOCKFOOD;
         this->MaxBlood = BLOOD_ELEPHANT;
-        speed = ANIMAL_SPEED;
+        speed = SPEED_ELEPHANT;
         attackType = ATTACKTYPE_ANIMAL;
         isAttackable = true;
         vision = VISION_ELEPHANT;
@@ -182,7 +181,7 @@ void Animal::setNowRes()
             templist=this->Stand[this->Num][this->Angle];
             break;
         case MOVEOBJECT_STATE_WALK:
-            if(changeToRun) templist=this->Run[this->Num][this->Angle];
+            if(changeToRun && Num != ANIMAL_ELEPHANT) templist=this->Run[this->Num][this->Angle];
             else  templist=this->Walk[this->Num][this->Angle];
             break;
         case MOVEOBJECT_STATE_ATTACK:

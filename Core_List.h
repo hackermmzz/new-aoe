@@ -39,8 +39,6 @@ private:
     Map* theMap;    //地图信息
     Player** player;    //player信息
     map<int , detail_EventPhase> relation_Event_static;     //静态表,描述行动的流程链的表
-
-    //需要优化，增加一个“NULL”表，goalObject为Null的行动移至该表，利于维护
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     //寻路相关

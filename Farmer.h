@@ -136,6 +136,7 @@ public:
 
     bool get_isEmptyBackpack(){ return resource == 0; }
 
+    //判断所持物与村民状态是否匹配
     bool get_MatchingOfResourceAndCarry(){ return (state == FARMER_LUMBER && resourceSort == HUMAN_WOOD)\
                                          || (state == FARMER_MINER && (resourceSort == HUMAN_STONE || resourceSort == HUMAN_GOLD ))\
                                          || ((state == FARMER_GATHERER|| state == FARMER_FARMER) && resourceSort == HUMAN_GRANARYFOOD) \

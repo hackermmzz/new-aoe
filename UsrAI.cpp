@@ -98,7 +98,7 @@ void UsrAI::processData(){
     fout.open("map.txt"); // 打开或创建文件以写入数据
     for(int i=0;i<MAP_L;i++){
         for(int j=0;j<MAP_U;j++){
-            fout<<tagUsrGame.getMap(i,j).high<<" ";
+            fout<<tagUsrGame.getMapHeight(i,j)<<" ";
         }
         fout<<endl;
     }

@@ -964,6 +964,21 @@ void Map::add_Map_Vision( Coordinate* object )
 //    }
 //}
 
+
+ void Map::init_Map_Height()
+ {
+     for(int x = 0; x<MAP_L; x++)
+     {
+         for(int y = 0; y<MAP_U; y++)
+         {
+            if(isSlope(x,y)) map_Height[x][y] = -1;
+            else map_Height[x][y] = cell[x][y].getMapHeight();
+         }
+     }
+
+     return;
+ }
+
 //更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
 void Map::reset_resMap_AI()
 {

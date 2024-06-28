@@ -32,7 +32,7 @@ public:
     virtual bool is_attackHit(){ return false; }
 
     //用于显示的属性
-    virtual int showATK_Basic(){ getATK()+get_add_specialAttack();}
+    virtual int showATK_Basic(){ return atk + get_add_specialAttack();}
     virtual int showATK_Addition(){ return 0; }
     virtual int showDEF_Close(){ return defence_close; }
     virtual int showDEF_Close_Addition(){ return 0; }
