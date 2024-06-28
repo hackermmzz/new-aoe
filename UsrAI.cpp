@@ -56,14 +56,14 @@ void UsrAI::processData(){
             int sn=-1;
             double dis=99999;
             for(tagResource res:tagUsrGame.getResource()){
-                if(countdistance(mid,mid,res.L,res.U)<dis){
+                if(countdistance(mid,mid,res.DR,res.UR)<dis){
                     sn=res.SN;
-                    dis=countdistance(mid,mid,res.L,res.U);
+                    dis=countdistance(mid,mid,res.DR,res.UR);
                 }
             }
             ins_id.push_back(HumanAction(human.SN,sn));
         }else if(human.SN==human2){
-            qDebug()<<"human2:"<<human.NowState<<" "<<human.BlockL;
+            qDebug()<<"human2:"<<human.NowState<<" "<<human.BlockDR;
             if(human.NowState==HUMAN_STATE_IDLE){
                 static int x= 20;
                 static int y= 20;
@@ -77,9 +77,9 @@ void UsrAI::processData(){
             int sn=-1;
             double dis=99999;
             for(tagResource res:tagUsrGame.getResource()){
-                if(res.ProductSort==HUMAN_STOCKFOOD&&res.Type!=RESOURCE_BUSH&&countdistance(mid,mid,res.L,res.U)<dis){
+                if(res.ProductSort==HUMAN_STOCKFOOD&&res.Type!=RESOURCE_BUSH&&countdistance(mid,mid,res.DR,res.UR)<dis){
                     sn=res.SN;
-                    dis=countdistance(mid,mid,res.L,res.U);
+                    dis=countdistance(mid,mid,res.DR,res.UR);
                 }
             }
             ins_id.push_back(HumanAction(human.SN,sn));

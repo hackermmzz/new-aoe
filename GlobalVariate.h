@@ -54,7 +54,7 @@ extern std::queue<st_DebugMassage>debugMassagePackage;
 
 struct tagBuilding
 {
-    int BlockL,BlockU;
+    int BlockDR,BlockUR;
     int Type;
     int SN;
     int Blood;
@@ -74,8 +74,8 @@ struct tagBuilding
 
 struct tagResource
 {
-    double L,U;
-    int BlockL,BlockU;
+    double DR,UR;
+    int BlockDR,BlockUR;
     int Type;
     int SN;
     int ProductSort;
@@ -84,8 +84,8 @@ struct tagResource
 };
 struct tagHuman
 {
-    double L,U;
-    int BlockL,BlockU;
+    double DR,UR;
+    int BlockDR,BlockUR;
     double L0,U0;   // 目的地
     int NowState;
     int WorkObjectSN;
@@ -93,10 +93,10 @@ struct tagHuman
     int SN;
     int Owner;
     void cast_from(tagHuman taghuman){
-        this->L=taghuman.L;
-        this->U=taghuman.U;
-        this->BlockL=taghuman.BlockL;
-        this->BlockU=taghuman.BlockU;
+        this->DR=taghuman.DR;
+        this->UR=taghuman.UR;
+        this->BlockDR=taghuman.BlockDR;
+        this->BlockUR=taghuman.BlockUR;
         this->L0=taghuman.L0;
         this->U0=taghuman.U0;
         this->NowState=taghuman.NowState;
@@ -147,16 +147,16 @@ struct instruction{
     Coordinate* self;
     Coordinate* obj;
     int option;
-    int BL,BU;
+    int BlockDR,BlockUR;
     int SN = -1,obSN = -1;
-    double L,U;
+    double DR,UR;
     bool isExist(){
         return type!=-1;
     }
     instruction(){ type=-1; }
     instruction(int type,int SN, int obSN , bool twoCoredinate);
-    instruction(int type,int SN, int BL,int BU,int option);
-    instruction(int type,int SN, double L,double U);
+    instruction(int type,int SN, int BlockDR,int BlockUR,int option);
+    instruction(int type,int SN, double DR,double UR);
     instruction(int type,int SN, int option);
 };
 struct ins{

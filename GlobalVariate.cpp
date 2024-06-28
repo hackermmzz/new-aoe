@@ -498,16 +498,16 @@ instruction::instruction(int type,int SN,int BL,int BU,int option){
     this->SN = SN;
     this->type=type;
     this->self=g_Object[SN];
-    this->BL=BL;
-    this->BU=BU;
+    this->BlockDR=BL;
+    this->BlockUR=BU;
     this->option=option;
 }
 instruction::instruction(int type,int SN,double L,double U){
     this->SN = SN;
     this->type=type;
     this->self=g_Object[SN];
-    this->L=L;
-    this->U=U;
+    this->DR=L;
+    this->UR=U;
 }
 instruction::instruction(int type,int SN,int option){
     this->SN = SN;

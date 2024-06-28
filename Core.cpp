@@ -280,10 +280,10 @@ void Core::updateByPlayer(int id){
         taghuman.Owner=id;
         taghuman.SN=human->getglobalNum();
         taghuman.Blood=human->getBlood();
-        taghuman.L=human->getDR();
-        taghuman.U=human->getUR();
-        taghuman.BlockL=human->getBlockDR();
-        taghuman.BlockU=human->getBlockUR();
+        taghuman.DR=human->getDR();
+        taghuman.UR=human->getUR();
+        taghuman.BlockDR=human->getBlockDR();
+        taghuman.BlockUR=human->getBlockUR();
         taghuman.Blood=human->getBlood();
         taghuman.NowState=interactionList->getNowPhaseNum(human);
         if(human->getSort()==HUMAN_STATE_IDLE){
@@ -354,10 +354,10 @@ void Core::updateByPlayer(int id){
             resource.Type=-1;
             resource.ProductSort=-1;
         }
-        resource.BlockL=animal->getBlockDR();
-        resource.BlockU=animal->getBlockUR();
-        resource.L=animal->getDR();
-        resource.U=animal->getUR();
+        resource.BlockDR=animal->getBlockDR();
+        resource.BlockUR=animal->getBlockUR();
+        resource.DR=animal->getDR();
+        resource.UR=animal->getUR();
         resource.Blood=animal->getBlood();
         resource.Cnt=animal->get_Cnt();
         if(id==1||animal->getexplored()==1)
@@ -368,10 +368,10 @@ void Core::updateByPlayer(int id){
     for(StaticRes* staticRes: theMap->staticres){
         tagResource resource;
         resource.SN=staticRes->getglobalNum();
-        resource.L=staticRes->getDR();
-        resource.U=staticRes->getUR();
-        resource.BlockL=staticRes->getBlockDR();
-        resource.BlockU=staticRes->getBlockUR();
+        resource.DR=staticRes->getDR();
+        resource.UR=staticRes->getUR();
+        resource.BlockDR=staticRes->getBlockDR();
+        resource.BlockUR=staticRes->getBlockUR();
         switch(staticRes->getNum()){
         case 0:
             resource.Type=RESOURCE_BUSH;
@@ -395,8 +395,8 @@ void Core::updateByPlayer(int id){
     for(Building* build:self->build){
         tagBuilding building;
         building.SN=build->getglobalNum();
-        building.BlockL=build->getBlockDR();
-        building.BlockU=build->getBlockUR();
+        building.BlockDR=build->getBlockDR();
+        building.BlockUR=build->getBlockUR();
         building.Blood=build->getBlood();
         building.MaxBlood=build->getMaxBlood();
         building.Percent=build->getPercent();
@@ -591,7 +591,7 @@ void Core::manageOrder(int id)
             break;
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
-            ret=interactionList->addRelation(self,cur.L,cur.U,CoreEven_JustMoveTo);
+            ret=interactionList->addRelation(self,cur.DR,cur.UR,CoreEven_JustMoveTo);
             break;
         }
         case 2:{    /// type 2:命令村民self将工作目标设为obj
@@ -628,7 +628,7 @@ void Core::manageOrder(int id)
             break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            ret=interactionList->addRelation(self,cur.BL,cur.BU,CoreEven_CreatBuilding,0,cur.option);
+            ret=interactionList->addRelation(self,cur.BlockDR,cur.BlockUR,CoreEven_CreatBuilding,0,cur.option);
             break;
         }
         case 4:{    ///type 4:命令建筑self进行option工作

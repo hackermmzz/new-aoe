@@ -37,7 +37,7 @@ void AI::printInsRet(int id){
     }
     if(tmp.type==1){
         qDebug()<<"ins:"<<id
-               <<"\n   HumanMove("<<tmp.SN<<","<<tmp.L<<","<<tmp.U
+               <<"\n   HumanMove("<<tmp.SN<<","<<tmp.DR<<","<<tmp.UR
               <<")\n   return "<<tmp.ret;
     }else if(tmp.type==2){
         qDebug()<<"ins:"<<id
@@ -45,7 +45,7 @@ void AI::printInsRet(int id){
               <<")\n   return "<<tmp.ret;
     }else if(tmp.type==3){
         qDebug()<<"ins:"<<id
-               <<"\n   HumanBuild("<<tmp.SN<<","<<tmp.BL<<","<<tmp.BU<<","<<tmp.option
+               <<"\n   HumanBuild("<<tmp.SN<<","<<tmp.BlockDR<<","<<tmp.BlockUR<<","<<tmp.option
               <<")\n   return "<<tmp.ret;
     }else if(tmp.type==4){
         qDebug()<<"ins:"<<id
