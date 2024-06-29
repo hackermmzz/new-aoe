@@ -72,7 +72,7 @@ private:
 
 //    bool isValidPoint(const int (&map)[MAP_L][MAP_U], const Point& p);
 //    vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);
-    stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination);
+    stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate* goalOb = NULL);
 //    stack<Point> findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point& start, const Point& destination);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}

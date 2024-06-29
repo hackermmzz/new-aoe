@@ -943,6 +943,27 @@ vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
     return blockLab;
 }
 
+vector<Point> Map::get_ObjectBlock(Coordinate* object)
+{
+    /**
+    * 获取指定目标在地图上所占格子
+    * 输入:指定的object的Coorinate指针
+    * 传出:其所占格子的vector列表
+    */
+
+    int blockSidelen = object->get_BlockSizeLen();
+    Point position;
+    vector<Point> blockLab;
+    position.x = object->getBlockDR();
+    position.y = object->getBlockUR();
+
+    for(int x = 0 ; x < blockSidelen; x++)
+        for(int y = 0 ; y < blockSidelen; y++)
+            blockLab.push_back(Point(position.x+x , position.y + y));
+
+    return blockLab;
+}
+
 void Map::add_Map_Vision( Coordinate* object )
 {
     vector<Point> blockLab = get_ObjectVisionBlock(object);
@@ -1171,7 +1192,7 @@ bool Map::loadResource() {
 //            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
 
             if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
-            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
+//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
             else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
             else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
             else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j)+BLOCKSIDELENGTH / 2 + tOffsetY); // 瞪羚

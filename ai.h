@@ -30,7 +30,7 @@ public:
 public slots:
     void startProcessing() {
         if(!mutex.tryLock()){
-                return;
+            return;
         }
         stopThread = false;
         condition.wakeAll();
@@ -50,11 +50,9 @@ protected:
             QMutexLocker locker(&mutex);
             if(stopThread)
                 return;
-
             if (g_frame > 10) {
                 processData();
             }
-
             condition.wait(&mutex);
         }
     }
@@ -85,6 +83,23 @@ private:
 
     bool isBuilding(int SN) {
         return g_Object[SN] && SN / 10000 == SORT_BUILDING;
+    }
+
+public:
+    double calDistance(double DR1, double UR1, double DR2, double UR2) {
+        return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5);
+    }
+
+    void DebugText(std::string debugStr) {
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromStdString(debugStr));
+    }
+
+    void DebugText(int debugInt) {
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugInt));
+    }
+
+    void DebugText(double debugDouble) {
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugDouble));
     }
 };
 

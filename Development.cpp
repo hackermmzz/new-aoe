@@ -371,9 +371,9 @@ void Development::init_DevelopLab()
         //升级金矿采集
 //        {
 //            newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_MARKET , TIME_BUILDING_MARKET_UPGRADE_GOLD, \
-//                                           BUILDING_MARKET_GOLD_UPGRADE_WOOD , BUILDING_MARKET_GOLD_UPGRADE_FOOD);
-//            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_GOLD_UPGRADE].setHead(newNode);
 //        }
+        //                                           BUILDING_MARKET_GOLD_UPGRADE_WOOD , BUILDING_MARKET_GOLD_UPGRADE_FOOD);
+        //            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_GOLD_UPGRADE].setHead(newNode);
 
 
         //升级农田
