@@ -21,6 +21,18 @@ public:
 
     void printInsRet(int id);
 
+    double calDistance( double DR1 , double UR1 , double DR2 , double UR2 )
+        { return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5); }
+
+    void DebugText( string debugStr )
+        { call_debugText("black" , " AI"+QString::number(id) + "打印：" + QString::fromStdString(debugStr)); }
+
+    void DebugText( int debugInt )
+        { call_debugText("black" , " AI"+QString::number(id) + "打印：" + QString::number(debugInt)); }
+
+    void DebugText( double debugDouble )
+        { call_debugText("black" , " AI"+QString::number(id) + "打印：" + QString::number(debugDouble)); }
+
 /*###########INTERFACE ENDS HERE###########*/
     virtual void processData()=0;
     void run() override{
@@ -36,8 +48,8 @@ public:
     void unlock(){
         aiLock.unlock();
     }
-    AI(){;}
-    ~AI(){;}
+    AI(){}
+    ~AI(){}
 protected:
     QMutex aiLock;
     int id;
