@@ -3,6 +3,7 @@
 
 int g_globalNum=1;
 int g_frame=0;
+int mapmoveFrequency = 1;
 
 std::map<int,Coordinate*> g_Object;
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
@@ -95,6 +96,17 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     showTimer->setTimerType(Qt::PreciseTimer);
     showTimer->start(1000);
 
+    pbuttonGroup = new QButtonGroup(this);
+    pbuttonGroup->addButton(ui->radioButton_1,0);
+    pbuttonGroup->addButton(ui->radioButton_2,1);
+    pbuttonGroup->addButton(ui->radioButton_4,2);
+    pbuttonGroup->addButton(ui->radioButton_8,3);
+
+    //绑定倍速按钮
+    connect(ui->radioButton_1, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     //时间增加
     connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
 
@@ -173,6 +185,7 @@ MainWidget::~MainWidget()
     delete UsrAi;
     delete EnemyAi;
     delete ui;
+    delete pbuttonGroup;
     deleteBlock();
     deleteAnimal();
     deleteStaticResource();
@@ -692,6 +705,26 @@ void MainWidget::statusUpdate()
     ui->version->setText(QString::fromStdString(GAME_VERSION));
 }
 
+void MainWidget::gameDataUpdate()
+{
+    core->gameUpdate();
+    core->infoShare();
+    statusUpdate();
+    emit startAI();
+
+    //    UsrAi->start();///AI线程尝试开始
+    //    EnemyAi->start();
+}
+void MainWidget::paintUpdate()
+{
+    ui->Game->update();
+    ui->mapView->update();
+    ui->tip->update();
+    ui->statusLbl->update();
+    emit mapmove();
+}
+
+//**************槽函数***************
 // 游戏帧更新
 void MainWidget::FrameUpdate()
 {
@@ -701,18 +734,48 @@ void MainWidget::FrameUpdate()
     gameframe++;
     g_frame=gameframe;
     ui->lcdNumber->display(gameframe);
-    ui->Game->update();
-    core->gameUpdate();
-    ui->mapView->update();
-    ui->tip->update();
-    ui->statusLbl->update();
-    statusUpdate();
-    core->infoShare();
-//    UsrAi->start();///AI线程尝试开始
-//    EnemyAi->start();
-    emit startAI();
-    emit mapmove();
+
+    if(mapmoveFrequency==1||mapmoveFrequency==2){
+        paintUpdate();
+    }
+    else if(mapmoveFrequency==4){
+        if(gameframe%2==0) paintUpdate();
+    }
+    else if(mapmoveFrequency==8){
+        if(gameframe%4==0) paintUpdate();
+    }
+    else{
+        qDebug()<<"速度设置错误";
+    }
+    gameDataUpdate();
     return;
+}
+void MainWidget::onRadioClickSlot()
+{
+    switch(pbuttonGroup->checkedId())
+    {
+    case 0:
+        timer->setInterval(40);
+        showTimer->setInterval(1000);
+        mapmoveFrequency=1;
+        break;
+    case 1:
+        timer->setInterval(20);
+        showTimer->setInterval(500);
+        mapmoveFrequency=2;
+        break;
+    case 2:
+        timer->setInterval(10);
+        showTimer->setInterval(250);
+        mapmoveFrequency=4;
+        break;
+    case 3:
+        timer->setInterval(5);
+        showTimer->setInterval(125);
+        mapmoveFrequency=8;
+        nowobject=NULL;
+        break;
+    }
 }
 
 

@@ -387,6 +387,64 @@
     <string/>
    </property>
   </widget>
+  <widget class="QRadioButton" name="radioButton_1">
+   <property name="geometry">
+    <rect>
+     <x>1120</x>
+     <y>0</y>
+     <width>61</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>1×</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButton_2">
+   <property name="geometry">
+    <rect>
+     <x>1180</x>
+     <y>0</y>
+     <width>61</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>2×</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButton_4">
+   <property name="geometry">
+    <rect>
+     <x>1240</x>
+     <y>0</y>
+     <width>61</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>4×</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButton_8">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>1300</x>
+     <y>0</y>
+     <width>61</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::PreventContextMenu</enum>
+   </property>
+   <property name="text">
+    <string>8×</string>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
