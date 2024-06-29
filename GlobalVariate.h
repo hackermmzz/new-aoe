@@ -159,6 +159,7 @@ struct instruction{
     instruction(int type,int SN, double DR,double UR);
     instruction(int type,int SN, int option);
 };
+
 struct ins{
     int g_id=0;
     std::queue<instruction> instructions;
@@ -210,7 +211,7 @@ struct tagInfo
     int enemy_armies_n;
     vector<tagResource> resources;
     int resources_n;
-    map<int,instruction> ins_ret;
+    map<int,int> ins_ret;   //map<id,ret>
     int theMap[MAP_L][MAP_U];   //地图高度
     int GameFrame;
     int civilizationStage;
@@ -253,107 +254,19 @@ public:
     }
     insertInsRet(int id,instruction ins){
         QMutexLocker locker(&Locker);
-        this->Info->ins_ret.insert(make_pair(id,ins));
+        this->Info->ins_ret.insert(make_pair(id,ins.ret));
     }
-    instruction getInsRet(int ins_id){
+//    instruction getInsRet(int ins_id){
+//        QMutexLocker locker(&Locker);
+//        if(this->Info->ins_ret.find(ins_id)==this->Info->ins_ret.end()){
+//            return instruction();
+//        }else{
+//            return this->Info->ins_ret[ins_id];
+//        }
+//    }
+    tagInfo getInfo(){
         QMutexLocker locker(&Locker);
-        if(this->Info->ins_ret.find(ins_id)==this->Info->ins_ret.end()){
-            return instruction();
-        }else{
-            return this->Info->ins_ret[ins_id];
-        }
-    }
-    int getFood(){
-        QMutexLocker locker(&Locker);
-        return Info->Meat;
-    }
-    int getWood(){
-        QMutexLocker locker(&Locker);
-        return Info->Wood;
-    }
-    int getStone(){
-        QMutexLocker locker(&Locker);
-        return Info->Stone;
-    }
-    int getGold(){
-        QMutexLocker locker(&Locker);
-        return Info->Gold;
-    }
-    int getMapHeight(int L,int U){
-        /**
-         * 输入:地图位置
-         * 返回:地图高度
-        */
-        QMutexLocker locker(&Locker);
-        return Info->theMap[L][U];
-    }
-    int getGameFrame(){
-        QMutexLocker locker(&Locker);
-        return Info->GameFrame;
-    }
-    int getCivilizationStage(){
-        QMutexLocker locker(&Locker);
-        return Info->civilizationStage;
-    }
-    int getMaxHumanNum(){
-        QMutexLocker locker(&Locker);
-        return Info->Human_MaxNum;
-    }
-    vector<tagFarmer> getFarmers(){
-        QMutexLocker locker(&Locker);
-        return Info->farmers;
-    }
-    int getFarmers_n(){
-        QMutexLocker locker(&Locker);
-        return Info->farmers.size();
-    }
-    vector<tagFarmer> getEnemyFarmers(){
-        QMutexLocker locker(&Locker);
-        return Info->enemy_farmers;
-    }
-    int getEnemyFarmers_n(){
-        QMutexLocker locker(&Locker);
-        return Info->enemy_farmers.size();
-    }
-    vector<tagArmy> getArmies(){
-        QMutexLocker locker(&Locker);
-        return Info->armies;
-    }
-    int getArmies_n(){
-        QMutexLocker locker(&Locker);
-        return Info->armies.size();
-    }
-    vector<tagArmy> getEnemyArmies(){
-        QMutexLocker locker(&Locker);
-        return Info->enemy_armies;
-    }
-    int getEnemyArmies_n(){
-        QMutexLocker locker(&Locker);
-        return Info->enemy_armies.size();
-    }
-    vector<tagBuilding> getBuildings(){
-        QMutexLocker locker(&Locker);
-        return Info->buildings;
-    }
-    int getBuildings_n(){
-        QMutexLocker locker(&Locker);
-        return Info->buildings.size();
-    }
-    vector<tagBuilding> getEnemyBuildings(){
-        QMutexLocker locker(&Locker);
-        return Info->enemy_buildings;
-    }
-    int getEnemyBuildings_n(){
-        QMutexLocker locker(&Locker);
-        return Info->enemy_buildings.size();
-    }
-    vector<tagResource> getResource(){
-        QMutexLocker locker(&Locker);
-        return Info->resources;
-    }
-    int getResource_n(){
-        QMutexLocker locker(&Locker);
-        return Info->resources.size();
+        return *Info;
     }
     void clearInsRet(){
         QMutexLocker locker(&Locker);
