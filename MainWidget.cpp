@@ -122,6 +122,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
     player[0]->changeResource(2000,2000,2000,2000);
+    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     debugText("blue"," 游戏开始");
 }
@@ -684,17 +685,14 @@ void MainWidget::respond_DebugMessage()
 void MainWidget::debugText(const QString& color, const QString& content)
 {
     if (color == "blue")
-    {
         ui->DebugTexter->insertHtml(COLOR_BLUE(sel->getShowTime() + content));
-    }
     else if (color == "red")
-    {
         ui->DebugTexter->insertHtml(COLOR_RED(sel->getShowTime() + content));
-    }
     else if (color == "green")
-    {
         ui->DebugTexter->insertHtml(COLOR_GREEN(sel->getShowTime() + content));
-    }
+    else if(color == "black")
+        ui->DebugTexter->insertHtml(COLOR_BLACK(sel->getShowTime() + content));
+
     ui->DebugTexter->insertPlainText("\n");
     QScrollBar *bar = ui->DebugTexter->verticalScrollBar();
     bar->setValue(bar->maximum());

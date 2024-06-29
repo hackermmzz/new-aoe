@@ -41,6 +41,7 @@ void Building_Resource::setAttribute()
         resourceSort = HUMAN_GRANARYFOOD;
         gatherable = false;
         vision = VISION_FARM;
+        incorrectNum = false;
         setMaxCnt();
     }
     else incorrectNum = true;

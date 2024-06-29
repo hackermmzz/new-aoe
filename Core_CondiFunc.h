@@ -109,6 +109,8 @@ struct relation_Object
     //行动无用指标，当如移动长时间不实际进行时增加，当达到一定限度时被认为行动无用，强制结束行动
     int useless_norm = 0;
 
+    int time_wait = 0;  //行动暂时停止时长，如为10，代表从当前帧暂停10帧
+
     //构造函数
     relation_Object() {isExist = false; goalObject = NULL;}
     relation_Object( int evenClass );
@@ -140,6 +142,10 @@ struct relation_Object
 
     void useless(){ useless_norm ++; }
     void useOnce(){ useless_norm = 0; }
+
+    void wait( int time ){ time_wait = time; }
+    bool isWaiting(){ return time_wait>0;}
+    void waiting(){ if(time_wait>0) time_wait--; }
 };
 
 struct conditionF
