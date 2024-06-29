@@ -20,6 +20,7 @@ vector<int> ins_id;//添加到监视的指令数组
 void UsrAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
     qDebug()<<"#####UsrStart#####";
+//    qDebug()<<tagUsrGame.getGameFrame();
     sleep(2);
     //打印添加到监视的指令执行结果，并从监视中删除
     auto it = ins_id.begin();
