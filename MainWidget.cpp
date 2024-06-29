@@ -112,9 +112,14 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
-
+    // AI初始化
     UsrAi=new UsrAI();
     EnemyAi=new EnemyAI();
+    connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
+    connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
+    UsrAi->start();
+    EnemyAi->start();
+
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
@@ -137,8 +142,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 // MainWidget析构函数
 MainWidget::~MainWidget()
 {
-    UsrAi->exit(0);
-    EnemyAi->exit(0);
+    UsrAi->stopProcessing();
+    EnemyAi->stopProcessing();
+    UsrAi->wait();
+    EnemyAi->wait();
     delete UsrAi;
     delete EnemyAi;
     delete ui;
@@ -673,8 +680,9 @@ void MainWidget::FrameUpdate()
     ui->mapView->update();
     statusUpdate();
     core->infoShare();
-    UsrAi->start();///AI线程尝试开始
-    EnemyAi->start();
+//    UsrAi->start();///AI线程尝试开始
+//    EnemyAi->start();
+    emit startAI();
     emit mapmove();
     return;
 }
