@@ -39,9 +39,12 @@ public:
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
     bool isFlat(Coordinate* judOb);
     vector<Point> findBlock_Free(Coordinate* object , int disLen = 1);
+    vector<Point> findBlock_Flat(int disLen = 1);
 
     //用于查找Object视野范围内的格子，返回格子的列表容器
     vector<Point> get_ObjectVisionBlock(Coordinate* object);
+
+    vector<Point> get_ObjectBlock(Coordinate* object);
 
     //初始化视野地图
     void init_Map_Vision(){

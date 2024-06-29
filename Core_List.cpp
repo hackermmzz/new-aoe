@@ -272,7 +272,6 @@ void Core_List::manageRelationList()
                 }
             }
             iter++;
-
         }
         else iter = relate_AllObject.erase(iter);   //删表
     }
@@ -315,6 +314,7 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
     relation.reset_Object1Predicted(object1);
     relation.update_GoalPoint();
     relation.update_Attrib_alter();
+    relation.waiting();
 }
 
 //查询最近的符合要求的建筑，并设置alterOB
@@ -474,9 +474,15 @@ int Core_List::getObjectSN(Coordinate* object){
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
 {
     MoveObject* moveObject = NULL;
+    Coordinate* goalOb;
     object->printer_ToMoveObject((void**)&moveObject);
+    //如果有目标点，设置目标点
+    if(relate_AllObject[object].isUseAlterGoal)
+        goalOb = relate_AllObject[object].alterOb;
+    else
+        goalOb = relate_AllObject[object].goalObject;
 
-    if(moveObject!=NULL)
+    if(moveObject!=NULL && !relate_AllObject[object].isWaiting())
     {
         if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
         {
@@ -489,32 +495,24 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             theMap->findPathMap[destination.x][destination.y] = 0;
 
             if(moveObject->getSort() == SORT_MISSILE) path.push(destination);
-            else path = findPath(theMap->findPathMap , theMap , start , destination);
-
-//            moveObject->setPath(stack<Point>());
+            else path = findPath(theMap->findPathMap , theMap , start , destination , goalOb);
             moveObject->setPath(path,DR,UR);
         }
-
-//        if(moveObject->getPath().size())
-//        {
-            relate_AllObject[object].useOnce();
-            if(!moveObject->isWalking()) moveObject->setPreWalk();
-//        }
-//        else
-//        {
-//            if(moveObject->isStand()) moveObject->setPreStand();
-//            relate_AllObject[object].useless();
-//        }
-
-        if(moveObject->getCrashOb()!=NULL)
+        else
         {
-            //处理碰撞
-
-            moveObject->initCrash();
+            if(!moveObject->isWalking()) moveObject->setPreWalk();
+            else if(moveObject->getCrashOb()!=NULL)
+            {
+                //处理碰撞
+                relate_AllObject[object].wait(50);
+                moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
+                if(!moveObject->isStand()) moveObject->setPreStand();
+                moveObject->initCrash();
+            }
+            else relate_AllObject[object].useOnce();
         }
     }
     else relate_AllObject[object].useless();
-
 }
 
 void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
@@ -843,11 +841,14 @@ void Core_List::manageMontorAct()
 //    return adjacentPoints;
 //}
 
-stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination)
+stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination , Coordinate* goalOb)
 {
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1) , Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
 
+    bool goalMap[MAP_L][MAP_U];
     stack<Point> path;
+    vector<Point> objectBlock;
+    vector<Point>::iterator oBiter,oBitere;
     Point nextPoint, nowPoint;
     pathNode* newPathNode = NULL , *findPathNode = NULL, *nowBestPathNode;
     stack<pathNode*> lab_needDele;
@@ -860,11 +861,27 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     //起始点标记
     haveJud_Map_Move(start);
 
+    memset(goalMap , 0 , sizeof(goalMap));
+    //标记终点
+    if(goalOb != NULL)
+    {
+        objectBlock = map->get_ObjectBlock(goalOb);
+        oBiter = objectBlock.begin();
+        oBitere = objectBlock.end();
+        while(oBiter != oBitere)
+        {
+            goalMap[(*oBiter).x][(*oBiter).y] = true;
+            qDebug()<<(*oBiter).x<<(*oBiter).y;
+            oBiter++;
+        }
+    }
+    goalMap[destination.x][destination.y] = true;
+
     newPathNode = new pathNode(start);
     lab_needDele.push(newPathNode);
     nodeQue->addNode(newPathNode);
 
-    if( start == destination)
+    if( goalMap[start.x][start.y] )
     {
         meetGoal = true;
         findPathNode = newPathNode;
@@ -886,7 +903,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
             //斜线方向，多判断马脚操作
             //  if( i<4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y]||findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])\|| i>=4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y])) //判断直线方向
 
-            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] || i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y]) ))
+            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] || i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y]) ))
             {
                 //创建新节点
                 newPathNode = new pathNode( nextPoint );
@@ -896,7 +913,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
                 //为新节点增加前驱点信息,然后添加新节点到小根堆
                 nodeQue->addNode(nowBestPathNode->pushNode(newPathNode));
 
-                if( nextPoint == destination)
+                if( goalMap[nextPoint.x][nextPoint.y] )
                 {
                     meetGoal = true;
                     findPathNode = newPathNode;

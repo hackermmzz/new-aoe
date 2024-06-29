@@ -55,8 +55,6 @@ void SelectWidget::paintEvent(QPaintEvent *event)
             {//如果有血条的对象，绘制血条
                 int StartX = 130, StartY = 110;
                 int percent = 0;
-//                if(nowobject->getSort() == SORT_BUILDING) percent = ((Building *)nowobject)->getBlood() * ((Building *)nowobject)->getMaxBlood();
-//                else if(nowobject->getSort() == SORT_FARMER) percent = ((Farmer *)nowobject)->getBlood() * ((Farmer *)nowobject)->getMaxBlood();
 
                 //修改percent
                 percent = bloodobject->getBloodPercent()*100;
@@ -70,7 +68,6 @@ void SelectWidget::paintEvent(QPaintEvent *event)
                 painter.fillRect(QRect(StartX, StartY + 14, 3, 3), QBrush(QColor(0, 103, 99)));
                 painter.fillRect(QRect(StartX + 120 * percent / 100, StartY, 120 - 120 * percent / 100, 20), QBrush(Qt::red));
             }
-
         }
     }
     else
@@ -101,7 +98,6 @@ void SelectWidget::frameUpdate()
 
 void SelectWidget::initActs()
 {
-//    qDebug()<<"initact";
     //根据点击的对象初始化行动数组
     if(nowobject == NULL)
     {
@@ -310,86 +306,6 @@ void SelectWidget::refreshActs()
             if(!mainPtr->player[0]->get_isBuildActionAble(buildType , buildingActType))
                 actionStatus[i] = ACT_STATUS_DISABLED;
         }
-
-
-//        switch(actions[i])//根据actions数组的值（行动类别）判断可用性
-//        {
-//            case ACT_BUILD_ARROWTOWER:
-//                if(mainPtr->player[0]->getStone() < BUILD_ARROWTOWER_STONE || !mainPtr->player[0]->getArrowTowerUnlocked())
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_BUILD_FARM:
-//                if(mainPtr->player[0]->getWood() < BUILD_FARM_WOOD || !isMarketBuilt)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_BUILD_GRANARY:
-//                if(mainPtr->player[0]->getWood() < BUILD_GRANARY_WOOD)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_BUILD_HOUSE:
-//                if(mainPtr->player[0]->getWood() < BUILD_HOUSE_WOOD)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_BUILD_MARKET:
-//                if(mainPtr->player[0]->getWood() < BUILD_MARKET_WOOD)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_BUILD_STOCK:
-//                if(mainPtr->player[0]->getWood() < BUILD_STOCK_WOOD)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-
-
-//            case ACT_CREATEFARMER:
-//                if(mainPtr->player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD || human_num >= mainPtr->player[0]->getMaxHumanNum())
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_UPGRADE_AGE:
-//                if(mainPtr->player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD || !isGranaryBuilt || !isStockBuilt)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_UPGRADE_FARM:
-//                if(mainPtr->player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD || mainPtr->player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_UPGRADE_STONE:
-//                if(mainPtr->player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || mainPtr->player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_UPGRADE_WOOD:
-//                if(mainPtr->player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || mainPtr->player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD)
-//                {
-//                    actionStatus[i] = ACT_STATUS_DISABLED;
-//                }
-//                break;
-//            case ACT_NULL:
-//                actionStatus[i] = ACT_STATUS_DISABLED;
-//                break;
-//            case ACT_BUILD_CANCEL:
-//                actionStatus[i] = ACT_STATUS_ENABLED;
-//                break;
-//        }
-
     }
 
 
@@ -424,9 +340,6 @@ void SelectWidget::refreshActs()
 
             //根据不同时代设置不同的图标
             ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType)].front().scaled(110,110));
-//            if(mainPtr->player[0]->getCiv() == CIVILIZATION_STONEAGE) ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(CIVILIZATION_STONEAGE, buildType)].front().scaled(110,110));
-//            else if(mainPtr->player[0]->getCiv() == CIVILIZATION_TOOLAGE) ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(CIVILIZATION_TOOLAGE, buildType)].front().scaled(110,110));
-
 
             if(objBuilding->getActSpeed() != 0)
             {
@@ -469,14 +382,6 @@ void SelectWidget::refreshActs()
                 //统一根据内置行动数组设置
                 for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
                 {
-//                    actions[i] = objBuilding->getActNames(i);
-//                    actionStatus[i] = objBuilding->getActStatus(i);
-//                    if(objBuilding->getActNames(i) != ACT_NULL)
-//                    {
-//                        mainPtr->getActs(i)->show();
-//                    }
-//                    else mainPtr->getActs(i)->hide();
-
                     if(actions[i] != ACT_NULL) mainPtr->getActs(i)->show();
                     else mainPtr->getActs(i)->hide();
                 }
@@ -532,9 +437,12 @@ void SelectWidget::refreshActs()
             ui->objName->setText(name);
             ui->objIcon->setPixmap(resMap["Button_Village"].front().scaled(110,110));
 
-            ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(30, 30));
-            if(objFarmer->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()));
-            else ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()) + "+" + QString::number(objFarmer->showATK_Addition())); // 显示攻击力（基础+额外）
+            if(objFarmer->getState() == 0 || objFarmer->getState() == 4)
+            {
+                ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(30, 30));
+                if(objFarmer->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()));
+                else ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()) + "+" + QString::number(objFarmer->showATK_Addition())); // 显示攻击力（基础+额外）
+            }
 
             if(objFarmer->getResourceSort() == HUMAN_WOOD) ui->objIconSmall->setPixmap(resMap["Icon_Wood"].front());
             else if(objFarmer->getResourceSort() == HUMAN_GRANARYFOOD || objFarmer->getResourceSort() == HUMAN_STOCKFOOD)
@@ -556,6 +464,21 @@ void SelectWidget::refreshActs()
             this->update();
             this->show();
 
+        }
+        else if(type == SORT_ARMY)
+        {
+            //objIconSmall_ATK objText_ATK用于展示攻击力 objIconSmall objText表示携带资源或者防御
+            Army* objArmy = (Army*)nowobject;
+            ui->objName->setText(objArmy->getChineseName());
+            ui->objIcon->setPixmap(resMap["Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel())].front().scaled(110,110));
+            ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(30, 30)); //攻击图标
+            if(objArmy->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()));
+            else ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic())+ "+" +QString::number(objArmy->showATK_Addition()));// 显示攻击力（基础+额外）
+
+            //设置血量
+            ui->objHp->setText(QString::number(objArmy->getBlood()) + "/" +QString::number(objArmy->getMaxBlood()));
+            this->update();
+            this->show();
         }
 //        else if(type == SORT_TREEFOREST)//树
 //        {

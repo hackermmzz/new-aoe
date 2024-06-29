@@ -488,6 +488,8 @@ void Map::generateResource() {
 void Map::generateCenter() {
     srand(time(NULL));
 
+    vector<Point>block_StockLab;
+    Point blockStock;
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
     player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
@@ -506,6 +508,14 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+    block_StockLab = findBlock_Flat(3);
+    blockStock = block_StockLab[rand()%block_StockLab.size()];
+    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
+
+    for(int i = 0 ; i < 3;i++)
+        for(int j = 0 ; j < 3; j++)
+            mapFlag[i+blockStock.x][j+blockStock.y] = true;
+
 
     // 生成城镇中心附近9 * 9部分的1棵随机位置的树
     // flag：0表示未生成，1表示已生成
@@ -826,15 +836,17 @@ bool Map::isFlat(Coordinate* judOb)
 {
     int blockDR = judOb->getBlockDR(),blockUR = judOb->getBlockUR() , blockSideLen = judOb->get_BlockSizeLen();
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
-    int maxHight = cell[blockDR][blockUR].getMapHeight(),minHight = maxHight,tempHight;
+    int maxHight = map_Height[blockDR][blockUR] ,minHight = maxHight,tempHight;
 
     for(int x = blockDR; x<sideR; x++)
     {
         for(int y = blockUR; y<sideU;y++)
         {
-            tempHight = cell[x][y].getMapHeight();
+            tempHight = map_Height[blockDR][blockUR];
             if(tempHight<minHight) minHight = tempHight;
             else if(tempHight>maxHight) maxHight= tempHight;
+
+            if(minHight == -1) return false;
         }
     }
 
@@ -918,6 +930,65 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
     return Block_Free;
 }
 
+vector<Point> Map::findBlock_Flat(int disLen )
+{
+    /**
+    * 仅在地图资源初始化时可使用，用于寻找建筑可建筑地点
+    * 输入：建筑的边长
+    * 输出：建筑可建的位置表，从中心开始往外扩展
+    *
+    */
+    int blockDR = MAP_L / 2 - 2, blockUR = MAP_L / 2 - 2 , blockSideLen = 4;
+
+    int sideRM = blockDR+blockSideLen, sideUM = blockUR+blockSideLen;
+    int sideRL = blockDR - disLen , sideUL = blockUR - disLen;
+
+    int bDRL,bURD,bDRR,bURU;
+    vector<Point> Block_Flat;
+    Point tempPoint;
+    int maxh,minh,temph;
+    bool isfalse;
+
+    do{
+        bDRL = max(0, sideRL++) , bURD = max(0, sideUL++) , bDRR = min(sideRM++, MAP_L - disLen) , bURU = min(sideUM++, MAP_U  - disLen);
+        //在给定范围内找寻指定区域平坦的格子
+        for(int x = bDRL; x<bDRR; x++)
+        {
+            for(int y = bURD; y<bURU;y++)
+            {
+                maxh = minh = map_Height[x][y];
+                if(mapFlag[x][y]) continue;
+
+                isfalse = false;
+                for(int i = 0 ; i < disLen; i++)
+                {
+                    for(int j = 0 ; j<disLen; j++)
+                    {
+                        temph = map_Height[x+i][y+j];
+                        if(temph>maxh) maxh = temph;
+                        else if(temph < minh) minh = temph;
+
+                        if(mapFlag[x+i][y+j] || minh == -1 || maxh!=minh)
+                        {
+                            isfalse = true;
+                            break;
+                        }
+                    }
+                    if(isfalse) break;
+                }
+                if(isfalse) continue;
+                tempPoint.x = x;
+                tempPoint.y = y;
+                Block_Flat.push_back(tempPoint);
+            }
+        }
+    }while(Block_Flat.empty());
+
+    return Block_Flat;
+}
+
+
+
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
     int vision = object->getVision()-1;
@@ -939,6 +1010,27 @@ vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
             blockLab.push_back(Point( x,y ));
         }
     }
+
+    return blockLab;
+}
+
+vector<Point> Map::get_ObjectBlock(Coordinate* object)
+{
+    /**
+    * 获取指定目标在地图上所占格子
+    * 输入:指定的object的Coorinate指针
+    * 传出:其所占格子的vector列表
+    */
+
+    int blockSidelen = object->get_BlockSizeLen();
+    Point position;
+    vector<Point> blockLab;
+    position.x = object->getBlockDR();
+    position.y = object->getBlockUR();
+
+    for(int x = 0 ; x < blockSidelen; x++)
+        for(int y = 0 ; y < blockSidelen; y++)
+            blockLab.push_back(Point(position.x+x , position.y + y));
 
     return blockLab;
 }
@@ -1171,7 +1263,7 @@ bool Map::loadResource() {
 //            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
 
             if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
-            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
+//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
             else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
             else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
             else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j)+BLOCKSIDELENGTH / 2 + tOffsetY); // 瞪羚

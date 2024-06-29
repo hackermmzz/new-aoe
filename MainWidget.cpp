@@ -113,16 +113,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //为map添加player指针
     map->setPlayer(player);
     map->init(MapJudge);
+    map->init_Map_Height();
 
     // 内存图开辟空间
     for(int i = 0;i < MEMORYROW; i++)
     {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
-
     // 向地图中添加资源
     initmap();
-    map->init_Map_Height();
+
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
@@ -136,6 +136,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
     player[0]->changeResource(2000,2000,2000,2000);
+    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     // 设置鼠标追踪
     ui->Game->setMouseTracking(true);
@@ -721,17 +722,14 @@ void MainWidget::respond_DebugMessage()
 void MainWidget::debugText(const QString& color, const QString& content)
 {
     if (color == "blue")
-    {
         ui->DebugTexter->insertHtml(COLOR_BLUE(sel->getShowTime() + content));
-    }
     else if (color == "red")
-    {
         ui->DebugTexter->insertHtml(COLOR_RED(sel->getShowTime() + content));
-    }
     else if (color == "green")
-    {
         ui->DebugTexter->insertHtml(COLOR_GREEN(sel->getShowTime() + content));
-    }
+    else if(color == "black")
+        ui->DebugTexter->insertHtml(COLOR_BLACK(sel->getShowTime() + content));
+
     ui->DebugTexter->insertPlainText("\n");
     QScrollBar *bar = ui->DebugTexter->verticalScrollBar();
     bar->setValue(bar->maximum());

@@ -86,28 +86,8 @@ void UsrAI::processData(){
         }
     }
 
-    for(tagBuilding building:tagUsrGame.getBuildings()){
-        sleep(0.5);
-        if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&building.Percent==100){
-            ins_id.push_back(BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER));
-        }
-        else if(building.Type==BUILDING_ARMYCAMP&&building.Project==ACT_NULL&&building.Percent==100){
-            ins_id.push_back(BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN));
-        }
-    }
-
-    ///测试获取地形高度
-    ofstream fout; // 创建一个ofstream对象
-    fout.open("map.txt"); // 打开或创建文件以写入数据
-    for(int i=0;i<MAP_L;i++){
-        for(int j=0;j<MAP_U;j++){
-            fout<<tagUsrGame.getMapHeight(i,j)<<" ";
-        }
-        fout<<endl;
-    }
-    fout.close();
-
     qDebug()<<"#####UsrEnd#####";
+
 /*###########YOUR CODE ENDS HERE###########*/
 }
 

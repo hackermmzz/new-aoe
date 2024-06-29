@@ -115,6 +115,7 @@
 #define COLOR_RED(STRING) QString("<font color=red>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_BLUE(STRING) QString("<font color=blue>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_GREEN(STRING) QString("<font color=green>%1</font><font color=black> </font>").arg(STRING)
+#define COLOR_BLACK(STRING) QString("<font color=black>%1</font><font color=black> </font>").arg(STRING)
 
 /********** 碰撞箱 **********/
 #define CRASHBOX_SINGLEBLOCK 16.36
