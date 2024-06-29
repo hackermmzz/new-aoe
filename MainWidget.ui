@@ -243,6 +243,16 @@
     </rect>
    </property>
   </widget>
+  <widget class="ViewWidget" name="mapView" native="true">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>810</y>
+     <width>513</width>
+     <height>177</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -256,6 +266,12 @@
    <class>ActWidget</class>
    <extends>QWidget</extends>
    <header>ActWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ViewWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">ViewWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -124,6 +124,13 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->changeResource(2000,2000,2000,2000);
     player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
+    // 给小地图传递list
+    ui->mapView->setFriendlyFarmerList(&(player[0]->human));
+    ui->mapView->setEnemyFarmerList(&(player[1]->human));
+    ui->mapView->setFriendlyBuildList(&(player[0]->build));
+    ui->mapView->setEnemyBuildList(&(player[1]->build));
+    ui->mapView->setAnimalList(&(map->animal));
+    ui->mapView->setResList(&(map->staticres));
     debugText("blue"," 游戏开始");
 }
 
@@ -648,6 +655,8 @@ void MainWidget::showPlayerResource(int playerRepresent)
 void MainWidget::statusUpdate()
 {
     showPlayerResource(0);
+    ui->mapView->screenL = ui->Game->getBlockDR();
+    ui->mapView->screenU = ui->Game->getBlockUR();
 }
 
 // 游戏帧更新
@@ -658,10 +667,10 @@ void MainWidget::FrameUpdate()
 
     gameframe++;
     g_frame=gameframe;
-
     ui->lcdNumber->display(gameframe);
     ui->Game->update();
     core->gameUpdate();
+    ui->mapView->update();
     statusUpdate();
     core->infoShare();
     UsrAi->start();///AI线程尝试开始
