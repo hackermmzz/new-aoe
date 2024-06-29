@@ -190,7 +190,6 @@ void SelectWidget::refreshActs()
     //updateActs里面setActStatus的一系列判断条件都也要写到(复制，两个地方都要有，updateActs更新建筑的action,actionStatus数组要用于手操按钮游玩时判定是否可以执行行动)doActs的对应行动里面(用于拒绝ai无效命令)
     bool isBuild ,isBuildingAct;
     int buildType , buildingActType;
-
     if(nowobject != NULL)
     {
         if(nowobject->getActSpeed() > 0) ui->objText->setText(QString::number((int)(nowobject->getActPercent())) + "%");//如果有进行中的任务则显示进度

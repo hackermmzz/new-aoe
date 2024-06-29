@@ -28,14 +28,13 @@ public:
 
     //获取debug窗口显示时间
     QString getShowTime();
-
+    int actions[ACT_WINDOW_NUM_FREE] = {0};
 private:
     Ui::SelectWidget *ui;
 //    Building * objBuilding;
 //    Coores * objCoores;
 //    GameRes * objGameRes;
 //    Human * objHuman;
-    int actions[ACT_WINDOW_NUM_FREE] = {0};
     int actionStatus[ACT_WINDOW_NUM_FREE] = {0};
     MainWidget *mainPtr;
 

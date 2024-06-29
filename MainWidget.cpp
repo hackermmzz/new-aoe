@@ -22,7 +22,21 @@ std::map<int, std::string> actNames = {
     {ACT_BUILD_FARM, ACT_BUILD_FARM_NAME},
     {ACT_BUILD_MARKET, ACT_BUILD_MARKET_NAME},
     {ACT_BUILD_ARROWTOWER, ACT_BUILD_ARROWTOWER_NAME},
-    {ACT_NULL, ACT_NULL_NAME}
+    {ACT_NULL, ACT_NULL_NAME},
+    {ACT_ARMYCAMP_CREATE_CLUBMAN, ACT_ARMYCAMP_CREATE_CLUBMAN_NAME},
+    {ACT_ARMYCAMP_CREATE_SLINGER, ACT_ARMYCAMP_CREATE_SLINGER_NAME},
+    {ACT_ARMYCAMP_UPGRADE_CLUBMAN, ACT_ARMYCAMP_UPGRADE_CLUBMAN_NAME},
+    {ACT_BUILD_ARMYCAMP, ACT_BUILD_ARMYCAMP_NAME},
+    {ACT_BUILD_RANGE, ACT_BUILD_RANGE_NAME},
+    {ACT_BUILD_STABLE, ACT_BUILD_STABLE_NAME},
+    {ACT_RANGE_CREATE_BOWMAN, ACT_RANGE_CREATE_BOWMAN_NAME},
+    {ACT_RESEARCH_WALL, ACT_RESEARCH_WALL_NAME},
+    {ACT_STABLE_CREATE_SCOUT, ACT_STABLE_CREATE_SCOUT_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_ARCHER, ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_RIDER, ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME},
+    {ACT_STOCK_UPGRADE_USETOOL, ACT_STOCK_UPGRADE_USETOOL_NAME},
+
 };
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
@@ -123,6 +137,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //设置user初始资源
     player[0]->changeResource(2000,2000,2000,2000);
 
+    // 设置鼠标追踪
+    ui->Game->setMouseTracking(true);
+    ui->Game->setAttribute(Qt::WA_MouseTracking,true);
+    ui->Game->installEventFilter(this);
+
+    // 设置提示颜色
+    QPalette pe;
+    pe.setColor(QPalette::WindowText,Qt::green);
+    ui->tip->setPalette(pe);
+    tipLbl = ui->tip;
     // 给小地图传递list
     ui->mapView->setFriendlyFarmerList(&(player[0]->human));
     ui->mapView->setEnemyFarmerList(&(player[1]->human));
@@ -619,7 +643,7 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
     {
         if(watched == acts[i] && !acts[i]->isHidden()) {
             if(event->type() == QEvent::HoverEnter) {
-                ui->tipLbl->setText(QString::fromStdString(actNames[acts[i]->getActName()]));
+                ui->tip->setText(QString::fromStdString(actNames[sel->actions[i]]));
                 if(acts[i]->getStatus() != 2)
                 {
                     acts[i]->setStatus(0);
@@ -634,7 +658,7 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
             }
             else if(event->type() == QEvent::HoverLeave && acts[i]->getStatus() != 2)
             {
-                ui->tipLbl->setText("");
+                ui->tip->setText("");
             }
         }
     }
@@ -656,6 +680,8 @@ void MainWidget::statusUpdate()
     showPlayerResource(0);
     ui->mapView->screenL = ui->Game->getBlockDR();
     ui->mapView->screenU = ui->Game->getBlockUR();
+    ui->statusLbl->setText(sel->getShowTime() + QString::fromStdString("\n"));
+    ui->version->setText(QString::fromStdString(GAME_VERSION));
 }
 
 // 游戏帧更新
@@ -670,6 +696,8 @@ void MainWidget::FrameUpdate()
     ui->Game->update();
     core->gameUpdate();
     ui->mapView->update();
+    ui->tip->update();
+    ui->statusLbl->update();
     statusUpdate();
     core->infoShare();
     UsrAi->start();///AI线程尝试开始
