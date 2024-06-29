@@ -85,7 +85,7 @@ public:
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
     MouseEvent *mouseEvent=new MouseEvent();
-
+    QLabel *tipLbl =NULL;
 private slots:
     void FrameUpdate();
 
