@@ -58,7 +58,7 @@ public:
     //当前能达到的最大人口数目
     int getHumanNumCanReach(){ return getMaxHumanNum()<humanNum_Top? getMaxHumanNum(): humanNum_Top; }
     //是否仍有空间添加人口
-    bool get_isHumanHaveSpace(){ return get_humanNum()<=getHumanNumCanReach(); }
+    bool get_isHumanHaveSpace(){ return get_humanNum()<getHumanNumCanReach(); }
 
     /***************当前建筑信息*******************/
     //获取当前房屋数目

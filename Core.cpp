@@ -677,6 +677,12 @@ void Core::judge_Crush()
                 barrierOb = theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ][k];
                 if(judOb == barrierOb ) continue;
 
+                /****当前取消移动物体之间的碰撞******/
+                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
+                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
+                if(barrierOb->getSort() == SORT_STATICRES && barrierOb->getNum() == NUM_STATICRES_Bush) continue;   //浆果不碰撞
+                /****当前取消移动物体之间的碰撞******/
+
                 //判断碰撞，碰撞箱有重合
                 if(judOb->isCrash(barrierOb))break;
             }
