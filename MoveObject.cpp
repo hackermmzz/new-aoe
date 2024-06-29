@@ -135,54 +135,54 @@ int MoveObject::calculateAngle(double nextDR, double nextUR)
     return flag;
 }
 
-//void MoveObject::setNextBlock()
-//{
-//    if(pathI==0)
-//    {
-//        Point p=path.top();
-//        this->nextBlockDR=p.x;
-//        this->nextBlockUR=p.y;
-//        this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
-//        this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
-//        path.pop();
-//    }
-//    else
-//    {
-//        Point p=path.top();
-//        int lastBlockDR=nextBlockDR;
-//        int lastBlockUR=nextBlockUR;
-//        this->nextBlockDR=p.x;
-//        this->nextBlockUR=p.y;
-//        this->nextDR=DR+(nextBlockDR-lastBlockDR)*BLOCKSIDELENGTH;
-//        this->nextUR=UR+(nextBlockUR-lastBlockUR)*BLOCKSIDELENGTH;
-//        path.pop();
-//    }
-
-//}
-
 void MoveObject::setNextBlock()
 {
-    if(path.size())
+    if(pathI==0)
     {
-        Point p = path.top();
-        if(pathInit)
-        {
-            this->nextBlockDR=p.x;
-            this->nextBlockUR=p.y;
-            this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
-            this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
-            pathInit = false;
-        }
-        else
-        {
-            nextDR = DR+(p.x - nextBlockDR)*BLOCKSIDELENGTH;
-            nextUR = UR+(p.y - nextBlockUR)*BLOCKSIDELENGTH;
-            this->nextBlockDR=p.x;
-            this->nextBlockUR=p.y;
-        }
+        Point p=path.top();
+        this->nextBlockDR=p.x;
+        this->nextBlockUR=p.y;
+        this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
+        this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
         path.pop();
     }
+    else
+    {
+        Point p=path.top();
+        int lastBlockDR=nextBlockDR;
+        int lastBlockUR=nextBlockUR;
+        this->nextBlockDR=p.x;
+        this->nextBlockUR=p.y;
+        this->nextDR=DR+(nextBlockDR-lastBlockDR)*BLOCKSIDELENGTH;
+        this->nextUR=UR+(nextBlockUR-lastBlockUR)*BLOCKSIDELENGTH;
+        path.pop();
+    }
+
 }
+
+//void MoveObject::setNextBlock()
+//{
+//    if(path.size())
+//    {
+//        Point p = path.top();
+//        if(pathInit)
+//        {
+//            this->nextBlockDR=p.x;
+//            this->nextBlockUR=p.y;
+//            this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
+//            this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
+//            pathInit = false;
+//        }
+//        else
+//        {
+//            nextDR = DR+(p.x - nextBlockDR)*BLOCKSIDELENGTH;
+//            nextUR = UR+(p.y - nextBlockUR)*BLOCKSIDELENGTH;
+//            this->nextBlockDR=p.x;
+//            this->nextBlockUR=p.y;
+//        }
+//        path.pop();
+//    }
+//}
 
 void MoveObject::updateMove()
 {
