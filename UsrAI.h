@@ -22,9 +22,6 @@ private:
         UsrIns.lock.unlock();
         return ins.id;
     }
-    instruction getInsRet(int id){
-        return tagUsrGame.getInsRet(id);
-    }
     void clearInsRet() override{
         tagUsrGame.clearInsRet();
     }

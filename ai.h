@@ -24,8 +24,7 @@ public:
     int HumanAction(int SN, int obSN);
     int HumanBuild(int SN, int BuildingNum, int BlockL, int BlockU);
     int BuildingAction(int SN, int Action);
-    virtual instruction getInsRet(int id) = 0;
-    void printInsRet(int id);
+//    void printInsRet(int id);
 
 public slots:
     void startProcessing() {

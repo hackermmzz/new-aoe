@@ -20,24 +20,25 @@ vector<int> ins_id;//添加到监视的指令数组
 void UsrAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
     qDebug()<<"#####UsrStart#####";
-//    qDebug()<<tagUsrGame.getGameFrame();
+    qDebug()<<tagUsrGame.getInfo().GameFrame;
     sleep(2);
     //打印添加到监视的指令执行结果，并从监视中删除
     auto it = ins_id.begin();
     while (it != ins_id.end()) {
-        instruction tmp=getInsRet(*it);
-        if (tmp.isExist()) {
-            printInsRet(*it);
+        try {
+            int value = tagUsrGame.getInfo().ins_ret.at(*it);
+            qDebug()<<"ins:"<<*it<<":"<<value;
             it = ins_id.erase(it);
-        } else {
-            ++it;
+        } catch (const std::out_of_range& e) {
+            qDebug() << "Key not found";
+             ++it;
         }
     }
 
 //    for(tagResource res:tagUsrGame.getResource()){
 //        qDebug()<<res.Type<<" "<<res.BlockL<<" "<<res.BlockU;
 //    }
-    for(tagFarmer human:tagUsrGame.getFarmers()){
+    for(tagFarmer human:tagUsrGame.getInfo().farmers){
         if(human1==-1){
            human1=human.SN;
            break;
@@ -51,12 +52,12 @@ void UsrAI::processData(){
 //            break;
 //        }
     }
-    for(tagFarmer human:tagUsrGame.getFarmers()){
+    for(tagFarmer human:tagUsrGame.getInfo().farmers){
         sleep(0.5);
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
-            for(tagResource res:tagUsrGame.getResource()){
+            for(tagResource res:tagUsrGame.getInfo().resources){
                 if(countdistance(mid,mid,res.DR,res.UR)<dis){
                     sn=res.SN;
                     dis=countdistance(mid,mid,res.DR,res.UR);
@@ -77,7 +78,7 @@ void UsrAI::processData(){
         }else if(human.SN==human3&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
-            for(tagResource res:tagUsrGame.getResource()){
+            for(tagResource res:tagUsrGame.getInfo().resources){
                 if(res.ProductSort==HUMAN_STOCKFOOD&&res.Type!=RESOURCE_BUSH&&countdistance(mid,mid,res.DR,res.UR)<dis){
                     sn=res.SN;
                     dis=countdistance(mid,mid,res.DR,res.UR);
