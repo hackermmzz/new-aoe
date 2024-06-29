@@ -326,6 +326,11 @@ void SelectWidget::refreshActs()
         ui->objText_ATK->setText("");
         ui->objIconSmall->setPixmap(QPixmap());
         ui->objIconSmall_ATK->setPixmap(QPixmap());
+        for(int i = 0 ; i<ACT_WINDOW_NUM_FREE; i++)
+        {
+            actionStatus[i] = ACT_STATUS_DISABLED;
+            actions[i] = ACT_NULL;
+        }
         this->hide();
         this->update();
     }
@@ -357,7 +362,6 @@ void SelectWidget::refreshActs()
             //同步行动状态至窗口
             if(objBuilding->isFinish())
             {
-
                 //后续简化代码
                 if(isActing)
                 {
@@ -409,6 +413,11 @@ void SelectWidget::refreshActs()
             {
                 ui->objText->setText(QString::number((int)(objBuilding->getPercent())) + "%");
                 ui->objIconSmall->setPixmap(resMap["SmallIcon_Sandglass"].front());
+                for(int i = 0 ; i<ACT_WINDOW_NUM_FREE; i++)
+                {
+                    actions[i] = ACT_NULL;
+                    actionStatus[i] = ACT_STATUS_DISABLED;
+                }
             }
             this->update();
             this->show();//必要的update和show
@@ -1050,7 +1059,7 @@ void SelectWidget::drawActs()
                 break;
             }
         }
-//        else if(actions[i] == ACT_ARMYCAMP_CREATE_SLINGER) pix = resMap["Button_"].front().scaled(80,80);
+//        else if(actions[i] == ACT_ARMYCAMP_CREATE_SLINGER) pix = resMap["Button_Slinger"].front().scaled(80,80);
         else if(actions[i] == ACT_RANGE_CREATE_BOWMAN) pix = resMap["Button_Archer"].front().scaled(80,80);
         else if(actions[i] == ACT_STABLE_CREATE_SCOUT) pix = resMap["Button_Scout"].front().scaled(80,80);
 
