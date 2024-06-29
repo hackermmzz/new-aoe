@@ -99,16 +99,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //为map添加player指针
     map->setPlayer(player);
     map->init(MapJudge);
+    map->init_Map_Height();
 
     // 内存图开辟空间
     for(int i = 0;i < MEMORYROW; i++)
     {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
-
     // 向地图中添加资源
     initmap();
-    map->init_Map_Height();
+
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
