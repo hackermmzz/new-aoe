@@ -164,6 +164,21 @@ void GameWidget::paintEvent(QPaintEvent *)
         }
     }
 
+    if(nowobject!=NULL)
+    {
+        painter.setPen(Qt::white);
+        int width=nowobject->getimageX()*2;
+        int height=nowobject->getimageY()*2;
+        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getimageX();
+        int Y=tranY(nowobject->getDR()-DR,nowobject->getUR()-UR) - height / 2;
+        QPolygonF diamond;
+        diamond << QPointF(X+width/2, Y);
+        diamond << QPointF(X+width, Y+height/2);
+        diamond << QPointF(X+width/2, Y+height);
+        diamond << QPointF(X, Y+height/2);
+        painter.drawPolygon(diamond);
+    }
+
     //drawlist正常绘制
     if(!drawlist.empty())
     {

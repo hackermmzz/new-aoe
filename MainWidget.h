@@ -88,8 +88,7 @@ public:
     QLabel *tipLbl =NULL;
 private slots:
     void FrameUpdate();
-
-
+    void onRadioClickSlot();
 
 signals:
     void mapmove();
@@ -100,11 +99,16 @@ private:
     QTimer *timer;
     QTimer *showTimer;
     int gameframe;
+    QButtonGroup *pbuttonGroup;
+
+    void gameDataUpdate();
+    void paintUpdate();
+
 //    tagGame *Game=new tagGame;
 //    int Winnning=0;
 //    int Lose = 0;
 //    int flag=0;
-//    QButtonGroup *pbuttonGroup;
+
 //    double *ArrowTowerBlockL=new double[3];
 //    double *ArrowTowerBlockU=new double[3];
 //    int ArrowTowerBuilt[3]={0,0,0};
