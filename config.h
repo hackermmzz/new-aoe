@@ -167,13 +167,13 @@
 
 /**房子**/
 #define BLOOD_BUILD_HOUSE 75
-#define VISION_HOME 3
+#define VISION_HOME 4
 #define BUILD_HOUSE_WOOD 30
 #define TIME_BUILD_HOME 20
 
 /**仓库**/
 #define BLOOD_BUILD_STOCK 350
-#define VISION_STOCK 3
+#define VISION_STOCK 4
 #define BUILD_STOCK_WOOD 120
 #define TIME_BUILD_STOCK 30
 //升级工具利用（1级）
@@ -223,7 +223,7 @@
 
 /**靶场**/
 #define BLOOD_BUILD_RANGE 350
-#define VISION_RANGE 3
+#define VISION_RANGE 4
 #define BUILD_RANGE_WOOD 150
 #define TIME_BUILD_RANGE 40
 //生产弓箭手
@@ -233,7 +233,7 @@
 
 /**马厩**/
 #define BLOOD_BUILD_STABLE 350
-#define VISION_STABLE 3
+#define VISION_STABLE 4
 #define BUILD_STABLE_WOOD 150
 #define TIME_BUILD_STABLE 40
 //生产侦察骑兵

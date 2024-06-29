@@ -79,7 +79,7 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
     int x0 = (blockSize - 1)/2;  //计算的原点
     int y0 = x0;
     int changeY;
-
+ 
     lx = - visionLen + 1;
     mx =2*x0 + visionLen;
     my = mx;

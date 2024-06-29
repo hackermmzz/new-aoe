@@ -991,27 +991,39 @@ vector<Point> Map::findBlock_Flat(int disLen )
 
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
-    int vision = object->getVision()-1;
-    int blockSidelen = object->get_BlockSizeLen()-1;
-    Point position;
-    position.x = object->getBlockDR();
-    position.y = object->getBlockUR();
-    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
-    int lx = position.x-vision, ly = position.y-vision;
-    vector<Point> blockLab;
+//    int vision = object->getVision()-1;
+//    int blockSidelen = object->get_BlockSizeLen()-1;
+//    Point position;
+//    position.x = object->getBlockDR();
+//    position.y = object->getBlockUR();
+//    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
+//    int lx = position.x-vision, ly = position.y-vision;
+//    vector<Point> blockLab;
 
-    for(int x = lx; x<=mx;x++)
+//    for(int x = lx; x<=mx;x++)
+//    {
+//        for(int y = ly; y<=my; y++)
+//        {
+//            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
+//            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
+
+//            blockLab.push_back(Point( x,y ));
+//        }
+//    }
+//    return blockLab;
+
+    Point position(object->getBlockDR() , object->getBlockUR());
+    Point visionPoint;
+    vector<Point> blockLab = object->getViewLab();
+    vector<Point> visionLab;
+    int labSize = blockLab.size();
+    for(int i = 0 ; i<labSize; i++)
     {
-        for(int y = ly; y<=my; y++)
-        {
-            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
-            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
-
-            blockLab.push_back(Point( x,y ));
-        }
+        visionPoint = position+blockLab[i];
+        visionLab.push_back(visionPoint);
     }
 
-    return blockLab;
+    return visionLab;
 }
 
 vector<Point> Map::get_ObjectBlock(Coordinate* object)
