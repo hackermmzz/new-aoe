@@ -93,6 +93,8 @@ private slots:
 
 signals:
     void mapmove();
+    void startAI();
+    void stopAI();
 private:
     Ui::MainWidget *ui;
     QTimer *timer;

@@ -22,9 +22,6 @@ private:
         EnemyIns.lock.unlock();
         return ins.id;
     }
-    instruction getInsRet(int id){
-        return tagEnemyGame.getInsRet(id);
-    }
     void clearInsRet() override{
         tagEnemyGame.clearInsRet();
     }
