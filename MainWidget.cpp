@@ -118,11 +118,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     map = new Map;
     //为map添加player指针
     map->setPlayer(player);
-    qDebug()<<"2.2";
     map->init(MapJudge);
-    qDebug()<<"2.3";
     map->init_Map_Height();
-    qDebug()<<"2";
     // 内存图开辟空间
     for(int i = 0;i < MEMORYROW; i++)
     {

@@ -497,9 +497,9 @@ void SelectWidget::refreshActs()
             ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
             if(objArmy->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()));
             else ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic())+ "+" +QString::number(objArmy->showATK_Addition()));// 显示攻击力（基础+额外）
-            if(objArmy->showDEF_Close_Addition() == 0) ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close_Addition()));
+            if(objArmy->showDEF_Close_Addition() == 0) ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()));
             else ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()) + "+" + QString::number(objArmy->showDEF_Close_Addition())); // 显示近战防御（基础+额外）
-            if(objArmy->showDEF_Shoot_Addition() == 0) ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot_Addition()));
+            if(objArmy->showDEF_Shoot_Addition() == 0) ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot()));
             else ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot()) + "+" + QString::number(objArmy->showDEF_Shoot_Addition())); // 显示远程防御（基础+额外）
             //设置血量
             ui->objHp->setText(QString::number(objArmy->getBlood()) + "/" +QString::number(objArmy->getMaxBlood()));
