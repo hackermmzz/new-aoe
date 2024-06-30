@@ -1090,7 +1090,7 @@ void Core_List::initDetailList()
     //行动: 攻击**************************************
     {
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK)};
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
         forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
