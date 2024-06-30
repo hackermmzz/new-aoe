@@ -360,12 +360,13 @@
  * 5代表正在采集果子的状态
  * 6代表正在建造建筑的状态
  * 7代表正在修理建筑的状态
- * 8代表为进行攻击的状态 在攻击状态的下边进行特判 采用不同的方式计算
+ * 8代表为进行攻击的状态
  * 9代表为正在返回资源建筑的状态，即放置资源
  * 10代表正在前往攻击的状态
  * 11代表人物遇到障碍物停止移动的状态
  * 12代表种地
  * 13代表正在采集肉的状态
+ * 14代表正在走向目的地的状态
  * 后续补充
  */
 #define HUMAN_STATE_IDLE 0
@@ -382,6 +383,7 @@
 #define HUMAN_STATE_STOP 11
 #define HUMAN_STATE_FARMING 12
 #define HUMAN_STATE_BUTCHERING 13
+#define HUMAN_STATE_JUSTWALKING 14
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
