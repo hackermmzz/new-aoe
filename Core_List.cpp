@@ -1114,7 +1114,7 @@ void Core_List::initDetailList()
                                /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move ,\
                                /*12*/ CoreDetail_JumpPhase};
         conditionList = new conditionF[13]{ conditionF( condition_AllTrue), \
-                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
+                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK),\
                 /*3*/conditionF(condition_AllTrue) ,                                /*4*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
                 /*5*/conditionF(condition_Object1_EmptyBackpack),                   /*6*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
                 /*7*/conditionF(condition_Object1_FullBackpack) , \

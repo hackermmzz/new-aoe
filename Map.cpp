@@ -1020,6 +1020,7 @@ vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
     for(int i = 0 ; i<labSize; i++)
     {
         visionPoint = position+blockLab[i];
+        if(visionPoint.x<0 || visionPoint.x>=MAP_L || visionPoint.y<0 || visionPoint.y>=MAP_U) continue;
         visionLab.push_back(visionPoint);
     }
 

@@ -123,6 +123,8 @@ public:
 
     void init_BuildAttackAct(){ defencing = false; missionThrowTimer = 0; }
 
+    bool isAttackBegin(){ return missionThrowTimer == 0;}
+
 protected:
   /********************静态资源**************************/
     static std::list<ImageResource> *build[4];//建设list
