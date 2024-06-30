@@ -294,6 +294,7 @@ void Army::setAttribute()
         crashLength = CRASHBOX_SINGLEOB;
 
         type_Missile = Missile_Cobblestone;
+        phaseFromEnd_MissionAttack = THROWMISSION_SLINGER;
         break;
 
     case AT_BOWMAN:     //弓箭手
