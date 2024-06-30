@@ -458,7 +458,7 @@ void SelectWidget::refreshActs()
 
             if(objFarmer->getState() == 0 || objFarmer->getState() == 4)
             {
-                ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(30, 30));
+                ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30));
                 if(objFarmer->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()));
                 else ui->objText_ATK->setText(QString::number(objFarmer->showATK_Basic()) + "+" + QString::number(objFarmer->showATK_Addition())); // 显示攻击力（基础+额外）
 
@@ -491,7 +491,9 @@ void SelectWidget::refreshActs()
             Army* objArmy = (Army*)nowobject;
             ui->objName->setText(objArmy->getChineseName());
             ui->objIcon->setPixmap(resMap["Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel())].front().scaled(110,110));
-            ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(30, 30)); //攻击图标
+            ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); //攻击图标
+            ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
+            ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
             if(objArmy->showATK_Addition() == 0) ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()));
             else ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic())+ "+" +QString::number(objArmy->showATK_Addition()));// 显示攻击力（基础+额外）
             if(objArmy->showDEF_Close_Addition() == 0) ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close_Addition()));
