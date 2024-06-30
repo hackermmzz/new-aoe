@@ -519,6 +519,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 {
     bool calculateDamage = false;
     int damage; //记录伤害
+    int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
     Missile* missile = NULL;
@@ -554,6 +555,8 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     {
         calculateDamage = true;
         attacker = missile->getAttackAponsor();
+
+        extra_damage += missile->get_AttackAddition_Height(theMap->get_MapHeight(object2->getBlockDR() ,object2->getBlockUR()));
         if(!attackee->isGotAttack())
         {
             if(missile->isAttackerHaveDie())
@@ -568,7 +571,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
-        damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
+        damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
     }
@@ -1056,7 +1059,7 @@ Missile* Core_List::creatMissile(Coordinate* attacker ,Coordinate* attackee)
     if(judHuman!=NULL) playerRepresent = judHuman->getPlayerRepresent();
     if(judBuild!= NULL) playerRepresent = judBuild->getPlayerRepresent();
 
-    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee);
+    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
     else return NULL;
 }
 
