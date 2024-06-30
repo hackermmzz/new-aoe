@@ -527,8 +527,22 @@ void Core::manageMouseEvent()
                     switch (object_click->getSort())
                     {
                         case SORT_ANIMAL:
-
                             interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+                            break;
+                        case SORT_Building_Resource:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            break;
+                        case SORT_BUILDING:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            else
+                                interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            break;
+                        case SORT_ARMY:
+                        case SORT_FARMER:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:
                             break;
@@ -543,10 +557,24 @@ void Core::manageMouseEvent()
                         case SORT_ANIMAL:
                             interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
                             break;
+                        case SORT_Building_Resource:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            break;
+                        case SORT_BUILDING:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            else
+                                interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            break;
+                        case SORT_ARMY:
+                        case SORT_FARMER:
+                            if(object_click->getPlayerRepresent() != 0)
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            break;
                         default:
                             break;
                     }
-
                     break;
                 case SORT_ANIMAL:
                     if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );

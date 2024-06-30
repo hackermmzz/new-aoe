@@ -95,9 +95,9 @@ public:
         { interactSort = interSort ; interactNum = interNum; interact_sameRepresent = interRepresent; interactBui_builtUp = interBui_builtUp; }
 
     vector<Point> getViewLab(){
-        if(viewLab[(int)BlockSizeLen][vision].empty() && BlockSizeLen>0 && vision > 2) setViewLab((int)BlockSizeLen , vision);
+        if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>0 && getVision() > 1) setViewLab((int)BlockSizeLen , getVision());
 
-        return viewLab[(int)BlockSizeLen][vision];
+        return viewLab[(int)BlockSizeLen][getVision()];
     }
 
 /*****************act获取***************/
@@ -179,7 +179,7 @@ protected:
     /*****************act获取***************/
 
     void initNowresTimer(){ nowres_changeRecord = 0; }
-    bool isNowresShift(){
+    bool isNowresShift(){   //用于限制nowres切换，以降低图像资源循环速度
         if(nowres_step == nowres_changeRecord)
         {
             nowres_changeRecord = 0;

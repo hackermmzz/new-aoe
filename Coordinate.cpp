@@ -84,9 +84,10 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
     mx =2*x0 + visionLen;
     my = mx;
 
-    if(blockSize == 1 && visionLen == 3)
+    if(blockSize == 1 && visionLen == 2)
     {
         viewBlock.y = y0;
+        mx++; my++; lx--;
         for(int x = lx ; x < mx ; x++)
         {
             viewBlock.x = x;
@@ -98,7 +99,7 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
             Coordinate::addViewLab(viewLab[blockSize][visionLen] , lx , mx , y , 2*y0 - y);
         }
     }
-    else if(visionLen<8)
+    else if(visionLen<7)
     {
         viewBlock.y = y0;
         for(int x = lx ; x < mx; x++)
