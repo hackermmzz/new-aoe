@@ -205,6 +205,8 @@ struct detail_EventPhase
     relation_Object& 对象的关系（内含目标对象） ，
     int& 操作控制符 ，
     bool 是否取反（true表取反，flase按原真值输出） ）
+
+    条件函数返回true表示需要阶段切换/需要强制中止行动等
 */
 
 //永真
@@ -227,6 +229,9 @@ bool condition_Object1_FullBackpack( Coordinate* , relation_Object& , int& ,bool
 bool condition_ObjectNearby( Coordinate* , relation_Object& , int& ,bool);
 //object目标能被采集
 bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int& ,bool);
+
+//object攻击进程
+bool condition_Object1_AttackingEnd(Coordinate* , relation_Object& ,int& ,bool);
 
 //取消判断无效的行动
 bool condition_UselessAction(Coordinate* , relation_Object& , int& ,bool);

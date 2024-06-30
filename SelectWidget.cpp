@@ -490,7 +490,8 @@ void SelectWidget::refreshActs()
             //objIconSmall_ATK objText_ATK用于展示攻击力 objIconSmall objText表示携带资源或者防御
             Army* objArmy = (Army*)nowobject;
             ui->objName->setText(objArmy->getChineseName());
-            ui->objIcon->setPixmap(resMap["Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel())].front().scaled(110,110));
+            if(objArmy->getNum()!=AT_SLINGER)
+                ui->objIcon->setPixmap(resMap["Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel())].front().scaled(110,110));
             ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); //攻击图标
             ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
             ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
@@ -619,61 +620,6 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
 
         actions[9] = ACT_BUILD_CANCEL;
         actionStatus[9] = ACT_STATUS_ENABLED;
-
-//        if(mainPtr->player[0]->getWood() < BUILD_HOUSE_WOOD)
-//        {
-//            actionStatus[0] = ACT_STATUS_DISABLED;
-//        }
-//        if(mainPtr->player[0]->getWood() < BUILD_GRANARY_WOOD)
-//        {
-//            actionStatus[1] = ACT_STATUS_DISABLED;
-//        }
-//        if(mainPtr->player[0]->getWood() < BUILD_STOCK_WOOD)
-//        {
-//            actionStatus[2] = ACT_STATUS_DISABLED;
-//        }
-
-//        if(mainPtr->player[0]->getCiv() == CIVILIZATION_TOOLAGE)
-//        {
-            //设置按钮位置
-//            mainPtr->getActs(3)->setPix(resMap["Button_Farm"].front().scaled(80,80));
-//            mainPtr->getActs(3)->show();
-//            actions[3] = ACT_BUILD_FARM;
-//            mainPtr->getActs(4)->setPix(resMap["Button_Market"].front().scaled(80,80));
-//            mainPtr->getActs(4)->show();
-//            actions[4] = ACT_BUILD_MARKET;
-//            mainPtr->getActs(5)->setPix(resMap["Button_ArrowTower"].front().scaled(80,80));
-//            mainPtr->getActs(5)->show();
-//            actions[5] = ACT_BUILD_ARROWTOWER;
-//            mainPtr->getActs(6)->setPix(resMap["Exit"].front().scaled(80,80));
-//            mainPtr->getActs(6)->show();
-//            actions[6] = ACT_BUILD_CANCEL;
-//            std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
-//            bool isGranaryBuilt = false, isMarketBuilt = false;
-//            for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
-//            {
-//                if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish())//建成谷仓
-//                {
-//                    isGranaryBuilt = true;
-//                }
-//                if((*buildIt)->getNum() == BUILDING_MARKET && (*buildIt)->isFinish())//建成市场
-//                {
-//                    isMarketBuilt = true;
-//                }
-//            }
-//            if(!isGranaryBuilt || mainPtr->player[0]->getWood() < BUILD_MARKET_WOOD)
-//            {
-//                actionStatus[4] = ACT_STATUS_DISABLED;
-//            }
-//            if(!isMarketBuilt || mainPtr->player[0]->getWood() < BUILD_FARM_WOOD)
-//            {
-//                actionStatus[3] = ACT_STATUS_DISABLED;
-//            }
-//            if(!mainPtr->player[0]->getArrowTowerUnlocked() || mainPtr->player[0]->getStone() < BUILD_ARROWTOWER_STONE)
-//            {
-//                actionStatus[5] = ACT_STATUS_DISABLED;
-//            }
-//        }
     }
     else if(actName == ACT_BUILD_HOUSE){
         QApplication::restoreOverrideCursor();
@@ -736,83 +682,23 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
         initActs();
     }
     else if(actName == ACT_CREATEFARMER){
-//        if(mainPtr->player[0]->getFood() < BUILDING_CENTER_CREATEFARMER_FOOD) return ACTION_INVALID_RESOURCE;
-//        mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_CENTER_CREATEFARMER_FOOD);
-        //设置actpercent行动速度
-//        nowobject->setActPercent(0);
-//        nowobject->setActSpeed(0.25);//设置每帧完成进度,进度到达100.0即完成
-//        nowobject->setActNum(BUILDING_CENTER_CREATEFARMER);
-//        nowobject->setActName(ACT_CREATEFARMER);
         core->addRelation(nowobject , CoreEven_BuildingAct,BUILDING_CENTER_CREATEFARMER);
     }
-    else if(actName == ACT_UPGRADE_AGE)
-    {
-//        std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
-//        bool isGranaryBuilt = false, isStockBuilt = false;
-//        for(; buildIt != mainPtr->player[0]->build.end(); buildIt++)
-//        {
-//            if((*buildIt)->getNum() == BUILDING_GRANARY && (*buildIt)->isFinish()) isGranaryBuilt = true;
-//            else if((*buildIt)->getNum() == BUILDING_STOCK && (*buildIt)->isFinish()) isStockBuilt = true;
-//        }
-//        if(!isGranaryBuilt || !isStockBuilt) return ACTION_INVALID_ACTION;
-
-//        if(mainPtr->player[0]->getFood() < BUILDING_CENTER_UPGRADE_FOOD) return ACTION_INVALID_RESOURCE;
-
+    else if(actName == ACT_UPGRADE_AGE){
         if(mainPtr->player[0]->get_civiBuild_Times(mainPtr->player[0]->getCiv())>=2)
             core->addRelation(nowobject, CoreEven_BuildingAct , BUILDING_CENTER_UPGRADE);
-
-//        mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_CENTER_UPGRADE_FOOD);
-//        nowobject->setActPercent(0);
-//        nowobject->setActSpeed(0.05);
-//        nowobject->setActNum(BUILDING_CENTER_UPGRADE);
-//        nowobject->setActName(ACT_UPGRADE_AGE);
     }
-    else if(actName == ACT_UPGRADE_TOWERBUILD)
-    {
+    else if(actName == ACT_UPGRADE_TOWERBUILD){
         core->addRelation(nowobject , CoreEven_BuildingAct , BUILDING_GRANARY_ARROWTOWER);
-
-//        if(mainPtr->player[0]->getFood() < BUILDING_GRANARY_ARROWTOWER_FOOD) return ACTION_INVALID_RESOURCE;
-//        mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_GRANARY_ARROWTOWER_FOOD);
-//        nowobject->setActPercent(0);
-//        nowobject->setActSpeed(0.25);
-//        nowobject->setActNum(BUILDING_GRANARY_ARROWTOWER);
-//        nowobject->setActName(ACT_UPGRADE_TOWERBUILD);
     }
-    else if(actName == ACT_UPGRADE_WOOD)
-    {
+    else if(actName == ACT_UPGRADE_WOOD){
         core->addRelation(nowobject , CoreEven_BuildingAct , BUILDING_MARKET_WOOD_UPGRADE);
-
-//        if(mainPtr->player[0]->getFood() < BUILDING_MARKET_WOOD_UPGRADE_FOOD || mainPtr->player[0]->getWood() < BUILDING_MARKET_WOOD_UPGRADE_WOOD) return ACTION_INVALID_RESOURCE;
-//        mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_MARKET_WOOD_UPGRADE_FOOD);
-//        mainPtr->player[0]->setWood(mainPtr->player[0]->getWood() - BUILDING_MARKET_WOOD_UPGRADE_WOOD);
-//        nowobject->setActPercent(0);
-//        nowobject->setActSpeed(0.25);
-//        nowobject->setActNum(BUILDING_MARKET_WOOD_UPGRADE);
-//        nowobject->setActName(ACT_UPGRADE_WOOD);
     }
-    else if(actName == ACT_UPGRADE_STONE)
-    {
+    else if(actName == ACT_UPGRADE_STONE){
         core->addRelation(nowobject , CoreEven_BuildingAct , BUILDING_MARKET_STONE_UPGRADE);
-
-//        if(mainPtr->player[0]->getFood() < BUILDING_MARKET_STONE_UPGRADE_FOOD || mainPtr->player[0]->getStone() < BUILDING_MARKET_STONE_UPGRADE_STONE) return ACTION_INVALID_RESOURCE;
-//        mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_MARKET_STONE_UPGRADE_FOOD);
-//        mainPtr->player[0]->setStone(mainPtr->player[0]->getStone() - BUILDING_MARKET_STONE_UPGRADE_STONE);
-//        nowobject->setActPercent(0);
-//        nowobject->setActSpeed(0.25);
-//        nowobject->setActNum(BUILDING_MARKET_STONE_UPGRADE);
-//        nowobject->setActName(ACT_UPGRADE_STONE);
     }
-    else if(actName == ACT_UPGRADE_FARM)
-    {
+    else if(actName == ACT_UPGRADE_FARM){
         core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_MARKET_FARM_UPGRADE);
-
-//        if(mainPtr->player[0]->getFood() < BUILDING_MARKET_FARM_UPGRADE_FOOD || mainPtr->player[0]->getWood() < BUILDING_MARKET_FARM_UPGRADE_WOOD) return ACTION_INVALID_RESOURCE;
-//        mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() - BUILDING_MARKET_FARM_UPGRADE_FOOD);
-//        mainPtr->player[0]->setWood(mainPtr->player[0]->getWood() - BUILDING_MARKET_FARM_UPGRADE_WOOD);
-//        nowobject->setActPercent(0);
-//        nowobject->setActSpeed(0.25);
-//        nowobject->setActNum(BUILDING_MARKET_FARM_UPGRADE);
-//        nowobject->setActName(ACT_UPGRADE_FARM);
     }
     else if(actName == ACT_STOCK_UPGRADE_USETOOL) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_STOCK_UPGRADE_USETOOL);
     else if( actName == ACT_STOCK_UPGRADE_DEFENSE_INFANTRY ) core->addRelation(nowobject , CoreEven_BuildingAct , BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY);
@@ -825,46 +711,6 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     else if(actName == ACT_STABLE_CREATE_SCOUT) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_STABLE_CREATE_SCOUT);
     else if(actName == ACT_STOP)
     {
-//        nowobject->setActNum(0);
-//        if(nowobject->getActName() == ACT_CREATEFARMER) mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() + BUILDING_CENTER_CREATEFARMER_FOOD);
-//        else if(nowobject->getActName() == ACT_UPGRADE_AGE) mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() + BUILDING_CENTER_UPGRADE_FOOD);
-//        else if(nowobject->getActName() == ACT_UPGRADE_TOWERBUILD) mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() + BUILDING_GRANARY_ARROWTOWER_FOOD);
-//        else if(nowobject->getActName() == ACT_UPGRADE_WOOD)
-//        {
-//            mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() + BUILDING_MARKET_WOOD_UPGRADE_FOOD);
-//            mainPtr->player[0]->setWood(mainPtr->player[0]->getWood() + BUILDING_MARKET_WOOD_UPGRADE_WOOD);
-//        }
-//        else if(nowobject->getActName() == ACT_UPGRADE_STONE)
-//        {
-//            mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() + BUILDING_MARKET_STONE_UPGRADE_FOOD);
-//            mainPtr->player[0]->setStone(mainPtr->player[0]->getStone() + BUILDING_MARKET_STONE_UPGRADE_STONE);
-//        }
-//        else if(nowobject->getActName() == ACT_UPGRADE_FARM)
-//        {
-//            mainPtr->player[0]->setFood(mainPtr->player[0]->getFood() + BUILDING_MARKET_FARM_UPGRADE_FOOD);
-//            mainPtr->player[0]->setWood(mainPtr->player[0]->getWood() + BUILDING_MARKET_FARM_UPGRADE_WOOD);
-//        }
-//        if(nowobject->getActName() == ACT_CREATEFARMER || nowobject->getActName() == ACT_UPGRADE_AGE)
-//        {
-//            ui->objText->setText("");
-//            nowobject->setActSpeed(0);
-//            nowobject->setActPercent(0);
-//            nowobject->setActName(ACT_NULL);
-//        }
-//        else if(nowobject->getActName() == ACT_UPGRADE_TOWERBUILD)
-//        {
-//            ui->objText->setText("");
-//            nowobject->setActSpeed(0);
-//            nowobject->setActPercent(0);
-//            nowobject->setActName(ACT_NULL);
-//        }
-//        else if(nowobject->getActName() == ACT_UPGRADE_WOOD || nowobject->getActName() == ACT_UPGRADE_STONE || nowobject->getActName() == ACT_UPGRADE_FARM)
-//        {
-//            ui->objText->setText("");
-//            nowobject->setActSpeed(0);
-//            nowobject->setActPercent(0);
-//            nowobject->setActName(ACT_NULL);
-//        }
         if(nowobject!=NULL)
         {
              core->suspendRelation(nowobject);
