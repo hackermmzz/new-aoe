@@ -29,7 +29,7 @@ public:
     int addHuman(int Num,double DR,double UR);
     Army* addArmy(int Num , double DR , double UR);
     int addFarmer(double DR,double UR);
-    Missile* addMissile( Coordinate* attacker , Coordinate* attackee );
+    Missile* addMissile( Coordinate* attacker , Coordinate* attackee  , int beginHeight);
 
     //删除实例对象
     list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele );

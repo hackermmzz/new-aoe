@@ -1843,7 +1843,9 @@ void Map::init(int MapJudge) {
     InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
+    qDebug()<<"t3";
     GenerateType();             // 通过高度差计算调用的地图块资源
+    qDebug()<<"t4";
     CalOffset();                // 计算偏移量
     InitFaultHandle();          // 抛出地图生成中的错误
 //    generateLandforms();        // 在草地中生成小片沙漠

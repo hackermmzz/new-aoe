@@ -73,7 +73,7 @@ private:
     QMutex aiLock;
     QMutex mutex;
     QWaitCondition condition;
-    bool stopThread;
+    bool stopThread = false;
 
     bool isHuman(int SN) {
         int type = SN / 10000;
