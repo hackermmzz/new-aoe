@@ -86,7 +86,6 @@ void Missile::calculateDMove()
 
 int Missile::calculateAngle(double nextDR, double nextUR)
 {
-    //角度设置有问题，需要修改
     int tempAngle = 0 , partNum = 32;
     double dDR =nextDR - DR , dUR = nextUR - UR , sita = atan2(dUR,dDR) , gama , neta;
     const double pi = 3.1415926 ;
