@@ -46,6 +46,8 @@ public:
 
     vector<Point> get_ObjectBlock(Coordinate* object);
 
+    int get_MapHeight(int blockDR , int blockUR){ return cell[blockDR][blockUR].getMapHeight();  }
+
     //初始化视野地图
     void init_Map_Vision(){
         for(int x = 0; x<MAP_L;x++)
@@ -111,14 +113,14 @@ public:
 //    std::list<Ruin *> ruin={};
 
 
-    int findPathMap[MAP_L][MAP_U];
+    int findPathMap[MAP_L][MAP_U] = {};
 
     //用于记录需要监视视野的Ob的视野格子和各Ob所在位置的地图
     vector<Coordinate*> map_Vision[MAP_L][MAP_U];   //对需要实时监视的ob所能看到的格子，填入ob相应的coordinate  实时监视是指瞪羚逃跑、狮子索敌等
     vector<Coordinate*> map_Object[MAP_L][MAP_U];   //对ob所在位置——有体积size，填入相应的coordinate
 
     //>=0为高度， = -1表示其为坡
-    int map_Height[MAP_L][MAP_U];
+    int map_Height[MAP_L][MAP_U] = {};
 
 
     /*************  取消使用，待删除   ***********************/
@@ -153,8 +155,8 @@ private:
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
     Player** player;
-    short m_heightMap[80][80];
-    int Gamemap[MAP_L][MAP_U];  // 地图资源二维数组
+    short m_heightMap[80][80] = {{}};
+    int Gamemap[MAP_L][MAP_U] = {};  // 地图资源二维数组
     bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
 
     int barrierMap[MAP_L][MAP_U];   //障碍物地图

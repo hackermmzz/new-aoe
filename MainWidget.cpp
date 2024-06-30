@@ -47,7 +47,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 初始化游戏资源
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
-
     // 初始化游戏元素
     initBlock();
     initBuilding();
@@ -65,7 +64,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);
     sel->show();
-
     ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8 , ui->interact9 , ui->interact10};
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
@@ -95,13 +93,11 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     showTimer=new QTimer(this);
     showTimer->setTimerType(Qt::PreciseTimer);
     showTimer->start(1000);
-
     pbuttonGroup = new QButtonGroup(this);
     pbuttonGroup->addButton(ui->radioButton_1,0);
     pbuttonGroup->addButton(ui->radioButton_2,1);
     pbuttonGroup->addButton(ui->radioButton_4,2);
     pbuttonGroup->addButton(ui->radioButton_8,3);
-
     //绑定倍速按钮
     connect(ui->radioButton_1, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
@@ -112,8 +108,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
-    // 游戏帧数初始化
-    gameframe = 0;    
 
     // 玩家开辟空间
     for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
@@ -124,9 +118,11 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     map = new Map;
     //为map添加player指针
     map->setPlayer(player);
+    qDebug()<<"2.2";
     map->init(MapJudge);
+    qDebug()<<"2.3";
     map->init_Map_Height();
-
+    qDebug()<<"2";
     // 内存图开辟空间
     for(int i = 0;i < MEMORYROW; i++)
     {
@@ -134,7 +130,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     }
     // 向地图中添加资源
     initmap();
-
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);

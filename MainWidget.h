@@ -98,8 +98,8 @@ private:
     Ui::MainWidget *ui;
     QTimer *timer;
     QTimer *showTimer;
-    int gameframe;
-    QButtonGroup *pbuttonGroup;
+    int gameframe = 0; // 游戏帧数初始化
+    QButtonGroup *pbuttonGroup = NULL;
 
     void gameDataUpdate();
     void paintUpdate();

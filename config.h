@@ -276,7 +276,7 @@
 /**农场**/
 #define BLOOD_BUILD_FARM 50
 #define CNT_BUILD_FARM 250
-#define VISION_FARM 3
+#define VISION_FARM 4
 #define BUILD_FARM_WOOD 75
 #define TIME_BUILD_FARM 30
 
