@@ -1420,9 +1420,10 @@ bool Map::GenerateTerrain() {
                     m_heightMap[i][j] ++;
             }
 
+        // 特判市镇中心附近
         if(height == 1) {
-            for(int i = MAP_L / 2 - 7; i < MAP_L / 2 + 8; i ++) {
-                for(int j = MAP_U / 2 - 7; j < MAP_U / 2 + 8; j ++) {
+            for(int i = MAP_L / 2 - CENTER_RADIUS - 1 + CENTER_DEVIATION; i < MAP_L / 2 + CENTER_RADIUS + CENTER_DEVIATION; i ++) {
+                for(int j = MAP_U / 2 - CENTER_RADIUS - 1 + CENTER_DEVIATION; j < MAP_U / 2 + CENTER_RADIUS + CENTER_DEVIATION; j ++) {
                     m_heightMap[i][j] = 0;
                 }
             }
@@ -1612,10 +1613,13 @@ void Map::GenerateType() {
             CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
                     CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count == 0) {
-                if(j + 1 < 72 && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
+                if(j + 1 < MAP_U && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
                     this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
             }
-            if(i + 1 < 72 && j + 1 < 72 && (this->cell[i - 1][j].getMapType() == MAPTYPE_A0_DOWNTOD || this->cell[i - 1][j].getMapType() == MAPTYPE_L2_UPTORU) && this->cell[i][j + 1].getMapType() == MAPTYPE_A0_DOWNTOD && this->cell[i + 1][j].getMapType() == MAPTYPE_FLAT)
+            if(i + 1 < MAP_L && j + 1 < MAP_U && i > 0 &&
+                    (this->cell[i - 1][j].getMapType() == MAPTYPE_A0_DOWNTOD || this->cell[i - 1][j].getMapType() == MAPTYPE_L2_UPTORU) &&
+                    this->cell[i][j + 1].getMapType() == MAPTYPE_A0_DOWNTOD &&
+                    this->cell[i + 1][j].getMapType() == MAPTYPE_FLAT)
                 this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
             count = CheckNeighborType(i, j, MAPTYPE_L0_UPTOLD) + CheckNeighborType(i, j, MAPTYPE_L3_UPTORD);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count > 0)
