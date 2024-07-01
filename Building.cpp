@@ -34,6 +34,7 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playe
     this->visible=1;
     this->imageH=(BlockDR-BlockUR)*BLOCKSIDELENGTH;
     this->Percent=Percent;
+    if(isFinish()) recordConstruct();
     setAttribute();
     init_Blood();
     setFundation();
