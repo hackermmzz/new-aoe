@@ -63,6 +63,7 @@ protected:
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
 
+
     /*********************静态数组***********************/
     //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
     //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
@@ -197,6 +198,7 @@ public:
 
     Coordinate* getCrashOb(){ return crashOb;}
     void initCrash(){ crashOb = NULL; }
+    bool stateCrash=false;//用于传递状态给tagGame
 
     /*********************静态函数***********************/
     static void init_jud_Block( int foundation , int dblockDR, int dblockUR )

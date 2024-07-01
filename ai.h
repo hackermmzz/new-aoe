@@ -20,9 +20,9 @@ public:
         wait();
     }
 
-    int HumanMove(int SN, double L0, double U0);
+    int HumanMove(int SN, double DR0, double UR0);
     int HumanAction(int SN, int obSN);
-    int HumanBuild(int SN, int BuildingNum, int BlockL, int BlockU);
+    int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR);
     int BuildingAction(int SN, int Action);
 //    void printInsRet(int id);
 

@@ -42,7 +42,7 @@ private:
     Core_List* interactionList;
 
     void updateByPlayer(int id);  //更新tagGame
-    void updateCommon(tagInfo* taginfo);
+    void updateCommon(tagInfo* taginfo);//更新tagGame
 
     vector<MoveObject*> moveOb_judCrush;
     /************管理添加表************/

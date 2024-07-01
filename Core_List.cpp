@@ -428,56 +428,6 @@ void Core_List::eraseObject(Coordinate* eraseOb)
     manageRelation_deleteGoalOb(eraseOb);
 }
 
-int Core_List::getNowPhaseNum(Coordinate* object){
-    ///获取当前object的行动阶段，用于将信息传递给AIGame
-    relation_Object& thisRelation=relate_AllObject[object];
-    if(!thisRelation.isExist||thisRelation.relationAct==CoreEven_JustMoveTo){
-        return HUMAN_STATE_IDLE;
-    }
-    int& nowPhaseNum = thisRelation.nowPhaseNum;
-    //detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
-    Coordinate* obj=relate_AllObject[object].goalObject;
-    if(obj==NULL){
-        return HUMAN_STATE_IDLE;
-    }
-    if(nowPhaseNum==0){
-        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
-            return HUMAN_STATE_GOTO_ATTACK;
-        }else{
-            return HUMAN_STATE_GOTO_OBJECT;
-        }
-    }else if(nowPhaseNum==1||nowPhaseNum==2){
-        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
-            return HUMAN_STATE_ATTACKING;
-        }else if(obj->getSort()==SORT_BUILDING){
-            return HUMAN_STATE_BUILDING;
-        }else if((obj->getSort()==SORT_ANIMAL)&&(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST)){
-            return HUMAN_STATE_CUTTING;
-        }
-    }else if(nowPhaseNum==3||nowPhaseNum==4||nowPhaseNum==8||nowPhaseNum==9){
-        return HUMAN_STATE_GOTO_RESOURCE;
-    }else if(nowPhaseNum==5||nowPhaseNum==10||nowPhaseNum==11){
-        return HUMAN_STATE_GOTO_OBJECT;
-    }else if(nowPhaseNum==6||nowPhaseNum==7){
-        ///资源采集
-        if(obj->getSort()==SORT_STATICRES){
-            if(obj->getNum()==0){
-                return HUMAN_STATE_GATHERING;
-            }else if(obj->getNum()==1){
-                return HUMAN_STATE_DIGGING_STONE;
-            }else if(obj->getNum()==2){
-                return HUMAN_STATE_DIGGING_GOLD;
-            }
-        }else if(obj->getSort()==SORT_ANIMAL){
-            if(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST){
-                return HUMAN_STATE_CUTTING;
-            }else{
-                return HUMAN_STATE_BUTCHERING;
-            }
-        }
-    }
-    return -1;
-}
 
 int Core_List::getObjectSN(Coordinate* object){
     relation_Object& thisRelation=relate_AllObject[object];
@@ -495,6 +445,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
     Coordinate* goalOb;
     object->printer_ToMoveObject((void**)&moveObject);
     //如果有目标点，设置目标点
+    moveObject->stateCrash=false;//重置碰撞状态（tagGame）
     if(relate_AllObject[object].isUseAlterGoal)
         goalOb = relate_AllObject[object].alterOb;
     else
@@ -522,6 +473,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             else if(moveObject->getCrashOb()!=NULL)
             {
                 //处理碰撞
+                moveObject->stateCrash=true;
                 relate_AllObject[object].wait(50);
                 moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
                 if(!moveObject->isStand()) moveObject->setPreStand();
@@ -530,7 +482,10 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             else relate_AllObject[object].useOnce();
         }
     }
-    else relate_AllObject[object].useless();
+    else {
+        relate_AllObject[object].useless();
+        if (moveObject)moveObject->stateCrash = true;
+    }
 }
 
 void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
@@ -1248,4 +1203,83 @@ void Core_List::initDetailList()
         delete phaseList;
         delete conditionList;
     }
+}
+int STATE_JustMoveTo[1]={HUMAN_STATE_JUSTWALKING};
+int STATE_Attacking[2]={HUMAN_STATE_GOTO_ATTACK,HUMAN_STATE_ATTACKING};
+int STATE_Gather[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
+                      /*1前往攻击目标*/HUMAN_STATE_GOTO_ATTACK ,/*2攻击*/HUMAN_STATE_ATTACKING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*4前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*5资源放置*/HUMAN_STATE_GOTO_OBJECT, /*6前往资源*/HUMAN_STATE_GOTO_OBJECT,\
+                      /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
+                      /*12*/ HUMAN_STATE_JUSTWALKING};
+int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_RESOURCE, \
+                      /*1前往攻击目标*/HUMAN_STATE_GOTO_RESOURCE ,/*2攻击*/HUMAN_STATE_GATHERING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*4前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*5资源放置*/HUMAN_STATE_GOTO_OBJECT, /*6前往资源*/HUMAN_STATE_GOTO_OBJECT,\
+                      /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
+                      /*12*/ HUMAN_STATE_JUSTWALKING};
+
+int STATE_FixBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_FIXING};
+int STATE_CreateBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_BUILDING};
+
+int Core_List::getNowPhaseNum(Coordinate* object){
+    ///获取当前object的行动阶段，用于将信息传递给AIGame
+    relation_Object& thisRelation=relate_AllObject[object];
+    MoveObject* move=dynamic_cast<MoveObject*>(object);
+    if(move->stateCrash){
+        return HUMAN_STATE_STOP;
+    }
+    if(!thisRelation.isExist){
+        return HUMAN_STATE_IDLE;
+    }
+    int& nowPhaseNum = thisRelation.nowPhaseNum;
+    Coordinate* obj=relate_AllObject[object].goalObject;
+    if(thisRelation.relationAct==CoreEven_JustMoveTo){
+
+        return HUMAN_STATE_JUSTWALKING;
+    }else if(thisRelation.relationAct==CoreEven_Attacking){
+        return STATE_Attacking[nowPhaseNum];
+    }else if(thisRelation.relationAct==CoreEven_Gather){
+        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
+            //对动物
+            Animal* animal=dynamic_cast<Animal*>(obj);
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING&&animal->getBlood()<=0){
+                return HUMAN_STATE_BUTCHERING;
+            }else if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING&&animal->getBlood()>0){
+                return HUMAN_STATE_ATTACKING;
+            }
+            return STATE_Gather[nowPhaseNum];
+        }else if(obj->getSort()==SORT_ANIMAL&&(obj->getNum()!=ANIMAL_TREE||obj->getNum()!=ANIMAL_FOREST)){
+            //对树
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_CUTTING;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+
+        }else if(obj->getSort()==SORT_STATICRES&&obj->getNum()==0){
+            //对浆果
+            return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_STATICRES&&obj->getNum()==1){
+            //对石头
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_DIGGING_STONE;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_STATICRES&&obj->getNum()==2){
+            //对金子
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_DIGGING_GOLD;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+        }
+    }else if(thisRelation.relationAct==CoreEven_FixBuilding){
+        Building* building=dynamic_cast<Building*>(obj);
+        if(building->getPercent()<100){
+            return STATE_CreateBuilding[nowPhaseNum];
+        }else{
+            return STATE_FixBuilding[nowPhaseNum];
+        }
+    }
+
+    return -1;
 }
