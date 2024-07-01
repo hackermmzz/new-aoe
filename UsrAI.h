@@ -13,6 +13,9 @@ public:
     }
     ~UsrAI(){;}
 private:
+    tagInfo getInfo(){
+        return tagUsrGame.getInfo();
+    }
     void processData() override;
     int AddToIns(instruction ins) override{
         UsrIns.lock.lock();
