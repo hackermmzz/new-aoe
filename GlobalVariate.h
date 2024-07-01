@@ -217,7 +217,7 @@ struct tagInfo
     vector<tagResource> resources; // 资源列表
     int resources_n; // 资源数量
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
-    int theMap[MAP_L][MAP_U]; // 地图，高度为 MAP_L，宽度为 MAP_U
+    int theMap[MAP_L][MAP_U]; // 高程图
     int GameFrame; // 游戏帧数
     int civilizationStage; // 文明阶段
     int Wood; // 木材数量

@@ -197,7 +197,7 @@ public:
 
     Coordinate* getCrashOb(){ return crashOb;}
     void initCrash(){ crashOb = NULL; }
-    bool stateCrash;//用于传递状态给tagGame
+    bool stateCrash=false;//用于传递状态给tagGame
 
     /*********************静态函数***********************/
     static void init_jud_Block( int foundation , int dblockDR, int dblockUR )

@@ -65,7 +65,7 @@ void UsrAI::processData(){
             }
             ins_id.push_back(HumanAction(human.SN,sn));
         }else if(human.SN==human2){
-            qDebug()<<"human2:"<<human.NowState;
+//            qDebug()<<"human2:"<<human.NowState;
 //            if(human.NowState==HUMAN_STATE_IDLE){
 //                static int x= 20;
 //                static int y= 20;
