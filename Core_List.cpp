@@ -903,7 +903,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         while(oBiter != oBitere)
         {
             goalMap[(*oBiter).x][(*oBiter).y] = true;
-            qDebug()<<(*oBiter).x<<(*oBiter).y;
+//            qDebug()<<(*oBiter).x<<(*oBiter).y;
             oBiter++;
         }
     }
