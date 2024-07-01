@@ -62,7 +62,7 @@ private:
     void object_FinishAction_Absolute(Coordinate*);
     void object_FinishAction(Coordinate*);
 
-
+    void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
     /************寻路相关************/
     void initMap_HaveJud(){ memset(map_HaveJud , 0 ,sizeof(map_HaveJud)); }
     void haveJud_Map_Move( int blockDR , int blockUR ){ map_HaveJud[blockDR][blockUR] = true; }
