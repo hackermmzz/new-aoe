@@ -1226,6 +1226,7 @@ int Core_List::getNowPhaseNum(Coordinate* object){
     ///获取当前object的行动阶段，用于将信息传递给AIGame
     relation_Object& thisRelation=relate_AllObject[object];
     MoveObject* move=dynamic_cast<MoveObject*>(object);
+    Coordinate* obj=relate_AllObject[object].goalObject;
     if(move->stateCrash){
         return HUMAN_STATE_STOP;
     }
@@ -1233,9 +1234,8 @@ int Core_List::getNowPhaseNum(Coordinate* object){
         return HUMAN_STATE_IDLE;
     }
     int& nowPhaseNum = thisRelation.nowPhaseNum;
-    Coordinate* obj=relate_AllObject[object].goalObject;
-    if(thisRelation.relationAct==CoreEven_JustMoveTo){
 
+    if(thisRelation.relationAct==CoreEven_JustMoveTo||obj==NULL){
         return HUMAN_STATE_JUSTWALKING;
     }else if(thisRelation.relationAct==CoreEven_Attacking){
         return STATE_Attacking[nowPhaseNum];

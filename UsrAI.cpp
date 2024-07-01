@@ -1,95 +1,95 @@
 #include "UsrAI.h"
 tagGame tagUsrGame;
 ins UsrIns;
-/*##########DO NOT EDIT ABOVE##########*/
+/*##########请勿修改以上部分##########*/
 
-
-#include <random>
 #include <fstream>
-bool ismove=false;
-int human1=-1;
-int human2=-1;
-int human3=-1;
-double mid=36*BLOCKSIDELENGTH;
-double X[4]={mid-100,mid+100,mid+100,mid-100};
-double Y[4]={mid-100,mid-100,mid+100,mid+100};
-int step1=0;
-int step2=3;
-vector<int> ins_id;//添加到监视的指令数组
+double mid=36*BLOCKSIDELENGTH;  // 中间位置的坐标
+bool once=true;
+bool iscamp=false;  // 是否有军营
+bool iscampfinish=false;  // 军营是否建造完成
+int tmpframe=99999999;  // 临时帧计数
 
 void UsrAI::processData(){
-/*##########YOUR CODE BEGINS HERE##########*/
-//    qDebug()<<"#####UsrStart#####";
-//    qDebug()<<tagUsrGame.getInfo().GameFrame;
-//    sleep(2);
-    //打印添加到监视的指令执行结果，并从监视中删除
-//    auto it = ins_id.begin();
-//    while (it != ins_id.end()) {
-//        try {
-//            int value = tagUsrGame.getInfo().ins_ret.at(*it);
-//            qDebug()<<"ins:"<<*it<<":"<<value;
-//            it = ins_id.erase(it);
-//        } catch (const std::out_of_range& e) {
-//            qDebug() << "Key not found";
-//             ++it;
-//        }
-//    }
+    int House=0;  // 统计房子的数量
 
-//    for(tagResource res:tagUsrGame.getResource()){
-//        qDebug()<<res.Type<<" "<<res.BlockL<<" "<<res.BlockU;
-//    }
-    for(tagFarmer human:tagUsrGame.getInfo().farmers){
-        if(human1==-1){
-           human1=human.SN;
-           break;
-        }
-        if(human2==-1&&human.SN!=human1){
-           human2=human.SN;
-           break;
-        }
-//        if(human3==-1&&human.Sort==SORT_ARMY){
-//            human3=human.SN;
-//            break;
-//        }
-    }
-    for(tagFarmer human:tagUsrGame.getInfo().farmers){
-//        sleep(0.5);
-        if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
-            int sn=-1;
-            double dis=99999;
-            for(tagResource res:tagUsrGame.getInfo().resources){
-                if(countdistance(mid,mid,res.DR,res.UR)<dis){
-                    sn=res.SN;
-                    dis=countdistance(mid,mid,res.DR,res.UR);
-                }
+    // 遍历所有建筑（此处用了C++的快速遍历方式）
+    for(tagBuilding building:getInfo().buildings){
+        if(building.Type==BUILDING_HOME&&building.Percent==100){
+            // 如果建筑类型是房子且建造完成，增加房子数量计数
+            House++;
+        }else if(building.Type==BUILDING_ARMYCAMP){
+            // 如果建筑类型是军营
+            iscamp=true;  // 标记有军营
+            if(getInfo().GameFrame>tmpframe+10){
+                // 军营建好后过一会，执行创建棍棒兵的指令
+                BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN);
             }
-            ins_id.push_back(HumanAction(human.SN,sn));
-        }else if(human.SN==human2){
-//            qDebug()<<"human2:"<<human.NowState;
-//            if(human.NowState==HUMAN_STATE_IDLE){
-//                static int x= 20;
-//                static int y= 20;
-//                if(x<75&&y<75){
-//                    ins_id.push_back(HumanBuild(human.SN,BUILDING_HOME,x,y));
-//                }
-//                x+=10;
-//                y+=10;
-//            }
-        }else if(human.SN==human3&&human.NowState==HUMAN_STATE_IDLE){
-            int sn=-1;
-            double dis=99999;
-            for(tagResource res:tagUsrGame.getInfo().resources){
-                if(res.ProductSort==HUMAN_STOCKFOOD&&res.Type!=RESOURCE_BUSH&&countdistance(mid,mid,res.DR,res.UR)<dis){
-                    sn=res.SN;
-                    dis=countdistance(mid,mid,res.DR,res.UR);
-                }
+            if(building.Percent==100&&!iscampfinish){
+                // 如果军营建造完成且尚未标记完成
+                iscampfinish=true;  // 标记军营建造完成
+                tmpframe=tagUsrGame.getInfo().GameFrame;  // 记录下当前帧数
             }
-            ins_id.push_back(HumanAction(human.SN,sn));
+        }else if(building.Type==BUILDING_CENTER&&building.Project==ACT_NULL&&getInfo().farmers_n<8){
+            // 如果建筑类型是城镇中心且没有进行任何项目且农民数量少于8，创建农民
+            BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
         }
     }
 
-//    qDebug()<<"#####UsrEnd#####";
+    // 遍历所有农民（此处即传统遍历方式）
+    for(int i=0;i<getInfo().farmers_n;i++){
+        tagFarmer farmer=getInfo().farmers[i];
+        if(i==0&&(farmer.NowState==HUMAN_STATE_IDLE||farmer.NowState==HUMAN_STATE_STOP)){
+            // 如果是第一个农民且处于空闲或停止状态，建造房子
+            static int x= 20;
+            static int y= 20;
+            if(x<75&&y<75&&House<2){
+                HumanBuild(farmer.SN,BUILDING_HOME,x,y);
+            }
+            x+=10;
+            y+=10;
+        }
+        else if(i==1&&(farmer.NowState==HUMAN_STATE_IDLE||farmer.NowState==HUMAN_STATE_STOP)){
+            // 如果是第二个农民且处于空闲或停止状态，建造军营
+            static int x= 20;
+            static int y= 20;
+            if(x<75&&y<75&&!iscamp){
+                HumanBuild(farmer.SN,BUILDING_ARMYCAMP,75-x,y);
+            }
+            x+=10;
+            y+=10;
+        }
+        else if(i<5&&farmer.NowState==HUMAN_STATE_IDLE){
+            // 如果是前三个农民且处于空闲状态，采集浆果资源
+            int sn=-1;
+            double dis=99999;
+            for(tagResource res:getInfo().resources){
+                if(res.Type==RESOURCE_BUSH&&calDistance(mid,mid,res.DR,res.UR)<dis){
+                    sn=res.SN;
+                    dis=calDistance(mid,mid,res.DR,res.UR);
+                }
+            }
+            HumanAction(farmer.SN,sn);
+        }
+        else if(i>=5&&farmer.NowState==HUMAN_STATE_IDLE){
+            // 如果是第五个及以上的农民且处于空闲状态，采集树木资源
+            int sn=-1;
+            double dis=99999;
+            for(tagResource res:getInfo().resources){
+                if(res.Type==RESOURCE_TREE&&calDistance(mid,mid,res.DR,res.UR)<dis){
+                    sn=res.SN;
+                    dis=calDistance(mid,mid,res.DR,res.UR);
+                }
+            }
+            HumanAction(farmer.SN,sn);
+        }
+    }
+    // 遍历所有军队
+    for(tagArmy army:getInfo().armies){
+        if(calDistance(army.DR,army.UR,mid+100,mid-100)>100&&army.NowState==HUMAN_STATE_IDLE){
+            // 如果军队距离中间位置超过200且处于空闲状态，移动到中间位置
+            HumanMove(army.SN,mid+100,mid-100);
+        }
+    }
 
-/*###########YOUR CODE ENDS HERE###########*/
 }
-
