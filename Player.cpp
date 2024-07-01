@@ -69,7 +69,7 @@ int Player::addFarmer(double DR, double UR)
     return 0;
 }
 
-Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee )
+Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee , int beginHeight)
 {
     Missile* newMissile = NULL;
     BloodHaver* aterOb = NULL;
@@ -77,7 +77,7 @@ Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee )
     attacker->printer_ToBloodHaver((void**)&aterOb);
     if(aterOb!=NULL)
     {
-        newMissile = new Missile(aterOb->get_type_Missile(), attacker , attackee, playerScience , represent);
+        newMissile = new Missile(aterOb->get_type_Missile(), attacker , attackee, beginHeight , playerScience , represent);
 
         missile.push_back(newMissile);
     }

@@ -61,7 +61,7 @@ void ViewWidget::paintEvent(QPaintEvent *)
             int farmerU = (*farmerIter)->getUR() / 16 / gen5;
             int farmerY = 1.23 * (MAP_L + farmerL - farmerU);
             int farmerX = 3.55 * (farmerL + farmerU);
-            painter.fillRect(QRect(farmerX, farmerY, 6, 6), QBrush(Qt::red));
+            if(mainwidget->map->cell[farmerL][farmerU].Visible) painter.fillRect(QRect(farmerX, farmerY, 6, 6), QBrush(Qt::red));
 
         }
     }
@@ -73,7 +73,7 @@ void ViewWidget::paintEvent(QPaintEvent *)
             int buildU = (*buildIter)->getUR() / 16 / gen5;
             int buildY = 1.23 * (MAP_L + buildL - buildU);
             int buildX = 3.55 * (buildL + buildU);
-            painter.fillRect(QRect(buildX, buildY, 8, 8), QBrush(Qt::red));
+            if(mainwidget->map->cell[buildL][buildU].Visible) painter.fillRect(QRect(buildX, buildY, 8, 8), QBrush(Qt::red));
 
         }
     }

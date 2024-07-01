@@ -3,6 +3,7 @@
 
 int g_globalNum=1;
 int g_frame=0;
+int mapmoveFrequency = 1;
 
 std::map<int,Coordinate*> g_Object;
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
@@ -22,7 +23,21 @@ std::map<int, std::string> actNames = {
     {ACT_BUILD_FARM, ACT_BUILD_FARM_NAME},
     {ACT_BUILD_MARKET, ACT_BUILD_MARKET_NAME},
     {ACT_BUILD_ARROWTOWER, ACT_BUILD_ARROWTOWER_NAME},
-    {ACT_NULL, ACT_NULL_NAME}
+    {ACT_NULL, ACT_NULL_NAME},
+    {ACT_ARMYCAMP_CREATE_CLUBMAN, ACT_ARMYCAMP_CREATE_CLUBMAN_NAME},
+    {ACT_ARMYCAMP_CREATE_SLINGER, ACT_ARMYCAMP_CREATE_SLINGER_NAME},
+    {ACT_ARMYCAMP_UPGRADE_CLUBMAN, ACT_ARMYCAMP_UPGRADE_CLUBMAN_NAME},
+    {ACT_BUILD_ARMYCAMP, ACT_BUILD_ARMYCAMP_NAME},
+    {ACT_BUILD_RANGE, ACT_BUILD_RANGE_NAME},
+    {ACT_BUILD_STABLE, ACT_BUILD_STABLE_NAME},
+    {ACT_RANGE_CREATE_BOWMAN, ACT_RANGE_CREATE_BOWMAN_NAME},
+    {ACT_RESEARCH_WALL, ACT_RESEARCH_WALL_NAME},
+    {ACT_STABLE_CREATE_SCOUT, ACT_STABLE_CREATE_SCOUT_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_ARCHER, ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_RIDER, ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME},
+    {ACT_STOCK_UPGRADE_USETOOL, ACT_STOCK_UPGRADE_USETOOL_NAME},
+
 };
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
@@ -32,7 +47,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 初始化游戏资源
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
-
     // 初始化游戏元素
     initBlock();
     initBuilding();
@@ -50,7 +64,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);
     sel->show();
-
     ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8 , ui->interact9 , ui->interact10};
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
@@ -80,14 +93,21 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     showTimer=new QTimer(this);
     showTimer->setTimerType(Qt::PreciseTimer);
     showTimer->start(1000);
-
+    pbuttonGroup = new QButtonGroup(this);
+    pbuttonGroup->addButton(ui->radioButton_1,0);
+    pbuttonGroup->addButton(ui->radioButton_2,1);
+    pbuttonGroup->addButton(ui->radioButton_4,2);
+    pbuttonGroup->addButton(ui->radioButton_8,3);
+    //绑定倍速按钮
+    connect(ui->radioButton_1, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     //时间增加
     connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
 
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
-    // 游戏帧数初始化
-    gameframe = 0;    
 
     // 玩家开辟空间
     for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
@@ -99,16 +119,14 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //为map添加player指针
     map->setPlayer(player);
     map->init(MapJudge);
-
+    map->init_Map_Height();
     // 内存图开辟空间
     for(int i = 0;i < MEMORYROW; i++)
     {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
-
     // 向地图中添加资源
     initmap();
-    map->init_Map_Height();
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
@@ -129,6 +147,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->changeResource(2000,2000,2000,2000);
     player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
+    // 设置鼠标追踪
+    ui->Game->setMouseTracking(true);
+    ui->Game->setAttribute(Qt::WA_MouseTracking,true);
+    ui->Game->installEventFilter(this);
+
+    // 设置提示颜色
+    QPalette pe;
+    pe.setColor(QPalette::WindowText,Qt::green);
+    ui->tip->setPalette(pe);
+    tipLbl = ui->tip;
     // 给小地图传递list
     ui->mapView->setFriendlyFarmerList(&(player[0]->human));
     ui->mapView->setEnemyFarmerList(&(player[1]->human));
@@ -149,6 +177,7 @@ MainWidget::~MainWidget()
     delete UsrAi;
     delete EnemyAi;
     delete ui;
+    delete pbuttonGroup;
     deleteBlock();
     deleteAnimal();
     deleteStaticResource();
@@ -627,7 +656,7 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
     {
         if(watched == acts[i] && !acts[i]->isHidden()) {
             if(event->type() == QEvent::HoverEnter) {
-                ui->tipLbl->setText(QString::fromStdString(actNames[acts[i]->getActName()]));
+                ui->tip->setText(QString::fromStdString(actNames[sel->actions[i]]));
                 if(acts[i]->getStatus() != 2)
                 {
                     acts[i]->setStatus(0);
@@ -642,7 +671,7 @@ bool MainWidget::eventFilter(QObject *watched, QEvent *event)
             }
             else if(event->type() == QEvent::HoverLeave && acts[i]->getStatus() != 2)
             {
-                ui->tipLbl->setText("");
+                ui->tip->setText("");
             }
         }
     }
@@ -664,8 +693,30 @@ void MainWidget::statusUpdate()
     showPlayerResource(0);
     ui->mapView->screenL = ui->Game->getBlockDR();
     ui->mapView->screenU = ui->Game->getBlockUR();
+    ui->statusLbl->setText(sel->getShowTime() + QString::fromStdString("\n"));
+    ui->version->setText(QString::fromStdString(GAME_VERSION));
 }
 
+void MainWidget::gameDataUpdate()
+{
+    core->gameUpdate();
+    core->infoShare();
+    statusUpdate();
+    emit startAI();
+
+    //    UsrAi->start();///AI线程尝试开始
+    //    EnemyAi->start();
+}
+void MainWidget::paintUpdate()
+{
+    ui->Game->update();
+    ui->mapView->update();
+    ui->tip->update();
+    ui->statusLbl->update();
+    emit mapmove();
+}
+
+//**************槽函数***************
 // 游戏帧更新
 void MainWidget::FrameUpdate()
 {
@@ -675,16 +726,48 @@ void MainWidget::FrameUpdate()
     gameframe++;
     g_frame=gameframe;
     ui->lcdNumber->display(gameframe);
-    ui->Game->update();
-    core->gameUpdate();
-    ui->mapView->update();
-    statusUpdate();
-    core->infoShare();
-//    UsrAi->start();///AI线程尝试开始
-//    EnemyAi->start();
-    emit startAI();
-    emit mapmove();
+
+    if(mapmoveFrequency==1||mapmoveFrequency==2){
+        paintUpdate();
+    }
+    else if(mapmoveFrequency==4){
+        if(gameframe%2==0) paintUpdate();
+    }
+    else if(mapmoveFrequency==8){
+        if(gameframe%4==0) paintUpdate();
+    }
+    else{
+        qDebug()<<"速度设置错误";
+    }
+    gameDataUpdate();
     return;
+}
+void MainWidget::onRadioClickSlot()
+{
+    switch(pbuttonGroup->checkedId())
+    {
+    case 0:
+        timer->setInterval(40);
+        showTimer->setInterval(1000);
+        mapmoveFrequency=1;
+        break;
+    case 1:
+        timer->setInterval(20);
+        showTimer->setInterval(500);
+        mapmoveFrequency=2;
+        break;
+    case 2:
+        timer->setInterval(10);
+        showTimer->setInterval(250);
+        mapmoveFrequency=4;
+        break;
+    case 3:
+        timer->setInterval(5);
+        showTimer->setInterval(125);
+        mapmoveFrequency=8;
+        nowobject=NULL;
+        break;
+    }
 }
 
 

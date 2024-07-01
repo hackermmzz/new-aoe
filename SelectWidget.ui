@@ -52,9 +52,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>20</y>
-     <width>31</width>
+     <x>130</x>
+     <y>10</y>
+     <width>41</width>
      <height>31</height>
     </rect>
    </property>
@@ -66,7 +66,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>20</y>
+     <y>10</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -105,9 +105,9 @@
   <widget class="QLabel" name="objIconSmall">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>130</x>
      <y>50</y>
-     <width>31</width>
+     <width>40</width>
      <height>31</height>
     </rect>
    </property>
@@ -133,6 +133,78 @@
      <weight>75</weight>
      <bold>true</bold>
     </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="objText_DEF_melee">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>40</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>13</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="objText_DEF_range">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>70</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>13</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="objIconSmall_DEF_melee">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>40</y>
+     <width>41</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="objIconSmall_DEF_range">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>70</y>
+     <width>41</width>
+     <height>31</height>
+    </rect>
    </property>
    <property name="text">
     <string/>

@@ -94,6 +94,12 @@ public:
     void set_interAct(int interSort , int interNum , bool interRepresent = false , bool interBui_builtUp=false)
         { interactSort = interSort ; interactNum = interNum; interact_sameRepresent = interRepresent; interactBui_builtUp = interBui_builtUp; }
 
+    vector<Point> getViewLab(){
+        if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>0 && getVision() > 1) setViewLab((int)BlockSizeLen , getVision());
+
+        return viewLab[(int)BlockSizeLen][getVision()];
+    }
+
 /*****************act获取***************/
     double getActPercent() {return this->actPercent;}
     double getActSpeed(){ return this->actSpeed;}
@@ -112,12 +118,10 @@ public:
 /*****************act获取***************/
 
 protected:
-
     int Num;//对象在对应类中的编号
     //比如building类下Num==0为小房子
     //在不同的类有着不同的含义
-
-    bool incorrectNum = false;
+    bool incorrectNum = false;  //标识Num的值是否在该Sort下合法
 
     //此时此刻交互对象的类别和Num
     int interactSort = -1;
@@ -127,9 +131,7 @@ protected:
 
     double DR;//当前物体中心所在的坐标位置
     double UR;//在块类中该坐标即为正中心
-    //此LU所指游戏中坐标
-
-    // illegal value
+    //此DR，UR所指游戏中坐标
     int BlockDR = INT_MAX;
     int BlockUR = INT_MAX;
     //对象所在的区块
@@ -140,11 +142,9 @@ protected:
     double imageY;//需要根据占地大小来就算确切的绘制偏移量
 
     double BlockSizeLen = SIZELEN_SINGEL; //物体占地,块坐标， 如小房子，为2，中型房子为3，动物为1
+    double SideLength; //占地大小转换成游戏内坐标 边长
 
-    double SideLength;
-    //占地大小转换成游戏内坐标 边长
-
-    double crashLength = 0;
+    double crashLength = 0; //碰撞箱大小
 
     int imageH;//绘制y坐标
     //该物体在平面中的上下位置
@@ -154,7 +154,6 @@ protected:
 
     int explored=0;
     //0为未探索 1为探索
-
     int visible=0;
     //0为不可见 1为可见
 
@@ -168,8 +167,19 @@ protected:
     int nowres_step = 0;
     int nowres_changeRecord = 0;
 
+    static vector<Point> viewLab[5][11];
+
+    /*****************act获取***************/
+    double actPercent = 0;
+    double actSpeed = 0;
+    int actName = 0;
+    //执行行动时的进度、速率和行动类型
+    int actNum=0;
+    //动作类型的编号
+    /*****************act获取***************/
+
     void initNowresTimer(){ nowres_changeRecord = 0; }
-    bool isNowresShift(){
+    bool isNowresShift(){   //用于限制nowres切换，以降低图像资源循环速度
         if(nowres_step == nowres_changeRecord)
         {
             nowres_changeRecord = 0;
@@ -190,16 +200,8 @@ protected:
     }
     void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
 
-
-
-    /*****************act获取***************/
-    double actPercent = 0;
-    double actSpeed = 0;
-    int actName = 0;
-    //执行行动时的进度、速率和行动类型
-    int actNum=0;
-    //动作类型的编号
-    /*****************act获取***************/
+    static void setViewLab( int blockSize , int visionLen );
+    static void addViewLab( vector<Point>& blockLab , int lx , int mx , int y , int y_mirr );
 };
 
 #endif // COORDINATE_H

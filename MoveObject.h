@@ -92,6 +92,7 @@ public:
     bool isWorking(){ return this->nowstate == MOVEOBJECT_STATE_WORK; }
     bool isStand(){return this->nowstate == MOVEOBJECT_STATE_STAND;}
 
+    bool isAction_ResBegin(){ return nowres == nowlist->begin(); }
     void beginRun(){ changeToRun = true; }
 
     void calculateDiretionArray(stack<Point>& path);

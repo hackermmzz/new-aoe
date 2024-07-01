@@ -8,7 +8,7 @@ Missile::Missile()
 
 }
 
-Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee, Development* playerScience, int playerRepresent)
+Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight , Development* playerScience, int playerRepresent)
 {
     //划分玩家阵营
     this->playerScience = playerScience;
@@ -19,6 +19,7 @@ Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee, Developm
     this->UR = attacker->getUR();
     this->DR0 = attackee->getDR();
     this->UR0 = attackee->getUR();
+    Height_begin = beginHeight; //设置初始出发高度
     setAttribute();
     Angle = calculateAngle(this->DR0, this->UR0);
     //Angle计算有bug 近距离时可能出现超大负数
@@ -85,7 +86,6 @@ void Missile::calculateDMove()
 
 int Missile::calculateAngle(double nextDR, double nextUR)
 {
-    //角度设置有问题，需要修改
     int tempAngle = 0 , partNum = 32;
     double dDR =nextDR - DR , dUR = nextUR - UR , sita = atan2(dUR,dDR) , gama , neta;
     const double pi = 3.1415926 ;

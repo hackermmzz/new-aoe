@@ -91,7 +91,7 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     return ACTION_INVALID_ISNTFREE;
 }
 
-//添加
+//建造
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -115,7 +115,6 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
 
             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
-
         }
     }
 
@@ -312,7 +311,10 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
     }
 
     relation.reset_Object1Predicted(object1);
+    relation.height_Object = theMap->get_MapHeight(object1->getBlockDR() , object1->getBlockUR());
     relation.update_GoalPoint();
+    if(relation.goalObject != NULL)
+        relation.height_GoalObject = theMap->get_MapHeight(relation.goalObject->getBlockDR() , relation.goalObject->getBlockUR());
     relation.update_Attrib_alter();
     relation.waiting();
 }
@@ -474,6 +476,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 {
     bool calculateDamage = false;
     int damage; //记录伤害
+    int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
     Missile* missile = NULL;
@@ -509,6 +512,8 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     {
         calculateDamage = true;
         attacker = missile->getAttackAponsor();
+
+        extra_damage += missile->get_AttackAddition_Height(theMap->get_MapHeight(object2->getBlockDR() ,object2->getBlockUR()));
         if(!attackee->isGotAttack())
         {
             if(missile->isAttackerHaveDie())
@@ -523,7 +528,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
-        damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
+        damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
     }
@@ -1011,7 +1016,7 @@ Missile* Core_List::creatMissile(Coordinate* attacker ,Coordinate* attackee)
     if(judHuman!=NULL) playerRepresent = judHuman->getPlayerRepresent();
     if(judBuild!= NULL) playerRepresent = judBuild->getPlayerRepresent();
 
-    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee);
+    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
     else return NULL;
 }
 
@@ -1045,7 +1050,7 @@ void Core_List::initDetailList()
     //行动: 攻击**************************************
     {
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK)};
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
         forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
@@ -1069,7 +1074,7 @@ void Core_List::initDetailList()
                                /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move ,\
                                /*12*/ CoreDetail_JumpPhase};
         conditionList = new conditionF[13]{ conditionF( condition_AllTrue), \
-                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
+                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK),\
                 /*3*/conditionF(condition_AllTrue) ,                                /*4*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
                 /*5*/conditionF(condition_Object1_EmptyBackpack),                   /*6*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
                 /*7*/conditionF(condition_Object1_FullBackpack) , \

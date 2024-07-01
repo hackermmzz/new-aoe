@@ -36,7 +36,7 @@
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v1.0"
+#define GAME_VERSION "v0.99"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define GAME_LOSE_SEC 1500
 #define GOLD 10                         //金块资源数量
@@ -167,13 +167,13 @@
 
 /**房子**/
 #define BLOOD_BUILD_HOUSE 75
-#define VISION_HOME 3
+#define VISION_HOME 4
 #define BUILD_HOUSE_WOOD 30
 #define TIME_BUILD_HOME 20
 
 /**仓库**/
 #define BLOOD_BUILD_STOCK 350
-#define VISION_STOCK 3
+#define VISION_STOCK 4
 #define BUILD_STOCK_WOOD 120
 #define TIME_BUILD_STOCK 30
 //升级工具利用（1级）
@@ -223,7 +223,7 @@
 
 /**靶场**/
 #define BLOOD_BUILD_RANGE 350
-#define VISION_RANGE 3
+#define VISION_RANGE 4
 #define BUILD_RANGE_WOOD 150
 #define TIME_BUILD_RANGE 40
 //生产弓箭手
@@ -233,7 +233,7 @@
 
 /**马厩**/
 #define BLOOD_BUILD_STABLE 350
-#define VISION_STABLE 3
+#define VISION_STABLE 4
 #define BUILD_STABLE_WOOD 150
 #define TIME_BUILD_STABLE 40
 //生产侦察骑兵
@@ -276,7 +276,7 @@
 /**农场**/
 #define BLOOD_BUILD_FARM 50
 #define CNT_BUILD_FARM 250
-#define VISION_FARM 3
+#define VISION_FARM 4
 #define BUILD_FARM_WOOD 75
 #define TIME_BUILD_FARM 30
 
@@ -491,6 +491,19 @@
 #define ACT_BUILD_FARM_NAME "建造农场(花费:75木头)(需要先建造市场)"
 #define ACT_BUILD_MARKET_NAME "建造市场(花费:150木头)(需要先建造谷仓)"
 #define ACT_BUILD_ARROWTOWER_NAME "建造箭塔(花费:150石头)(需要先在谷仓内升级科技)"
+#define ACT_ARMYCAMP_CREATE_CLUBMAN_NAME "训练棍棒兵(花费:50食物)"
+#define ACT_ARMYCAMP_CREATE_SLINGER_NAME "训练投石兵(花费:40食物,10石头)"
+#define ACT_ARMYCAMP_UPGRADE_CLUBMAN_NAME "升级为战斧(花费:100食物)"
+#define ACT_BUILD_ARMYCAMP_NAME "建造兵营(花费:125木头)"
+#define ACT_BUILD_RANGE_NAME "建造靶场(花费:150木头)"
+#define ACT_BUILD_STABLE_NAME "建造马厩(花费:150木头)"
+#define ACT_RANGE_CREATE_BOWMAN_NAME "训练弓箭手(花费:40食物,20木头)"
+#define ACT_RESEARCH_WALL_NAME "研发:建造低级城墙"
+#define ACT_STABLE_CREATE_SCOUT_NAME "训练侦察骑兵(花费:100食物)"
+#define ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME "研发弓兵护甲:弓箭手近战防御+2(花费:100食物)"
+#define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
+#define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
+#define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
 #define ACT_NULL_NAME ""
 
 
@@ -887,7 +900,7 @@
 /********** 飞行物投掷判断 **********/
 #define THROWMISSION_FARMER 25
 #define THROWMISSION_ARCHER 4
-#define THROWMISSION_SLINGER 10
+#define THROWMISSION_SLINGER 5
 
 #define THROWMISSION_ARROWTOWN_TIMER 30
 
