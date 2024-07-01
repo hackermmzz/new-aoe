@@ -75,6 +75,7 @@ Animal::Animal(int Num, double DR, double UR)
         crashLength = CRASHBOX_BIGOB;
 
         nowres_step = NOWRES_TIMER_ELEPHANT;
+        isRangeAttack = true;
     }
     else if( this->Num == ANIMAL_TREE )
     {
