@@ -113,7 +113,7 @@ public:
     void setFundation();
 
     bool isFinish(){return this->Percent>=100;}
-    bool isConstructed(){ return constructed; }
+    bool isConstructed(){ return constructed; } //判断已建造完成
     void recordConstruct(){ constructed = true; }
 
     double getPercent() {return this->Percent;}
@@ -150,7 +150,7 @@ protected:
 
     int civ;
     //建筑所处时代 来确定不同时代建筑有何变化 ？时代要不要用player类下的
-    bool constructed = false;
+    bool constructed = false;   //是否已完成建造
 
     int Foundation;
     //地基类型

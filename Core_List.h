@@ -11,6 +11,7 @@ public:
     ~Core_List(){}
 
 
+    void update();
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
     *用于：判断对象是否处于空闲
@@ -43,6 +44,9 @@ private:
 
     //寻路相关
     bool map_HaveJud[MAP_L][MAP_U];
+
+    bool resourceBuildingChange = false;
+    bool needReset_resBuild = false;
 
     void initDetailList();
     int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
@@ -77,6 +81,9 @@ private:
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
+
+    void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
+    void init_resetResBuild(){ needReset_resBuild = false; }
 
 };
 

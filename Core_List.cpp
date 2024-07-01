@@ -6,6 +6,15 @@ Core_List::Core_List(Map* theMap, Player* player[])
     this->player = player;
     initDetailList();
 }
+void Core_List::update()
+{
+    //对正在监视的Object，进行行动处理
+    manageMontorAct();
+    theMap->loadBarrierMap();//更新寻路用障碍表
+    jud_resetResBuild();
+    manageRelationList();
+    init_resetResBuild();
+}
 
 //****************************************************************************************
 //控制动态表
@@ -19,8 +28,11 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
     if(! relate_AllObject[object1].isExist )
     {
         BloodHaver* bloodOb = NULL;
+        Building* buildOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
-        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+        object1->printer_ToBuilding((void**)&buildOb);
+        if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
+        if( buildOb != NULL && !(buildOb->isConstructed() && buildOb->isFinish())) return ACTION_INVALID_BUILDACT_NEEDBUILT;
 
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
@@ -65,7 +77,7 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     {
         BloodHaver* bloodOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
-        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+        if( bloodOb!=NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
 
         if(eventType == CoreEven_JustMoveTo)
         {
@@ -110,7 +122,7 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
     {
         BloodHaver* bloodOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
-        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+        if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
 
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         if(eventType == CoreEven_CreatBuilding)
@@ -141,14 +153,13 @@ int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
         BloodHaver* bloodOb = NULL;
-        object1->printer_ToBloodHaver((void**)&bloodOb);
-        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
-
         Building* buildOb = NULL;
         int oper = 0;
         object1->printer_ToBuilding((void**)&buildOb);
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( !buildOb || !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
 
-        if(!buildOb->isFinish()) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+        if(!(buildOb->isConstructed() && buildOb->isFinish())) return ACTION_INVALID_BUILDACT_NEEDBUILT;
 
         if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionShowAble(buildOb->getNum(),actNum))
             return ACTION_INVALID_BUILDACT_LOCK;
@@ -176,8 +187,15 @@ void Core_List::suspendRelation(Coordinate * object)
     if(relate_AllObject[object].isExist)
     {
         Building* buildOb = NULL;
+        MoveObject* moveOb = NULL;
         object->printer_ToBuilding((void**)&buildOb);
+        object->printer_ToMoveObject((void**)&moveOb);
         if(buildOb!=NULL) player[buildOb->getPlayerRepresent()]->back_Resource_TS(buildOb); //返还资源
+        if(moveOb!= NULL)   //清空路径
+        {
+            moveOb->setPreStand();
+            moveOb->setPath(stack<Point>(),object->getDR(),object->getUR());
+        }
         object->initAction();  //行动全部重置
 
         relate_AllObject[object].isExist = false;
@@ -321,7 +339,7 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
 {
     relation_Object& relation = relate_AllObject[object1];
 
-    if(relation.alterOb == NULL)
+    if(relation.alterOb == NULL || needReset_resBuild)
     {
         if(relation.needResourceBuilding) findResourceBuiding( relation ,  player[object1->getPlayerRepresent()]->build);
     }
@@ -411,7 +429,7 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
 
         if(!theMap->isFlat(tempBuild))
         {
-            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差");
+            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差或斜坡");
             answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
         }
     }
@@ -622,14 +640,16 @@ void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
     vector<Point> Block_Free;
-//    qDebug()<<"ending";
-//    qDebug()<<relate_AllObject[object1].relationAct;
     switch(relate_AllObject[object1].relationAct){
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
         {
             if(!((Building*)relate_AllObject[object1].goalObject)->isConstructed())
-                player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+            {
+                 player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+                 if(relate_AllObject[object1].goalObject->getNum() == BUILDING_STOCK || relate_AllObject[object1].goalObject->getNum() == BUILDING_GRANARY)
+                     resourceBuildingChange = true;
+            }
             relate_AllObject[object1].goalObject->initAction();
             if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
             {
@@ -642,7 +662,6 @@ void Core_List::object_FinishAction(Coordinate* object1)
     case CoreEven_BuildingAct:
         Block_Free = theMap->findBlock_Free(object1);
         player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1,Block_Free);  //进行建筑行动的结果处理
-//        qDebug()<<"end";
         break;
     case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
