@@ -100,6 +100,8 @@
 #define MAPHEIGHT_MAX 5         // 最高地形高度
 #define MAPHEIGHT_PERCENT 60    // 生成概率，范围0~100
 #define MAPHEIGHT_OPTCOUNT 20   // 生成高度时的优化次数，范围要求>=5
+#define CENTER_RADIUS   12      // 特判市镇中心附近平地的半径
+#define CENTER_DEVIATION 3      // 市镇中心坐标偏移量
 
 /********** 地图块样式 **********/
 #define MAPPATTERN_EMPTY 0      // 未定义样式
