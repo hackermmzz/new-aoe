@@ -258,6 +258,7 @@ void Army::setAttribute()
         defence_shoot_change  = new int[2]{ DEFSHOOT_CLUBMAN1,DEFSHOOT_CLUBMAN2 };
 
         crashLength = CRASHBOX_SINGLEOB;
+        nowres_step = NOWRES_TIMER_CLUBMAN;
 
         break;
 
@@ -295,6 +296,8 @@ void Army::setAttribute()
 
         type_Missile = Missile_Cobblestone;
         phaseFromEnd_MissionAttack = THROWMISSION_SLINGER;
+
+        nowres_step = NOWRES_TIMER_SLINGER;
         break;
 
     case AT_BOWMAN:     //弓箭手
@@ -316,6 +319,8 @@ void Army::setAttribute()
 
         type_Missile = Missile_Arrow;
         phaseFromEnd_MissionAttack = THROWMISSION_ARCHER;
+
+        nowres_step = NOWRES_TIMER_BOWMAN;
         break;
 
     case AT_SCOUT:      //侦察骑兵
@@ -334,6 +339,8 @@ void Army::setAttribute()
         defence_shoot = DEFSHOOT_SCOUT;
 
         crashLength = CRASHBOX_SMALLOB;
+
+        nowres_step = NOWRES_TIMER_SCOUT;
         break;
 
     default:
