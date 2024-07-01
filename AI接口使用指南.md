@@ -19,10 +19,10 @@
     int BuildingAction(int SN, int Action);
 ```
 
-以下是您可以调用的获取游戏信息的接口，为tagUsrGame的成员函数
+以下是您可以调用的获取游戏信息的接口，为UsrAI的成员函数
 
 ```c++
-    tagInfo getInfo();
+    UsrAI::tagInfo getInfo();
 ```
 
 以下是上述函数返回的结构体说明
