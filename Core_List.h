@@ -21,7 +21,7 @@ public:
 
     /*********关系表控制***********/
     int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
+    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);  //移动
     int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止

@@ -433,6 +433,8 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 //    double predr = relation.DR_Predicted,preur = relation.UR_Predicted;
 //    double dis_r = object1->getCrashLength();
     double dis = 1e6;
+    BloodHaver* attacker = NULL;
+    int heightAdd = 0;
 
     if(operate/OPERATECHANGE == OPERATECON_MOVEALTER)
     {
@@ -462,9 +464,23 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
                 break;
             case OPERATECON_NEAR_ATTACK:
                 dis = relation.disAttack;
+                object1->printer_ToBloodHaver((void**)&attacker);
+                if(attacker && attacker->is_missileAttack())
+                {
+                    heightAdd = relation.height_Object - relation.height_GoalObject;
+                    if(heightAdd > 0)
+                        dis = min( dis + heightAdd*BLOCKSIDELENGTH , object1->getVision() * BLOCKSIDELENGTH );
+                }
                 break;
             case OPERATECON_NEAR_ATTACK_MOVE:
-                dis = relation.disAttack;
+                dis = relation.disAttack;   //暂且修改为disAttack，理论应略小于disAttack
+                object1->printer_ToBloodHaver((void**)&attacker);
+                if(attacker && attacker->is_missileAttack())
+                {
+                    heightAdd = relation.height_Object - relation.height_GoalObject;
+                    if(heightAdd > 0)
+                        dis = min( dis + heightAdd*BLOCKSIDELENGTH , object1->getVision() * BLOCKSIDELENGTH );
+                }
                 break;
             case OPERATECON_NEAR_WORK:
                 dis = relation.distance_AllowWork;
