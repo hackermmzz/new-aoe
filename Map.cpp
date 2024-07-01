@@ -1602,7 +1602,6 @@ void Map::GenerateType() {
         }
     }
 
-    qDebug()<<"t1.1";
     // 特殊处理（直接处理cell）
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U; j ++) {
