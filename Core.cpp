@@ -157,6 +157,13 @@ void Core::gameUpdate()
 //                if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
 //                    theMap->add_Map_Vision(*builditer);
                 (*builditer)->nextframe();
+
+//                if((*builditer)->getBlockDR() != INT_MAX && (*builditer)->getBlockUR() != INT_MAX)
+//                {
+//                    // 更新人物Y轴偏移（伪三维）
+//                    int curMapHeight = theMap->cell[(*builditer)->getBlockDR()][(*builditer)->getBlockUR()].getMapHeight();
+//                    (*builditer)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+//                }
                 builditer++;
             }
         }
@@ -254,12 +261,7 @@ void Core::gameUpdate()
     manageOrder(0);
     manageOrder(1);
 
-    //对正在监视的Object，进行行动处理
-    interactionList->manageMontorAct();
-
-    theMap->loadBarrierMap();//更新寻路用障碍表
-    interactionList->manageRelationList();
-
+    interactionList->update();
 }
 
 
