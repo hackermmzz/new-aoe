@@ -44,6 +44,7 @@ void Core::gameUpdate()
                     call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡");
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
+                    g_Object[(*humaniter)->getglobalNum()] = NULL;
                     //如果Missle的投出者是该ob，则让该missle使用投出者记录
                     player[playerIndx]->deleteMissile_Attacker(*humaniter);
                 }
@@ -143,6 +144,7 @@ void Core::gameUpdate()
                 else
                     call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁");
 
+                g_Object[(*builditer)->getglobalNum()] = NULL;
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
                 interactionList->eraseObject(*builditer);
                 deleteOb_setNowobNULL(*builditer);
@@ -223,6 +225,7 @@ void Core::gameUpdate()
         else
         {
             call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成");
+            g_Object[(*animaliter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
             animaliter = theMap->deleteAnimal(animaliter);
@@ -243,6 +246,7 @@ void Core::gameUpdate()
         {
             call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成");
 
+            g_Object[(*SRiter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*SRiter);
             deleteOb_setNowobNULL(*SRiter);
             SRiter = theMap->deleteStaticRes(SRiter);
