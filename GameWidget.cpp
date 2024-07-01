@@ -167,9 +167,9 @@ void GameWidget::paintEvent(QPaintEvent *)
     if(nowobject!=NULL)
     {
         painter.setPen(Qt::white);
-        int width=nowobject->getimageX()*2;
-        int height=nowobject->getimageY()*2;
-        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getimageX();
+        int width=nowobject->getCrashLength()*4;
+        int height=nowobject->getCrashLength()*2;
+        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getCrashLength()*2;
         int Y=tranY(nowobject->getDR()-DR,nowobject->getUR()-UR) - height / 2;
         QPolygonF diamond;
         diamond << QPointF(X+width/2, Y);
