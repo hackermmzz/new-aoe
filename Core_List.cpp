@@ -91,7 +91,7 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     return ACTION_INVALID_ISNTFREE;
 }
 
-//添加
+//建造
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -115,7 +115,6 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
 
             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
-
         }
     }
 
@@ -312,7 +311,10 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
     }
 
     relation.reset_Object1Predicted(object1);
+    relation.height_Object = theMap->get_MapHeight(object1->getBlockDR() , object1->getBlockUR());
     relation.update_GoalPoint();
+    if(relation.goalObject != NULL)
+        relation.height_GoalObject = theMap->get_MapHeight(relation.goalObject->getBlockDR() , relation.goalObject->getBlockUR());
     relation.update_Attrib_alter();
     relation.waiting();
 }

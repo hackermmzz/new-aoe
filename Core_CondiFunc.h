@@ -5,6 +5,8 @@
 #include <Map.h>
 #include <Player.h>
 
+//****************************************************************************************
+//寻路相关
 struct pathNode{
     static int cost_stra,cost_bias; //cost标准
     static std::map<Point , int> costLab;  //根据点之间位置，获得cost_total
@@ -14,6 +16,7 @@ struct pathNode{
 
     pathNode* preNode = NULL;   //记录前驱点
 
+    //**************************
     pathNode(){}
     pathNode( Point newPoint );
     ~pathNode(){ }
@@ -23,14 +26,11 @@ struct pathNode{
 
     //计算预期cost
     void calCost_predict(){ cost_predict = calculateManhattanDistance(goalPoint.x , goalPoint.y ,position.x , position.y) *10;}
-//                countdistance(goalPoint.x , goalPoint.y ,position.x , position.y)  }
-
     //获取总cost
     int getCost() const{ return cost_predict + cost_total; }
 
     //添加后续点，并返回后续点
     pathNode* pushNode( pathNode* nextNode );
-
     //获取输出
     Point toPoint(){ return position; }
 
@@ -43,8 +43,8 @@ struct treeNode
     pathNode* value;
     treeNode* father = NULL, *lchild = NULL, *rchild = NULL;
 
+    //**************************
     treeNode(){}
-//    treeNode(Point newPoint){value = new pathNode(newPoint);}
     treeNode( pathNode* newNode ){ value = newNode; }
     ~treeNode(){  }
 
@@ -57,6 +57,7 @@ struct lessHeap
     treeNode* head = NULL, *cacheNode = NULL;
     int nodeNum = 0;
 
+    //**************************
     lessHeap(){}
     ~lessHeap();
 
@@ -64,17 +65,12 @@ struct lessHeap
 
     //返回堆顶最小元素
     treeNode* top(){ return  head; }
-
     //删除头节点，并且调整小根堆
     void pop();
-
     //增加节点
-//    void addNode(Point newPoint);
     void addNode( pathNode* newNode );
-
     //小根堆上浮操作
     void floatUp( treeNode* obNode );
-
     //小根堆下沉操作
     void downChange();
 
@@ -82,9 +78,11 @@ private:
     void push_back();
     //节点交换，限一个父节点一个孩子节点
     void nodeChange( treeNode* __x , treeNode* __y  );
-//    void swapNode( treeNode* __x, treeNode* __y );
 };
 
+
+//****************************************************************************************
+//关系表结构体
 struct relation_Object
 {
     bool isExist , isUseAlterGoal=false;
@@ -100,6 +98,7 @@ struct relation_Object
     double distance_AllowWork , dis_AllowWork_alter;  //若goalObject为可工作对象，human对其的可工作距离（游戏中具体距离）
     double distance_Record; //游戏中的距离的记录,为曼哈顿距离，用于更新relation
     double disAttack = 0;
+    int height_Object = 0 , height_GoalObject = 0;
 
     int times_Execution = 0;
 
