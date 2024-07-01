@@ -1,11 +1,11 @@
 #include "AI.h"
 
-int AI::HumanMove(int SN, double L0, double U0){
+int AI::HumanMove(int SN, double DR0, double UR0){
     if(!isHuman(SN))
         return ACTION_INVALID_SN;
-    if(L0 > 2575 || L0 < 0||U0 > 2575 || U0 < 0)
+    if(DR0 > 2575 || DR0 < 0||UR0 > 2575 || UR0 < 0)
         return ACTION_INVALID_LOCATION;    
-    return AddToIns(instruction(1,SN,L0,U0));
+    return AddToIns(instruction(1,SN,DR0,UR0));
 }
 
 int AI::HumanAction(int SN,int obSN){
@@ -14,11 +14,11 @@ int AI::HumanAction(int SN,int obSN){
     return AddToIns(instruction(2,SN,obSN , true));
 }
 
-int AI::HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU){
+int AI::HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR){
     if(!isHuman(SN)){
         return ACTION_INVALID_SN;
     }
-    return AddToIns(instruction(3,SN,BlockL,BlockU,BuildingNum));
+    return AddToIns(instruction(3,SN,BlockDR,BlockUR,BuildingNum));
 }
 
 int AI::BuildingAction(int SN,int Action){
