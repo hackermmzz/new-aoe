@@ -516,7 +516,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     Missile* missile = NULL;
 
     object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
-    object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
+    if(object2) object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
     object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
 
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
@@ -1223,6 +1223,7 @@ void Core_List::initDetailList()
         delete conditionList;
     }
 }
+
 int STATE_JustMoveTo[1]={HUMAN_STATE_JUSTWALKING};
 int STATE_Attacking[2]={HUMAN_STATE_GOTO_ATTACK,HUMAN_STATE_ATTACKING};
 int STATE_Gather[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
