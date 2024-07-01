@@ -77,8 +77,7 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
     vector<Point>& pointLab = viewLab[blockSize][visionLen];
     int lx,mx,my;
     int x0 = (blockSize - 1)/2;  //计算的原点
-    int y0 = x0;
-    int changeY;
+    int y0 = x0 , yr , R , vL;
 
     lx = - visionLen + 1;
     mx =2*x0 + visionLen;
@@ -115,8 +114,7 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
     }
     else
     {
-        changeY = my - visionLen + 2;
-
+        R = visionLen;
         viewBlock.y = y0;
         for(int x = lx ; x < mx; x++)
         {
@@ -126,7 +124,11 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
 
         for(int y = y0+1; y<my; y++)
         {
-            if(y > changeY){mx--;lx++;}
+            yr = y - y0;
+            vL = (int)(sqrt((double)( R*R - yr*yr ))+0.5);
+
+            lx = -vL +1;
+            mx = 2*x0 + vL;
             Coordinate::addViewLab(viewLab[blockSize][visionLen] , lx , mx , y , 2*y0 - y);
         }
     }
