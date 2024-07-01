@@ -77,6 +77,8 @@ public:
 
     void haveAttack(){ attack_OneCircle = false; }
 
+    bool get_isRangeAttack(){return isRangeAttack;}
+
 protected:
     double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
     int MaxBlood = 100;
@@ -89,6 +91,7 @@ protected:
 
 
     bool isAttackable = false;
+    bool isRangeAttack = false;
     int attackType = ATTACKTYPE_CANTATTACK;     //攻击类型
     int atk = 0;    //攻击力
     double dis_Attack = DISTANCE_ATTACK_CLOSE;  //攻击距离

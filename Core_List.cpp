@@ -18,6 +18,10 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
 
     if(! relate_AllObject[object1].isExist )
     {
+        BloodHaver* bloodOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if(object1->isPlayerControl() && object2->isPlayerControl()) isSameReprensent = object1->getPlayerRepresent() == object2->getPlayerRepresent();
@@ -59,6 +63,10 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
 
     if(! relate_AllObject[object1].isExist )
     {
+        BloodHaver* bloodOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+
         if(eventType == CoreEven_JustMoveTo)
         {
             if(DR<0) DR = 0;
@@ -100,6 +108,10 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
 
     if(! relate_AllObject[object1].isExist )
     {
+        BloodHaver* bloodOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         if(eventType == CoreEven_CreatBuilding)
         {
@@ -128,6 +140,10 @@ int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
+        BloodHaver* bloodOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+
         Building* buildOb = NULL;
         int oper = 0;
         object1->printer_ToBuilding((void**)&buildOb);
@@ -549,6 +565,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
             {
                 calculateDamage = true;
                 attacker->haveAttack();
+                if(attacker->get_isRangeAttack()) deal_RangeAttack(object1 , object2);
                 if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
             }
         }
@@ -809,6 +826,42 @@ void Core_List::manageMontorAct()
     }
 
     return;
+}
+
+void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
+{
+    int bx,by;
+    int size , damage;
+    BloodHaver* blooder , *bloodee;
+    Coordinate* judOb;
+    attacker->printer_ToBloodHaver((void**)&blooder);
+    for(int x = -1 ; x<2; x++)
+    {
+        for(int y = -1; y<2 ; y++)
+        {
+            bx = x+attacker->getBlockDR();
+            by = x+attacker->getBlockUR();
+            if(bx < 0 || by < 0 || bx>=MAP_L|| by >= MAP_U) continue;
+            size = theMap->map_Object[bx][by].size();
+            bloodee = NULL;
+            for(int i = 0 ; i<size ; i++)
+            {
+                judOb = theMap->map_Object[bx][by][i];
+                if(judOb == attackee) continue;
+                if(judOb->getSort() == SORT_ANIMAL && ((Animal*)judOb)->isTree()) continue;
+                if(attacker->getPlayerRepresent() == judOb->getPlayerRepresent()) continue;
+
+                judOb->printer_ToBloodHaver((void**)&bloodee);
+                if(bloodee && countdistance(attacker->getDR() , attacker->getUR() , judOb->getDR() , judOb->getUR()) <= blooder->getDis_attack())
+                {
+                    damage = blooder->getATK() - bloodee->getDEF(blooder->get_AttackType());   //统一伤害计算公式
+                    if(damage<0) damage = 0;
+                    bloodee->updateBlood(damage);  //damage反映到受攻击者血量减少
+                }
+            }
+        }
+    }
+
 }
 
 //**************************************************************
