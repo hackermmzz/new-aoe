@@ -54,83 +54,88 @@ extern std::queue<st_DebugMassage>debugMassagePackage;
 
 struct tagBuilding
 {
-    int BlockDR,BlockUR;
-    int Type;
-    int SN;
-    int Blood;
-    int MaxBlood;
-    int Percent;
-    int Project;
-    int ProjectPercent;
-    int Cnt;
-    int Owner;
+    int BlockDR,BlockUR; //区块坐标
+    int Type; // 建筑类型
+    int SN; // 序列号
+    int Blood; // 当前血量
+    int MaxBlood; // 最大血量
+    int Percent; // 完成百分比
+    int Project; // 当前项目
+    int ProjectPercent; // 项目完成百分比
+    int Cnt; // 剩余资源量（仅农田）
+    int Owner; // 所有者
     tagBuilding toEnemy(){
-        this->Cnt=-1;
-        this->Project=-1;
-        this->ProjectPercent=-1;
+        this->Cnt = -1;
+        this->Project = -1;
+        this->ProjectPercent = -1;
         return *this;
     }
 };
 
 struct tagResource
 {
-    double DR,UR;
-    int BlockDR,BlockUR;
-    int Type;
-    int SN;
-    int ProductSort;
-    int Cnt;
-    int Blood;
+    double DR,UR; //细节坐标
+    int BlockDR,BlockUR; //区块坐标
+    int Type; // 资源类型
+    int SN; // 序列号
+    int ProductSort; // 产品种类
+    int Cnt; // 剩余资源数量
+    int Blood; // 当前血量
 };
+
 struct tagHuman
 {
-    double DR,UR;
-    int BlockDR,BlockUR;
-    double L0,U0;   // 目的地
-    int NowState;
-    int WorkObjectSN;
-    int Blood;
-    int SN;
-    int Owner;
+    double DR,UR; //细节坐标
+    int BlockDR,BlockUR; //区块坐标
+    double DR0,UR0; // 目的地坐标
+    int NowState; // 当前状态
+    int WorkObjectSN; // 工作对象序列号
+    int Blood; // 当前血量
+    int SN; // 序列号
+    int Owner; // 所有者
+    int attack; // 攻击力
+    int rangedDefense; // 远程防御
+    int meleeDefense; // 近战防御
     void cast_from(tagHuman taghuman){
-        this->DR=taghuman.DR;
-        this->UR=taghuman.UR;
-        this->BlockDR=taghuman.BlockDR;
-        this->BlockUR=taghuman.BlockUR;
-        this->L0=taghuman.L0;
-        this->U0=taghuman.U0;
-        this->NowState=taghuman.NowState;
-        this->WorkObjectSN=taghuman.WorkObjectSN;
-        this->Blood=taghuman.Blood;
-        this->SN=taghuman.SN;
-        this->Owner=taghuman.Owner;
+        this->DR = taghuman.DR;
+        this->UR = taghuman.UR;
+        this->BlockDR = taghuman.BlockDR;
+        this->BlockUR = taghuman.BlockUR;
+        this->DR0 = taghuman.DR0;
+        this->UR0 = taghuman.UR0;
+        this->NowState = taghuman.NowState;
+        this->WorkObjectSN = taghuman.WorkObjectSN;
+        this->Blood = taghuman.Blood;
+        this->SN = taghuman.SN;
+        this->Owner = taghuman.Owner;
     }
 };
-struct tagFarmer:public tagHuman
+
+struct tagFarmer: public tagHuman
 {
-    int ResourceSort;
-    int Resource;
+    int ResourceSort; // 手持资源种类
+    int Resource; // 手持资源数量
     tagFarmer toEnemy(){
-        Resource=-1;
-        L0=-1.0;
-        U0=-1.0;
+        Resource = -1;
+        DR0= -1.0;
+        UR0= -1.0;
         return *this;
     }
 };
 
-struct tagArmy:public tagHuman
+struct tagArmy: public tagHuman
 {
-    int Sort;   //军队种类
+    int Sort; // 军队种类
     tagArmy toEnemy(){
-        L0=-1.0;
-        U0=-1.0;
+        DR0 = -1.0;
+        UR0 = -1.0;
         return *this;
     }
 };
-struct tagBlock{
-    bool explored=false;
-    int height=0;
-};
+//struct tagBlock{
+//    bool explored=false;
+//    int height=0;
+//};
 
 struct instruction{
     ///用于存储ai发出的指令信息
@@ -197,29 +202,29 @@ struct tagMap
 };
 struct tagInfo
 {
-    vector<tagBuilding> buildings;
-    int buildings_n;
-    vector<tagFarmer> farmers;
-    int farmers_n;
-    vector<tagArmy> armies;
-    int armies_n;
-    vector<tagBuilding> enemy_buildings;
-    int enemy_buildings_n;
-    vector<tagFarmer> enemy_farmers;
-    int enemy_farmers_n;
-    vector<tagArmy> enemy_armies;
-    int enemy_armies_n;
-    vector<tagResource> resources;
-    int resources_n;
-    map<int,int> ins_ret;   //map<id,ret>
-    int theMap[MAP_L][MAP_U];   //地图高度
-    int GameFrame;
-    int civilizationStage;
-    int Wood;
-    int Meat;
-    int Stone;
-    int Gold;
-    int Human_MaxNum;
+    vector<tagBuilding> buildings; // 我方建筑列表
+    int buildings_n; // 我方建筑数量
+    vector<tagFarmer> farmers; // 我方农民列表
+    int farmers_n; // 我方农民数量
+    vector<tagArmy> armies; // 我方军队列表
+    int armies_n; // 我方军队数量
+    vector<tagBuilding> enemy_buildings; // 敌方建筑列表
+    int enemy_buildings_n; // 敌方建筑数量
+    vector<tagFarmer> enemy_farmers; // 敌方农民列表
+    int enemy_farmers_n; // 敌方农民数量
+    vector<tagArmy> enemy_armies; // 敌方军队列表
+    int enemy_armies_n; // 敌方军队数量
+    vector<tagResource> resources; // 资源列表
+    int resources_n; // 资源数量
+    map<int, int> ins_ret; // 指令返回值，map<id, ret>
+    int theMap[MAP_L][MAP_U]; // 高程图
+    int GameFrame; // 游戏帧数
+    int civilizationStage; // 文明阶段
+    int Wood; // 木材数量
+    int Meat; // 肉类数量
+    int Stone; // 石头数量
+    int Gold; // 黄金数量
+    int Human_MaxNum; // 最大人口数量
     void clear(){
         buildings.clear();
         farmers.clear();
@@ -233,6 +238,7 @@ struct tagInfo
     ~tagInfo(){
     }
 };
+
 
 struct tagGame
 {

@@ -19,21 +19,21 @@ vector<int> ins_id;//添加到监视的指令数组
 
 void UsrAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
-    qDebug()<<"#####UsrStart#####";
-    qDebug()<<tagUsrGame.getInfo().GameFrame;
-    sleep(2);
+//    qDebug()<<"#####UsrStart#####";
+//    qDebug()<<tagUsrGame.getInfo().GameFrame;
+//    sleep(2);
     //打印添加到监视的指令执行结果，并从监视中删除
-    auto it = ins_id.begin();
-    while (it != ins_id.end()) {
-        try {
-            int value = tagUsrGame.getInfo().ins_ret.at(*it);
-            qDebug()<<"ins:"<<*it<<":"<<value;
-            it = ins_id.erase(it);
-        } catch (const std::out_of_range& e) {
-            qDebug() << "Key not found";
-             ++it;
-        }
-    }
+//    auto it = ins_id.begin();
+//    while (it != ins_id.end()) {
+//        try {
+//            int value = tagUsrGame.getInfo().ins_ret.at(*it);
+//            qDebug()<<"ins:"<<*it<<":"<<value;
+//            it = ins_id.erase(it);
+//        } catch (const std::out_of_range& e) {
+//            qDebug() << "Key not found";
+//             ++it;
+//        }
+//    }
 
 //    for(tagResource res:tagUsrGame.getResource()){
 //        qDebug()<<res.Type<<" "<<res.BlockL<<" "<<res.BlockU;
@@ -53,7 +53,7 @@ void UsrAI::processData(){
 //        }
     }
     for(tagFarmer human:tagUsrGame.getInfo().farmers){
-        sleep(0.5);
+//        sleep(0.5);
         if(human.SN==human1&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
@@ -65,16 +65,16 @@ void UsrAI::processData(){
             }
             ins_id.push_back(HumanAction(human.SN,sn));
         }else if(human.SN==human2){
-            qDebug()<<"human2:"<<human.NowState<<" "<<human.BlockDR;
-            if(human.NowState==HUMAN_STATE_IDLE){
-                static int x= 20;
-                static int y= 20;
-                if(x<75&&y<75){
-                    ins_id.push_back(HumanBuild(human.SN,BUILDING_HOME,x,y));
-                }
-                x+=10;
-                y+=10;
-            }
+//            qDebug()<<"human2:"<<human.NowState;
+//            if(human.NowState==HUMAN_STATE_IDLE){
+//                static int x= 20;
+//                static int y= 20;
+//                if(x<75&&y<75){
+//                    ins_id.push_back(HumanBuild(human.SN,BUILDING_HOME,x,y));
+//                }
+//                x+=10;
+//                y+=10;
+//            }
         }else if(human.SN==human3&&human.NowState==HUMAN_STATE_IDLE){
             int sn=-1;
             double dis=99999;
@@ -88,7 +88,7 @@ void UsrAI::processData(){
         }
     }
 
-    qDebug()<<"#####UsrEnd#####";
+//    qDebug()<<"#####UsrEnd#####";
 
 /*###########YOUR CODE ENDS HERE###########*/
 }

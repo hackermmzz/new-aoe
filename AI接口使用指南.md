@@ -7,137 +7,107 @@
 以下是您可以调用的控制游戏的接口，所有接口都是AI的成员函数
 
 ```c++
-    //以下函数为控制函数，若命令下达成功，则返回该指令对应的唯一id
-	//通过指令id可以在下一帧查询该指令的执行结果
+    //以下函数为控制函数，若命令下达成功，则返回该指令对应的唯一id,若失败，则返回错误码
+	//命令下达成功不代表能成功执行，通过指令id可以在下一帧通过inse_ret查询该指令的执行结果
 	//所有的指令一旦下达，无论ai是否结束，都会在下一帧执行
-	int HumanMove(int SN, double L0, double U0);
+	int HumanMove(int SN, double DR0, double UR0);
 
-    int HumanAction(int SN,int obSN);
+    int HumanAction(int SN, int obSN);
 
-    int HumanBuild(int SN,int BuildingNum,int BlockL,int BlockU);
+    int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR);
 
-    int BuildingAction(int SN,int Action);
-	//辅助函数，打印对应指令id的执行信息
-    void printInsRet(int id);
+    int BuildingAction(int SN, int Action);
 ```
 
-以下是您可以调用的获取游戏信息的接口，所有接口都是tagUsrGame/tagEnemyGame的成员函数
+以下是您可以调用的获取游戏信息的接口，为tagUsrGame的成员函数
 
 ```c++
-	//获取食物数量
-    int getFood();
-	//获取木材数量
-    int getWood();
-	//获取石材数量
-    int getStone();
-	//获取金子数量
-    int getGold();
-	//获取当前游戏帧
-    int getGameFrame();
-	//获取当前文明进程
-    int getCivilizationStage();
-	//获取当前的人口上限
-    int getMaxHumanNum();
-	//获取对应坐标位置的单格地图信息
-    tagMap getMap(int L,int U);
-	//获取己方农民数组
-    vector<tagFarmer> getFarmers();
-	//获取己方农民数
-    int getFarmers_n();
-	//获取敌方农民数组
-    vector<tagFarmer> getEnemyFarmers();
-	//获取敌方农民数
-    int getEnemyFarmers_n();
-	//获取己方军队数组
-    vector<tagArmy> getArmies();
-	//获取己方军队数
-    int getArmies_n();
-	//获取敌方军队数组
-    vector<tagArmy> getEnemyArmies();
-	//获取敌方军队数
-    int getEnemyArmies_n();
-	//获取己方建筑数组
-    vector<tagBuilding> getBuildings();
-	//获取己方建筑数
-    int getBuildings_n();
-	//获取敌方建筑数组
-    vector<tagBuilding> getEnemyBuildings();
-	//获取敌方建筑数
-    int getEnemyBuildings_n();
-	//获取地图资源数组
-    vector<tagResource> getResource();
-	//获取地图资源数
-    int getResource_n();
-	//获取对应指令id的执行信息，若没有该id对应的信息，则返回一个type为-1的非法instruction
-	instruction getInsRet(int ins_id);
-	//清空记录的指令
-    void clearInsRet();
+    tagInfo getInfo();
 ```
 
 以下是上述函数返回的结构体说明
 
 ```c++
-struct tagMap
+struct tagInfo
 {
-    bool explore;
-    int high;
-    int type;       //资源种类（浆果、树等）
-    int ResType;    //采集获得的资源种类（食物、木头等） human_WOOD...
-    int fundation;  //该资源占地图大小
-    int SN;
-    int remain;     //剩余资源量
-}
+    vector<tagBuilding> buildings; // 我方建筑列表
+    int buildings_n; // 我方建筑数量
+    vector<tagFarmer> farmers; // 我方农民列表
+    int farmers_n; // 我方农民数量
+    vector<tagArmy> armies; // 我方军队列表
+    int armies_n; // 我方军队数量
+    vector<tagBuilding> enemy_buildings; // 敌方建筑列表
+    int enemy_buildings_n; // 敌方建筑数量
+    vector<tagFarmer> enemy_farmers; // 敌方农民列表
+    int enemy_farmers_n; // 敌方农民数量
+    vector<tagArmy> enemy_armies; // 敌方军队列表
+    int enemy_armies_n; // 敌方军队数量
+    vector<tagResource> resources; // 资源列表
+    int resources_n; // 资源数量
+    map<int, int> ins_ret; // 指令返回值，map<id, ret>
+    int theMap[MAP_L][MAP_U]; // 高程图（存储地图的高度） theMap[BlockDR][BlockUR]
+    int GameFrame; // 当前帧数
+    int civilizationStage; // 文明阶段
+    int Wood; // 木材数量
+    int Meat; // 肉类数量
+    int Stone; // 石头数量
+    int Gold; // 黄金数量
+    int Human_MaxNum; // 最大人口数量
+};
 
 ```
 
 ```c++
 struct tagBuilding
 {
-    int BlockL,BlockU;
-    int Type;
-    int SN;
-    int Blood;
-    int MaxBlood;
-    int Percent;
-    int Project;
-    int ProjectPercent;
-    int Cnt;
-    int Owner;	//归属玩家  0是Usr，1是Enemy
+    int BlockDR,BlockUR; //区块坐标
+    int Type; // 建筑类型
+    int SN; // 序列号
+    int Blood; // 当前血量
+    int MaxBlood; // 最大血量
+    int Percent; // 完成百分比
+    int Project; // 当前项目
+    int ProjectPercent; // 项目完成百分比
+    int Cnt; // 剩余资源量（仅农田）
+    int Owner; // 所有者
 };
 ```
 
 ```c++
 struct tagResource
 {
-    double L,U;
-    int BlockL,BlockU;
-    int Type;
-    int SN;
-    int ProductSort;
-    int Cnt;
-    int Blood;
+    double DR,UR; //细节坐标
+    int BlockDR,BlockUR; //区块坐标
+    int Type; // 资源类型
+    int SN; // 序列号
+    int ProductSort; // 产品种类
+    int Cnt; // 剩余资源数量
+    int Blood; // 当前血量
 };
 ```
 
 ```c++
 struct tagHuman
 {
-    double L,U;
-    int BlockL,BlockU;
-    double L0,U0;   // 目的地
-    int NowState;
-    int WorkObjectSN;
-    int Blood;
-    int SN;
-    int Owner;
+    double DR,UR; //细节坐标
+    int BlockDR,BlockUR; //区块坐标
+    double DR0,UR0; // 目的地坐标
+    int NowState; // 当前状态
+    int WorkObjectSN; // 工作对象序列号
+    int Blood; // 当前血量
+    int SN; // 序列号
+    int Owner; // 所有者
+    int attack; // 攻击力
+    int rangedDefense; // 远程防御
+    int meleeDefense; // 近战防御
 };
 ```
 
 ```C++
-struct tagFarmer:public tagHuman
+struct tagFarmer: public tagHuman
 {
-    int ResourceSort;
-    int Resource;
+    int ResourceSort; // 手持资源种类
+    int Resource; // 手持资源数量
 };
 ```
 
@@ -149,23 +119,12 @@ struct tagArmy:public tagHuman
 ```
 
 ```C++
-struct instruction{
-    ///用于存储ai发出的指令信息
-    /// @param type 指令类型
-    /// @param option 对应类型下的操作
-    /// type 0:终止对象self的动作
-    /// type 1:命令村民self走向指定坐标L0，U0
-    /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
-    /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-    /// type 4:对建筑self发出命令option
-    int ret=-1;
-    int type;
-    int id;
-    Coordinate* self;
-    Coordinate* obj;
-    int option;
-    int BL,BU;
-    double L,U;
-    bool isExist();
-};
+    double calDistance(double DR1, double UR1, double DR2, double UR2) //计算距离
+
+    void DebugText(std::string debugStr) //在侧栏输出调试信息
+
+    void DebugText(int debugInt)
+
+    void DebugText(double debugDouble) 
 ```
+
