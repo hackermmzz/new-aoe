@@ -918,6 +918,10 @@
 
 /********** 设置多少帧切换一次nowres **********/
 #define NOWRES_TIMER_FARMER 1
+#define NOWRES_TIMER_CLUBMAN 1
+#define NOWRES_TIMER_BOWMAN 2
+#define NOWRES_TIMER_SCOUT 2
+#define NOWRES_TIMER_SLINGER 1
 #define NOWRES_TIMER_LION 1
 #define NOWRES_TIMER_ELEPHANT 1
 
