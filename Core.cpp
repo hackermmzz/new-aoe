@@ -13,8 +13,6 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
     this->memorymap = memorymap;    //内存图
     this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
     this->interactionList = new Core_List( this->theMap , this->player );   //本类中管理的对象交互动态表
-
-
 }
 
 void Core::gameUpdate()

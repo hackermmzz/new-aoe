@@ -706,6 +706,7 @@
 
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
+#define DISTANCE_Manhattan_PathMove 0.01
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
 #define DISTANCE_HIT_TARGET 4
 

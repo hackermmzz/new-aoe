@@ -446,7 +446,6 @@ void Core_List::eraseObject(Coordinate* eraseOb)
     manageRelation_deleteGoalOb(eraseOb);
 }
 
-
 int Core_List::getObjectSN(Coordinate* object){
     relation_Object& thisRelation=relate_AllObject[object];
     if(thisRelation.isExist&&thisRelation.goalObject!=nullptr){
@@ -493,6 +492,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
                 //处理碰撞
                 moveObject->stateCrash=true;
                 relate_AllObject[object].wait(50);
+                moveObject->GoBackLU();
                 moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
                 if(!moveObject->isStand()) moveObject->setPreStand();
                 moveObject->initCrash();
