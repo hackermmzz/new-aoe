@@ -28,6 +28,7 @@ protected:
     int nextBlockDR0=0,nextBlockUR0=0;
     double DR0,UR0;//目的地
 
+    int dMove_BDR = 0 , dMove_BUR = 0;
     //ΔDR ΔUR
     double VDR=0,VUR=0;
     // 单位向量
@@ -41,7 +42,7 @@ protected:
     double PredictedDR,PredictedUR;
 
     stack<Point> path;    //记录路径
-    int pathN=0;    //路径长度
+//    int pathN=0;    //路径长度
     int pathI=0;    //当前进行到路径的哪一步
     bool pathInit = false;
 
@@ -70,6 +71,8 @@ protected:
     void update_PredictPoint();
 
     void jud_ArrivePhaseGoal(double dDR , double dUR , double distance);
+
+    void update_moveDire( double dDR , double dUR );
 
 public:
     bool stateCrash=false;//用于传递状态给tagGame 判断碰撞
@@ -150,7 +153,7 @@ public:
 
     //获取碰撞对象
     Coordinate* getCrashOb(){ return crashOb;}
-
+    Point getMoveDire(){ return Point(dMove_BDR,dMove_BUR); }
 
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }

@@ -353,6 +353,14 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
     relation.waiting();
 }
 
+void Core_List::eraseObject(Coordinate* eraseOb)
+{
+    eraseRelation(eraseOb);
+    manageRelation_deleteGoalOb(eraseOb);
+}
+
+//****************************************************************************************
+//辅助动态表处理交互
 //查询最近的符合要求的建筑，并设置alterOB
 void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>& building)
 {
@@ -440,12 +448,6 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
     return answer;
 }
 
-void Core_List::eraseObject(Coordinate* eraseOb)
-{
-    eraseRelation(eraseOb);
-    manageRelation_deleteGoalOb(eraseOb);
-}
-
 int Core_List::getObjectSN(Coordinate* object){
     relation_Object& thisRelation=relate_AllObject[object];
     if(thisRelation.isExist&&thisRelation.goalObject!=nullptr){
@@ -454,6 +456,7 @@ int Core_List::getObjectSN(Coordinate* object){
         return -1;
     }
 }
+
 //****************************************************************************************
 //通用的控制对象行动函数
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
@@ -840,39 +843,6 @@ void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
 
 //**************************************************************
 //寻路相关
-//bool Core_List::isValidPoint(const int (&map)[MAP_L][MAP_U], const Point &p)
-//{
-//    int rows = MAP_L;
-//    int cols = MAP_U;
-//    return (p.x >= 0 && p.x < rows && p.y >= 0 && p.y < cols);
-//}
-
-//vector<Point> Core_List::getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point &p)
-//{
-//    vector<Point> adjacentPoints;
-
-//    // 八个相邻正方向的偏移量
-//    int dx[] = { -1, 1, 0, 0, -1, -1, 1, 1 };
-//    int dy[] = { 0, 0, -1, 1, -1, 1, -1, 1 };
-
-//    for (int i = 0; i < 8; i++) {
-//        int newX = p.x + dx[i];
-//        int newY = p.y + dy[i];
-//        Point newPoint = { newX, newY };
-//        if (isValidPoint(map, newPoint) && map[newX][newY] != 1) {
-//            if(abs(dx[i])+abs(dy[i])==2)
-//            {
-//                if(map[newX][p.y]!=1&&map[p.x][newY]!=1)
-//                {
-//                    adjacentPoints.push_back(newPoint);
-//                }
-//            }
-//            else adjacentPoints.push_back(newPoint);
-//        }
-//    }
-//    return adjacentPoints;
-//}
-
 stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination , Coordinate* goalOb)
 {
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1) , Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
@@ -976,102 +946,8 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     }
     delete nodeQue;
 
-
-//    qDebug()<<meetGoal<<path.size();
     return path;
 }
-
-
-//stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination)
-//{
-//    int rows = 72;
-//    int cols = 72;
-
-//    // 记录已访问的点
-//    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
-
-//    // 使用map记录每个点的前驱点，以便回溯路径
-//    vector<vector<Point>> prev(rows, vector<Point>(cols));
-
-//    // 使用queue保存路径
-//    queue<Point> q;
-
-//    // 广度优先搜索
-//    q.push(start);
-//    visited[start.x][start.y] = true;
-
-//    while (!q.empty()) {
-//        Point current = q.front();
-//        q.pop();
-
-//        // 找到目标点，回溯路径
-//        if (current.x == destination.x && current.y == destination.y) {
-//            stack<Point> pathStack;
-//            while (!(current.x == start.x && current.y == start.y)) {
-//                pathStack.push(current);
-//                current = prev[current.x][current.y];
-//            }
-//            return pathStack;
-//        }
-
-//        vector<Point> adjacentPoints = getAdjacentPoints(findPathMap, current);
-//        for (const Point& next : adjacentPoints) {
-//            if (!visited[next.x][next.y]) {
-//                visited[next.x][next.y] = true;
-//                q.push(next);
-//                prev[next.x][next.y] = current;
-//            }
-//        }
-//    }
-
-//    return findPathAlternative(map->intmap,start,destination);
-//}
-
-//stack<Point> Core_List::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point &start, const Point &destination)
-//{
-//    int rows = 72;
-//    int cols = 72;
-
-//    // 记录已访问的点
-//    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
-
-//    // 使用map记录每个点的前驱点，以便回溯路径
-//    vector<vector<Point>> prev(rows, vector<Point>(cols));
-
-//    // 使用queue保存路径
-//    queue<Point> q;
-
-//    // 广度优先搜索
-//    q.push(start);
-//    visited[start.x][start.y] = true;
-
-//    while (!q.empty()) {
-//        Point current = q.front();
-//        q.pop();
-
-//        // 找到目标点，回溯路径
-//        if (current.x == destination.x && current.y == destination.y) {
-//            stack<Point> pathStack;
-//            while (!(current.x == start.x && current.y == start.y)) {
-//                pathStack.push(current);
-//                current = prev[current.x][current.y];
-//            }
-//            return pathStack;
-//        }
-
-//        vector<Point> adjacentPoints = getAdjacentPoints(map, current);
-//        for (const Point& next : adjacentPoints) {
-//            if (!visited[next.x][next.y]) {
-//                visited[next.x][next.y] = true;
-//                q.push(next);
-//                prev[next.x][next.y] = current;
-//            }
-//        }
-//    }
-
-//    return stack<Point>();
-//}
-
 
 //*************************************************************
 //行动预备处理
@@ -1091,7 +967,6 @@ Missile* Core_List::creatMissile(Coordinate* attacker ,Coordinate* attackee)
     if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
     else return NULL;
 }
-
 
 /**************************************************************/
 //建立行动细节的静态表

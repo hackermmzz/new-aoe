@@ -64,7 +64,6 @@ void MoveObject::setPath(stack<Point> path , double goalDR, double goalUR)
     resetpathIN();  //重置path的步数
     nextBlockDR= transBlock(DR);
     nextBlockUR= transBlock(UR);
-//    calculateDiretionArray(path);
 
     update_path_useBlock();
 }
@@ -84,50 +83,10 @@ void MoveObject::update_path_useBlock()
     }
 }
 
-//void MoveObject::calculateDiretionArray(stack<Point> &path)
-//{
-//    /**
-//    *   dx  dy  值   意义     lk  rk
-//    *   1   -1  0   下        2   0
-//    *   0   -1  1   左下      1   0
-//    *   -1  -1  2   左        0   0
-//    *   -1  0   3   左上      0   1
-//    *   -1  1   4   上        0   2
-//    *   0   1   5   右上      1   2
-//    *   1   1   6   右        2   2
-//    *   1   0   7   右下      2   1
-//    */
-//    static int d_lab[3][3] = {\
-//        {2 , 3 , 4},\
-//        {1 , -1, 5},\
-//        {0 , 7 , 6} \
-//    };
-
-//    stack<Point> pathCopy = path;  // 复制一份路径
-//    this->pathN=0;
-//    Point prevPoint(BlockDR,BlockUR);  // 第一个点
-//    int dx,dy;
-//    Point currentPoint;
-
-//    while (!pathCopy.empty()) {
-//        currentPoint = pathCopy.top();
-
-//        dx = currentPoint.x - prevPoint.x;
-//        dy = currentPoint.y - prevPoint.y;
-
-//        // 根据dx和dy计算方向值，并将其添加到方向数组d中
-//        d[pathN] = d_lab[dx+1][dy+1];
-
-//        prevPoint = currentPoint;
-//        pathCopy.pop();
-//        pathN++;
-//    }
-//}
-
 void MoveObject::resetpathIN()
 {
     this->pathI=0;
-    this->pathN=0;
+//    this->pathN=0;
     pathInit = true;
 }
 
@@ -160,30 +119,6 @@ void MoveObject::setUR0(double UR0)
 }
 
 //*************************移动处理
-//void MoveObject::setNextBlock()
-//{
-//    if(pathI==0)
-//    {
-//        Point p=path.top();
-//        this->nextBlockDR=p.x;
-//        this->nextBlockUR=p.y;
-//        this->nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
-//        this->nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
-//        path.pop();
-//    }
-//    else
-//    {
-//        Point p=path.top();
-//        int lastBlockDR=nextBlockDR;
-//        int lastBlockUR=nextBlockUR;
-//        this->nextBlockDR=p.x;
-//        this->nextBlockUR=p.y;
-//        this->nextDR=DR+(nextBlockDR-lastBlockDR)*BLOCKSIDELENGTH;
-//        this->nextUR=UR+(nextBlockUR-lastBlockUR)*BLOCKSIDELENGTH;
-//        path.pop();
-//    }
-//}
-
 void MoveObject::setNextBlock()
 {
     if(path.size())
@@ -208,7 +143,6 @@ void MoveObject::setNextBlock()
     }
 }
 
-
 void MoveObject::GoBackLU()
 {
     this->PredictedDR=PreviousDR;
@@ -223,150 +157,13 @@ void MoveObject::updateLU()
     BlockUR = transBlock(UR);
 }
 
-//void MoveObject::updateMove()
-//{
-//    if(isWalking())
-//    {
-//        if(DR!=DR0||UR!=UR0)
-//        {
-//            PreviousDR=DR;
-//            PreviousUR=UR;
-//            if(pathN==0)
-//            {
-//                nextDR=DR0;
-//                nextUR=UR0;
-//                double dDR=nextDR-DR;
-//                double dUR=nextUR-UR;
-//                double dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-//                // 根据速率计算每次的坐标变化量
-//                double ratio = getSpeed() / static_cast<double>(dis);
-//                VDR = round(dDR * ratio);
-//                VUR = round(dUR * ratio);
-//                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
-//                {
-//                    PredictedDR=nextDR;
-//                    PredictedUR=nextUR;
-//                }
-//                else
-//                {
-//                    PredictedDR=PreviousDR+VDR;
-//                    PredictedUR=PreviousUR+VUR;
-//                }
-//                //                    qDebug()<<"predictedDR:"<<PredictedDR;
-//                //                    qDebug()<<"predictedUR:"<<PredictedUR;
-//                int tempAngle=calculateAngle(nextDR,nextUR);
-//                if(tempAngle!=Angle)
-//                {
-//                    Angle=tempAngle;
-//                    setNowRes();
-//                }
-//            }
-//            else if(pathI==0&&pathI<pathN-1)
-//            {
-//                //                    qDebug()<<"pathI==0&&pathI<pathN-1";
-//                double dDR=nextDR-DR;
-//                double dUR=nextUR-UR;
-//                double dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-//                // 根据速率计算每次的坐标变化量
-//                double ratio = getSpeed() / static_cast<double>(dis);
-//                VDR = round(dDR * ratio);
-//                VUR = round(dUR * ratio);
-//                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
-//                {
-//                    PredictedDR=nextDR;
-//                    PredictedUR=nextUR;
-//                }
-//                else
-//                {
-//                    PredictedDR=PreviousDR+VDR;
-//                    PredictedUR=PreviousUR+VUR;
-//                }
-//                int tempAngle=d[pathI];
-//                if(tempAngle!=Angle)
-//                {
-//                    Angle=tempAngle;
-//                    setNowRes();
-//                }
-//                if(fabs(nextDR-DR)<0.01&&fabs(nextUR-UR)<0.01)
-//                {
-//                    pathI++;
-//                    setNextBlock();
-//                }
-
-//            }
-//            else if(pathI<pathN-1)
-//            {
-//                if(Angle!=d[pathI])
-//                {
-//                    Angle=d[pathI];
-//                    setNowRes();
-//                }
-//                VDR=VariationDR[Angle]*getSpeed();
-//                VUR=VariationUR[Angle]*getSpeed();
-//                if(countdistance(PreviousDR,PreviousUR,nextDR,nextUR)<getSpeed())
-//                {
-//                    PredictedDR=nextDR;
-//                    PredictedUR=nextUR;
-//                }
-//                else
-//                {
-//                    PredictedDR=PreviousDR+VDR;
-//                    PredictedUR=PreviousUR+VUR;
-//                }
-//                if(fabs(nextDR-DR)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(nextUR-UR)<DISTANCE_Manhattan_MoveEndNEAR)
-//                {
-//                    setNextBlock();
-//                    pathI++;
-//                }
-//            }
-//            else if(pathI==pathN-1)
-//            {
-//                //                    qDebug()<<"pathI==pathN-1";
-//                if(Angle!=d[pathI])
-//                {
-//                    Angle=d[pathI];
-//                    setNowRes();
-//                }
-//                nextDR=DR0;
-//                nextUR=UR0;
-//                double dDR=nextDR-DR;
-//                double dUR=nextUR-UR;
-//                double dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-//                // 根据速率计算每次的坐标变化量
-//                double ratio = getSpeed() / static_cast<double>(dis);
-//                VDR = round(dDR * ratio);
-//                VUR = round(dUR * ratio);
-//                if(countdistance(DR,UR,nextDR,nextUR)<getSpeed())
-//                {
-//                    PredictedDR=nextDR;
-//                    PredictedUR=nextUR;
-//                }
-//                else
-//                {
-//                    PredictedDR=PreviousDR+VDR;
-//                    PredictedUR=PreviousUR+VUR;
-//                }
-//                if(fabs(nextDR-DR)<DISTANCE_Manhattan_MoveEndNEAR&&fabs(nextUR-UR)<DISTANCE_Manhattan_MoveEndNEAR)
-//                {
-//                    pathI=0;
-//                    pathN=0;
-//                }
-//            }
-//        }
-//    }
-//    else
-//    {
-////        if(getSort() == SORT_FARMER) qDebug()<<"farmermoveF"<<PredictedDR<<PredictedUR<<DR<<UR;
-//        VDR=0;
-//        VUR=0;
-//        PredictedDR = DR;
-//        PredictedUR = UR;
-//    }
-//    this->BlockDR=DR/BLOCKSIDELENGTH;
-//    this->BlockUR=UR/BLOCKSIDELENGTH;
-//    //更新高度
-//    this->imageH=DR-UR;
-//}
+void MoveObject::update_moveDire( double dDR , double dUR )
+{
+    if(dDR>0) dMove_BDR = 1;
+    else if(dDR<0) dMove_BDR = -1;
+    if(dUR>0) dMove_BUR = 1;
+    else if(dUR<0) dMove_BUR = -1;
+}
 
 void MoveObject::updateMove()
 {
@@ -388,7 +185,6 @@ void MoveObject::updateMove()
     };
 
     double dDR,dUR,dis,ratio;
-    int dx,dy;
 
     if(isWalking() && (DR!=DR0||UR!=UR0))
     {
@@ -396,19 +192,12 @@ void MoveObject::updateMove()
         PreviousUR = UR;
 
         dDR=nextDR-DR;  dUR=nextUR-UR;
-        dx = nextBlockDR - PreviousBlockDR;
-        dy = nextBlockUR - PreviousBlockUR;
-        if(dx>0) dx = 1;
-        else if(dx<0) dx = -1;
-        if(dy>0) dy = 1;
-        else if(dy<0) dy = -1;
-
         if( path.empty() )
         {
             dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
             ratio = getSpeed() / static_cast<double>(dis);
             VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
-
+            update_moveDire(dDR , dUR);
             //改变角度
             change_Angel( calculateAngle(nextDR,nextUR) );
 
@@ -421,20 +210,20 @@ void MoveObject::updateMove()
             ratio = getSpeed() / static_cast<double>(dis);
             VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
 
-            change_Angel(d_lab[dx + 1][dy + 1]);
+            update_moveDire(nextBlockDR - PreviousBlockDR , nextBlockUR - PreviousBlockUR);
+            change_Angel(d_lab[dMove_BDR + 1][dMove_BUR + 1]);
             update_PredictPoint();
             jud_ArrivePhaseGoal(dDR , dUR , DISTANCE_Manhattan_PathMove);
         }
         else
         {
-            change_Angel(d_lab[dx + 1][dy + 1]);
+            update_moveDire(nextBlockDR - PreviousBlockDR , nextBlockUR - PreviousBlockUR);
+            change_Angel(d_lab[dMove_BDR + 1][dMove_BUR + 1]);
             VDR=VariationDR[Angle]*getSpeed(); VUR=VariationUR[Angle]*getSpeed();
 
             update_PredictPoint();
             jud_ArrivePhaseGoal(dDR , dUR , DISTANCE_Manhattan_MoveEndNEAR);
         }
-
-
     }
     else
     {

@@ -266,7 +266,6 @@ void Core::gameUpdate()
     interactionList->update();
 }
 
-
 void Core::updateByPlayer(int id){
     Player* self=player[id];
     tagInfo& taginfo = currentBuff[id];
