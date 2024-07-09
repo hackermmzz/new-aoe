@@ -130,6 +130,7 @@ public:
     void setPath(stack<Point> path , double goalDR, double goalUR);
     //获取路径
     stack<Point> getPath(){return this->path;}
+    int getPath_size(){ return path.size(); }
     //设置目标点
     void setdestination(double DR0,double UR0);
     void setDR0(double DR0);

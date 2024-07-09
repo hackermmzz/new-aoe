@@ -103,6 +103,9 @@ struct relation_Object
     bool crash_DealPhase = false;
     Point crashMove_Point;
     stack<Point> crashPointLab;
+    int crashRepresent = -1;
+
+    bool nullPath;
 
     int times_Execution = 0;
 

@@ -171,8 +171,11 @@ void MoveObject::update_moveDire( double dDR , double dUR )
 {
     if(dDR>0) dMove_BDR = 1;
     else if(dDR<0) dMove_BDR = -1;
+    else dMove_BDR = 0;
+
     if(dUR>0) dMove_BUR = 1;
     else if(dUR<0) dMove_BUR = -1;
+    else dMove_BUR = 0;
 }
 
 void MoveObject::updateMove()
@@ -232,7 +235,7 @@ void MoveObject::updateMove()
             VDR=VariationDR[Angle]*getSpeed(); VUR=VariationUR[Angle]*getSpeed();
 
             update_PredictPoint();
-            jud_ArrivePhaseGoal(dDR , dUR , DISTANCE_Manhattan_MoveEndNEAR);
+            jud_ArrivePhaseGoal(dDR , dUR , DISTANCE_Manhattan_PathMove);
         }
     }
     else

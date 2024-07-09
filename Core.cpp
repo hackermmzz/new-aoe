@@ -775,8 +775,8 @@ void Core::judge_Crush()
                 if(judOb == barrierOb ) continue;
 
                 /****当前取消移动物体之间的碰撞******/
-                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
-                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
+//                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
+//                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
                 if(barrierOb->getSort() == SORT_STATICRES && barrierOb->getNum() == NUM_STATICRES_Bush) continue;   //浆果不碰撞
                 /****当前取消移动物体之间的碰撞******/
 

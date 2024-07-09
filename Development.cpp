@@ -78,7 +78,16 @@ int Development::get_addition_DisAttack( int sort, int type , int armyClass , in
     int addition = 0;
     int level = 0;
 
-    if(attackType == ATTACKTYPE_SHOOT)
+    if(sort == SORT_ARMY && type == AT_SLINGER) //slinger不吃远程攻击距离加成
+    {
+        level = getActLevel(BUILDING_MARKET,BUILDING_MARKET_STONE_UPGRADE);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_MARKET_STONE_UPGRADE_ADDITION_SILNGERDIS;
+        default:
+            break;
+        }
+    }else if(attackType == ATTACKTYPE_SHOOT)
     {
         level = getActLevel(BUILDING_MARKET,BUILDING_MARKET_WOOD_UPGRADE);
 
@@ -90,16 +99,6 @@ int Development::get_addition_DisAttack( int sort, int type , int armyClass , in
         }
     }
 
-    if(sort == SORT_ARMY && type == AT_SLINGER)
-    {
-        level = getActLevel(BUILDING_MARKET,BUILDING_MARKET_STONE_UPGRADE);
-        switch (level) {
-        case 1:
-            addition+=BUILDING_MARKET_STONE_UPGRADE_ADDITION_SILNGERDIS;
-        default:
-            break;
-        }
-    }
 
 
     return addition;
