@@ -13,8 +13,6 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
     this->memorymap = memorymap;    //内存图
     this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
     this->interactionList = new Core_List( this->theMap , this->player );   //本类中管理的对象交互动态表
-
-
 }
 
 void Core::gameUpdate()
@@ -267,7 +265,6 @@ void Core::gameUpdate()
 
     interactionList->update();
 }
-
 
 void Core::updateByPlayer(int id){
     Player* self=player[id];
@@ -616,8 +613,10 @@ void Core::manageOrder(int id)
         NowIns->instructions.pop();
         Coordinate* self=cur.self;
         int ret=0;
-        //判断是否是己方对象
-        if(self->getPlayerRepresent()!=id){
+
+        //判断是否是己方对象 并 再次判断SN对象是否存在（可能存在ai下达指令后对象被删除了的情况）
+        if(g_Object[cur.SN] == NULL || self->getPlayerRepresent()!=id)
+        {
             cur.ret=ACTION_INVALID_SN;
             tagAIGame->insertInsRet(cur.id,cur);
             continue;
@@ -776,8 +775,8 @@ void Core::judge_Crush()
                 if(judOb == barrierOb ) continue;
 
                 /****当前取消移动物体之间的碰撞******/
-                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
-                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
+//                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
+//                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
                 if(barrierOb->getSort() == SORT_STATICRES && barrierOb->getNum() == NUM_STATICRES_Bush) continue;   //浆果不碰撞
                 /****当前取消移动物体之间的碰撞******/
 

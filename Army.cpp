@@ -236,6 +236,24 @@ double Army::getDis_attack()
     return dis;
 }
 
+int Army::get_add_specialAttack()
+{
+    int addition = 0;
+
+    if(Num == AT_SLINGER)
+    {
+        if(interactSort == SORT_ARMY)
+        {
+            if(interactNum == AT_BOWMAN) addition+=2;
+        }
+        else if( interactSort == SORT_BUILDING)
+        {
+            if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
+                addition += 7;
+        }
+    }
+    return addition;
+}
 /***********************************************************/
 void Army::setAttribute()
 {
