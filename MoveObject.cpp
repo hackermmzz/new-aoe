@@ -3,6 +3,7 @@
 //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];其中dblockDR和dblockUR均为实际值+1
 //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
 vector<Point> MoveObject::jud_Block[2][3][3];
+vector<Point> MoveObject::crashMove_Block[2][3][3];
 
 //角度计算
 int MoveObject::calculateAngle(double nextDR, double nextUR)
@@ -62,8 +63,6 @@ void MoveObject::setPath(stack<Point> path , double goalDR, double goalUR)
     }
     this->path=path;
     resetpathIN();  //重置path的步数
-    nextBlockDR= transBlock(DR);
-    nextBlockUR= transBlock(UR);
 
     update_path_useBlock();
 }
@@ -116,6 +115,17 @@ void MoveObject::setUR0(double UR0)
         this->UR0=MAP_U*BLOCKSIDELENGTH-1;
     else
         this->UR0=UR0;
+}
+
+void MoveObject::pathOptimize( Point addPoint )
+{
+    Point nextBlockPoint = Point(nextBlockDR,nextBlockUR);
+    path.push(nextBlockPoint);
+    if(!(addPoint == nextBlockPoint))
+        path.push(addPoint);
+
+    resetpathIN();
+    update_path_useBlock();
 }
 
 //*************************移动处理
@@ -310,77 +320,84 @@ bool MoveObject::isCrash(Coordinate* judOb)
 
 //静态函数，初始化判断碰撞的格子列表
 void MoveObject::init_jud_Block( int foundation , int dblockDR, int dblockUR )
+{
+    Point temp;
+    int slant_Jud = dblockDR & dblockUR;    //有一个为0则值为0
+    int x = dblockDR,y = dblockUR , m = 1+foundation, outrow ,inrow;
+    int lkey = dblockDR+1,rkey = dblockUR+1;
+
+    //移动方向水平或竖直
+    if(slant_Jud == 0)
     {
-        Point temp;
-        int slant_Jud = dblockDR & dblockUR;    //有一个为0则值为0
-        int x = dblockDR,y = dblockUR , m = 1+foundation, outrow ,inrow;
-        int lkey = dblockDR+1,rkey = dblockUR+1;
-
-        //移动方向水平或竖直
-        if(slant_Jud == 0)
+        if(dblockDR != 0)
         {
-            if(dblockDR != 0)
+            outrow = x<0? -1 : foundation;
+            inrow = outrow - x;
+            for(int i = -1; i<m; i++)
             {
-                outrow = x<0? -1 : foundation;
-                inrow = outrow - x;
-                for(int i = -1; i<m; i++)
-                {
-                    temp.y = i;
-                    temp.x = outrow;
-                    jud_Block[foundation][lkey][rkey].push_back(temp);
-                    temp.x = inrow;
-                    jud_Block[foundation][lkey][rkey].push_back(temp);
-                }
+                temp.y = i;
+                temp.x = outrow;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+                temp.x = inrow;
+                jud_Block[foundation][lkey][rkey].push_back(temp);
+            }
 
-            }
-            else if( dblockUR != 0)
-            {
-                outrow =  y < 0 ?  -1 : foundation;
-                inrow = outrow -y;
-                for(int i = -1; i<m;i++)
-                {
-                    temp.x = i;
-                    temp.y = outrow;
-                    jud_Block[foundation][lkey][rkey].push_back(temp);
-                    temp.y = inrow;
-                    jud_Block[foundation][lkey][rkey].push_back(temp);
-                }
-            }
         }
-        else    //否则为斜向
+        else if( dblockUR != 0)
         {
-            temp.x = x < 0 ? -1 : foundation;
-
-            for(int i = -1; i < m; i++)
-            {
-                temp.y = i;
-                jud_Block[foundation][lkey][rkey].push_back(temp);
-            }
-
-            if(x>0) m--;
-
-            temp.y = y<0 ? -1 : foundation;
-            for(int i = x<0 ? 0 : -1; i<m ; i++)
+            outrow =  y < 0 ?  -1 : foundation;
+            inrow = outrow -y;
+            for(int i = -1; i<m;i++)
             {
                 temp.x = i;
+                temp.y = outrow;
                 jud_Block[foundation][lkey][rkey].push_back(temp);
-            }
-
-            temp.x = x<0 ? 0 : foundation -1 ;
-            for(int i = 0 ; i < foundation ; i++)
-            {
-                temp.y = i;
-                jud_Block[foundation][lkey][rkey].push_back(temp);
-            }
-
-            if(x>0) m = foundation -1;
-            temp.y = y<0 ? 0 : foundation-1;
-            for(int i = x<0 ? 1 : 0; i<m ; i++)
-            {
-                temp.x = i;
+                temp.y = inrow;
                 jud_Block[foundation][lkey][rkey].push_back(temp);
             }
         }
-
-        return;
     }
+    else    //否则为斜向
+    {
+        temp.x = x < 0 ? -1 : foundation;
+
+        for(int i = -1; i < m; i++)
+        {
+            temp.y = i;
+            jud_Block[foundation][lkey][rkey].push_back(temp);
+        }
+
+        if(x>0) m--;
+
+        temp.y = y<0 ? -1 : foundation;
+        for(int i = x<0 ? 0 : -1; i<m ; i++)
+        {
+            temp.x = i;
+            jud_Block[foundation][lkey][rkey].push_back(temp);
+        }
+
+        temp.x = x<0 ? 0 : foundation -1 ;
+        for(int i = 0 ; i < foundation ; i++)
+        {
+            temp.y = i;
+            jud_Block[foundation][lkey][rkey].push_back(temp);
+        }
+
+        if(x>0) m = foundation -1;
+        temp.y = y<0 ? 0 : foundation-1;
+        for(int i = x<0 ? 1 : 0; i<m ; i++)
+        {
+            temp.x = i;
+            jud_Block[foundation][lkey][rkey].push_back(temp);
+        }
+    }
+
+    return;
+}
+
+
+void MoveObject::init_crashMove_Block( int foundation, int dblockDR, int dblockUR )
+{
+    //待编写以优化碰撞处理
+
+}

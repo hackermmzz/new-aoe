@@ -100,6 +100,10 @@ struct relation_Object
     double disAttack = 0;
     int height_Object = 0 , height_GoalObject = 0;
 
+    bool crash_DealPhase = false;
+    Point crashMove_Point;
+    stack<Point> crashPointLab;
+
     int times_Execution = 0;
 
     bool needResourceBuilding = false;

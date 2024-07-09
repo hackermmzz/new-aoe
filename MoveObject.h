@@ -59,12 +59,13 @@ protected:
     //其中dblockDR和dblockUR均为实际值+1
     //如左上[0][2]（实际为dblockDR = -1，dblockUR = 1）
     static vector<Point> jud_Block[2][3][3];
+    static vector<Point> crashMove_Block[2][3][3];
     /*********************静态数组***********************/
 
     void update_path_useBlock();
-    //计算方向数组
-    void calculateDiretionArray(stack<Point>& path);
+
     void resetpathIN(); //重置路径执行进度
+
     void setNextBlock();
 
     void change_Angel(int Angel_new);
@@ -96,6 +97,7 @@ public:
   /*********************静态函数***********************/
     //设置需要判断碰撞的格子列表
     static void init_jud_Block( int foundation , int dblockDR, int dblockUR );
+    static void init_crashMove_Block( int foundation, int dblockDR, int dblockUR );
 
   /*******************以上静态函数***********************/
 
@@ -136,11 +138,15 @@ public:
     double getDR0(){return this->DR0;}
     double getUR0(){return this->UR0;}
 
+    void pathOptimize( Point addPoint );
+
     //*****处理移动*****
     void GoBackLU();
     void updateLU();
     double get_PredictedDR(){ return PredictedDR; }
     double get_PredictedUR(){ return PredictedUR; }
+    Point get_PreviousBlock(){ return Point(PreviousBlockDR , PreviousBlockUR); }
+    Point get_NextBlockPoint(){ return Point(nextBlockDR , nextBlockUR); }
 
 
     //******碰撞判断******

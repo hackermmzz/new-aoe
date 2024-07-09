@@ -464,6 +464,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
     MoveObject* moveObject = NULL;
     Coordinate* goalOb;
     object->printer_ToMoveObject((void**)&moveObject);
+    Point PreviousPoint, nextBlockPoint , crashBlockPoint;
     //如果有目标点，设置目标点
     moveObject->stateCrash=false;//重置碰撞状态（tagGame）
     if(relate_AllObject[object].isUseAlterGoal)
@@ -482,6 +483,12 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 
             theMap->loadfindPathMap(moveObject);
             theMap->findPathMap[destination.x][destination.y] = 0;
+//            if(relate_AllObject[object].crashPointLab.size())
+//            {
+//                crashBlockPoint = relate_AllObject[object].crashPointLab.top();
+//                relate_AllObject[object].crashPointLab.pop();
+//                theMap->findPathMap[crashBlockPoint.x][crashBlockPoint.y] = 1;
+//            }
 
             if(moveObject->getSort() == SORT_MISSILE) path.push(destination);
             else path = findPath(theMap->findPathMap , theMap , start , destination , goalOb);
@@ -490,16 +497,31 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
         else
         {
             if(!moveObject->isWalking()) moveObject->setPreWalk();
-            else if(moveObject->getCrashOb()!=NULL)
-            {
-                //处理碰撞
-                moveObject->stateCrash=true;
-                relate_AllObject[object].wait(50);
-                moveObject->GoBackLU();
-                moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
-                if(!moveObject->isStand()) moveObject->setPreStand();
-                moveObject->initCrash();
-            }
+//            else if(moveObject->getCrashOb()!=NULL)
+//            {
+//                moveObject->GoBackLU();
+
+//                relate_AllObject[object].crash_DealPhase = true;
+//                nextBlockPoint = moveObject->get_NextBlockPoint();
+//                PreviousPoint = moveObject->get_PreviousBlock();
+//                moveObject->pathOptimize(PreviousPoint);
+//                relate_AllObject[object].crashMove_Point = PreviousPoint;
+//                relate_AllObject[object].crashPointLab.push(nextBlockPoint);
+//                //处理碰撞
+//                moveObject->initCrash();
+//            }
+//            else if(relate_AllObject[object].crash_DealPhase)
+//            {
+//                if(!(moveObject->get_NextBlockPoint() == relate_AllObject[object].crashMove_Point))
+//                {
+//                    relate_AllObject[object].crash_DealPhase = false;
+//                    moveObject->stateCrash=true;
+//                    relate_AllObject[object].wait(rand()%50);
+
+//                    if(rand()%2) moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
+//                    if(!moveObject->isStand()) moveObject->setPreStand();
+//                }
+//            }
             else relate_AllObject[object].useOnce();
         }
     }
