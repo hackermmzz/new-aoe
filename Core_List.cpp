@@ -502,12 +502,12 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             else if(moveObject->getCrashOb()!=NULL)
             {
                 moveObject->GoBackLU();
-                if(relate_AllObject[object].nullPath || relate_AllObject[object].relationAct == CoreEven_JustMoveTo && moveObject->getPath_size() == 0)
+                if(/*relate_AllObject[object].nullPath || */relate_AllObject[object].relationAct == CoreEven_JustMoveTo && moveObject->getPath_size() == 0)
                 {
                     call_debugText("red", object->getChineseName()+ "(编号:" + QString::number(object->getglobalNum()) + "当前位置为 ("+\
                                    QString::number(object->getDR()) +"," + QString::number(object->getUR())+") , 目标点 ("+\
                                    QString::number(moveObject->getDR0()) + "," + QString::number(moveObject->getUR0()) + ") 附近不可抵达");
-                    relate_AllObject[object].wait(70);
+                    relate_AllObject[object].wait(100);
                     moveObject->stateCrash=true;
                     if(!moveObject->isStand()) moveObject->setPreStand();
                 }
@@ -534,7 +534,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
                         relate_AllObject[object].wait(rand()%50);
                     else relate_AllObject[object].wait(rand()%20);
 
-                    if(rand() % 8) moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
+                    if(rand() % 8 > 0) moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
                     if(!moveObject->isStand()) moveObject->setPreStand();
                 }
             }
