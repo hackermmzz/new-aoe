@@ -73,6 +73,7 @@ Animal::Animal(int Num, double DR, double UR)
         isAttackable = true;
         vision = VISION_ELEPHANT;
         crashLength = CRASHBOX_BIGOB;
+        dis_Attack = DISTANCE_ATTACK_CLOSE_BIGOB;
 
         nowres_step = NOWRES_TIMER_ELEPHANT;
         isRangeAttack = true;
@@ -204,4 +205,19 @@ void Animal::setNowRes()
             initAttack_perCircle();
         }
     }
+}
+
+int Animal::get_add_specialAttack()
+{
+    int addition = 0;
+    if(Num == ANIMAL_ELEPHANT)
+    {
+        if(interactSort == SORT_BUILDING )
+        {
+            if(interactNum == BUILDING_ARROWTOWER) addition +=40;
+            else if(interactNum == BUILDING_WALL) addition +=80;
+        }
+    }
+
+    return addition;
 }

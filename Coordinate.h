@@ -103,13 +103,9 @@ public:
 /*****************act获取***************/
     double getActPercent() {return this->actPercent;}
     double getActSpeed(){ return this->actSpeed;}
-//    void setActName(int actName){this->actName = actName;}
     int getActName(){return this->actName;}
-//    void setActSpeed(double actSpeed){ this->actSpeed = actSpeed;}
     void setActPercent(double actPercent){this->actPercent = actPercent;}
-//    void updatePercent(){this->setActPercent(actPercent + actSpeed);}
     int getActNum(){ return this->actNum;}
-//    void setActNum(int actNum){this->actNum = actNum;}
 
     int ActNameToActNum(int actName);
 

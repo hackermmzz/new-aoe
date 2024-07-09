@@ -13,11 +13,13 @@ public:
     }
     ~UsrAI(){;}
 private:
-    tagInfo getInfo(){
+    tagInfo getInfo()
+    {
         return tagUsrGame.getInfo();
     }
     void processData() override;
-    int AddToIns(instruction ins) override{
+    int AddToIns(instruction ins) override
+    {
         UsrIns.lock.lock();
         ins.id=UsrIns.g_id;
         UsrIns.g_id++;
@@ -25,7 +27,8 @@ private:
         UsrIns.lock.unlock();
         return ins.id;
     }
-    void clearInsRet() override{
+    void clearInsRet() override
+    {
         tagUsrGame.clearInsRet();
     }
 };

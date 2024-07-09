@@ -22,7 +22,6 @@ public:
 
     void drawActs();
     int doActs(int actName,Coordinate* nowobject=::nowobject);
-    void actionUpdate();
 
     void setCore( Core* core ){ this->core = core; }
 
