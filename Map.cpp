@@ -758,7 +758,8 @@ void Map::loadBarrierMap()
         std::list<StaticRes *>::iterator iter=staticres.begin() , iterend = staticres.end();
         while(iter!=iterend)
         {
-            setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
+            if((*iter)->getNum() != NUM_STATICRES_Bush )
+                setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
             iter++;
         }
     }
