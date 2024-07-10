@@ -563,6 +563,57 @@ void Map::generateCenter() {
 
     return ;
 }
+/*
+ * 函数 Map::generateEnemy;
+ * 参数：无；
+ * 内容：在开始时生成三组敌人；
+ * 返回值：无；
+ */
+void Map::generateEnemy(){
+    //寻找三处可以生成敌人的地方
+    double pos_L[3]={0};
+    double pos_U[3]={0};
+    int num=0;
+    for(int i=10;i<20;i++){
+        for(int j=10;j<20;j++){
+            if (mapFlag[i][j]==false)
+            {pos_L[0]=i*BLOCKSIDELENGTH;
+             pos_U[0]=j*BLOCKSIDELENGTH;
+             num=1;
+             break;
+            }
+        }if(num==1) break;
+    }
+    for(int i=62;i>52;i--){
+        for(int j=62;j>52;j--){
+            if (mapFlag[i][j]==false)
+            {pos_L[1]=i*BLOCKSIDELENGTH;
+             pos_U[1]=j*BLOCKSIDELENGTH;
+             num=2;
+             break;
+            }
+        }if(num==2) break;
+    }
+    for(int i=10;i<20;i++){
+        for(int j=62;j>52;j--){
+            if (mapFlag[i][j]==false)
+            {pos_L[2]=i*BLOCKSIDELENGTH;
+             pos_U[2]=j*BLOCKSIDELENGTH;
+             num=3;
+             break;
+            }
+        }if(num==3) break;
+    }
+    //第一组
+    player[1]->addArmy(1,pos_L[0]-1,pos_U[0]-1);
+    player[1]->addArmy(1,pos_L[0]+1,pos_U[0]+1);
+    //第二组
+    player[1]->addArmy(2,pos_L[1]-1,pos_U[1]-1);
+    player[1]->addArmy(2,pos_L[1]+1,pos_U[1]+1);
+    //第三组
+    player[1]->addArmy(0,pos_L[2]-1,pos_U[2]-1);
+    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]+1);
+}
 
 /*
  * 函数：Map::genDesert；
@@ -1845,7 +1896,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
@@ -1854,7 +1905,8 @@ void Map::init(int MapJudge) {
 //    generateLandforms();        // 在草地中生成小片沙漠
     generateCenter();           // 生成市镇中心及附近资源
     generateResources();        // 生成片状资源
-    generateResource();         // 生成独立资源
+    generateResource();        // 生成独立资源
+    generateEnemy();          //生成敌人
     GenerateMapTxt(MapJudge);   // 生成地图文件
 }
 

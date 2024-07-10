@@ -23,6 +23,9 @@ public:
     // 生成城镇中心附近13*13的部分
     void generateCenter();
 
+    //生成敌人
+    void generateEnemy();
+
     // 随机生成沙漠地貌
     void genDesert(int i, int j, int number, int Map[][74]);
 
