@@ -169,8 +169,9 @@ void GameWidget::paintEvent(QPaintEvent *)
         painter.setPen(Qt::white);
         int width=nowobject->getCrashLength()*4;
         int height=nowobject->getCrashLength()*2;
-        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getCrashLength()*2;
-        int Y=tranY(nowobject->getDR()-DR,nowobject->getUR()-UR) - height / 2;
+        int tempBlockDR = nowobject->getDR() / BLOCKSIDELENGTH, tempBlockUR = nowobject->getUR() / BLOCKSIDELENGTH;
+        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getCrashLength()*2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
+        int Y=tranY(nowobject->getDR()-DR,nowobject->getUR()-UR) - height / 2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
         QPolygonF diamond;
         diamond << QPointF(X+width/2, Y);
         diamond << QPointF(X+width, Y+height/2);
@@ -185,13 +186,17 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<Coordinate *>::iterator iter=drawlist.begin();
         while(iter!=drawlist.end())
         {
-            painter.drawPixmap(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR) - (*iter)->getimageX(),
-                               (*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR) + (*iter)->getMapHeightOffsetY(),
+            // x、y坐标偏移量
+            int tx = tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR), ty = tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR);
+            // BlockDR、BlockUR
+            int tmpBlockDR = (*iter)->getDR() / BLOCKSIDELENGTH, tmpBlockUR = (*iter)->getUR() / BLOCKSIDELENGTH;
+            painter.drawPixmap(tx - (*iter)->getimageX() + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX(),
+                               (*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + ty + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
                                (*iter)->getNowRes()->pix.width(),
                                (*iter)->getNowRes()->pix.height(),
                                (*iter)->getNowRes()->pix);
             drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
-                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + (*iter)->getMapHeightOffsetY(),
+                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
                        (*(*iter)->getNowRes()),(*iter)->getglobalNum());
             iter++;
         }

@@ -1322,9 +1322,10 @@ bool Map::loadResource() {
         for(int j = 0; j < MAP_L; j++)
         {
             if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapType() != MAPTYPE_FLAT) continue;
-            int tOffsetX = this->cell[i][j].getOffsetX(), tOffsetY = this->cell[i][j].getOffsetY();
-            if(this->cell[i][j].getMapHeight() != 0) tOffsetX -= BLOCKSIDELENGTH / 2 * this->cell[i][j].getMapHeight() - BLOCKSIDELENGTH / 2;
-            if(this->cell[i][j].getMapHeight() != 0) tOffsetY += BLOCKSIDELENGTH * (this->cell[i][j].getMapHeight());
+            int tOffsetX = 0, tOffsetY = 0;
+//            int tOffsetX = this->cell[i][j].getOffsetX(), tOffsetY = this->cell[i][j].getOffsetY();
+//            if(this->cell[i][j].getMapHeight() != 0) tOffsetX -= BLOCKSIDELENGTH / 2 * this->cell[i][j].getMapHeight() - BLOCKSIDELENGTH / 2;
+//            if(this->cell[i][j].getMapHeight() != 0) tOffsetY += BLOCKSIDELENGTH * (this->cell[i][j].getMapHeight());
 //            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
 
             if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
