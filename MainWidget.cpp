@@ -145,7 +145,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
     player[0]->changeResource(200,200,200,200);
-    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
+//    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     // 设置鼠标追踪
     ui->Game->setMouseTracking(true);
