@@ -14,6 +14,9 @@ public:
     }
 private:
     void processData() override;
+    tagInfo getInfo(){
+        return tagEnemyGame.getInfo();
+    }
     int AddToIns(instruction ins) override{
         EnemyIns.lock.lock();
         ins.id=EnemyIns.g_id;
@@ -21,9 +24,6 @@ private:
         EnemyIns.instructions.push(ins);
         EnemyIns.lock.unlock();
         return ins.id;
-    }
-    instruction getInsRet(int id){
-        return tagEnemyGame.getInsRet(id);
     }
     void clearInsRet() override{
         tagEnemyGame.clearInsRet();

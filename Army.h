@@ -33,12 +33,10 @@ public:
     double getDis_attack();
 
     //特攻,根据兵种不同,会有攻击力加成
-    //需要优化，更改获取特攻、计算特攻方式。
-    int get_add_specialAttack(){ return 0; }
-
+    int get_add_specialAttack();
     //用于显示的战斗属性
     int showATK_Basic();
-    int showATK_Addition(){return playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType());}
+    int showATK_Addition(){return playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());}
 
     int showDEF_Close();
     int showDEF_Shoot();

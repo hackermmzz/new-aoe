@@ -488,6 +488,8 @@ void Map::generateResource() {
 void Map::generateCenter() {
     srand(time(NULL));
 
+    vector<Point>block_StockLab;
+    Point blockStock;
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
     player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
@@ -506,6 +508,14 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+    block_StockLab = findBlock_Flat(3);
+    blockStock = block_StockLab[rand()%block_StockLab.size()];
+    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
+
+    for(int i = 0 ; i < 3;i++)
+        for(int j = 0 ; j < 3; j++)
+            mapFlag[i+blockStock.x][j+blockStock.y] = true;
+
 
     // 生成城镇中心附近9 * 9部分的1棵随机位置的树
     // flag：0表示未生成，1表示已生成
@@ -552,6 +562,57 @@ void Map::generateCenter() {
     }
 
     return ;
+}
+/*
+ * 函数 Map::generateEnemy;
+ * 参数：无；
+ * 内容：在开始时生成三组敌人；
+ * 返回值：无；
+ */
+void Map::generateEnemy(){
+    //寻找三处可以生成敌人的地方
+    double pos_L[3]={0};
+    double pos_U[3]={0};
+    int num=0;
+    for(int i=10;i<20;i++){
+        for(int j=10;j<20;j++){
+            if (mapFlag[i][j]==false)
+            {pos_L[0]=i*BLOCKSIDELENGTH;
+             pos_U[0]=j*BLOCKSIDELENGTH;
+             num=1;
+             break;
+            }
+        }if(num==1) break;
+    }
+    for(int i=62;i>52;i--){
+        for(int j=62;j>52;j--){
+            if (mapFlag[i][j]==false)
+            {pos_L[1]=i*BLOCKSIDELENGTH;
+             pos_U[1]=j*BLOCKSIDELENGTH;
+             num=2;
+             break;
+            }
+        }if(num==2) break;
+    }
+    for(int i=10;i<20;i++){
+        for(int j=62;j>52;j--){
+            if (mapFlag[i][j]==false)
+            {pos_L[2]=i*BLOCKSIDELENGTH;
+             pos_U[2]=j*BLOCKSIDELENGTH;
+             num=3;
+             break;
+            }
+        }if(num==3) break;
+    }
+    //第一组
+    player[1]->addArmy(1,pos_L[0]-1,pos_U[0]-1);
+    player[1]->addArmy(1,pos_L[0]+1,pos_U[0]+1);
+    //第二组
+    player[1]->addArmy(2,pos_L[1]-1,pos_U[1]-1);
+    player[1]->addArmy(2,pos_L[1]+1,pos_U[1]+1);
+    //第三组
+    player[1]->addArmy(0,pos_L[2]-1,pos_U[2]-1);
+    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]+1);
 }
 
 /*
@@ -748,7 +809,8 @@ void Map::loadBarrierMap()
         std::list<StaticRes *>::iterator iter=staticres.begin() , iterend = staticres.end();
         while(iter!=iterend)
         {
-            setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
+            if((*iter)->getNum() != NUM_STATICRES_Bush )
+                setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
             iter++;
         }
     }
@@ -826,15 +888,17 @@ bool Map::isFlat(Coordinate* judOb)
 {
     int blockDR = judOb->getBlockDR(),blockUR = judOb->getBlockUR() , blockSideLen = judOb->get_BlockSizeLen();
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
-    int maxHight = cell[blockDR][blockUR].getMapHeight(),minHight = maxHight,tempHight;
+    int maxHight = map_Height[blockDR][blockUR] ,minHight = maxHight,tempHight;
 
     for(int x = blockDR; x<sideR; x++)
     {
         for(int y = blockUR; y<sideU;y++)
         {
-            tempHight = cell[x][y].getMapHeight();
+            tempHight = map_Height[blockDR][blockUR];
             if(tempHight<minHight) minHight = tempHight;
             else if(tempHight>maxHight) maxHight= tempHight;
+
+            if(minHight == -1) return false;
         }
     }
 
@@ -918,27 +982,120 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
     return Block_Free;
 }
 
+vector<Point> Map::findBlock_Flat(int disLen )
+{
+    /**
+    * 仅在地图资源初始化时可使用，用于寻找建筑可建筑地点
+    * 输入：建筑的边长
+    * 输出：建筑可建的位置表，从中心开始往外扩展
+    *
+    */
+    int blockDR = MAP_L / 2 - 2, blockUR = MAP_L / 2 - 2 , blockSideLen = 4;
+
+    int sideRM = blockDR+blockSideLen, sideUM = blockUR+blockSideLen;
+    int sideRL = blockDR - disLen , sideUL = blockUR - disLen;
+
+    int bDRL,bURD,bDRR,bURU;
+    vector<Point> Block_Flat;
+    Point tempPoint;
+    int maxh,minh,temph;
+    bool isfalse;
+
+    do{
+        bDRL = max(0, sideRL++) , bURD = max(0, sideUL++) , bDRR = min(sideRM++, MAP_L - disLen) , bURU = min(sideUM++, MAP_U  - disLen);
+        //在给定范围内找寻指定区域平坦的格子
+        for(int x = bDRL; x<bDRR; x++)
+        {
+            for(int y = bURD; y<bURU;y++)
+            {
+                maxh = minh = map_Height[x][y];
+                if(mapFlag[x][y]) continue;
+
+                isfalse = false;
+                for(int i = 0 ; i < disLen; i++)
+                {
+                    for(int j = 0 ; j<disLen; j++)
+                    {
+                        temph = map_Height[x+i][y+j];
+                        if(temph>maxh) maxh = temph;
+                        else if(temph < minh) minh = temph;
+
+                        if(mapFlag[x+i][y+j] || minh == -1 || maxh!=minh)
+                        {
+                            isfalse = true;
+                            break;
+                        }
+                    }
+                    if(isfalse) break;
+                }
+                if(isfalse) continue;
+                tempPoint.x = x;
+                tempPoint.y = y;
+                Block_Flat.push_back(tempPoint);
+            }
+        }
+    }while(Block_Flat.empty());
+
+    return Block_Flat;
+}
+
+
+
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
-    int vision = object->getVision()-1;
-    int blockSidelen = object->get_BlockSizeLen()-1;
+//    int vision = object->getVision()-1;
+//    int blockSidelen = object->get_BlockSizeLen()-1;
+//    Point position;
+//    position.x = object->getBlockDR();
+//    position.y = object->getBlockUR();
+//    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
+//    int lx = position.x-vision, ly = position.y-vision;
+//    vector<Point> blockLab;
+
+//    for(int x = lx; x<=mx;x++)
+//    {
+//        for(int y = ly; y<=my; y++)
+//        {
+//            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
+//            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
+
+//            blockLab.push_back(Point( x,y ));
+//        }
+//    }
+//    return blockLab;
+
+    Point position(object->getBlockDR() , object->getBlockUR());
+    Point visionPoint;
+    vector<Point> blockLab = object->getViewLab();
+    vector<Point> visionLab;
+    int labSize = blockLab.size();
+    for(int i = 0 ; i<labSize; i++)
+    {
+        visionPoint = position+blockLab[i];
+        if(visionPoint.x<0 || visionPoint.x>=MAP_L || visionPoint.y<0 || visionPoint.y>=MAP_U) continue;
+        visionLab.push_back(visionPoint);
+    }
+
+    return visionLab;
+}
+
+vector<Point> Map::get_ObjectBlock(Coordinate* object)
+{
+    /**
+    * 获取指定目标在地图上所占格子
+    * 输入:指定的object的Coorinate指针
+    * 传出:其所占格子的vector列表
+    */
+
+    int blockSidelen = object->get_BlockSizeLen();
     Point position;
+    vector<Point> blockLab;
     position.x = object->getBlockDR();
     position.y = object->getBlockUR();
-    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
-    int lx = position.x-vision, ly = position.y-vision;
-    vector<Point> blockLab;
 
-    for(int x = lx; x<=mx;x++)
-    {
-        for(int y = ly; y<=my; y++)
-        {
-            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
-            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
-
-            blockLab.push_back(Point( x,y ));
-        }
-    }
+    for(int x = 0 ; x < blockSidelen; x++)
+        for(int y = 0 ; y < blockSidelen; y++)
+            blockLab.push_back(Point(position.x+x , position.y + y));
 
     return blockLab;
 }
@@ -963,6 +1120,21 @@ void Map::add_Map_Vision( Coordinate* object )
 //        }
 //    }
 //}
+
+
+ void Map::init_Map_Height()
+ {
+     for(int x = 0; x<MAP_L; x++)
+     {
+         for(int y = 0; y<MAP_U; y++)
+         {
+            if(isSlope(x,y)) map_Height[x][y] = -1;
+            else map_Height[x][y] = cell[x][y].getMapHeight();
+         }
+     }
+
+     return;
+ }
 
 //更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
 void Map::reset_resMap_AI()
@@ -1156,7 +1328,7 @@ bool Map::loadResource() {
 //            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
 
             if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
-            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
+//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
             else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
             else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
             else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j)+BLOCKSIDELENGTH / 2 + tOffsetY); // 瞪羚
@@ -1300,9 +1472,10 @@ bool Map::GenerateTerrain() {
                     m_heightMap[i][j] ++;
             }
 
+        // 特判市镇中心附近
         if(height == 1) {
-            for(int i = MAP_L / 2 - 7; i < MAP_L / 2 + 8; i ++) {
-                for(int j = MAP_U / 2 - 7; j < MAP_U / 2 + 8; j ++) {
+            for(int i = MAP_L / 2 - CENTER_RADIUS - 1 + CENTER_DEVIATION; i < MAP_L / 2 + CENTER_RADIUS + CENTER_DEVIATION; i ++) {
+                for(int j = MAP_U / 2 - CENTER_RADIUS - 1 + CENTER_DEVIATION; j < MAP_U / 2 + CENTER_RADIUS + CENTER_DEVIATION; j ++) {
                     m_heightMap[i][j] = 0;
                 }
             }
@@ -1492,10 +1665,13 @@ void Map::GenerateType() {
             CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
                     CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count == 0) {
-                if(j + 1 < 72 && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
+                if(j + 1 < MAP_U && this->cell[i][j + 1].getMapType() != MAPTYPE_FLAT)
                     this->cell[i][j].setMapType(MAPTYPE_A0_UPTOD);
             }
-            if(i + 1 < 72 && j + 1 < 72 && (this->cell[i - 1][j].getMapType() == MAPTYPE_A0_DOWNTOD || this->cell[i - 1][j].getMapType() == MAPTYPE_L2_UPTORU) && this->cell[i][j + 1].getMapType() == MAPTYPE_A0_DOWNTOD && this->cell[i + 1][j].getMapType() == MAPTYPE_FLAT)
+            if(i + 1 < MAP_L && j + 1 < MAP_U && i > 0 &&
+                    (this->cell[i - 1][j].getMapType() == MAPTYPE_A0_DOWNTOD || this->cell[i - 1][j].getMapType() == MAPTYPE_L2_UPTORU) &&
+                    this->cell[i][j + 1].getMapType() == MAPTYPE_A0_DOWNTOD &&
+                    this->cell[i + 1][j].getMapType() == MAPTYPE_FLAT)
                 this->cell[i][j].setMapType(MAPTYPE_A2_UPTOU);
             count = CheckNeighborType(i, j, MAPTYPE_L0_UPTOLD) + CheckNeighborType(i, j, MAPTYPE_L3_UPTORD);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count > 0)
@@ -1720,7 +1896,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
@@ -1729,7 +1905,8 @@ void Map::init(int MapJudge) {
 //    generateLandforms();        // 在草地中生成小片沙漠
     generateCenter();           // 生成市镇中心及附近资源
     generateResources();        // 生成片状资源
-    generateResource();         // 生成独立资源
+    generateResource();        // 生成独立资源
+    generateEnemy();          //生成敌人
     GenerateMapTxt(MapJudge);   // 生成地图文件
 }
 

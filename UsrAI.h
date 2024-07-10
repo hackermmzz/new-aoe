@@ -8,13 +8,18 @@ extern ins UsrIns;
 class UsrAI:public AI
 {
 public:
-    UsrAI(){this->id=0;}
-    ~UsrAI(){
-        ;
+    UsrAI(){
+        this->id=0;
     }
+    ~UsrAI(){;}
 private:
+    tagInfo getInfo()
+    {
+        return tagUsrGame.getInfo();
+    }
     void processData() override;
-    int AddToIns(instruction ins) override{
+    int AddToIns(instruction ins) override
+    {
         UsrIns.lock.lock();
         ins.id=UsrIns.g_id;
         UsrIns.g_id++;
@@ -22,10 +27,8 @@ private:
         UsrIns.lock.unlock();
         return ins.id;
     }
-    instruction getInsRet(int id){
-        return tagUsrGame.getInsRet(id);
-    }
-    void clearInsRet() override{
+    void clearInsRet() override
+    {
         tagUsrGame.clearInsRet();
     }
 };

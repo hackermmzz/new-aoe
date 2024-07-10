@@ -166,7 +166,7 @@ int Army::getATK()
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
     return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType())) + \
-             get_add_specialAttack() + playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType());
+             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力
@@ -236,6 +236,24 @@ double Army::getDis_attack()
     return dis;
 }
 
+int Army::get_add_specialAttack()
+{
+    int addition = 0;
+
+    if(Num == AT_SLINGER)
+    {
+        if(interactSort == SORT_ARMY)
+        {
+            if(interactNum == AT_BOWMAN) addition+=2;
+        }
+        else if( interactSort == SORT_BUILDING)
+        {
+            if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
+                addition += 7;
+        }
+    }
+    return addition;
+}
 /***********************************************************/
 void Army::setAttribute()
 {
@@ -258,6 +276,7 @@ void Army::setAttribute()
         defence_shoot_change  = new int[2]{ DEFSHOOT_CLUBMAN1,DEFSHOOT_CLUBMAN2 };
 
         crashLength = CRASHBOX_SINGLEOB;
+        nowres_step = NOWRES_TIMER_CLUBMAN;
 
         break;
 
@@ -294,6 +313,9 @@ void Army::setAttribute()
         crashLength = CRASHBOX_SINGLEOB;
 
         type_Missile = Missile_Cobblestone;
+        phaseFromEnd_MissionAttack = THROWMISSION_SLINGER;
+
+        nowres_step = NOWRES_TIMER_SLINGER;
         break;
 
     case AT_BOWMAN:     //弓箭手
@@ -315,6 +337,8 @@ void Army::setAttribute()
 
         type_Missile = Missile_Arrow;
         phaseFromEnd_MissionAttack = THROWMISSION_ARCHER;
+
+        nowres_step = NOWRES_TIMER_BOWMAN;
         break;
 
     case AT_SCOUT:      //侦察骑兵
@@ -333,6 +357,8 @@ void Army::setAttribute()
         defence_shoot = DEFSHOOT_SCOUT;
 
         crashLength = CRASHBOX_SMALLOB;
+
+        nowres_step = NOWRES_TIMER_SCOUT;
         break;
 
     default:

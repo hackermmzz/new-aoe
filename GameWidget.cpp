@@ -164,6 +164,21 @@ void GameWidget::paintEvent(QPaintEvent *)
         }
     }
 
+    if(nowobject!=NULL)
+    {
+        painter.setPen(Qt::white);
+        int width=nowobject->getCrashLength()*4;
+        int height=nowobject->getCrashLength()*2;
+        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getCrashLength()*2;
+        int Y=tranY(nowobject->getDR()-DR,nowobject->getUR()-UR) - height / 2;
+        QPolygonF diamond;
+        diamond << QPointF(X+width/2, Y);
+        diamond << QPointF(X+width, Y+height/2);
+        diamond << QPointF(X+width/2, Y+height);
+        diamond << QPointF(X, Y+height/2);
+        painter.drawPolygon(diamond);
+    }
+
     //drawlist正常绘制
     if(!drawlist.empty())
     {
@@ -220,6 +235,12 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
         double tUR = tranUR(event->x(),event->y());
         mainwidget->mouseEvent->DR = tDR + DR;
         mainwidget->mouseEvent->UR = tUR + UR;
+
+        if(buildMode >= 0)
+        {
+            buildMode = -1;
+            QApplication::restoreOverrideCursor();
+        }
     }
 }
 

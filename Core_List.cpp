@@ -6,6 +6,15 @@ Core_List::Core_List(Map* theMap, Player* player[])
     this->player = player;
     initDetailList();
 }
+void Core_List::update()
+{
+    //对正在监视的Object，进行行动处理
+    manageMontorAct();
+    theMap->loadBarrierMap();//更新寻路用障碍表
+    jud_resetResBuild();
+    manageRelationList();
+    init_resetResBuild();
+}
 
 //****************************************************************************************
 //控制动态表
@@ -18,6 +27,13 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
 
     if(! relate_AllObject[object1].isExist )
     {
+        BloodHaver* bloodOb = NULL;
+        Building* buildOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        object1->printer_ToBuilding((void**)&buildOb);
+        if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
+        if( buildOb != NULL && !(buildOb->isConstructed() && buildOb->isFinish())) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if(object1->isPlayerControl() && object2->isPlayerControl()) isSameReprensent = object1->getPlayerRepresent() == object2->getPlayerRepresent();
@@ -59,6 +75,10 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
 
     if(! relate_AllObject[object1].isExist )
     {
+        BloodHaver* bloodOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( bloodOb!=NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
+
         if(eventType == CoreEven_JustMoveTo)
         {
             if(DR<0) DR = 0;
@@ -91,7 +111,7 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     return ACTION_INVALID_ISNTFREE;
 }
 
-//添加
+//建造
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -100,6 +120,10 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
 
     if(! relate_AllObject[object1].isExist )
     {
+        BloodHaver* bloodOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
+
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         if(eventType == CoreEven_CreatBuilding)
         {
@@ -115,7 +139,6 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
 
             player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
             return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
-
         }
     }
 
@@ -129,9 +152,14 @@ int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 
     if( object1->getSort() == SORT_BUILDING && !relate_AllObject[object1].isExist)
     {
+        BloodHaver* bloodOb = NULL;
         Building* buildOb = NULL;
         int oper = 0;
         object1->printer_ToBuilding((void**)&buildOb);
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        if( !buildOb || !bloodOb || bloodOb->isDie()) return ACTION_INVALID_SN;
+
+        if(!(buildOb->isConstructed() && buildOb->isFinish())) return ACTION_INVALID_BUILDACT_NEEDBUILT;
 
         if(!player[buildOb->getPlayerRepresent()]->get_isBuildActionShowAble(buildOb->getNum(),actNum))
             return ACTION_INVALID_BUILDACT_LOCK;
@@ -159,8 +187,15 @@ void Core_List::suspendRelation(Coordinate * object)
     if(relate_AllObject[object].isExist)
     {
         Building* buildOb = NULL;
+        MoveObject* moveOb = NULL;
         object->printer_ToBuilding((void**)&buildOb);
+        object->printer_ToMoveObject((void**)&moveOb);
         if(buildOb!=NULL) player[buildOb->getPlayerRepresent()]->back_Resource_TS(buildOb); //返还资源
+        if(moveOb!= NULL)   //清空路径
+        {
+            moveOb->setPreStand();
+            moveOb->setPath(stack<Point>(),object->getDR(),object->getUR());
+        }
         object->initAction();  //行动全部重置
 
         relate_AllObject[object].isExist = false;
@@ -270,7 +305,6 @@ void Core_List::manageRelationList()
                 }
             }
             iter++;
-
         }
         else iter = relate_AllObject.erase(iter);   //删表
     }
@@ -305,16 +339,28 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
 {
     relation_Object& relation = relate_AllObject[object1];
 
-    if(relation.alterOb == NULL)
+    if(relation.alterOb == NULL || needReset_resBuild)
     {
         if(relation.needResourceBuilding) findResourceBuiding( relation ,  player[object1->getPlayerRepresent()]->build);
     }
 
     relation.reset_Object1Predicted(object1);
+    relation.height_Object = theMap->get_MapHeight(object1->getBlockDR() , object1->getBlockUR());
     relation.update_GoalPoint();
+    if(relation.goalObject != NULL)
+        relation.height_GoalObject = theMap->get_MapHeight(relation.goalObject->getBlockDR() , relation.goalObject->getBlockUR());
     relation.update_Attrib_alter();
+    relation.waiting();
 }
 
+void Core_List::eraseObject(Coordinate* eraseOb)
+{
+    eraseRelation(eraseOb);
+    manageRelation_deleteGoalOb(eraseOb);
+}
+
+//****************************************************************************************
+//辅助动态表处理交互
 //查询最近的符合要求的建筑，并设置alterOB
 void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>& building)
 {
@@ -341,7 +387,7 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
     if(optimum!=NULL) relation.set_AlterOb(optimum , dis_opti);
 }
 
-//判断是否可以建造建筑（需要优化，错误码）
+//判断是否可以建造建筑
 int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
 {
     int answer = ACTION_SUCCESS;
@@ -364,21 +410,18 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
     if(DRL<0 || DRR>71 || URD<0 || URU>71)
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界");
-//        qDebug()<<"overBorder";
         answer = ACTION_INVALID_HUMANBUILD_OVERBORDER;
     }
 
     if( tempBuild->isIncorrect_Num() )
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,建筑类型不存在");
-//        qDebug()<<"numIncorrect";
         answer = ACTION_INVALID_BUILDINGNUM;
     }
 
     if( !theMap->cell[DRL][URD].Explored )
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索");
-//        qDebug()<<"explored";
         answer = ACTION_INVALID_HUMANBUILD_UNEXPLORE;
     }
 
@@ -389,15 +432,12 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
         if(theMap->isBarrier(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
         {
             call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠");
-
-//            qDebug()<<"overlap"<<bDR_ba<<bUR_ba;
             answer = ACTION_INVALID_HUMANBUILD_OVERLAP;
         }
 
         if(!theMap->isFlat(tempBuild))
         {
-            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差");
-//            qDebug()<<"isnt flat";
+            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差或斜坡");
             answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
         }
     }
@@ -408,63 +448,6 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
     return answer;
 }
 
-void Core_List::eraseObject(Coordinate* eraseOb)
-{
-    eraseRelation(eraseOb);
-    manageRelation_deleteGoalOb(eraseOb);
-}
-
-int Core_List::getNowPhaseNum(Coordinate* object){
-    ///获取当前object的行动阶段，用于将信息传递给AIGame
-    relation_Object& thisRelation=relate_AllObject[object];
-    if(!thisRelation.isExist||thisRelation.relationAct==CoreEven_JustMoveTo){
-        return HUMAN_STATE_IDLE;
-    }
-    int& nowPhaseNum = thisRelation.nowPhaseNum;
-    //detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
-    Coordinate* obj=relate_AllObject[object].goalObject;
-    if(obj==NULL){
-        return HUMAN_STATE_IDLE;
-    }
-    if(nowPhaseNum==0){
-        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
-            return HUMAN_STATE_GOTO_ATTACK;
-        }else{
-            return HUMAN_STATE_GOTO_OBJECT;
-        }
-    }else if(nowPhaseNum==1||nowPhaseNum==2){
-        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
-            return HUMAN_STATE_ATTACKING;
-        }else if(obj->getSort()==SORT_BUILDING){
-            return HUMAN_STATE_BUILDING;
-        }else if((obj->getSort()==SORT_ANIMAL)&&(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST)){
-            return HUMAN_STATE_CUTTING;
-        }
-    }else if(nowPhaseNum==3||nowPhaseNum==4||nowPhaseNum==8||nowPhaseNum==9){
-        return HUMAN_STATE_GOTO_RESOURCE;
-    }else if(nowPhaseNum==5||nowPhaseNum==10||nowPhaseNum==11){
-        return HUMAN_STATE_GOTO_OBJECT;
-    }else if(nowPhaseNum==6||nowPhaseNum==7){
-        ///资源采集
-        if(obj->getSort()==SORT_STATICRES){
-            if(obj->getNum()==0){
-                return HUMAN_STATE_GATHERING;
-            }else if(obj->getNum()==1){
-                return HUMAN_STATE_DIGGING_STONE;
-            }else if(obj->getNum()==2){
-                return HUMAN_STATE_DIGGING_GOLD;
-            }
-        }else if(obj->getSort()==SORT_ANIMAL){
-            if(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST){
-                return HUMAN_STATE_CUTTING;
-            }else{
-                return HUMAN_STATE_BUTCHERING;
-            }
-        }
-    }
-    return -1;
-}
-
 int Core_List::getObjectSN(Coordinate* object){
     relation_Object& thisRelation=relate_AllObject[object];
     if(thisRelation.isExist&&thisRelation.goalObject!=nullptr){
@@ -473,14 +456,23 @@ int Core_List::getObjectSN(Coordinate* object){
         return -1;
     }
 }
+
 //****************************************************************************************
 //通用的控制对象行动函数
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
 {
     MoveObject* moveObject = NULL;
+    Coordinate* goalOb;
     object->printer_ToMoveObject((void**)&moveObject);
+    Point PreviousPoint, nextBlockPoint , crashBlockPoint;
+    //如果有目标点，设置目标点
+    moveObject->stateCrash=false;//重置碰撞状态（tagGame）
+    if(relate_AllObject[object].isUseAlterGoal)
+        goalOb = relate_AllObject[object].alterOb;
+    else
+        goalOb = relate_AllObject[object].goalObject;
 
-    if(moveObject!=NULL)
+    if(moveObject!=NULL && !relate_AllObject[object].isWaiting())
     {
         if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
         {
@@ -491,64 +483,92 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 
             theMap->loadfindPathMap(moveObject);
             theMap->findPathMap[destination.x][destination.y] = 0;
+            if(relate_AllObject[object].crashPointLab.size())
+            {
+                crashBlockPoint = relate_AllObject[object].crashPointLab.top();
+                relate_AllObject[object].crashPointLab.pop();
+                theMap->findPathMap[crashBlockPoint.x][crashBlockPoint.y] = 1;
+            }
 
             if(moveObject->getSort() == SORT_MISSILE) path.push(destination);
-            else path = findPath(theMap->findPathMap , theMap , start , destination);
+            else path = findPath(theMap->findPathMap , theMap , start , destination , goalOb);
 
-//            moveObject->setPath(stack<Point>());
+            relate_AllObject[object].nullPath = path.empty();
             moveObject->setPath(path,DR,UR);
         }
-
-//        if(moveObject->getPath().size())
-//        {
-            relate_AllObject[object].useOnce();
-            if(!moveObject->isWalking()) moveObject->setPreWalk();
-//        }
-//        else
-//        {
-//            if(moveObject->isStand()) moveObject->setPreStand();
-//            relate_AllObject[object].useless();
-//        }
-
-        if(moveObject->getCrashOb()!=NULL)
+        else
         {
-            //处理碰撞
+            if(!moveObject->isWalking()) moveObject->setPreWalk();
+            else if(moveObject->getCrashOb()!=NULL)
+            {
+                moveObject->GoBackLU();
+                if(/*relate_AllObject[object].nullPath || */relate_AllObject[object].relationAct == CoreEven_JustMoveTo && moveObject->getPath_size() == 0)
+                {
+                    call_debugText("red", object->getChineseName()+ "(编号:" + QString::number(object->getglobalNum()) + "当前位置为 ("+\
+                                   QString::number(object->getDR()) +"," + QString::number(object->getUR())+") , 目标点 ("+\
+                                   QString::number(moveObject->getDR0()) + "," + QString::number(moveObject->getUR0()) + ") 附近不可抵达");
+                    relate_AllObject[object].wait(100);
+                    moveObject->stateCrash=true;
+                    if(!moveObject->isStand()) moveObject->setPreStand();
+                }
+                else
+                {
+                    relate_AllObject[object].crash_DealPhase = true;
+                    nextBlockPoint = moveObject->get_NextBlockPoint();
+                    PreviousPoint = moveObject->get_PreviousBlock();
+                    moveObject->pathOptimize(PreviousPoint);
+                    relate_AllObject[object].crashMove_Point = PreviousPoint;
+                    relate_AllObject[object].crashPointLab.push(nextBlockPoint);
+                    relate_AllObject[object].crashRepresent = moveObject->getCrashOb()->getPlayerRepresent();
+                }
+                //处理碰撞
+                moveObject->initCrash();
+            }
+            else if(relate_AllObject[object].crash_DealPhase)
+            {
+                if(!(moveObject->get_NextBlockPoint() == relate_AllObject[object].crashMove_Point))
+                {
+                    relate_AllObject[object].crash_DealPhase = false;
+                    moveObject->stateCrash=true;
+                    if(moveObject->getPlayerRepresent() == relate_AllObject[object].crashRepresent)
+                        relate_AllObject[object].wait(rand()%50);
+                    else relate_AllObject[object].wait(rand()%20);
 
-            moveObject->initCrash();
+                    if(rand() % 8 > 0) moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
+                    if(!moveObject->isStand()) moveObject->setPreStand();
+                }
+            }
+            else relate_AllObject[object].useOnce();
         }
     }
-    else relate_AllObject[object].useless();
-
+    else {
+        relate_AllObject[object].useless();
+        if (moveObject)moveObject->stateCrash = true;
+    }
 }
 
 void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 {
     bool calculateDamage = false;
     int damage; //记录伤害
+    int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
     Missile* missile = NULL;
 
-    //攻击者指针赋值(object1强制转换)
-    object1->printer_ToBloodHaver((void**)&attacker);
-    //受攻击者指针赋值(object2强制转换)
-    object2->printer_ToBloodHaver((void**)&attackee);
-    //判断obect1是否为投射物
-    object1->printer_ToMissile((void**)&missile);
+    object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
+    if(object2) object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
+    object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
 
-//    qDebug()<<"attacking";
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
     {
-//        qDebug()<<"isattacking"<<(attacker->isAttacking());
         if(!attacker->isAttacking()) attacker->setPreAttack();
         else
         {
-
             //非祭司,是普通的伤害计算公式
             /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
             if( attacker->is_missileAttack())
             {
-//                qDebug()<<"ismissile"<<(attacker->is_missileThrow() );
                 if( attacker->is_missileThrow() )
                 {
                     addRelation( creatMissile(object1 , object2) , object2 , CoreEven_MissileAttack , false);
@@ -559,6 +579,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
             {
                 calculateDamage = true;
                 attacker->haveAttack();
+                if(attacker->get_isRangeAttack()) deal_RangeAttack(object1 , object2);
                 if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
             }
         }
@@ -567,6 +588,8 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     {
         calculateDamage = true;
         attacker = missile->getAttackAponsor();
+
+        extra_damage += missile->get_AttackAddition_Height(theMap->get_MapHeight(object2->getBlockDR() ,object2->getBlockUR()));
         if(!attackee->isGotAttack())
         {
             if(missile->isAttackerHaveDie())
@@ -581,11 +604,9 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
-//        qDebug()<<(attacker->getATK())<<(attackee->getDEF(attacker->get_AttackType()));
-        damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType());   //统一伤害计算公式
+        damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
-//        qDebug()<<damage;
     }
 }
 
@@ -660,14 +681,16 @@ void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
     vector<Point> Block_Free;
-//    qDebug()<<"ending";
-//    qDebug()<<relate_AllObject[object1].relationAct;
     switch(relate_AllObject[object1].relationAct){
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
         {
             if(!((Building*)relate_AllObject[object1].goalObject)->isConstructed())
-                player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+            {
+                 player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+                 if(relate_AllObject[object1].goalObject->getNum() == BUILDING_STOCK || relate_AllObject[object1].goalObject->getNum() == BUILDING_GRANARY)
+                     resourceBuildingChange = true;
+            }
             relate_AllObject[object1].goalObject->initAction();
             if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
             {
@@ -680,7 +703,6 @@ void Core_List::object_FinishAction(Coordinate* object1)
     case CoreEven_BuildingAct:
         Block_Free = theMap->findBlock_Free(object1);
         player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1,Block_Free);  //进行建筑行动的结果处理
-//        qDebug()<<"end";
         break;
     case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
@@ -821,46 +843,52 @@ void Core_List::manageMontorAct()
     return;
 }
 
+void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
+{
+    int bx,by;
+    int size , damage;
+    BloodHaver* blooder , *bloodee;
+    Coordinate* judOb;
+    attacker->printer_ToBloodHaver((void**)&blooder);
+    for(int x = -1 ; x<2; x++)
+    {
+        for(int y = -1; y<2 ; y++)
+        {
+            bx = x+attacker->getBlockDR();
+            by = x+attacker->getBlockUR();
+            if(bx < 0 || by < 0 || bx>=MAP_L|| by >= MAP_U) continue;
+            size = theMap->map_Object[bx][by].size();
+            bloodee = NULL;
+            for(int i = 0 ; i<size ; i++)
+            {
+                judOb = theMap->map_Object[bx][by][i];
+                if(judOb == attackee) continue;
+                if(judOb->getSort() == SORT_ANIMAL && ((Animal*)judOb)->isTree()) continue;
+                if(attacker->getPlayerRepresent() == judOb->getPlayerRepresent()) continue;
+
+                judOb->printer_ToBloodHaver((void**)&bloodee);
+                if(bloodee && countdistance(attacker->getDR() , attacker->getUR() , judOb->getDR() , judOb->getUR()) <= blooder->getDis_attack())
+                {
+                    damage = blooder->getATK() - bloodee->getDEF(blooder->get_AttackType());   //统一伤害计算公式
+                    if(damage<0) damage = 0;
+                    bloodee->updateBlood(damage);  //damage反映到受攻击者血量减少
+                }
+            }
+        }
+    }
+
+}
+
 //**************************************************************
 //寻路相关
-//bool Core_List::isValidPoint(const int (&map)[MAP_L][MAP_U], const Point &p)
-//{
-//    int rows = MAP_L;
-//    int cols = MAP_U;
-//    return (p.x >= 0 && p.x < rows && p.y >= 0 && p.y < cols);
-//}
-
-//vector<Point> Core_List::getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point &p)
-//{
-//    vector<Point> adjacentPoints;
-
-//    // 八个相邻正方向的偏移量
-//    int dx[] = { -1, 1, 0, 0, -1, -1, 1, 1 };
-//    int dy[] = { 0, 0, -1, 1, -1, 1, -1, 1 };
-
-//    for (int i = 0; i < 8; i++) {
-//        int newX = p.x + dx[i];
-//        int newY = p.y + dy[i];
-//        Point newPoint = { newX, newY };
-//        if (isValidPoint(map, newPoint) && map[newX][newY] != 1) {
-//            if(abs(dx[i])+abs(dy[i])==2)
-//            {
-//                if(map[newX][p.y]!=1&&map[p.x][newY]!=1)
-//                {
-//                    adjacentPoints.push_back(newPoint);
-//                }
-//            }
-//            else adjacentPoints.push_back(newPoint);
-//        }
-//    }
-//    return adjacentPoints;
-//}
-
-stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination)
+stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination , Coordinate* goalOb)
 {
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1) , Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
 
+    bool goalMap[MAP_L][MAP_U];
     stack<Point> path;
+    vector<Point> objectBlock;
+    vector<Point>::iterator oBiter,oBitere;
     Point nextPoint, nowPoint;
     pathNode* newPathNode = NULL , *findPathNode = NULL, *nowBestPathNode;
     stack<pathNode*> lab_needDele;
@@ -873,11 +901,27 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     //起始点标记
     haveJud_Map_Move(start);
 
+    memset(goalMap , 0 , sizeof(goalMap));
+    //标记终点
+    if(goalOb != NULL)
+    {
+        objectBlock = map->get_ObjectBlock(goalOb);
+        oBiter = objectBlock.begin();
+        oBitere = objectBlock.end();
+        while(oBiter != oBitere)
+        {
+            goalMap[(*oBiter).x][(*oBiter).y] = true;
+//            qDebug()<<(*oBiter).x<<(*oBiter).y;
+            oBiter++;
+        }
+    }
+    goalMap[destination.x][destination.y] = true;
+
     newPathNode = new pathNode(start);
     lab_needDele.push(newPathNode);
     nodeQue->addNode(newPathNode);
 
-    if( start == destination)
+    if( goalMap[start.x][start.y] )
     {
         meetGoal = true;
         findPathNode = newPathNode;
@@ -899,7 +943,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
             //斜线方向，多判断马脚操作
             //  if( i<4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y]||findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])\|| i>=4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y])) //判断直线方向
 
-            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] || i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y]) ))
+            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] || i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y]) ))
             {
                 //创建新节点
                 newPathNode = new pathNode( nextPoint );
@@ -909,7 +953,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
                 //为新节点增加前驱点信息,然后添加新节点到小根堆
                 nodeQue->addNode(nowBestPathNode->pushNode(newPathNode));
 
-                if( nextPoint == destination)
+                if( goalMap[nextPoint.x][nextPoint.y] )
                 {
                     meetGoal = true;
                     findPathNode = newPathNode;
@@ -940,102 +984,8 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     }
     delete nodeQue;
 
-
-//    qDebug()<<meetGoal<<path.size();
     return path;
 }
-
-
-//stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination)
-//{
-//    int rows = 72;
-//    int cols = 72;
-
-//    // 记录已访问的点
-//    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
-
-//    // 使用map记录每个点的前驱点，以便回溯路径
-//    vector<vector<Point>> prev(rows, vector<Point>(cols));
-
-//    // 使用queue保存路径
-//    queue<Point> q;
-
-//    // 广度优先搜索
-//    q.push(start);
-//    visited[start.x][start.y] = true;
-
-//    while (!q.empty()) {
-//        Point current = q.front();
-//        q.pop();
-
-//        // 找到目标点，回溯路径
-//        if (current.x == destination.x && current.y == destination.y) {
-//            stack<Point> pathStack;
-//            while (!(current.x == start.x && current.y == start.y)) {
-//                pathStack.push(current);
-//                current = prev[current.x][current.y];
-//            }
-//            return pathStack;
-//        }
-
-//        vector<Point> adjacentPoints = getAdjacentPoints(findPathMap, current);
-//        for (const Point& next : adjacentPoints) {
-//            if (!visited[next.x][next.y]) {
-//                visited[next.x][next.y] = true;
-//                q.push(next);
-//                prev[next.x][next.y] = current;
-//            }
-//        }
-//    }
-
-//    return findPathAlternative(map->intmap,start,destination);
-//}
-
-//stack<Point> Core_List::findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point &start, const Point &destination)
-//{
-//    int rows = 72;
-//    int cols = 72;
-
-//    // 记录已访问的点
-//    vector<vector<bool>> visited(rows, vector<bool>(cols, false));
-
-//    // 使用map记录每个点的前驱点，以便回溯路径
-//    vector<vector<Point>> prev(rows, vector<Point>(cols));
-
-//    // 使用queue保存路径
-//    queue<Point> q;
-
-//    // 广度优先搜索
-//    q.push(start);
-//    visited[start.x][start.y] = true;
-
-//    while (!q.empty()) {
-//        Point current = q.front();
-//        q.pop();
-
-//        // 找到目标点，回溯路径
-//        if (current.x == destination.x && current.y == destination.y) {
-//            stack<Point> pathStack;
-//            while (!(current.x == start.x && current.y == start.y)) {
-//                pathStack.push(current);
-//                current = prev[current.x][current.y];
-//            }
-//            return pathStack;
-//        }
-
-//        vector<Point> adjacentPoints = getAdjacentPoints(map, current);
-//        for (const Point& next : adjacentPoints) {
-//            if (!visited[next.x][next.y]) {
-//                visited[next.x][next.y] = true;
-//                q.push(next);
-//                prev[next.x][next.y] = current;
-//            }
-//        }
-//    }
-
-//    return stack<Point>();
-//}
-
 
 //*************************************************************
 //行动预备处理
@@ -1052,10 +1002,9 @@ Missile* Core_List::creatMissile(Coordinate* attacker ,Coordinate* attackee)
     if(judHuman!=NULL) playerRepresent = judHuman->getPlayerRepresent();
     if(judBuild!= NULL) playerRepresent = judBuild->getPlayerRepresent();
 
-    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee);
+    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
     else return NULL;
 }
-
 
 /**************************************************************/
 //建立行动细节的静态表
@@ -1086,7 +1035,7 @@ void Core_List::initDetailList()
     //行动: 攻击**************************************
     {
         phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true)};
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK)};
 //        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
         forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
@@ -1110,7 +1059,7 @@ void Core_List::initDetailList()
                                /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move ,\
                                /*12*/ CoreDetail_JumpPhase};
         conditionList = new conditionF[13]{ conditionF( condition_AllTrue), \
-                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK,true),\
+                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK),\
                 /*3*/conditionF(condition_AllTrue) ,                                /*4*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
                 /*5*/conditionF(condition_Object1_EmptyBackpack),                   /*6*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
                 /*7*/conditionF(condition_Object1_FullBackpack) , \
@@ -1186,4 +1135,84 @@ void Core_List::initDetailList()
         delete phaseList;
         delete conditionList;
     }
+}
+
+int STATE_JustMoveTo[1]={HUMAN_STATE_JUSTWALKING};
+int STATE_Attacking[2]={HUMAN_STATE_GOTO_ATTACK,HUMAN_STATE_ATTACKING};
+int STATE_Gather[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
+                      /*1前往攻击目标*/HUMAN_STATE_GOTO_ATTACK ,/*2攻击*/HUMAN_STATE_ATTACKING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*4前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*5资源放置*/HUMAN_STATE_GOTO_OBJECT, /*6前往资源*/HUMAN_STATE_GOTO_OBJECT,\
+                      /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
+                      /*12*/ HUMAN_STATE_JUSTWALKING};
+int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_RESOURCE, \
+                      /*1前往攻击目标*/HUMAN_STATE_GOTO_RESOURCE ,/*2攻击*/HUMAN_STATE_GATHERING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*4前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*5资源放置*/HUMAN_STATE_GOTO_OBJECT, /*6前往资源*/HUMAN_STATE_GOTO_OBJECT,\
+                      /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
+                      /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
+                      /*12*/ HUMAN_STATE_JUSTWALKING};
+
+int STATE_FixBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_FIXING};
+int STATE_CreateBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_BUILDING};
+
+int Core_List::getNowPhaseNum(Coordinate* object){
+    ///获取当前object的行动阶段，用于将信息传递给AIGame
+    relation_Object& thisRelation=relate_AllObject[object];
+    MoveObject* move=dynamic_cast<MoveObject*>(object);
+    Coordinate* obj=relate_AllObject[object].goalObject;
+    if(move->stateCrash){
+        return HUMAN_STATE_STOP;
+    }
+    if(!thisRelation.isExist){
+        return HUMAN_STATE_IDLE;
+    }
+    int& nowPhaseNum = thisRelation.nowPhaseNum;
+
+    if(thisRelation.relationAct==CoreEven_JustMoveTo||obj==NULL){
+        return HUMAN_STATE_JUSTWALKING;
+    }else if(thisRelation.relationAct==CoreEven_Attacking){
+        return STATE_Attacking[nowPhaseNum];
+    }else if(thisRelation.relationAct==CoreEven_Gather){
+        if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
+            //对动物
+            Animal* animal=dynamic_cast<Animal*>(obj);
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING&&animal->getBlood()<=0){
+                return HUMAN_STATE_BUTCHERING;
+            }else if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING&&animal->getBlood()>0){
+                return HUMAN_STATE_ATTACKING;
+            }
+            return STATE_Gather[nowPhaseNum];
+        }else if(obj->getSort()==SORT_ANIMAL&&(obj->getNum()!=ANIMAL_TREE||obj->getNum()!=ANIMAL_FOREST)){
+            //对树
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_CUTTING;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+
+        }else if(obj->getSort()==SORT_STATICRES&&obj->getNum()==0){
+            //对浆果
+            return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_STATICRES&&obj->getNum()==1){
+            //对石头
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_DIGGING_STONE;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_STATICRES&&obj->getNum()==2){
+            //对金子
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_DIGGING_GOLD;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+        }
+    }else if(thisRelation.relationAct==CoreEven_FixBuilding){
+        Building* building=dynamic_cast<Building*>(obj);
+        if(building->getPercent()<100){
+            return STATE_CreateBuilding[nowPhaseNum];
+        }else{
+            return STATE_FixBuilding[nowPhaseNum];
+        }
+    }
+
+    return -1;
 }

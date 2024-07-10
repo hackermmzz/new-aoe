@@ -61,6 +61,8 @@ public:
 
     bool is_attackHit(){ return get_isActionEnd() && attack_OneCircle; }
     double getSpeed(){ return ((int)changeToRun*1.5)*speed; }
+    int get_add_specialAttack();
+
     /***************指针强制转化****************/
     //若要将Animal类指针转化为父类指针,务必用以下函数!
 

@@ -85,24 +85,30 @@ public:
     int **memorymap=new int*[MEMORYROW];//动态
     Player* player[MAXPLAYER];
     MouseEvent *mouseEvent=new MouseEvent();
-
+    QLabel *tipLbl =NULL;
 private slots:
     void FrameUpdate();
-
-
+    void onRadioClickSlot();
 
 signals:
     void mapmove();
+    void startAI();
+    void stopAI();
 private:
     Ui::MainWidget *ui;
     QTimer *timer;
     QTimer *showTimer;
-    int gameframe;
+    int gameframe = 0; // 游戏帧数初始化
+    QButtonGroup *pbuttonGroup = NULL;
+
+    void gameDataUpdate();
+    void paintUpdate();
+
 //    tagGame *Game=new tagGame;
 //    int Winnning=0;
 //    int Lose = 0;
 //    int flag=0;
-//    QButtonGroup *pbuttonGroup;
+
 //    double *ArrowTowerBlockL=new double[3];
 //    double *ArrowTowerBlockU=new double[3];
 //    int ArrowTowerBuilt[3]={0,0,0};

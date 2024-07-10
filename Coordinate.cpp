@@ -1,5 +1,7 @@
 ﻿#include "Coordinate.h"
 
+vector<Point> Coordinate::viewLab[5][11];
+
 Coordinate::Coordinate()
 {
 
@@ -66,4 +68,80 @@ int Coordinate::ActNameToActNum(int actName)
 
 
 
+}
+
+
+void Coordinate::setViewLab( int blockSize , int visionLen )
+{
+    Point viewBlock ;
+    vector<Point>& pointLab = viewLab[blockSize][visionLen];
+    int lx,mx,my;
+    int x0 = (blockSize - 1)/2;  //计算的原点
+    int y0 = x0 , yr , R , vL;
+
+    lx = - visionLen + 1;
+    mx =2*x0 + visionLen;
+    my = mx;
+
+    if(blockSize == 1 && visionLen == 2)
+    {
+        viewBlock.y = y0;
+        mx++; my++; lx--;
+        for(int x = lx ; x < mx ; x++)
+        {
+            viewBlock.x = x;
+            pointLab.push_back(viewBlock);
+        }
+        for(int y = y0+1 ; y<my; y++)
+        {
+            mx--; lx++;
+            Coordinate::addViewLab(viewLab[blockSize][visionLen] , lx , mx , y , 2*y0 - y);
+        }
+    }
+    else if(visionLen<7)
+    {
+        viewBlock.y = y0;
+        for(int x = lx ; x < mx; x++)
+        {
+            viewBlock.x = x;
+            pointLab.push_back(viewBlock);
+        }
+        for(int y = y0+1 ; y<my; y++)
+        {
+            if(y == my -1){mx-=1;lx+=1;}
+            Coordinate::addViewLab(viewLab[blockSize][visionLen] , lx , mx , y , 2*y0 - y);
+        }
+    }
+    else
+    {
+        R = visionLen;
+        viewBlock.y = y0;
+        for(int x = lx ; x < mx; x++)
+        {
+            viewBlock.x = x;
+            pointLab.push_back(viewBlock);
+        }
+
+        for(int y = y0+1; y<my; y++)
+        {
+            yr = y - y0;
+            vL = (int)(sqrt((double)( R*R - yr*yr ))+0.5);
+
+            lx = -vL +1;
+            mx = 2*x0 + vL;
+            Coordinate::addViewLab(viewLab[blockSize][visionLen] , lx , mx , y , 2*y0 - y);
+        }
+    }
+}
+
+void Coordinate::addViewLab( vector<Point>& blockLab , int lx , int mx , int y , int y_mirr )
+{
+    Point blockPoint(0,y),blockPoint_mirr(0,y_mirr);
+
+    for(int x = lx; x<mx; x++)
+    {
+        blockPoint.x = blockPoint_mirr.x = x;
+        blockLab.push_back(blockPoint);
+        blockLab.push_back(blockPoint_mirr);
+    }
 }

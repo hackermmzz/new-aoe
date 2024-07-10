@@ -433,6 +433,8 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 //    double predr = relation.DR_Predicted,preur = relation.UR_Predicted;
 //    double dis_r = object1->getCrashLength();
     double dis = 1e6;
+    BloodHaver* attacker = NULL;
+    int heightAdd = 0;
 
     if(operate/OPERATECHANGE == OPERATECON_MOVEALTER)
     {
@@ -462,9 +464,23 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
                 break;
             case OPERATECON_NEAR_ATTACK:
                 dis = relation.disAttack;
+                object1->printer_ToBloodHaver((void**)&attacker);
+                if(attacker && attacker->is_missileAttack())
+                {
+                    heightAdd = relation.height_Object - relation.height_GoalObject;
+                    if(heightAdd > 0)
+                        dis = min( dis + heightAdd*BLOCKSIDELENGTH , object1->getVision() * BLOCKSIDELENGTH );
+                }
                 break;
             case OPERATECON_NEAR_ATTACK_MOVE:
-                dis = relation.disAttack;
+                dis = relation.disAttack;   //暂且修改为disAttack，理论应略小于disAttack
+                object1->printer_ToBloodHaver((void**)&attacker);
+                if(attacker && attacker->is_missileAttack())
+                {
+                    heightAdd = relation.height_Object - relation.height_GoalObject;
+                    if(heightAdd > 0)
+                        dis = min( dis + heightAdd*BLOCKSIDELENGTH , object1->getVision() * BLOCKSIDELENGTH );
+                }
                 break;
             case OPERATECON_NEAR_WORK:
                 dis = relation.distance_AllowWork;
@@ -518,4 +534,25 @@ bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation
 bool condition_UselessAction(Coordinate* object1, relation_Object& relation, int& operate , bool isNegation)
 {
     return (relation.useless_norm>operate)^isNegation;
+}
+
+
+bool condition_Object1_AttackingEnd(Coordinate* object1, relation_Object& relation, int& operate , bool isNegation)
+{
+    if(operate == OPERATECON_NEAR_ATTACK)
+    {
+        BloodHaver* bloodOb;
+        MoveObject* moveOb = NULL;
+        Building* buildOb = NULL;
+        object1->printer_ToBloodHaver((void**)&bloodOb);
+        object1->printer_ToMoveObject((void**)&moveOb);
+        object1->printer_ToBuilding((void**)&buildOb);
+
+        if(moveOb!=NULL)
+            return isNegation^( (!bloodOb->isAttacking()|| moveOb->isAction_ResBegin()) && condition_ObjectNearby(object1,relation,operate,true));
+        else if(buildOb!=NULL)
+            return isNegation^( (!bloodOb->isAttacking()|| buildOb->isAttackBegin()) && condition_ObjectNearby(object1,relation,operate,true));
+    }
+
+    return true;
 }

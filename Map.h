@@ -23,6 +23,9 @@ public:
     // 生成城镇中心附近13*13的部分
     void generateCenter();
 
+    //生成敌人
+    void generateEnemy();
+
     // 随机生成沙漠地貌
     void genDesert(int i, int j, int number, int Map[][74]);
 
@@ -39,9 +42,14 @@ public:
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
     bool isFlat(Coordinate* judOb);
     vector<Point> findBlock_Free(Coordinate* object , int disLen = 1);
+    vector<Point> findBlock_Flat(int disLen = 1);
 
     //用于查找Object视野范围内的格子，返回格子的列表容器
     vector<Point> get_ObjectVisionBlock(Coordinate* object);
+
+    vector<Point> get_ObjectBlock(Coordinate* object);
+
+    int get_MapHeight(int blockDR , int blockUR){ return cell[blockDR][blockUR].getMapHeight();  }
 
     //初始化视野地图
     void init_Map_Vision(){
@@ -60,17 +68,14 @@ public:
             }
     }
 
+    void init_Map_Height();
+
     void add_Map_Vision( Coordinate* object );
     void add_Map_Object( Coordinate* object ){
         for(int x = object->getBlockDR(); x<object->getBlockDR()+object->get_BlockSizeLen(); x++ )
             for(int y = object->getBlockUR(); y<object->getBlockUR()+object->get_BlockSizeLen(); y++)
                 map_Object[x][y].push_back(object);
     }
-
-    //更新用于AI的资源状况表
-    void reset_resMap_AI();
-    //传入player阵营，若是用户，传出已探索地图部分的地图资源信息，若是Enemy，传回完整的资源地图
-    void reset_resMap_ForUserAndEnemy();
 
     //更新用户视野状况
     void reset_CellExplore(Coordinate* eye);
@@ -111,14 +116,26 @@ public:
 //    std::list<Ruin *> ruin={};
 
 
-    int findPathMap[MAP_L][MAP_U];
+    int findPathMap[MAP_L][MAP_U] = {};
 
     //用于记录需要监视视野的Ob的视野格子和各Ob所在位置的地图
     vector<Coordinate*> map_Vision[MAP_L][MAP_U];   //对需要实时监视的ob所能看到的格子，填入ob相应的coordinate  实时监视是指瞪羚逃跑、狮子索敌等
     vector<Coordinate*> map_Object[MAP_L][MAP_U];   //对ob所在位置——有体积size，填入相应的coordinate
 
+    //>=0为高度， = -1表示其为坡
+    int map_Height[MAP_L][MAP_U] = {};
+
+
+    /*************  取消使用，待删除   ***********************/
+    //后续若需要给出障碍物地图，则修改该部分并启用
+
     tagMap resMap_UserAI[MAP_L][MAP_U];
     tagMap resMap_EnemyAI[MAP_L][MAP_U];
+    //更新用于AI的资源状况表
+    void reset_resMap_AI();
+    //传入player阵营，若是用户，传出已探索地图部分的地图资源信息，若是Enemy，传回完整的资源地图
+    void reset_resMap_ForUserAndEnemy();
+    /************************************/
 
 private:
     int CheckNeighborHigher(int x, int y, int currentCalHeight);
@@ -141,8 +158,8 @@ private:
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
     Player** player;
-    short m_heightMap[80][80];
-    int Gamemap[MAP_L][MAP_U];  // 地图资源二维数组
+    short m_heightMap[80][80] = {{}};
+    int Gamemap[MAP_L][MAP_U] = {};  // 地图资源二维数组
     bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
 
     int barrierMap[MAP_L][MAP_U];   //障碍物地图

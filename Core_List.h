@@ -11,6 +11,7 @@ public:
     ~Core_List(){}
 
 
+    void update();
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
     *用于：判断对象是否处于空闲
@@ -21,7 +22,7 @@ public:
 
     /*********关系表控制***********/
     int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);
+    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1);  //移动
     int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止
@@ -39,12 +40,13 @@ private:
     Map* theMap;    //地图信息
     Player** player;    //player信息
     map<int , detail_EventPhase> relation_Event_static;     //静态表,描述行动的流程链的表
-
-    //需要优化，增加一个“NULL”表，goalObject为Null的行动移至该表，利于维护
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     //寻路相关
     bool map_HaveJud[MAP_L][MAP_U];
+
+    bool resourceBuildingChange = false;
+    bool needReset_resBuild = false;
 
     void initDetailList();
     int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
@@ -64,7 +66,7 @@ private:
     void object_FinishAction_Absolute(Coordinate*);
     void object_FinishAction(Coordinate*);
 
-
+    void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
     /************寻路相关************/
     void initMap_HaveJud(){ memset(map_HaveJud , 0 ,sizeof(map_HaveJud)); }
     void haveJud_Map_Move( int blockDR , int blockUR ){ map_HaveJud[blockDR][blockUR] = true; }
@@ -74,11 +76,14 @@ private:
 
 //    bool isValidPoint(const int (&map)[MAP_L][MAP_U], const Point& p);
 //    vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);
-    stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination);
+    stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate* goalOb = NULL);
 //    stack<Point> findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point& start, const Point& destination);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
+
+    void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
+    void init_resetResBuild(){ needReset_resBuild = false; }
 
 };
 

@@ -53,7 +53,8 @@ SOURCES += \
     AI.cpp \
     Building_Resource.cpp \
     UsrAI.cpp \
-    EnemyAI.cpp
+    EnemyAI.cpp \
+    ViewWidget.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -84,7 +85,8 @@ HEADERS += \
     AI.h \
     Building_Resource.h \
     UsrAI.h \
-    EnemyAI.h
+    EnemyAI.h \
+    ViewWidget.h
 
 FORMS += \
         MainWidget.ui \
