@@ -22,7 +22,6 @@ void EnemyAI::processData(){
     else if(g_frame>=7500) mode=2;
     else if(g_frame>=2500) mode=1;
     qDebug()<<mode;
-    sleep(2);
     if(mode==1){
 
         for(int i = 0 ;i<=1; i++)
