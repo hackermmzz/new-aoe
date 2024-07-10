@@ -906,7 +906,7 @@
 #define THROWMISSION_ARCHER 4
 #define THROWMISSION_SLINGER 5
 
-#define THROWMISSION_ARROWTOWN_TIMER 30
+#define THROWMISSION_ARROWTOWN_TIMER 45
 
 /********** 飞行物类别 **********/
 #define Missile_Spear 0
