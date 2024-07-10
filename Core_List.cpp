@@ -466,7 +466,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
     object->printer_ToMoveObject((void**)&moveObject);
     Point PreviousPoint, nextBlockPoint , crashBlockPoint;
     //如果有目标点，设置目标点
-    moveObject->stateCrash=false;//重置碰撞状态（tagGame）
+    if(moveObject) moveObject->stateCrash=false;//重置碰撞状态（tagGame）
     if(relate_AllObject[object].isUseAlterGoal)
         goalOb = relate_AllObject[object].alterOb;
     else

@@ -635,7 +635,8 @@ void Core::manageOrder(int id)
         }
         case 2:{    /// type 2:命令村民self将工作目标设为obj
             Coordinate* obj=cur.obj;
-            if(obj==NULL){
+            if(obj==NULL || g_Object[cur.obSN] == NULL)
+            {
                 ret=ACTION_INVALID_OBSN;
                 break;
             }
