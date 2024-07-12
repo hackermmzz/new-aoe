@@ -43,7 +43,7 @@ void EnemyAI::processData(){
         else if(mode==3){
         for(int i=0;i<enemyInfo.enemy_buildings_n&&find!=1;i++){
             buildtype=enemyInfo.enemy_buildings[i].Type;
-            if(buildtype==BUILDING_CENTER)
+            if(buildtype==BUILDING_ARROWTOWER)
                { targetBuilding=i;
                  find=1;
                 }
