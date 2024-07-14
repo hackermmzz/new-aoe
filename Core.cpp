@@ -695,12 +695,13 @@ void Core::manageOrder(int id)
             case SORT_ARMY:
                 switch (obj->getSort()){
                 case SORT_ANIMAL:
-                    if(!((Animal*)obj)->isTree())
-                    {
-                        ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()));
-                    }
+                    ret=ACTION_INVALID_OBSN;
+                    // if(!((Animal*)obj)->isTree())
+                    // {
+                    //     ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
+                    //     if(ret == ACTION_SUCCESS&& id == 0)
+                    //         call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()));
+                    // }
                     break;
                 case SORT_BUILDING:
                 case SORT_Building_Resource:
