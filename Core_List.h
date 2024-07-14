@@ -49,7 +49,7 @@ private:
     bool needReset_resBuild = false;
 
     void initDetailList();
-    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
+    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int PlayerID);
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/

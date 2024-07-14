@@ -620,7 +620,7 @@ void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirro
 
 double trans_BlockPointToDetailCenter( int p );
 
-void call_debugText(QString color, QString content);
+void call_debugText(QString color, QString content, int playerID);
 
 
 #endif // GLOBALVARIATE_H
