@@ -481,9 +481,10 @@ double trans_BlockPointToDetailCenter( int p )
     return (p+0.5)*BLOCKSIDELENGTH;
 }
 
-void call_debugText(QString color, QString content)
+void call_debugText(QString color, QString content,int playerID)
 {
-    debugMassagePackage.push(st_DebugMassage(color, content));
+    if(playerID==0)
+        debugMassagePackage.push(st_DebugMassage(color, content));
 }
 //*************************************************************
 
