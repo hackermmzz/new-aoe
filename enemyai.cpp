@@ -41,13 +41,13 @@ void EnemyAI::processData(){
             qDebug()<<"success";}}
         }
         else if(mode==3){
-        for(int i=0;i<enemyInfo.enemy_buildings_n&&find!=1;i++){
+        for(int i=0;i<enemyInfo.enemy_buildings.size()&&find!=1;i++){
             buildtype=enemyInfo.enemy_buildings[i].Type;
             if(buildtype==BUILDING_CENTER)
                { targetBuilding=i;
                  find=1;
                 }
-              for(int i=3;i<enemyInfo.armies_n;i++){
+              for(int i=3;i<enemyInfo.enemy_armies.size();i++){
                 nowState_Army=enemyInfo.armies[i].NowState;
                 if(nowState_Army==HUMAN_STATE_IDLE || nowState_Army==HUMAN_STATE_STOP)
               {

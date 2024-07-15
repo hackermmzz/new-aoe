@@ -94,7 +94,7 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
         else if(eventType == CoreEven_CreatBuilding)
         {
             int wrongCode;
-            wrongCode = is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR));
+            wrongCode = is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR),((Farmer*)object1)->getPlayerRepresent());
             if(wrongCode<0) return wrongCode;
 
             if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingShowAble(type))
@@ -128,7 +128,7 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
         if(eventType == CoreEven_CreatBuilding)
         {
             int wrongCode;
-            wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR);
+            wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR,((Farmer*)object1)->getPlayerRepresent());
             if(wrongCode<0) return wrongCode;
 
             if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingShowAble(type))
@@ -388,7 +388,7 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
 }
 
 //判断是否可以建造建筑
-int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
+int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int playerID)
 {
     int answer = ACTION_SUCCESS;
     int DRL = -1,DRR = -1,URD = -1, URU = -1;    //记录边界
@@ -409,19 +409,19 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
 
     if(DRL<0 || DRR>71 || URD<0 || URU>71)
     {
-        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界");
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界",playerID);
         answer = ACTION_INVALID_HUMANBUILD_OVERBORDER;
     }
 
     if( tempBuild->isIncorrect_Num() )
     {
-        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,建筑类型不存在");
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,建筑类型不存在",playerID);
         answer = ACTION_INVALID_BUILDINGNUM;
     }
 
     if( !theMap->cell[DRL][URD].Explored )
     {
-        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索");
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索",playerID);
         answer = ACTION_INVALID_HUMANBUILD_UNEXPLORE;
     }
 
@@ -431,13 +431,13 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR)
         int bDR_ba,bUR_ba;
         if(theMap->isBarrier(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
         {
-            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠");
+            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠",playerID);
             answer = ACTION_INVALID_HUMANBUILD_OVERLAP;
         }
 
         if(!theMap->isFlat(tempBuild))
         {
-            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差或斜坡");
+            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差或斜坡",playerID);
             answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
         }
     }
@@ -506,7 +506,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
                 {
                     call_debugText("red", object->getChineseName()+ "(编号:" + QString::number(object->getglobalNum()) + "当前位置为 ("+\
                                    QString::number(object->getDR()) +"," + QString::number(object->getUR())+") , 目标点 ("+\
-                                   QString::number(moveObject->getDR0()) + "," + QString::number(moveObject->getUR0()) + ") 附近不可抵达");
+                                   QString::number(moveObject->getDR0()) + "," + QString::number(moveObject->getUR0()) + ") 附近不可抵达",moveObject->getPlayerRepresent());
                     relate_AllObject[object].wait(100);
                     moveObject->stateCrash=true;
                     if(!moveObject->isStand()) moveObject->setPreStand();
@@ -733,7 +733,7 @@ void Core_List::conduct_Attacked(Coordinate* object)
         if(attacker!=NULL)
         {
             call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
-                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击");
+                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击",object->getPlayerRepresent());
 
              attackee->updateAvangeObjectPosition();
         }
