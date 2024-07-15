@@ -50,6 +50,8 @@ struct st_DebugMassage{
 };
 
 extern std::queue<st_DebugMassage>debugMassagePackage;
+extern bool only_debug_Player0;
+extern std::map<QString , int>debugMessageRecord;
 
 
 struct tagBuilding
@@ -614,6 +616,8 @@ void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirro
 double trans_BlockPointToDetailCenter( int p );
 
 void call_debugText(QString color, QString content, int playerID);
+
+int sgn(double __x);
 
 
 #endif // GLOBALVARIATE_H

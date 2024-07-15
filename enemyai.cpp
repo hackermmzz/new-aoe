@@ -11,7 +11,6 @@ static int mode=0;
 
 void EnemyAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
-    qDebug()<<"#####EnemyStart#####";
     int nowState_Army;
     int buildtype;
     int targetBuilding;
@@ -21,7 +20,7 @@ void EnemyAI::processData(){
     if(g_frame>=15000) mode=3;
     else if(g_frame>=7500) mode=2;
     else if(g_frame>=2500) mode=1;
-    qDebug()<<mode;
+//    qDebug()<<mode;
     if(mode==1){
 
         for(int i = 0 ;i<=1; i++)
@@ -29,7 +28,6 @@ void EnemyAI::processData(){
                 nowState_Army=enemyInfo.armies[i].NowState;
                 if(nowState_Army==HUMAN_STATE_IDLE || nowState_Army==HUMAN_STATE_STOP)
                 {HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[0].SN);
-                qDebug()<<"success";
 
 }
             }}
@@ -38,7 +36,7 @@ void EnemyAI::processData(){
                 nowState_Army=enemyInfo.armies[i].NowState;
                 if(nowState_Army==HUMAN_STATE_IDLE || nowState_Army==HUMAN_STATE_STOP)
                 {HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[0].SN);
-            qDebug()<<"success";}}
+                }}
         }
         else if(mode==3){
         for(int i=0;i<enemyInfo.enemy_buildings.size()&&find!=1;i++){
@@ -52,13 +50,10 @@ void EnemyAI::processData(){
                 if(nowState_Army==HUMAN_STATE_IDLE || nowState_Army==HUMAN_STATE_STOP)
               {
                   HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[targetBuilding].SN);
-                  qDebug()<<"success";
                     }
                 }}
         }
 
-
-    qDebug()<<"#####EnemyEnd#####";
     return;
 /*###########YOUR CODE ENDS HERE###########*/
 }

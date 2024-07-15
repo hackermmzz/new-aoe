@@ -69,7 +69,16 @@ void Army::nextframe()
     if(isDie())
     {
         if( !isDying() ) setPreDie();
-        else if(!get_isActionEnd() && isNowresShift() ) nowres++;
+        else if(!get_isActionEnd() && isNowresShift())
+        {
+            nowres++;
+            if( !changeToDisappear && get_isActionEnd())
+            {
+                changeToDisappear = true;
+                nowres_step = 1000;
+                setNowRes();
+            }
+        }
     }
     else
     {
@@ -87,6 +96,8 @@ void Army::nextframe()
         updateMove();
         setNowRes();
     }
+
+    if(playerRepresent != 0 && timer_Visible>0) time_BeVisible();
 
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -107,7 +118,8 @@ void Army::setNowRes()
         templist =this->Attack[playerRepresent][Num][getLevel()][Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
-        templist =this->Die[playerRepresent][Num][getLevel()][Angle];
+        if(changeToDisappear) templist = this->Disappear[playerRepresent][Num][getLevel()][Angle];
+        else templist =this->Die[playerRepresent][Num][getLevel()][Angle];
         break;
     default:
         break;

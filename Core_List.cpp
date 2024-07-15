@@ -464,86 +464,46 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
     MoveObject* moveObject = NULL;
     Coordinate* goalOb;
     object->printer_ToMoveObject((void**)&moveObject);
-    Point PreviousPoint, nextBlockPoint , crashBlockPoint;
     //如果有目标点，设置目标点
     if(moveObject) moveObject->stateCrash=false;//重置碰撞状态（tagGame）
+
     if(relate_AllObject[object].isUseAlterGoal)
         goalOb = relate_AllObject[object].alterOb;
     else
         goalOb = relate_AllObject[object].goalObject;
 
-    if(moveObject!=NULL && !relate_AllObject[object].isWaiting())
+    if(moveObject)
     {
-        if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
+        if(!relate_AllObject[object].isWaiting())
         {
-            //设置起点与目标点
-            Point start = Point(tranBlockDR(moveObject->getDR()),tranBlockUR(moveObject->getUR()));
-            Point destination = Point(tranBlockDR(DR),tranBlockUR(UR));
-            stack<Point> path;
-
-            theMap->loadfindPathMap(moveObject);
-            theMap->findPathMap[destination.x][destination.y] = 0;
-            if(relate_AllObject[object].crashPointLab.size())
+            if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
             {
-                crashBlockPoint = relate_AllObject[object].crashPointLab.top();
-                relate_AllObject[object].crashPointLab.pop();
-                theMap->findPathMap[crashBlockPoint.x][crashBlockPoint.y] = 1;
+                //为moveObject设置路径
+                setPath(moveObject, goalOb, DR, UR);
             }
-
-            if(moveObject->getSort() == SORT_MISSILE) path.push(destination);
-            else path = findPath(theMap->findPathMap , theMap , start , destination , goalOb);
-
-            relate_AllObject[object].nullPath = path.empty();
-            moveObject->setPath(path,DR,UR);
+            else
+            {
+                if(!moveObject->isWalking()) moveObject->setPreWalk();
+                else if(moveObject->getCrashOb()!=NULL)
+                {
+                    //处理碰撞
+                    crashHandle(moveObject);
+                }
+                else if(relate_AllObject[object].crash_DealPhase)
+                {
+                    //碰撞后的调整
+                    work_CrashPhase(moveObject);
+                }
+                else relate_AllObject[object].useOnce();
+            }
         }
-        else
-        {
-            if(!moveObject->isWalking()) moveObject->setPreWalk();
-            else if(moveObject->getCrashOb()!=NULL)
-            {
-                moveObject->GoBackLU();
-                if(/*relate_AllObject[object].nullPath || */relate_AllObject[object].relationAct == CoreEven_JustMoveTo && moveObject->getPath_size() == 0)
-                {
-                    call_debugText("red", object->getChineseName()+ "(编号:" + QString::number(object->getglobalNum()) + "当前位置为 ("+\
-                                   QString::number(object->getDR()) +"," + QString::number(object->getUR())+") , 目标点 ("+\
-                                   QString::number(moveObject->getDR0()) + "," + QString::number(moveObject->getUR0()) + ") 附近不可抵达",moveObject->getPlayerRepresent());
-                    relate_AllObject[object].wait(100);
-                    moveObject->stateCrash=true;
-                    if(!moveObject->isStand()) moveObject->setPreStand();
-                }
-                else
-                {
-                    relate_AllObject[object].crash_DealPhase = true;
-                    nextBlockPoint = moveObject->get_NextBlockPoint();
-                    PreviousPoint = moveObject->get_PreviousBlock();
-                    moveObject->pathOptimize(PreviousPoint);
-                    relate_AllObject[object].crashMove_Point = PreviousPoint;
-                    relate_AllObject[object].crashPointLab.push(nextBlockPoint);
-                    relate_AllObject[object].crashRepresent = moveObject->getCrashOb()->getPlayerRepresent();
-                }
-                //处理碰撞
-                moveObject->initCrash();
-            }
-            else if(relate_AllObject[object].crash_DealPhase)
-            {
-                if(!(moveObject->get_NextBlockPoint() == relate_AllObject[object].crashMove_Point))
-                {
-                    relate_AllObject[object].crash_DealPhase = false;
-                    moveObject->stateCrash=true;
-                    if(moveObject->getPlayerRepresent() == relate_AllObject[object].crashRepresent)
-                        relate_AllObject[object].wait(rand()%50);
-                    else relate_AllObject[object].wait(rand()%20);
 
-                    if(rand() % 8 > 0) moveObject->setPath(stack<Point>(),object->getDR(),object->getUR());
-                    if(!moveObject->isStand()) moveObject->setPreStand();
-                }
-            }
-            else relate_AllObject[object].useOnce();
-        }
+        moveObject->initCrash();
     }
-    else {
+    else
+    {
         relate_AllObject[object].useless();
-        if (moveObject)moveObject->stateCrash = true;
+        if(moveObject) moveObject->stateCrash = true;
     }
 }
 
@@ -554,6 +514,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
+    MoveObject* moveOb = NULL;
     Missile* missile = NULL;
 
     object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
@@ -561,10 +522,12 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
 
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
-    {
+    {        
         if(!attacker->isAttacking()) attacker->setPreAttack();
         else
         {
+            object1->printer_ToMoveObject((void**)&moveOb);
+            if(moveOb!=NULL) moveOb->adjustAngle(object2->getDR(),object2->getUR());
             //非祭司,是普通的伤害计算公式
             /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
             if( attacker->is_missileAttack())
@@ -580,7 +543,11 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
                 calculateDamage = true;
                 attacker->haveAttack();
                 if(attacker->get_isRangeAttack()) deal_RangeAttack(object1 , object2);
-                if(!attackee->isGotAttack()) attackee->setAvangeObject(object1);
+                if(!attackee->isGotAttack())
+                {
+                    attackee->setAvangeObject(object1);
+                    if(object1->getPlayerRepresent() != 0) object1->visibleSomeTimes();
+                }
             }
         }
     }
@@ -598,7 +565,12 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
                 missile->get_AttackSponsor_Position(DR , UR);
                 attackee->setAvangeObject(DR,UR);
             }
-            else attackee->setAvangeObject(missile->getAttacker());
+            else
+            {
+                attackee->setAvangeObject(missile->getAttacker());
+
+                if(missile->getAttacker()->getPlayerRepresent() != 0) missile->getAttacker()->visibleSomeTimes();
+            }
         }
     }
 
@@ -621,6 +593,7 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
         if(!gatherer->isWorking()) gatherer->setPreWork();
         else
         {
+            gatherer->adjustAngle(object2->getDR(),object2->getUR());
             if(gatherer->getResourceSort() != res->get_ResourceSort())
             {
                 gatherer->set_ResourceSort(res->get_ResourceSort());
@@ -762,17 +735,18 @@ void Core_List::conduct_Attacked(Coordinate* object)
             }
             else if(object->getSort() == SORT_FARMER)
             {
-                    if(attacker!=NULL)
+                if(attacker!=NULL && (isObject_Free(object) || relate_AllObject[object].relationAct != CoreEven_Attacking \
+                                      && relate_AllObject[object].relationAct != CoreEven_JustMoveTo ))
+                {
+                    if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking);
+                    else
                     {
-                        if(attacker->getSort() == SORT_ANIMAL)  addRelation(object,attacker,CoreEven_Attacking);
-                        else
-                        {
-                            //受到敌对ai的攻击，逃命
-                            calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
-                            suspendRelation(object);
-                            addRelation(object,dr,ur,CoreEven_JustMoveTo);
-                        }
+                        //受到敌对ai的攻击，逃命
+                        calMirrorPoint(dr,ur,object->getDR(),object->getUR(),3.5*BLOCKSIDELENGTH);
+                        suspendRelation(object);
+                        addRelation(object,dr,ur,CoreEven_JustMoveTo);
                     }
+                }
             }
         }
 
@@ -881,9 +855,95 @@ void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
 
 //**************************************************************
 //寻路相关
+void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0)
+{
+    //设置起点
+    Point start = Point(tranBlockDR(moveOb->getDR()),tranBlockUR(moveOb->getUR()));
+    Point destination =  Point(tranBlockDR(DR0),tranBlockUR(UR0));
+    Point crashBlockPoint;
+    stack<Point> path;
+
+    theMap->loadfindPathMap(moveOb);
+    theMap->findPathMap[destination.x][destination.y] = 0;
+    if(relate_AllObject[moveOb].crashPointLab.size())   //如果之前经历了碰撞，将碰撞处设为障碍物
+    {
+        crashBlockPoint = relate_AllObject[moveOb].crashPointLab.top();
+        relate_AllObject[moveOb].crashPointLab.pop();
+        theMap->findPathMap[crashBlockPoint.x][crashBlockPoint.y] = 1;
+    }
+
+    if(moveOb->getSort() == SORT_MISSILE) path.push(destination);
+    else path = findPath(theMap->findPathMap , theMap , start , destination , goalOb);
+
+    relate_AllObject[moveOb].nullPath = path.empty();
+    moveOb->setPath(path,DR0,UR0);
+}
+
+void Core_List::crashHandle(MoveObject* moveOb)
+{
+    Point PreviousPoint, nextBlockPoint;
+    Point probePoint;
+    vector<Point> blockLab_canMove;
+
+    //处理碰撞
+    moveOb->GoBackLU();
+    if(/*relate_AllObject[object].nullPath || */relate_AllObject[moveOb].relationAct == CoreEven_JustMoveTo && moveOb->getPath_size() == 0)
+    {
+        call_debugText("red", moveOb->getChineseName()+ "(编号:" + QString::number(moveOb->getglobalNum()) + "当前位置为 ("+\
+                       QString::number(moveOb->getDR()) +"," + QString::number(moveOb->getUR())+") , 目标点 ("+\
+                       QString::number(moveOb->getDR0()) + "," + QString::number(moveOb->getUR0()) + ") 附近不可抵达",moveOb->getPlayerRepresent());
+        relate_AllObject[moveOb].wait(100);
+
+        moveOb->stateCrash=true;
+        if(!moveOb->isStand()) moveOb->setPreStand();
+    }
+    else
+    {
+        relate_AllObject[moveOb].crash_DealPhase = true;
+        nextBlockPoint = moveOb->get_NextBlockPoint();
+        PreviousPoint = moveOb->get_PreviousBlock();
+
+        if(moveOb->is_MoveFirstStep())
+        {
+            probePoint = moveOb->getBlockPosition() - moveOb->getMoveDire();
+            if(!theMap->isBarrier(probePoint))
+                PreviousPoint = probePoint;
+            else
+            {
+                blockLab_canMove = theMap->findBlock_Free(moveOb,1,false);
+
+                if(blockLab_canMove.size()) PreviousPoint = blockLab_canMove[rand()%blockLab_canMove.size()];
+            }
+        }
+        moveOb->pathOptimize(PreviousPoint);
+
+        //碰撞后，离开碰撞所在格子
+        relate_AllObject[moveOb].crashMove_Point = PreviousPoint;
+        relate_AllObject[moveOb].crashPointLab.push(nextBlockPoint);
+        relate_AllObject[moveOb].crashRepresent = moveOb->getCrashOb()->getPlayerRepresent();
+    }
+}
+
+void Core_List::work_CrashPhase(MoveObject* moveOb)
+{
+    if(!(moveOb->get_NextBlockPoint() == relate_AllObject[moveOb].crashMove_Point))
+    {
+        relate_AllObject[moveOb].crash_DealPhase = false;
+        moveOb->stateCrash=true;
+        if(moveOb->getPlayerRepresent() == relate_AllObject[moveOb].crashRepresent)
+            relate_AllObject[moveOb].wait(rand()%50);
+        else relate_AllObject[moveOb].wait(rand()%20);
+
+        if(rand() % 8 > 0) moveOb->setPath(stack<Point>(),moveOb->getDR(),moveOb->getUR());
+        if(!moveOb->isStand()) moveOb->setPreStand();
+    }
+}
+
 stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination , Coordinate* goalOb)
 {
-    static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1) , Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
+    //8个移动方向 <4为斜线方向，>=4为水平竖直方向
+    static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
+                             Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
 
     bool goalMap[MAP_L][MAP_U];
     stack<Point> path;
@@ -911,7 +971,6 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         while(oBiter != oBitere)
         {
             goalMap[(*oBiter).x][(*oBiter).y] = true;
-//            qDebug()<<(*oBiter).x<<(*oBiter).y;
             oBiter++;
         }
     }
@@ -927,23 +986,21 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         findPathNode = newPathNode;
     }
 
-    while( nodeQue->top())    //nowBestPathNode记录当前节点
+    while( nodeQue->top() && !meetGoal)    //nowBestPathNode记录当前节点
     {
         nowBestPathNode = nodeQue->top()->value;
         nodeQue->pop();
         nowPoint = nowBestPathNode->position;    //当前nowBestPathNode记录点的坐标
 
-        for(int i = 0; i<8;i++)
+        for(int i = 0; i<8 && !meetGoal; i++)
         {
-            if(meetGoal) break;
-
             nextPoint = nowPoint + dire[i];
             if(nextPoint.x<= 0 || nextPoint.y <= 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
 
-            //斜线方向，多判断马脚操作
-            //  if( i<4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y]||findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])\|| i>=4 && !(isHaveJud(nextPoint)||findPathMap[nextPoint.x][nextPoint.y])) //判断直线方向
-
-            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] || i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y]) ))
+            //判断格子是否可走
+            //斜线方向需要多判断马脚操作
+            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] ||\
+                  i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])) )
             {
                 //创建新节点
                 newPathNode = new pathNode( nextPoint );
@@ -957,12 +1014,9 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
                 {
                     meetGoal = true;
                     findPathNode = newPathNode;
-                    break;
                 }
             }
         }
-
-        if(meetGoal) break;
     }
 
     if(meetGoal)
@@ -1002,7 +1056,8 @@ Missile* Core_List::creatMissile(Coordinate* attacker ,Coordinate* attackee)
     if(judHuman!=NULL) playerRepresent = judHuman->getPlayerRepresent();
     if(judBuild!= NULL) playerRepresent = judBuild->getPlayerRepresent();
 
-    if(playerRepresent<MAXPLAYER) return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
+    if(playerRepresent<MAXPLAYER)
+        return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
     else return NULL;
 }
 

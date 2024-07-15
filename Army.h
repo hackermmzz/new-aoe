@@ -148,7 +148,6 @@ private:
     static std::string ArmyName[4][2];
     static std::string ArmyDisplayName[4][2];
     /*************静态成员************/
-
 };
 
 #endif // ARMY_H
