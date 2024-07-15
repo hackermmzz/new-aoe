@@ -228,8 +228,6 @@ struct tagInfo
         resources.clear();
         ins_ret.clear();
     }
-    ~tagInfo(){
-    }
 };
 
 
