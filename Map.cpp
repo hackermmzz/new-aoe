@@ -508,6 +508,7 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+
     block_StockLab = findBlock_Flat(3);
     blockStock = block_StockLab[rand()%block_StockLab.size()];
     player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
