@@ -9,6 +9,7 @@ std::list<ImageResource>* Animal::Stand[5][8];
 std::list<ImageResource>* Animal::Attack[5][8];
 std::list<ImageResource>* Animal::Die[5][8];
 std::list<ImageResource>* Animal::Run[5][8];
+std::list<ImageResource>* Animal::Disappear[5][8];
 
 
 Animal::Animal()
@@ -128,10 +129,19 @@ void Animal::nextframe()
     {
         if( !isDying() )
         {
-             setPreDie();
-             changeToGatherAble();  //死亡后，设置资源为可采集
+            setPreDie();
+            changeToGatherAble();  //死亡后，设置资源为可采集
         }
         else if(!get_isActionEnd() && isNowresShift()) nowres++;
+        else if(!changeToDisappear && !is_Surplus())
+        {
+            changeToDisappear = true;
+            if(!isTree())
+            {
+                nowres_step = 1000;
+                setNowRes();
+            }
+        }
     }
     else
     {
@@ -190,7 +200,8 @@ void Animal::setNowRes()
             templist=this->Attack[this->Num][this->Angle];
             break;
         case MOVEOBJECT_STATE_DIE:
-            templist=this->Die[this->Num][this->Angle];
+            if(changeToDisappear)templist = this->Disappear[this->Num][this->Angle];
+            else templist=this->Die[this->Num][this->Angle];
             break;
         default:
             break;

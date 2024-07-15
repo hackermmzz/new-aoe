@@ -55,13 +55,18 @@ public:
     int getBlockUR(){return this->BlockUR;}
     double getCrashLength(){ return crashLength; }
 
+    //块、细节坐标转换
+    double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
+    int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }
+
     void setExplored(int explored){ this->explored = explored; }
     void setvisible( int visible  ){ this->visible = visible; }
     int getexplored(){ return explored; }
-    int getvisible(){ return visible; }
+    int getvisible(){ return (int)(visible||timer_Visible>0); }
+    void visibleSomeTimes(){ timer_Visible = 250;}
 
     //获取中心点块坐标
-    Point getBlockPosition(){ return Point(BlockDR+BlockSizeLen/2,BlockUR+BlockSizeLen/2); }
+    Point getBlockPosition(){ return Point(transBlock(DR), transBlock(UR)); }
 
     //获取两点间欧几里得距离
     double getDis_E_Detail(Coordinate* __x){
@@ -153,6 +158,8 @@ protected:
     int visible=0;
     //0为不可见 1为可见
 
+    int timer_Visible = 0;  //暂时可见时间
+
     int inWindow=0;
     //在游戏窗口内
 
@@ -173,6 +180,8 @@ protected:
     int actNum=0;
     //动作类型的编号
     /*****************act获取***************/
+
+    void time_BeVisible(){ timer_Visible--;}
 
     void initNowresTimer(){ nowres_changeRecord = 0; }
     bool isNowresShift(){   //用于限制nowres切换，以降低图像资源循环速度
@@ -198,6 +207,7 @@ protected:
 
     static void setViewLab( int blockSize , int visionLen );
     static void addViewLab( vector<Point>& blockLab , int lx , int mx , int y , int y_mirr );
+
 };
 
 #endif // COORDINATE_H

@@ -54,7 +54,7 @@ public:
     void setAttackObject(Coordinate* attackObject){ this->attackObject = attackObject; }
     //受到攻击，设置“复仇”目标，用于做受到攻击时的反应
     void setAvangeObject( Coordinate* avangeObject ){ this->avangeObject = avangeObject; underAttack(); updateAvangeObjectPosition(); }
-    void setAvangeObject( double DR , double UR ){ underAttack(); DR_avange = DR; UR_avange = UR; }
+    void setAvangeObject( double DR , double UR ){ underAttack(); avangeObject = NULL; DR_avange = DR; UR_avange = UR; }
     //设置说明本单位受到了攻击
     void underAttack(){ gotAttack = true; }
 

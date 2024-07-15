@@ -57,6 +57,8 @@ public:
     static std::list<ImageResource>* getDie(int i, int j) {
         return Die[i][j];
     }
+    static std::list<ImageResource>* getDisappear(int state,int angle) { return Disappear[state][angle]; }
+
     static void setCarry(int i, int j, std::list<ImageResource>* newValue) {
         Carry[i][j] = newValue;
     }
@@ -75,6 +77,8 @@ public:
     static void setDie(int i, int j, std::list<ImageResource>* newValue) {
         Die[i][j] = newValue;
     }
+    static void setDisappear(int state, int angle, std::list<ImageResource>* newValue) {Disappear[state][angle] = newValue;}
+
     static void allocateCarry(int i, int j) {
         Carry[i][j] = new std::list<ImageResource>;
     }
@@ -93,6 +97,8 @@ public:
     static void allocateDie(int i, int j) {
         Die[i][j] = new std::list<ImageResource>;
     }
+    static void allocateDisappear(int state, int angle) { Disappear[state][angle] = new std::list<ImageResource>;}
+
     static void deallocateCarry(int i, int j) {
         delete Carry[i][j];
         Carry[i][j] = nullptr;
@@ -118,6 +124,12 @@ public:
         delete Die[i][j];
         Die[i][j] = nullptr;
     }
+    static void deallocateDisappear(int state, int angle)
+    {
+        delete Disappear[state][angle];
+        Disappear[state][angle] = nullptr;
+    }
+
     std::string getDisplayName(int num)
     {
         return FarmerDisplayName[num];
@@ -203,6 +215,8 @@ private:
     static std::list<ImageResource> *Die[7][8];
 
     static std::list<ImageResource> *Carry[5][8];
+
+    static std::list<ImageResource> *Disappear[7][8];
 
     static std::string FarmerName[7];
     static std::string FarmerCarry[5];

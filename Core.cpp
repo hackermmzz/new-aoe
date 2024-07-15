@@ -43,17 +43,83 @@ void Core::gameUpdate()
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
                     g_Object[(*humaniter)->getglobalNum()] = NULL;
+
                     //如果Missle的投出者是该ob，则让该missle使用投出者记录
                     player[playerIndx]->deleteMissile_Attacker(*humaniter);
+                    player[playerIndx]->humanNumDecrease(*humaniter);
+                    deleteOb_setNowobNULL(*humaniter);
                 }
                 (*humaniter)->setPreStateIsIdle();
             }
 
-
-            if((*humaniter)->isDying() && (*humaniter)->get_isActionEnd())
+            if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
             {
-                deleteOb_setNowobNULL(*humaniter);
-                humaniter = player[playerIndx]->deleteHuman(humaniter);
+                // 更新人物Y轴偏移（伪三维）
+                int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
+
+                // 斜坡
+                if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
+                {
+                    if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
+                    {
+                        qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
+                        qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
+                    }
+
+                    // 判断mapType以确定上升方向
+                    int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
+                    pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
+                    pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+
+                    // 左高右低：
+                    if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
+                    {
+                        double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
+                        if(leftOffsetPercent > 1) leftOffsetPercent = 1;
+                       (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
+//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                    }
+                    // 右高左低：
+                    else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
+                    {
+                        double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
+                        if(rightOffsetPercent > 1) rightOffsetPercent = 1;
+                       (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
+//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                    }
+                    // 下高上低：
+                    else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
+                    {
+                        double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
+                        if(downOffsetPercent > 1) downOffsetPercent = 1;
+                        (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
+//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                    }
+                    // 上高下低：
+                    else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
+                    {
+                        double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
+                        if(upOffsetPercent > 1) upOffsetPercent = 1;
+                        (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
+//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                    }
+                }
+                // 平地
+                else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+            }
+
+
+            if((*humaniter)->isDying())
+            {
+                if((*humaniter)->get_isActionEnd())
+                {
+                    humaniter = player[playerIndx]->deleteHuman(humaniter);
+                }
+                else
+                {
+                    (*humaniter)->nextframe();
+                    humaniter++;
+                }
             }
             else
             {
@@ -62,6 +128,7 @@ void Core::gameUpdate()
 
                 interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->updateLU();
+
                 (*humaniter)->nextframe();
 
                 //移动后，记录当前位置
@@ -71,62 +138,6 @@ void Core::gameUpdate()
 
                 //更新视野
                 if(playerIndx == 0) theMap->reset_CellExplore(*humaniter);
-
-                if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
-                {
-                    // 更新人物Y轴偏移（伪三维）
-                    int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
-
-                    // 斜坡
-                    if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
-                    {
-                        if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
-                        {
-                            qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
-                            qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
-                        }
-
-                        // 判断mapType以确定上升方向
-                        int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
-                        pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
-                        pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
-
-                        // 左高右低：
-                        if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
-                        {
-                            double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
-                            if(leftOffsetPercent > 1) leftOffsetPercent = 1;
-                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
-//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
-                        }
-                        // 右高左低：
-                        else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
-                        {
-                            double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
-                            if(rightOffsetPercent > 1) rightOffsetPercent = 1;
-                           (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
-//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
-                        }
-                        // 下高上低：
-                        else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
-                        {
-                            double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
-                            if(downOffsetPercent > 1) downOffsetPercent = 1;
-                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
-//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
-                        }
-                        // 上高下低：
-                        else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
-                        {
-                            double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
-                            if(upOffsetPercent > 1) upOffsetPercent = 1;
-                            (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
-//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
-                        }
-                    }
-                    // 平地
-                    else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
-                }
 
                 humaniter++;
             }
@@ -202,31 +213,50 @@ void Core::gameUpdate()
                 (*animaliter)->setPreStateIsIdle();
             }
 
-            if((*animaliter)->isTree())
-                (*animaliter)->initAvengeObject();
-            interactionList->conduct_Attacked(*animaliter);
-            (*animaliter)->updateLU();
+            if((*animaliter)->isDie())
+            {
+                (*animaliter)->nextframe();
+            }
+            else
+            {
+                (*animaliter)->updateLU();
+                (*animaliter)->nextframe();
+                if((*animaliter)->isTree())
+                    (*animaliter)->initAvengeObject();
+                interactionList->conduct_Attacked(*animaliter);
+
+                //没有死亡的瞪羚和狮子需要监视地图
+                if(((*animaliter)->getNum() == ANIMAL_GAZELLE ||(*animaliter)->getNum() == ANIMAL_LION) && get_IsObjectFree(*animaliter) )
+                    theMap->add_Map_Vision(*animaliter);
+
+                //移动后，记录当前位置
+                theMap->add_Map_Object(*animaliter);
+                //如果正在移动，需要判断碰撞，加入判断碰撞对象表
+                if((*animaliter)->isWalking()) moveOb_judCrush.push_back(*animaliter);
+            }
+            animaliter++;
+        }
+        else if(!(*animaliter)->isDisappearing())
+        {
             (*animaliter)->nextframe();
-
-            //没有死亡的瞪羚和狮子需要监视地图
-            if(!(*animaliter)->isDie() \
-               && ((*animaliter)->getNum() == ANIMAL_GAZELLE ||(*animaliter)->getNum() == ANIMAL_LION) && get_IsObjectFree(*animaliter) )
-                theMap->add_Map_Vision(*animaliter);
-
-            //移动后，记录当前位置
-            theMap->add_Map_Object(*animaliter);
-            //如果正在移动，需要判断碰撞，加入判断碰撞对象表
-            if((*animaliter)->isWalking()) moveOb_judCrush.push_back(*animaliter);
+            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
+            g_Object[(*animaliter)->getglobalNum()] = NULL;
+            interactionList->eraseObject(*animaliter);   //行动表中animal设为null
+            deleteOb_setNowobNULL(*animaliter);
 
             animaliter++;
         }
         else
         {
-            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
-            g_Object[(*animaliter)->getglobalNum()] = NULL;
-            interactionList->eraseObject(*animaliter);   //行动表中animal设为null
-            deleteOb_setNowobNULL(*animaliter);
-            animaliter = theMap->deleteAnimal(animaliter);
+            if((*animaliter)->get_isActionEnd())
+            {
+                animaliter = theMap->deleteAnimal(animaliter);
+            }
+            else
+            {
+                (*animaliter)->nextframe();
+                animaliter++;
+            }
         }
     }
 
@@ -278,7 +308,10 @@ void Core::updateByPlayer(int id){
     taginfo.civilizationStage=self->getCiv();
     taginfo.GameFrame=g_frame;
     //更新人口数据
-    for(Human* human:self->human){
+    for(Human* human:self->human)
+    {
+        if(g_Object[human->getglobalNum()] == NULL) continue;
+
         tagHuman taghuman;
         taghuman.Owner=id;
         taghuman.SN=human->getglobalNum();
@@ -316,14 +349,16 @@ void Core::updateByPlayer(int id){
                 if(farmer->getvisible()==1||i!=0)
                     currentBuff[i].enemy_farmers.push_back(tagfarmer.toEnemy());
             }
-        }else if(human->getSort()==SORT_ARMY){
+        }else if(human->getSort()==SORT_ARMY)
+        {
             Army* army=static_cast<Army*> (human);
             tagArmy tagarmy;
             tagarmy.cast_from(taghuman);
             tagarmy.Sort=army->getNum();
             taginfo.armies.push_back(tagarmy);
             //同步更新其他ai的信息
-            for(int i=0;i<NOWPLAYER;i++){
+            for(int i=0;i<NOWPLAYER;i++)
+            {
                 if(i==id) {continue;}
                 if(army->getvisible()==1||i!=0)
                     currentBuff[i].enemy_armies.push_back(tagarmy.toEnemy());
@@ -332,7 +367,10 @@ void Core::updateByPlayer(int id){
     }
 
     //更新动物数据
-    for(Animal* animal:theMap->animal){
+    for(Animal* animal:theMap->animal)
+    {
+        if(g_Object[animal->getglobalNum()] == NULL) continue;
+
         tagResource resource;
         resource.SN=animal->getglobalNum();
         switch(animal->getNum()){
@@ -530,15 +568,7 @@ void Core::manageMouseEvent()
                             interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
                             break;
                         case SORT_Building_Resource:
-                            if(object_click->getPlayerRepresent() != 0)
-                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
-                            break;
                         case SORT_BUILDING:
-                            if(object_click->getPlayerRepresent() != 0)
-                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
-                            else
-                                interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
-                            break;
                         case SORT_ARMY:
                         case SORT_FARMER:
                             if(object_click->getPlayerRepresent() != 0)
@@ -628,7 +658,8 @@ void Core::manageOrder(int id)
         }
         case 2:{    /// type 2:命令村民self将工作目标设为obj
             Coordinate* obj=cur.obj;
-            if(obj==NULL){
+            if(obj==NULL || g_Object[cur.obSN] == NULL)
+            {
                 ret=ACTION_INVALID_OBSN;
                 break;
             }
