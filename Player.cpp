@@ -42,7 +42,7 @@ int Player::addHuman(int Num, double DR, double UR)
 {
     Human *newhuman=new Human(Num,DR,UR , playerScience , represent);
 
-    call_debugText("blue"," 产生了新的"+newhuman->getChineseName()+"(编号:" + QString::number(newhuman->getglobalNum()) + ")");
+    call_debugText("blue"," 产生了新的"+newhuman->getChineseName()+"(编号:" + QString::number(newhuman->getglobalNum()) + ")",represent);
 
     human.push_back(newhuman);
     humanNumIncrease(newhuman);
@@ -52,7 +52,7 @@ int Player::addHuman(int Num, double DR, double UR)
 Army* Player::addArmy(int Num , double DR , double UR)
 {
     Army *newArmy = new Army(DR , UR, Num ,  playerScience , represent);
-    call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")");
+    call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
 
     human.push_back(newArmy);
     humanNumIncrease(newArmy);
@@ -62,7 +62,7 @@ Army* Player::addArmy(int Num , double DR , double UR)
 int Player::addFarmer(double DR, double UR)
 {
     Farmer *newfarmer=new Farmer(DR,UR , playerScience , represent);
-    call_debugText("blue"," 产生了新的村民(编号:" + QString::number(newfarmer->getglobalNum()) + ")");
+    call_debugText("blue"," 产生了新的村民(编号:" + QString::number(newfarmer->getglobalNum()) + ")",represent);
 
     human.push_back(newfarmer);
     humanNumIncrease(newfarmer);
@@ -229,7 +229,7 @@ void Player::finishBuild( Building* buildBuilding ){
     else if(buildBuilding->getNum() != BUILDING_CENTER && buildBuilding->getNum()!= BUILDING_FARM)  //建造建筑不是Home、市镇中心、农田，则其具有时代特性，记录
           playerScience->add_civiBuildNum(buildBuilding->getNum());
 
-    call_debugText("blue"," "+buildBuilding->getChineseName()+"(编号:"+QString::number(buildBuilding->getglobalNum())+")建造完毕");
+    call_debugText("blue"," "+buildBuilding->getChineseName()+"(编号:"+QString::number(buildBuilding->getglobalNum())+")建造完毕",represent);
 }
 
 //**********************************************************

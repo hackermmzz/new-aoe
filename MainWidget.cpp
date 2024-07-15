@@ -783,10 +783,18 @@ void MainWidget::onRadioClickSlot()
 //输出提示框
 void MainWidget::respond_DebugMessage()
 {
+    std::map<QString,int>::iterator iter = debugMessageRecord.begin(), itere = debugMessageRecord.end();
+
     while(!debugMassagePackage.empty())
     {
         debugText(debugMassagePackage.front().color,debugMassagePackage.front().content);
         debugMassagePackage.pop();
+    }
+
+    while(iter!= itere)
+    {
+        if(gameframe - iter->second > 125) iter = debugMessageRecord.erase(iter);
+        else iter++;
     }
 }
 

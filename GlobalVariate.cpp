@@ -15,8 +15,10 @@ std::list<Coordinate*> drawlist;
 
 Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
+std::map<QString , int>debugMessageRecord;
 
 int ProcessDataWork = 0;
+bool only_debug_Player0 = true;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 
@@ -481,9 +483,16 @@ double trans_BlockPointToDetailCenter( int p )
     return (p+0.5)*BLOCKSIDELENGTH;
 }
 
-void call_debugText(QString color, QString content)
+void call_debugText(QString color, QString content,int playerID)
 {
-    debugMassagePackage.push(st_DebugMassage(color, content));
+    if(!only_debug_Player0 || playerID==0)
+    {
+        if(debugMessageRecord[content] == 0 || color == "black"|| color == "green")
+        {
+            debugMassagePackage.push(st_DebugMassage(color, content));
+            debugMessageRecord[content] = g_frame;
+        }
+    }
 }
 //*************************************************************
 
