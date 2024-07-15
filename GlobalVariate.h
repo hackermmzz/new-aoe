@@ -203,19 +203,12 @@ struct tagMap
 struct tagInfo
 {
     vector<tagBuilding> buildings; // 我方建筑列表
-    int buildings_n; // 我方建筑数量
     vector<tagFarmer> farmers; // 我方农民列表
-    int farmers_n; // 我方农民数量
     vector<tagArmy> armies; // 我方军队列表
-    int armies_n; // 我方军队数量
     vector<tagBuilding> enemy_buildings; // 敌方建筑列表
-    int enemy_buildings_n; // 敌方建筑数量
     vector<tagFarmer> enemy_farmers; // 敌方农民列表
-    int enemy_farmers_n; // 敌方农民数量
     vector<tagArmy> enemy_armies; // 敌方军队列表
-    int enemy_armies_n; // 敌方军队数量
     vector<tagResource> resources; // 资源列表
-    int resources_n; // 资源数量
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
     int theMap[MAP_L][MAP_U]; // 高程图
     int GameFrame; // 游戏帧数

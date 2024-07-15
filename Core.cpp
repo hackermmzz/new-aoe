@@ -430,13 +430,6 @@ void Core::updateByPlayer(int id){
  *更新tagGame中的数组大小，资源地图
  */
 void Core::updateCommon(tagInfo* taginfo){
-    taginfo->armies_n=taginfo->armies.size();
-    taginfo->buildings_n=taginfo->buildings.size();
-    taginfo->farmers_n=taginfo->farmers.size();
-    taginfo->enemy_armies_n=taginfo->enemy_armies.size();
-    taginfo->enemy_buildings_n=taginfo->enemy_buildings.size();
-    taginfo->enemy_farmers_n=taginfo->enemy_farmers.size();
-    taginfo->resources_n=taginfo->resources.size();
     for (int i = 0; i < MAP_L; ++i) {
         for (int j = 0; j < MAP_U; ++j) {
             taginfo->theMap[i][j] = theMap->map_Height[i][j];
