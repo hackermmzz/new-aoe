@@ -622,5 +622,7 @@ double trans_BlockPointToDetailCenter( int p );
 
 void call_debugText(QString color, QString content);
 
+int sgn(double __x);
+
 
 #endif // GLOBALVARIATE_H

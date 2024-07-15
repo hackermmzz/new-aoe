@@ -169,13 +169,9 @@ void MoveObject::updateLU()
 
 void MoveObject::update_moveDire( double dDR , double dUR )
 {
-    if(dDR>0) dMove_BDR = 1;
-    else if(dDR<0) dMove_BDR = -1;
-    else dMove_BDR = 0;
-
-    if(dUR>0) dMove_BUR = 1;
-    else if(dUR<0) dMove_BUR = -1;
-    else dMove_BUR = 0;
+    //只要移动，一定会更新
+    dMove_BDR = sgn(dDR);
+    dMove_BUR = sgn(dUR);
 }
 
 void MoveObject::updateMove()
@@ -297,7 +293,10 @@ bool MoveObject::isCrash(Coordinate* judOb)
     MoveObject* moveOb = NULL;
     double length = getCrashLength() + judOb->getCrashLength();
     double dx,dy;
+    int blockDR_angle = sgn(DR - judOb->getDR()) , blockUR_angle = sgn(UR - judOb->getUR());
     judOb->printer_ToMoveObject((void**)&moveOb);
+
+    if(blockDR_angle == dMove_BDR && blockUR_angle == dMove_BUR) return false;
 
     if(moveOb == NULL || !moveOb->isWalking())
     {
@@ -312,7 +311,8 @@ bool MoveObject::isCrash(Coordinate* judOb)
 
     if( fabs(dx)<length && fabs(dy)<length)
     {
-        call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
+        if(getPlayerRepresent() == 0)
+            call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
                        " 与 " + judOb->getChineseName() + "(编号:" + QString::number(judOb->getglobalNum()) + " 发生碰撞");
         crashOb = judOb;
         return true;

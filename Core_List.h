@@ -74,6 +74,11 @@ private:
     bool isHaveJud( int blockDR , int blockUR ){ return map_HaveJud[blockDR][blockUR]; }
     bool isHaveJud( Point judPoi){ return map_HaveJud[judPoi.x][judPoi.y]; }
 
+    void setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0);
+    void crashHandle(MoveObject* moveOb);
+    void work_CrashPhase(MoveObject* moveOb);
+
+
 //    bool isValidPoint(const int (&map)[MAP_L][MAP_U], const Point& p);
 //    vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);
     stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate* goalOb = NULL);
