@@ -308,7 +308,6 @@ void Core_List::manageRelationList()
         }
         else iter = relate_AllObject.erase(iter);   //删表
     }
-
 }
 
 void Core_List::manageRelation_deleteGoalOb( Coordinate* goalObject )
@@ -997,7 +996,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
             nextPoint = nowPoint + dire[i];
             if(nextPoint.x<= 0 || nextPoint.y <= 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
 
-            //判断格子是否可走
+            //判断格子是否可走、未走过
             //斜线方向需要多判断马脚操作
             if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] ||\
                   i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])) )
