@@ -280,7 +280,6 @@ void Core::updateByPlayer(int id){
     //更新人口数据
     for(Human* human:self->human){
         tagHuman taghuman;
-        taghuman.Owner=id;
         taghuman.SN=human->getglobalNum();
         taghuman.Blood=human->getBlood();
         taghuman.DR=human->getDR();
@@ -408,7 +407,6 @@ void Core::updateByPlayer(int id){
         building.Percent=build->getPercent();
         building.Project=build->getActNum();
         building.ProjectPercent=build->getActPercent();
-        building.Owner=id;
         if(build->getSort()==SORT_Building_Resource){
             building.Type=BUILDING_FARM;
             Building_Resource* building_resource=static_cast<Building_Resource*> (build);
