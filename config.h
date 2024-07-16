@@ -749,19 +749,19 @@
 
 /********** 兵种类别 **********/
 #define AT_CLUBMAN 0
-//#define AT_SWORDSMAN 1
 #define AT_SLINGER 1
+#define AT_SWORDSMAN 4
 
 //#define AT_HOPLITE 3
 
 #define AT_BOWMAN 2
-//#define AT_IMPROVED 5
+#define AT_IMPROVED 5
 //#define AT_CHARIOTARCHER 6
 //#define AT_HORSE 7
 //#define AT_ELEPHENTARCHER 8
 
 #define AT_SCOUT 3
-//#define AT_CAVALRY 10
+#define AT_CAVALRY 6
 //#define AT_CAMEL 11
 //#define AT_CHARIOT 12
 //#define AT_ELEPHENT 13
@@ -894,6 +894,17 @@
 #define DEFCLOSE_SCOUT 0
 #define DEFSHOOT_SCOUT 0
 
+//骑兵
+#define BLOOD_CAVALRY 150
+#define SPEED_CAVALRY (2/1.1*HUMAN_SPEED)
+#define VISION_CAVALRY 4
+#define DIS_CAVALRY 0
+#define INTERVAL_CAVALRY 1.5
+#define ATK_CAVALRY 8
+#define DEFCLOSE_CAVALRY 0
+#define DEFSHOOT_CAVALRY 0
+
+
 /********** animal友好度 **********/
 #define FRIENDLY_NULL 0
 #define FRIENDLY_FRI 1
@@ -904,6 +915,8 @@
 /********** 飞行物投掷判断 **********/
 #define THROWMISSION_FARMER 25
 #define THROWMISSION_ARCHER 4
+#define THROWMISSION_IMPROVEDBOWMAN1 4
+
 #define THROWMISSION_SLINGER 5
 
 #define THROWMISSION_ARROWTOWN_TIMER 45
@@ -922,8 +935,11 @@
 #define NOWRES_TIMER_FARMER 1
 #define NOWRES_TIMER_CLUBMAN 1
 #define NOWRES_TIMER_BOWMAN 2
+#define NOWRES_TIMER_IMPROVEDBOWMAN1 2
 #define NOWRES_TIMER_SCOUT 2
+#define NOWRES_TIMER_CAVALRY 2
 #define NOWRES_TIMER_SLINGER 1
+#define NOWRES_TIMER_SWORSMAN 1
 #define NOWRES_TIMER_LION 1
 #define NOWRES_TIMER_ELEPHANT 1
 

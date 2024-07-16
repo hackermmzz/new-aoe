@@ -140,13 +140,13 @@ private:
 
 
     /*************静态成员************/
-    static std::list<ImageResource> *Walk[2][4][2][8];
-    static std::list<ImageResource> *Stand[2][4][2][8];
-    static std::list<ImageResource> *Attack[2][4][2][8];
-    static std::list<ImageResource> *Die[2][4][2][8];
-    static std::list<ImageResource> *Disappear[2][4][2][8];
-    static std::string ArmyName[4][2];
-    static std::string ArmyDisplayName[4][2];
+    static std::list<ImageResource> *Walk[2][7][2][8];
+    static std::list<ImageResource> *Stand[2][7][2][8];
+    static std::list<ImageResource> *Attack[2][7][2][8];
+    static std::list<ImageResource> *Die[2][7][2][8];
+    static std::list<ImageResource> *Disappear[2][7][2][8];
+    static std::string ArmyName[7][2];
+    static std::string ArmyDisplayName[7][2];
     /*************静态成员************/
 };
 
