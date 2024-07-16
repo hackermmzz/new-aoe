@@ -15,7 +15,6 @@ static int armystate[50]={0};
 static int Blood[50]={0};
 static double chasestart_L[50]={0};
 static double chasestart_U[50]={0};
-
 void EnemyAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
     int nowState_Army;
@@ -46,6 +45,7 @@ void EnemyAI::processData(){
                 HumanMove(enemyInfo.armies[i].SN,chasestart_L[i],chasestart_U[i]);
                 armystate[i]=WAITING;
             }}
+
     }
 //    qDebug()<<mode;
     if(mode==1){

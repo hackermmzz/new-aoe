@@ -828,7 +828,7 @@ void MainWidget::clearDebugText()
 void MainWidget::buildInitialStock()
 {
     int map_Height[72][72];
-    map->init_Map_Object();
+    map->barrierMap
 
 
 }
