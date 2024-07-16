@@ -15,8 +15,10 @@ std::list<Coordinate*> drawlist;
 
 Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
+std::map<QString , int>debugMessageRecord;
 
 int ProcessDataWork = 0;
+bool only_debug_Player0 = true;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 
@@ -26,7 +28,7 @@ int InitImageResMap(QString path)
     QDir dir(path);
     if(!dir.exists())
     {
-        qDebug()<<"路径不存在";
+        qDebug()<<"Error: A path that does not exist. path: "<<path;
         return -1;
     }
 
@@ -481,9 +483,16 @@ double trans_BlockPointToDetailCenter( int p )
     return (p+0.5)*BLOCKSIDELENGTH;
 }
 
-void call_debugText(QString color, QString content)
+void call_debugText(QString color, QString content,int playerID)
 {
-    debugMassagePackage.push(st_DebugMassage(color, content));
+    if(!only_debug_Player0 || playerID==0)
+    {
+        if(debugMessageRecord[content] == 0 || color == "black"|| color == "green")
+        {
+            debugMassagePackage.push(st_DebugMassage(color, content));
+            debugMessageRecord[content] = g_frame;
+        }
+    }
 }
 //*************************************************************
 
@@ -514,4 +523,11 @@ instruction::instruction(int type,int SN,int option){
     this->type=type;
     this->self=g_Object[SN];
     this->option=option;
+}
+
+int sgn(double __x)
+{
+    if(__x > 0) return 1;
+    else if(__x < 0) return -1;
+    else return 0;
 }

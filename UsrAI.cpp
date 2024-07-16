@@ -62,14 +62,14 @@ void UsrAI::processData()
                 DebugText("我有兵营啦"); //打印信息到debugText窗口
             }
         }
-        else if( building.Type==BUILDING_CENTER && building.Project==ACT_NULL && getInfo().farmers_n<8 )
+        else if( building.Type==BUILDING_CENTER && building.Project==ACT_NULL && getInfo().farmers.size()<8 )
         {       // 如果建筑类型是城镇中心且没有进行任何项目且农民数量少于8，创建农民
             BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
         }
     }
 
     // 遍历所有农民（此处即传统遍历方式）
-    for(int i = 0 ; i<myInfo.farmers_n ; i++)
+    for(int i = 0 ; i<myInfo.farmers.size() ; i++)
     {
         nowState_Farmer = myInfo.farmers[i].NowState;
 
@@ -104,7 +104,7 @@ void UsrAI::processData()
             SN_res = -1;
             dis = 1e6;
 
-            for(int j = 0 ; j<myInfo.resources_n ; j++)
+            for(int j = 0 ; j<myInfo.resources.size() ; j++)
             {
                 temp_dis = calDistance(mid , mid , myInfo.resources[j].DR , myInfo.resources[j].UR);
                 if(myInfo.resources[j].Type==RESOURCE_BUSH && temp_dis < dis )
@@ -120,7 +120,7 @@ void UsrAI::processData()
             SN_res = -1;
             dis = 1e6;
 
-            for(int j = 0 ; j<myInfo.resources_n ; j++)
+            for(int j = 0 ; j<myInfo.resources.size() ; j++)
             {
                 temp_dis = calDistance(mid , mid , myInfo.resources[j].DR , myInfo.resources[j].UR);
 
@@ -135,7 +135,7 @@ void UsrAI::processData()
     }
 
     // 遍历所有军队
-    for(int i = 0 ; i<myInfo.armies_n; i++)
+    for(int i = 0 ; i<myInfo.armies.size(); i++)
     {
         temp_dis = calDistance(myInfo.armies[i].DR , myInfo.armies[i].UR , mid+100 , mid-100);
 

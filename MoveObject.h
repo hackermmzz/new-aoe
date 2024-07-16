@@ -53,6 +53,7 @@ protected:
     //stand walk attack die disappear work run
     int nowstate=0;//当前的状态
     int prestate=-1;//准备开始的状态 指示状态的切换
+    bool changeToDisappear = false;
 
     /*********************静态数组***********************/
     //用于记录判断碰撞时需要检查的格子，[foundation][dblockDR][dblockUR];
@@ -120,11 +121,12 @@ public:
 
     //nowlist不使用walk，使用run
     void beginRun(){ changeToRun = true; }
+    bool isDisappearing(){ return changeToDisappear; }
 
     //判断动作执行进程——通过nowres在nowlist中位置判断
     bool isAction_ResBegin(){ return nowres == nowlist->begin(); }
 
-
+    void adjustAngle(double goalDR,double goalUR){ Angle = calculateAngle(goalDR,goalUR); }
     //*****路劲设置相关*****
     //设置寻路得到的路劲
     void setPath(stack<Point> path , double goalDR, double goalUR);
@@ -148,7 +150,7 @@ public:
     double get_PredictedUR(){ return PredictedUR; }
     Point get_PreviousBlock(){ return Point(PreviousBlockDR , PreviousBlockUR); }
     Point get_NextBlockPoint(){ return Point(nextBlockDR , nextBlockUR); }
-
+    bool is_MoveFirstStep(){ return pathI == 0; }
 
     //******碰撞判断******
     //获取需要判断碰撞的格子
@@ -161,10 +163,6 @@ public:
     //获取碰撞对象
     Coordinate* getCrashOb(){ return crashOb;}
     Point getMoveDire(){ return Point(dMove_BDR,dMove_BUR); }
-
-    //块、细节坐标转换
-    double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
-    int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }
 };
 
 #endif // MOVEOBJECT_H

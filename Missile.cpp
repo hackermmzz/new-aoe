@@ -19,6 +19,8 @@ Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int begin
     this->UR = attacker->getUR();
     this->DR0 = attackee->getDR();
     this->UR0 = attackee->getUR();
+    BlockDR = transBlock(DR);
+    BlockUR = transBlock(UR);
     Height_begin = beginHeight; //设置初始出发高度
     setAttribute();
     Angle = calculateAngle(this->DR0, this->UR0);

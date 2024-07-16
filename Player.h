@@ -150,6 +150,10 @@ public:
         return this->startScores[type];
     }
 
+
+    //增加人口，考虑未来可能有政府中心兵营兵种人口减半，故留函数接口以重写
+    void humanNumIncrease(Human* newHuman){ playerScience->addHumanNum(); }
+    void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
 private:
     int represent;  //player阵营
 
@@ -174,11 +178,6 @@ private:
     bool marketResearch[3] = {false};
 //    bool cheatMaxHumanNum=false;
     bool startScores[17] = {false};
-
-
-    //增加人口，考虑未来可能有政府中心兵营兵种人口减半，故留函数接口以重写
-    void humanNumIncrease(Human* newHuman){ playerScience->addHumanNum(); }
-    void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
 };
 
 #endif // PLAYER_H

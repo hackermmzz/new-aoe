@@ -49,7 +49,7 @@ private:
     bool needReset_resBuild = false;
 
     void initDetailList();
-    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR);
+    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int PlayerID);
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     /*********关系表相关维护***********/
@@ -73,6 +73,11 @@ private:
     void haveJud_Map_Move(Point movePoi){ map_HaveJud[movePoi.x][movePoi.y] = true; }
     bool isHaveJud( int blockDR , int blockUR ){ return map_HaveJud[blockDR][blockUR]; }
     bool isHaveJud( Point judPoi){ return map_HaveJud[judPoi.x][judPoi.y]; }
+
+    void setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0);
+    void crashHandle(MoveObject* moveOb);
+    void work_CrashPhase(MoveObject* moveOb);
+
 
 //    bool isValidPoint(const int (&map)[MAP_L][MAP_U], const Point& p);
 //    vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);

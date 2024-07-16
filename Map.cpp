@@ -510,6 +510,7 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+
     block_StockLab = findBlock_Flat(3);
     blockStock = block_StockLab[rand()%block_StockLab.size()];
     player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
@@ -934,6 +935,23 @@ void Map::setBarrier(int blockDR,int blockUR , int blockSideLen )
     return;
 }
 
+bool Map::isBarrier(Point blockPoint,int blockSideLen)
+{
+    return isBarrier(blockPoint.x,blockPoint.y,blockSideLen);
+}
+
+bool Map::isBarrier( int blockDR , int blockUR, int blockSideLen)
+{
+    if(isOverBorder(blockDR,blockUR)) return true;
+    int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
+
+    for(int i = blockDR; i<bDRR; i++)
+        for(int j = blockUR;j<bURU;j++)
+            if(barrierMap[i][j] == 1) return true;
+
+    return false;
+}
+
 bool Map::isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen )
 {
 /**
@@ -948,7 +966,9 @@ true：指定范围内有障碍物；
 false：指定范围内无障碍物；
 */
     int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
-    bDR_barrier = bUR_barrier = -1;
+    bDR_barrier=blockDR;
+    bUR_barrier = blockUR;
+    if(isOverBorder(blockDR,blockUR)) return true;
 
     for(int i = blockDR; i<bDRR; i++)
         for(int j = blockUR;j<bURU;j++)
@@ -988,7 +1008,7 @@ bool Map::isFlat(Coordinate* judOb)
 }
 
 //该函数调用必须在barrierMap数组更新后
-vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
+vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind)
 {
     int blockDR = object->getBlockDR(),blockUR = object->getBlockUR() , blockSideLen = object->get_BlockSizeLen();
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
@@ -1013,7 +1033,7 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
     }
 
     //如果一次找寻后为空,再次查询
-    while(Block_Free.empty())
+    while(Block_Free.empty() && mustFind)
     {
         bDRL = max(0,bDRL-1);
         bURD = max(0,bURD-1);
@@ -1403,9 +1423,10 @@ bool Map::loadResource() {
         for(int j = 0; j < MAP_L; j++)
         {
             if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapType() != MAPTYPE_FLAT) continue;
-            int tOffsetX = this->cell[i][j].getOffsetX(), tOffsetY = this->cell[i][j].getOffsetY();
-            if(this->cell[i][j].getMapHeight() != 0) tOffsetX -= BLOCKSIDELENGTH / 2 * this->cell[i][j].getMapHeight() - BLOCKSIDELENGTH / 2;
-            if(this->cell[i][j].getMapHeight() != 0) tOffsetY += BLOCKSIDELENGTH * (this->cell[i][j].getMapHeight());
+            int tOffsetX = 0, tOffsetY = 0;
+//            int tOffsetX = this->cell[i][j].getOffsetX(), tOffsetY = this->cell[i][j].getOffsetY();
+//            if(this->cell[i][j].getMapHeight() != 0) tOffsetX -= BLOCKSIDELENGTH / 2 * this->cell[i][j].getMapHeight() - BLOCKSIDELENGTH / 2;
+//            if(this->cell[i][j].getMapHeight() != 0) tOffsetY += BLOCKSIDELENGTH * (this->cell[i][j].getMapHeight());
 //            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
 
             if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
@@ -1977,7 +1998,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
