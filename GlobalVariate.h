@@ -65,7 +65,6 @@ struct tagBuilding
     int Project; // 当前项目
     int ProjectPercent; // 项目完成百分比
     int Cnt; // 剩余资源量（仅农田）
-    int Owner; // 所有者
     tagBuilding toEnemy(){
         this->Cnt = -1;
         this->Project = -1;
@@ -94,7 +93,6 @@ struct tagHuman
     int WorkObjectSN; // 工作对象序列号
     int Blood; // 当前血量
     int SN; // 序列号
-    int Owner; // 所有者
     int attack; // 攻击力
     int rangedDefense; // 远程防御
     int meleeDefense; // 近战防御
@@ -109,7 +107,6 @@ struct tagHuman
         this->WorkObjectSN = taghuman.WorkObjectSN;
         this->Blood = taghuman.Blood;
         this->SN = taghuman.SN;
-        this->Owner = taghuman.Owner;
     }
 };
 
@@ -229,8 +226,6 @@ struct tagInfo
         enemy_armies.clear();
         resources.clear();
         ins_ret.clear();
-    }
-    ~tagInfo(){
     }
 };
 
