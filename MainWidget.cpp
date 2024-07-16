@@ -139,6 +139,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     UsrAi->start();
     EnemyAi->start();
 
+    connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
+
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 
@@ -778,6 +780,11 @@ void MainWidget::onRadioClickSlot()
     }
 }
 
+void MainWidget::cheat_Player0Resource()
+{
+    player[0]->changeResource(500,500,500,500);
+}
+
 
 //***********************************************************************
 //输出提示框
@@ -885,5 +892,3 @@ void MainWidget::buildInitialStock()
     player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
     return;
 }
-
-

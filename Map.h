@@ -183,6 +183,8 @@ private:
 
     int barrierMap[MAP_L][MAP_U];   //障碍物地图
     tagMap resMap_AI[MAP_L][MAP_U]; //为AI准备的资源地图
+    int EL;
+    int EU;
 
     //记录当前帧可见格子
     stack<Point> blockLab_Visible;

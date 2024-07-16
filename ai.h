@@ -6,6 +6,7 @@
 #include <QWaitCondition>
 #include "assert.h"
 #include "GlobalVariate.h"
+extern bool is_cheatAction;
 
 class AI : public QThread
 {
@@ -25,6 +26,7 @@ public:
     int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR);
     int BuildingAction(int SN, int Action);
 //    void printInsRet(int id);
+    void cheatAction(){ is_cheatAction = true;  }
 
 public slots:
     void startProcessing() {
@@ -100,6 +102,9 @@ public:
     void DebugText(double debugDouble) {
         call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugDouble), id);
     }
+signals:
+    void cheatRes();
+
 };
 
 #endif // AI_H
