@@ -18,7 +18,7 @@ static double chasestart_U[50]={0};
 
 void EnemyAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
-//    qDebug()<<"#####EnemyStart#####";
+    qDebug()<<"#####EnemyStart#####";
     int nowState_Army;
     int buildtype;
     int targetBuilding;
@@ -35,10 +35,9 @@ void EnemyAI::processData(){
         }
     }
 
-//    if(g_frame>=15000) mode=3;
-//    else if(g_frame>=7500) mode=2;
-//    else if(g_frame>=2500) mode=1;
-//    qDebug()<<mode;
+    if(g_frame>=15000) mode=3;
+    else if(g_frame>=7500) mode=2;
+    else if(g_frame>=2500) mode=1;
     for(int i=0;i<enemyInfo.armies_n;i++){
         if(armystate[i]==CHASE){
             qDebug()<<"1";
@@ -85,7 +84,7 @@ void EnemyAI::processData(){
                 nowState_Army=enemyInfo.armies[i].NowState;
                 if(nowState_Army==MOVEOBJECT_STATE_STAND )
                 {HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[0].SN);
-        /*    qDebug()<<"success";*/}}
+            qDebug()<<"success";}}
         }
         else if(mode==3){
         for(int i=0;i<enemyInfo.enemy_buildings_n&&find!=1;i++){
@@ -99,13 +98,12 @@ void EnemyAI::processData(){
                 if(nowState_Army==MOVEOBJECT_STATE_STAND )
               {
                   HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[targetBuilding].SN);
-//                  qDebug()<<"success";
+                  qDebug()<<"success";
                     }
                 }}
         }
     for(int i=0;i<enemyInfo.armies_n;i++){
         if(armystate[i]==WAITING&&enemyInfo.armies[i].Blood!=Blood[i]){
-//              qDebug()<<"1";
             for(int j=0;j<enemyInfo.enemy_armies_n;j++){
 
                 if(enemyInfo.enemy_armies[j].WorkObjectSN==enemyInfo.armies[i].SN){
@@ -131,7 +129,7 @@ void EnemyAI::processData(){
             }
         }
     }}
-//    qDebug()<<"#####EnemyEnd#####";
+    qDebug()<<"#####EnemyEnd#####";
     return;
 /*###########YOUR CODE ENDS HERE###########*/
 }
