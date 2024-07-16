@@ -726,10 +726,70 @@ void MainWidget::paintUpdate()
     emit mapmove();
 }
 
+bool MainWidget::isLoss()
+{
+    return sel->getSecend()>=GAME_LOSE_SEC || player[0]->get_centerNum()<1;
+}
+bool MainWidget::isWin()
+{
+    bool enemyClear = true;
+    std::list<Human *>::iterator enemyiter = player[1]->human.begin(), enemyitere = player[1]->human.end();
+    while(enemyiter != enemyitere)
+    {
+        if(!(*enemyiter)->isDie())
+        {
+            enemyClear = false;
+            break;
+        }
+        enemyiter++;
+    }
+    return enemyClear;
+}
+
+void MainWidget::judgeVictory()
+{
+    if(isLoss())
+    {
+        //停止当前动作
+        timer->stop();
+        showTimer->stop();
+//        playSound("Lose");
+        debugText("blue"," 游戏失败，未达成目标。最终得分为:" + QString::number(player[0]->getScore()));
+        //            ui->DebugTextBrowser->insertHtml(COLOR_BLUE(getShowTime() + " 游戏失败，未达成目标。最终得分为:" + QString::number(player[0]->getScore())));
+        //            ui->DebugTextBrowser->insertPlainText("\n");
+        //弹出胜利提示
+        if(QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
+        {
+//            setLose();
+        }
+    }
+
+    if(isWin())
+    {
+        //停止当前动作
+        timer->stop();
+        showTimer->stop();
+
+//        playSound("Win");
+        debugText("blue"," 游戏胜利");
+        //                    ui->DebugTextBrowser->insertHtml(COLOR_BLUE(getShowTime() + " 游戏胜利"));
+        //                    ui->DebugTextBrowser->insertPlainText("\n");
+        //弹出胜利提示
+        if(QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
+        {
+//            setWinning();
+        }
+    }
+    else return;
+}
+
+
 //**************槽函数***************
 // 游戏帧更新
 void MainWidget::FrameUpdate()
 {
+    judgeVictory();
+
     //打印debug栏
     respond_DebugMessage();
 

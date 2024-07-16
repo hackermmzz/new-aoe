@@ -154,6 +154,8 @@ public:
     //增加人口，考虑未来可能有政府中心兵营兵种人口减半，故留函数接口以重写
     void humanNumIncrease(Human* newHuman){ playerScience->addHumanNum(); }
     void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
+
+    int get_centerNum(){ return playerScience->get_centerNum(); }
 private:
     int represent;  //player阵营
 

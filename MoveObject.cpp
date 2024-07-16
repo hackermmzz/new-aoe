@@ -311,8 +311,8 @@ bool MoveObject::isCrash(Coordinate* judOb)
 
     if( fabs(dx)<length && fabs(dy)<length)
     {
-        call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
-                       " 与 " + judOb->getChineseName() + "(编号:" + QString::number(judOb->getglobalNum()) + " 发生碰撞",getPlayerRepresent());
+//        call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
+//                       " 与 " + judOb->getChineseName() + "(编号:" + QString::number(judOb->getglobalNum()) + " 发生碰撞",getPlayerRepresent());
         crashOb = judOb;
         return true;
     }

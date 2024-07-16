@@ -974,6 +974,30 @@ false：指定范围内无障碍物；
     return false;
 }
 
+bool Map::isHaveObject(int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen)
+{
+    int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
+    bDR_barrier=blockDR;
+    bUR_barrier = blockUR;
+    if(isOverBorder(blockDR,blockUR)) return true;
+
+    for(int i = blockDR; i<bDRR; i++)
+        for(int j = blockUR;j<bURU;j++)
+        {
+            if(map_Object[i][j].size())
+            {
+                bDR_barrier = i;
+                bUR_barrier = j;
+
+                return true;
+            }
+        }
+
+    return false;
+}
+
+
+
 bool Map::isFlat(Coordinate* judOb)
 {
     int blockDR = judOb->getBlockDR(),blockUR = judOb->getBlockUR() , blockSideLen = judOb->get_BlockSizeLen();
@@ -2014,7 +2038,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
