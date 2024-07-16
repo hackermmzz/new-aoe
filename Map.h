@@ -35,14 +35,21 @@ public:
     // 判断地图块是否为斜坡
     bool isSlope(int BlockDR, int BlockUR);
 
-    //加载寻路用地图
+
+    /*********************寻路相关*******************/
+    //加载寻路用地图 视野+障碍物
     void loadfindPathMap(MoveObject* moveOb);
     //加载障碍物地图
     void loadBarrierMap();
+    /*********************寻路相关*******************/
+    bool isBarrier(Point blockPoint,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
+    bool isBarrier( int blockDR , int blockUR,int blockSideLen = 1 );
     bool isFlat(Coordinate* judOb);
-    vector<Point> findBlock_Free(Coordinate* object , int disLen = 1);
+    vector<Point> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
     vector<Point> findBlock_Flat(int disLen = 1);
+
+    bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }
 
     //用于查找Object视野范围内的格子，返回格子的列表容器
     vector<Point> get_ObjectVisionBlock(Coordinate* object);
@@ -122,7 +129,8 @@ public:
     vector<Coordinate*> map_Vision[MAP_L][MAP_U];   //对需要实时监视的ob所能看到的格子，填入ob相应的coordinate  实时监视是指瞪羚逃跑、狮子索敌等
     vector<Coordinate*> map_Object[MAP_L][MAP_U];   //对ob所在位置——有体积size，填入相应的coordinate
 
-    //>=0为高度， = -1表示其为坡
+    //高层地图
+    ///>=0为高度， = -1表示其为坡
     int map_Height[MAP_L][MAP_U] = {};
 
 
@@ -164,6 +172,8 @@ private:
 
     int barrierMap[MAP_L][MAP_U];   //障碍物地图
     tagMap resMap_AI[MAP_L][MAP_U]; //为AI准备的资源地图
+    int EL;
+    int EU;
 
     //记录当前帧可见格子
     stack<Point> blockLab_Visible;

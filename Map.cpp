@@ -416,6 +416,8 @@ void Map::generateResource() {
             {
                 int I = i + tmpL[rand() % 3], J = j + tmpU[rand() % 2];
                 Gamemap[i][j] = 7;
+                EL=i;
+                EU=j;
                 Gamemap[I][J] = 7;
                 mapFlag[i][j] = true;
                 mapFlag[I][J] = true;
@@ -508,6 +510,7 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+
     block_StockLab = findBlock_Flat(3);
     blockStock = block_StockLab[rand()%block_StockLab.size()];
     player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
@@ -571,48 +574,127 @@ void Map::generateCenter() {
  */
 void Map::generateEnemy(){
     //寻找三处可以生成敌人的地方
-    double pos_L[3]={0};
-    double pos_U[3]={0};
+    double pos_L[4]={0};
+    double pos_U[4]={0};
+    int I=0;
+    int J=0;
     int num=0;
-    for(int i=10;i<20;i++){
+    int dir=0;
+    if(EL>=36&&EU>=36) dir=1;
+    else if(EL>=36&&EU<36) dir=2;
+    else if(EL<36&&EU<36) dir=3;
+    else if(EL<36&&EU>=36) dir=4;
+
+    for(int i=62;i>52&&dir!=2;i--){
         for(int j=10;j<20;j++){
-            if (mapFlag[i][j]==false)
-            {pos_L[0]=i*BLOCKSIDELENGTH;
-             pos_U[0]=j*BLOCKSIDELENGTH;
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
              num=1;
+             I++;
+             J++;
              break;
             }
         }if(num==1) break;
     }
-    for(int i=62;i>52;i--){
-        for(int j=62;j>52;j--){
-            if (mapFlag[i][j]==false)
-            {pos_L[1]=i*BLOCKSIDELENGTH;
-             pos_U[1]=j*BLOCKSIDELENGTH;
-             num=2;
+    num=0;
+    for(int i=10;i<20&&dir!=3;i++){
+        for(int j=10;j<20;j++){
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
+             num=1;
+             I++;
+             J++;
              break;
             }
-        }if(num==2) break;
+        }if(num==1) break;
     }
-    for(int i=10;i<20;i++){
+    num=0;
+    for(int i=62;i>52&&dir!=1;i--){
         for(int j=62;j>52;j--){
-            if (mapFlag[i][j]==false)
-            {pos_L[2]=i*BLOCKSIDELENGTH;
-             pos_U[2]=j*BLOCKSIDELENGTH;
-             num=3;
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
+             num=1;
+             I++;
+             J++;
              break;
             }
-        }if(num==3) break;
+        }if(num==1) break;
     }
+    num=0;
+    for(int i=10;i<20&&dir!=4;i++){
+        for(int j=62;j>52;j--){
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
+             num=1;
+             I++;
+             J++;
+             break;
+            }
+        }if(num==1) break;
+    }
+    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+    int rand=qrand()%6;
+    double TL=0,TU=0;
+    if(rand==1){
+        TL=pos_L[1];TU=pos_U[1];
+        pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+    else if(rand==2){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[1];pos_U[0]=pos_U[1];
+        pos_L[1]=TL;pos_U[1]=TU;
+    }
+    else if(rand==3){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[1];pos_U[0]=pos_U[1];
+        pos_L[1]=TL;pos_U[1]=TU;
+        TL=pos_L[1];TU=pos_U[1];
+        pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+    else if(rand==4){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[2];pos_U[0]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+    else if(rand==5){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[2];pos_U[0]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+        TL=pos_L[1];TU=pos_U[1];
+        pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+
     //第一组
-    player[1]->addArmy(1,pos_L[0]-1,pos_U[0]-1);
-    player[1]->addArmy(1,pos_L[0]+1,pos_U[0]+1);
+    player[1]->addArmy(0,pos_L[0]-1,pos_U[0]-1);
+    player[1]->addArmy(0,pos_L[0]+1,pos_U[0]+1);
     //第二组
-    player[1]->addArmy(2,pos_L[1]-1,pos_U[1]-1);
-    player[1]->addArmy(2,pos_L[1]+1,pos_U[1]+1);
+    player[1]->addArmy(0,pos_L[1]-1,pos_U[1]-1);
+    player[1]->addArmy(0,pos_L[1]+1,pos_U[1]+1);
+    player[1]->addArmy(0,pos_L[1]-2,pos_U[1]-2);
+    player[1]->addArmy(1,pos_L[1]-1,pos_U[1]+1);
+    player[1]->addArmy(1,pos_L[1]+1,pos_U[1]-1);
+    player[1]->addArmy(1,pos_L[1]+2,pos_U[1]+2);
     //第三组
-    player[1]->addArmy(0,pos_L[2]-1,pos_U[2]-1);
-    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]+1);
+    player[1]->addArmy(2,pos_L[2]-1,pos_U[2]-1);
+    player[1]->addArmy(2,pos_L[2]+1,pos_U[2]+1);
+    player[1]->addArmy(2,pos_L[2]-1,pos_U[2]+1);
+    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]-1);
+    player[1]->addArmy(0,pos_L[2]+2,pos_U[2]+2);
+    player[1]->addArmy(0,pos_L[2]-2,pos_U[2]-2);
+    player[1]->addArmy(1,pos_L[2]-2,pos_U[2]+2);
+    player[1]->addArmy(1,pos_L[2]+2,pos_U[2]-2);
+    player[1]->addArmy(1,pos_L[2]+3,pos_U[2]+3);
 }
 
 /*
@@ -853,6 +935,23 @@ void Map::setBarrier(int blockDR,int blockUR , int blockSideLen )
     return;
 }
 
+bool Map::isBarrier(Point blockPoint,int blockSideLen)
+{
+    return isBarrier(blockPoint.x,blockPoint.y,blockSideLen);
+}
+
+bool Map::isBarrier( int blockDR , int blockUR, int blockSideLen)
+{
+    if(isOverBorder(blockDR,blockUR)) return true;
+    int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
+
+    for(int i = blockDR; i<bDRR; i++)
+        for(int j = blockUR;j<bURU;j++)
+            if(barrierMap[i][j] == 1) return true;
+
+    return false;
+}
+
 bool Map::isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen )
 {
 /**
@@ -867,7 +966,9 @@ true：指定范围内有障碍物；
 false：指定范围内无障碍物；
 */
     int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
-    bDR_barrier = bUR_barrier = -1;
+    bDR_barrier=blockDR;
+    bUR_barrier = blockUR;
+    if(isOverBorder(blockDR,blockUR)) return true;
 
     for(int i = blockDR; i<bDRR; i++)
         for(int j = blockUR;j<bURU;j++)
@@ -907,7 +1008,7 @@ bool Map::isFlat(Coordinate* judOb)
 }
 
 //该函数调用必须在barrierMap数组更新后
-vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
+vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind)
 {
     int blockDR = object->getBlockDR(),blockUR = object->getBlockUR() , blockSideLen = object->get_BlockSizeLen();
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
@@ -932,7 +1033,7 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen)
     }
 
     //如果一次找寻后为空,再次查询
-    while(Block_Free.empty())
+    while(Block_Free.empty() && mustFind)
     {
         bDRL = max(0,bDRL-1);
         bURD = max(0,bURD-1);
@@ -1897,7 +1998,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源

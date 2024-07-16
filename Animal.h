@@ -36,6 +36,8 @@ private:
 
     static std::list<ImageResource> *Run[5][8];
 
+    static std::list<ImageResource> *Disappear[5][8];
+
     static std::string Animalname[5];
     static std::string Animalcarcassname[5];
     static std::string AnimalDisplayName[5];
@@ -99,6 +101,8 @@ public:
     static std::list<ImageResource>* getDie(int i, int j) {
         return Die[i][j];
     }
+    static std::list<ImageResource>* getDisappear(int num,int angle) { return Disappear[num][angle]; }
+
     static void setRun(int i, int j, std::list<ImageResource>* newValue) {
         Run[i][j] = newValue;
     }
@@ -114,6 +118,8 @@ public:
     static void setDie(int i, int j, std::list<ImageResource>* newValue) {
         Die[i][j] = newValue;
     }
+    static void setDisappear(int num, int angle, std::list<ImageResource>* newValue) {Disappear[num][angle] = newValue;}
+
     static void allocateWalk(int i, int j) {
         Walk[i][j] = new std::list<ImageResource>;
     }
@@ -129,6 +135,8 @@ public:
     static void allocateRun(int i, int j) {
         Run[i][j] = new std::list<ImageResource>;
     }
+    static void allocateDisappear(int num, int angle) { Disappear[num][angle] = new std::list<ImageResource>;}
+
     static void deallocateWalk(int i, int j) {
         delete Walk[i][j];
         Walk[i][j] = nullptr;
@@ -149,6 +157,12 @@ public:
         delete Run[i][j];
         Run[i][j] = nullptr;
     }
+    static void deallocateDisappear(int num, int angle)
+    {
+        delete Disappear[num][angle];
+        Disappear[num][angle] = nullptr;
+    }
+
 
     bool isTree(){ return !moveAble;}
     int get_Friendly(){ return Friendly; }

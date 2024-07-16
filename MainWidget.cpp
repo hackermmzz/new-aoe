@@ -128,6 +128,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 向地图中添加资源
     initmap();
 
+
+
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
     // AI初始化
@@ -305,10 +307,12 @@ void MainWidget::initAnimal()
             Animal::allocateWalk(num,i);
             Animal::allocateStand(num,i);
             Animal::allocateDie(num,i);
+            Animal::allocateDisappear(num,i);
             loadResource(Animal::getAnimalName(num)+"_Stand_"+direction[i],Animal::getStand(num,i));
             loadResource(Animal::getAnimalName(num)+"_Walk_"+direction[i],Animal::getWalk(num,i));
             loadResource(Animal::getAnimalName(num)+"_Attack_"+direction[i],Animal::getAttack(num,i));
             loadResource(Animal::getAnimalName(num)+"_Die_"+direction[i],Animal::getDie(num,i));
+            loadResource(Animal::getAnimalName(num)+"_Disappear_"+direction[i],Animal::getDisappear(num,i));
         }
         for(int i=5;i<8;i++)
         {
@@ -316,10 +320,12 @@ void MainWidget::initAnimal()
             Animal::allocateWalk(num,i);
             Animal::allocateStand(num,i);
             Animal::allocateDie(num,i);
+            Animal::allocateDisappear(num,i);
             flipResource(Animal::getWalk(num,8-i),Animal::getWalk(num,i));
             flipResource(Animal::getStand(num,8-i),Animal::getStand(num,i));
             flipResource(Animal::getAttack(num,8-i),Animal::getAttack(num,i));
             flipResource(Animal::getDie(num,8-i),Animal::getDie(num,i));
+            flipResource(Animal::getDisappear(num,8-i),Animal::getDisappear(num,i));
         }
     }
 }
@@ -347,18 +353,22 @@ void MainWidget::initFarmer()
             Farmer::allocateWalk(statei,i);
             Farmer::allocateStand(statei,i);
             Farmer::allocateDie(statei,i);
+            Farmer::allocateDisappear(statei,i);
             loadResource(Farmer::getFarmerName(statei)+"_Stand_"+direction[i],Farmer::getStand(statei,i));
             loadResource(Farmer::getFarmerName(statei)+"_Walk_"+direction[i],Farmer::getWalk(statei,i));
             loadResource(Farmer::getFarmerName(statei)+"_Die_"+direction[i],Farmer::getDie(statei,i));
+            loadResource(Farmer::getFarmerName(statei)+"_Disappear_"+direction[i],Farmer::getDisappear(statei,i));
         }
         for(int i=5;i<8;i++)
         {
             Farmer::allocateWalk(statei,i);
             Farmer::allocateStand(statei,i);
             Farmer::allocateDie(statei,i);
+            Farmer::allocateDisappear(statei,i);
             flipResource(Farmer::getWalk(statei,8-i),Farmer::getWalk(statei,i));
             flipResource(Farmer::getStand(statei,8-i),Farmer::getStand(statei,i));
             flipResource(Farmer::getDie(statei,8-i),Farmer::getDie(statei,i));
+            flipResource(Farmer::getDisappear(statei,8-i),Farmer::getDisappear(statei,i));
         }
     }
     // Work
@@ -436,7 +446,7 @@ void MainWidget::initArmy()
                 Army::allocateDisappear(0,statei,level,i);
                 Army::allocateAttack(0,statei,level,i);
                 loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(0,statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(0,statei,level,i));
+                loadResource(Army::getArmyName(statei,level)+"_Disappear_"+direction[i],Army::getDisappear(0,statei,level,i));
                 loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(0,statei,level,i));
                 loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(0,statei,level,i));
                 loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(0,statei,level,i));
@@ -447,7 +457,7 @@ void MainWidget::initArmy()
                 Army::allocateDisappear(1,statei,level,i);
                 Army::allocateAttack(1,statei,level,i);
                 loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(1,statei,level,i));
-                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Work_"+direction[i],Army::getDisappear(1,statei,level,i));
+                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Disappear_"+direction[i],Army::getDisappear(1,statei,level,i));
                 loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(1,statei,level,i));
                 loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(1,statei,level,i));
                 loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(1,statei,level,i));
@@ -547,6 +557,7 @@ void MainWidget::deleteAnimal()
             Animal::deallocateWalk(num, i);
             Animal::deallocateStand(num, i);
             Animal::deallocateDie(num, i);
+            Animal::deallocateDisappear(num,i);
         }
         for (int i = 5; i < 8; i++)
         {
@@ -554,6 +565,7 @@ void MainWidget::deleteAnimal()
             Animal::deallocateWalk(num, i);
             Animal::deallocateStand(num, i);
             Animal::deallocateDie(num, i);
+            Animal::deallocateDisappear(num,i);
         }
     }
 }
@@ -576,6 +588,7 @@ void MainWidget::deleteFarmer()
             Farmer::deallocateWalk(statei, i);
             Farmer::deallocateStand(statei, i);
             Farmer::deallocateDie(statei, i);
+            Farmer::deallocateDisappear(statei, i);
         }
     }
 
@@ -639,7 +652,6 @@ void MainWidget::deleteArmy()
                     Army::deallocateDie(re , statei,level, i);
                     Army::deallocateAttack(re , statei,level, i);
                     Army::deallocateDisappear(re , statei,level, i);
-
                 }
             }
         }
@@ -782,10 +794,18 @@ void MainWidget::cheat_Player0Resource()
 //输出提示框
 void MainWidget::respond_DebugMessage()
 {
+    std::map<QString,int>::iterator iter = debugMessageRecord.begin(), itere = debugMessageRecord.end();
+
     while(!debugMassagePackage.empty())
     {
         debugText(debugMassagePackage.front().color,debugMassagePackage.front().content);
         debugMassagePackage.pop();
+    }
+
+    while(iter!= itere)
+    {
+        if(gameframe - iter->second > 200) iter = debugMessageRecord.erase(iter);
+        else iter++;
     }
 }
 
@@ -809,5 +829,4 @@ void MainWidget::clearDebugText()
 {
     ui->DebugTexter->clear();
 }
-
 

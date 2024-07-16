@@ -92,15 +92,15 @@ public:
     }
 
     void DebugText(std::string debugStr) {
-        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromStdString(debugStr),id);
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromStdString(debugStr), id);
     }
 
     void DebugText(int debugInt) {
-        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugInt),id);
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugInt), id);
     }
 
     void DebugText(double debugDouble) {
-        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugDouble),id);
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugDouble), id);
     }
 signals:
     void cheatRes();

@@ -88,7 +88,6 @@ Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee , int b
 //删除实例对象
 list<Human*>::iterator Player::deleteHuman( list<Human*>::iterator iterDele )
 {
-    humanNumDecrease(*iterDele);
     delete *iterDele;
     return human.erase(iterDele);
 }

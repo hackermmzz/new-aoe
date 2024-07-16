@@ -109,6 +109,8 @@ private:
     void gameDataUpdate();
     void paintUpdate();
 
+    void buildInitialStock();
+
 //    tagGame *Game=new tagGame;
 //    int Winnning=0;
 //    int Lose = 0;

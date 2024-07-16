@@ -6,6 +6,7 @@ std::list<ImageResource>* Farmer::Work[7][8];
 std::list<ImageResource>* Farmer::Stand[7][8];
 std::list<ImageResource>* Farmer::Attack[7][8];
 std::list<ImageResource>* Farmer::Die[7][8];
+std::list<ImageResource>* Farmer::Disappear[7][8];
 
 
 std::string Farmer::FarmerName[7]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"};
@@ -68,7 +69,17 @@ void Farmer::nextframe()
     if(isDie())
     {
         if( !isDying() ) setPreDie();
-        else if(!get_isActionEnd() && isNowresShift()) nowres++;
+        else if(!get_isActionEnd() && isNowresShift())
+        {
+            nowres++;
+            if( !changeToDisappear && get_isActionEnd())
+            {
+                changeToDisappear = true;
+                nowres_step = 1000;
+                setNowRes();
+            }
+        }
+
     }
     else
     {
@@ -117,7 +128,8 @@ void Farmer::setNowRes()
         templist=this->Work[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_DIE:
-        templist = this->Die[this->state][this->Angle];
+        if(changeToDisappear) templist = this->Disappear[this->state][this->Angle];
+        else templist = this->Die[this->state][this->Angle];
         break;
     default:
         break;
