@@ -509,15 +509,6 @@ void Map::generateCenter() {
         }
     }
 
-    block_StockLab = findBlock_Flat(3);
-    blockStock = block_StockLab[rand()%block_StockLab.size()];
-    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
-
-    for(int i = 0 ; i < 3;i++)
-        for(int j = 0 ; j < 3; j++)
-            mapFlag[i+blockStock.x][j+blockStock.y] = true;
-
-
     // 生成城镇中心附近9 * 9部分的1棵随机位置的树
     // flag：0表示未生成，1表示已生成
     int flag = 0;
@@ -907,6 +898,11 @@ false：指定范围内无障碍物；
 bool Map::isFlat(Coordinate* judOb)
 {
     int blockDR = judOb->getBlockDR(),blockUR = judOb->getBlockUR() , blockSideLen = judOb->get_BlockSizeLen();
+    return isFlat(blockDR,blockUR,blockSideLen);
+}
+
+bool Map::isFlat(int blockDR , int blockUR,int blockSideLen)
+{
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
     int maxHight = map_Height[blockDR][blockUR] ,minHight = maxHight,tempHight;
 
@@ -1154,6 +1150,28 @@ void Map::add_Map_Vision( Coordinate* object )
      }
 
      return;
+ }
+
+ void Map::reset_Map_Object_Resource()
+ {
+    std::list<Animal*>::iterator animaliter=animal.begin(), animalitere = animal.end();
+    std::list<StaticRes*>::iterator SRiter=staticres.begin(), SRitere = staticres.end();
+
+    while(animaliter!=animalitere)
+    {
+        if((*animaliter)->is_Surplus())
+            add_Map_Object(*animaliter);
+        animaliter++;
+    }
+
+    while(SRiter != SRitere)
+    {
+        if((*SRiter)->is_Surplus())
+            add_Map_Object(*SRiter);
+        SRiter++;
+    }
+
+    return;
  }
 
 //更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
@@ -1917,7 +1935,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
