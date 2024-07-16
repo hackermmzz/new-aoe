@@ -416,6 +416,8 @@ void Map::generateResource() {
             {
                 int I = i + tmpL[rand() % 3], J = j + tmpU[rand() % 2];
                 Gamemap[i][j] = 7;
+                EL=i;
+                EU=j;
                 Gamemap[I][J] = 7;
                 mapFlag[i][j] = true;
                 mapFlag[I][J] = true;
@@ -571,48 +573,127 @@ void Map::generateCenter() {
  */
 void Map::generateEnemy(){
     //寻找三处可以生成敌人的地方
-    double pos_L[3]={0};
-    double pos_U[3]={0};
+    double pos_L[4]={0};
+    double pos_U[4]={0};
+    int I=0;
+    int J=0;
     int num=0;
-    for(int i=10;i<20;i++){
+    int dir=0;
+    if(EL>=36&&EU>=36) dir=1;
+    else if(EL>=36&&EU<36) dir=2;
+    else if(EL<36&&EU<36) dir=3;
+    else if(EL<36&&EU>=36) dir=4;
+
+    for(int i=62;i>52&&dir!=2;i--){
         for(int j=10;j<20;j++){
-            if (mapFlag[i][j]==false)
-            {pos_L[0]=i*BLOCKSIDELENGTH;
-             pos_U[0]=j*BLOCKSIDELENGTH;
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
              num=1;
+             I++;
+             J++;
              break;
             }
         }if(num==1) break;
     }
-    for(int i=62;i>52;i--){
-        for(int j=62;j>52;j--){
-            if (mapFlag[i][j]==false)
-            {pos_L[1]=i*BLOCKSIDELENGTH;
-             pos_U[1]=j*BLOCKSIDELENGTH;
-             num=2;
+    num=0;
+    for(int i=10;i<20&&dir!=3;i++){
+        for(int j=10;j<20;j++){
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
+             num=1;
+             I++;
+             J++;
              break;
             }
-        }if(num==2) break;
+        }if(num==1) break;
     }
-    for(int i=10;i<20;i++){
+    num=0;
+    for(int i=62;i>52&&dir!=1;i--){
         for(int j=62;j>52;j--){
-            if (mapFlag[i][j]==false)
-            {pos_L[2]=i*BLOCKSIDELENGTH;
-             pos_U[2]=j*BLOCKSIDELENGTH;
-             num=3;
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
+             num=1;
+             I++;
+             J++;
              break;
             }
-        }if(num==3) break;
+        }if(num==1) break;
     }
+    num=0;
+    for(int i=10;i<20&&dir!=4;i++){
+        for(int j=62;j>52;j--){
+            if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+            {pos_L[I]=i*BLOCKSIDELENGTH;
+             pos_U[J]=j*BLOCKSIDELENGTH;
+             num=1;
+             I++;
+             J++;
+             break;
+            }
+        }if(num==1) break;
+    }
+    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+    int rand=qrand()%6;
+    double TL=0,TU=0;
+    if(rand==1){
+        TL=pos_L[1];TU=pos_U[1];
+        pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+    else if(rand==2){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[1];pos_U[0]=pos_U[1];
+        pos_L[1]=TL;pos_U[1]=TU;
+    }
+    else if(rand==3){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[1];pos_U[0]=pos_U[1];
+        pos_L[1]=TL;pos_U[1]=TU;
+        TL=pos_L[1];TU=pos_U[1];
+        pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+    else if(rand==4){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[2];pos_U[0]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+    else if(rand==5){
+        TL=pos_L[0];TU=pos_U[0];
+        pos_L[0]=pos_L[2];pos_U[0]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+        TL=pos_L[1];TU=pos_U[1];
+        pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
+        pos_L[2]=TL;pos_U[2]=TU;
+    }
+
     //第一组
-    player[1]->addArmy(1,pos_L[0]-1,pos_U[0]-1);
-    player[1]->addArmy(1,pos_L[0]+1,pos_U[0]+1);
+    player[1]->addArmy(0,pos_L[0]-1,pos_U[0]-1);
+    player[1]->addArmy(0,pos_L[0]+1,pos_U[0]+1);
     //第二组
-    player[1]->addArmy(2,pos_L[1]-1,pos_U[1]-1);
-    player[1]->addArmy(2,pos_L[1]+1,pos_U[1]+1);
+    player[1]->addArmy(0,pos_L[1]-1,pos_U[1]-1);
+    player[1]->addArmy(0,pos_L[1]+1,pos_U[1]+1);
+    player[1]->addArmy(0,pos_L[1]-2,pos_U[1]-2);
+    player[1]->addArmy(1,pos_L[1]-1,pos_U[1]+1);
+    player[1]->addArmy(1,pos_L[1]+1,pos_U[1]-1);
+    player[1]->addArmy(1,pos_L[1]+2,pos_U[1]+2);
     //第三组
-    player[1]->addArmy(0,pos_L[2]-1,pos_U[2]-1);
-    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]+1);
+    player[1]->addArmy(2,pos_L[2]-1,pos_U[2]-1);
+    player[1]->addArmy(2,pos_L[2]+1,pos_U[2]+1);
+    player[1]->addArmy(2,pos_L[2]-1,pos_U[2]+1);
+    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]-1);
+    player[1]->addArmy(0,pos_L[2]+2,pos_U[2]+2);
+    player[1]->addArmy(0,pos_L[2]-2,pos_U[2]-2);
+    player[1]->addArmy(1,pos_L[2]-2,pos_U[2]+2);
+    player[1]->addArmy(1,pos_L[2]+2,pos_U[2]-2);
+    player[1]->addArmy(1,pos_L[2]+3,pos_U[2]+3);
 }
 
 /*
