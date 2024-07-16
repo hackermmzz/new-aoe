@@ -84,6 +84,7 @@ public:
                                                         AttackSponsor = NULL;}
                                                     }
     int get_AttackAddition_Height(int goalHeigh){ return goalHeigh<Height_begin ? Height_begin - goalHeigh : 0; }
+
 private:
     bool isAttackerDie = false;
     Coordinate* AttackSponsor = NULL;

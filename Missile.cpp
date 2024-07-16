@@ -24,7 +24,6 @@ Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int begin
     Height_begin = beginHeight; //设置初始出发高度
     setAttribute();
     Angle = calculateAngle(this->DR0, this->UR0);
-    //Angle计算有bug 近距离时可能出现超大负数
     setNowRes();
     globalNum = -1;
 }
@@ -80,7 +79,7 @@ void Missile::calculateDMove()
     dUR = UR0 - UR;
     total = sqrt(dDR*dDR+dUR*dUR);
 
-    if(total!=0)
+    if(total>0.1)
     {
         dDR = dDR*speed/total;
         dUR = dUR*speed/total;

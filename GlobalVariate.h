@@ -17,6 +17,7 @@ class Coordinate;
 extern bool AIfinished;
 extern bool INSfinshed;
 extern int g_globalNum;
+extern int mapmoveFrequency;
 extern std::map<int,Coordinate*> g_Object;
 
 extern int MidX;

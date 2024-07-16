@@ -46,6 +46,7 @@ public:
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR,int blockSideLen = 1 );
     bool isFlat(Coordinate* judOb);
+    bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
     vector<Point> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
     vector<Point> findBlock_Flat(int disLen = 1);
 
@@ -56,7 +57,15 @@ public:
 
     vector<Point> get_ObjectBlock(Coordinate* object);
 
-    int get_MapHeight(int blockDR , int blockUR){ return cell[blockDR][blockUR].getMapHeight();  }
+    int get_MapHeight(int blockDR , int blockUR)
+    {
+        if(blockDR<0 || blockUR<0 || blockDR>MAP_L || blockUR>MAP_U)
+        {
+            qDebug()<<"get_MapHeight overborder";
+            return 0;
+        }
+        else return cell[blockDR][blockUR].getMapHeight();
+    }
 
     //初始化视野地图
     void init_Map_Vision(){
@@ -83,6 +92,8 @@ public:
             for(int y = object->getBlockUR(); y<object->getBlockUR()+object->get_BlockSizeLen(); y++)
                 map_Object[x][y].push_back(object);
     }
+
+    void reset_Map_Object_Resource();
 
     //更新用户视野状况
     void reset_CellExplore(Coordinate* eye);
