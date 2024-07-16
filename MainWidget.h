@@ -111,6 +111,9 @@ private:
 
     void buildInitialStock();
 
+    void judgeVictory();
+    bool isLoss();
+    bool isWin();
 //    tagGame *Game=new tagGame;
 //    int Winnning=0;
 //    int Lose = 0;

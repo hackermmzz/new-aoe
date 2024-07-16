@@ -569,7 +569,7 @@ void Core::manageMouseEvent()
                         case SORT_BUILDING:
                         case SORT_ARMY:
                         case SORT_FARMER:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != nowobject->getPlayerRepresent())
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:

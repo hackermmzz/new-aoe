@@ -45,6 +45,8 @@ public:
     bool isBarrier(Point blockPoint,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR,int blockSideLen = 1 );
+
+    bool isHaveObject(int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen);
     bool isFlat(Coordinate* judOb);
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
     vector<Point> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);

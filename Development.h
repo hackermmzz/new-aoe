@@ -60,6 +60,7 @@ public:
     //是否仍有空间添加人口
     bool get_isHumanHaveSpace(){ return get_humanNum()<getHumanNumCanReach(); }
 
+    int get_centerNum(){ return centerNum; }
     /***************当前建筑信息*******************/
     //获取当前房屋数目
     int get_homeNum(){ return (int)(centerNum>0) + homeNum; }
