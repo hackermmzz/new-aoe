@@ -17,7 +17,6 @@ int id_Wrong_lastFrame = -1;
 
 void UsrAI::processData()
 {
-
     int nowState_Farmer;
     int SN_res;
     double dis , temp_dis;
