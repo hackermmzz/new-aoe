@@ -490,8 +490,6 @@ void Map::generateResource() {
 void Map::generateCenter() {
     srand(time(NULL));
 
-    vector<Point>block_StockLab;
-    Point blockStock;
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
     player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
@@ -1019,7 +1017,7 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
         {
             if(x>=blockDR && x<sideR && y>=blockUR && y<sideU) continue;
 
-            if(!barrierMap[x][y])
+            if(map_Object[x][y].empty())
             {
                 tempPoint.x = x;
                 tempPoint.y = y;
@@ -1045,13 +1043,13 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
         //查找边界是否有无障碍空位
         for(int x = bDRL; x<bDRR;x++)
         {
-            if(!barrierMap[x][bURD])
+            if(map_Object[x][bURD].empty())
             {
                 tempPoint.x = x;
                 tempPoint.y = bURD;
                 Block_Free.push_back(tempPoint);
             }
-            if(!barrierMap[x][bURU-1])
+            if(map_Object[x][bURU-1].empty())
             {
                 tempPoint.x = x;
                 tempPoint.y = bURU-1;
@@ -1061,13 +1059,13 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
 
         for(int y = bURD+1; y<bURU;y++)
         {
-            if(!barrierMap[bDRL][y])
+            if(map_Object[bDRL][y].empty())
             {
                 tempPoint.x = bDRL;
                 tempPoint.y = y;
                 Block_Free.push_back(tempPoint);
             }
-            if(!barrierMap[bDRR-1][y])
+            if(map_Object[bDRR-1][y].empty())
             {
                 tempPoint.x = bDRR-1;
                 tempPoint.y = y;
