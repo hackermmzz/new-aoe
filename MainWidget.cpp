@@ -728,7 +728,7 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
-    return gameframe >= GAME_LOSE_SEC*25 || player[0]->get_centerNum()<1;
+    return sel->getSecend()>=GAME_LOSE_SEC || player[0]->get_centerNum()<1;
 }
 bool MainWidget::isWin()
 {

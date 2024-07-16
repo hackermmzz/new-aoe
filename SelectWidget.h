@@ -25,6 +25,7 @@ public:
 
     void setCore( Core* core ){ this->core = core; }
 
+    int getSecend(){ return elapsedSec; }
     //获取debug窗口显示时间
     QString getShowTime();
     int actions[ACT_WINDOW_NUM_FREE] = {0};
