@@ -433,7 +433,7 @@ void MainWidget::initArmy()
     //"Archer","Axeman","Clubman","Scout"
 
     // Stand Walk Die
-    for(int statei=0;statei<4;statei++)
+    for(int statei=0;statei<7;statei++)
     {
         for(int level = 0 ; level<2;level++)
         {
