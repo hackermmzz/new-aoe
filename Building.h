@@ -83,8 +83,8 @@ public:
     void setActStatus(int num, int status){this->actStatus[num] = status;}
 
     /*************控制建筑行为****************/
-    double get_retio_Build(){ return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;}
-    double get_retio_Action(){ return 100.0/playerScience->get_actTime(Num , actNum)/FRAMES_PER_SECOND; }
+    double get_retio_Build();
+    double get_retio_Action();
 
     bool is_ActionFinish(){ return actPercent>=100; }
     void update_Action(){ actPercent += actSpeed; }

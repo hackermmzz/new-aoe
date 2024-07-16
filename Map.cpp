@@ -676,25 +676,25 @@ void Map::generateEnemy(){
     }
 
     //第一组
-    player[1]->addArmy(0,pos_L[0]-1,pos_U[0]-1);
-    player[1]->addArmy(0,pos_L[0]+1,pos_U[0]+1);
+    player[1]->addArmy(0,pos_L[0]-2,pos_U[0]-2);
+    player[1]->addArmy(0,pos_L[0]+2,pos_U[0]+2);
     //第二组
-    player[1]->addArmy(0,pos_L[1]-1,pos_U[1]-1);
-    player[1]->addArmy(0,pos_L[1]+1,pos_U[1]+1);
     player[1]->addArmy(0,pos_L[1]-2,pos_U[1]-2);
-    player[1]->addArmy(1,pos_L[1]-1,pos_U[1]+1);
-    player[1]->addArmy(1,pos_L[1]+1,pos_U[1]-1);
-    player[1]->addArmy(1,pos_L[1]+2,pos_U[1]+2);
+    player[1]->addArmy(0,pos_L[1]+2,pos_U[1]+2);
+    player[1]->addArmy(0,pos_L[1]-8,pos_U[1]-8);
+    player[1]->addArmy(1,pos_L[1]-8,pos_U[1]+8);
+    player[1]->addArmy(1,pos_L[1]+14,pos_U[1]-14);
+    player[1]->addArmy(1,pos_L[1]+14,pos_U[1]+14);
     //第三组
-    player[1]->addArmy(2,pos_L[2]-1,pos_U[2]-1);
-    player[1]->addArmy(2,pos_L[2]+1,pos_U[2]+1);
-    player[1]->addArmy(2,pos_L[2]-1,pos_U[2]+1);
-    player[1]->addArmy(0,pos_L[2]+1,pos_U[2]-1);
-    player[1]->addArmy(0,pos_L[2]+2,pos_U[2]+2);
-    player[1]->addArmy(0,pos_L[2]-2,pos_U[2]-2);
-    player[1]->addArmy(1,pos_L[2]-2,pos_U[2]+2);
-    player[1]->addArmy(1,pos_L[2]+2,pos_U[2]-2);
-    player[1]->addArmy(1,pos_L[2]+3,pos_U[2]+3);
+    player[1]->addArmy(2,pos_L[2]-2,pos_U[2]-2);
+    player[1]->addArmy(2,pos_L[2]+2,pos_U[2]+2);
+    player[1]->addArmy(2,pos_L[2]-8,pos_U[2]+8);
+    player[1]->addArmy(0,pos_L[2]+8,pos_U[2]-8);
+    player[1]->addArmy(0,pos_L[2]+14,pos_U[2]+14);
+    player[1]->addArmy(0,pos_L[2]-14,pos_U[2]-14);
+    player[1]->addArmy(1,pos_L[2]-20,pos_U[2]+20);
+    player[1]->addArmy(1,pos_L[2]+20,pos_U[2]-20);
+    player[1]->addArmy(1,45,45);
 }
 
 /*
@@ -1998,7 +1998,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源

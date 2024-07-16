@@ -31,19 +31,13 @@
 struct tagInfo
 {
     vector<tagBuilding> buildings; // 我方建筑列表
-    int buildings_n; // 我方建筑数量
     vector<tagFarmer> farmers; // 我方农民列表
-    int farmers_n; // 我方农民数量
     vector<tagArmy> armies; // 我方军队列表
-    int armies_n; // 我方军队数量
     vector<tagBuilding> enemy_buildings; // 敌方建筑列表
     int enemy_buildings_n; // 敌方建筑数量
     vector<tagFarmer> enemy_farmers; // 敌方农民列表
-    int enemy_farmers_n; // 敌方农民数量
     vector<tagArmy> enemy_armies; // 敌方军队列表
-    int enemy_armies_n; // 敌方军队数量
     vector<tagResource> resources; // 资源列表
-    int resources_n; // 资源数量
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
     int theMap[MAP_L][MAP_U]; // 高程图（存储地图的高度） theMap[BlockDR][BlockUR]
     int GameFrame; // 当前帧数
@@ -69,7 +63,6 @@ struct tagBuilding
     int Project; // 当前项目
     int ProjectPercent; // 项目完成百分比
     int Cnt; // 剩余资源量（仅农田）
-    int Owner; // 所有者
 };
 ```
 
@@ -96,7 +89,6 @@ struct tagHuman
     int WorkObjectSN; // 工作对象序列号
     int Blood; // 当前血量
     int SN; // 序列号
-    int Owner; // 所有者
     int attack; // 攻击力
     int rangedDefense; // 远程防御
     int meleeDefense; // 近战防御
@@ -193,14 +185,14 @@ void UsrAI::processData()
                 DebugText("我有兵营啦"); //打印信息到debugText窗口
             }
         }
-        else if( building.Type==BUILDING_CENTER && building.Project==ACT_NULL && getInfo().farmers_n<8 )
+        else if( building.Type==BUILDING_CENTER && building.Project==ACT_NULL && getInfo().farmers.size()<8 )
         {       // 如果建筑类型是城镇中心且没有进行任何项目且农民数量少于8，创建农民
             BuildingAction(building.SN,BUILDING_CENTER_CREATEFARMER);
         }
     }
 
     // 遍历所有农民（此处即传统遍历方式）
-    for(int i = 0 ; i<myInfo.farmers_n ; i++)
+    for(int i = 0 ; i<myInfo.farmers.size() ; i++)
     {
         nowState_Farmer = myInfo.farmers[i].NowState;
 
@@ -235,7 +227,7 @@ void UsrAI::processData()
             SN_res = -1;
             dis = 1e6;
 
-            for(int j = 0 ; j<myInfo.resources_n ; j++)
+            for(int j = 0 ; j<myInfo.resources.size() ; j++)
             {
                 temp_dis = calDistance(mid , mid , myInfo.resources[j].DR , myInfo.resources[j].UR);
                 if(myInfo.resources[j].Type==RESOURCE_BUSH && temp_dis < dis )
@@ -251,7 +243,7 @@ void UsrAI::processData()
             SN_res = -1;
             dis = 1e6;
 
-            for(int j = 0 ; j<myInfo.resources_n ; j++)
+            for(int j = 0 ; j<myInfo.resources.size() ; j++)
             {
                 temp_dis = calDistance(mid , mid , myInfo.resources[j].DR , myInfo.resources[j].UR);
 
@@ -266,7 +258,7 @@ void UsrAI::processData()
     }
 
     // 遍历所有军队
-    for(int i = 0 ; i<myInfo.armies_n; i++)
+    for(int i = 0 ; i<myInfo.armies.size(); i++)
     {
         temp_dis = calDistance(myInfo.armies[i].DR , myInfo.armies[i].UR , mid+100 , mid-100);
 

@@ -14,6 +14,8 @@ std::string Building::BuildDisplayName[10]={"房屋","谷仓","市镇中心","�
 int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
 
 /********************静态资源**************************/
+bool is_cheatAction = false;
+
 
 
 /********************构造与析构**************************/
@@ -267,4 +269,16 @@ void Building::setActStatus(int wood , int food , int stone , int gold)
             actStatus[position] = ACT_STATUS_DISABLED;
         else actStatus[position] = ACT_STATUS_ENABLED;
     }
+}
+
+double Building::get_retio_Build()
+{
+    if(is_cheatAction) return 100.0;
+    else return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;
+}
+
+double Building::get_retio_Action()
+{
+    if(is_cheatAction) return 100.0;
+    else    return 100.0/playerScience->get_actTime(Num , actNum)/FRAMES_PER_SECOND;
 }
