@@ -6,6 +6,7 @@ ins EnemyIns;
 #define CHASE 1
 #define ATTACK 2
 #define DESTORY 3
+#define Cavalry 7
 tagInfo enemyInfo;
 static int mode=0;
 static int num=0;
@@ -15,14 +16,15 @@ static int armystate[50]={0};
 static int Blood[50]={0};
 static double chasestart_L[50]={0};
 static double chasestart_U[50]={0};
-
+static int cheat=0;
+static int FinalAtt=0;
 void EnemyAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
     int nowState_Army;
     int buildtype;
     int targetBuilding;
     int find=0;
-//    int target=0;
+    int target=0;
     enemyInfo=getInfo();
     if(g_frame==15){
         for(int i=0;i<enemyInfo.armies.size();i++){
@@ -34,18 +36,28 @@ void EnemyAI::processData(){
             pos_U[i]=enemyInfo.armies[i].UR;
         }
     }
+    if(g_frame>=15){
+    if(cheat==1||enemyInfo.armies[16].Blood!=Blood[16]||FinalAtt==1){
+        FinalAtt=1;
+        for(int i=0;i<enemyInfo.armies.size();i++){
+            if(armystate[i]!=ATTACK)
+            {HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[0].SN);
+            armystate[i]=ATTACK;}
+        }
+    }}
 
-    if(g_frame>=15000) mode=3;
-    else if(g_frame>=7500) mode=2;
-    else if(g_frame>=2500) mode=1;
+    qDebug()<<FinalAtt;
+    if(g_frame>=13500) mode=3;
+    else if(g_frame>=9000) mode=2;
+    else if(g_frame>=4500) mode=1;
     for(int i=0;i<enemyInfo.armies.size();i++){
         if(armystate[i]==CHASE){
-            qDebug()<<"1";
-            if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=100)
+            if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
             {
                 HumanMove(enemyInfo.armies[i].SN,chasestart_L[i],chasestart_U[i]);
                 armystate[i]=WAITING;
             }}
+
     }
 //    qDebug()<<mode;
     if(mode==1){
