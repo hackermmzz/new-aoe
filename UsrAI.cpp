@@ -3,8 +3,6 @@ tagGame tagUsrGame;
 ins UsrIns;
 /*##########请勿修改以上部分##########*/
 
-#include <fstream>
-
 tagInfo myInfo;
 
 double mid=36*BLOCKSIDELENGTH;  // 中间位置的坐标
@@ -27,7 +25,7 @@ void UsrAI::processData()
     myInfo = getInfo(); //每帧获取新的tagInfo
     // cheatAction();
     // cheatRes();
-    // cheatAttack(3);
+    cheatAttack(3);
 
     if(id_Wrong_lastFrame >= 0 && timers > 0) //记录了上一帧下达命令的编号
     {

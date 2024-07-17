@@ -15,6 +15,7 @@ public:
     }
 private:
     void processData() override;
+
     tagInfo getInfo(){
         return tagEnemyGame.getInfo();
     }
