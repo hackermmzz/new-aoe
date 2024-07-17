@@ -7,6 +7,7 @@ extern ins EnemyIns;
 
 class EnemyAI:public AI
 {
+
 public:
     EnemyAI(){this->id=1;}
     ~EnemyAI(){
@@ -28,6 +29,8 @@ private:
     void clearInsRet() override{
         tagEnemyGame.clearInsRet();
     }
+public slots:
+    void onWaveAttack(int wave);
 };
 /*##########DO NOT EDIT ABOVE##########*/
 

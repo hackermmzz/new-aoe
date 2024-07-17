@@ -59,7 +59,7 @@ void EnemyAI::processData(){
             }}
 
     }
-//    qDebug()<<mode;
+   // qDebug()<<mode;
     if(mode==1){
         qDebug()<<num;
         if(g_frame>=5000){
@@ -141,8 +141,17 @@ void EnemyAI::processData(){
             }
         }
     }}
-    qDebug()<<"#####EnemyEnd#####";
     return;
 /*###########YOUR CODE ENDS HERE###########*/
+}
+
+void EnemyAI::onWaveAttack(int wave){
+    //TODO: 发起第wave波进攻
+    if(wave<1||wave>3){
+        // std::string debugStr="非法波次："+std::to_string(wave);
+        // call_debugText("black", " AI" + QString::number(0) + "打印：" + QString::fromStdString(debugStr), 0);
+        return;
+    }
+    mode=wave;
 }
 

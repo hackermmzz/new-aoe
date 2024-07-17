@@ -27,6 +27,7 @@ void UsrAI::processData()
     myInfo = getInfo(); //每帧获取新的tagInfo
     // cheatAction();
     // cheatRes();
+    // cheatAttack(3);
 
     if(id_Wrong_lastFrame >= 0 && timers > 0) //记录了上一帧下达命令的编号
     {
