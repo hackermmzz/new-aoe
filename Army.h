@@ -51,14 +51,14 @@ public:
 
   /********************静态函数**************************/
     static std::string getArmyName(int num , int level) {
-        if (num >= 0 && num < 4 && level>=0&& level<2) {
+        if (num >= 0 && num < 7 && level>=0&& level<2) {
             return ArmyName[num][level];
         }
         return "";
     }
 
     static std::string getArmyDisplayNum(int num , int level) {
-        if (num >= 0 && num < 4&& level>=0&& level<2) {
+        if (num >= 0 && num < 7&& level>=0&& level<2) {
             return ArmyDisplayName[num][level];
         }
         return "";

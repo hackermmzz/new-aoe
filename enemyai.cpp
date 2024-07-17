@@ -27,15 +27,25 @@ static int Find[50];
 static int seek(int SN){
     double temp=0;
     double min=10000;
-    int target=0;
-    if(SN<2||(SN>=2&&enemyInfo.enemy_armies.size()==0)){
+    int target=101;
+    if(SN<2){
+        if(enemyInfo.enemy_farmers.size()!=0)
         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_farmers[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_farmers[i].BlockUR, 2), 0.5);
             if (temp<min) {min=temp;
-            target=i;}
+            target=i;
+           }
         }
-    }
-    else
+        else if(enemyInfo.enemy_armies.size()!=0){
+            for(int i=0;i<enemyInfo.enemy_armies.size();i++){
+                temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_farmers[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_farmers[i].BlockUR, 2), 0.5);
+                if (temp<min) {min=temp;
+                target=i+50;
+        }
+        return target;
+    }}}
+    else if(SN>=2){
+        if(enemyInfo.enemy_armies.size()!=0)
     for(int i=0;i<enemyInfo.enemy_armies.size();i++){
          temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_armies[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_armies[i].BlockUR, 2), 0.5);
         if(temp<min){
@@ -43,7 +53,18 @@ static int seek(int SN){
             target=i+50;
         }
     }
+    else if(enemyInfo.enemy_farmers.size()!=0){
+        for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
+            temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_farmers[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_farmers[i].BlockUR, 2), 0.5);
+            if(temp<min){
+                min=temp;
+                target=i;
+    }
+    }
+            }
     return target;
+    }
+
 }
 void EnemyAI::processData(){
 /*##########YOUR CODE BEGINS HERE##########*/
@@ -65,12 +86,13 @@ void EnemyAI::processData(){
         }
     }  
     //更新波数
-    if(g_frame>=13500) mode=3;
-    else if(g_frame>=9000) mode=2;
-    else if(g_frame>=4500) mode=1;
+    if(g_frame>=22500) mode=3;
+    else if(g_frame>=15000) mode=2;
+    else if(g_frame>=7500) mode=1;
+    qDebug()<<enemyInfo.armies[0].Sort;
     //强制总攻
     if(g_frame>=15){
-    if(cheat==1||enemyInfo.armies[16].Blood!=Blood[16]||FinalAtt==1){
+    if(cheat==1||enemyInfo.armies[0].Blood!=Blood[0]||FinalAtt==1){
         FinalAtt=1;
         mode=3;
     }}
@@ -81,7 +103,7 @@ void EnemyAI::processData(){
     }
     //根据波数启动军队
     if(mode==1){
-        if(g_frame<=7500)
+        if(g_frame<=10500)
         for(int i=0;i<ATT1;i++){
             if(armystate[i]==CHASE||armystate[i]==WAITING) armystate[i]=ATTACK;
         }
@@ -150,6 +172,7 @@ void EnemyAI::processData(){
 //        }
         //攻击状态
         else if(armystate[i]==ATTACK){
+            if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())!=0){
             if(mode==1){
             if(Lock[i]==0&&i<ATT1){
                int tar=0;
@@ -157,9 +180,11 @@ void EnemyAI::processData(){
                      if(nowState_Army==MOVEOBJECT_STATE_STAND)
                      {
                          tar=seek(i);
-                         if(tar>50)
+                         if(tar==101)
+                         armystate[i]==WAITING;
+                         else if(tar>=50)
                          HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
-                         else HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+                         else  HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
                          Lock[i]=1;
                          timer[i]=g_frame;
 
@@ -172,7 +197,9 @@ void EnemyAI::processData(){
                           if(nowState_Army==MOVEOBJECT_STATE_STAND)
                           {
                               tar=seek(i);
-                              if(tar>50)
+                              if(tar==101)
+                              armystate[i]==WAITING;
+                              else if(tar>=50)
                               HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
                               else HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
                               Lock[i]=1;
@@ -190,7 +217,9 @@ void EnemyAI::processData(){
                           if(nowState_Army==MOVEOBJECT_STATE_STAND)
                           {
                               tar=seek(i);
-                              if(tar>50)
+                              if(tar==101)
+                              armystate[i]==WAITING;
+                              else if(tar>=50)
                               HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
                               else HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
                               Lock[i]=1;
@@ -202,7 +231,7 @@ void EnemyAI::processData(){
                 Lock[i]=0;timer[i]=0;
             }
             qDebug()<<Lock[i];
-        }
+        }}
 }
 
 // 线性化进攻

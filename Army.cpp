@@ -21,9 +21,9 @@ std::string Army::ArmyDisplayName[7][2]={{"棍棒兵","刀斧兵"},
                                          {"投石兵","投石兵"},
                                          {"弓箭手","弓箭手"},
                                          {"侦察骑兵","侦察骑兵"},
-                                         {"将军","将军"},
-                                         {"将军","将军"},
-                                         {"将军","将军"}
+                                         {"Prof.Yan","Prof.Yan"},
+                                         {"Prof.Lou","Prof.Lou"},
+                                         {"Prof.Lu","Prof.Lu"}
                                         };
 
 Army::Army()
