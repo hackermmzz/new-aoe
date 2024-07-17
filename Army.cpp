@@ -1,23 +1,29 @@
 ﻿#include "Army.h"
 
 //[playerrepresent][num][leve][angel]
-std::list<ImageResource>* Army::Walk[2][4][2][8];
-std::list<ImageResource>* Army::Disappear[2][4][2][8];
-std::list<ImageResource>* Army::Stand[2][4][2][8];
-std::list<ImageResource>* Army::Attack[2][4][2][8];
-std::list<ImageResource>* Army::Die[2][4][2][8];
+std::list<ImageResource>* Army::Walk[2][7][2][8];
+std::list<ImageResource>* Army::Disappear[2][7][2][8];
+std::list<ImageResource>* Army::Stand[2][7][2][8];
+std::list<ImageResource>* Army::Attack[2][7][2][8];
+std::list<ImageResource>* Army::Die[2][7][2][8];
 
 //[num][level]
-std::string Army::ArmyName[4][2]={{"Clubman","Axeman"},
+std::string Army::ArmyName[7][2]={{"Clubman","Axeman"},
                                   {"Slinger","Slinger"},
                                   {"Archer","Archer"},
-                                  {"Scout","Scout"}
+                                  {"Scout","Scout"},
+                                  {"Sworder","Sworder"},
+                                  {"ImprovedArcher","ImprovedArcher"},
+                                  {"Cavalry","Cavalry"}
                                  };
 
-std::string Army::ArmyDisplayName[4][2]={{"棍棒兵","刀斧兵"},
+std::string Army::ArmyDisplayName[7][2]={{"棍棒兵","刀斧兵"},
                                          {"投石兵","投石兵"},
                                          {"弓箭手","弓箭手"},
-                                         {"侦察骑兵","侦察骑兵"}
+                                         {"侦察骑兵","侦察骑兵"},
+                                         {"将军","将军"},
+                                         {"将军","将军"},
+                                         {"将军","将军"}
                                         };
 
 Army::Army()
@@ -256,13 +262,22 @@ int Army::get_add_specialAttack()
     {
         if(interactSort == SORT_ARMY)
         {
-            if(interactNum == AT_BOWMAN) addition+=2;
+            if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
         }
         else if( interactSort == SORT_BUILDING)
         {
             if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
                 addition += 7;
         }
+    }
+    else if(Num == AT_CAVALRY)
+    {
+        if(interactSort == SORT_ARMY)
+        {
+            if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN)
+                addition+=5;
+        }
+
     }
     return addition;
 }
@@ -306,6 +321,25 @@ void Army::setAttribute()
 //        defence_close_change  = new int[4]{ DEFCLOSE_SHORTSWORSMAN1,DEFCLOSE_SHORTSWORSMAN2,DEFCLOSE_SHORTSWORSMAN3,DEFCLOSE_SHORTSWORSMAN4 };
 //        defence_shoot_change  = new int[4]{ DEFSHOOT_SHORTSWORSMAN1,DEFSHOOT_SHORTSWORSMAN2,DEFSHOOT_SHORTSWORSMAN3,DEFSHOOT_SHORTSWORSMAN4 };
 //        break;
+
+    case AT_SWORDSMAN:    //投石者
+        upgradable = false;
+        dependBuildNum = BUILDING_ARMYCAMP;
+        armyClass = ARMY_INFANTRY;
+        attackType = ATTACKTYPE_CLOSE;
+
+        MaxBlood = BLOOD_SHORTSWORDSMAN1;
+        speed = SPEED_SHORTSWORDSMAN1;
+        vision = VISION_SHORTSWORDSMAN1;
+        atk = ATK_SHORTSWORSMAN1;
+        dis_Attack = DIS_SHORTSWORDSMAN1;
+        inter_Attack = INTERVAL_SHORTSWORDSMAN1;
+        defence_close = DEFCLOSE_SHORTSWORSMAN1;
+        defence_shoot = DEFSHOOT_SHORTSWORSMAN1;
+
+        crashLength = CRASHBOX_SINGLEOB;
+        nowres_step = NOWRES_TIMER_SWORSMAN;
+        break;
 
     case AT_SLINGER:    //投石者
         upgradable = false;
@@ -353,6 +387,29 @@ void Army::setAttribute()
         nowres_step = NOWRES_TIMER_BOWMAN;
         break;
 
+    case AT_IMPROVED:     //弓箭手
+        upgradable = false;
+        dependBuildNum = BUILDING_RANGE;
+        armyClass = ARMY_ARCHER;
+        attackType = ATTACKTYPE_SHOOT;
+
+        MaxBlood = BLOOD_IMPROVEDBOWMAN1;
+        speed = SPEED_IMPROVEDBOWMAN1;
+        vision = VISION_IMPROVEDBOWMAN1;
+        atk = ATK_IMPROVEDBOWMAN1;
+        dis_Attack = DIS_IMPROVEDBOWMAN1;
+        inter_Attack = INTERVAL_IMPROVEDBOWMAN1;
+        defence_close = DEFCLOSE_IMPROVEDBOWMAN1;
+        defence_shoot = DEFSHOOT_IMPROVEDBOWMAN1;
+
+        crashLength = CRASHBOX_SINGLEOB;
+
+        type_Missile = Missile_Arrow;
+        phaseFromEnd_MissionAttack = THROWMISSION_IMPROVEDBOWMAN1;
+
+        nowres_step = NOWRES_TIMER_IMPROVEDBOWMAN1;
+        break;
+
     case AT_SCOUT:      //侦察骑兵
         upgradable = false;
         dependBuildNum = BUILDING_STABLE;
@@ -373,6 +430,25 @@ void Army::setAttribute()
         nowres_step = NOWRES_TIMER_SCOUT;
         break;
 
+    case AT_CAVALRY:      //侦察骑兵
+        upgradable = false;
+        dependBuildNum = BUILDING_STABLE;
+        armyClass = ARMY_RIDER;
+        attackType = ATTACKTYPE_CLOSE;
+
+        MaxBlood = BLOOD_CAVALRY;
+        speed = SPEED_CAVALRY;
+        vision = VISION_CAVALRY;
+        atk = ATK_CAVALRY;
+        dis_Attack = DIS_CAVALRY;
+        inter_Attack = INTERVAL_CAVALRY;
+        defence_close = DEFCLOSE_CAVALRY;
+        defence_shoot = DEFSHOOT_CAVALRY;
+
+        crashLength = CRASHBOX_SMALLOB;
+
+        nowres_step = NOWRES_TIMER_CAVALRY;
+        break;
     default:
         incorrectNum = true;
         break;

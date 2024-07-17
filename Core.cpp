@@ -181,7 +181,6 @@ void Core::gameUpdate()
 
         while(missileiter!=missileiterEnd)
         {
-//            qDebug()<<playerIndx<<(player[playerIndx]->missile.size())<<((*missileiter)->isNeedDelete());s
             if((*missileiter)->isNeedDelete())
             {
                 interactionList->eraseObject(*missileiter);
@@ -288,7 +287,7 @@ void Core::gameUpdate()
 
     judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
 
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT) manageMouseEvent();
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT && mapmoveFrequency != 8) manageMouseEvent();
 
     manageOrder(0);
     manageOrder(1);
@@ -562,14 +561,15 @@ void Core::manageMouseEvent()
                     if(nowobject->getPlayerRepresent() != 0) break;
                     switch (object_click->getSort())
                     {
-                        case SORT_ANIMAL:
-                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
-                            break;
+//                        case SORT_ANIMAL:
+//                            if(!((Animal*)object_click)->isTree())
+//                                interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+//                            break;
                         case SORT_Building_Resource:
                         case SORT_BUILDING:
                         case SORT_ARMY:
                         case SORT_FARMER:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != nowobject->getPlayerRepresent())
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:

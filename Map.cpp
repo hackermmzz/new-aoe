@@ -490,8 +490,6 @@ void Map::generateResource() {
 void Map::generateCenter() {
     srand(time(NULL));
 
-    vector<Point>block_StockLab;
-    Point blockStock;
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
     player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
@@ -510,15 +508,6 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
-
-    block_StockLab = findBlock_Flat(3);
-    blockStock = block_StockLab[rand()%block_StockLab.size()];
-    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , blockStock.x, blockStock.y , 100));
-
-    for(int i = 0 ; i < 3;i++)
-        for(int j = 0 ; j < 3; j++)
-            mapFlag[i+blockStock.x][j+blockStock.y] = true;
-
 
     // 生成城镇中心附近9 * 9部分的1棵随机位置的树
     // flag：0表示未生成，1表示已生成
@@ -985,9 +974,38 @@ false：指定范围内无障碍物；
     return false;
 }
 
+bool Map::isHaveObject(int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen)
+{
+    int bDRR = min(blockDR+blockSideLen, MAP_L),bURU = min(blockUR+blockSideLen,MAP_U);
+    bDR_barrier=blockDR;
+    bUR_barrier = blockUR;
+    if(isOverBorder(blockDR,blockUR)) return true;
+
+    for(int i = blockDR; i<bDRR; i++)
+        for(int j = blockUR;j<bURU;j++)
+        {
+            if(map_Object[i][j].size())
+            {
+                bDR_barrier = i;
+                bUR_barrier = j;
+
+                return true;
+            }
+        }
+
+    return false;
+}
+
+
+
 bool Map::isFlat(Coordinate* judOb)
 {
     int blockDR = judOb->getBlockDR(),blockUR = judOb->getBlockUR() , blockSideLen = judOb->get_BlockSizeLen();
+    return isFlat(blockDR,blockUR,blockSideLen);
+}
+
+bool Map::isFlat(int blockDR , int blockUR,int blockSideLen)
+{
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
     int maxHight = map_Height[blockDR][blockUR] ,minHight = maxHight,tempHight;
 
@@ -1023,7 +1041,7 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
         {
             if(x>=blockDR && x<sideR && y>=blockUR && y<sideU) continue;
 
-            if(!barrierMap[x][y])
+            if(map_Object[x][y].empty())
             {
                 tempPoint.x = x;
                 tempPoint.y = y;
@@ -1049,13 +1067,13 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
         //查找边界是否有无障碍空位
         for(int x = bDRL; x<bDRR;x++)
         {
-            if(!barrierMap[x][bURD])
+            if(map_Object[x][bURD].empty())
             {
                 tempPoint.x = x;
                 tempPoint.y = bURD;
                 Block_Free.push_back(tempPoint);
             }
-            if(!barrierMap[x][bURU-1])
+            if(map_Object[x][bURU-1].empty())
             {
                 tempPoint.x = x;
                 tempPoint.y = bURU-1;
@@ -1065,13 +1083,13 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
 
         for(int y = bURD+1; y<bURU;y++)
         {
-            if(!barrierMap[bDRL][y])
+            if(map_Object[bDRL][y].empty())
             {
                 tempPoint.x = bDRL;
                 tempPoint.y = y;
                 Block_Free.push_back(tempPoint);
             }
-            if(!barrierMap[bDRR-1][y])
+            if(map_Object[bDRR-1][y].empty())
             {
                 tempPoint.x = bDRR-1;
                 tempPoint.y = y;
@@ -1235,6 +1253,28 @@ void Map::add_Map_Vision( Coordinate* object )
      }
 
      return;
+ }
+
+ void Map::reset_Map_Object_Resource()
+ {
+    std::list<Animal*>::iterator animaliter=animal.begin(), animalitere = animal.end();
+    std::list<StaticRes*>::iterator SRiter=staticres.begin(), SRitere = staticres.end();
+
+    while(animaliter!=animalitere)
+    {
+        if((*animaliter)->is_Surplus())
+            add_Map_Object(*animaliter);
+        animaliter++;
+    }
+
+    while(SRiter != SRitere)
+    {
+        if((*SRiter)->is_Surplus())
+            add_Map_Object(*SRiter);
+        SRiter++;
+    }
+
+    return;
  }
 
 //更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
@@ -1998,7 +2038,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
