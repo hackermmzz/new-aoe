@@ -7,11 +7,13 @@ extern ins UsrIns;
 
 class UsrAI:public AI
 {
+
 public:
     UsrAI(){
         this->id=0;
     }
     ~UsrAI(){;}
+
 private:
     tagInfo getInfo()
     {
