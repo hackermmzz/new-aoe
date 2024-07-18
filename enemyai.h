@@ -30,6 +30,10 @@ private:
     void clearInsRet() override{
         tagEnemyGame.clearInsRet();
     }
+
+    double calDistance(double DR1, double UR1, double DR2, double UR2) {
+        return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5);
+    }
 public slots:
     void onWaveAttack(int wave);
 };

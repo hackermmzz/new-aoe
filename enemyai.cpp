@@ -196,6 +196,7 @@ void EnemyAI::processData() {
                           if(nowState_Army==MOVEOBJECT_STATE_STAND)
                           {
                               tar=seek(i);
+                              qDebug()<<tar<<enemyInfo.enemy_farmers.size();
                               if(tar==101)
                               armystate[i]==WAITING;
                               else if(tar>=50)

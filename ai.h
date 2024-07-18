@@ -87,10 +87,6 @@ private:
     }
 
 public:
-    double calDistance(double DR1, double UR1, double DR2, double UR2) {
-        return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5);
-    }
-
     void DebugText(std::string debugStr) {
         call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromStdString(debugStr), id);
     }
