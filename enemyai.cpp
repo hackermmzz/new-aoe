@@ -104,12 +104,8 @@ void EnemyAI::processData() {
     }
     //根据波数启动军队
     if(mode==1){
-        if(g_frame<=10500)
-        for(int i=0;i<ATT1;i++){
-            if(armystate[i]==CHASE||armystate[i]==WAITING) armystate[i]=ATTACK;
-        }
-        else {armystate[0]=WAITING;armystate[1]=WAITING;
-        }
+
+         armystate[0]=ATTACK;armystate[1]=ATTACK;
     }
     else if(mode==2){
         for(int i=0;i<ATT1+ATT2;i++){
@@ -122,54 +118,42 @@ void EnemyAI::processData() {
         }
     }
 
-    // 更新波数
-    if (g_frame >= 13500) mode = 3;
-    else if (g_frame >= 9000) mode = 2;
-    else if (g_frame >= 4500) mode = 1;
-
-    // 强制总攻
-    if (g_frame >= 15) {
-        if (cheat == 1 || enemyInfo.armies[16].Blood != Blood[16] || FinalAtt == 1) {
-            FinalAtt = 1;
-            mode = 3;
-        }
-    }
-    if (mode == 3) {
-        for (int i = 0; i < enemyInfo.armies.size(); i++) {
-            armystate[i] = ATTACK;
-        }
-    }
-
-    // 根据波数启动军队
-    if (mode == 1) {
-        if (g_frame <= 7500) {
-            for (int i = 0; i < ATT1; i++) {
-                if (armystate[i] == CHASE || armystate[i] == WAITING) armystate[i] = ATTACK;
-            }
-        } else {
-            armystate[0] = WAITING;
-            armystate[1] = WAITING;
-        }
-    } else if (mode == 2) {
-        for (int i = 0; i < ATT1 + ATT2; i++) {
-            if (armystate[i] == CHASE || armystate[i] == WAITING) armystate[i] = ATTACK;
-        }
-    } else if (mode == 3) {
-        for (int i = 0; i < enemyInfo.armies.size(); i++) {
-            if (armystate[i] == CHASE || armystate[i] == WAITING) armystate[i] = ATTACK;
-        }
-    }
-
     // 自动反击
-    for (int i = 0; i < enemyInfo.armies.size(); i++) {
-        if (armystate[i] == WAITING && enemyInfo.armies[i].Blood != Blood[i]) {
-            armystate[i] = CHASE;
-            Blood[i] = enemyInfo.armies[i].Blood;
-            chasestart_L[i] = enemyInfo.armies[i].DR;
-            chasestart_U[i] = enemyInfo.armies[i].UR;
-            timer[i] = g_frame;
-        }
+    for(int i=0;i<enemyInfo.armies.size();i++){
+           if(armystate[i]==WAITING&&enemyInfo.armies[i].Blood!=Blood[i]){
+               for(int j=0;j<enemyInfo.enemy_armies.size();j++){
+                   if(enemyInfo.enemy_armies[j].WorkObjectSN==enemyInfo.armies[i].SN){
+                       HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[j].SN);
+                       qDebug()<<"success";
+                       armystate[i]=CHASE;
+                       Blood[i]=enemyInfo.armies[i].Blood;
+                       chasestart_L[i]=enemyInfo.armies[i].DR;
+                       chasestart_U[i]=enemyInfo.armies[i].UR;
+                   }
+               }
+               if(armystate[i]!=CHASE){
+                   for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
+   //                    qDebug()<<"3";
+                       if(enemyInfo.enemy_farmers[j].WorkObjectSN==enemyInfo.armies[i].SN){
+                           HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[j].SN);
+                           qDebug()<<"success";
+                           armystate[i]=CHASE;
+                           Blood[i]=enemyInfo.armies[i].Blood;
+                           chasestart_L[i]=enemyInfo.armies[i].DR;
+                           chasestart_U[i]=enemyInfo.armies[i].UR;
+                       }
+               }
+           }}}
         //攻击状态
+    for(int i=0;i<enemyInfo.armies.size();i++){
+           if(armystate[i]==CHASE){
+               if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
+               {
+                   HumanMove(enemyInfo.armies[i].SN,chasestart_L[i],chasestart_U[i]);
+                   armystate[i]=WAITING;
+               }}
+
+
         else if(armystate[i]==ATTACK){
             if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())!=0){
             if(mode==1){
@@ -208,16 +192,6 @@ void EnemyAI::processData() {
                 }
             }
 
-            if (calDistance(enemyInfo.armies[i].DR, enemyInfo.armies[i].UR, chasestart_L[i], chasestart_U[i]) >= 200) {
-                armystate[i] = WAITING;
-                HumanMove(enemyInfo.armies[i].SN, chasestart_L[i], chasestart_U[i]);
-                Find[i] = 0;
-            }
-            if ((g_frame - timer[i]) >= 75 && enemyInfo.armies[i].NowState == MOVEOBJECT_STATE_STAND) {
-                armystate[i] = WAITING;
-                Find[i] = 0;
-                timer[i] = 0;
-            }
         }
             else if(mode==3){
                 if(Lock[i]==0){
@@ -234,59 +208,15 @@ void EnemyAI::processData() {
                               Lock[i]=1;
                               timer[i]=g_frame;
             }
-        }}
+        }
+               }
+            if ((g_frame - timer[i]) >= 75 && enemyInfo.armies[i].NowState == MOVEOBJECT_STATE_STAND) {
 
-        // 攻击状态
-        else if (armystate[i] == ATTACK) {
-            if (mode == 1) {
-                if (Lock[i] == 0 && i < ATT1) {
-                    int tar = 0;
-                    nowState_Army = enemyInfo.armies[i].NowState;
-                    if (nowState_Army == MOVEOBJECT_STATE_STAND) {
-                        tar = seek(i);
-                        if (tar > 50) {
-                            HumanAction(enemyInfo.armies[i].SN, enemyInfo.enemy_armies[tar - 50].SN);
-                        } else {
-                            HumanAction(enemyInfo.armies[i].SN, enemyInfo.enemy_farmers[tar].SN);
-                        }
-                        Lock[i] = 1;
-                        timer[i] = g_frame;
-                    }
-                }
-            } else if (mode == 2) {
-                if (Lock[i] == 0 && i < ATT1 + ATT2) {
-                    int tar = 0;
-                    nowState_Army = enemyInfo.armies[i].NowState;
-                    if (nowState_Army == MOVEOBJECT_STATE_STAND) {
-                        tar = seek(i);
-                        if (tar > 50) {
-                            HumanAction(enemyInfo.armies[i].SN, enemyInfo.enemy_armies[tar - 50].SN);
-                        } else {
-                            HumanAction(enemyInfo.armies[i].SN, enemyInfo.enemy_farmers[tar].SN);
-                        }
-                        Lock[i] = 1;
-                        timer[i] = g_frame;
-                    }
-                }
-            } else if (mode == 3) {
-                if (Lock[i] == 0) {
-                    int tar = 0;
-                    nowState_Army = enemyInfo.armies[i].NowState;
-                    if (nowState_Army == MOVEOBJECT_STATE_STAND) {
-                        tar = seek(i);
-                        if (tar > 50) {
-                            HumanAction(enemyInfo.armies[i].SN, enemyInfo.enemy_armies[tar - 50].SN);
-                        } else {
-                            HumanAction(enemyInfo.armies[i].SN, enemyInfo.enemy_farmers[tar].SN);
-                        }
-                        Lock[i] = 1;
-                        timer[i] = g_frame;
-                    }
-                }
+                Lock[i]=0;
+                timer[i] = 0;
             }
-//            qDebug()<<Lock[i];
-        }}
-        }}
+
+        }}}
 
 // 线性化进攻
 //    if(mode==1){

@@ -697,8 +697,8 @@ void MainWidget::showPlayerResource(int playerRepresent)
     core->getPlayerNowResource(playerRepresent,wood,food,stone,gold);
     ui->resWood->setText(QString::number(wood));
     ui->resFood->setText(QString::number(food));
-    ui->resStone->setText(QString::number(stone));
-    ui->resGold->setText(QString::number(gold));
+    ui->resStone->setText(QString::number(gold));
+    ui->resGold->setText(QString::number(stone));
 }
 
 void MainWidget::statusUpdate()

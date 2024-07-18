@@ -685,8 +685,6 @@ void Map::generateEnemy(){
     player[1]->addArmy(0,pos_L[2]-30,pos_U[2]-30);
     player[1]->addArmy(1,pos_L[2]-40,pos_U[2]+40);
     player[1]->addArmy(1,pos_L[2]+40,pos_U[2]-40);
-    player[1]->addArmy(1,pos_L[2]+50,pos_U[2]-50);
-    player[1]->addArmy(1,pos_L[2]+50,pos_U[2]+50);
      player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
 
 }
@@ -2043,7 +2041,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
