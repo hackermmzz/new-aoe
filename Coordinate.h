@@ -170,7 +170,7 @@ protected:
     int nowres_step = 0;
     int nowres_changeRecord = 0;
 
-    static vector<Point> viewLab[5][11];
+    static vector<Point> viewLab[5][12];
 
     /*****************act获取***************/
     double actPercent = 0;
