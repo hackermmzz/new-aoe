@@ -38,7 +38,7 @@ static int seek(int SN){
         }
         else if(enemyInfo.enemy_armies.size()!=0){
             for(int i=0;i<enemyInfo.enemy_armies.size();i++){
-                temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_farmers[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_farmers[i].BlockUR, 2), 0.5);
+                temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_armies[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_armies[i].BlockUR, 2), 0.5);
                 if (temp<min) {min=temp;
                 target=i+50;
         }
