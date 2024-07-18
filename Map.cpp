@@ -631,6 +631,7 @@ void Map::generateEnemy(){
     }
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     int rand=qrand()%6;
+    int rand2=qrand()%3;
     double TL=0,TU=0;
     if(rand==1){
         TL=pos_L[1];TU=pos_U[1];
@@ -665,25 +666,28 @@ void Map::generateEnemy(){
     }
 
     //第一组
-    player[1]->addArmy(0,pos_L[0]-2,pos_U[0]-2);
-    player[1]->addArmy(0,pos_L[0]+2,pos_U[0]+2);
+    player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
+    player[1]->addArmy(0,pos_L[0]-10,pos_U[0]-10);
+    player[1]->addArmy(0,pos_L[0]+10,pos_U[0]+10);
     //第二组
-    player[1]->addArmy(0,pos_L[1]-2,pos_U[1]-2);
-    player[1]->addArmy(0,pos_L[1]+2,pos_U[1]+2);
-    player[1]->addArmy(0,pos_L[1]-8,pos_U[1]-8);
-    player[1]->addArmy(1,pos_L[1]-8,pos_U[1]+8);
-    player[1]->addArmy(1,pos_L[1]+14,pos_U[1]-14);
-    player[1]->addArmy(1,pos_L[1]+14,pos_U[1]+14);
+    player[1]->addArmy(0,pos_L[1]-10,pos_U[1]-10);
+    player[1]->addArmy(0,pos_L[1]+10,pos_U[1]+10);
+    player[1]->addArmy(0,pos_L[1]-20,pos_U[1]-20);
+    player[1]->addArmy(1,pos_L[1]-20,pos_U[1]+20);
+    player[1]->addArmy(1,pos_L[1]+30,pos_U[1]-30);
+    player[1]->addArmy(1,pos_L[1]+30,pos_U[1]+30);
     //第三组
-    player[1]->addArmy(2,pos_L[2]-2,pos_U[2]-2);
-    player[1]->addArmy(2,pos_L[2]+2,pos_U[2]+2);
-    player[1]->addArmy(2,pos_L[2]-8,pos_U[2]+8);
-    player[1]->addArmy(0,pos_L[2]+8,pos_U[2]-8);
-    player[1]->addArmy(0,pos_L[2]+14,pos_U[2]+14);
-    player[1]->addArmy(0,pos_L[2]-14,pos_U[2]-14);
-    player[1]->addArmy(1,pos_L[2]-20,pos_U[2]+20);
-    player[1]->addArmy(1,pos_L[2]+20,pos_U[2]-20);
-    player[1]->addArmy(1,45,45);
+    player[1]->addArmy(2,pos_L[2]-10,pos_U[2]-10);
+    player[1]->addArmy(2,pos_L[2]+10,pos_U[2]+10);
+    player[1]->addArmy(2,pos_L[2]-20,pos_U[2]+20);
+    player[1]->addArmy(0,pos_L[2]+20,pos_U[2]-20);
+    player[1]->addArmy(0,pos_L[2]+30,pos_U[2]+30);
+    player[1]->addArmy(0,pos_L[2]-30,pos_U[2]-30);
+    player[1]->addArmy(1,pos_L[2]-40,pos_U[2]+40);
+    player[1]->addArmy(1,pos_L[2]+40,pos_U[2]-40);
+    player[1]->addArmy(1,pos_L[2]+50,pos_U[2]-50);
+    player[1]->addArmy(1,pos_L[2]+50,pos_U[2]+50);
+
 }
 
 /*
@@ -2038,7 +2042,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
