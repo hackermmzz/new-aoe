@@ -79,7 +79,7 @@ void EnemyAI::processData(){
             timer[i]=0;
             Lock[i]=0;
             armystate[i]=WAITING;
-            qDebug()<<Blood[i];
+//            qDebug()<<Blood[i];
             pos_L[i]=enemyInfo.armies[i].DR;
             pos_U[i]=enemyInfo.armies[i].UR;
             Find[i]=0;
@@ -89,7 +89,7 @@ void EnemyAI::processData(){
     if(g_frame>=22500) mode=3;
     else if(g_frame>=15000) mode=2;
     else if(g_frame>=7500) mode=1;
-    qDebug()<<enemyInfo.armies[0].Sort;
+//    qDebug()<<enemyInfo.armies[0].Sort;
     //强制总攻
     if(g_frame>=15){
     if(cheat==1||enemyInfo.armies[0].Blood!=Blood[0]||FinalAtt==1){
@@ -230,7 +230,7 @@ void EnemyAI::processData(){
             if((g_frame-timer[i])>=75&&enemyInfo.armies[i].NowState==MOVEOBJECT_STATE_STAND){
                 Lock[i]=0;timer[i]=0;
             }
-            qDebug()<<Lock[i];
+//            qDebug()<<Lock[i];
         }}
 }
 
