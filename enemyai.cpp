@@ -92,7 +92,7 @@ void EnemyAI::processData(){
     qDebug()<<enemyInfo.armies[0].Sort;
     //强制总攻
     if(g_frame>=15){
-    if(cheat==1||enemyInfo.armies[0].Blood!=Blood[0]||FinalAtt==1){
+    if(cheat==1||enemyInfo.armies[16].Blood!=Blood[16]||FinalAtt==1){
         FinalAtt=1;
         mode=3;
     }}
