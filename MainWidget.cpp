@@ -638,7 +638,7 @@ void MainWidget::deleteFarmer()
 void MainWidget::deleteArmy()
 {
     // 清理素材资源
-    for(int statei = 0; statei < 4; statei++)
+    for(int statei = 0; statei < 7; statei++)
     {
         for(int level = 0 ;level<2;level++)
         {

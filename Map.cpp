@@ -631,6 +631,7 @@ void Map::generateEnemy(){
     }
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     int rand=qrand()%6;
+    int rand2=qrand()%3;
     double TL=0,TU=0;
     if(rand==1){
         TL=pos_L[1];TU=pos_U[1];
@@ -665,6 +666,7 @@ void Map::generateEnemy(){
     }
 
     //第一组
+    player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
     player[1]->addArmy(0,pos_L[0]-10,pos_U[0]-10);
     player[1]->addArmy(0,pos_L[0]+10,pos_U[0]+10);
     //第二组
@@ -685,6 +687,7 @@ void Map::generateEnemy(){
     player[1]->addArmy(1,pos_L[2]+40,pos_U[2]-40);
     player[1]->addArmy(1,pos_L[2]+50,pos_U[2]-50);
     player[1]->addArmy(1,pos_L[2]+50,pos_U[2]+50);
+
 }
 
 /*
