@@ -685,8 +685,6 @@ void Map::generateEnemy(){
     player[1]->addArmy(0,pos_L[2]-30,pos_U[2]-30);
     player[1]->addArmy(1,pos_L[2]-40,pos_U[2]+40);
     player[1]->addArmy(1,pos_L[2]+40,pos_U[2]-40);
-    player[1]->addArmy(1,pos_L[2]+50,pos_U[2]-50);
-    player[1]->addArmy(1,pos_L[2]+50,pos_U[2]+50);
      player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
 
 }
