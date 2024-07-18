@@ -197,7 +197,7 @@ private:
     int resource_Max = 10;
     //最大资源携带量
 
-    double quantity_GatherOnce = 0.2;
+    double quantity_GatherOnce = 0.55;
 
     int resourceSort;
     //指示所携带资源的类型

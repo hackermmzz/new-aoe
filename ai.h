@@ -104,7 +104,7 @@ public:
     }
 signals:
     void cheatRes();
-
+    void cheatAttack(int wave);
 };
 
 #endif // AI_H
