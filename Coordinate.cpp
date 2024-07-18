@@ -1,6 +1,6 @@
 ﻿#include "Coordinate.h"
 
-vector<Point> Coordinate::viewLab[5][11];
+vector<Point> Coordinate::viewLab[5][12];
 
 Coordinate::Coordinate()
 {

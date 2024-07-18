@@ -30,6 +30,7 @@ private:
     void clearInsRet() override{
         tagEnemyGame.clearInsRet();
     }
+
 public slots:
     void onWaveAttack(int wave);
 };

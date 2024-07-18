@@ -1,25 +1,20 @@
 #ifndef USRAI_H
 #define USRAI_H
 #include "AI.h"
-
 extern tagGame tagUsrGame;
 extern ins UsrIns;
+/*##########请勿修改以上部分##########*/
 
 class UsrAI:public AI
 {
-
 public:
-    UsrAI(){
-        this->id=0;
-    }
-    ~UsrAI(){;}
+    UsrAI(){this->id=0;}
+    ~UsrAI(){}
 
 private:
-    tagInfo getInfo()
-    {
-        return tagUsrGame.getInfo();
-    }
+  /***************AI通信函数，请勿修改***************/
     void processData() override;
+    tagInfo getInfo(){return tagUsrGame.getInfo();}
     int AddToIns(instruction ins) override
     {
         UsrIns.lock.lock();
@@ -33,8 +28,8 @@ private:
     {
         tagUsrGame.clearInsRet();
     }
+  /***************AI通信函数，请勿修改***************/
 };
-/*##########DO NOT EDIT ABOVE##########*/
 
 
 #endif // USRAI_H

@@ -39,6 +39,12 @@ public:
         else return 0;
     }
 
+    int getVision(){
+        if(getNum() == BUILDING_ARROWTOWER)
+            return vision + playerScience->get_addition_DisAttack(getSort(),Num, 0 ,get_AttackType());
+        else return vision;
+    }
+
     void setAttribute();
     void setNowRes();
     void setAction( int actNum );
