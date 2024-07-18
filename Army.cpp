@@ -170,7 +170,7 @@ int Army::getVision()
     if(upgradable) realVision = vision_change[getLevel()];
     else realVision = vision;
 
-    return realVision;
+    return realVision + playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType());
 }
 
 //攻击力
