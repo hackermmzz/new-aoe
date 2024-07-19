@@ -582,9 +582,9 @@ void Core::manageMouseEvent()
 
                     switch (object_click->getSort())
                     {
-                        case SORT_ANIMAL:
-                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
-                            break;
+//                        case SORT_ANIMAL:
+//                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+//                            break;
                         case SORT_Building_Resource:
                             if(object_click->getPlayerRepresent() != 0)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
