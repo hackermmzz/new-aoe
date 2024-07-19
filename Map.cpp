@@ -573,7 +573,6 @@ void Map::generateEnemy(){
     else if(EL>=36&&EU<36) dir=2;
     else if(EL<36&&EU<36) dir=3;
     else if(EL<36&&EU>=36) dir=4;
-
     for(int i=62;i>52&&dir!=2;i--){
         for(int j=10;j<20;j++){
             if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
@@ -664,9 +663,7 @@ void Map::generateEnemy(){
         pos_L[1]=pos_L[2];pos_U[1]=pos_U[2];
         pos_L[2]=TL;pos_U[2]=TU;
     }
-
     //第一组
-
     player[1]->addArmy(0,pos_L[0]-10,pos_U[0]-10);
     player[1]->addArmy(0,pos_L[0]+10,pos_U[0]+10);
     //第二组
@@ -685,8 +682,7 @@ void Map::generateEnemy(){
     player[1]->addArmy(0,pos_L[2]-30,pos_U[2]-30);
     player[1]->addArmy(1,pos_L[2]-40,pos_U[2]+40);
     player[1]->addArmy(1,pos_L[2]+40,pos_U[2]-40);
-     player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
-
+    player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
 }
 
 /*
