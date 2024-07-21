@@ -149,7 +149,7 @@ void Core::gameUpdate()
             if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
                 if(!(*builditer)->isDie())
-                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
+                    call_debugText("green"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
                 else
                     call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
 
@@ -238,7 +238,7 @@ void Core::gameUpdate()
         else if(!(*animaliter)->isDisappearing())
         {
             (*animaliter)->nextframe();
-            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
+            call_debugText("green"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
             g_Object[(*animaliter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
@@ -271,7 +271,7 @@ void Core::gameUpdate()
         }
         else
         {
-            call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成",0);
+            call_debugText("green"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成",0);
 
             g_Object[(*SRiter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*SRiter);
