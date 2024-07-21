@@ -57,12 +57,13 @@ void ViewWidget::paintEvent(QPaintEvent *)
         auto farmerIter = enemyFarmerList->begin();
         for(; farmerIter != enemyFarmerList->end(); farmerIter++)
         {
-            int farmerL = (*farmerIter)->getDR() / 16 / gen5;
-            int farmerU = (*farmerIter)->getUR() / 16 / gen5;
-            int farmerY = 1.23 * (MAP_L + farmerL - farmerU);
-            int farmerX = 3.55 * (farmerL + farmerU);
-            if(mainwidget->map->cell[farmerL][farmerU].Visible) painter.fillRect(QRect(farmerX, farmerY, 6, 6), QBrush(Qt::red));
-
+            if((*farmerIter)->isDie()){
+                int farmerL = (*farmerIter)->getDR() / 16 / gen5;
+                int farmerU = (*farmerIter)->getUR() / 16 / gen5;
+                int farmerY = 1.23 * (MAP_L + farmerL - farmerU);
+                int farmerX = 3.55 * (farmerL + farmerU);
+                if(mainwidget->map->cell[farmerL][farmerU].Visible) painter.fillRect(QRect(farmerX, farmerY, 6, 6), QBrush(Qt::red));
+            }
         }
     }
     if(!enemyBuildList->empty()){
@@ -82,12 +83,14 @@ void ViewWidget::paintEvent(QPaintEvent *)
         auto farmerIter = friendlyFarmerList->begin();
         for(; farmerIter != friendlyFarmerList->end(); farmerIter++)
         {
-            int farmerL = (*farmerIter)->getDR() / 16 / gen5;
-            int farmerU = (*farmerIter)->getUR() / 16 / gen5;
-            int farmerY = 1.23 * (MAP_L + farmerL - farmerU);
-            int farmerX = 3.55 * (farmerL + farmerU);
-            painter.fillRect(QRect(farmerX, farmerY, 6, 6), QBrush(Qt::blue));
+            if(!(*farmerIter)->isDie()){
+                int farmerL = (*farmerIter)->getDR() / 16 / gen5;
+                int farmerU = (*farmerIter)->getUR() / 16 / gen5;
+                int farmerY = 1.23 * (MAP_L + farmerL - farmerU);
+                int farmerX = 3.55 * (farmerL + farmerU);
+                painter.fillRect(QRect(farmerX, farmerY, 6, 6), QBrush(Qt::blue));
 
+            }
         }
     }
     if(!friendlyBuildList->empty()){
