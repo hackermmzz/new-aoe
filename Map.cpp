@@ -848,7 +848,7 @@ bool Map::isSlope(int BlockDR, int BlockUR)
     return true;
 }
 
-void Map::loadBarrierMap()
+void Map::loadBarrierMap(bool absolute)
 {
     clearBarrierMap();
 
@@ -883,7 +883,7 @@ void Map::loadBarrierMap()
         std::list<StaticRes *>::iterator iter=staticres.begin() , iterend = staticres.end();
         while(iter!=iterend)
         {
-            if((*iter)->getNum() != NUM_STATICRES_Bush )
+            if( absolute || (*iter)->getNum() != NUM_STATICRES_Bush )
                 setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
             iter++;
         }
@@ -1165,27 +1165,6 @@ vector<Point> Map::findBlock_Flat(int disLen )
 
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
-//    int vision = object->getVision()-1;
-//    int blockSidelen = object->get_BlockSizeLen()-1;
-//    Point position;
-//    position.x = object->getBlockDR();
-//    position.y = object->getBlockUR();
-//    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
-//    int lx = position.x-vision, ly = position.y-vision;
-//    vector<Point> blockLab;
-
-//    for(int x = lx; x<=mx;x++)
-//    {
-//        for(int y = ly; y<=my; y++)
-//        {
-//            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
-//            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
-
-//            blockLab.push_back(Point( x,y ));
-//        }
-//    }
-//    return blockLab;
-
     Point position(object->getBlockDR() , object->getBlockUR());
     Point visionPoint;
     vector<Point> blockLab = object->getViewLab();
@@ -1381,8 +1360,18 @@ void Map::reset_CellExplore(Coordinate* eye)
     * 输入：用户的控制对象，如Human、Building
     * 操作：根据用户输入的对象，设置视野内格子为已探索
     */
-    vector<Point> blockLab = get_ObjectVisionBlock(eye);
-    int size = blockLab.size();
+    vector<Point> blockLab;
+    int size;
+    Building* buildPrinter = NULL;
+
+    eye->printer_ToBuilding((void**)& buildPrinter);
+
+    if(!(buildPrinter == NULL || buildPrinter->isFinish()))
+        blockLab = get_ObjectBlock(eye);
+    else
+        blockLab = get_ObjectVisionBlock(eye);
+
+    size = blockLab.size();
 
     for(int i = 0 ; i<size; i++)
     {

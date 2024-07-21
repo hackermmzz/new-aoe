@@ -83,7 +83,8 @@ private:
     }
 
     bool isBuilding(int SN) {
-        return g_Object[SN] && SN / 10000 == SORT_BUILDING;
+        int sort = SN / 10000 ;
+        return g_Object[SN] && (sort == SORT_BUILDING || sort == SORT_Building_Resource);
     }
 
 public:

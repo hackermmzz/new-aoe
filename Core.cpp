@@ -39,7 +39,7 @@ void Core::gameUpdate()
                 //需要变化的行动为“死亡”，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
-                    call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
+                    call_debugText("red"," "+(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
                     g_Object[(*humaniter)->getglobalNum()] = NULL;
@@ -643,6 +643,7 @@ void Core::manageOrder(int id)
             tagAIGame->insertInsRet(cur.id,cur);
             continue;
         }
+
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
             interactionList->suspendRelation(self);
@@ -740,6 +741,7 @@ void Core::manageOrder(int id)
                 }
                 break;
             default:
+                ret = ACTION_INVALID_SN;
                 break;
             }
             break;

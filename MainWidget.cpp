@@ -728,7 +728,7 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
-    return sel->getSecend()>=GAME_LOSE_SEC || player[0]->get_centerNum()<1;
+    return sel->getSecend()>GAME_LOSE_SEC || player[0]->get_centerNum()<1;
 }
 bool MainWidget::isWin()
 {
@@ -899,7 +899,7 @@ void MainWidget::buildInitialStock()
     int labSize,treeNum,maxtreeNum = 0;
     int lx,ly,mx,my;
 
-    map->loadBarrierMap();
+    map->loadBarrierMap(true);
     map->reset_Map_Object_Resource();
     map->reset_resMap_AI();
     while(tasking)
