@@ -253,7 +253,7 @@
   <widget class="QLabel" name="resGold">
    <property name="geometry">
     <rect>
-     <x>550</x>
+     <x>395</x>
      <y>10</y>
      <width>81</width>
      <height>21</height>
@@ -273,7 +273,7 @@
   <widget class="QLabel" name="resStone">
    <property name="geometry">
     <rect>
-     <x>395</x>
+     <x>550</x>
      <y>10</y>
      <width>81</width>
      <height>21</height>
