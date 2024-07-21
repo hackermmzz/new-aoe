@@ -136,13 +136,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     EnemyAi=new EnemyAI();
     connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
     connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
-<<<<<<< HEAD
-//    UsrAi->start();
-=======
-    connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
-    connect(UsrAi,&UsrAI::cheatAttack,EnemyAi,&EnemyAI::onWaveAttack);
     UsrAi->start();
->>>>>>> 815cda72022345e0406f0f2e425c32d886ca8602
     EnemyAi->start();
 
     core->sel = sel;
