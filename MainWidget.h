@@ -79,7 +79,8 @@ public:
 
     SelectWidget *sel;
     Core *core;
-    AI* UsrAi,*EnemyAi;
+    UsrAI* UsrAi;
+    EnemyAI *EnemyAi;
     bool eventFilter(QObject *watched, QEvent *event);
     Map *map;
     int **memorymap=new int*[MEMORYROW];//动态

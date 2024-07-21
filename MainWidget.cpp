@@ -136,10 +136,14 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     EnemyAi=new EnemyAI();
     connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
     connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
+<<<<<<< HEAD
 //    UsrAi->start();
-    EnemyAi->start();
-
+=======
     connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
+    connect(UsrAi,&UsrAI::cheatAttack,EnemyAi,&EnemyAI::onWaveAttack);
+    UsrAi->start();
+>>>>>>> 815cda72022345e0406f0f2e425c32d886ca8602
+    EnemyAi->start();
 
     core->sel = sel;
     connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
@@ -697,8 +701,8 @@ void MainWidget::showPlayerResource(int playerRepresent)
     core->getPlayerNowResource(playerRepresent,wood,food,stone,gold);
     ui->resWood->setText(QString::number(wood));
     ui->resFood->setText(QString::number(food));
-    ui->resStone->setText(QString::number(stone));
-    ui->resGold->setText(QString::number(gold));
+    ui->resStone->setText(QString::number(gold));
+    ui->resGold->setText(QString::number(stone));
 }
 
 void MainWidget::statusUpdate()
