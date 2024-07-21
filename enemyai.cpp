@@ -108,7 +108,7 @@ void EnemyAI::processData() {
     }
     else if(mode==2){
 
-        for(int i=0;i<enemyInfo.armies.size()-9;i++){
+        for(int i=0;i<enemyInfo.armies.size();i++){
             if(armystate[i]==CHASE||armystate[i]==WAITING) armystate[i]=ATTACK;
         }
     }
