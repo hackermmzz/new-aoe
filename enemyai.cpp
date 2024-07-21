@@ -165,6 +165,8 @@ void EnemyAI::processData() {
                          Lock[i]=1;
                          timer[i]=g_frame;
            }
+            if(num==16)armystate[1]=WAITING;
+            else if(num==15)armystate[0]=WAITING;
             }}
             else if(mode==2){
                 if(Lock[i]==0&&i<ATT1+ATT2){
@@ -183,6 +185,11 @@ void EnemyAI::processData() {
                               timer[i]=g_frame;
                 }
             }
+                if(num<17){
+                    for(int i=17;i>num;i--){
+                        armystate[i-10]=WAITING;
+                    }
+                }
 
         }
             else if(mode==3){
