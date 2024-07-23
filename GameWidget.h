@@ -68,7 +68,7 @@ private:
     QPoint selectionEndPos;
 
     //是否展示地图的格子线
-    bool showLine = true;
+    bool showLine = false;
     int buildMode = -1;
 //    bool pos = false;
 };
