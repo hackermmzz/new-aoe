@@ -445,6 +445,19 @@
     <string>8×</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="option">
+   <property name="geometry">
+    <rect>
+     <x>760</x>
+     <y>850</y>
+     <width>80</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>设置</string>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

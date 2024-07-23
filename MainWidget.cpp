@@ -60,6 +60,27 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
+    option = new Option();
+    option->hide();
+
+
+//    connect(option->btnHtml,&QPushButton::clicked,this,&MainWidget::exportDebugTextHtml);
+//    connect(option->btntxt,&QPushButton::clicked,this,&MainWidget::exportDebugTextTxt);
+//    connect(option->btnTextClear,&QPushButton::clicked,this,&MainWidget::clearDebugText);
+//    connect(option->btnFileClear,&QPushButton::clicked,this,&MainWidget::clearDebugTextFile);
+//    connect(option->btnMusic,&QPushButton::clicked,this,&MainWidget::toggleMusic);
+//    connect(option->btnSound,&QPushButton::clicked,this,&MainWidget::toggleSound);
+//    connect(option->btnSelect,&QPushButton::clicked,this,&MainWidget::toggleSelect);
+//    connect(option->btnLine,&QPushButton::clicked,this,&MainWidget::toggleLine);
+//    connect(option->btnPos,&QPushButton::clicked,this,&MainWidget::togglePos);
+//    connect(option->btnOverlap,&QPushButton::clicked,this,&MainWidget::toggleShowOverlap);
+    option->btnSelect->hide();
+    option->btnLine->hide();
+    option->btnPos->hide();
+    option->btnOverlap->hide();
+    connect(ui->option,&QPushButton::clicked,option,&QDialog::show);
+
+
 
     sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);

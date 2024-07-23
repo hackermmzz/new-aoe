@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <SelectWidget.h>
 //#include <AboutDialog.h>
-//#include <Option.h>
+#include <Option.h>
 #include <Core.h>
 #include "UsrAI.h"
 #include "EnemyAI.h"
@@ -138,6 +138,8 @@ private:
 //    bool line = false;
 //    bool pos = false;
 //    bool showOverlap = true;
+
+    Option *option = NULL;
     ActWidget *acts[ACT_WINDOW_NUM_FREE];
 };
 
