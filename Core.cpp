@@ -663,6 +663,14 @@ void Core::manageOrder(int id)
             }
             switch(self->getSort()){
             case SORT_FARMER:
+                if(self==obj){
+                    ret=deleteSelf(self);
+                    if(ret == ACTION_SUCCESS){
+                        call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+"  被删除",id);
+                    }
+                    break;
+                }
+
                 switch (obj->getSort()){
                 case SORT_STATICRES:
                 case SORT_ANIMAL:
@@ -715,6 +723,13 @@ void Core::manageOrder(int id)
                 if(self->getNum() != BUILDING_ARROWTOWER)
                     break;
             case SORT_ARMY:
+                if(self==obj){
+                    ret=deleteSelf(self);
+                    if(ret == ACTION_SUCCESS){
+                        call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+"  被删除",id);
+                    }
+                    break;
+                }
                 switch (obj->getSort()){
                 case SORT_ANIMAL:
                     ret=ACTION_INVALID_OBSN;
