@@ -7,9 +7,6 @@ ins EnemyIns;
 #define ATTACK 2
 #define DESTROY 3
 #define COUNTER 4
-#define ATT1 2
-#define ATT2 6
-#define ATT3 9
 tagInfo enemyInfo;
 static int mode = 0;
 static double pos_L[50] = {0};
@@ -24,6 +21,10 @@ static int Find[50];
 static int Hero=0;
 static int Herotemp=0;
 static int num=17;
+static int ATT1=2;
+static int ATT2=8;
+static int ATT3=17;
+static int sum;
 static int seek(int SN){
     double temp=0;
     double min=10000;
@@ -79,6 +80,7 @@ void EnemyAI::processData() {
         }
     }
     if(g_frame==15){
+        sum=enemyInfo.armies.size();
         for(int i=0;i<enemyInfo.armies.size();i++){
             Blood[i]=enemyInfo.armies[i].Blood;
             timer[i]=0;
@@ -97,6 +99,19 @@ void EnemyAI::processData() {
     if(g_frame==22500) mode=3;
     else if(g_frame==15000) mode=2;
     else if(g_frame==7500) mode=1;
+        if(enemyInfo.armies.size()!=sum){
+            if(mode==1){
+            int dif=(sum-enemyInfo.armies.size());
+            sum=enemyInfo.armies.size();
+            ATT1-=dif;
+        }
+            else if (mode==2){
+                int dif=(sum-enemyInfo.armies.size());
+                sum=enemyInfo.armies.size();
+                ATT2-=dif;
+
+            }
+    }
     //强制总攻
     if(g_frame>=15){
     if(enemyInfo.armies[Hero].Blood!=Blood[Hero]){
@@ -104,12 +119,12 @@ void EnemyAI::processData() {
     }}
     //根据波数启动军队
     if(mode==1){
-         armystate[0]=ATTACK;armystate[1]=ATTACK;
+         for(int i=0;i<ATT1;i++)
+             if(armystate[i]==WAITING) armystate[i]=ATTACK;
     }
     else if(mode==2){
-
         for(int i=0;i<enemyInfo.armies.size();i++){
-            if(armystate[i]==CHASE||armystate[i]==WAITING) armystate[i]=ATTACK;
+            if(armystate[i]==WAITING) armystate[i]=ATTACK;
         }
     }
     else if(mode==3){
@@ -118,8 +133,9 @@ void EnemyAI::processData() {
         }
     }
     // 自动反击
+    if(mode!=3){
     for(int i=0;i<enemyInfo.armies.size();i++){
-           if(armystate[i]==WAITING&&enemyInfo.armies[i].Blood!=Blood[i]){
+           if(enemyInfo.armies[i].Blood!=Blood[i]&&armystate[i]!=CHASE){
                for(int j=0;j<enemyInfo.enemy_armies.size();j++){
                    if(enemyInfo.enemy_armies[j].WorkObjectSN==enemyInfo.armies[i].SN){
                        HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[j].SN);
@@ -137,17 +153,39 @@ void EnemyAI::processData() {
                            Blood[i]=enemyInfo.armies[i].Blood;
                            chasestart_L[i]=enemyInfo.armies[i].DR;
                            chasestart_U[i]=enemyInfo.armies[i].UR;
+                           timer[i]=g_frame;
                        }
                }
-           }}}
+           }
+               if(armystate[i]!=CHASE){
+                   for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
+                       if(enemyInfo.enemy_buildings[j].Type==BUILDING_ARROWTOWER){
+                           HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[j].SN);
+                           armystate[i]=CHASE;
+                           Blood[i]=enemyInfo.armies[i].Blood;
+                           chasestart_L[i]=enemyInfo.armies[i].DR;
+                           chasestart_U[i]=enemyInfo.armies[i].UR;
+                           timer[i]=g_frame;
+                       }
+                   }
+               }
+           }}
+    }
         //攻击状态
     for(int i=0;i<enemyInfo.armies.size();i++){
            if(armystate[i]==CHASE){
+               //反击检查
                if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
                {
                    HumanMove(enemyInfo.armies[i].SN,chasestart_L[i],chasestart_U[i]);
                    armystate[i]=WAITING;
-               }}
+               }
+               if((g_frame - timer[i]) >= 75 && enemyInfo.armies[i].NowState == MOVEOBJECT_STATE_STAND){
+                   timer[i] = 0;
+                   armystate[i]=WAITING;
+               }
+
+           }
         else if(armystate[i]==ATTACK){
             if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())!=0){
             if(mode==1){
@@ -165,8 +203,6 @@ void EnemyAI::processData() {
                          Lock[i]=1;
                          timer[i]=g_frame;
            }
-            if(num==16)armystate[1]=WAITING;
-            else if(num==15)armystate[0]=WAITING;
             }}
             else if(mode==2){
                 if(Lock[i]==0&&i<ATT1+ATT2){
@@ -213,11 +249,6 @@ void EnemyAI::processData() {
                 Lock[i]=0;
                 timer[i] = 0;
             }
-            int dif=num-enemyInfo.armies.size();
-            if(dif!=0)
-                for(int i=dif;i>0;i--){
-                    armystate[i-1]==WAITING;
-                }
         }}}
 
 // 线性化进攻
