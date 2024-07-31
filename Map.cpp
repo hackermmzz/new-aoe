@@ -667,12 +667,12 @@ void Map::generateEnemy(){
     player[1]->addArmy(0,pos_L[0]-10,pos_U[0]-10);
     player[1]->addArmy(0,pos_L[0]+10,pos_U[0]+10);
     //第二组
-    player[1]->addArmy(2,pos_L[1]-10,pos_U[1]-10);
-    player[1]->addArmy(2,pos_L[1]+10,pos_U[1]+10);
+    player[1]->addArmy(1,pos_L[1]-10,pos_U[1]-10);
+    player[1]->addArmy(1,pos_L[1]+10,pos_U[1]+10);
     player[1]->addArmy(3,pos_L[1]-20,pos_U[1]-20);
     player[1]->addArmy(3,pos_L[1]-20,pos_U[1]+20);
-    player[1]->addArmy(1,pos_L[1]+30,pos_U[1]-30);
-    player[1]->addArmy(1,pos_L[1]+30,pos_U[1]+30);
+    player[1]->addArmy(2,pos_L[1]+30,pos_U[1]-30);
+    player[1]->addArmy(2,pos_L[1]+30,pos_U[1]+30);
     //第三组
     player[1]->addArmy(0,pos_L[2]-10,pos_U[2]-10);
     player[1]->addArmy(0,pos_L[2]+10,pos_U[2]+10);

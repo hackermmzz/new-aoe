@@ -9,6 +9,7 @@ ins EnemyIns;
 #define COUNTER 4
 tagInfo enemyInfo;
 static int mode = 0;
+static int target[5]={151,151,151,151,151};
 static double pos_L[50] = {0};
 static double pos_U[50] = {0};
 static int armystate[50] = {0};
@@ -20,55 +21,60 @@ static int timer[50] = {0};
 static int Find[50];
 static int Hero=0;
 static int Herotemp=0;
-static int num=17;
 static int ATT1=2;
 static int ATT2=8;
 static int ATT3=17;
+static int ChasingLock[17]={0};
 static int sum;
-static int seek(int SN){
+static int seek(int Sort,int number){
     double temp=0;
+    int SN=0;
     double min=10000;
-    int target=101;
-    if(SN<2){
+    int target=151;
+    for(int i=0;i<enemyInfo.armies.size();i++){
+        if(enemyInfo.armies[i].Sort==Sort)
+            SN=i;
+    }
+    if(number==1){
         if(enemyInfo.enemy_farmers.size()!=0)
         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_farmers[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_farmers[i].BlockUR, 2), 0.5);
             if (temp<min) {min=temp;
             target=i;
            }
-        }
-        else if(enemyInfo.enemy_armies.size()!=0){
-            for(int i=0;i<enemyInfo.enemy_armies.size();i++){
-                temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_armies[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_armies[i].BlockUR, 2), 0.5);
-                if (temp<min) {min=temp;
-                target=i+50;
-        }
-        return target;
-    }}}
-    else if(SN>=2){
-        if(enemyInfo.enemy_armies.size()!=0)
-    for(int i=0;i<enemyInfo.enemy_armies.size();i++){
-         temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_armies[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_armies[i].BlockUR, 2), 0.5);
-        if(temp<min){
-            min=temp;
-            target=i+50;
-        }
+        }return target;
+   }
+    else if(number==2){
+        if(enemyInfo.enemy_armies.size()!=0){
+                    for(int i=0;i<enemyInfo.enemy_armies.size();i++){
+                        temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_armies[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_armies[i].BlockUR, 2), 0.5);
+                        if (temp<min) {min=temp;
+                        target=i+50;
+                }
     }
-    else if(enemyInfo.enemy_farmers.size()!=0){
-         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
-            temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_farmers[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_farmers[i].BlockUR, 2), 0.5);
+        }return target;
+    }
+    else if(number==3){
+        if(enemyInfo.enemy_buildings.size()!=0){
+        for(int i=0;i<enemyInfo.enemy_buildings.size();i++){
+            if(enemyInfo.enemy_buildings[i].Type==BUILDING_ARROWTOWER){
+            temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_buildings[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_buildings[i].BlockUR, 2), 0.5);
             if(temp<min){
-                min=temp;
-                target=i;
-    }
-    }
+                min=temp;target=i+100;
+            }}
+        }
+        if(target==151){
+            for(int i=0;i<enemyInfo.enemy_buildings.size();i++){
+                if(enemyInfo.enemy_buildings[i].Type==BUILDING_CENTER)
+                 target=i+100;
+
             }
-    return target;
-    }
-}
+            return target;
+        }else return target;
+    }}}
 void EnemyAI::processData() {
     /*##########YOUR CODE BEGINS HERE##########*/
-    int nowState_Army;
+    int nowState_Army=0;
     enemyInfo=getInfo();
     //军队数据初始化
     for(int i=0;i<enemyInfo.armies.size();i++){
@@ -78,7 +84,7 @@ void EnemyAI::processData() {
                 Blood[Hero]=Blood[Herotemp];
             }
         }
-    }
+    }   
     if(g_frame==15){
         sum=enemyInfo.armies.size();
         for(int i=0;i<enemyInfo.armies.size();i++){
@@ -92,13 +98,17 @@ void EnemyAI::processData() {
             Find[i]=0;
             Hero=16;
             Herotemp=16;
+            ChasingLock[i]=0;
         }
     }
-
     //更新波数
     if(g_frame==22500) mode=3;
     else if(g_frame==15000) mode=2;
     else if(g_frame==7500) mode=1;
+    if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.buildings.size()==0){
+        mode=4;
+    }
+    //防止连续出兵
         if(enemyInfo.armies.size()!=sum){
             if(mode==1){
             int dif=(sum-enemyInfo.armies.size());
@@ -117,25 +127,46 @@ void EnemyAI::processData() {
     if(enemyInfo.armies[Hero].Blood!=Blood[Hero]){
         mode=3;
     }}
-    //根据波数启动军队
+    //根据波数启动军队,选定各兵种目标
     if(mode==1){
          for(int i=0;i<ATT1;i++)
              if(armystate[i]==WAITING) armystate[i]=ATTACK;
+         target[0]=seek(0,1);
+         if(target[0]>150) target[0]=seek(0,2);
+         if(target[0]>150) target[0]=seek(0,3);
     }
     else if(mode==2){
-        for(int i=0;i<enemyInfo.armies.size();i++){
-            if(armystate[i]==WAITING) armystate[i]=ATTACK;
-        }
+        for(int i=0;i<ATT2;i++){
+            if(armystate[i]==WAITING) armystate[i]=ATTACK;}
+
+            target[1]=seek(1,3);
+            if(target[1]>150) target[1]=seek(1,2);
+            if(target[1]>150) target[1]=seek(1,1);
+
+            target[2]=seek(2,1);
+            qDebug()<<target[2];
+            if(target[2]>150) target[2]=seek(2,2);
+            qDebug()<<target[2];
+            if(target[2]>150) target[2]=seek(2,3);
+            qDebug()<<target[2];
+            target[3]=seek(3,1);
+            if(target[3]>150) target[3]=seek(3,2);
+            if(target[3]>150) target[3]=seek(3,3);
+
     }
     else if(mode==3){
+        target[4]=seek(enemyInfo.armies[Hero].Sort,3);
+        if(target[4]>150) target[2]=seek(enemyInfo.armies[Hero].Sort,2);
+        if(target[4]>150)target[2]=seek(enemyInfo.armies[Hero].Sort,1);
         for(int i=0;i<enemyInfo.armies.size();i++){
             if(armystate[i]==CHASE||armystate[i]==WAITING) armystate[i]=ATTACK;
         }
     }
+
     // 自动反击
     if(mode!=3){
     for(int i=0;i<enemyInfo.armies.size();i++){
-           if(enemyInfo.armies[i].Blood!=Blood[i]&&armystate[i]!=CHASE){
+           if(enemyInfo.armies[i].Blood!=Blood[i]&&armystate[i]!=CHASE&&ChasingLock[i]==0){
                for(int j=0;j<enemyInfo.enemy_armies.size();j++){
                    if(enemyInfo.enemy_armies[j].WorkObjectSN==enemyInfo.armies[i].SN){
                        HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[j].SN);
@@ -187,59 +218,74 @@ void EnemyAI::processData() {
 
            }
         else if(armystate[i]==ATTACK){
-            if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())!=0){
             if(mode==1){
             if(Lock[i]==0&&i<ATT1){
-                     int tar=0;
+
                      nowState_Army=enemyInfo.armies[i].NowState;
                      if(nowState_Army==MOVEOBJECT_STATE_STAND)
                      {
-                         tar=seek(i);
-                         if(tar==101)
+
+                         int tar=target[0];
+                         if(tar==151)
                          armystate[i]==WAITING;
-                         else if(tar>=50)
-                         HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
-                         else  HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+                         else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                             HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+
+                         else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+                         else if(enemyInfo.enemy_farmers.size()!=0) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
                          Lock[i]=1;
                          timer[i]=g_frame;
            }
             }}
             else if(mode==2){
-                if(Lock[i]==0&&i<ATT1+ATT2){
-                    int tar=0;
-                          nowState_Army=enemyInfo.armies[i].NowState;
-                          if(nowState_Army==MOVEOBJECT_STATE_STAND)
-                          {
-                              tar=seek(i);
-                              qDebug()<<tar<<enemyInfo.enemy_farmers.size();
-                              if(tar==101)
-                              armystate[i]==WAITING;
-                              else if(tar>=50)
-                              HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
-                              else HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
-                              Lock[i]=1;
-                              timer[i]=g_frame;
-                }
-            }
-                if(num<17){
-                    for(int i=17;i>num;i--){
-                        armystate[i-10]=WAITING;
-                    }
-                }
+                nowState_Army=enemyInfo.armies[i].NowState;
+                if(nowState_Army==MOVEOBJECT_STATE_STAND&&i<ATT2&&Lock[i]==0){
+                if(enemyInfo.armies[i].Sort==2){
+                    ChasingLock[i]=1;
+                    int tar=target[2];
+                    if(tar==151)
+                    armystate[i]==WAITING;
+                    else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                        HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+                    else if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+                    else if(enemyInfo.enemy_farmers.size()!=0) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+                    Lock[i]=1;
+                    timer[i]=g_frame;}
+                else if(enemyInfo.armies[i].Sort==1)
+                {
+                    int tar=target[1];
+                    if(tar==151)
+                    armystate[i]==WAITING;
+                    else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                        HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+                    else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+                    else if(enemyInfo.enemy_farmers.size()!=0)HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+                    Lock[i]=1;
+                    timer[i]=g_frame;}
 
-        }
+                else if(enemyInfo.armies[i].Sort==3)
+                {
+                    int tar=target[3];
+                    if(tar==151)
+                    armystate[i]==WAITING;
+                    else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                    HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+                    else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+                    else if(enemyInfo.enemy_farmers.size()!=0)HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+                    Lock[i]=1;
+                    timer[i]=g_frame;}
+        }}
             else if(mode==3){
                 if(Lock[i]==0){
-                    int tar=0;
                           nowState_Army=enemyInfo.armies[i].NowState;
                           if(nowState_Army==MOVEOBJECT_STATE_STAND)
-                          {
-                              tar=seek(i);
-                              if(tar==101)
+                          {   int tar=target[4];
+                              if(tar==151)
                               armystate[i]==WAITING;
-                              else if(tar>=50)
-                              HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
-                              else HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+                              else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                              HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+                              else if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+                              else if(enemyInfo.enemy_farmers.size()!=0)HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
                               Lock[i]=1;
                               timer[i]=g_frame;
             }
@@ -249,7 +295,7 @@ void EnemyAI::processData() {
                 Lock[i]=0;
                 timer[i] = 0;
             }
-        }}}
+        }}
 
 // 线性化进攻
 //    if(mode==1){
