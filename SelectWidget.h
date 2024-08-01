@@ -26,6 +26,7 @@ public:
     void setCore( Core* core ){ this->core = core; }
 
     int getSecend(){ return elapsedSec; }
+    void resetSecond(){ elapsedSec = g_frame/25; elapsedFrame = (g_frame%25)*4; }
     //获取debug窗口显示时间
     QString getShowTime();
     int actions[ACT_WINDOW_NUM_FREE] = {0};
@@ -50,12 +51,10 @@ private:
 
     Core* core = NULL;
 
-    void manageBuildBottom(int position, int actNum , int buildingNum );
-    void setShowTimeFrame();
+    void manageBuildBottom(int position, int actNum , int buildingNum );;
 public slots:
     void widgetAct(int num);
     int  aiAct(int actName,Coordinate* self);
-    void timeUpdate();
     void frameUpdate();
     void initActs();
     void getBuild(int BlockL, int BlockU, int num);

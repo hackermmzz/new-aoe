@@ -39,6 +39,8 @@ std::map<int, std::string> actNames = {
     {ACT_STOCK_UPGRADE_USETOOL, ACT_STOCK_UPGRADE_USETOOL_NAME},
 
 };
+
+
 MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -79,7 +81,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     option->btnPos->hide();
     option->btnOverlap->hide();
     connect(ui->option,&QPushButton::clicked,option,&QDialog::show);
-
+    connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
 
 
     sel = new SelectWidget(this); // 设置左下角窗口
@@ -111,9 +113,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
     timer->start(40);
-    showTimer=new QTimer(this);
-    showTimer->setTimerType(Qt::PreciseTimer);
-    showTimer->start(1000);
     pbuttonGroup = new QButtonGroup(this);
     pbuttonGroup->addButton(ui->radioButton_1,0);
     pbuttonGroup->addButton(ui->radioButton_2,1);
@@ -125,8 +124,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     //时间增加
-    connect(showTimer, &QTimer::timeout, sel, &SelectWidget::timeUpdate);
-
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
 
@@ -186,6 +183,21 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     ui->mapView->setEnemyBuildList(&(player[1]->build));
     ui->mapView->setAnimalList(&(map->animal));
     ui->mapView->setResList(&(map->staticres));
+
+    // 创建 QSound 对象，指定音乐文件
+    bgm = SoundMap["BGM"];
+    // 设置循环播放
+    if(bgm != NULL)
+    {
+        bgm->setLoops(QSound::Infinite);
+//        bgm->play();
+    }
+
+    for(std::map<string, QSound*>::iterator iter = SoundMap.begin(); iter != SoundMap.end(); iter++)
+    {
+        qDebug()<<QString::fromStdString( iter->first );
+    }
+
     debugText("blue"," 游戏开始");
 }
 
@@ -731,9 +743,16 @@ void MainWidget::statusUpdate()
 
 void MainWidget::gameDataUpdate()
 {
-    core->gameUpdate();
-    core->infoShare();
-    emit startAI();
+    if(!pause)
+    {
+        core->gameUpdate();
+        core->infoShare();
+        emit startAI();
+    }
+    else
+        core->resetNowObject_Click();
+
+    makeSound();
 }
 void MainWidget::paintUpdate()
 {
@@ -771,11 +790,9 @@ void MainWidget::judgeVictory()
     {
         //停止当前动作
         timer->stop();
-        showTimer->stop();
-//        playSound("Lose");
+        playSound("Lose");
         debugText("blue"," 游戏失败，未达成目标。最终得分为:" + QString::number(player[0]->getScore()));
-        //            ui->DebugTextBrowser->insertHtml(COLOR_BLUE(getShowTime() + " 游戏失败，未达成目标。最终得分为:" + QString::number(player[0]->getScore())));
-        //            ui->DebugTextBrowser->insertPlainText("\n");
+
         //弹出胜利提示
         if(QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
         {
@@ -787,12 +804,11 @@ void MainWidget::judgeVictory()
     {
         //停止当前动作
         timer->stop();
-        showTimer->stop();
 
-//        playSound("Win");
+        const char*
+        playSound("Win");
         debugText("blue"," 游戏胜利");
-        //                    ui->DebugTextBrowser->insertHtml(COLOR_BLUE(getShowTime() + " 游戏胜利"));
-        //                    ui->DebugTextBrowser->insertPlainText("\n");
+
         //弹出胜利提示
         if(QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
         {
@@ -802,6 +818,34 @@ void MainWidget::judgeVictory()
     else return;
 }
 
+void MainWidget::playSound(string soundType)
+{
+    if(SoundMap[soundType] == NULL) return;
+
+    if(SoundMap[soundType]->isFinished())
+        SoundMap[soundType]->play();
+
+    return;
+}
+
+void MainWidget::makeSound()
+{
+    if(soundQueue.empty()) return;
+
+    if(!option->getSound())
+    {
+        queue<string> empty;
+        swap(empty, soundQueue);
+    }
+
+    while(soundQueue.size())
+    {
+        playSound(soundQueue.front());
+        soundQueue.pop();
+    }
+
+    return;
+}
 
 //**************槽函数***************
 // 游戏帧更新
@@ -811,19 +855,23 @@ void MainWidget::FrameUpdate()
 
     //打印debug栏
     respond_DebugMessage();
+    playSound("Army_Die");
 
-    gameframe++;
+
+    if(!pause) gameframe++;
     g_frame=gameframe;
+    sel->resetSecond();
+
     ui->lcdNumber->display(gameframe);
 
     if(mapmoveFrequency==1||mapmoveFrequency==2){
         paintUpdate();
     }
     else if(mapmoveFrequency==4){
-        if(gameframe%2==0) paintUpdate();
+        if(gameframe%2==0 || pause) paintUpdate();
     }
     else if(mapmoveFrequency==8){
-        if(gameframe%4==0) paintUpdate();
+        if(gameframe%4==0 || pause) paintUpdate();
     }
     else{
         qDebug()<<"速度设置错误";
@@ -837,22 +885,18 @@ void MainWidget::onRadioClickSlot()
     {
     case 0:
         timer->setInterval(40);
-        showTimer->setInterval(1000);
         mapmoveFrequency=1;
         break;
     case 1:
         timer->setInterval(20);
-        showTimer->setInterval(500);
         mapmoveFrequency=2;
         break;
     case 2:
         timer->setInterval(10);
-        showTimer->setInterval(250);
         mapmoveFrequency=4;
         break;
     case 3:
         timer->setInterval(5);
-        showTimer->setInterval(125);
         mapmoveFrequency=8;
         nowobject=NULL;
         break;
@@ -864,6 +908,21 @@ void MainWidget::cheat_Player0Resource()
     player[0]->changeResource(500,500,500,500);
 }
 
+void MainWidget::on_stopButton_clicked()
+{
+    pause = !pause;
+
+    if(pause) ui->stopButton->setText("继续");
+    else ui->stopButton->setText("暂停");
+}
+
+void MainWidget::responseMusicChange()
+{
+    if(option->getMusic())
+        bgm->play();
+    else
+        bgm->stop();
+}
 
 //***********************************************************************
 //输出提示框
@@ -971,3 +1030,5 @@ void MainWidget::buildInitialStock()
     player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
     return;
 }
+
+

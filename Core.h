@@ -35,6 +35,9 @@ public:
     //指令手动停止
     void suspendRelation(Coordinate * object){ interactionList->suspendRelation(object); }
     /************添加/删除表************/
+
+    void resetNowObject_Click();
+    void requestSound_Click( Coordinate* object );
 private:
     Player** player;    //player信息
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问

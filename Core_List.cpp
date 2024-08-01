@@ -411,21 +411,12 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界",playerID);
         answer = ACTION_INVALID_HUMANBUILD_OVERBORDER;
     }
-
-    if( tempBuild->isIncorrect_Num() )
-    {
-        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,建筑类型不存在",playerID);
-        answer = ACTION_INVALID_BUILDINGNUM;
-    }
-
-    if( !theMap->cell[DRL][URD].Explored )
+    else if( !theMap->cell[DRL][URD].Explored )
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索",playerID);
         answer = ACTION_INVALID_HUMANBUILD_UNEXPLORE;
     }
-
-    //如果以上限制均未触发，判断是否有重叠
-    if(answer == 0)
+    else if(answer == 0) //如果以上限制均未触发，判断是否有重叠
     {
         int bDR_ba,bUR_ba;
         if(theMap->isHaveObject(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
@@ -433,8 +424,7 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
             call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠",playerID);
             answer = ACTION_INVALID_HUMANBUILD_OVERLAP;
         }
-
-        if(!theMap->isFlat(tempBuild))
+        else if(!theMap->isFlat(tempBuild))
         {
             call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差或斜坡",playerID);
             answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
@@ -610,17 +600,15 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
 
 void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& relation)
 {
-    if(relation.relationAct == CoreEven_Gather)
+    if(relation.relationAct == CoreEven_Gather && object1->getSort() == SORT_FARMER)
     {
-        if(object1->getSort() == SORT_FARMER)
+        Farmer* worker = (Farmer*) object1;
+        if(relation.alterOb == NULL) worker->setPreStand();
+        else
         {
-            Farmer* worker = (Farmer*) object1;
-            if(relation.alterOb == NULL) worker->setPreStand();
-            else
-            {
-                player[worker->getPlayerRepresent()]->changeResource(worker->getResourceSort() , worker->getResourceNowHave());
-                worker->update_resourceClear();
-            }
+            player[worker->getPlayerRepresent()]->changeResource(worker->getResourceSort() , worker->getResourceNowHave());
+
+            worker->update_resourceClear();
         }
     }
 }

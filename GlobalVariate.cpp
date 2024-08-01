@@ -9,6 +9,7 @@ using namespace std;
 
 map<std::string, std::list<QPixmap>> resMap;
 map<string, QSound*> SoundMap;
+std::queue<string> soundQueue;
 
 std::list<Coordinate*> drawlist;
 
@@ -17,7 +18,6 @@ Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;
 
-int ProcessDataWork = 0;
 bool only_debug_Player0 = true;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};

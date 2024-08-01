@@ -1,10 +1,13 @@
 #include "UsrAI.h"
+#include <cmath>
+#include <algorithm>
+#include <vector>
+#include <limits>
 tagGame tagUsrGame;
 ins UsrIns;
-/*##########请勿修改以上部分##########*/
+
 
 void UsrAI::processData()
 {
-    //写入你的代码
 
 }

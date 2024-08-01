@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QPainter>
+#include <config.h>
 namespace Ui {
 class Option;
 }
@@ -15,12 +16,22 @@ public:
     explicit Option(QWidget *parent = 0);
     ~Option();
     QPushButton *btnHtml, *btntxt, *btnTextClear, *btnFileClear, *btnMusic, *btnSound, *btnPause, *btnSelect, *btnLine, *btnPos, *btnOverlap;
+
+    bool getMusic(){ return music; }
+    bool getSound(){ return sound; }
+    bool getSelect(){ return select; }
+    bool getLine(){ return line; }
+    bool getPos(){ return pos; }
+    bool getOverlap(){ return overlap; }
+
+signals:
+    void changeMusic();
+
 private slots:
 
     void on_music_clicked();
     void on_sound_clicked();
     void paintEvent(QPaintEvent *event);
-//    void on_pause_clicked();
 
     void on_select_clicked();
 
@@ -32,16 +43,13 @@ private slots:
 
 private:
     Ui::Option *ui;
-    bool music = false;
-    bool sound = false;
-    bool select = false;
-//    bool pause = false;
-    bool line = false;
-    bool pos = false;
-    bool overlap = false;
+    bool music = OPTION_MUSIC;
+    bool sound = OPTION_SOUND;
+    bool select = OPTION_SELECT;
+    bool line = OPTION_LINE;
+    bool pos = OPTION_POS;
+    bool overlap = OPTION_OVERLAP;
     QPixmap pix;
-
-
 };
 
 #endif // OPTION_H

@@ -287,7 +287,11 @@ void Core::gameUpdate()
 
     judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
 
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT && mapmoveFrequency != 8) manageMouseEvent();
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
+    {
+        if( mapmoveFrequency == 8) resetNowObject_Click();
+        else manageMouseEvent();
+    }
 
     manageOrder(0);
     manageOrder(1);
@@ -503,12 +507,7 @@ void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int&
 void Core::manageMouseEvent()
 {
     Coordinate* object_click = g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
-    if(mouseEvent->mouseEventType==LEFT_PRESS)
-    {
-        nowobject=object_click;
-        sel->initActs();
-        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
-    }
+    resetNowObject_Click();
     if(mouseEvent->mouseEventType==RIGHT_PRESS && nowobject!=NULL)
     {
         if( object_click== NULL )
@@ -605,7 +604,7 @@ void Core::manageMouseEvent()
                     }
                     break;
                 case SORT_ANIMAL:
-                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+//                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 
                 default:
                     break;
@@ -814,3 +813,88 @@ void Core::judge_Crush()
 
     moveOb_judCrush.clear();
 }
+
+void Core::resetNowObject_Click()
+{
+    if(mouseEvent->mouseEventType==LEFT_PRESS)
+    {
+        nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+        requestSound_Click(nowobject);
+        sel->initActs();
+        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    }
+}
+
+void Core::requestSound_Click( Coordinate* object )
+{
+    if(nowobject == NULL) return;
+
+    switch (object->getSort()){
+    case SORT_ARMY:
+        soundQueue.push("Click_Army");
+        return;
+
+    case SORT_FARMER:
+        soundQueue.push("Click_Villager");
+        return;
+
+    case SORT_BUILDING:
+
+        switch (object->getNum()) {
+        case BUILDING_ARMYCAMP:
+            soundQueue.push("Click_ArmyCamp");
+            return;
+        case BUILDING_CENTER:
+            soundQueue.push("Click_Center");
+            return;
+        case BUILDING_GRANARY:
+            soundQueue.push("Click_Granary");
+            return;
+        case BUILDING_HOME:
+            soundQueue.push("Click_House");
+            return;
+        case BUILDING_MARKET:
+            soundQueue.push("Click_Market");
+            return;
+        case BUILDING_RANGE:
+            soundQueue.push("Click_Range");
+            return;
+        case BUILDING_STABLE:
+            soundQueue.push("Click_Stable");
+            return;
+        case BUILDING_STOCK:
+            soundQueue.push("Click_Stock");
+            return;
+        case BUILDING_WALL:
+            soundQueue.push("Click_Wall");
+            return;
+        default:
+            return;
+        }
+
+    case SORT_Building_Resource:
+        if(object->getNum() == BUILDING_FARM)
+            soundQueue.push("Click_Farm");
+        return;
+
+    case SORT_ANIMAL:
+
+        switch (object->getNum()) {
+        case ANIMAL_LION:
+            soundQueue.push("Lion_Stand");
+            return;
+        case ANIMAL_ELEPHANT:
+            soundQueue.push("Elephant_Stand");
+            return;
+        default:
+            return;
+        }
+
+    default:
+        break;
+    }
+}
+
+
+
+

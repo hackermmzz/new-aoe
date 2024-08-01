@@ -29,9 +29,9 @@ extern int Food[5][5][5];
 extern int Stone[5][5][5];
 extern int g_frame;
 extern QTextBrowser* g_DebugText;
-extern int ProcessDataWork;
 extern map<string, list<QPixmap>> resMap;
 extern map<string, QSound*> SoundMap;
+extern std::queue<string> soundQueue;
 
 extern std::list<Coordinate*> drawlist;
 

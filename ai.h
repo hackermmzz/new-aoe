@@ -52,7 +52,9 @@ protected:
             if(stopThread)
                 return;
             if (g_frame > 10) {
+                ProcessDataWork = 1;
                 processData();
+                ProcessDataWork = 0;
             }
             condition.wait(&mutex);
         }
@@ -88,6 +90,8 @@ private:
     }
 
 public:
+    int ProcessDataWork = 0;
+
     double calDistance(double DR1, double UR1, double DR2, double UR2) {
         return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5);
     }
@@ -95,6 +99,15 @@ public:
     void DebugText(std::string debugStr) {
         call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromStdString(debugStr), id);
     }
+
+    void DebugText(QString debugStr) {
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + debugStr, id);
+    }
+    void DebugText(char* debugStr)
+    {
+        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromUtf8(debugStr), id);
+    }
+
 
     void DebugText(int debugInt) {
         call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugInt), id);
