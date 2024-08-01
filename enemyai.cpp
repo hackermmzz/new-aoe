@@ -65,10 +65,10 @@ static int seek(int Sort,int number){
         }
         if(target==151){
             for(int i=0;i<enemyInfo.enemy_buildings.size();i++){
-                if(enemyInfo.enemy_buildings[i].Type==BUILDING_CENTER)
+                    temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_buildings[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_buildings[i].BlockUR, 2), 0.5);
+                    if (temp<min) {min=temp;
                  target=i+100;
-
-            }
+                    }}
             return target;
         }else return target;
     }}}
@@ -144,15 +144,11 @@ void EnemyAI::processData() {
             if(target[1]>150) target[1]=seek(1,1);
 
             target[2]=seek(2,1);
-            qDebug()<<target[2];
             if(target[2]>150) target[2]=seek(2,2);
-            qDebug()<<target[2];
             if(target[2]>150) target[2]=seek(2,3);
-            qDebug()<<target[2];
             target[3]=seek(3,1);
             if(target[3]>150) target[3]=seek(3,2);
             if(target[3]>150) target[3]=seek(3,3);
-
     }
     else if(mode==3){
         target[4]=seek(enemyInfo.armies[Hero].Sort,3);
@@ -190,7 +186,7 @@ void EnemyAI::processData() {
            }
                if(armystate[i]!=CHASE){
                    for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
-                       if(enemyInfo.enemy_buildings[j].Type==BUILDING_ARROWTOWER){
+                       if(enemyInfo.enemy_buildings[j].Project==enemyInfo.armies[i].SN){
                            HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[j].SN);
                            armystate[i]=CHASE;
                            Blood[i]=enemyInfo.armies[i].Blood;
