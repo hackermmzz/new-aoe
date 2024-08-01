@@ -26,6 +26,19 @@ public:
     //如果指定object和全局nowobject指向同一地址，则设置nowobject为NULL
     void deleteOb_setNowobNULL(Coordinate* deOb){ if(deOb == nowobject) nowobject = NULL; }
 
+    int deleteSelf(Coordinate* object) //删除对象，返回错误码
+    {
+        BloodHaver *bloodOb = NULL;
+
+        if(object->getPlayerRepresent()!=0) return ACTION_INVALID_SN;
+
+        object->printer_ToBloodHaver((void**) &bloodOb);
+        if(bloodOb && !bloodOb->isDie())
+            bloodOb->updateBlood(bloodOb->getMaxBlood());
+
+        return ACTION_SUCCESS;
+    }
+
     /************添加/删除表************/
     int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true){ return interactionList->addRelation(object1,object2,eventType,respond); }
     int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,DR,UR,eventType,respond,type); }
