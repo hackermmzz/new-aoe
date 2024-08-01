@@ -442,7 +442,16 @@ void Core::updateByPlayer(int id){
         building.Blood=build->getBlood();
         building.MaxBlood=build->getMaxBlood();
         building.Percent=build->getPercent();
-        building.Project=build->getActNum();
+        if(build->getNum()==BUILDING_ARROWTOWER){
+            int obj=interactionList->getObjectSN(build);
+            if(build->isAttacking()&&obj!=-1){
+                building.Project=obj;
+            }else{
+                building.Project=0;
+            }
+        }else{
+            building.Project=build->getActNum();
+        }
         building.ProjectPercent=build->getActPercent();
         if(build->getSort()==SORT_Building_Resource){
             building.Type=BUILDING_FARM;
@@ -663,6 +672,14 @@ void Core::manageOrder(int id)
             }
             switch(self->getSort()){
             case SORT_FARMER:
+                if(self==obj){
+                    ret=deleteSelf(self);
+                    if(ret == ACTION_SUCCESS){
+                        call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+"  被删除",id);
+                    }
+                    break;
+                }
+
                 switch (obj->getSort()){
                 case SORT_STATICRES:
                 case SORT_ANIMAL:
@@ -715,6 +732,13 @@ void Core::manageOrder(int id)
                 if(self->getNum() != BUILDING_ARROWTOWER)
                     break;
             case SORT_ARMY:
+                if(self==obj&&self->getSort()==SORT_ARMY){
+                    ret=deleteSelf(self);
+                    if(ret == ACTION_SUCCESS){
+                        call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+"  被删除",id);
+                    }
+                    break;
+                }
                 switch (obj->getSort()){
                 case SORT_ANIMAL:
                     ret=ACTION_INVALID_OBSN;
