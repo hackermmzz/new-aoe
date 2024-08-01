@@ -12,7 +12,7 @@ map<string, QSound*> SoundMap;
 
 std::list<Coordinate*> drawlist;
 
-
+Score usrScore=Score(0);
 Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;

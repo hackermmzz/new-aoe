@@ -323,11 +323,9 @@ void Core::updateByPlayer(int id){
         taghuman.attack=human->getATK();
         taghuman.meleeDefense=human->getDEF(ATTACKTYPE_CLOSE);
         taghuman.rangedDefense=human->getDEF(ATTACKTYPE_SHOOT);
-        if(human->getSort()==HUMAN_STATE_IDLE){
-            taghuman.WorkObjectSN=-1;
-        }else{
-            taghuman.WorkObjectSN=interactionList->getObjectSN(human);
-        }
+
+        taghuman.WorkObjectSN=interactionList->getObjectSN(human);
+
         taghuman.DR0=human->getDR0();
         taghuman.UR0=human->getUR0();
         if(human->getSort()==SORT_FARMER){
