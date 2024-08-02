@@ -36,7 +36,7 @@
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.00"
+#define GAME_VERSION "v2.00a"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define GAME_LOSE_SEC 1500
 #define GOLD 10                         //金块资源数量
@@ -44,6 +44,8 @@
 #define gen5 sqrt(5)
 #define MAXPLAYER 8
 #define NOWPLAYER 2
+#define NOWPLAYERREPRESENT 0
+
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度
 #define GAMEWIDGET_WIDTH 1440
@@ -72,6 +74,12 @@
 #define KEY_RIGHT 68
 #define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
 #define FRAMES_PER_SECOND 25    //每秒帧数
+#define OPTION_MUSIC true
+#define OPTION_SOUND true
+#define OPTION_SELECT false
+#define OPTION_LINE false
+#define OPTION_POS false
+#define OPTION_OVERLAP false
 
 /********** 地图块种类 **********/
 /* L0边为右上角，L0到L3顺时针排列 */

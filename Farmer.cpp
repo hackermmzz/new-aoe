@@ -12,6 +12,12 @@ std::list<ImageResource>* Farmer::Disappear[7][8];
 std::string Farmer::FarmerName[7]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"};
 std::string Farmer::FarmerCarry[5]={"","CarryWood","CarryMeat","CarryStone","CarryGold"};
 
+string Farmer::sound_click = "Click_Villager";
+
+std::string Farmer::sound_work[7] = {\
+    "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
+};
+
 Farmer::Farmer()
 {
 
@@ -68,9 +74,19 @@ void Farmer::nextframe()
 {
     if(isDie())
     {
-        if( !isDying() ) setPreDie();
+        if( !isDying() )
+        {
+            setPreDie();
+            requestSound_Die();
+        }
         else if(!get_isActionEnd() && isNowresShift())
         {
+            if(nowres == nowlist->begin() && nowstate == MOVEOBJECT_STATE_ATTACK)
+            {
+                if(state == FARMER_HUNTER)
+                     soundQueue.push(sound_work[state]);
+            }
+
             nowres++;
             if( !changeToDisappear && get_isActionEnd())
             {
@@ -84,15 +100,17 @@ void Farmer::nextframe()
     else
     {
         updateState();
+
         if(isNowresShift())
         {
             nowres++;
             if(nowres==nowlist->end())
             {
+                requestSound_Work();
                 nowres=nowlist->begin();
                 initAttack_perCircle();
                 //读到最后回到最初
-            }
+            }            
         }
 
         updateMove();
@@ -103,10 +121,6 @@ void Farmer::nextframe()
     this->imageY=this->nowres->pix.width()/4.0;
 }
 
-int Farmer::getSort()
-{
-    return SORT_FARMER;
-}
 
 void Farmer::setNowRes()
 {
@@ -197,6 +211,15 @@ void Farmer::updateState()
         setState(0);
         break;
     }
+}
 
+void Farmer::requestSound_Work()
+{
+    if( nowstate == MOVEOBJECT_STATE_WORK &&\
+        ( state == FARMER_LUMBER || state == FARMER_MINER || state == FARMER_WORKER|| state == FARMER_FARMER || state == FARMER_GATHERER )\
+        || nowstate == MOVEOBJECT_STATE_ATTACK && state == FARMER_LUMBER
+    )
+        soundQueue.push(sound_work[state]);
 
+    return;
 }

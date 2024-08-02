@@ -6,4 +6,7 @@ ins UsrIns;
 void UsrAI::processData()
 {
 
+//   if(g_frame>20)AI::cheatAttack(2);  //写入你的代码
+
+
 }

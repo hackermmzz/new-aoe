@@ -250,7 +250,7 @@
   <widget class="QLabel" name="resGold">
    <property name="geometry">
     <rect>
-     <x>550</x>
+     <x>395</x>
      <y>10</y>
      <width>81</width>
      <height>21</height>
@@ -269,7 +269,7 @@
   <widget class="QLabel" name="resStone">
    <property name="geometry">
     <rect>
-     <x>395</x>
+     <x>550</x>
      <y>10</y>
      <width>81</width>
      <height>21</height>
@@ -438,6 +438,32 @@
    <property name="text">
     <string>8×</string>
    </property>
+  </widget>
+  <widget class="QPushButton" name="option">
+    <property name="geometry">
+        <rect>
+            <x>760</x>
+            <y>850</y>
+            <width>80</width>
+            <height>50</height>
+        </rect>
+    </property>
+    <property name="text">
+        <string>设置</string>
+    </property>
+  </widget>
+  <widget class="QPushButton" name="stopButton">
+    <property name="geometry">
+        <rect>
+            <x>1370</x>
+            <y>0</y>
+            <width>71</width>
+            <height>31</height>
+        </rect>
+    </property>
+    <property name="text">
+        <string>暂停</string>
+    </property>
   </widget>
   <widget class="QLabel" name="usr">
    <property name="geometry">

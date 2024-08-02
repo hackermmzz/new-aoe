@@ -54,7 +54,8 @@ SOURCES += \
     Building_Resource.cpp \
     UsrAI.cpp \
     EnemyAI.cpp \
-    ViewWidget.cpp
+    ViewWidget.cpp \
+    Option.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -86,9 +87,11 @@ HEADERS += \
     Building_Resource.h \
     UsrAI.h \
     EnemyAI.h \
-    ViewWidget.h
+    ViewWidget.h \
+    Option.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
-    SelectWidget.ui
+    SelectWidget.ui \
+    Option.ui
