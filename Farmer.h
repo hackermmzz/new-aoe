@@ -12,12 +12,14 @@ public:
   /**********************虚函数**************************/
     void nextframe();
     void setNowRes();
-    int getSort();
+    int getSort(){return SORT_FARMER;}
     double getDis_attack();
     int get_AttackType();
     int get_add_specialAttack();
     QString getChineseName(){ return "村民"; }
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
+
+    string getSound_Click(){return sound_click;}
 
     /***************指针强制转化****************/
     //若要将Farmer类指针转化为父类指针,务必用以下函数!
@@ -71,17 +73,13 @@ public:
     static void setStand(int i, int j, std::list<ImageResource>* newValue) {
         Stand[i][j] = newValue;
     }
-    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {
-        Attack[i][j] = newValue;
-    }
+    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {Attack[i][j] = newValue;}
     static void setDie(int i, int j, std::list<ImageResource>* newValue) {
         Die[i][j] = newValue;
     }
     static void setDisappear(int state, int angle, std::list<ImageResource>* newValue) {Disappear[state][angle] = newValue;}
 
-    static void allocateCarry(int i, int j) {
-        Carry[i][j] = new std::list<ImageResource>;
-    }
+    static void allocateCarry(int i, int j) {Carry[i][j] = new std::list<ImageResource>;}
     static void allocateWork(int i, int j) {
         Work[i][j] = new std::list<ImageResource>;
     }
@@ -130,14 +128,10 @@ public:
         Disappear[state][angle] = nullptr;
     }
 
-    std::string getDisplayName(int num)
-    {
-        return FarmerDisplayName[num];
-    }
-    int getState()
-    {
-        return state;
-    }
+    std::string getDisplayName(int num){return FarmerDisplayName[num];}
+
+    int getState(){return state;}
+
     double getResourceNowHave(){ return resource; }
     int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
     int getResourceSort(){ return resourceSort; }
@@ -220,10 +214,18 @@ private:
 
     static std::string FarmerName[7];
     static std::string FarmerCarry[5];
+
     std::string FarmerDisplayName[7]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人"};
+
     //    std::string actName[1]={};
     //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
 
+    static string sound_click;
+    static std::string sound_work[7];
+
+
+    void requestSound_Work();
+    void requestSound_Die(){soundQueue.push("Army_Die");}
 };
 
 #endif // FARMER_H

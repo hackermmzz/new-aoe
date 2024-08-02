@@ -40,7 +40,7 @@ public:
     //加载寻路用地图 视野+障碍物
     void loadfindPathMap(MoveObject* moveOb);
     //加载障碍物地图
-    void loadBarrierMap();
+    void loadBarrierMap(bool absolute = false);
     /*********************寻路相关*******************/
     bool isBarrier(Point blockPoint,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );

@@ -4,6 +4,11 @@ Development::Development()
 {
     init_DevelopLab();
 }
+Development::Development(int represent)
+{
+    playerRepresent = represent;
+    init_DevelopLab();
+}
 
 double Development::get_rate_Move(int sort , int type)
 {

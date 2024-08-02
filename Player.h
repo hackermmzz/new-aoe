@@ -156,6 +156,8 @@ public:
     void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
 
     int get_centerNum(){ return playerScience->get_centerNum(); }
+
+    void beginAttack();
 private:
     int represent;  //player阵营
 
@@ -165,6 +167,7 @@ private:
     //人口容量
 //    int maxHumanNum=0;  //人口上限
 
+    int attackFrame = 0;
 
     //所拥有的四个资源
     int wood=200;

@@ -38,8 +38,7 @@ private:
     void initGatherer(){ gatherer = NULL; }
     void setGatherer( Coordinate* gatherer){ this->gatherer = gatherer; }
 
-    Coordinate* gatherer = NULL;
-
+    Coordinate* gatherer = NULL;    
 };
 
 #endif // BUILDING_RESOURCE_H
