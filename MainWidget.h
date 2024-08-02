@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <SelectWidget.h>
 //#include <AboutDialog.h>
-//#include <Option.h>
+#include <Option.h>
 #include <Core.h>
 #include "UsrAI.h"
 #include "EnemyAI.h"
@@ -55,27 +55,20 @@ public:
     void deleteArmy();
     void deleteMissile();
 
-    //判断胜利
-//    void judgeVictory();
-
-
-    //**********************************************************
-    //输出框
-
+    //****************输出框****************
     void respond_DebugMessage();
     void debugText(const QString& color,const QString& content);
     void clearDebugText();
+    //*************************************
 
+    void playSound(string soundType);
+    void makeSound();
 
-    //**********************************************************
-
-    ActWidget* getActs(int num)
-    {
-        return acts[num];
-    }
-
+    ActWidget* getActs(int num){return acts[num];}
     void statusUpdate();
     void showPlayerResource(int playerRepresent);
+
+
 
     SelectWidget *sel;
     Core *core;
@@ -96,6 +89,10 @@ private slots:
     void FrameUpdate();
     void onRadioClickSlot();
 
+    void on_stopButton_clicked();
+
+    void responseMusicChange();
+
 signals:
     void mapmove();
     void startAI();
@@ -103,7 +100,6 @@ signals:
 private:
     Ui::MainWidget *ui;
     QTimer *timer;
-    QTimer *showTimer;
     int gameframe = 0; // 游戏帧数初始化
     QButtonGroup *pbuttonGroup = NULL;
 
@@ -112,33 +108,19 @@ private:
 
     void buildInitialStock();
 
+    //判断胜利
     void judgeVictory();
     bool isLoss();
     bool isWin();
-//    tagGame *Game=new tagGame;
-//    int Winnning=0;
-//    int Lose = 0;
-//    int flag=0;
 
-//    double *ArrowTowerBlockL=new double[3];
-//    double *ArrowTowerBlockU=new double[3];
-//    int ArrowTowerBuilt[3]={0,0,0};
-//    AI* worker;
-//    QThread* AIthread;
-//    time_t t,t0;
-//    int LastFrame = 0;
-//    int CollisionMap[72][72];
-
-//    std::list<Coordinate *> CollisionObject;
-//    std::list<Farmer *> *nowselectList=new std::list<Farmer *>;
-//    bool music = false;
-//    bool sound = false;
-//    bool pause = false;
-//    bool select = false;
-//    bool line = false;
-//    bool pos = false;
-//    bool showOverlap = true;
+    bool pause = false;
+    Option *option = NULL;
     ActWidget *acts[ACT_WINDOW_NUM_FREE];
+
+    //****************Music*********************
+    QSound* bgm = NULL;
+
+    //****************Music*********************
 };
 
 #endif // MAINWIDGET_H

@@ -78,20 +78,8 @@ void SelectWidget::paintEvent(QPaintEvent *event)
     }
 }
 
-void SelectWidget::timeUpdate()
-{
-    elapsedSec++;
-}
-
-void SelectWidget::setShowTimeFrame()
-{
-    elapsedFrame += 4;
-    if(elapsedFrame >= 100) elapsedFrame = 0;
-}
-
 void SelectWidget::frameUpdate()
 {
-    setShowTimeFrame(); //帧记录更新
     refreshActs();
     updateActs();
     drawActs();

@@ -26,6 +26,8 @@ std::string Army::ArmyDisplayName[7][2]={{"棍棒兵","刀斧兵"},
                                          {"Prof.Lu","Prof.Lu"}
                                         };
 
+string Army::click_sound = "Click_Army";
+
 Army::Army()
 {
 
@@ -74,7 +76,11 @@ void Army::nextframe()
 {
     if(isDie())
     {
-        if( !isDying() ) setPreDie();
+        if( !isDying() )
+        {
+             setPreDie();
+             requestSound_Die();
+        }
         else if(!get_isActionEnd() && isNowresShift())
         {
             nowres++;
@@ -90,6 +96,14 @@ void Army::nextframe()
     {
         if(isNowresShift())
         {
+            if(nowres == nowlist->begin())
+            {
+                if(nowstate == MOVEOBJECT_STATE_ATTACK)
+                    requestSound_Attack();
+                else if(nowobject == this && nowstate == MOVEOBJECT_STATE_WALK && playerRepresent == NOWPLAYERREPRESENT)
+                    requestSound_Walk();
+            }
+
             nowres++;
             if(nowres==nowlist->end())
             {
@@ -139,6 +153,26 @@ void Army::setNowRes()
     }
 }
 
+
+void Army::requestSound_Attack()
+{
+    if(Num == AT_IMPROVED|| Num == AT_BOWMAN)
+        soundQueue.push("Archer_Attack");
+}
+
+void Army::requestSound_Die()
+{
+    if(Num == AT_SCOUT)
+        soundQueue.push("Scout_Die");
+    else
+        soundQueue.push("Army_Die");
+}
+
+void Army::requestSound_Walk()
+{
+    if(Num == AT_SCOUT)
+        soundQueue.push("Scout_Walk");
+}
 /***********************************************************/
 //获取军队的各项数据
 //移速
@@ -282,6 +316,8 @@ int Army::get_add_specialAttack()
     return addition;
 }
 /***********************************************************/
+
+
 void Army::setAttribute()
 {
     //设置军队属性

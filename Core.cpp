@@ -39,7 +39,7 @@ void Core::gameUpdate()
                 //需要变化的行动为“死亡”，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
-                    call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
+                    call_debugText("red"," "+(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
                     g_Object[(*humaniter)->getglobalNum()] = NULL;
@@ -149,7 +149,7 @@ void Core::gameUpdate()
             if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
                 if(!(*builditer)->isDie())
-                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
+                    call_debugText("green"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
                 else
                     call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
 
@@ -238,7 +238,7 @@ void Core::gameUpdate()
         else if(!(*animaliter)->isDisappearing())
         {
             (*animaliter)->nextframe();
-            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
+            call_debugText("green"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
             g_Object[(*animaliter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
@@ -271,7 +271,7 @@ void Core::gameUpdate()
         }
         else
         {
-            call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成",0);
+            call_debugText("green"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成",0);
 
             g_Object[(*SRiter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*SRiter);
@@ -287,7 +287,11 @@ void Core::gameUpdate()
 
     judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
 
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT && mapmoveFrequency != 8) manageMouseEvent();
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
+    {
+        if( mapmoveFrequency == 8) resetNowObject_Click();
+        else manageMouseEvent();
+    }
 
     manageOrder(0);
     manageOrder(1);
@@ -510,12 +514,7 @@ void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int&
 void Core::manageMouseEvent()
 {
     Coordinate* object_click = g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
-    if(mouseEvent->mouseEventType==LEFT_PRESS)
-    {
-        nowobject=object_click;
-        sel->initActs();
-        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
-    }
+    resetNowObject_Click();
     if(mouseEvent->mouseEventType==RIGHT_PRESS && nowobject!=NULL)
     {
         if( object_click== NULL )
@@ -612,7 +611,7 @@ void Core::manageMouseEvent()
                     }
                     break;
                 case SORT_ANIMAL:
-                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+//                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 
                 default:
                     break;
@@ -650,6 +649,7 @@ void Core::manageOrder(int id)
             tagAIGame->insertInsRet(cur.id,cur);
             continue;
         }
+
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
             interactionList->suspendRelation(self);
@@ -762,6 +762,7 @@ void Core::manageOrder(int id)
                 }
                 break;
             default:
+                ret = ACTION_INVALID_SN;
                 break;
             }
             break;
@@ -843,3 +844,34 @@ void Core::judge_Crush()
 
     moveOb_judCrush.clear();
 }
+
+void Core::resetNowObject_Click()
+{
+    if(mouseEvent->mouseEventType==LEFT_PRESS)
+    {
+        nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+        requestSound_Click(nowobject);
+        sel->initActs();
+        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    }
+}
+
+void Core::requestSound_Click( Coordinate* object )
+{
+    if(nowobject == NULL) return;
+    Building* buildOb = NULL;
+    object->printer_ToBuilding((void**)&buildOb);
+
+    if(buildOb!=NULL && !buildOb->isFinish()) return;
+
+    std::string clickSound = object->getSound_Click();
+
+    if(!clickSound.empty())
+        soundQueue.push(clickSound);
+
+    return;
+}
+
+
+
+

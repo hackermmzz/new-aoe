@@ -4,13 +4,13 @@
 //构造与析构
 Player::Player()
 {
-    playerScience = new Development();
+    playerScience = new Development(represent);
 }
 
 Player::Player(int represent)
 {
     this->represent = represent;
-    playerScience = new Development();
+    playerScience = new Development(represent);
 }
 
 Player::~Player()
@@ -54,6 +54,9 @@ Army* Player::addArmy(int Num , double DR , double UR)
     Army *newArmy = new Army(DR , UR, Num ,  playerScience , represent);
     call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
 
+    if(g_frame > 10 && represent == NOWPLAYERREPRESENT)
+        soundQueue.push("Army_Born");
+
     human.push_back(newArmy);
     humanNumIncrease(newArmy);
     return newArmy;
@@ -63,6 +66,9 @@ int Player::addFarmer(double DR, double UR)
 {
     Farmer *newfarmer=new Farmer(DR,UR , playerScience , represent);
     call_debugText("blue"," 产生了新的村民(编号:" + QString::number(newfarmer->getglobalNum()) + ")",represent);
+
+    if(g_frame > 10 && represent == NOWPLAYERREPRESENT)
+        soundQueue.push("Villager_Born");
 
     human.push_back(newfarmer);
     humanNumIncrease(newfarmer);
@@ -230,6 +236,14 @@ void Player::finishBuild( Building* buildBuilding ){
           playerScience->add_civiBuildNum(buildBuilding->getNum());
 
     call_debugText("blue"," "+buildBuilding->getChineseName()+"(编号:"+QString::number(buildBuilding->getglobalNum())+")建造完毕",represent);
+}
+
+void Player::beginAttack()
+{
+    if(represent == NOWPLAYERREPRESENT && (g_frame - attackFrame > 1500|| attackFrame == 0))
+        soundQueue.push("Beginning_Attack");
+
+    attackFrame = g_frame;
 }
 
 //**********************************************************
