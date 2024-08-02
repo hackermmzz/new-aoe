@@ -166,7 +166,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //设置user初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
-    player[0]->changeResource(200,200,200,200);
+//    player[0]->changeResource(2000,2000,2000,2000);
 //    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     // 设置鼠标追踪
@@ -193,7 +193,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     if(bgm != NULL)
     {
         bgm->setLoops(QSound::Infinite);
-        qDebug()<< (option->getMusic());
+//        qDebug()<< (option->getMusic());
         if(option->getMusic()) bgm->play();
     }
 
@@ -865,7 +865,6 @@ void MainWidget::FrameUpdate()
     //打印debug栏
     respond_DebugMessage();
 
-
     if(!pause) gameframe++;
     g_frame=gameframe;
     sel->resetSecond();
@@ -884,7 +883,9 @@ void MainWidget::FrameUpdate()
     else{
         qDebug()<<"速度设置错误";
     }
+
     gameDataUpdate();
+
     return;
 }
 void MainWidget::onRadioClickSlot()

@@ -13,7 +13,9 @@ void Core_List::update()
     manageMontorAct();
     theMap->loadBarrierMap();//更新寻路用障碍表
     jud_resetResBuild();
+
     manageRelationList();
+
     init_resetResBuild();
 }
 
@@ -547,6 +549,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
         relate_AllObject[object].useless();
         if(moveObject) moveObject->stateCrash = true;
     }
+
 }
 
 void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)

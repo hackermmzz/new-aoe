@@ -280,6 +280,7 @@ void Core::gameUpdate()
         }
     }
 
+
     //更新AI用的资源表，该资源表是User/Enemy的通用模板
     theMap->reset_resMap_AI();
 
@@ -297,6 +298,7 @@ void Core::gameUpdate()
     manageOrder(1);
 
     interactionList->update();
+
 }
 
 void Core::updateByPlayer(int id){

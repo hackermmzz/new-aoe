@@ -210,7 +210,7 @@ void EnemyAI::processData() {
         //攻击状态
     if(mode>0)
     for(int i=0;i<enemyInfo.armies.size();i++){
-           qDebug()<<i<<armystate[i];
+//           qDebug()<<i<<armystate[i];
            if(armystate[i]==CHASE){
                //反击检查
                if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
