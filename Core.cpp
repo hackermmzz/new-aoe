@@ -327,11 +327,9 @@ void Core::updateByPlayer(int id){
         taghuman.attack=human->getATK();
         taghuman.meleeDefense=human->getDEF(ATTACKTYPE_CLOSE);
         taghuman.rangedDefense=human->getDEF(ATTACKTYPE_SHOOT);
-        if(human->getSort()==HUMAN_STATE_IDLE){
-            taghuman.WorkObjectSN=-1;
-        }else{
-            taghuman.WorkObjectSN=interactionList->getObjectSN(human);
-        }
+
+        taghuman.WorkObjectSN=interactionList->getObjectSN(human);
+
         taghuman.DR0=human->getDR0();
         taghuman.UR0=human->getUR0();
         if(human->getSort()==SORT_FARMER){
@@ -776,7 +774,16 @@ void Core::manageOrder(int id)
             break;
         }
         case 4:{    ///type 4:命令建筑self进行option工作
-            ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
+            if(cur.option==0){
+                if(self->getSort()!=SORT_BUILDING){
+                    ret=ACTION_INVALID_SN;
+                }else{
+                    interactionList->suspendRelation(self);
+                    ret=ACTION_SUCCESS;
+                }
+            }else{
+                ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
+            }
             if(ret == ACTION_SUCCESS&& id == 0)
                 call_debugText("green"," BuildAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 执行行动 ACTION_"+QString::number(cur.option),id);
             break;

@@ -13,7 +13,8 @@ std::queue<string> soundQueue;
 
 std::list<Coordinate*> drawlist;
 
-
+Score usrScore=Score(0);
+Score enemyScore=Score(1);
 Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;

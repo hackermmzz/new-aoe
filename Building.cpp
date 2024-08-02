@@ -19,7 +19,7 @@ int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
 
 /********************静态资源**************************/
 bool is_cheatAction = false;
-
+extern Score usrScore;
 
 
 /********************构造与析构**************************/
@@ -230,7 +230,15 @@ void Building::init_Blood()
 void Building::update_Build()
 {
     double ratio = get_retio_Build();
-    if(Percent<100) Percent+=ratio;
+    if(Percent<100) {
+        Percent+=ratio;
+        if(Percent>100){
+            if(getNum()==BUILDING_HOME||getNum()==BUILDING_FARM)
+                usrScore.update(_BUILDING1);
+            else
+                usrScore.update(_BUILDING2);
+        }
+    }
     if(Percent>100) Percent = 100;
     Blood+=ratio/100;
 
@@ -258,7 +266,20 @@ void Building::setFundation()
         break;
     }
 }
-
+void Building::update_Action(){
+    actPercent += actSpeed;
+    if(is_ActionFinish()){
+        int num=getActNum();
+        if(num==BUILDING_CENTER_CREATEFARMER||num==BUILDING_ARMYCAMP_CREATE_CLUBMAN
+            ||num==BUILDING_ARMYCAMP_CREATE_SLINGER||num==BUILDING_RANGE_CREATE_BOWMAN)
+            usrScore.update(_HUMAN1);
+        else if(num==BUILDING_STABLE_CREATE_SCOUT){
+            usrScore.update(_HUMAN2);
+        }else{
+            usrScore.update(_TECH);
+        }
+    }
+}
 
 void Building::setActStatus(int wood , int food , int stone , int gold)
 {
