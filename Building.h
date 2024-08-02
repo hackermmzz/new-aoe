@@ -45,6 +45,8 @@ public:
         else return vision;
     }
 
+    string getSound_Click(){return sound_click[Num];}
+
     void setAttribute();
     void setNowRes();
     void setAction( int actNum );
@@ -143,6 +145,9 @@ protected:
     static std::string BuildDisplayName[10];
 
     static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
+
+    static string sound_click[10];
+
   /********************静态资源**************************/
 
     bool defencing = false;

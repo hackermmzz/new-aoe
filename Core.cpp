@@ -852,71 +852,17 @@ void Core::resetNowObject_Click()
 void Core::requestSound_Click( Coordinate* object )
 {
     if(nowobject == NULL) return;
+    Building* buildOb = NULL;
+    object->printer_ToBuilding((void**)&buildOb);
 
-    switch (object->getSort()){
-    case SORT_ARMY:
-        soundQueue.push("Click_Army");
-        return;
+    if(buildOb!=NULL && !buildOb->isFinish()) return;
 
-    case SORT_FARMER:
-        soundQueue.push("Click_Villager");
-        return;
+    std::string clickSound = object->getSound_Click();
 
-    case SORT_BUILDING:
+    if(!clickSound.empty())
+        soundQueue.push(clickSound);
 
-        switch (object->getNum()) {
-        case BUILDING_ARMYCAMP:
-            soundQueue.push("Click_ArmyCamp");
-            return;
-        case BUILDING_CENTER:
-            soundQueue.push("Click_Center");
-            return;
-        case BUILDING_GRANARY:
-            soundQueue.push("Click_Granary");
-            return;
-        case BUILDING_HOME:
-            soundQueue.push("Click_House");
-            return;
-        case BUILDING_MARKET:
-            soundQueue.push("Click_Market");
-            return;
-        case BUILDING_RANGE:
-            soundQueue.push("Click_Range");
-            return;
-        case BUILDING_STABLE:
-            soundQueue.push("Click_Stable");
-            return;
-        case BUILDING_STOCK:
-            soundQueue.push("Click_Stock");
-            return;
-        case BUILDING_WALL:
-            soundQueue.push("Click_Wall");
-            return;
-        default:
-            return;
-        }
-
-    case SORT_Building_Resource:
-        if(object->getNum() == BUILDING_FARM)
-            soundQueue.push("Click_Farm");
-        return;
-
-    case SORT_ANIMAL:
-
-        switch (object->getNum()) {
-        case ANIMAL_LION:
-            soundQueue.push("Lion_Stand");
-            return;
-        case ANIMAL_ELEPHANT:
-            soundQueue.push("Elephant_Stand");
-            return;
-        default:
-            return;
-        }
-
-    default:
-        break;
-    }
+    return;
 }
 
 

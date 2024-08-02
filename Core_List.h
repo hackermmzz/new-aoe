@@ -90,6 +90,8 @@ private:
     void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
     void init_resetResBuild(){ needReset_resBuild = false; }
 
+    void requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject = NULL);
+
 };
 
 #endif // CORE_LIST_H

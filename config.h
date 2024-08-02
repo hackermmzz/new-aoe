@@ -44,6 +44,8 @@
 #define gen5 sqrt(5)
 #define MAXPLAYER 8
 #define NOWPLAYER 2
+#define NOWPLAYERREPRESENT 0
+
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度
 #define GAMEWIDGET_WIDTH 1440
@@ -72,8 +74,8 @@
 #define KEY_RIGHT 68
 #define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
 #define FRAMES_PER_SECOND 25    //每秒帧数
-#define OPTION_MUSIC false
-#define OPTION_SOUND false
+#define OPTION_MUSIC true
+#define OPTION_SOUND true
 #define OPTION_SELECT false
 #define OPTION_LINE false
 #define OPTION_POS false

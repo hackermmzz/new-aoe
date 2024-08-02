@@ -41,6 +41,12 @@ private:
     static std::string Animalname[5];
     static std::string Animalcarcassname[5];
     static std::string AnimalDisplayName[5];
+
+    static std::string sound_click[5];
+
+    void requestSound_Die();
+    void requestSound_Attack();
+
     
 public:
     Animal();
@@ -56,8 +62,11 @@ public:
     }
 
     QString getChineseName(){ return QString::fromStdString(getAnimalDisplayName(Num)); }
+
+    string getSound_Click(){return sound_click[Num];}
+
     void nextframe();
-    int getSort();
+    int getSort(){return SORT_ANIMAL;}
     void setNowRes();
     double getDis_attack(){ return dis_Attack + (attackObject->getSideLength())/2.0; }
 

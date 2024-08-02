@@ -24,6 +24,20 @@ public:
     bool getPos(){ return pos; }
     bool getOverlap(){ return overlap; }
 
+
+private:
+    Ui::Option *ui;
+    bool music = OPTION_MUSIC;
+    bool sound = OPTION_SOUND;
+    bool select = OPTION_SELECT;
+    bool line = OPTION_LINE;
+    bool pos = OPTION_POS;
+    bool overlap = OPTION_OVERLAP;
+    QPixmap pix;
+
+    void showText_Sound();
+    void showText_Music();
+
 signals:
     void changeMusic();
 
@@ -40,16 +54,6 @@ private slots:
     void on_clickPos_clicked();
 
     void on_overlap_clicked();
-
-private:
-    Ui::Option *ui;
-    bool music = OPTION_MUSIC;
-    bool sound = OPTION_SOUND;
-    bool select = OPTION_SELECT;
-    bool line = OPTION_LINE;
-    bool pos = OPTION_POS;
-    bool overlap = OPTION_OVERLAP;
-    QPixmap pix;
 };
 
 #endif // OPTION_H

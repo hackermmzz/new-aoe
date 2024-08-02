@@ -63,6 +63,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     this->setWindowTitle("Age Of Empires");     // 设置标题
     this->setWindowIcon(QIcon());               // 设置图标（暂空）
     option = new Option();
+    option->setModal(true);
     option->hide();
 
 
@@ -190,12 +191,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     if(bgm != NULL)
     {
         bgm->setLoops(QSound::Infinite);
-//        bgm->play();
-    }
-
-    for(std::map<string, QSound*>::iterator iter = SoundMap.begin(); iter != SoundMap.end(); iter++)
-    {
-        qDebug()<<QString::fromStdString( iter->first );
+        qDebug()<< (option->getMusic());
+        if(option->getMusic()) bgm->play();
     }
 
     debugText("blue"," 游戏开始");
@@ -822,7 +819,7 @@ void MainWidget::playSound(string soundType)
 {
     if(SoundMap[soundType] == NULL) return;
 
-    if(SoundMap[soundType]->isFinished())
+//    if(SoundMap[soundType]->isFinished())
         SoundMap[soundType]->play();
 
     return;
@@ -855,7 +852,6 @@ void MainWidget::FrameUpdate()
 
     //打印debug栏
     respond_DebugMessage();
-    playSound("Army_Die");
 
 
     if(!pause) gameframe++;

@@ -11,6 +11,10 @@ std::string Building::Builtname[3][10]={{},
                                       };
 std::string Building::BuildDisplayName[10]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场"};
 
+std::string Building::sound_click[10] = {\
+    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market","Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range"\
+};
+
 int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
 
 /********************静态资源**************************/

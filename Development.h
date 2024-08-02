@@ -9,6 +9,8 @@ class Development
 public:
     /************类的初始化***********/
     Development();
+    Development(int represent);
+
     //初始化科技树
     void init_DevelopLab();
     /************类的初始化***********/
@@ -107,6 +109,7 @@ public:
 
 private:
     int civilization = CIVILIZATION_STONEAGE;
+    int playerRepresent = 0;
 
 
     //home数量，用于计算当前最大人口
@@ -126,7 +129,12 @@ private:
 
     /*****************游戏进程信息*******************/
     //时代升级，进入下一时代
-    void civiChange(){ civilization++; }
+    void civiChange()
+    {
+        civilization++;
+        if(playerRepresent == NOWPLAYERREPRESENT)
+            soundQueue.push("Age_Level_Up");
+    }
 };
 
 #endif // DEVELOPMENT_H

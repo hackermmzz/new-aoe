@@ -62,6 +62,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
                 break;
         }
 
+        requestSound_Action(object1, eventType, object2);
         return ACTION_SUCCESS;
     }
     return ACTION_INVALID_ISNTFREE;
@@ -88,6 +89,8 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
             relate_AllObject[object1] = relation_Object(DR , UR , eventType);
             relate_AllObject[object1].respondConduct = respond;
             relate_AllObject[object1].sort = SORT_COORDINATE;
+
+            requestSound_Action(object1, CoreEven_JustMoveTo);
             return ACTION_SUCCESS;
         }
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
@@ -446,6 +449,55 @@ int Core_List::getObjectSN(Coordinate* object){
     }
 }
 
+//音效
+void Core_List::requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject)
+{
+    if(object->getPlayerRepresent() != NOWPLAYERREPRESENT) return;
+
+    Animal* aniOb = NULL;
+    StaticRes* staticOb = NULL;
+
+    if(object->getSort() == SORT_FARMER)
+    {
+        switch (actionType) {
+        case CoreEven_FixBuilding:
+            soundQueue.push("Villager_Builder");
+            break;
+        case CoreEven_JustMoveTo:
+            soundQueue.push("Villager_Move");
+            break;
+        case CoreEven_Gather:
+
+            goalObject->printer_ToAnimal((void**)&aniOb);
+            goalObject->printer_ToStaticRes((void**)&staticOb);
+
+            if(aniOb!=NULL)
+            {
+                if(aniOb->isTree()) soundQueue.push("Villager_Lumber");
+                else soundQueue.push("Villager_Hunter");
+            }
+            else if(staticOb!=NULL)
+            {
+                if(staticOb->getNum() == NUM_STATICRES_Bush)
+                    soundQueue.push("Villager_Gather");
+                else
+                    soundQueue.push("Villager_Miner");
+            }
+            else if(goalObject->getSort() == SORT_Building_Resource)
+                soundQueue.push("Villager_Gather");
+
+            break;
+        default:
+            break;
+        }
+    }
+    else if(object->getSort() == SORT_ARMY)
+    {
+        soundQueue.push("Army_Walk");
+    }
+}
+
+
 //****************************************************************************************
 //通用的控制对象行动函数
 void Core_List::object_Move(Coordinate * object , double DR , double UR)
@@ -647,9 +699,16 @@ void Core_List::object_FinishAction(Coordinate* object1)
         {
             if(!((Building*)relate_AllObject[object1].goalObject)->isConstructed())
             {
-                 player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
-                 if(relate_AllObject[object1].goalObject->getNum() == BUILDING_STOCK || relate_AllObject[object1].goalObject->getNum() == BUILDING_GRANARY)
-                     resourceBuildingChange = true;
+                std::string clickSound;
+
+                player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
+                if(relate_AllObject[object1].goalObject->getNum() == BUILDING_STOCK || relate_AllObject[object1].goalObject->getNum() == BUILDING_GRANARY)
+                    resourceBuildingChange = true;
+
+                clickSound = relate_AllObject[object1].goalObject->getSound_Click();
+
+                if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
+                    soundQueue.push(clickSound);
             }
             relate_AllObject[object1].goalObject->initAction();
             if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
@@ -685,15 +744,21 @@ void Core_List::conduct_Attacked(Coordinate* object)
     BloodHaver* attackee = NULL;
     object->printer_ToBloodHaver((void**)&attackee); 
 
-    if(attackee != NULL && !attackee->isDie()&& attackee->isGotAttack() )
+    if(attackee == NULL || !attackee->isGotAttack())
+        return;
+
+    if(object->getPlayerRepresent() <MAXPLAYER)
+        player[object->getPlayerRepresent()]->beginAttack();
+
+    if(!attackee->isDie())
     {
 
         //判断攻击者是否为空指针
         attacker=attackee->getAvangeObject();
         if(attacker!=NULL)
         {
-//            call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
-//                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击",object->getPlayerRepresent());
+            /*call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
+                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击",object->getPlayerRepresent());*/
 
              attackee->updateAvangeObjectPosition();
         }
@@ -722,6 +787,9 @@ void Core_List::conduct_Attacked(Coordinate* object)
             }
             else if(object->getSort() == SORT_FARMER)
             {
+                if(object->getPlayerRepresent() == NOWPLAYERREPRESENT)
+                    soundQueue.push("Villager_BeAttacked");
+
                 if(attacker!=NULL && (isObject_Free(object) || relate_AllObject[object].relationAct != CoreEven_Attacking \
                                       && relate_AllObject[object].relationAct != CoreEven_JustMoveTo ))
                 {
@@ -876,9 +944,10 @@ void Core_List::crashHandle(MoveObject* moveOb)
     moveOb->GoBackLU();
     if(/*relate_AllObject[object].nullPath || */relate_AllObject[moveOb].relationAct == CoreEven_JustMoveTo && moveOb->getPath_size() == 0)
     {
-//        call_debugText("red", moveOb->getChineseName()+ "(编号:" + QString::number(moveOb->getglobalNum()) + "当前位置为 ("+\
-//                       QString::number(moveOb->getDR()) +"," + QString::number(moveOb->getUR())+") , 目标点 ("+\
-//                       QString::number(moveOb->getDR0()) + "," + QString::number(moveOb->getUR0()) + ") 附近不可抵达",moveOb->getPlayerRepresent());
+
+        /*call_debugText("red", moveOb->getChineseName()+ "(编号:" + QString::number(moveOb->getglobalNum()) + "当前位置为 ("+\
+                       QString::number(moveOb->getDR()) +"," + QString::number(moveOb->getUR())+") , 目标点 ("+\
+                       QString::number(moveOb->getDR0()) + "," + QString::number(moveOb->getUR0()) + ") 附近不可抵达",moveOb->getPlayerRepresent());*/
         relate_AllObject[moveOb].wait(100);
 
         moveOb->stateCrash=true;
@@ -1197,7 +1266,8 @@ int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_RESO
 int STATE_FixBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_FIXING};
 int STATE_CreateBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_BUILDING};
 
-int Core_List::getNowPhaseNum(Coordinate* object){
+int Core_List::getNowPhaseNum(Coordinate* object)
+{
     ///获取当前object的行动阶段，用于将信息传递给AIGame
     relation_Object& thisRelation=relate_AllObject[object];
     MoveObject* move=dynamic_cast<MoveObject*>(object);

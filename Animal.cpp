@@ -11,6 +11,9 @@ std::list<ImageResource>* Animal::Die[5][8];
 std::list<ImageResource>* Animal::Run[5][8];
 std::list<ImageResource>* Animal::Disappear[5][8];
 
+std::string Animal::sound_click[5] = {\
+    "", "", "Elephant_Stand", "Lion_Stand", ""\
+};
 
 Animal::Animal()
 {
@@ -131,6 +134,7 @@ void Animal::nextframe()
         {
             setPreDie();
             changeToGatherAble();  //死亡后，设置资源为可采集
+            requestSound_Die();
         }
         else if(!get_isActionEnd() && isNowresShift()) nowres++;
         else if(!changeToDisappear && !is_Surplus())
@@ -150,6 +154,9 @@ void Animal::nextframe()
 
             if(isNowresShift())
             {
+                if(nowres == nowlist->begin() && nowstate == MOVEOBJECT_STATE_ATTACK)
+                    requestSound_Attack();
+
                 this->nowres++;
                 if(this->nowres==nowlist->end())
                 {
@@ -165,9 +172,19 @@ void Animal::nextframe()
     }
 }
 
-int Animal::getSort()
+void Animal::requestSound_Die()
 {
-    return SORT_ANIMAL;
+    if(!isTree())
+        soundQueue.push("Animal_Die");
+}
+
+
+void Animal::requestSound_Attack()
+{
+    if(Num == ANIMAL_LION)
+        soundQueue.push("Lion_Attack");
+    else if(Num == ANIMAL_ELEPHANT)
+        soundQueue.push("Elephant_Attack");
 }
 
 void Animal::setNowRes()

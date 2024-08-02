@@ -20,6 +20,10 @@ Option::Option(QWidget *parent) :
     btnPos = ui->clickPos;
     btnOverlap = ui->overlap;
 //    btnPause = ui->pause;
+
+    showText_Sound();
+    showText_Music();
+
 }
 
 Option::~Option()
@@ -46,6 +50,24 @@ void Option::paintEvent(QPaintEvent *event)
 //        ui->pause->setText("继续游戏");
 //    }
 //}
+
+void Option::showText_Sound()
+{
+    if(sound)
+        ui->sound->setText("关闭音效");
+    else
+        ui->sound->setText("开启音效");
+}
+
+void Option::showText_Music()
+{
+    if(music)
+        ui->music->setText("关闭音乐");
+    else
+        ui->music->setText("开启音乐");
+}
+
+
 //***************option槽函数*******************
 void Option::on_select_clicked()
 {
@@ -89,10 +111,7 @@ void Option::on_music_clicked()
 {
     music = !music;
 
-    if(music)
-        ui->music->setText("关闭音乐");
-    else
-        ui->music->setText("开启音乐");
+    showText_Music();
 
     emit changeMusic();
 }
@@ -101,9 +120,6 @@ void Option::on_sound_clicked()
 {
     sound = !sound;
 
-    if(sound)
-        ui->sound->setText("关闭音效");
-    else
-        ui->sound->setText("开启音效");
+    showText_Sound();
 }
 
