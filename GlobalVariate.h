@@ -58,12 +58,14 @@ extern std::map<QString , int>debugMessageRecord;
 enum ScoreType {
     _WOOD= 0,
     _STONE,
+    _MEAT,
 
-    _MEAT,  //其值为以下之和
     _BERRY,
     _GAZELLE,
     _ELEPHANT,
     _FARM,
+    _ISWOOD,
+    _ISSTONE,
 
     _TECH,
     _BUILDING1,
@@ -91,7 +93,7 @@ private:
     void addScore(int points,  const QString& message) {
         score += points;
         if(id==0)
-            call_debugText("green", " 玩家"+message, 0);
+            call_debugText("blue", " 玩家"+message, 0);
         else
             call_debugText("red", " 敌方"+message, 0);
     }
@@ -102,13 +104,13 @@ public:
         return score;
     }
     void update(int type,int num=1) {
-        if (type < _TECH && scoreTypes[type] == 0 && type != _MEAT) {
-            addScore(5, " 获得新资源，分数+5");
+        if (type <=_ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
+            addScore(5, " 采集到新资源，分数+5");
         }
 
-        if (type > _MEAT && type < _TECH) {
+        if (type > _MEAT && type <=_ISSTONE) {
             scoreTypes[type]=scoreTypes[type]|1;
-            type = _MEAT;
+            return;
         }
 
         int before=scoreTypes[type]/100;

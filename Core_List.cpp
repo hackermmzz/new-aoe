@@ -582,16 +582,16 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
 
         //更新得分
-        if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==1&&object2->getSort()==SORT_ARMY){
+        if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==1&&object2->getSort()==SORT_ARMY&&object1->getPlayerRepresent()==0){
             if(object2->getNum()>3){
                 usrScore.update(_KILL10);
             }else{
                 usrScore.update(_KILL2);
             }
         }
-        if(object2->getSort()==SORT_BUILDING&&attackee->isDie()){
-            qDebug()<<!isDead<<attackee->isDie()<<object2->getPlayerRepresent()<<object1->getPlayerRepresent();
-        }
+        // if(object2->getSort()==SORT_BUILDING&&attackee->isDie()){
+        //     qDebug()<<!isDead<<attackee->isDie()<<object2->getPlayerRepresent()<<object1->getPlayerRepresent();
+        // }
         if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==0&&object1->getPlayerRepresent()==1){
             if(object2->getSort()==SORT_BUILDING){
                 switch(object2->getNum()){
@@ -653,6 +653,11 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
                     }
                 }else if(object2->getSort()==SORT_Building_Resource){
                     usrScore.update(_FARM);
+                }
+                if(res->get_ResourceSort()==HUMAN_WOOD){
+                    usrScore.update(_ISWOOD);
+                }else if(res->get_ResourceSort()==HUMAN_STONE){
+                    usrScore.update(_ISSTONE);
                 }
                 gatherer->update_addResource();
             }

@@ -62,7 +62,7 @@ public:
     void setPlayerScience(Development* science){ playerScience = science; }
     //记录隶属的player阵营
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
-
+    int getPlayerRepresent(){ return playerRepresent; }
 
     void needDelete(){ taskEnd = true; }
     void set_attackerDie(){ isAttackerDie = true; }
