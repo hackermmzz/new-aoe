@@ -58,12 +58,14 @@ extern std::map<QString , int>debugMessageRecord;
 enum ScoreType {
     _WOOD= 0,
     _STONE,
+    _MEAT,
 
-    _MEAT,  //其值为以下之和
     _BERRY,
     _GAZELLE,
     _ELEPHANT,
     _FARM,
+    _ISWOOD,
+    _ISSTONE,
 
     _TECH,
     _BUILDING1,
@@ -73,6 +75,11 @@ enum ScoreType {
 
     _KILL2,
     _KILL10,
+
+    _DESTORY2,
+    _DESTORY4,
+    _DESTORY5,
+    _DESTORY10,
 
     SCORE_TYPE_COUNT
 };
@@ -85,49 +92,69 @@ private:
 
     void addScore(int points,  const QString& message) {
         score += points;
-        call_debugText("green", message, id);
+        if(id==0)
+            call_debugText("blue", " 玩家"+message, 0);
+        else
+            call_debugText("red", " 敌方"+message, 0);
     }
 
 public:
     Score(int id) : id(id), score(0) {}
-
-    void update(int type) {
-        if (type < _TECH && scoreTypes[type] == 0 && type != _MEAT) {
-            addScore(5, "获得新资源，分数+5");
+    int getScore(){
+        return score;
+    }
+    void update(int type,int num=1) {
+        if (type <=_ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
+            addScore(5, " 采集到新资源，分数+5");
         }
 
-        if (type > _MEAT && type < _TECH) {
-            scoreTypes[_MEAT]++;
-            type = _MEAT;
+        if (type > _MEAT && type <=_ISSTONE) {
+            scoreTypes[type]=scoreTypes[type]|1;
+            return;
         }
 
-        scoreTypes[type]++;
+        int before=scoreTypes[type]/100;
+        scoreTypes[type]+=num;
 
-        if (type <= _MEAT && scoreTypes[type] != 0 && scoreTypes[type] % 100 == 0) {
-            addScore(1, "单种资源收集满100个，分数+1");
+        if (type <= _MEAT) {
+            int after=scoreTypes[type]/100;
+            int change=after-before;
+            while(change>0){
+                addScore(1, " 单种资源收集满100个，分数+1");
+                change--;
+            }
         }
 
         switch (type) {
         case _TECH:
-            addScore(2, "解锁新科技，分数+2");
+            addScore(2, " 解锁新科技，分数+2");
             break;
         case _HUMAN1:
-            addScore(1, "生产农民和普通兵种，分数+1");
+            addScore(1, " 生产农民或普通兵种，分数+1");
             break;
         case _HUMAN2:
-            addScore(2, "生产骑兵，分数+2");
+            addScore(2, " 生产骑兵，分数+2");
             break;
         case _BUILDING1:
-            addScore(1, "建造住房或农田，分数+1");
+            addScore(1, " 建造住房或农田，分数+1");
             break;
         case _BUILDING2:
-            addScore(2, "建造一般建筑，分数+2");
+            addScore(2, " 建造一般建筑，分数+2");
             break;
         case _KILL2:
-            addScore(2, "击杀一般敌人，分数+2");
+            addScore(2, " 击杀一般敌人，分数+2");
             break;
-        case _KILL10:
-            addScore(10, "击杀敌方英雄，分数+10");
+        case _DESTORY2:
+            addScore(2, " 摧毁房屋或农田，分数+2");
+            break;
+        case _DESTORY4:
+            addScore(4, " 摧毁一般建筑，分数+4");
+            break;
+        case _DESTORY5:
+            addScore(5, " 摧毁箭塔，分数+5");
+            break;
+        case _DESTORY10:
+            addScore(10, " 摧毁主营，分数+10");
             break;
         default:
             break;

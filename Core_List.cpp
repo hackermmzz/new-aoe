@@ -1,5 +1,6 @@
 #include "Core_list.h"
-
+extern Score usrScore;
+extern Score enemyScore;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
     this->theMap = theMap;
@@ -575,9 +576,43 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
+        bool isDead=attackee->isDie();
         damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
+
+        //更新得分
+        if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==1&&object2->getSort()==SORT_ARMY&&object1->getPlayerRepresent()==0){
+            if(object2->getNum()>3){
+                usrScore.update(_KILL10);
+            }else{
+                usrScore.update(_KILL2);
+            }
+        }
+        // if(object2->getSort()==SORT_BUILDING&&attackee->isDie()){
+        //     qDebug()<<!isDead<<attackee->isDie()<<object2->getPlayerRepresent()<<object1->getPlayerRepresent();
+        // }
+        if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==0&&object1->getPlayerRepresent()==1){
+            if(object2->getSort()==SORT_BUILDING){
+                switch(object2->getNum()){
+                case BUILDING_HOME:
+                case BUILDING_FARM:
+                    enemyScore.update(_DESTORY2);
+                    break;
+                case BUILDING_ARROWTOWER:
+                    enemyScore.update(_DESTORY5);
+                    break;
+                case BUILDING_CENTER:
+                    enemyScore.update(_DESTORY10);
+                    break;
+                default:
+                    enemyScore.update(_DESTORY4);
+                }
+            }else{
+                enemyScore.update(_KILL2);
+            }
+        }
+
     }
 }
 
@@ -585,8 +620,11 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
 {
     Farmer* gatherer = (Farmer*) object1;
     Resource* res = NULL;
+
+    StaticRes* s_res=NULL;
     object2->printer_ToResource((void**)&res);
 
+    object2->printer_ToStaticRes((void**)&s_res);
     if(res!= NULL)
     {
         if(!gatherer->isWorking()) gatherer->setPreWork();
@@ -602,6 +640,25 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
             if( res->isFarmerGatherable(gatherer) && gatherer->get_isActionEnd())
             {
                 res->updateCnt_byGather(gatherer->get_quantityGather());
+                //更新首次收集得分
+                if(object2->getSort()==SORT_STATICRES&&s_res->getNum()==0){
+                    usrScore.update(_BERRY);
+                }else if(object2->getSort()==SORT_ANIMAL){
+                    Animal* animal=NULL;
+                    object2->printer_ToAnimal((void**)&animal);
+                    if(animal->getNum()==ANIMAL_GAZELLE){
+                        usrScore.update(_GAZELLE);
+                    }else if(animal->getNum()==ANIMAL_ELEPHANT){
+                        usrScore.update(_ELEPHANT);
+                    }
+                }else if(object2->getSort()==SORT_Building_Resource){
+                    usrScore.update(_FARM);
+                }
+                if(res->get_ResourceSort()==HUMAN_WOOD){
+                    usrScore.update(_ISWOOD);
+                }else if(res->get_ResourceSort()==HUMAN_STONE){
+                    usrScore.update(_ISSTONE);
+                }
                 gatherer->update_addResource();
             }
         }
@@ -619,6 +676,19 @@ void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& rel
             else
             {
                 player[worker->getPlayerRepresent()]->changeResource(worker->getResourceSort() , worker->getResourceNowHave());
+                //更新累计收集得分
+                switch(worker->getResourceSort()){
+                case HUMAN_WOOD:
+                    usrScore.update(_WOOD,worker->getResourceNowHave());
+                    break;
+                case HUMAN_STONE:
+                    usrScore.update(_STONE,worker->getResourceNowHave());
+                    break;
+                case HUMAN_GRANARYFOOD:
+                case HUMAN_STOCKFOOD:
+                    usrScore.update(_MEAT,worker->getResourceNowHave());
+                    break;
+                }
                 worker->update_resourceClear();
             }
         }
