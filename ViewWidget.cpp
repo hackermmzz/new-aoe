@@ -57,7 +57,7 @@ void ViewWidget::paintEvent(QPaintEvent *)
         auto farmerIter = enemyFarmerList->begin();
         for(; farmerIter != enemyFarmerList->end(); farmerIter++)
         {
-            if((*farmerIter)->isDie()){
+            if(!(*farmerIter)->isDie()){
                 int farmerL = (*farmerIter)->getDR() / 16 / gen5;
                 int farmerU = (*farmerIter)->getUR() / 16 / gen5;
                 int farmerY = 1.23 * (MAP_L + farmerL - farmerU);

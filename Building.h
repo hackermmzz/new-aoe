@@ -47,7 +47,7 @@ public:
 
     void setAttribute();
     void setNowRes();
-    void setAction( int actNum );
+    void setAction( int actN5um );
     void ActNumToActName();
 
     bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
@@ -93,7 +93,7 @@ public:
     double get_retio_Action();
 
     bool is_ActionFinish(){ return actPercent>=100; }
-    void update_Action(){ actPercent += actSpeed; }
+    void update_Action();
     void update_Build();
     /*************控制建筑行为****************/
 

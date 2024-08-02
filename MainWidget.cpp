@@ -4,7 +4,8 @@
 int g_globalNum=1;
 int g_frame=0;
 int mapmoveFrequency = 1;
-
+extern Score usrScore;
+extern Score enemyScore;
 std::map<int,Coordinate*> g_Object;
 ActWidget *acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
@@ -136,6 +137,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     EnemyAi=new EnemyAI();
     connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
     connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
+    connect(UsrAi, &AI::cheatAttack, EnemyAi, &EnemyAI::onWaveAttack);
     UsrAi->start();
     EnemyAi->start();
 
@@ -702,6 +704,16 @@ void MainWidget::showPlayerResource(int playerRepresent)
 void MainWidget::statusUpdate()
 {
     showPlayerResource(0);
+
+    QFont currentFont = ui->score0->font();
+    ui->score0->setTextFormat(Qt::RichText); // 确保使用富文本格式
+    ui->score0->setText("<html><head/><body><p><span style=\" font-size:12pt; color:#00007f;\">"
+                        +QString::number(usrScore.getScore())+"</span></p></body></html>");
+
+    ui->score1->setTextFormat(Qt::RichText); // 确保使用富文本格式
+    ui->score1->setText("<html><head/><body><p><span style=\" font-size:12pt; color:#aa0000;\">"
+                        +QString::number(enemyScore.getScore())+"</span></p></body></html>");
+
     ui->mapView->screenL = ui->Game->getBlockDR();
     ui->mapView->screenU = ui->Game->getBlockUR();
     ui->statusLbl->setText(sel->getShowTime() + QString::fromStdString("\n"));
