@@ -166,7 +166,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //设置user初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
-//    player[0]->changeResource(2000,2000,2000,2000);
+    player[0]->changeResource(2000,2000,2000,2000);
 //    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     // 设置鼠标追踪

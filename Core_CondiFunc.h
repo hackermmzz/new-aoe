@@ -14,6 +14,8 @@ struct pathNode{
     Point position; //当前点
     int cost_predict = 0 , cost_total = 0;
 
+    int pathLength = 1;
+
     pathNode* preNode = NULL;   //记录前驱点
 
     //**************************

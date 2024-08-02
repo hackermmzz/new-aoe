@@ -127,24 +127,31 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
     if(! relate_AllObject[object1].isExist )
     {
         BloodHaver* bloodOb = NULL;
+        Building* buildOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
         if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
 
         //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
         if(eventType == CoreEven_CreatBuilding)
         {
-            int wrongCode;
-            wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR,((Farmer*)object1)->getPlayerRepresent());
+            int playerRepresent = object1->getPlayerRepresent();
+            int wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR, playerRepresent);
+
             if(wrongCode<0) return wrongCode;
 
-            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingShowAble(type))
+            //判断是否已解锁建筑
+            if(!player[playerRepresent]->get_isBuildingShowAble(type) )
                 return ACTION_INVALID_HUMANBUILD_LOCK;
 
-            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type))
+            if(!player[playerRepresent]->get_isBuildingAble(type))
                 return ACTION_INVALID_RESOURCE;
 
-            player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
-            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type, BlockDR , BlockUR) , CoreEven_FixBuilding);
+            player[playerRepresent]->changeResource_byBuild(type);
+
+            buildOb = player[playerRepresent]->addBuilding( type, BlockDR , BlockUR);
+
+            theMap->add_Map_Object(buildOb);    //防止同一帧内建筑重叠
+            return addRelation(object1 , buildOb , CoreEven_FixBuilding);
         }
     }
 
@@ -395,9 +402,10 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
 //判断是否可以建造建筑
 int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int playerID)
 {
-    int answer = ACTION_SUCCESS;
     int DRL = -1,DRR = -1,URD = -1, URU = -1;    //记录边界
+    int blockSideLength;
     Building* tempBuild = NULL;
+    QString chineseName;
 
     //预创建
     if(buildtype == BUILDING_FARM)
@@ -407,40 +415,43 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
     }
     else tempBuild = new Building(buildtype,BlockDR,BlockUR);
 
-    DRL = tempBuild->getBlockDR();
-    DRR = tempBuild->getBlockDR()+tempBuild->get_BlockSizeLen();
-    URD = tempBuild->getBlockUR();
-    URU = tempBuild->getBlockUR()+tempBuild->get_BlockSizeLen();
+    blockSideLength = tempBuild->get_BlockSizeLen();
+    chineseName = tempBuild->getChineseName();
+
+    delete tempBuild;
+
+    DRL = BlockDR;
+    DRR = BlockDR + blockSideLength;
+    URD = BlockUR;
+    URU = BlockUR + blockSideLength;
 
     if(DRL<0 || DRR>71 || URD<0 || URU>71)
     {
-        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置越界",playerID);
-        answer = ACTION_INVALID_HUMANBUILD_OVERBORDER;
-    }
-    else if( !theMap->cell[DRL][URD].Explored )
-    {
-        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败,选中位置未被探索",playerID);
-        answer = ACTION_INVALID_HUMANBUILD_UNEXPLORE;
-    }
-    else if(answer == 0) //如果以上限制均未触发，判断是否有重叠
-    {
-        int bDR_ba,bUR_ba;
-        if(theMap->isHaveObject(tempBuild->getBlockDR(),tempBuild->getBlockUR(),bDR_ba,bUR_ba , tempBuild->get_BlockSizeLen()))
-        {
-            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠",playerID);
-            answer = ACTION_INVALID_HUMANBUILD_OVERLAP;
-        }
-        else if(!theMap->isFlat(tempBuild))
-        {
-            call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+tempBuild->getChineseName()+" 建造失败:放置位置存在高度差或斜坡",playerID);
-            answer = ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
-        }
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败,选中位置越界",playerID);
+        return ACTION_INVALID_HUMANBUILD_OVERBORDER;
     }
 
-    //*************结束******************
-    delete tempBuild;
+    if( !theMap->cell[DRL][URD].Explored )
+    {
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败,选中位置未被探索",playerID);
+        return  ACTION_INVALID_HUMANBUILD_UNEXPLORE;
+    }
 
-    return answer;
+    //如果以上限制均未触发，判断是否有重叠
+    int bDR_ba,bUR_ba;
+    if(theMap->isHaveObject(BlockDR, BlockUR, bDR_ba, bUR_ba, blockSideLength))
+    {
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败:放置位置非空地，在("+ QString::number(bDR_ba)+","+QString::number(bUR_ba)+")处与其他物体重叠",playerID);
+        return ACTION_INVALID_HUMANBUILD_OVERLAP;
+    }
+
+    if(!theMap->isFlat(BlockDR, BlockUR, blockSideLength))
+    {
+        call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败:放置位置存在高度差或斜坡",playerID);
+        return ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
+    }
+
+    return ACTION_SUCCESS;
 }
 
 int Core_List::getObjectSN(Coordinate* object){
@@ -672,40 +683,52 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
     object2->printer_ToStaticRes((void**)&s_res);
     if(res!= NULL)
     {
-        if(!gatherer->isWorking()) gatherer->setPreWork();
-        else
+        if(!gatherer->isWorking())
         {
+            gatherer->setPreWork();
             gatherer->adjustAngle(object2->getDR(),object2->getUR());
             if(gatherer->getResourceSort() != res->get_ResourceSort())
             {
                 gatherer->set_ResourceSort(res->get_ResourceSort());
                 gatherer->update_resourceClear();
             }
+        }
+        else if( res->isFarmerGatherable(gatherer) && gatherer->get_isActionEnd())
+        {
+            res->updateCnt_byGather(gatherer->get_quantityGather());
 
-            if( res->isFarmerGatherable(gatherer) && gatherer->get_isActionEnd())
+            //更新首次收集得分
+            if(object2->getSort()==SORT_STATICRES&&s_res->getNum()==0)
             {
-                res->updateCnt_byGather(gatherer->get_quantityGather());
-                //更新首次收集得分
-                if(object2->getSort()==SORT_STATICRES&&s_res->getNum()==0){
-                    usrScore.update(_BERRY);
-                }else if(object2->getSort()==SORT_ANIMAL){
-                    Animal* animal=NULL;
-                    object2->printer_ToAnimal((void**)&animal);
-                    if(animal->getNum()==ANIMAL_GAZELLE){
-                        usrScore.update(_GAZELLE);
-                    }else if(animal->getNum()==ANIMAL_ELEPHANT){
-                        usrScore.update(_ELEPHANT);
-                    }
-                }else if(object2->getSort()==SORT_Building_Resource){
-                    usrScore.update(_FARM);
-                }
-                if(res->get_ResourceSort()==HUMAN_WOOD){
-                    usrScore.update(_ISWOOD);
-                }else if(res->get_ResourceSort()==HUMAN_STONE){
-                    usrScore.update(_ISSTONE);
-                }
-                gatherer->update_addResource();
+                usrScore.update(_BERRY);
             }
+            else if(object2->getSort()==SORT_ANIMAL)
+            {
+                Animal* animal=NULL;
+                object2->printer_ToAnimal((void**)&animal);
+                if(animal->getNum()==ANIMAL_GAZELLE)
+                {
+                    usrScore.update(_GAZELLE);
+                }
+                else if(animal->getNum()==ANIMAL_ELEPHANT)
+                {
+                    usrScore.update(_ELEPHANT);
+                }
+            }
+            else if(object2->getSort()==SORT_Building_Resource)
+            {
+                usrScore.update(_FARM);
+            }
+            if(res->get_ResourceSort()==HUMAN_WOOD)
+            {
+                usrScore.update(_ISWOOD);
+            }
+            else if(res->get_ResourceSort()==HUMAN_STONE)
+            {
+                usrScore.update(_ISSTONE);
+            }
+
+            gatherer->update_addResource();
         }
     }
 }
@@ -787,7 +810,9 @@ void Core_List::object_FinishAction(Coordinate* object1)
                 if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
                     soundQueue.push(clickSound);
             }
+
             relate_AllObject[object1].goalObject->initAction();
+
             if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
             {
                  object1->initAction();
@@ -1123,6 +1148,8 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     {
         nowBestPathNode = nodeQue->top()->value;
         nodeQue->pop();
+        if(nowBestPathNode->pathLength > 144) continue;
+
         nowPoint = nowBestPathNode->position;    //当前nowBestPathNode记录点的坐标
 
         for(int i = 0; i<8 && !meetGoal; i++)
@@ -1292,6 +1319,7 @@ void Core_List::initDetailList()
     {
         phaseList = new int[2]{CoreDetail_Move , CoreDetail_UpdateRatio };
         conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby , OPERATECON_NEAR_WORK ) , conditionF( condition_UniObjectPercent , OPERATECON_OBJECT2 ) };
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectNULL,OPERATECON_OBJECT2));
         forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
 
         relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);

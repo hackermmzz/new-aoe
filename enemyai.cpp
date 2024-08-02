@@ -7,6 +7,7 @@ ins EnemyIns;
 #define ATTACK 2
 #define DESTROY 3
 #define COUNTER 4
+#define RETREAT 5
 tagInfo enemyInfo;
 static int mode = 0;
 static int target[5]={151,151,151,151,151};
@@ -101,16 +102,15 @@ void EnemyAI::processData() {
         }
     }
     //更新波数
-    if(g_frame==22500) mode=3;
-    else if(g_frame==15000) mode=2;
-    else if(g_frame==9000)mode=0;
-    else if(g_frame==7500) mode=1;
+    if(g_frame==18000) mode=3;
+    else if(g_frame==16000) mode=-2;
+    else if(g_frame==12000) mode=2;
+    else if(g_frame==7000)mode=-1;
+    else if(g_frame==5000) mode=1;
     if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.buildings.size()==0){
         mode=4;
     }
-    for(int i=0;i<ATT2;i++)
-    if(mode==0&&armystate[i]==WAITING&&calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,pos_L[i],pos_U[i])>=200)
-        HumanMove(enemyInfo.armies[i].SN,pos_L[i],pos_U[i]);
+
     //防止连续出兵
         if(g_frame>15&&enemyInfo.armies.size()!=sum){
             if(mode==1){
@@ -124,6 +124,26 @@ void EnemyAI::processData() {
                 ATT2-=dif;
             }
     }
+    if(mode==-1)
+        for(int i=0;i<ATT1;i++)
+            if(armystate[i]!=RETREAT&&armystate[i]!=CHASE){
+                armystate[i]=WAITING;
+                if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,pos_L[i],pos_U[i])>=50){
+                     HumanMove(enemyInfo.armies[i].SN,pos_L[i],pos_U[i]);
+                     armystate[i]=RETREAT;
+            }
+
+            }
+    if(mode==-2)
+        for(int i=0;i<ATT2;i++)
+        if(armystate[i]!=RETREAT&&armystate[i]!=CHASE){
+            armystate[i]=WAITING;
+            if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,pos_L[i],pos_U[i])>=50){
+                 HumanMove(enemyInfo.armies[i].SN,pos_L[i],pos_U[i]);
+                 armystate[i]=RETREAT;
+        }
+
+        }
     //强制总攻
     if(g_frame>=15){
     if(enemyInfo.armies[Hero].Blood!=Blood[Hero]){
@@ -167,7 +187,7 @@ void EnemyAI::processData() {
         }
     }
 
-
+//     qDebug()<<ChasingLock[0]<<ChasingLock[1];
     // 自动反击
     if(mode!=3){
     for(int i=0;i<enemyInfo.armies.size();i++){
@@ -179,6 +199,8 @@ void EnemyAI::processData() {
                        Blood[i]=enemyInfo.armies[i].Blood;
                        chasestart_L[i]=enemyInfo.armies[i].DR;
                        chasestart_U[i]=enemyInfo.armies[i].UR;
+                       timer[i]=g_frame;
+                       ChasingLock[i]==1;
                    }
                }
                if(armystate[i]!=CHASE){
@@ -190,6 +212,7 @@ void EnemyAI::processData() {
                            chasestart_L[i]=enemyInfo.armies[i].DR;
                            chasestart_U[i]=enemyInfo.armies[i].UR;
                            timer[i]=g_frame;
+                           ChasingLock[i]==1;
                        }
                }
            }
@@ -202,29 +225,34 @@ void EnemyAI::processData() {
                            chasestart_L[i]=enemyInfo.armies[i].DR;
                            chasestart_U[i]=enemyInfo.armies[i].UR;
                            timer[i]=g_frame;
+                           ChasingLock[i]==1;
                        }
                    }
                }
            }}
     }
-        //攻击状态
-    if(mode>0)
-    for(int i=0;i<enemyInfo.armies.size();i++){
-//           qDebug()<<i<<armystate[i];
+        //反击检查
+    if(mode!=3)
+    for(int i=0;i<enemyInfo.armies.size();i++){       
            if(armystate[i]==CHASE){
-               //反击检查
+
                if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
                {
                    HumanMove(enemyInfo.armies[i].SN,chasestart_L[i],chasestart_U[i]);
+                   timer[i] = 0;
+                   ChasingLock[i]==0;
                    armystate[i]=WAITING;
                }
                if((g_frame - timer[i]) >= 75 && enemyInfo.armies[i].NowState == MOVEOBJECT_STATE_STAND){
                    timer[i] = 0;
+                   ChasingLock[i]==0;
                    armystate[i]=WAITING;
                }
 
-           }
-        else if(armystate[i]==ATTACK){
+           }}
+      //攻击状态
+      for(int i=0;i<enemyInfo.armies.size();i++)
+      if(armystate[i]==ATTACK){
             if(mode==1){
             if(Lock[i]==0&&i<ATT1){
 
@@ -237,12 +265,12 @@ void EnemyAI::processData() {
                          armystate[i]==WAITING;
                          else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
                              HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
-
                          else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
                          else if(enemyInfo.enemy_farmers.size()!=0) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
                          if(tar!=151){    Lock[i]=1;
                              timer[i]=g_frame;
                          }
+
            }
             }}
             else if(mode==2){
@@ -297,7 +325,7 @@ void EnemyAI::processData() {
                     if(tar!=151){    Lock[i]=1;
                         timer[i]=g_frame;
                 }
-        }}
+        }}}
             else if(mode==3){
                 if(Lock[i]==0){
                           nowState_Army=enemyInfo.armies[i].NowState;
@@ -314,14 +342,15 @@ void EnemyAI::processData() {
                             }
             }
         }
-               }
-            if ((g_frame - timer[i]) >= 75 && enemyInfo.armies[i].NowState == MOVEOBJECT_STATE_STAND) {
+               }        
+
+            if ((g_frame - timer[i]) >= 15 && enemyInfo.armies[i].NowState ==MOVEOBJECT_STATE_STAND) {
+//                qDebug()<<"success";
                 Lock[i]=0;
                 timer[i] = 0;
                 armystate[i]=WAITING;
                             }
-        }}
-}
+       }
 
 // 线性化进攻
 //    if(mode==1){
@@ -393,5 +422,5 @@ void EnemyAI::onWaveAttack(int wave) {
         return;
     }
     mode = wave;
-    qDebug()<<"change";
+//    qDebug()<<"change";
 }

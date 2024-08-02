@@ -1006,22 +1006,21 @@ bool Map::isFlat(Coordinate* judOb)
 bool Map::isFlat(int blockDR , int blockUR,int blockSideLen)
 {
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
-    int maxHight = map_Height[blockDR][blockUR] ,minHight = maxHight,tempHight;
+    int standard = map_Height[blockDR][blockUR] , tempHight;
+
+    if(standard == -1) return false;
 
     for(int x = blockDR; x<sideR; x++)
     {
         for(int y = blockUR; y<sideU;y++)
         {
-            tempHight = map_Height[blockDR][blockUR];
-            if(tempHight<minHight) minHight = tempHight;
-            else if(tempHight>maxHight) maxHight= tempHight;
+            tempHight = map_Height[x][y];
 
-            if(minHight == -1) return false;
+            if(tempHight != standard) return false;
         }
     }
 
-    if(maxHight==minHight) return true;
-    return false;
+    return true;
 }
 
 //该函数调用必须在barrierMap数组更新后
@@ -1225,7 +1224,8 @@ void Map::add_Map_Vision( Coordinate* object )
      {
          for(int y = 0; y<MAP_U; y++)
          {
-            if(isSlope(x,y)) map_Height[x][y] = -1;
+            if(isSlope(x,y))
+                map_Height[x][y] = -1;
             else map_Height[x][y] = cell[x][y].getMapHeight();
          }
      }
@@ -2026,7 +2026,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源
