@@ -74,6 +74,11 @@ enum ScoreType {
     _KILL2,
     _KILL10,
 
+    _DESTORY2,
+    _DESTORY4,
+    _DESTORY5,
+    _DESTORY10,
+
     SCORE_TYPE_COUNT
 };
 
@@ -85,7 +90,10 @@ private:
 
     void addScore(int points,  const QString& message) {
         score += points;
-        call_debugText("green", message, id);
+        if(id==0)
+            call_debugText("green", " 玩家"+message, 0);
+        else
+            call_debugText("red", " 敌方"+message, 0);
     }
 
 public:
@@ -134,8 +142,17 @@ public:
         case _KILL2:
             addScore(2, " 击杀一般敌人，分数+2");
             break;
-        case _KILL10:
-            addScore(10, " 击杀敌方英雄，分数+10");
+        case _DESTORY2:
+            addScore(2, " 摧毁房屋或农田，分数+2");
+            break;
+        case _DESTORY4:
+            addScore(4, " 摧毁一般建筑，分数+4");
+            break;
+        case _DESTORY5:
+            addScore(5, " 摧毁箭塔，分数+5");
+            break;
+        case _DESTORY10:
+            addScore(10, " 摧毁主营，分数+10");
             break;
         default:
             break;

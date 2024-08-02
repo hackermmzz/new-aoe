@@ -5,4 +5,9 @@ ins UsrIns;
 void UsrAI::processData()
 {
     //写入你的代码
+    cheatAction();
+    tagInfo info=getInfo();
+    if(info.GameFrame>3000){
+        emit cheatAttack(2);
+    }
 }
