@@ -11,10 +11,20 @@ void Core_List::update()
 {
     //对正在监视的Object，进行行动处理
     manageMontorAct();
+
     theMap->loadBarrierMap();//更新寻路用障碍表
+
     jud_resetResBuild();
 
+//    QElapsedTimer timer4;
+//    timer4.start();
+
     manageRelationList();
+
+//    //若想知道微秒级的运行时间
+//    qint64 elapsedNanoseconds = timer4.nsecsElapsed();
+//    qDebug() <<g_frame<< "manageRelationList:" << elapsedNanoseconds/1000<<"(ns)";
+
 
     init_resetResBuild();
 }
@@ -219,7 +229,6 @@ void Core_List::manageRelationList()
 {
     Coordinate* object1;
     Coordinate* object2;
-    list<conditionF> forcedInterrupCondition;
 
     map<Coordinate* , relation_Object>::iterator iter = relate_AllObject.begin();
 
@@ -239,27 +248,31 @@ void Core_List::manageRelationList()
             conditionF* recordCondition;
 
             //该部分为强制中止行动部分代码
-            forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
-            for(list<conditionF>::iterator iter_list = forcedInterrupCondition.begin();iter_list!=forcedInterrupCondition.end();iter_list++)
+            list<conditionF>& forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
+            list<conditionF>::iterator iter_list = forcedInterrupCondition.begin() , iter_liste = forcedInterrupCondition.end();
+            while(iter_list != iter_liste)
             {
                 if( iter_list->condition( object1,thisRelation,iter_list->variableArgu,iter_list->isNegation ) )
                 {
                     thisRelation.nowPhaseNum = thisDetailEven.phaseInterrup;
                     break;
                 }
+                iter_list++;
             }
 
             //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
             {
                 list<conditionF> &overCondition = thisDetailEven.loopOverCondition[nowPhaseNum];
-                for(list<conditionF>::iterator iter_list = overCondition.begin(); iter_list!= overCondition.end();iter_list++)
+                list<conditionF>::iterator iterOver=overCondition.begin(), iterOvere = overCondition.end();
+                while(iterOver != iterOvere)
                 {
-                    if( iter_list->condition( object1 , thisRelation , iter_list->variableArgu,iter_list->isNegation ))
+                    if( iterOver->condition( object1 , thisRelation , iterOver->variableArgu,iterOver->isNegation ))
                     {
-                        nowPhaseNum ++;
+                        nowPhaseNum++;
                         break;
                     }
+                    iterOver++;
                 }
             }
 
@@ -304,6 +317,7 @@ void Core_List::manageRelationList()
                 switch (thisDetailEven.phaseList[nowPhaseNum])
                 {
                     case CoreDetail_Move:
+                        ((MoveObject*)object1)->setPath(stack<Point>(),object1->getDR(),object1->getUR());
                         break;
                     case CoreDetail_Attack:
                         if(thisRelation.relationAct == CoreEven_MissileAttack) thisRelation.set_ExecutionTime(1);
@@ -531,7 +545,13 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
     {
         if(!relate_AllObject[object].isWaiting())
         {
-            if((moveObject->getDR0()!=DR || moveObject->getUR0()!= UR))
+            double DR0,UR0,thisDR,thisUR;
+            DR0 = moveObject->getDR0();
+            UR0 = moveObject->getUR0();
+            thisDR = moveObject->getDR();
+            thisUR = moveObject->getUR();
+
+            if( thisDR == DR0 && thisUR == UR0 && (DR0!=DR || UR0!= UR) || countdistance(DR0,UR0,DR,UR) > 107 )
             {
                 //为moveObject设置路径
                 setPath(moveObject, goalOb, DR, UR);
@@ -632,7 +652,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(calculateDamage)
     {
-        bool isDead=attackee->isDie();
+        bool isDead = attackee->isDie();
         damage = attacker->getATK()-attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
         if(damage<0) damage = 0;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
@@ -645,9 +665,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
                 usrScore.update(_KILL2);
             }
         }
-        // if(object2->getSort()==SORT_BUILDING&&attackee->isDie()){
-        //     qDebug()<<!isDead<<attackee->isDie()<<object2->getPlayerRepresent()<<object1->getPlayerRepresent();
-        // }
+
         if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==0&&object1->getPlayerRepresent()==1){
             if(object2->getSort()==SORT_BUILDING){
                 switch(object2->getNum()){

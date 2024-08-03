@@ -144,6 +144,7 @@ void UsrAI::processData()
             HumanMove(myInfo.armies[i].SN , mid+100 , mid-100);
         }
     }
+    if(g_frame<9500)
     for(int m=0;m<myInfo.farmers.size();m++)
     {
         if(myInfo.farmers[m].Blood<80&&!goStrack)

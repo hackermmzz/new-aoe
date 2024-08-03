@@ -867,7 +867,8 @@ void Map::loadBarrierMap(bool absolute)
             while(iter!=iterend)
             {
 //                CollisionObject.push_back((*ite));
-                setBarrier((*iter)->getBlockDR(),(*iter)->getBlockUR(),(*iter)->get_BlockSizeLen());
+                if(!(*iter)->isDie())
+                    setBarrier((*iter)->getBlockDR(),(*iter)->getBlockUR(),(*iter)->get_BlockSizeLen());
                 iter++;
             }
         }
