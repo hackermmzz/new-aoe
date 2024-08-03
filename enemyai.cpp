@@ -203,7 +203,7 @@ void EnemyAI::processData() {
             }
         }
     }
-    qDebug()<<armystate[0];
+//    qDebug()<<armystate[0];
     // 自动反击
     if(mode!=3){
     for(int i=0;i<enemyInfo.armies.size();i++){
@@ -437,5 +437,5 @@ void EnemyAI::onWaveAttack(int wave) {
         return;
     }
     mode = wave;
-    qDebug()<<"change";
+//    qDebug()<<"change";
 }

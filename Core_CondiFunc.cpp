@@ -25,6 +25,7 @@ pathNode* pathNode::pushNode( pathNode* nextNode )
     nextNode->preNode = this;
     nextNode->cost_total = cost_total;
     nextNode->cost_total += costLab[ nextNode->position - this->position ];
+    nextNode->pathLength += this->pathLength;
 
     return nextNode;
 }
@@ -399,6 +400,8 @@ bool condition_UniObjectPercent(  Coordinate* object1, relation_Object& relation
     int relationAct = relation.relationAct;
     if(operate == OPERATECON_OBJECT1) judge = object1;
     else if(operate == OPERATECON_OBJECT2) judge = relation.goalObject;
+
+    if(judge == NULL) isNegation^true;
 
     if(relationAct == CoreEven_FixBuilding) return isNegation^(((Building*)judge)->isFullHp()&&((Building*)judge)->isFinish());
     else if(relationAct == CoreEven_BuildingAct) return isNegation^((Building*)judge)->is_ActionFinish();

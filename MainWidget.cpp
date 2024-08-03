@@ -67,11 +67,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     option->setModal(true);
     option->hide();
 
-
-//    connect(option->btnHtml,&QPushButton::clicked,this,&MainWidget::exportDebugTextHtml);
-//    connect(option->btntxt,&QPushButton::clicked,this,&MainWidget::exportDebugTextTxt);
-//    connect(option->btnTextClear,&QPushButton::clicked,this,&MainWidget::clearDebugText);
-//    connect(option->btnFileClear,&QPushButton::clicked,this,&MainWidget::clearDebugTextFile);
 //    connect(option->btnMusic,&QPushButton::clicked,this,&MainWidget::toggleMusic);
 //    connect(option->btnSound,&QPushButton::clicked,this,&MainWidget::toggleSound);
 //    connect(option->btnSelect,&QPushButton::clicked,this,&MainWidget::toggleSelect);
@@ -84,6 +79,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     option->btnOverlap->hide();
     connect(ui->option,&QPushButton::clicked,option,&QDialog::show);
     connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
+    connect(option, &Option::request_ClearDebugText, this, &MainWidget::clearDebugText);
+    connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
+    connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
+    connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
 
 
     sel = new SelectWidget(this); // 设置左下角窗口
@@ -166,7 +165,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //设置user初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
-    player[0]->changeResource(200,200,200,200);
+//    player[0]->changeResource(2000,2000,2000,2000);
 //    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     // 设置鼠标追踪
@@ -193,7 +192,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     if(bgm != NULL)
     {
         bgm->setLoops(QSound::Infinite);
-        qDebug()<< (option->getMusic());
+//        qDebug()<< (option->getMusic());
         if(option->getMusic()) bgm->play();
     }
 
@@ -865,7 +864,6 @@ void MainWidget::FrameUpdate()
     //打印debug栏
     respond_DebugMessage();
 
-
     if(!pause) gameframe++;
     g_frame=gameframe;
     sel->resetSecond();
@@ -884,7 +882,9 @@ void MainWidget::FrameUpdate()
     else{
         qDebug()<<"速度设置错误";
     }
+
     gameDataUpdate();
+
     return;
 }
 void MainWidget::onRadioClickSlot()
@@ -970,6 +970,96 @@ void MainWidget::debugText(const QString& color, const QString& content)
 void MainWidget::clearDebugText()
 {
     ui->DebugTexter->clear();
+}
+
+void MainWidget::exportDebugTextHtml()
+{
+    QString debugInfo = ui->DebugTexter->toHtml();
+
+    // 获取当前系统时间，用于命名文件
+    QString currentTime = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
+
+    // 获取项目文件夹路径
+    QString projectPath = QDir::currentPath();
+
+    // 构建输出文件夹路径
+    QString outputPath = QDir::cleanPath(projectPath + QDir::separator() + "output");
+
+    // 创建输出文件夹（如果不存在）
+    QDir outputDir(outputPath);
+    if (!outputDir.exists()) {
+        outputDir.mkpath(".");
+    }
+
+    // 构建文件名
+    QString fileName = QString("%1/debug_info_%2.html").arg(outputPath).arg(currentTime);
+
+    // 打开文件以写入文本
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << debugInfo;
+        file.close();
+        qDebug() << "已保存调试信息至:" << fileName;
+    } else {
+        qDebug() << "保存失败";
+    }
+}
+
+void MainWidget::exportDebugTextTxt()
+{
+    QString debugInfo = ui->DebugTexter->toPlainText();
+
+    // 获取当前系统时间，用于命名文件
+    QString currentTime = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
+
+    // 获取项目文件夹路径
+    QString projectPath = QDir::currentPath();
+
+    // 构建输出文件夹路径
+    QString outputPath = QDir::cleanPath(projectPath + QDir::separator() + "output");
+
+    // 创建输出文件夹（如果不存在）
+    QDir outputDir(outputPath);
+    if (!outputDir.exists()) {
+        outputDir.mkpath(".");
+    }
+
+    // 构建文件名
+    QString fileName = QString("%1/debug_info_%2.txt").arg(outputPath).arg(currentTime);
+
+    // 打开文件以写入文本
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << debugInfo;
+        file.close();
+        qDebug() << "已保存调试信息至:" << fileName;
+    } else {
+        qDebug() << "保存失败";
+    }
+}
+
+void MainWidget::clearDebugTextFile()
+{
+    // 获取项目文件夹路径
+    QString projectPath = QDir::currentPath();
+
+    // 构建输出文件夹路径
+    QString outputPath = QDir::cleanPath(projectPath + QDir::separator() + "output");
+
+    // 打开输出文件夹
+    QDir outputDir(outputPath);
+
+    // 遍历目录并删除文件
+    QStringList fileList = outputDir.entryList(QDir::Files);
+    foreach (QString fileName, fileList) {
+        if (outputDir.remove(fileName)) {
+            qDebug() << "已删除:" << fileName;
+        } else {
+            qDebug() << "删除失败";
+        }
+    }
 }
 
 //***********************************************************************

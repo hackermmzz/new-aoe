@@ -172,8 +172,8 @@ private:
     //所拥有的四个资源
     int wood=200;
     int food=200;
-    int stone=150;
-    int gold=0;
+    int stone=200;
+    int gold=200;
     int score=0;    //得分
 
     //研究技术进度与成果
