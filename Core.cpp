@@ -280,6 +280,7 @@ void Core::gameUpdate()
         }
     }
 
+
     //更新AI用的资源表，该资源表是User/Enemy的通用模板
     theMap->reset_resMap_AI();
 
@@ -297,6 +298,7 @@ void Core::gameUpdate()
     manageOrder(1);
 
     interactionList->update();
+
 }
 
 void Core::updateByPlayer(int id){
@@ -541,7 +543,7 @@ void Core::manageMouseEvent()
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             else
                             {
-                                if(((Building_Resource*)nowobject)->get_Gatherable())
+                                if(((Building_Resource*)object_click)->get_Gatherable())
                                     interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
                                 else
                                     interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
@@ -699,17 +701,20 @@ void Core::manageOrder(int id)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
+
                 case SORT_Building_Resource:
+
                     if(self->getPlayerRepresent() == obj->getPlayerRepresent())
                     {
-                        if(((Building*)obj)->isFinish()) ret=interactionList->addRelation(self,obj,CoreEven_Gather);
+                        if(((Building_Resource*)obj)->get_Gatherable()) ret=interactionList->addRelation(self,obj,CoreEven_Gather);
                         else ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
+
                         if(ret == ACTION_SUCCESS&& id == 0)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }else
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS && id == 0)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;

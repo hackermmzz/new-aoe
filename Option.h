@@ -40,6 +40,10 @@ private:
 
 signals:
     void changeMusic();
+    void request_ClearDebugText();
+    void request_exportHtml();
+    void request_exportTxt();
+    void request_exportClear();
 
 private slots:
 
@@ -54,6 +58,10 @@ private slots:
     void on_clickPos_clicked();
 
     void on_overlap_clicked();
+    void on_textClear_clicked();
+    void on_exportHtml_clicked();
+    void on_exportTxt_clicked();
+    void on_exportClear_clicked();
 };
 
 #endif // OPTION_H

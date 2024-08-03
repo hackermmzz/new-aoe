@@ -123,3 +123,23 @@ void Option::on_sound_clicked()
     showText_Sound();
 }
 
+
+void Option::on_textClear_clicked()
+{
+    emit request_ClearDebugText();
+}
+
+void Option::on_exportHtml_clicked()
+{
+    emit request_exportHtml();
+}
+
+void Option::on_exportTxt_clicked()
+{
+    emit request_exportTxt();
+}
+
+void Option::on_exportClear_clicked()
+{
+    emit request_exportClear();
+}

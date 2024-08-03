@@ -59,6 +59,10 @@ public:
     void respond_DebugMessage();
     void debugText(const QString& color,const QString& content);
     void clearDebugText();
+    void exportDebugTextHtml();
+    void exportDebugTextTxt();
+    void clearDebugTextFile();
+
     //*************************************
 
     void playSound(string soundType);
