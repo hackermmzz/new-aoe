@@ -44,6 +44,7 @@ private:
 
     //寻路相关
     bool map_HaveJud[MAP_L][MAP_U];
+    bool goalMap[MAP_L][MAP_U];
 
     bool resourceBuildingChange = false;
     bool needReset_resBuild = false;

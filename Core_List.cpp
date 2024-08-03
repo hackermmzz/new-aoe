@@ -563,11 +563,13 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
                 {
                     //处理碰撞
                     crashHandle(moveObject);
+                    relate_AllObject[object].useless();
                 }
                 else if(relate_AllObject[object].crash_DealPhase)
                 {
                     //碰撞后的调整
                     work_CrashPhase(moveObject);
+                    relate_AllObject[object].useless();
                 }
                 else relate_AllObject[object].useOnce();
             }
@@ -1079,7 +1081,7 @@ void Core_List::crashHandle(MoveObject* moveOb)
         nextBlockPoint = moveOb->get_NextBlockPoint();
         PreviousPoint = moveOb->get_PreviousBlock();
 
-        if(moveOb->is_MoveFirstStep())
+        if(moveOb->is_MoveFirstStep() || PreviousPoint == nextBlockPoint)
         {
             probePoint = moveOb->getBlockPosition() - moveOb->getMoveDire();
             if(!theMap->isBarrier(probePoint))
@@ -1121,7 +1123,6 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
                              Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
 
-    bool goalMap[MAP_L][MAP_U];
     stack<Point> path;
     vector<Point> objectBlock;
     vector<Point>::iterator oBiter,oBitere;
@@ -1138,6 +1139,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     haveJud_Map_Move(start);
 
     memset(goalMap , 0 , sizeof(goalMap));
+
     //标记终点
     if(goalOb != NULL)
     {

@@ -149,7 +149,11 @@ struct relation_Object
     bool is_ExecutionOver(){ return times_Execution == 0; }
 
     void useless(){ useless_norm ++; }
-    void useOnce(){ useless_norm = 0; }
+    void useOnce()
+    {
+        if(useless_norm < 1)useless_norm = 0;
+        else useless_norm --;
+    }
 
     void wait( int time ){ time_wait = time; }
     bool isWaiting(){ return time_wait>0;}
