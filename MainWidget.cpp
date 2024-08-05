@@ -156,6 +156,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
     connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
     connect(UsrAi, &AI::cheatAttack, EnemyAi, &EnemyAI::onWaveAttack);
+    connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
     UsrAi->start();
     EnemyAi->start();
 
@@ -188,13 +189,16 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 创建 QSound 对象，指定音乐文件
     bgm = SoundMap["BGM"];
+
     // 设置循环播放
     if(bgm != NULL)
     {
-        bgm->setLoops(QSound::Infinite);
+        bgm->setLoopCount(QSoundEffect::Infinite);
+
 //        qDebug()<< (option->getMusic());
         if(option->getMusic()) bgm->play();
     }
+
 
     debugText("blue"," 游戏开始");
 }
@@ -758,7 +762,12 @@ void MainWidget::gameDataUpdate()
         emit startAI();
     }
     else
+    {
+        call_debugText("blue", " 细节坐标 ("+QString::number(mouseEvent->DR)+","+QString::number(mouseEvent->UR)\
+                       +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", 0);
+
         core->resetNowObject_Click();
+    }
 
     makeSound();
 }
@@ -799,7 +808,7 @@ void MainWidget::judgeVictory()
         //停止当前动作
         timer->stop();
         playSound("Lose");
-        debugText("blue"," 游戏失败，未达成目标。最终得分为:" + QString::number(player[0]->getScore()));
+        debugText("blue"," 游戏失败，未达成目标。最终得分为:" + QString::number(usrScore.getScore()));
 
         //弹出胜利提示
         if(QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
@@ -813,9 +822,8 @@ void MainWidget::judgeVictory()
         //停止当前动作
         timer->stop();
 
-        const char*
         playSound("Win");
-        debugText("blue"," 游戏胜利");
+        debugText("blue"," 游戏胜利。最终得分为:"+ QString::number(usrScore.getScore()) );
 
         //弹出胜利提示
         if(QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
@@ -880,7 +888,7 @@ void MainWidget::FrameUpdate()
         if(gameframe%4==0 || pause) paintUpdate();
     }
     else{
-        qDebug()<<"速度设置错误";
+        qDebug()<<"Speed setting error";
     }
 
     gameDataUpdate();
@@ -927,11 +935,12 @@ void MainWidget::on_stopButton_clicked()
 void MainWidget::responseMusicChange()
 {
     if(option->getMusic())
+    {
         bgm->play();
+    }
     else
         bgm->stop();
 }
-
 //***********************************************************************
 //输出提示框
 void MainWidget::respond_DebugMessage()
@@ -1000,9 +1009,9 @@ void MainWidget::exportDebugTextHtml()
         QTextStream out(&file);
         out << debugInfo;
         file.close();
-        qDebug() << "已保存调试信息至:" << fileName;
+        qDebug() << "Debugging information has been saved to:" << fileName;
     } else {
-        qDebug() << "保存失败";
+        qDebug() << "fail to save Debugging information.";
     }
 }
 
@@ -1034,9 +1043,9 @@ void MainWidget::exportDebugTextTxt()
         QTextStream out(&file);
         out << debugInfo;
         file.close();
-        qDebug() << "已保存调试信息至:" << fileName;
+        qDebug() << "Debugging information has been saved to:" << fileName;
     } else {
-        qDebug() << "保存失败";
+        qDebug() << "fail to save Debugging information.";
     }
 }
 
@@ -1055,9 +1064,9 @@ void MainWidget::clearDebugTextFile()
     QStringList fileList = outputDir.entryList(QDir::Files);
     foreach (QString fileName, fileList) {
         if (outputDir.remove(fileName)) {
-            qDebug() << "已删除:" << fileName;
+            qDebug() << "have deleted:" << fileName;
         } else {
-            qDebug() << "删除失败";
+            qDebug() << "fail to delete debugging infomation.";
         }
     }
 }

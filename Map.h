@@ -39,8 +39,10 @@ public:
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
     void loadfindPathMap(MoveObject* moveOb);
+    void loadfindPathMapTemperature();
     //加载障碍物地图
     void loadBarrierMap(bool absolute = false);
+    void loadBarrierMap_ByObjectMap();
     /*********************寻路相关*******************/
     bool isBarrier(Point blockPoint,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
@@ -50,6 +52,7 @@ public:
     bool isFlat(Coordinate* judOb);
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
     vector<Point> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
+    vector<Point> findBlock_Free(Point blockPoint, int lenth);
     vector<Point> findBlock_Flat(int disLen = 1);
 
     bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }
@@ -61,7 +64,7 @@ public:
 
     int get_MapHeight(int blockDR , int blockUR)
     {
-        if(blockDR<0 || blockUR<0 || blockDR>MAP_L || blockUR>MAP_U)
+        if(blockDR<0 || blockUR<0 || blockDR>=MAP_L || blockUR>=MAP_U)
         {
             qDebug()<<"get_MapHeight overborder";
             return 0;
@@ -175,6 +178,7 @@ private:
 
     //寻路障碍地图
     void clearfindPathMap(){memset(findPathMap,0,sizeof(findPathMap));}
+    void clearfindPathMapTemperature(){memset(findPathMapTemperature,0,sizeof(findPathMapTemperature));}
     void clearBarrierMap(){ memset(barrierMap ,0 , sizeof(barrierMap)); }
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
@@ -190,6 +194,8 @@ private:
 
     //记录当前帧可见格子
     stack<Point> blockLab_Visible;
+
+    int findPathMapTemperature[MAXPLAYER][MAP_L][MAP_U] = {};
 };
 
 #endif // MAP_H
