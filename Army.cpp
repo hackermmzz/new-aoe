@@ -217,8 +217,11 @@ int Army::getATK()
     else atkValue = atk;
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
-    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType())) + \
-             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+//    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType()), interactSort, interactNum) + \
+//             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+
+    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType(), interactSort, interactNum)) + \
+            get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力
@@ -294,25 +297,26 @@ int Army::get_add_specialAttack()
 
     if(Num == AT_SLINGER)
     {
-        if(interactSort == SORT_ARMY)
+/*        if(interactSort == SORT_ARMY)
         {
             if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
         }
-        else if( interactSort == SORT_BUILDING)
+        else */if( interactSort == SORT_BUILDING)
         {
             if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
                 addition += 7;
         }
     }
-    else if(Num == AT_CAVALRY)
-    {
-        if(interactSort == SORT_ARMY)
-        {
-            if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN)
-                addition+=5;
-        }
+//    else if(Num == AT_CAVALRY)
+//    {
+//        if(interactSort == SORT_ARMY)
+//        {
+//            if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN)
+//                addition+=5;
+//        }
 
-    }
+//    }
+
     return addition;
 }
 /***********************************************************/

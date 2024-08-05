@@ -8,7 +8,8 @@
 using namespace std;
 
 map<std::string, std::list<QPixmap>> resMap;
-map<string, QSound*> SoundMap;
+//map<string, QSound*> SoundMap;
+map<string, QSoundEffect*> SoundMap;
 std::queue<string> soundQueue;
 
 std::list<Coordinate*> drawlist;
@@ -72,7 +73,7 @@ int InitImageResMap(QString path)
         //debug用，可删
         QStringList ImageList;
         ImageList.append(filePath);
-        //        qDebug()<<filePath;
+
 
         //获取文件后缀
         QFileInfo testInfo(filePath);
@@ -87,6 +88,8 @@ int InitImageResMap(QString path)
         //        qDebug()<<"图片是所在List中第"<<fileName.right(7).left(3)<<"张";
 
         std::string tmpListName = imageMapName.toStdString();
+
+//        qDebug()<<filePath;
         resMap[tmpListName].push_back(QPixmap(filePath));
 
     }
@@ -119,7 +122,6 @@ int InitSoundResMap(QString path)
     }
 
     //获取分隔符
-    //QChar separator = QDir::separator();
     QChar separator = QChar('/');
 
     if(!path.contains(separator))
@@ -142,7 +144,7 @@ int InitSoundResMap(QString path)
         //debug用，可删
         QStringList SoundList;
         SoundList.append(filePath);
-//                qDebug()<<filePath;
+
 
         //获取文件后缀
         QFileInfo testInfo(filePath);
@@ -156,10 +158,20 @@ int InitSoundResMap(QString path)
         //        qDebug()<<"音频所对应String为："<<SoundMapName;
 
         std::string tmpMapName = SoundMapName.toStdString();
-        QSound *Psound = new QSound(filePath);
-        SoundMap.insert(map<string, QSound*>::value_type(tmpMapName, Psound));
+
+
+        int volume = 50;
+        QSoundEffect* qMediaPlayer = new QSoundEffect();
+
+        filePath ="qrc"+filePath;
+//        qDebug()<<filePath;
+        qMediaPlayer->setSource(QUrl(filePath));
+        qMediaPlayer->setVolume(volume);
+
+        SoundMap.insert(map<string, QSoundEffect*>::value_type(tmpMapName, qMediaPlayer));
     }
-    //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
+
+
     return -1;
 }
 

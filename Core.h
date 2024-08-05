@@ -60,6 +60,8 @@ private:
     void updateByPlayer(int id);  //更新tagGame
     void updateCommon(tagInfo* taginfo);//更新tagGame
 
+    void loadRelationMap();
+
     vector<MoveObject*> moveOb_judCrush;
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加

@@ -95,6 +95,9 @@ public:
     double get_retio_Action();
 
     bool is_ActionFinish(){ return actPercent>=100; }
+    bool isActionNeedCreatObject(int &creatObjectSort, int& creatObjectNum){ return playerScience->isNeedCreatObjectAfterAction(getNum() , getActNum() , creatObjectSort , creatObjectNum);}
+    bool isRepresentHumanHaveSpace(){ return playerScience->get_isHumanHaveSpace(); }
+
     void update_Action();
     void update_Build();
     /*************控制建筑行为****************/
