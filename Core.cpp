@@ -39,7 +39,8 @@ void Core::gameUpdate()
                 //需要变化的行动为“死亡”，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
-                    call_debugText("red"," "+(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
+                    call_debugText("red"," "+(*humaniter)->getChineseName()+\
+                                   "(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
                     g_Object[(*humaniter)->getglobalNum()] = NULL;
@@ -55,10 +56,12 @@ void Core::gameUpdate()
             if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
             {
                 // 更新人物Y轴偏移（伪三维）
-                int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
+                Human* theHuman = (*humaniter);
+                int blockDR = (*humaniter)->getBlockDR(), blockUR = (*humaniter)->getBlockUR();
+                int curMapHeight = theMap->cell[blockDR][blockUR].getMapHeight();
 
                 // 斜坡
-                if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
+                if(theMap->isSlope(blockDR, blockUR))
                 {
                     if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
                     {
@@ -67,9 +70,9 @@ void Core::gameUpdate()
                     }
 
                     // 判断mapType以确定上升方向
-                    int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
+                    int curMapType = theMap->cell[blockDR][blockUR].getMapType();
                     pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
-                    pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+                    pair<double, double> curBlockCoor = {blockDR * 16.0 * gen5, blockUR * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
 
                     // 左高右低：
                     if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
@@ -165,16 +168,8 @@ void Core::gameUpdate()
                 //更新视野 用户控制的对象
                 if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
-//                if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
-//                    theMap->add_Map_Vision(*builditer);
                 (*builditer)->nextframe();
 
-//                if((*builditer)->getBlockDR() != INT_MAX && (*builditer)->getBlockUR() != INT_MAX)
-//                {
-//                    // 更新人物Y轴偏移（伪三维）
-//                    int curMapHeight = theMap->cell[(*builditer)->getBlockDR()][(*builditer)->getBlockUR()].getMapHeight();
-//                    (*builditer)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
-//                }
                 builditer++;
             }
         }
@@ -280,11 +275,13 @@ void Core::gameUpdate()
         }
     }
 
+    loadRelationMap();
 
     //更新AI用的资源表，该资源表是User/Enemy的通用模板
     theMap->reset_resMap_AI();
 
-    theMap->reset_ObjectExploreAndVisible();    //刷新视野并处理区域探索结果
+    //刷新视野并处理区域探索结果
+    theMap->reset_ObjectExploreAndVisible();
 
     judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
 
@@ -850,11 +847,22 @@ void Core::judge_Crush()
     moveOb_judCrush.clear();
 }
 
+void Core::loadRelationMap()
+{
+    //更新寻路用障碍表
+    theMap->loadBarrierMap_ByObjectMap();
+    //更新寻路地图模板
+    theMap->loadfindPathMapTemperature();
+}
+
+
 void Core::resetNowObject_Click()
 {
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
         nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+        if(nowobject!=NULL)
+            call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), 0);
         requestSound_Click(nowobject);
         sel->initActs();
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;

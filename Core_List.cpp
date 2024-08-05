@@ -1,6 +1,8 @@
 #include "Core_list.h"
 extern Score usrScore;
 extern Score enemyScore;
+
+//int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
     this->theMap = theMap;
@@ -12,8 +14,6 @@ void Core_List::update()
     //对正在监视的Object，进行行动处理
     manageMontorAct();
 
-    theMap->loadBarrierMap();//更新寻路用障碍表
-
     jud_resetResBuild();
 
 //    QElapsedTimer timer4;
@@ -21,13 +21,16 @@ void Core_List::update()
 
     manageRelationList();
 
-//    //若想知道微秒级的运行时间
+    //若想知道微秒级的运行时间
 //    qint64 elapsedNanoseconds = timer4.nsecsElapsed();
+//    timerStand = elapsedNanoseconds/1000;
 //    qDebug() <<g_frame<< "manageRelationList:" << elapsedNanoseconds/1000<<"(ns)";
 
 
     init_resetResBuild();
 }
+
+
 
 //****************************************************************************************
 //控制动态表
@@ -81,7 +84,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
     return ACTION_INVALID_ISNTFREE;
 }
 
-int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond , int type)
+int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
@@ -106,22 +109,6 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
             requestSound_Action(object1, CoreEven_JustMoveTo);
             return ACTION_SUCCESS;
         }
-        //判断行动为CoreEven_CreatBuilding，紧接着判断地图上建筑范围内是否有障碍物，最后判断player是否有足够资源并进行资源扣除
-        else if(eventType == CoreEven_CreatBuilding)
-        {
-            int wrongCode;
-            wrongCode = is_BuildingCanBuild(type , tranBlockDR(DR) , tranBlockUR(UR),((Farmer*)object1)->getPlayerRepresent());
-            if(wrongCode<0) return wrongCode;
-
-            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingShowAble(type))
-                return ACTION_INVALID_HUMANBUILD_LOCK;
-
-            if(!player[((Farmer*)object1)->getPlayerRepresent()]->get_isBuildingAble(type))
-                return ACTION_INVALID_RESOURCE;
-
-            player[((Farmer*)object1)->getPlayerRepresent()]->changeResource_byBuild(type);
-            return addRelation(object1 , player[((Farmer*)object1)->getPlayerRepresent()]->addBuilding( type,tranBlockDR(DR) , tranBlockUR(UR)) , CoreEven_FixBuilding);
-        }
     }
 
     return ACTION_INVALID_ISNTFREE;
@@ -138,6 +125,7 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
     {
         BloodHaver* bloodOb = NULL;
         Building* buildOb = NULL;
+        QString chineseName;
         object1->printer_ToBloodHaver((void**)&bloodOb);
         if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
 
@@ -145,23 +133,31 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
         if(eventType == CoreEven_CreatBuilding)
         {
             int playerRepresent = object1->getPlayerRepresent();
-            int wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR, playerRepresent);
+            int wrongCode = is_BuildingCanBuild(type , BlockDR, BlockUR, playerRepresent,chineseName);
 
             if(wrongCode<0) return wrongCode;
 
             //判断是否已解锁建筑
             if(!player[playerRepresent]->get_isBuildingShowAble(type) )
+            {
+                call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败,该建筑尚未解锁",object1->getPlayerRepresent());
                 return ACTION_INVALID_HUMANBUILD_LOCK;
+            }
+
 
             if(!player[playerRepresent]->get_isBuildingAble(type))
+            {
+                call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败,当前资源不足",object1->getPlayerRepresent());
                 return ACTION_INVALID_RESOURCE;
+            }
+
 
             player[playerRepresent]->changeResource_byBuild(type);
 
             buildOb = player[playerRepresent]->addBuilding( type, BlockDR , BlockUR);
 
             theMap->add_Map_Object(buildOb);    //防止同一帧内建筑重叠
-            return addRelation(object1 , buildOb , CoreEven_FixBuilding);
+            return addRelation(object1 , buildOb , CoreEven_FixBuilding, respond);
         }
     }
 
@@ -314,10 +310,13 @@ void Core_List::manageRelationList()
             }
             else    //nowphase变化产生的1帧停顿，进行需要的相关初始值设置
             {
+                MoveObject* moveOb = NULL;
                 switch (thisDetailEven.phaseList[nowPhaseNum])
                 {
                     case CoreDetail_Move:
-                        ((MoveObject*)object1)->setPath(stack<Point>(),object1->getDR(),object1->getUR());
+                        object1->printer_ToMoveObject((void**)& moveOb);
+                        if(moveOb != NULL)
+                            ((MoveObject*)object1)->setPath(stack<Point>(),object1->getDR(),object1->getUR());
                         break;
                     case CoreDetail_Attack:
                         if(thisRelation.relationAct == CoreEven_MissileAttack) thisRelation.set_ExecutionTime(1);
@@ -414,12 +413,11 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
 }
 
 //判断是否可以建造建筑
-int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int playerID)
+int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int playerID, QString& chineseName)
 {
     int DRL = -1,DRR = -1,URD = -1, URU = -1;    //记录边界
     int blockSideLength;
     Building* tempBuild = NULL;
-    QString chineseName;
 
     //预创建
     if(buildtype == BUILDING_FARM)
@@ -543,7 +541,9 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
 
     if(moveObject)
     {
-        if(!relate_AllObject[object].isWaiting())
+        if(relate_AllObject[object].isWaiting())
+            relate_AllObject[object].useless();
+        else
         {
             double DR0,UR0,thisDR,thisUR;
             DR0 = moveObject->getDR0();
@@ -803,6 +803,7 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
     object1->printer_ToMoveObject((void**)&moOb);
     object1->printer_ToBuilding((void**)&buiOb);
     object1->resetCoreAttribute();
+    object1->resetINterAct();
     if(moOb!=NULL) moOb->setPreStand();
     if(buiOb!=NULL) buiOb->init_BuildAttackAct();
 
@@ -813,6 +814,8 @@ void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
     vector<Point> Block_Free;
+    int num = -1;
+
     switch(relate_AllObject[object1].relationAct){
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
@@ -844,6 +847,15 @@ void Core_List::object_FinishAction(Coordinate* object1)
     case CoreEven_BuildingAct:
         Block_Free = theMap->findBlock_Free(object1);
         player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1,Block_Free);  //进行建筑行动的结果处理
+        num= object1->getActNum();
+        if(num==BUILDING_CENTER_CREATEFARMER || num==BUILDING_ARMYCAMP_CREATE_CLUBMAN
+          || num==BUILDING_ARMYCAMP_CREATE_SLINGER || num==BUILDING_RANGE_CREATE_BOWMAN)
+            usrScore.update(_HUMAN1);
+        else if(num==BUILDING_STABLE_CREATE_SCOUT)
+            usrScore.update(_HUMAN2);
+        else
+            usrScore.update(_TECH);
+
         break;
     case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
@@ -1041,7 +1053,7 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
     stack<Point> path;
 
     theMap->loadfindPathMap(moveOb);
-    theMap->findPathMap[destination.x][destination.y] = 0;
+//    theMap->findPathMap[destination.x][destination.y] = 0;
     if(relate_AllObject[moveOb].crashPointLab.size())   //如果之前经历了碰撞，将碰撞处设为障碍物
     {
         crashBlockPoint = relate_AllObject[moveOb].crashPointLab.top();
@@ -1059,7 +1071,6 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
 void Core_List::crashHandle(MoveObject* moveOb)
 {
     Point PreviousPoint, nextBlockPoint;
-    Point probePoint;
     vector<Point> blockLab_canMove;
 
     //处理碰撞
@@ -1083,15 +1094,9 @@ void Core_List::crashHandle(MoveObject* moveOb)
 
         if(moveOb->is_MoveFirstStep() || PreviousPoint == nextBlockPoint)
         {
-            probePoint = moveOb->getBlockPosition() - moveOb->getMoveDire();
-            if(!theMap->isBarrier(probePoint))
-                PreviousPoint = probePoint;
-            else
-            {
-                blockLab_canMove = theMap->findBlock_Free(moveOb,1,false);
+            blockLab_canMove = theMap->findBlock_Free(nextBlockPoint, 1);
 
-                if(blockLab_canMove.size()) PreviousPoint = blockLab_canMove[rand()%blockLab_canMove.size()];
-            }
+            if(blockLab_canMove.size()) PreviousPoint = blockLab_canMove[rand()%blockLab_canMove.size()];
         }
         moveOb->pathOptimize(PreviousPoint);
 
@@ -1140,6 +1145,8 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
 
     memset(goalMap , 0 , sizeof(goalMap));
 
+    bool isNoPath = true;
+    int ix,iy,jx,jy;
     //标记终点
     if(goalOb != NULL)
     {
@@ -1148,10 +1155,51 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         oBitere = objectBlock.end();
         while(oBiter != oBitere)
         {
-            goalMap[(*oBiter).x][(*oBiter).y] = true;
+            ix = (*oBiter).x;
+            iy = (*oBiter).y;
+            goalMap[ix][iy] = true;
+
             oBiter++;
+            if(!isNoPath)
+                continue;
+
+            for(int i = 4; i<8; i++)
+            {
+                jx = ix + dire[i].x;
+                jy = iy + dire[i].y;
+                if(jx < 0 || jy < 0 || jx>=MAP_L || jy >= MAP_U) continue;
+
+                if(findPathMap[jx][jy]==0)
+                {
+                    isNoPath = false;
+                    break;
+                }
+            }
         }
     }
+    else
+    {
+        ix = destination.x;
+        iy = destination.y;
+        goalMap[ix][iy] = true;
+
+        for(int i = 4; i<8; i++)
+        {
+            jx = ix + dire[i].x;
+            jy = iy + dire[i].y;
+            if(jx < 0 || jy < 0 || jx>=MAP_L || jy >= MAP_U) continue;
+
+            if(findPathMap[jx][jy]==0)
+            {
+                isNoPath = false;
+                break;
+            }
+        }
+    }
+
+    if(isNoPath)
+        return path;
+
     goalMap[destination.x][destination.y] = true;
 
     newPathNode = new pathNode(start);
@@ -1308,6 +1356,7 @@ void Core_List::initDetailList()
 
         relation_Event_static[CoreEven_Gather] = detail_EventPhase(13 , phaseList, conditionList,forcedInterrupCondition);
         //设置循环，1->2，攻击猎物直至可采集
+        overCondition.push_back(conditionF(condition_UniObjectNULL,OPERATECON_OBJECT2));
         overCondition.push_back(conditionF(condition_Object2CanbeGather));
         relation_Event_static[CoreEven_Gather].setLoop(1,2,overCondition);
         overCondition.clear();

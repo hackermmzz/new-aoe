@@ -898,19 +898,53 @@ void Map::loadBarrierMap(bool absolute)
     }
 }
 
+void Map::loadBarrierMap_ByObjectMap()
+{
+    clearBarrierMap();
+
+    int size;
+    Coordinate* object;
+    for(int x = 0; x<MAP_L; x++)
+        for(int y = 0 ; y<MAP_U; y++)
+        {
+            size = map_Object[x][y].size();
+            for(int i = 0; i<size; i++)
+            {
+                object = map_Object[x][y][i];
+                if(object->getSort() == SORT_STATICRES && object->getNum() == NUM_STATICRES_Bush)
+                    continue;
+
+                barrierMap[x][y] = 1;
+                break;
+            }
+        }
+    return;
+}
+
+
 void Map::loadfindPathMap(MoveObject* moveOb)
 {
-    bool studentPlayer = moveOb->getPlayerRepresent() == 0;
+    int represent = moveOb->getPlayerRepresent();
 
-    clearfindPathMap();
+    if(represent == MAXPLAYER)
+        represent = NOWPLAYER-1;
 
-    for (int i = 0; i < MAP_L; ++i)
-    {
-        for (int j = 0; j < MAP_U; ++j)
-        {
-            if( barrierMap[i][j] || studentPlayer && !cell[i][j].Explored) findPathMap[i][j] = 1;
-        }
-    }
+    memcpy(findPathMap, findPathMapTemperature[represent], sizeof(findPathMapTemperature[represent]));
+
+    return;
+}
+
+void Map::loadfindPathMapTemperature()
+{
+    clearfindPathMapTemperature();
+    for(int represent = 0; represent<NOWPLAYER; represent++)
+        for(int x=0; x<MAP_L; x++)
+            for(int y=0; y<MAP_U; y++)
+            {
+                if(barrierMap[x][y] || represent == NOWPLAYERREPRESENT && !cell[x][y].Explored)
+                    findPathMapTemperature[represent][x][y] = 1;
+            }
+    return;
 }
 
 //设置障碍物
@@ -1091,6 +1125,35 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
             if(map_Object[bDRR-1][y].empty())
             {
                 tempPoint.x = bDRR-1;
+                tempPoint.y = y;
+                Block_Free.push_back(tempPoint);
+            }
+        }
+    }
+
+    return Block_Free;
+}
+
+vector<Point> Map::findBlock_Free(Point blockPoint, int lenth)
+{
+    int blockDR = blockPoint.x, blockUR = blockPoint.y;
+
+    int bDRL = max(0,blockDR-lenth) , bURD = max(0,blockUR - lenth);
+    int bDRR = min(blockDR+1+lenth, MAP_L) , bURU = min(blockUR+1+lenth, MAP_U);
+
+    vector<Point> Block_Free;
+    Point tempPoint;
+
+    //在给定范围内找寻没有障碍物的格子
+    for(int x = bDRL; x<bDRR; x++)
+    {
+        for(int y = bURD; y<bURU;y++)
+        {
+            if(x == blockDR && y==blockUR) continue;
+
+            if(map_Object[x][y].empty())
+            {
+                tempPoint.x = x;
                 tempPoint.y = y;
                 Block_Free.push_back(tempPoint);
             }

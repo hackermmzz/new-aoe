@@ -122,7 +122,7 @@ private:
     ActWidget *acts[ACT_WINDOW_NUM_FREE];
 
     //****************Music*********************
-    QSound* bgm = NULL;
+    QSoundEffect* bgm = NULL;
 
     //****************Music*********************
 };

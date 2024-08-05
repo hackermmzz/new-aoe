@@ -397,14 +397,29 @@ bool condition_UniObjectNULL( Coordinate* object1, relation_Object& relation, in
 bool condition_UniObjectPercent(  Coordinate* object1, relation_Object& relation, int& operate, bool isNegation )
 {
     Coordinate* judge = NULL;
+    Building* buildOb = NULL;
     int relationAct = relation.relationAct;
     if(operate == OPERATECON_OBJECT1) judge = object1;
     else if(operate == OPERATECON_OBJECT2) judge = relation.goalObject;
 
-    if(judge == NULL) isNegation^true;
+    if(judge == NULL) return isNegation^true;
 
-    if(relationAct == CoreEven_FixBuilding) return isNegation^(((Building*)judge)->isFullHp()&&((Building*)judge)->isFinish());
-    else if(relationAct == CoreEven_BuildingAct) return isNegation^((Building*)judge)->is_ActionFinish();
+    judge->printer_ToBuilding((void**)&buildOb);
+    if(buildOb != NULL)
+    {
+        if(relationAct == CoreEven_FixBuilding)
+            return isNegation^(buildOb->isFullHp()&& buildOb->isFinish());
+        else if(relationAct == CoreEven_BuildingAct)
+        {
+            int creatSort = -1, creatNum = -1;
+            bool needCreatOb = buildOb->isActionNeedCreatObject(creatSort, creatNum);
+
+            if(needCreatOb && (creatSort == SORT_ARMY || creatSort == SORT_FARMER))
+                return isNegation^(buildOb->is_ActionFinish() && buildOb->isRepresentHumanHaveSpace());
+            else
+                return isNegation^(buildOb->is_ActionFinish());
+        }
+    }
 
     return isNegation^true;
 }
@@ -519,7 +534,6 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 //object目标能被采集
 bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation, int& operate , bool isNegation)
 {
-
     if(relation.goalObject != NULL)
     {
         //object2强制转化为Resource指针，若转化后仍为NULL，说明对象不包含Resource类的属性

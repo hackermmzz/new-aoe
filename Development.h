@@ -21,7 +21,7 @@ public:
     double get_rate_Blood(int sort , int type);
     int get_addition_Blood( int sort , int type );
 
-    double get_rate_Attack( int sort , int type , int armyClass , int attackType );
+    double get_rate_Attack( int sort , int type , int armyClass , int attackType, int interSort = -1, int interNum = -1 );
     int get_addition_Attack( int sort , int type , int armyClass , int attackType );
 
     int get_addition_DisAttack( int sort, int type , int armyClass , int attackType );

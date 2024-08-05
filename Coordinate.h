@@ -102,6 +102,8 @@ public:
     void set_interAct(int interSort , int interNum , bool interRepresent = false , bool interBui_builtUp=false)
         { interactSort = interSort ; interactNum = interNum; interact_sameRepresent = interRepresent; interactBui_builtUp = interBui_builtUp; }
 
+    void resetINterAct(){ interactSort = -1; interactNum = -1; interact_sameRepresent = false; interactBui_builtUp = false; }
+
     vector<Point> getViewLab(){
         if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>0 && getVision() > 1) setViewLab((int)BlockSizeLen , getVision());
 

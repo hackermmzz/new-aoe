@@ -38,9 +38,15 @@ int Development::get_addition_Blood( int sort , int type )
 
 /***************************************************************/
 //攻击倍率加成
-double Development::get_rate_Attack( int sort , int type , int armyClass , int attackType )
+double Development::get_rate_Attack( int sort , int type , int armyClass , int attackType, int interSort, int interNum )
 {
     double rate = 1;
+
+    if(interSort!=-1 && interNum!=-1)
+    {
+        if(interSort == SORT_BUILDING && sort == SORT_ARMY && (type == AT_SWORDSMAN || type == AT_CAVALRY || type == AT_IMPROVED))
+            rate = 2;
+    }
 
     return rate;
 }
