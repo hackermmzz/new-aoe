@@ -18,11 +18,6 @@ std::string Farmer::sound_work[7] = {\
     "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
 };
 
-Farmer::Farmer()
-{
-
-}
-
 Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent )
 {
     this->playerScience = playerScience;
