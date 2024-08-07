@@ -136,6 +136,8 @@ public:
 
     bool isAttackBegin(){ return missionThrowTimer == 0;}
 
+    bool isMatchResourceType(int resourceType);
+
 
 protected:
   /********************静态资源**************************/
