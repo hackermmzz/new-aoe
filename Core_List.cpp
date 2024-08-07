@@ -77,7 +77,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
             relate_AllObject[object1] = relation_Object(NULL , eventType);
 
             relate_AllObject[object1].set_goalPoint(object1->getDR(), object1->getUR());
-            relate_AllObject[object1].distance_AllowWork = object1->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
+            relate_AllObject[object1].distance_AllowWork = 1e6;
             relate_AllObject[object1].alterOb = object2;
             relate_AllObject[object1].update_Attrib_alter();
             relate_AllObject[object1].distance_Record = 0;
