@@ -29,7 +29,7 @@ static int sum;
 static int seek(int Sort,int number){
     double temp=0;
     int SN=0;
-    double min=10000;
+    long min=1000000;
     int target=151;
     for(int i=0;i<enemyInfo.armies.size();i++){
         if(enemyInfo.armies[i].Sort==Sort)
@@ -60,7 +60,7 @@ static int seek(int Sort,int number){
             if(enemyInfo.enemy_buildings[i].Type==BUILDING_ARROWTOWER){
             temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_buildings[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_buildings[i].BlockUR, 2), 0.5);
             if(temp<min){
-                min=temp;target=i+100;
+                min=temp;target=i+100;qDebug()<<target;
             }}
         }
         if(target==151){
@@ -107,18 +107,17 @@ void EnemyAI::processData() {
     else if(g_frame==15000) mode=2;
     else if(g_frame==12500)mode=-1;
     else if(g_frame==7500) mode=1;
-    if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.buildings.size()==0){
+    if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.enemy_buildings.size()==0){
         mode=4;
     }
-
     //防止连续出兵
         if(g_frame>15&&enemyInfo.armies.size()!=sum){
-            if(mode==1){
+            if(mode==1||mode==-1){
             int dif=(sum-enemyInfo.armies.size());
             sum=enemyInfo.armies.size();
             ATT1-=dif;
         }
-            else if (mode==2){
+            else if (mode==2||mode==-2){
                 int dif=(sum-enemyInfo.armies.size());
                 sum=enemyInfo.armies.size();
                 ATT2-=dif;
@@ -205,7 +204,7 @@ void EnemyAI::processData() {
     }
 //    qDebug()<<armystate[0];
     // 自动反击
-    if(mode!=3){
+    if(mode!=3&&g_frame>15){
     for(int i=0;i<enemyInfo.armies.size();i++){
            if(enemyInfo.armies[i].Blood!=Blood[i]&&armystate[i]!=CHASE&&ChasingLock[i]==0){
                for(int j=0;j<enemyInfo.enemy_armies.size();j++){
@@ -216,7 +215,7 @@ void EnemyAI::processData() {
                        chasestart_L[i]=enemyInfo.armies[i].DR;
                        chasestart_U[i]=enemyInfo.armies[i].UR;
                        timer[i]=g_frame;
-                       ChasingLock[i]==1;
+                       ChasingLock[i]=1;
                    }
                }
                if(armystate[i]!=CHASE){
@@ -228,40 +227,39 @@ void EnemyAI::processData() {
                            chasestart_L[i]=enemyInfo.armies[i].DR;
                            chasestart_U[i]=enemyInfo.armies[i].UR;
                            timer[i]=g_frame;
-                           ChasingLock[i]==1;
+                           ChasingLock[i]=1;
                        }
                }
            }
                if(armystate[i]!=CHASE){
-                   for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
-                       if(enemyInfo.enemy_buildings[j].Project==enemyInfo.armies[i].SN){
-                           HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[j].SN);
+                   int targettemp=0;
+                   targettemp=seek(enemyInfo.armies[i].Sort,3);
+                           HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[targettemp-100].SN);
                            armystate[i]=CHASE;
                            Blood[i]=enemyInfo.armies[i].Blood;
                            chasestart_L[i]=enemyInfo.armies[i].DR;
                            chasestart_U[i]=enemyInfo.armies[i].UR;
                            timer[i]=g_frame;
-                           ChasingLock[i]==1;
+                           ChasingLock[i]=1;
                        }
                    }
                }
-           }}
-    }
+           }
         //反击检查
     if(mode!=3)
-    for(int i=0;i<enemyInfo.armies.size();i++){       
+    for(int i=0;i<enemyInfo.armies.size();i++){
            if(armystate[i]==CHASE){
 
                if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
                {
                    HumanMove(enemyInfo.armies[i].SN,chasestart_L[i],chasestart_U[i]);
                    timer[i] = 0;
-                   ChasingLock[i]==0;
+                   ChasingLock[i]=0;
                    armystate[i]=WAITING;
                }
                if((g_frame - timer[i]) >= 75 && enemyInfo.armies[i].NowState == MOVEOBJECT_STATE_STAND){
                    timer[i] = 0;
-                   ChasingLock[i]==0;
+                   ChasingLock[i]=0;
                    armystate[i]=WAITING;
                }
 
@@ -358,7 +356,7 @@ void EnemyAI::processData() {
                             }
             }
         }
-               }        
+               }
 
             if ((g_frame - timer[i]) >= 15 && enemyInfo.armies[i].NowState ==MOVEOBJECT_STATE_STAND) {
                 Lock[i]=0;
