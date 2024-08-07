@@ -33,6 +33,8 @@ public:
     /**************资源相关**************/
     int get_addition_ResourceSort( int resourceSort );
     int get_addition_MaxCnt( int sort , int type );
+    double get_rate_ResorceGather( int resourceSort );
+
    /******************加成信息*******************/
 
 

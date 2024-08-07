@@ -6,8 +6,6 @@
 #include <QPixmap>
 #include <QString>
 #include <list>
-#include <QSound>
-#include <QMediaPlayer>
 #include <QSoundEffect>
 #include <config.h>
 #include <QTextBrowser>
@@ -32,7 +30,6 @@ extern int Stone[5][5][5];
 extern int g_frame;
 extern QTextBrowser* g_DebugText;
 extern map<string, list<QPixmap>> resMap;
-//extern map<string, QSound*> SoundMap;
 extern map<string, QSoundEffect*> SoundMap;
 extern std::queue<string> soundQueue;
 

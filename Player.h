@@ -99,30 +99,6 @@ public:
 
     void set_AllTechnology(){ playerScience->all_technology_tree(); }
 
-
-    //获取科技树
-//    bool *getmarketResearch()
-//    {
-//        return this->marketResearch;
-//    }
-
-
-//    bool getArrowTowerUnlocked()
-//    {
-//        return this->isArrowTowerUnlocked;
-//    }
-//    void setArrowTowerUnlocked(bool flag)
-//    {
-//        this->isArrowTowerUnlocked = flag;
-//    }
-//    bool getMarketResearch(int num)
-//    {
-//        return marketResearch[num];
-//    }
-//    void setMarketResearch(int num, bool flag)
-//    {
-//        this->marketResearch[num] = flag;
-//    }
     int getScore()
     {
         return this->score;
@@ -132,15 +108,6 @@ public:
         this->score = score;
     }
 
-
-//    void setCheatMaxHumanNum(bool flag)
-//    {
-//        this->cheatMaxHumanNum = flag;
-//    }
-//    bool getCheatMaxHumanNum()
-//    {
-//        return this->cheatMaxHumanNum;
-//    }
     void setStartScores(int type)
     {
         this->startScores[type] = true;

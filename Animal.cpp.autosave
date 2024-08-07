@@ -62,7 +62,6 @@ Animal::Animal(int Num, double DR, double UR)
     else if( this->Num == ANIMAL_ELEPHANT )
     {
         atk = 10;
-//        BlockSizeLen = SIZELEN_SMALL;
         Friendly = FRIENDLY_FENCY;
         this->MaxCnt = CNT_ELEPHANT;
         resourceSort = HUMAN_STOCKFOOD;

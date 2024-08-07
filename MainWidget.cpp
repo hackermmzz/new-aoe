@@ -187,7 +187,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     ui->mapView->setAnimalList(&(map->animal));
     ui->mapView->setResList(&(map->staticres));
 
-    // 创建 QSound 对象，指定音乐文件
+    // 创建 QSoundEffect 对象，指定音乐文件
     bgm = SoundMap["BGM"];
 
     // 设置循环播放
