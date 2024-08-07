@@ -218,6 +218,46 @@ int Development::get_addition_ResourceSort( int resourceSort )
     return addition;
 }
 
+double Development::get_rate_ResorceGather( int resourceSort )
+{
+    int rate = 1;
+
+    int level = 0;
+    if(resourceSort == HUMAN_WOOD)  //对搬运wood加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_WOOD_UPGRADE);
+        switch (level) {
+        case 1:
+            rate+=BUILDING_MARKET_WOOD_UPGRADE_ADDITION_GATHERRATE;
+        default:
+            break;
+        }
+    }
+    else if(resourceSort == HUMAN_STONE)    //对搬运stone加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_STONE_UPGRADE);
+        switch (level) {
+        case 1:
+            rate+=BUILDING_MARKET_STONE_UPGRADE_ADDITION_GATHERRATE;
+        default:
+            break;
+        }
+    }
+    else if(resourceSort == HUMAN_GOLD)     //对搬运gold加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_GOLD_UPGRADE);
+        switch (level) {
+        case 1:
+            rate+=BUILDING_MARKET_GOLD_UPGRADE_ADDITION_GATHERRATE;
+        default:
+            break;
+        }
+    }
+
+    return rate;
+}
+
+
 int Development::get_addition_MaxCnt( int sort , int type )
 {
     int addition = 0 , level = 0;

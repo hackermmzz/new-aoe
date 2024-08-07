@@ -8,7 +8,6 @@
 using namespace std;
 
 map<std::string, std::list<QPixmap>> resMap;
-//map<string, QSound*> SoundMap;
 map<string, QSoundEffect*> SoundMap;
 std::queue<string> soundQueue;
 
@@ -159,16 +158,15 @@ int InitSoundResMap(QString path)
 
         std::string tmpMapName = SoundMapName.toStdString();
 
-
         int volume = 50;
-        QSoundEffect* qMediaPlayer = new QSoundEffect();
+        QSoundEffect* qSoundEffect = new QSoundEffect();
 
         filePath ="qrc"+filePath;
-//        qDebug()<<filePath;
-        qMediaPlayer->setSource(QUrl(filePath));
-        qMediaPlayer->setVolume(volume);
 
-        SoundMap.insert(map<string, QSoundEffect*>::value_type(tmpMapName, qMediaPlayer));
+        qSoundEffect->setSource(QUrl(filePath));
+        qSoundEffect->setVolume(volume);
+
+        SoundMap.insert(map<string, QSoundEffect*>::value_type(tmpMapName, qSoundEffect));
     }
 
 

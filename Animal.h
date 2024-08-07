@@ -49,7 +49,7 @@ private:
 
     
 public:
-    Animal();
+    Animal(){}
     Animal(int Num,double DR,double UR);
   /**********************虚函数**************************/
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
