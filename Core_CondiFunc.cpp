@@ -198,7 +198,8 @@ relation_Object::relation_Object( Coordinate* goal , int eventClass)
     isExist = true;
     goalObject = goal;
     relationAct = eventClass;
-    sort = goalObject->getSort();
+    if(goalObject!=NULL)
+        sort = goalObject->getSort();
     update_GoalPoint();
     init_AlterOb();
 }
@@ -207,8 +208,8 @@ relation_Object::relation_Object(double DR_goal , double UR_goal , int eventClas
 {
     isExist = true;
     goalObject = NULL;
-    this->DR_goal = DR_goal;
-    this->UR_goal = UR_goal;
+
+    set_goalPoint(DR_goal, UR_goal);
     relationAct = eventClass;
     init_AlterOb();
 }
@@ -216,9 +217,10 @@ relation_Object::relation_Object(double DR_goal , double UR_goal , int eventClas
 void relation_Object::set_ResourceBuildingType()
 {
     Resource* resource = NULL;
-    goalObject->printer_ToResource((void**)&resource);
+    if(goalObject != NULL)
+        goalObject->printer_ToResource((void**)&resource);
 
-    if( resource ==NULL )  resourceBuildingType = BUILDING_CENTER;
+    if( resource == NULL )  resourceBuildingType = BUILDING_CENTER;
     else resourceBuildingType = resource->get_ReturnBuildingType();
 }
 
@@ -249,8 +251,7 @@ void relation_Object::update_GoalPoint()
 {
     if(goalObject!= NULL)
     {
-        DR_goal = goalObject->getDR();
-        UR_goal = goalObject->getUR();
+        set_goalPoint(goalObject->getDR(), goalObject->getUR());
         crashLength_goal = goalObject->getCrashLength();
         set_distance_AllowWork();
     }
@@ -260,8 +261,7 @@ void relation_Object::update_Attrib_alter()
 {
     if(alterOb!= NULL)
     {
-        DR_alter = alterOb->getDR();
-        UR_alter = alterOb->getUR();
+        set_AlterPoint(alterOb->getDR(), alterOb->getUR());
         crashLength_alter = alterOb->getCrashLength();
         set_dis_AllowWork_alter();
     }
@@ -277,7 +277,9 @@ void relation_Object::init_AlterOb()
 void relation_Object::init_AttackAb( Coordinate* object1 )
 {
     BloodHaver* attacker = NULL;
-    object1->printer_ToBloodHaver((void**)&attacker);
+    if(object1!=NULL)
+        object1->printer_ToBloodHaver((void**)&attacker);
+
     if(attacker!=NULL)
     {
          attacker->setAttackObject(goalObject); //攻击者记录攻击目标, 用于对于army会计算特攻,farmer计算距离

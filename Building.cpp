@@ -193,6 +193,20 @@ void Building::setAttribute()
     }
 }
 
+bool Building::isMatchResourceType(int resourceType)
+{
+    if(Num == BUILDING_CENTER)
+        return true;
+
+    if(Num == BUILDING_STOCK && ( resourceType == HUMAN_WOOD || resourceType == HUMAN_GOLD || resourceType == HUMAN_STONE || resourceType == HUMAN_STOCKFOOD ))
+        return true;
+
+    if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
+        return true;
+
+    return false;
+}
+
 /**********更新*************/
 void Building::nextframe()
 {
