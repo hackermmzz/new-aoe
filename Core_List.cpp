@@ -813,6 +813,8 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
+    Building* buildOb = NULL;
+    Building_Resource* buildResOb = NULL;
     vector<Point> Block_Free;
     int num = -1;
 
@@ -820,26 +822,34 @@ void Core_List::object_FinishAction(Coordinate* object1)
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
         {
-            if(!((Building*)relate_AllObject[object1].goalObject)->isConstructed())
+            relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildOb);
+            relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResOb);
+
+            if(buildOb!=NULL && !buildOb->isConstructed())
             {
                 std::string clickSound;
 
-                player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
-                if(relate_AllObject[object1].goalObject->getNum() == BUILDING_STOCK || relate_AllObject[object1].goalObject->getNum() == BUILDING_GRANARY)
+                buildOb->initAction();
+
+                if(buildOb->getNum()==BUILDING_HOME||buildOb->getNum()==BUILDING_FARM)
+                    usrScore.update(_BUILDING1);
+                else
+                    usrScore.update(_BUILDING2);
+
+                player[object1->getPlayerRepresent()]->finishBuild(buildOb);
+                if(buildOb->getNum() == BUILDING_STOCK || buildOb->getNum() == BUILDING_GRANARY)
                     resourceBuildingChange = true;
 
-                clickSound = relate_AllObject[object1].goalObject->getSound_Click();
+                clickSound = buildOb->getSound_Click();
 
                 if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
                     soundQueue.push(clickSound);
             }
 
-            relate_AllObject[object1].goalObject->initAction();
-
-            if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
+            if( buildResOb!=NULL &&  buildResOb->getNum() == BUILDING_FARM) //是农田
             {
                  object1->initAction();
-                 addRelation(object1 , relate_AllObject[object1].goalObject ,CoreEven_Gather);
+                 addRelation(object1 , buildResOb ,CoreEven_Gather);
                  return;
             }
         }

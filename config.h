@@ -929,7 +929,7 @@
 
 #define THROWMISSION_SLINGER 5
 
-#define THROWMISSION_ARROWTOWN_TIMER 45
+#define THROWMISSION_ARROWTOWN_TIMER 25
 
 /********** 飞行物类别 **********/
 #define Missile_Spear 0
@@ -939,7 +939,7 @@
 /********** 飞行物属性 **********/
 #define Missile_Speed_Spear (4*HUMAN_SPEED)
 #define Missile_Speed_Arrow (4*HUMAN_SPEED)
-#define Missile_Speed_Cobblestone (4*HUMAN_SPEED)
+#define Missile_Speed_Cobblestone (7*HUMAN_SPEED)
 
 /********** 设置多少帧切换一次nowres **********/
 #define NOWRES_TIMER_FARMER 1
