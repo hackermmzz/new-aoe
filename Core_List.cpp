@@ -45,10 +45,21 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
     {
         BloodHaver* bloodOb = NULL;
         Building* buildOb = NULL;
+        Building* buildGoalOb = NULL;
+        BloodHaver* bloodGoalOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
         object1->printer_ToBuilding((void**)&buildOb);
+        object2->printer_ToBuilding((void**)&buildGoalOb);
+        object2->printer_ToBloodHaver((void**)&bloodGoalOb);
         if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
-        if( buildOb != NULL && !(buildOb->isConstructed() && buildOb->isFinish())) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+        if( buildOb != NULL && !buildOb->isConstructed()) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+
+        if( eventType == CoreEven_FixBuilding && bloodGoalOb!=NULL && bloodGoalOb->isFullHp() ) //建筑不需要修理
+            return ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX;
+
+        if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && buildGoalOb!=NULL \
+                && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
+            return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
 
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
@@ -56,19 +67,30 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         else isSameReprensent = false;
 
         if(object2->getSort() == SORT_BUILDING || object2->getSort() == SORT_Building_Resource)
-            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent , ((Building*)object2)->isFinish());
+            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent , ((Building*)object2)->isConstructed());
         else
             object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent);
 
         //加入行动交互表
-        relate_AllObject[object1] = relation_Object(object2 , eventType);
+        if(eventType == CoreEven_Gather && object2->getSort() == SORT_BUILDING)
+        {
+            relate_AllObject[object1] = relation_Object(NULL , eventType);
+
+            relate_AllObject[object1].set_goalPoint(object1->getDR(), object1->getUR());
+            relate_AllObject[object1].distance_AllowWork = object1->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
+            relate_AllObject[object1].alterOb = object2;
+            relate_AllObject[object1].update_Attrib_alter();
+            relate_AllObject[object1].distance_Record = 0;
+        }
+        else
+            relate_AllObject[object1] = relation_Object(object2 , eventType);
+
         relate_AllObject[object1].respondConduct = respond; //是否可由addrelation更改行动
 
         //根据行动类型，设置需要的额外属性
         switch (eventType)
         {
             case CoreEven_Gather:
-                relate_AllObject[object1].update_GoalPoint();
                 relate_AllObject[object1].set_ResourceBuildingType();
             case CoreEven_Attacking:
                 relate_AllObject[object1].init_AttackAb(object1);

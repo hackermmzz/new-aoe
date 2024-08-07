@@ -159,7 +159,13 @@ double Farmer::getDis_attack()
     if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
     else dis = 0;
 
-    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0 ;
+    if(dis == 0)
+    {
+        dis = DISTANCE_ATTACK_CLOSE;
+
+        if(attackObject != NULL)
+            dis += (attackObject->getSideLength())/2.0 ;
+    }
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(), Num , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;

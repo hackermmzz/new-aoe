@@ -57,7 +57,7 @@ void Core::gameUpdate()
             {
                 // 更新人物Y轴偏移（伪三维）
                 Human* theHuman = (*humaniter);
-                int blockDR = (*humaniter)->getBlockDR(), blockUR = (*humaniter)->getBlockUR();
+                int blockDR = theHuman->getBlockDR(), blockUR = theHuman->getBlockUR();
                 int curMapHeight = theMap->cell[blockDR][blockUR].getMapHeight();
 
                 // 斜坡
@@ -71,7 +71,7 @@ void Core::gameUpdate()
 
                     // 判断mapType以确定上升方向
                     int curMapType = theMap->cell[blockDR][blockUR].getMapType();
-                    pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
+                    pair<double, double> curHumanCoor = {theHuman->getDR(), theHuman->getUR()};   // 当前人物细节坐标
                     pair<double, double> curBlockCoor = {blockDR * 16.0 * gen5, blockUR * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
 
                     // 左高右低：
@@ -79,7 +79,7 @@ void Core::gameUpdate()
                     {
                         double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
                         if(leftOffsetPercent > 1) leftOffsetPercent = 1;
-                       (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
 //                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
                     }
                     // 右高左低：
@@ -87,7 +87,7 @@ void Core::gameUpdate()
                     {
                         double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
                         if(rightOffsetPercent > 1) rightOffsetPercent = 1;
-                       (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
 //                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
                     }
                     // 下高上低：
@@ -95,7 +95,7 @@ void Core::gameUpdate()
                     {
                         double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
                         if(downOffsetPercent > 1) downOffsetPercent = 1;
-                        (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
 //                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
                     }
                     // 上高下低：
@@ -103,12 +103,12 @@ void Core::gameUpdate()
                     {
                         double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
                         if(upOffsetPercent > 1) upOffsetPercent = 1;
-                        (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
 //                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                     }
                 }
                 // 平地
-                else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+                else theHuman->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
             }
 
 
@@ -525,6 +525,9 @@ void Core::manageMouseEvent()
         }
         else
         {
+            Farmer* farmer = NULL;
+            Building* buildOb = NULL;
+
             switch(nowobject->getSort())
             {
                 case SORT_FARMER:
@@ -550,7 +553,16 @@ void Core::manageMouseEvent()
                             if(object_click->getPlayerRepresent() != 0)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             else
-                                interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            {
+                                farmer = (Farmer*)nowobject;
+                                object_click->printer_ToBuilding((void**)&buildOb);
+
+                                if(!farmer->get_isEmptyBackpack() && buildOb!=NULL && buildOb->isConstructed() &&\
+                                        buildOb->isMatchResourceType(farmer->getResourceSort()))
+                                    interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
+                                else
+                                    interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                            }
                             break;
                         case SORT_ARMY:
                         case SORT_FARMER:
@@ -627,15 +639,23 @@ void Core::manageOrder(int id)
 {
     ins* NowIns;
     tagGame* tagAIGame;
-    if(id==0){
+    Farmer* farmer = NULL;
+    Building* buildOb = NULL;
+
+    if(id==0)
+    {
         NowIns=&UsrIns;
         tagAIGame=&tagUsrGame;
-    }else{
+    }
+    else
+    {
         NowIns=&EnemyIns;
         tagAIGame=&tagEnemyGame;
     }
     NowIns->lock.lock();
-    while(!NowIns->instructions.empty()){
+
+    while(!NowIns->instructions.empty())
+    {
         instruction cur=NowIns->instructions.front();
         NowIns->instructions.pop();
         Coordinate* self=cur.self;
@@ -669,6 +689,8 @@ void Core::manageOrder(int id)
             }
             switch(self->getSort()){
             case SORT_FARMER:
+                farmer = (Farmer*)self;
+
                 if(self==obj){
                     ret=deleteSelf(self);
                     if(ret == ACTION_SUCCESS){
@@ -687,7 +709,14 @@ void Core::manageOrder(int id)
                 case SORT_BUILDING:
                     if(self->getPlayerRepresent() == obj->getPlayerRepresent())
                     {
-                        ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
+                        obj->printer_ToBuilding((void**)&buildOb);
+
+                        if(!farmer->get_isEmptyBackpack() && buildOb!=NULL && buildOb->isConstructed() \
+                                && buildOb->isMatchResourceType(farmer->getResourceSort()))
+                            ret=interactionList->addRelation(self , obj , CoreEven_Gather);
+                        else
+                            ret=interactionList->addRelation(self , obj , CoreEven_FixBuilding);
+
                         if(ret == ACTION_SUCCESS&& id == 0)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }

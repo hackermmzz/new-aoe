@@ -88,7 +88,8 @@ HEADERS += \
     UsrAI.h \
     EnemyAI.h \
     ViewWidget.h \
-    Option.h
+    Option.h \
+    digitalConfig.h
 
 FORMS += \
         MainWidget.ui \
