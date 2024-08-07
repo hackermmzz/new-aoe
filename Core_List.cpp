@@ -77,7 +77,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
             relate_AllObject[object1] = relation_Object(NULL , eventType);
 
             relate_AllObject[object1].set_goalPoint(object1->getDR(), object1->getUR());
-            relate_AllObject[object1].distance_AllowWork = object1->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
+            relate_AllObject[object1].distance_AllowWork = 1e6;
             relate_AllObject[object1].alterOb = object2;
             relate_AllObject[object1].update_Attrib_alter();
             relate_AllObject[object1].distance_Record = 0;
@@ -1476,21 +1476,20 @@ int Core_List::getNowPhaseNum(Coordinate* object)
 {
     ///获取当前object的行动阶段，用于将信息传递给AIGame
     relation_Object& thisRelation=relate_AllObject[object];
-    MoveObject* move=dynamic_cast<MoveObject*>(object);
     Coordinate* obj=relate_AllObject[object].goalObject;
-    // if(move->stateCrash){
-    //     return HUMAN_STATE_STOP;
-    // }
     if(!thisRelation.isExist){
         return HUMAN_STATE_IDLE;
     }
     int& nowPhaseNum = thisRelation.nowPhaseNum;
 
-    if(thisRelation.relationAct==CoreEven_JustMoveTo||obj==NULL){
+    if(thisRelation.relationAct==CoreEven_JustMoveTo){
         return HUMAN_STATE_JUSTWALKING;
     }else if(thisRelation.relationAct==CoreEven_Attacking){
         return STATE_Attacking[nowPhaseNum];
     }else if(thisRelation.relationAct==CoreEven_Gather){
+        if(obj==NULL){
+            return HUMAN_STATE_GOTO_RESOURCE;
+        }
         if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
             //对动物
             Animal* animal=dynamic_cast<Animal*>(obj);
@@ -1530,6 +1529,8 @@ int Core_List::getNowPhaseNum(Coordinate* object)
         }else{
             return STATE_FixBuilding[nowPhaseNum];
         }
+    }else{
+        return HUMAN_STATE_IDLE;
     }
 
     return -1;
