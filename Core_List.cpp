@@ -1440,8 +1440,8 @@ int STATE_Gather[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
                       /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
                       /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
                       /*12*/ HUMAN_STATE_JUSTWALKING};
-int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_RESOURCE, \
-                      /*1前往攻击目标*/HUMAN_STATE_GOTO_RESOURCE ,/*2攻击*/HUMAN_STATE_GATHERING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
+int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
+                      /*1前往攻击目标*/HUMAN_STATE_GOTO_OBJECT ,/*2攻击*/HUMAN_STATE_GATHERING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
                       /*4前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*5资源放置*/HUMAN_STATE_GOTO_OBJECT, /*6前往资源*/HUMAN_STATE_GOTO_OBJECT,\
                       /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
                       /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
@@ -1456,9 +1456,9 @@ int Core_List::getNowPhaseNum(Coordinate* object)
     relation_Object& thisRelation=relate_AllObject[object];
     MoveObject* move=dynamic_cast<MoveObject*>(object);
     Coordinate* obj=relate_AllObject[object].goalObject;
-    if(move->stateCrash){
-        return HUMAN_STATE_STOP;
-    }
+    // if(move->stateCrash){
+    //     return HUMAN_STATE_STOP;
+    // }
     if(!thisRelation.isExist){
         return HUMAN_STATE_IDLE;
     }
@@ -1478,7 +1478,7 @@ int Core_List::getNowPhaseNum(Coordinate* object)
                 return HUMAN_STATE_ATTACKING;
             }
             return STATE_Gather[nowPhaseNum];
-        }else if(obj->getSort()==SORT_ANIMAL&&(obj->getNum()!=ANIMAL_TREE||obj->getNum()!=ANIMAL_FOREST)){
+        }else if(obj->getSort()==SORT_ANIMAL&&(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST)){
             //对树
             if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
                 return HUMAN_STATE_CUTTING;
