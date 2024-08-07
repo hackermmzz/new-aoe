@@ -230,16 +230,13 @@ void Building::init_Blood()
 void Building::update_Build()
 {
     double ratio = get_retio_Build();
-    if(Percent<100) {
+
+    if(!constructed)
+    {
         Percent+=ratio;
-        if(Percent>100){
-            if(getNum()==BUILDING_HOME||getNum()==BUILDING_FARM)
-                usrScore.update(_BUILDING1);
-            else
-                usrScore.update(_BUILDING2);
-        }
+        if(Percent>100) Percent = 100;
     }
-    if(Percent>100) Percent = 100;
+
     Blood+=ratio/100;
 
     if(Blood>1) Blood = 1;

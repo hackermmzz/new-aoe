@@ -18,11 +18,6 @@ std::string Farmer::sound_work[7] = {\
     "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
 };
 
-Farmer::Farmer()
-{
-
-}
-
 Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent )
 {
     this->playerScience = playerScience;
@@ -203,7 +198,8 @@ void Farmer::updateState()
     case SORT_Building_Resource:
         if(interactBui_builtUp)
         {
-            if(interactNum == BUILDING_FARM) setState(5);
+            if(interactNum == BUILDING_FARM)
+                setState(5);
         }
         else setState(6);
         break;

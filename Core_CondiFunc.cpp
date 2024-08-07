@@ -517,7 +517,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     //对飞行物的距离判定进行特判
     if(operate == OPERATECON_NEAR_MISSILE)
     {
-        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 )<=dis )
+        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 ) <= dis+relation.goalObject->getCrashLength()/2.0 )
             ((Missile*)object1)->hitTarget();
         return isNegation^((Missile*)object1)->isMissileFinishTask();
     }
