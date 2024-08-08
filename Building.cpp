@@ -193,6 +193,20 @@ void Building::setAttribute()
     }
 }
 
+bool Building::isMatchResourceType(int resourceType)
+{
+    if(Num == BUILDING_CENTER)
+        return true;
+
+    if(Num == BUILDING_STOCK && ( resourceType == HUMAN_WOOD || resourceType == HUMAN_GOLD || resourceType == HUMAN_STONE || resourceType == HUMAN_STOCKFOOD ))
+        return true;
+
+    if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
+        return true;
+
+    return false;
+}
+
 /**********更新*************/
 void Building::nextframe()
 {
@@ -230,16 +244,13 @@ void Building::init_Blood()
 void Building::update_Build()
 {
     double ratio = get_retio_Build();
-    if(Percent<100) {
+
+    if(!constructed)
+    {
         Percent+=ratio;
-        if(Percent>100){
-            if(getNum()==BUILDING_HOME||getNum()==BUILDING_FARM)
-                usrScore.update(_BUILDING1);
-            else
-                usrScore.update(_BUILDING2);
-        }
+        if(Percent>100) Percent = 100;
     }
-    if(Percent>100) Percent = 100;
+
     Blood+=ratio/100;
 
     if(Blood>1) Blood = 1;

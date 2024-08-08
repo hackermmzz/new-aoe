@@ -18,11 +18,6 @@ std::string Farmer::sound_work[7] = {\
     "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
 };
 
-Farmer::Farmer()
-{
-
-}
-
 Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent )
 {
     this->playerScience = playerScience;
@@ -164,7 +159,13 @@ double Farmer::getDis_attack()
     if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
     else dis = 0;
 
-    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0 ;
+    if(dis == 0)
+    {
+        dis = DISTANCE_ATTACK_CLOSE;
+
+        if(attackObject != NULL)
+            dis += (attackObject->getSideLength())/2.0 ;
+    }
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(), Num , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
@@ -203,7 +204,8 @@ void Farmer::updateState()
     case SORT_Building_Resource:
         if(interactBui_builtUp)
         {
-            if(interactNum == BUILDING_FARM) setState(5);
+            if(interactNum == BUILDING_FARM)
+                setState(5);
         }
         else setState(6);
         break;

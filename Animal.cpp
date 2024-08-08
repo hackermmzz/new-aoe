@@ -15,11 +15,6 @@ std::string Animal::sound_click[5] = {\
     "", "", "Elephant_Stand", "Lion_Stand", ""\
 };
 
-Animal::Animal()
-{
-
-}
-
 Animal::Animal(int Num, double DR, double UR)
 {
     this->Num=Num;
@@ -67,7 +62,6 @@ Animal::Animal(int Num, double DR, double UR)
     else if( this->Num == ANIMAL_ELEPHANT )
     {
         atk = 10;
-//        BlockSizeLen = SIZELEN_SMALL;
         Friendly = FRIENDLY_FENCY;
         this->MaxCnt = CNT_ELEPHANT;
         resourceSort = HUMAN_STOCKFOOD;
@@ -114,8 +108,6 @@ Animal::Animal(int Num, double DR, double UR)
     this->Blood = 1;
 
     this->state = ANIMAL_STATE_IDLE;
-//    this->nowres = Stand[this->Num][this->Angle]->begin();
-//    this->Angle=2;
     setNowRes();
 
     this->imageX=this->nowres->pix.width()/2.0;
@@ -223,7 +215,6 @@ void Animal::setNowRes()
         default:
             break;
         }
-//        this->nowres = nowlist->begin();
 
         if(templist!=nowlist && templist)
         {

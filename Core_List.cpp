@@ -45,10 +45,21 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
     {
         BloodHaver* bloodOb = NULL;
         Building* buildOb = NULL;
+        Building* buildGoalOb = NULL;
+        BloodHaver* bloodGoalOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
         object1->printer_ToBuilding((void**)&buildOb);
+        object2->printer_ToBuilding((void**)&buildGoalOb);
+        object2->printer_ToBloodHaver((void**)&bloodGoalOb);
         if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
-        if( buildOb != NULL && !(buildOb->isConstructed() && buildOb->isFinish())) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+        if( buildOb != NULL && !buildOb->isConstructed()) return ACTION_INVALID_BUILDACT_NEEDBUILT;
+
+        if( eventType == CoreEven_FixBuilding && bloodGoalOb!=NULL && bloodGoalOb->isFullHp() ) //建筑不需要修理
+            return ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX;
+
+        if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && buildGoalOb!=NULL \
+                && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
+            return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
 
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
@@ -56,19 +67,30 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         else isSameReprensent = false;
 
         if(object2->getSort() == SORT_BUILDING || object2->getSort() == SORT_Building_Resource)
-            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent , ((Building*)object2)->isFinish());
+            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent , ((Building*)object2)->isConstructed());
         else
             object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent);
 
         //加入行动交互表
-        relate_AllObject[object1] = relation_Object(object2 , eventType);
+        if(eventType == CoreEven_Gather && object2->getSort() == SORT_BUILDING)
+        {
+            relate_AllObject[object1] = relation_Object(NULL , eventType);
+
+            relate_AllObject[object1].set_goalPoint(object1->getDR(), object1->getUR());
+            relate_AllObject[object1].distance_AllowWork = 1e6;
+            relate_AllObject[object1].alterOb = object2;
+            relate_AllObject[object1].update_Attrib_alter();
+            relate_AllObject[object1].distance_Record = 0;
+        }
+        else
+            relate_AllObject[object1] = relation_Object(object2 , eventType);
+
         relate_AllObject[object1].respondConduct = respond; //是否可由addrelation更改行动
 
         //根据行动类型，设置需要的额外属性
         switch (eventType)
         {
             case CoreEven_Gather:
-                relate_AllObject[object1].update_GoalPoint();
                 relate_AllObject[object1].set_ResourceBuildingType();
             case CoreEven_Attacking:
                 relate_AllObject[object1].init_AttackAb(object1);
@@ -813,6 +835,8 @@ void Core_List::object_FinishAction_Absolute(Coordinate* object1)
 void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
+    Building* buildOb = NULL;
+    Building_Resource* buildResOb = NULL;
     vector<Point> Block_Free;
     int num = -1;
 
@@ -820,26 +844,34 @@ void Core_List::object_FinishAction(Coordinate* object1)
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
         {
-            if(!((Building*)relate_AllObject[object1].goalObject)->isConstructed())
+            relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildOb);
+            relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResOb);
+
+            if(buildOb!=NULL && !buildOb->isConstructed())
             {
                 std::string clickSound;
 
-                player[((Human*)object1)->getPlayerRepresent()]->finishBuild((Building*)relate_AllObject[object1].goalObject);
-                if(relate_AllObject[object1].goalObject->getNum() == BUILDING_STOCK || relate_AllObject[object1].goalObject->getNum() == BUILDING_GRANARY)
+                buildOb->initAction();
+
+                if(buildOb->getNum()==BUILDING_HOME||buildOb->getNum()==BUILDING_FARM)
+                    usrScore.update(_BUILDING1);
+                else
+                    usrScore.update(_BUILDING2);
+
+                player[object1->getPlayerRepresent()]->finishBuild(buildOb);
+                if(buildOb->getNum() == BUILDING_STOCK || buildOb->getNum() == BUILDING_GRANARY)
                     resourceBuildingChange = true;
 
-                clickSound = relate_AllObject[object1].goalObject->getSound_Click();
+                clickSound = buildOb->getSound_Click();
 
                 if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
                     soundQueue.push(clickSound);
             }
 
-            relate_AllObject[object1].goalObject->initAction();
-
-            if(relate_AllObject[object1].goalObject->getSort() == SORT_Building_Resource) //是农田
+            if( buildResOb!=NULL &&  buildResOb->getNum() == BUILDING_FARM) //是农田
             {
                  object1->initAction();
-                 addRelation(object1 , relate_AllObject[object1].goalObject ,CoreEven_Gather);
+                 addRelation(object1 , buildResOb ,CoreEven_Gather);
                  return;
             }
         }
@@ -1430,8 +1462,8 @@ int STATE_Gather[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
                       /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
                       /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
                       /*12*/ HUMAN_STATE_JUSTWALKING};
-int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_RESOURCE, \
-                      /*1前往攻击目标*/HUMAN_STATE_GOTO_RESOURCE ,/*2攻击*/HUMAN_STATE_GATHERING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
+int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
+                      /*1前往攻击目标*/HUMAN_STATE_GOTO_OBJECT ,/*2攻击*/HUMAN_STATE_GATHERING , /*3*/HUMAN_STATE_GOTO_OBJECT ,\
                       /*4前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*5资源放置*/HUMAN_STATE_GOTO_OBJECT, /*6前往资源*/HUMAN_STATE_GOTO_OBJECT,\
                       /*7采集*/HUMAN_STATE_GATHERING, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/HUMAN_STATE_GOTO_OBJECT ,\
                       /*9前往资源建筑*/HUMAN_STATE_GOTO_RESOURCE ,  /*10资源放置*/HUMAN_STATE_GOTO_OBJECT,/*11前往资源原位置*/HUMAN_STATE_JUSTWALKING ,\
@@ -1444,21 +1476,20 @@ int Core_List::getNowPhaseNum(Coordinate* object)
 {
     ///获取当前object的行动阶段，用于将信息传递给AIGame
     relation_Object& thisRelation=relate_AllObject[object];
-    MoveObject* move=dynamic_cast<MoveObject*>(object);
     Coordinate* obj=relate_AllObject[object].goalObject;
-    if(move->stateCrash){
-        return HUMAN_STATE_STOP;
-    }
     if(!thisRelation.isExist){
         return HUMAN_STATE_IDLE;
     }
     int& nowPhaseNum = thisRelation.nowPhaseNum;
 
-    if(thisRelation.relationAct==CoreEven_JustMoveTo||obj==NULL){
+    if(thisRelation.relationAct==CoreEven_JustMoveTo){
         return HUMAN_STATE_JUSTWALKING;
     }else if(thisRelation.relationAct==CoreEven_Attacking){
         return STATE_Attacking[nowPhaseNum];
     }else if(thisRelation.relationAct==CoreEven_Gather){
+        if(obj==NULL){
+            return HUMAN_STATE_GOTO_RESOURCE;
+        }
         if(obj->getSort()==SORT_ANIMAL&&obj->getNum()!=ANIMAL_TREE&&obj->getNum()!=ANIMAL_FOREST){
             //对动物
             Animal* animal=dynamic_cast<Animal*>(obj);
@@ -1468,7 +1499,7 @@ int Core_List::getNowPhaseNum(Coordinate* object)
                 return HUMAN_STATE_ATTACKING;
             }
             return STATE_Gather[nowPhaseNum];
-        }else if(obj->getSort()==SORT_ANIMAL&&(obj->getNum()!=ANIMAL_TREE||obj->getNum()!=ANIMAL_FOREST)){
+        }else if(obj->getSort()==SORT_ANIMAL&&(obj->getNum()==ANIMAL_TREE||obj->getNum()==ANIMAL_FOREST)){
             //对树
             if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
                 return HUMAN_STATE_CUTTING;
@@ -1498,6 +1529,8 @@ int Core_List::getNowPhaseNum(Coordinate* object)
         }else{
             return STATE_FixBuilding[nowPhaseNum];
         }
+    }else{
+        return HUMAN_STATE_IDLE;
     }
 
     return -1;
