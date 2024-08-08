@@ -19,7 +19,6 @@ static double chasestart_L[50] = {0};
 static double chasestart_U[50] = {0};
 static int Lock[50];
 static int timer[50] = {0};
-static int Find[50];
 static int Hero=0;
 static int Herotemp=0;
 static int ATT1=2;
@@ -95,10 +94,18 @@ void EnemyAI::processData() {
 //            qDebug()<<Blood[i];
             pos_L[i]=enemyInfo.armies[i].DR;
             pos_U[i]=enemyInfo.armies[i].UR;
-            Find[i]=0;
             Hero=16;
             Herotemp=16;
             ChasingLock[i]=0;
+        }
+    }
+    if(enemyInfo.armies.size()!=sum){
+        for(int i=0;i<enemyInfo.armies.size();i++){
+             Blood[i]=enemyInfo.armies[i].Blood;
+             timer[i]=0;
+             Lock[i]=0;
+             armystate[i]=WAITING;
+             ChasingLock[i]=0;
         }
     }
     //更新波数
