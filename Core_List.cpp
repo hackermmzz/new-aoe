@@ -1522,7 +1522,7 @@ int Core_List::getNowPhaseNum(Coordinate* object)
             }
             return STATE_Gather_Static[nowPhaseNum];
         }
-    }else if(thisRelation.relationAct==CoreEven_FixBuilding){
+    }else if(thisRelation.relationAct==CoreEven_FixBuilding&&obj!=NULL){
         Building* building=dynamic_cast<Building*>(obj);
         if(building->getPercent()<100){
             return STATE_CreateBuilding[nowPhaseNum];
