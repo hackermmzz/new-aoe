@@ -53,6 +53,7 @@ void call_debugText(QString color, QString content, int playerID);
 
 extern std::queue<st_DebugMassage>debugMassagePackage;
 extern bool only_debug_Player0;
+extern bool filterRepetitionMessage;
 extern std::map<QString , int>debugMessageRecord;
 
 enum ScoreType {
@@ -597,6 +598,7 @@ struct conditionDevelop
 struct st_upgradeLab{
     conditionDevelop *headAct = NULL , *nowExecuteNode = NULL , *endNode = NULL;
     int haveFinishedPhaseNum = 0;
+    bool nowExecuting = false;
 
     st_upgradeLab(){}
     ~st_upgradeLab()
@@ -626,6 +628,7 @@ struct st_upgradeLab{
     {
         if(nowExecuteNode!=NULL)
         {
+            overExecute();
             haveFinishedPhaseNum++;
             nowExecuteNode = nowExecuteNode->nextDevAction;
         }
@@ -635,11 +638,14 @@ struct st_upgradeLab{
     bool isShowAble( int nowcivilization )
     {
         if(nowExecuteNode == NULL) return false;
-        else return nowExecuteNode->isShowable(nowcivilization);
+        else return nowExecuteNode->isShowable(nowcivilization) && ( !nowExecuting || nowExecuteNode == nowExecuteNode->nextDevAction ) ;
     }
 
     //当前行动是否可执行
     bool executable( int nowcivilization,int wood,int food,int stone,int gold ){ return isShowAble(nowcivilization) && nowExecuteNode->executable(wood , food, stone,gold) ; }
+
+    void beginExecute(){ this->nowExecuting = true; }
+    void overExecute(){ this->nowExecuting = false; }
 
     //获取当前行动列表执行过几轮（一个链node算一轮）
     int getPhaseTimes(){return this->haveFinishedPhaseNum;}

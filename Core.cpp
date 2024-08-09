@@ -20,6 +20,33 @@ void Core::gameUpdate()
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
+    updateByObject();
+
+    loadRelationMap();
+
+    //更新AI用的资源表，该资源表是User/Enemy的通用模板
+    theMap->reset_resMap_AI();
+
+    //刷新视野并处理区域探索结果
+    theMap->reset_ObjectExploreAndVisible();
+
+    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
+
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
+    {
+        if( mapmoveFrequency == 8) resetNowObject_Click();
+        else manageMouseEvent();
+    }
+
+    manageOrder(0);
+    manageOrder(1);
+
+    interactionList->update();
+
+}
+
+void Core::updateByObject()
+{
     //player管理的各个ob更新状态
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
@@ -28,8 +55,8 @@ void Core::gameUpdate()
         list<Missile*>::iterator missileiter = player[playerIndx]->missile.begin() , missileiterEnd = player[playerIndx]->missile.end();
 
         //更新human子类的状态
-        while(humaniter!=humaniterEnd)
-        {       
+        while(humaniter != humaniterEnd)
+        {
             //如果当前对象需要变换行动状态，如从采集浆果->移动
             if((*humaniter)->needTranState())
             {
@@ -80,7 +107,7 @@ void Core::gameUpdate()
                         double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
                         if(leftOffsetPercent > 1) leftOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
-//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                        //qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
                     }
                     // 右高左低：
                     else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
@@ -88,7 +115,7 @@ void Core::gameUpdate()
                         double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
                         if(rightOffsetPercent > 1) rightOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
-//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                        //qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
                     }
                     // 下高上低：
                     else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
@@ -96,7 +123,7 @@ void Core::gameUpdate()
                         double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
                         if(downOffsetPercent > 1) downOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
-//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                        //qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
                     }
                     // 上高下低：
                     else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
@@ -104,7 +131,7 @@ void Core::gameUpdate()
                         double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
                         if(upOffsetPercent > 1) upOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
-//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                        //qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                     }
                 }
                 // 平地
@@ -146,15 +173,17 @@ void Core::gameUpdate()
             }
         }
 
-        while(builditer!= builditerEnd)
+        while(builditer != builditerEnd)
         {
             interactionList->conduct_Attacked(*builditer);
-            if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
+            if((*builditer)->isDie() || ((*builditer)->getSort() == SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
                 if(!(*builditer)->isDie())
-                    call_debugText("green"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
+                    call_debugText("green"," "+(*builditer)->getChineseName()+\
+                                   "(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
                 else
-                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
+                    call_debugText("red"," "+(*builditer)->getChineseName()+\
+                                   "(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
 
                 g_Object[(*builditer)->getglobalNum()] = NULL;
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
@@ -174,7 +203,7 @@ void Core::gameUpdate()
             }
         }
 
-        while(missileiter!=missileiterEnd)
+        while(missileiter != missileiterEnd)
         {
             if((*missileiter)->isNeedDelete())
             {
@@ -274,28 +303,6 @@ void Core::gameUpdate()
             SRiter = theMap->deleteStaticRes(SRiter);
         }
     }
-
-    loadRelationMap();
-
-    //更新AI用的资源表，该资源表是User/Enemy的通用模板
-    theMap->reset_resMap_AI();
-
-    //刷新视野并处理区域探索结果
-    theMap->reset_ObjectExploreAndVisible();
-
-    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
-
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
-    {
-        if( mapmoveFrequency == 8) resetNowObject_Click();
-        else manageMouseEvent();
-    }
-
-    manageOrder(0);
-    manageOrder(1);
-
-    interactionList->update();
-
 }
 
 void Core::updateByPlayer(int id){
@@ -799,7 +806,7 @@ void Core::manageOrder(int id)
             break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            ret=interactionList->addRelation(self,cur.BlockDR,cur.BlockUR,CoreEven_CreatBuilding,0,cur.option);
+            ret=interactionList->addRelation(self, cur.BlockDR, cur.BlockUR, CoreEven_CreatBuilding, true, cur.option);
             if(ret == ACTION_SUCCESS && id == 0)
                 call_debugText("green"," HumanBuild:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 开始在块坐标 ("+QString::number(cur.BlockDR)+","+QString::number(cur.BlockUR)+") 处建造 Building_"+ QString::number(cur.option),id);
             break;

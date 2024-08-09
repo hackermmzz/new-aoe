@@ -295,18 +295,18 @@ int Army::get_add_specialAttack()
 {
     int addition = 0;
 
-    if(Num == AT_SLINGER)
-    {
-/*        if(interactSort == SORT_ARMY)
-        {
-            if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
-        }
-        else */if( interactSort == SORT_BUILDING)
-        {
-            if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
-                addition += 7;
-        }
-    }
+//    if(Num == AT_SLINGER)
+//    {
+//        if(interactSort == SORT_ARMY)
+//        {
+//            if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
+//        }
+//        else if( interactSort == SORT_BUILDING)
+//        {
+//            if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
+//                addition += 7;
+//        }
+//    }
 //    else if(Num == AT_CAVALRY)
 //    {
 //        if(interactSort == SORT_ARMY)

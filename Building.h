@@ -49,7 +49,8 @@ public:
 
     void setAttribute();
     void setNowRes();
-    void setAction( int actN5um );
+    void setAction( int actNum );
+    void initAction();
     void ActNumToActName();
 
     bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
@@ -100,6 +101,8 @@ public:
 
     void update_Action();
     void update_Build();
+
+    void BuildingActionOver();
     /*************控制建筑行为****************/
 
     /*************建筑行为对player资源的改变****************/

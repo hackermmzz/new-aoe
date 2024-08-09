@@ -36,6 +36,9 @@ public:
     virtual QString getChineseName(){ return ""; }
 
     virtual string getSound_Click(){return "";}
+
+    //重置行动record
+    virtual void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; }
     /***************指针强制转化****************/
     //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
     virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
@@ -118,8 +121,6 @@ public:
 
     int ActNameToActNum(int actName);
 
-    //重置行动record
-    void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; }
     void initActionPersent(){ actPercent = 0; }
 /*****************act获取***************/
 
@@ -180,9 +181,9 @@ protected:
     /*****************act获取***************/
     double actPercent = 0;
     double actSpeed = 0;
-    int actName = 0;
+    int actName = ACT_NULL;
     //执行行动时的进度、速率和行动类型
-    int actNum=0;
+    int actNum=ACT_NULL;
     //动作类型的编号
     /*****************act获取***************/
 

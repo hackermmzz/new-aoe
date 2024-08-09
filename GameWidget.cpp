@@ -195,6 +195,8 @@ void GameWidget::paintEvent(QPaintEvent *)
                                (*iter)->getNowRes()->pix.width(),
                                (*iter)->getNowRes()->pix.height(),
                                (*iter)->getNowRes()->pix);
+
+
             drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
                        (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
                        (*(*iter)->getNowRes()),(*iter)->getglobalNum());

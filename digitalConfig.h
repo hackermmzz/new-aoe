@@ -1,6 +1,12 @@
 #ifndef DIGITALCONFIG_H
 #define DIGITALCONFIG_H
 
+/**********初始资源************/
+#define INITIAL_WOOD 200
+#define INITIAL_MEAT 200
+#define INITIAL_STONE 200
+#define INITIAL_GOLD 200
+
 /********** 碰撞箱 **********/
 #define CRASHBOX_SINGLEBLOCK 16.36
 #define CRASHBOX_SMALLBLOCK 34.21

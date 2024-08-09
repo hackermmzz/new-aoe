@@ -66,7 +66,18 @@ void Building::setAction( int actNum)
 
     ActNumToActName();
     initActionPersent();
+    playerScience->BuildingActionExecuting(Num, actNum);
     actSpeed= get_retio_Action();
+}
+
+void Building::initAction()
+{
+    if(actSpeed != 0 && actNum != ACT_NULL)
+        playerScience->BuildingActionOverExecuting(Num, actNum);
+
+    actName = ACT_NULL;
+    actNum = ACT_NULL;
+    actSpeed = 0;
 }
 
 void Building::ActNumToActName()

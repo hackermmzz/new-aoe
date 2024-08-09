@@ -13,6 +13,7 @@ public:
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
     void gameUpdate();
+    void updateByObject();
     void infoShare();   //将游戏信息同步给AIGame
 
     void getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold );
