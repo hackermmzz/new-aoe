@@ -10,11 +10,11 @@
 class Coordinate
 {
 public:
-    Coordinate();
+    Coordinate(){}
 
   /**********************虚函数**************************/
-    virtual void nextframe();
-    virtual int getSort();
+    virtual void nextframe(){}
+    virtual int getSort(){return SORT_COORDINATE;}
     virtual bool isPlayerControl(){ return false; }
 
     virtual bool isMonitorObject(Coordinate* judOb){ return false; }
@@ -114,13 +114,13 @@ public:
     double getActPercent() {return this->actPercent;}
     double getActSpeed(){ return this->actSpeed;}
     int getActName(){return this->actName;}
-    void setActPercent(double actPercent){this->actPercent = actPercent;}
     int getActNum(){ return this->actNum;}
 
     int ActNameToActNum(int actName);
 
     //重置行动record
-    void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; actPercent = 0; }
+    void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; }
+    void initActionPersent(){ actPercent = 0; }
 /*****************act获取***************/
 
 protected:
