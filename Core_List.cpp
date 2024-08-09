@@ -57,8 +57,8 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         if( eventType == CoreEven_FixBuilding && bloodGoalOb!=NULL && bloodGoalOb->isFullHp() ) //建筑不需要修理
             return ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX;
 
-        if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && buildGoalOb!=NULL \
-                && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
+        if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
+                && buildGoalOb!=NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
 
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
@@ -1358,8 +1358,8 @@ void Core_List::initDetailList()
         overCondition.push_back(conditionF( condition_UniObjectDie, OPERATECON_OBJECT2 ));
         relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);   //向前跳转使用setLoop
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
         forcedInterrupCondition.clear();
         overCondition.clear();
     }
@@ -1409,8 +1409,8 @@ void Core_List::initDetailList()
         //资源被采集完毕后，若身上无资源，则直接停止
         relation_Event_static[CoreEven_Gather].setJump(8 , 12);
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
         forcedInterrupCondition.clear();
         overCondition.clear();
     }
@@ -1425,8 +1425,8 @@ void Core_List::initDetailList()
 
         relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
         forcedInterrupCondition.clear();
     }
 
@@ -1449,8 +1449,8 @@ void Core_List::initDetailList()
 
         relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
     }
 }
 
@@ -1522,7 +1522,7 @@ int Core_List::getNowPhaseNum(Coordinate* object)
             }
             return STATE_Gather_Static[nowPhaseNum];
         }
-    }else if(thisRelation.relationAct==CoreEven_FixBuilding&&obj!=NULL){
+    }else if(thisRelation.relationAct==CoreEven_FixBuilding && obj != NULL){
         Building* building=dynamic_cast<Building*>(obj);
         if(building->getPercent()<100){
             return STATE_CreateBuilding[nowPhaseNum];

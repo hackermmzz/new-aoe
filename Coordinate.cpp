@@ -2,21 +2,6 @@
 
 vector<Point> Coordinate::viewLab[5][12];
 
-Coordinate::Coordinate()
-{
-
-}
-
-void Coordinate::nextframe()
-{
-
-}
-
-int Coordinate::getSort()
-{
-    return SORT_COORDINATE;
-}
-
 int Coordinate::getMapHeightOffsetY()
 {
     return MapHeightOffsetY;
@@ -65,9 +50,6 @@ int Coordinate::ActNameToActNum(int actName)
         return -1;
         break;
     }
-
-
-
 }
 
 

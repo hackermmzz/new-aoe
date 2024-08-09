@@ -65,7 +65,7 @@ void Building::setAction( int actNum)
     this->actNum = actNum;
 
     ActNumToActName();
-    actPercent = 0;
+    initActionPersent();
     actSpeed= get_retio_Action();
 }
 
