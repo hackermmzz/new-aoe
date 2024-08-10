@@ -297,14 +297,14 @@ int Army::get_add_specialAttack()
 
     if(Num == AT_SLINGER)
     {
-/*        if(interactSort == SORT_ARMY)
+       /* if(interactSort == SORT_ARMY)
         {
             if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
         }
         else */if( interactSort == SORT_BUILDING)
         {
             if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
-                addition += 7;
+                addition += DEFSHOOT_BUILD_ARROWTOWER;
         }
     }
 //    else if(Num == AT_CAVALRY)

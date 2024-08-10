@@ -9,7 +9,7 @@
 class BloodHaver
 {
 public:
-    BloodHaver();
+    BloodHaver(){}
 
     /***********虚函数************/
     virtual void setPreAttack( ){ }
@@ -18,9 +18,7 @@ public:
 
     virtual int getATK(){ return atk+ get_add_specialAttack(); }
     virtual int get_add_specialAttack(){ return 0; }
-    virtual int getDEF(int attackType_got){  if(attackType_got == ATTACKTYPE_CLOSE) return defence_close;
-                                             else if(attackType_got == ATTACKTYPE_SHOOT) return defence_shoot;
-                                             else return 0;}
+    virtual int getDEF(int attackType_got);
     virtual double getDis_attack(){ return dis_Attack; }
     virtual int get_AttackType(){ return attackType; }
 

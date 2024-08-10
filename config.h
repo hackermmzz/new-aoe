@@ -33,6 +33,7 @@
 #include <vector>
 #include <digitalConfig.h>
 
+
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
@@ -81,6 +82,7 @@
 #define OPTION_POS false
 #define OPTION_OVERLAP false
 
+
 /********** 地图块种类 **********/
 /* L0边为右上角，L0到L3顺时针排列 */
 /* A0边为上方角，A0到A3顺时针排列 */
@@ -103,6 +105,7 @@
 #define MAPTYPE_A2_DOWNTOU 12   // A2角（向上方凹陷）
 #define MAPTYPE_A0_UPTOD 13     // A0角（向下方凸起）
 
+
 /********** 地图块高度 **********/
 #define MAPHEIGHT_FLAT 0        // 地形高度
 #define MAPHEIGHT_MAX 5         // 最高地形高度
@@ -111,6 +114,7 @@
 #define CENTER_RADIUS   12      // 特判市镇中心附近平地的半径
 #define CENTER_DEVIATION 3      // 市镇中心坐标偏移量
 
+
 /********** 地图块样式 **********/
 #define MAPPATTERN_EMPTY 0      // 未定义样式
 #define MAPPATTERN_GRASS 0      // 草原
@@ -118,14 +122,27 @@
 #define MAPPATTERN_OCEAN 2      // 海洋/河流
 #define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
 
+
 /********** 地图块绘制偏移量 **********/
 #define DRAW_OFFSET -15
+
 
 /********** DebugText栏颜色 **********/
 #define COLOR_RED(STRING) QString("<font color=red>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_BLUE(STRING) QString("<font color=blue>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_GREEN(STRING) QString("<font color=green>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_BLACK(STRING) QString("<font color=black>%1</font><font color=black> </font>").arg(STRING)
+
+
+/********** 建筑火焰种类 **********/
+#define BUILDING_FIRE_SMALL 0
+#define BUILDING_FIRE_MIDDLE 1
+#define BUILDING_FIRE_BIG 2
+
+#define BUILDING_BLOOD_FIRE_SMALL 0.75
+#define BUILDING_BLOOD_FIRE_MIDDLE 0.5
+#define BUILDING_BLOOD_FIRE_BIG 0.25
+
 
 /********** 建筑种类 **********/
 #define BUILDING_TYPE_MAXNUM 12
@@ -146,6 +163,7 @@
 
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
+
 
 /********** 建筑状态 **********/
 #define BUILDING_FREE 0 // 建筑状态为空闲（无工作）时用0表示
@@ -183,6 +201,7 @@
 
 #define BUILDING_CANCEL 12
 
+
 /********** 建筑动作命名 **********/
 #define BUILDING_GRANARY_ARROWTOWER_NAME "研发:建造箭塔(花费:50食物)"
 #define BUILDING_CENTER_CREATEFARMER_NAME "创造村民(花费:50食物)"
@@ -191,6 +210,7 @@
 #define BUILDING_MARKET_STONE_UPGRADE_NAME "研发石矿开采:采石+3(花费:100食物,50石头)"
 #define BUILDING_MARKET_FARM_UPGRADE_NAME "研发驯养动物:农场食物产量+75(花费:200食物,50木头)"
 #define BUILDING_ACTION_CANCEL_NAME "中止"
+
 
 /********** Coordinate子类中 Num值实际指代种类 **********/
 //资源
@@ -240,6 +260,7 @@
 #define HUMAN_STATE_FARMING 12
 #define HUMAN_STATE_BUTCHERING 13
 #define HUMAN_STATE_JUSTWALKING 14
+
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
@@ -310,6 +331,7 @@
 //建筑未解锁，未达成建筑条件
 #define ACTION_INVALID_HUMANBUILD_LOCK -45
 
+
 /********** 资源种类 **********/
 /*
  * 如表 十进制位代表大的分类 个位代表他在大类中的具体编号
@@ -333,6 +355,7 @@
 #define ACT_STATUS_ENABLED 0
 #define ACT_STATUS_ANIME 1
 #define ACT_STATUS_DISABLED 2
+
 
 /********** 人物动作命名 **********/
 #define ACT_CREATEFARMER_NAME "创造村民(花费:50食物)"
@@ -364,7 +387,6 @@
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
 #define ACT_NULL_NAME ""
-
 
 #define ACT_WINDOW_NUM_FREE 10
 
@@ -401,12 +423,14 @@
 
 #define ACT_STOP 100
 
+
 /********** 对象视野 **********/
 //建筑的视野搬至建筑属性相关
 #define VISION_FARMER 4
 #define VISION_GAZELLE 2
 #define VISION_LION 3
 #define VISION_ELEPHANT 4
+
 
 /********** 地基编号 **********/
 #define FOUNDATION_SMALL 0
@@ -449,7 +473,6 @@
 #define BLOOD_FOREST 100
 
 #define SPEED_ELEPHANT (0.8 * ANIMAL_SPEED)
-
 
 #define CNT_TREE 75
 #define CNT_GAZELLE 150
@@ -509,8 +532,10 @@
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
 
+
 /********** 同Class中图像资源种类数 **********/
 #define NUMBER_MISSILE 3
+
 
 /********** Core静态表 **********/
 //####关系事件名称
@@ -521,7 +546,6 @@
 #define CoreEven_FixBuilding 5
 #define CoreEven_BuildingAct 6
 #define CoreEven_MissileAttack 7
-
 
 //####对一个关系事件，细节关系的最大数量
 #define CoreDetailLinkMaxNum 15
@@ -535,6 +559,7 @@
 #define CoreDetail_ResourceIn 3
 //#define CoreDetail_FindNextGoal 4
 #define CoreDetail_UpdateRatio 5
+
 
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 11111
@@ -559,6 +584,7 @@
 #define OPERATE_TIMEMAX 10
 
 #define OPERATECON_TIMES_USELESSACT_MOVE 250
+
 
 /********** 占地边长-块坐标常量 **********/
 #define SIZELEN_SINGEL 1

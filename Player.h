@@ -137,10 +137,10 @@ private:
     int attackFrame = 0;
 
     //所拥有的四个资源
-    int wood=200;
-    int food=200;
-    int stone=200;
-    int gold=200;
+    int wood=INITIAL_WOOD;
+    int food=INITIAL_MEAT;
+    int stone=INITIAL_STONE;
+    int gold=INITIAL_GOLD;
     int score=0;    //得分
 
     //研究技术进度与成果
