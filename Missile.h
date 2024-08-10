@@ -10,7 +10,7 @@
 class Missile : public MoveObject
 {
 public:
-    Missile();
+    Missile(){}
     Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
     ~Missile(){ if(AttackerRecord) delete AttackerRecord; }
 
@@ -79,10 +79,7 @@ public:
     void get_AttackSponsor_Position(double& DR , double& UR);
 
     //攻击者死亡，设置missile的攻击发起者为NULL
-    void deleteAttackerSponsor(Coordinate* attacker){if(attacker == AttackSponsor)
-                                                      { set_attackerDie();
-                                                        AttackSponsor = NULL;}
-                                                    }
+    void deleteAttackerSponsor(Coordinate* attacker);
     int get_AttackAddition_Height(int goalHeigh){ return goalHeigh<Height_begin ? Height_begin - goalHeigh : 0; }
 
 private:
@@ -103,7 +100,6 @@ private:
     bool taskEnd = false;
 
     std::map<int ,int > lab_SpecialAttack;
-
     int Height_begin = 0;   //记录起始高度,只能在初始化时设置
 
 

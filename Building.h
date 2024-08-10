@@ -8,7 +8,7 @@
 class Building:public Coordinate,public BloodHaver
 {
 public:
-    Building();
+    Building(){}
     Building(int Num, int BlockDR, int BlockUR, int civ = CIVILIZATION_STONEAGE,Development* playerScience = NULL, int playerRepresent = MAXPLAYER , int Percent=100);
 
   /**********************虚函数**************************/
@@ -20,36 +20,21 @@ public:
 
     QString getChineseName(){ return QString::fromStdString(getDisplayName(Num)); }
 
-    bool isMonitorObject(Coordinate* judOb)
-    {
-        if(Num == BUILDING_ARROWTOWER)
-            return judOb->isPlayerControl() && judOb->getPlayerRepresent()!= getPlayerRepresent();
-
-        return false;
-    }
+    bool isMonitorObject(Coordinate* judOb);
 
     void nextframe();
     void init_Blood();
     void setPreAttack(){ defencing = true; missionThrowTimer = 0; }
     bool isAttacking(){ return defencing; }
-    double getDis_attack()
-    {
-        if(getNum() == BUILDING_ARROWTOWER)
-            return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType() ) )*BLOCKSIDELENGTH;
-        else return 0;
-    }
-
-    int getVision(){
-        if(getNum() == BUILDING_ARROWTOWER)
-            return vision + playerScience->get_addition_DisAttack(getSort(),Num, 0 ,get_AttackType());
-        else return vision;
-    }
+    double getDis_attack();
+    int getVision();
 
     string getSound_Click(){return sound_click[Num];}
 
     void setAttribute();
     void setNowRes();
-    void setAction( int actN5um );
+    void setAction( int actNum );
+    void initAction();
     void ActNumToActName();
 
     bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
@@ -62,21 +47,22 @@ public:
 
 
   /********************静态函数**************************/
-    static std::list<ImageResource>* getBuild(int i) {return build[i];}
-    static std::list<ImageResource>* getBuilt(int i,int j) { return built[i][j]; }
     static std::string getBuildingname(int index){return Buildingname[index];}
     static std::string getBuiltname(int index1,int index2){return Builtname[index1][index2];}
     static std::string getDisplayName(int num){return BuildDisplayName[num];}
+    static std::string getBuildingFireName(int index){ return BuildFireName[index]; }
+
     static void allocatebuild(int i){ build[i]=new std::list<ImageResource>;}
     static void allocatebuilt(int i,int j){built[i][j]=new std::list<ImageResource>;}
-    static void deallocatebuild(int i) {
-        delete build[i];
-        build[i] = nullptr;
-    }
-    static void deallocatebuilt(int i,int j) {
-        delete built[i][j];
-        built[i][j] = nullptr;
-    }
+    static void allocatebuildFire( int type ){ buildFire[type] = new std::list<ImageResource>; }
+
+    static std::list<ImageResource>* getBuild(int i) {return build[i];}
+    static std::list<ImageResource>* getBuilt(int i,int j) { return built[i][j]; }
+    static std::list<ImageResource>* getBuildFire(int type){ return buildFire[type]; }
+
+    static void deallocatebuild(int i);
+    static void deallocatebuilt(int i,int j);
+    static void deallocatebuildFire(int type);
 
     static void setActNames(int buildNum , int num, int name){ actNames[buildNum][num] = name; }
   /********************静态函数**************************/
@@ -100,6 +86,8 @@ public:
 
     void update_Action();
     void update_Build();
+
+    void BuildingActionOver();
     /*************控制建筑行为****************/
 
     /*************建筑行为对player资源的改变****************/
@@ -129,8 +117,7 @@ public:
 
     double getPercent() {return this->Percent;}
 
-    int get_civilization(){ if(playerScience == NULL) return CIVILIZATION_STONEAGE;
-                            else return playerScience->get_civilization();}
+    int get_civilization();
 
     void init_BuildAttackAct(){ defencing = false; missionThrowTimer = 0; }
 
@@ -138,21 +125,27 @@ public:
 
     bool isMatchResourceType(int resourceType);
 
+    double getFireImageX(){ return fireImageX; }
+    double getFireImageY(){ return fireImageY; }
+
+    std::list<ImageResource>::iterator getFireNowRes(){return this->fireNowRes;}
+    std::list<ImageResource>* getFireNowList(){ return fireNowList; }
+
 
 protected:
   /********************静态资源**************************/
     static std::list<ImageResource> *build[4];//建设list
-
     static std::list<ImageResource> *built[3][10]; //建设完成的list
+    static std::list<ImageResource> *buildFire[3];
 
     static std::string Buildingname[4];
     static std::string Builtname[3][10];
     static std::string BuildDisplayName[10];
+    static std::string BuildFireName[3];
 
     static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
 
     static string sound_click[10];
-
   /********************静态资源**************************/
 
     bool defencing = false;
@@ -186,6 +179,17 @@ protected:
     int food_TS = 0;
     int stone_TS = 0;
     int gold_TS = 0;
+
+    std::list<ImageResource>::iterator fireNowRes;
+    std::list<ImageResource> *fireNowList = NULL;
+
+    double fireImageX;
+    double fireImageY;
+
+
+    void setFireNowRes();
+
+
 };
 
 #endif // BUILDING_H
