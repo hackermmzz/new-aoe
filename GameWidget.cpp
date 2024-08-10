@@ -180,6 +180,8 @@ void GameWidget::paintEvent(QPaintEvent *)
         painter.drawPolygon(diamond);
     }
 
+
+    Building* buildOb = NULL;
     //drawlist正常绘制
     if(!drawlist.empty())
     {
@@ -196,6 +198,17 @@ void GameWidget::paintEvent(QPaintEvent *)
                                (*iter)->getNowRes()->pix.height(),
                                (*iter)->getNowRes()->pix);
 
+            (*iter)->printer_ToBuilding((void**)&buildOb);
+            if(buildOb != NULL && buildOb->getFireNowList() != NULL)
+            {
+                painter.drawPixmap(\
+                    tx - buildOb->getFireImageX() + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX(),
+                    buildOb->getFireImageY() - buildOb->getFireNowRes()->pix.height() + ty + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
+                    buildOb->getFireNowRes()->pix.width(),
+                    buildOb->getFireNowRes()->pix.height(),
+                    buildOb->getFireNowRes()->pix
+                );
+            }
 
             drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
                        (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),

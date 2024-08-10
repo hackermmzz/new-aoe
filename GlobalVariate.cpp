@@ -95,16 +95,15 @@ int InitImageResMap(QString path)
     }
     //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
 
-    std::map<string, list<QPixmap>>::iterator iter,itere;
-    iter = resMap.begin();
-    itere = resMap.end();
-    while(iter != itere)
-    {
-        qDebug()<<QString::fromStdString(iter->first);
-        iter++;
-    }
-
-
+//查看rcc
+//    std::map<string, list<QPixmap>>::iterator iter,itere;
+//    iter = resMap.begin();
+//    itere = resMap.end();
+//    while(iter != itere)
+//    {
+//        qDebug()<<QString::fromStdString(iter->first);
+//        iter++;
+//    }
     return -1;
 }
 int InitSoundResMap(QString path)

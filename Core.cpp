@@ -582,7 +582,7 @@ void Core::manageMouseEvent()
                     break;
 
                 case SORT_ARMY:
-                    if(nowobject->getPlayerRepresent() != 0) break;
+//                    if(nowobject->getPlayerRepresent() != 0) break;
                     switch (object_click->getSort())
                     {
 //                        case SORT_ANIMAL:
