@@ -163,6 +163,11 @@ bool Coordinate::isNowresShift()
     }
 }
 
+void Coordinate::updateImageXYByNowRes()
+{
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
+}
 
 /*******坐标相关*******/
 void Coordinate::setDetailPointAttrb_FormBlock()

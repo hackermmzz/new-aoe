@@ -40,29 +40,24 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     this->playerRepresent = playerRepresent;
 
     this->Num = Num;
-    this->Blood=1;
+
     setAttribute();
-    this->Angle=rand()%8;
-    this->DR=DR;
-    this->UR=UR;
-    this->BlockDR=DR/BLOCKSIDELENGTH;
-    this->BlockUR=UR/BLOCKSIDELENGTH;
+
+    setDRUR(DR, UR);
+    updateBlockByDetail();
 
     setSideLenth();
     this->nextBlockDR=BlockDR;
     this->nextBlockUR=BlockUR;
-    this->PredictedDR=DR;
-    this->PredictedUR=UR;
-    this->PreviousDR=DR;
-    this->PreviousUR=UR;
-    this->DR0=DR;
-    this->UR0=UR;
+    setPredictedDRUR(DR, UR);
+    setPreviousDRUR(DR, UR);
+    setDR0UR0(DR, UR);
+
     this->nowstate=MOVEOBJECT_STATE_STAND;
     isAttackable = true;
 
     setNowRes();
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
     this->imageH=DR-UR;
 
     //设置SN信息
@@ -119,8 +114,7 @@ void Army::nextframe()
 
     if(playerRepresent != 0 && timer_Visible>0) time_BeVisible();
 
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 }
 
 void Army::setNowRes()
@@ -324,6 +318,8 @@ int Army::get_add_specialAttack()
 
 void Army::setAttribute()
 {
+    this->Blood=1;
+    this->Angle=rand()%8;
     //设置军队属性
     switch (Num) {
     case AT_CLUBMAN:        //棍棒兵,可升级1次
