@@ -62,7 +62,131 @@ Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* play
 
 
 /********************虚函数**************************/
-/**********设置*************/
+/***************状态与图像显示****************/
+void Building::nextframe()
+{
+    setNowRes();
+    if(Percent<100)
+    {
+        nowres = nowlist->begin();
+        advance(nowres, (int)(Percent/25));
+    }
+    else
+    {
+        nowres++;
+        if(nowres==nowlist->end())
+        {
+            nowres=nowlist->begin(); //读到最后回到最初
+            initAttack_perCircle();
+        }
+
+        if(fireNowList != NULL)
+        {
+            fireNowRes++;
+
+            if(fireNowRes == fireNowList->end())
+                fireNowRes = fireNowList->begin();
+
+            this->fireImageX = fireNowRes->pix.width()/2.0;
+            this->fireImageY = fireNowRes->pix.width()/4.0;
+        }
+
+        if(defencing)
+            missionThrowTimer = missionThrowTimer == missionThrowStep ? 0 : missionThrowTimer+1;
+    }
+
+    updateImageXYByNowRes();
+}
+
+void Building::setNowRes()
+{
+    std::list<ImageResource>* tempNowlist = NULL;
+    if(Percent<100) tempNowlist = Building::build[Foundation];
+    else
+    {
+        tempNowlist = Building::built[get_civilization()][Num];
+        setFireNowRes();
+    }
+
+    if(tempNowlist != nowlist)
+    {
+        nowlist = tempNowlist;
+        nowres = nowlist->begin();
+    }
+}
+
+
+/*******状态与属性设置、获取*******/
+void Building::setAttribute()
+{
+    /*********特殊设定**********/
+    switch (Num) {
+    case BUILDING_CENTER:
+    case BUILDING_HOME:
+    case BUILDING_STOCK:
+    case BUILDING_GRANARY:
+    case BUILDING_ARMYCAMP:
+    case BUILDING_MARKET:
+    case BUILDING_RANGE:
+    case BUILDING_STABLE:
+    case BUILDING_WALL:
+        break;
+    case BUILDING_ARROWTOWER:
+        atk = ATK_BUILD_ARROWTOWER;
+        defence_shoot = DEFSHOOT_BUILD_ARROWTOWER;
+        dis_Attack = DIS_ARROWTOWER;
+        attackType = ATTACKTYPE_SHOOT;
+        type_Missile = Missile_Arrow;
+        missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
+
+        isAttackable = true;
+        break;
+    default:
+        incorrectNum = true;
+        Foundation=FOUNDATION_MIDDLE;
+        break;
+    }
+
+    if(incorrectNum)
+        return;
+
+    MaxBlood = BuildingMaxBlood[Num];
+    Foundation = BuildingFundation[Num];
+    vision = BuildingVision[Num];
+}
+
+int Building::getVision()
+{
+    if(getNum() == BUILDING_ARROWTOWER)
+        return vision + playerScience->get_addition_DisAttack(getSort(), Num, 0, get_AttackType());
+    else
+        return vision;
+}
+
+bool Building::isMonitorObject(Coordinate* judOb)
+{
+    if(Num == BUILDING_ARROWTOWER)
+        return judOb->isPlayerControl() && judOb->getPlayerRepresent() != getPlayerRepresent();
+
+    return false;
+}
+
+int Building::get_civilization()
+{
+    if(playerScience == NULL)
+        return CIVILIZATION_STONEAGE;
+    else
+        return playerScience->get_civilization();
+}
+
+void Building::init_Blood()
+{
+    if(Percent == 100) Blood = 1;
+    else Blood = 1.0/(double)getMaxBlood();
+}
+
+
+/*******行动相关*******/
 void Building::setAction( int actNum)
 {
     this->actNum = actNum;
@@ -124,129 +248,13 @@ void Building::ActNumToActName()
     }
 }
 
-void Building::setNowRes()
-{
-    std::list<ImageResource>* tempNowlist = NULL;
-    if(Percent<100) tempNowlist = Building::build[Foundation];
-    else
-    {
-        tempNowlist = Building::built[get_civilization()][Num];
-        setFireNowRes();
-    }
 
-    if(tempNowlist != nowlist)
-    {
-        nowlist = tempNowlist;
-        nowres = nowlist->begin();
-    }
-}
-
-void Building::setAttribute()
-{
-    MaxBlood = BuildingMaxBlood[Num];
-    Foundation = BuildingFundation[Num];
-    vision = BuildingVision[Num];
-
-    //根据房屋种类设置相关信息
-    switch (Num) {
-    case BUILDING_CENTER:
-    case BUILDING_HOME:
-    case BUILDING_STOCK:
-    case BUILDING_GRANARY:
-    case BUILDING_ARMYCAMP:
-    case BUILDING_MARKET:
-    case BUILDING_RANGE:
-    case BUILDING_STABLE:
-    case BUILDING_WALL:
-        break;
-    case BUILDING_ARROWTOWER:
-        atk = ATK_BUILD_ARROWTOWER;
-        defence_shoot = DEFSHOOT_BUILD_ARROWTOWER;
-        dis_Attack = DIS_ARROWTOWER;
-        attackType = ATTACKTYPE_SHOOT;
-        type_Missile = Missile_Arrow;
-        missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
-
-        isAttackable = true;
-        break;
-    default:
-        incorrectNum = true;
-        Foundation=FOUNDATION_MIDDLE;
-        break;
-    }
-}
-
+/*******战斗相关*******/
 double Building::getDis_attack()
 {
     if(getNum() == BUILDING_ARROWTOWER)
         return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType()) )*BLOCKSIDELENGTH;
     else return 0;
-}
-
-int Building::getVision()
-{
-    if(getNum() == BUILDING_ARROWTOWER)
-        return vision + playerScience->get_addition_DisAttack(getSort(), Num, 0, get_AttackType());
-    else
-        return vision;
-}
-
-int Building::get_civilization()
-{
-    if(playerScience == NULL)
-        return CIVILIZATION_STONEAGE;
-    else
-        return playerScience->get_civilization();
-}
-
-bool Building::isMonitorObject(Coordinate* judOb)
-{
-    if(Num == BUILDING_ARROWTOWER)
-        return judOb->isPlayerControl() && judOb->getPlayerRepresent() != getPlayerRepresent();
-
-    return false;
-}
-
-/**********更新*************/
-void Building::nextframe()
-{
-    setNowRes();
-    if(Percent<100)
-    {
-        nowres = nowlist->begin();
-        advance(nowres, (int)(Percent/25));
-    }
-    else
-    {
-        nowres++;
-        if(nowres==nowlist->end())
-        {
-            nowres=nowlist->begin(); //读到最后回到最初
-            initAttack_perCircle();
-        }
-
-        if(fireNowList != NULL)
-        {
-            fireNowRes++;
-
-            if(fireNowRes == fireNowList->end())
-                fireNowRes = fireNowList->begin();
-
-            this->fireImageX = fireNowRes->pix.width()/2.0;
-            this->fireImageY = fireNowRes->pix.width()/4.0;
-        }
-
-        if(defencing)
-            missionThrowTimer = missionThrowTimer == missionThrowStep ? 0 : missionThrowTimer+1;
-    }
-
-    updateImageXYByNowRes();
-}
-
-void Building::init_Blood()
-{
-    if(Percent == 100) Blood = 1;
-    else Blood = 1.0/(double)getMaxBlood();
 }
 
 /********************虚函数**************************/
@@ -277,21 +285,8 @@ void Building::deallocatebuildFire(int type)
 /********************静态函数**************************/
 
 
-//********************************************
-bool Building::isMatchResourceType(int resourceType)
-{
-    if(Num == BUILDING_CENTER)
-        return true;
-
-    if(Num == BUILDING_STOCK && ( resourceType == HUMAN_WOOD || resourceType == HUMAN_GOLD || resourceType == HUMAN_STONE || resourceType == HUMAN_STOCKFOOD ))
-        return true;
-
-    if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
-        return true;
-
-    return false;
-}
-
+/********************************************/
+/*****************act相关***************/
 void Building::update_Build()
 {
     double ratio = get_retio_Build();
@@ -305,6 +300,54 @@ void Building::update_Build()
     Blood+=ratio/100;
 
     if(Blood>1) Blood = 1;
+}
+
+void Building::update_Action(){
+    actPercent += actSpeed;
+    if(actPercent > 100) actPercent = 100;
+}
+
+void Building::setActStatus(int wood , int food , int stone , int gold)
+{
+    int actionName, actionNumber;
+
+    for(int position = 0; position<ACT_WINDOW_NUM_FREE; position++)
+    {
+        actionName = getActNames(position);
+        actionNumber = ActNameToActNum(actionName);
+
+        if(actionNumber>-1 && !playerScience->get_isBuildActionAble(Num, actionNumber, get_civilization(), wood, food, stone, gold))
+            actStatus[position] = ACT_STATUS_DISABLED;
+        else actStatus[position] = ACT_STATUS_ENABLED;
+    }
+}
+
+double Building::get_retio_Build()
+{
+    if(is_cheatAction) return 100.0;
+    else return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;
+}
+
+double Building::get_retio_Action()
+{
+    if(is_cheatAction) return 100.0;
+    else return 100.0/playerScience->get_actTime(Num, actNum)/FRAMES_PER_SECOND;
+}
+
+
+/*******状态与属性设置、获取*******/
+bool Building::isMatchResourceType(int resourceType)
+{
+    if(Num == BUILDING_CENTER)
+        return true;
+
+    if(Num == BUILDING_STOCK && ( resourceType == HUMAN_WOOD || resourceType == HUMAN_GOLD || resourceType == HUMAN_STONE || resourceType == HUMAN_STOCKFOOD ))
+        return true;
+
+    if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
+        return true;
+
+    return false;
 }
 
 //依据fundation设置数据
@@ -328,26 +371,9 @@ void Building::setFundation()
         break;
     }
 }
-void Building::update_Action(){
-    actPercent += actSpeed;
-    if(actPercent > 100) actPercent = 100;
-}
 
-void Building::setActStatus(int wood , int food , int stone , int gold)
-{
-    int actionName, actionNumber;
 
-    for(int position = 0; position<ACT_WINDOW_NUM_FREE; position++)
-    {
-        actionName = getActNames(position);
-        actionNumber = ActNameToActNum(actionName);
-
-        if(actionNumber>-1 && !playerScience->get_isBuildActionAble(Num, actionNumber, get_civilization(), wood, food, stone, gold))
-            actStatus[position] = ACT_STATUS_DISABLED;
-        else actStatus[position] = ACT_STATUS_ENABLED;
-    }
-}
-
+/***************状态与图像显示****************/
 void Building::setFireNowRes()
 {
     std::list<ImageResource>* tempNowlist = NULL;
@@ -367,16 +393,4 @@ void Building::setFireNowRes()
     }
 
     return;
-}
-
-double Building::get_retio_Build()
-{
-    if(is_cheatAction) return 100.0;
-    else return 100.0/playerScience->get_buildTime(Num)/FRAMES_PER_SECOND;
-}
-
-double Building::get_retio_Action()
-{
-    if(is_cheatAction) return 100.0;
-    else return 100.0/playerScience->get_actTime(Num, actNum)/FRAMES_PER_SECOND;
 }

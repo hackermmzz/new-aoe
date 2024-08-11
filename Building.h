@@ -13,31 +13,42 @@ public:
 
   /**********************虚函数**************************/
     int getSort(){return SORT_BUILDING;}
-    bool isPlayerControl(){ return true; }
 
-    int getMaxBlood(){ return MaxBlood; }
-    int getPlayerRepresent(){ return playerRepresent; }
-
-    QString getChineseName(){ return QString::fromStdString(getDisplayName(Num)); }
-
-    bool isMonitorObject(Coordinate* judOb);
-
+    /***************状态与图像显示****************/
     void nextframe();
-    void init_Blood();
     void setPreAttack(){ defencing = true; missionThrowTimer = 0; }
     bool isAttacking(){ return defencing; }
-    double getDis_attack();
-    int getVision();
-
-    string getSound_Click(){return sound_click[Num];}
-
-    void setAttribute();
     void setNowRes();
+
+
+    /*******player相关*******/
+    bool isPlayerControl(){ return true; }
+    int getPlayerRepresent(){ return playerRepresent; }
+
+
+    /*******状态与属性设置、获取*******/
+    int getMaxBlood(){ return MaxBlood; }
+    QString getChineseName(){ return QString::fromStdString(getDisplayName(Num)); }
+    bool isMonitorObject(Coordinate* judOb);
+    void init_Blood();
+    int getVision();
+    void setAttribute();
+
+
+    /*******战斗相关*******/
+    double getDis_attack();
+    bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
+
+
+    /*******行动相关*******/
     void setAction( int actNum );
     void initAction();
     void ActNumToActName();
 
-    bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
+
+    /*******音乐与音效*******/
+    string getSound_Click(){return sound_click[Num];}
+
     /***************指针强制转化****************/
     //若要将Building类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
@@ -68,14 +79,13 @@ public:
   /********************静态函数**************************/
 
 
-  /********************action相关**************************/
+    /*****************act相关***************/
     int getActNames(int num){return actNames[this->Num][num];}
 
     int getActStatus(int num){return actStatus[num];}
     void setActStatus(int wood = 0 , int food = 0 , int stone = 0 , int gold = 0);
     void setActStatus(int num, int status){this->actStatus[num] = status;}
 
-    /*************控制建筑行为****************/
     double get_retio_Build();
     double get_retio_Action();
 
@@ -87,7 +97,7 @@ public:
     void update_Build();
 
     void BuildingActionOver();
-    /*************控制建筑行为****************/
+
 
     /*************建筑行为对player资源的改变****************/
     //初始化暂存（建筑行动预计消耗的资源）资源
@@ -98,32 +108,36 @@ public:
 
     //取消建筑行动，返还暂存资源
     void get_Resouce_TS( int& wood, int& food , int& stone , int& gold ){ wood = wood_TS , food = food_TS, stone = stone_TS, gold = gold_TS; }
-    /*************建筑行为对player资源的改变****************/
 
- /********************action相关**************************/
 
+    /*****************player相关***************/
     //以下两设置，用于转化时使用
     //设置科技，用于计算科技提升
     void setPlayerScience(Development* science){ this->playerScience = science; }
     //设置隶属player
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 
+
+    /*******状态与属性设置、获取*******/
     void setFundation();
 
     bool isFinish(){return this->Percent>=100;}
+    double getPercent() {return this->Percent;}
     bool isConstructed(){ return constructed; } //判断已建造完成
     void recordConstruct(){ constructed = true; }
 
-    double getPercent() {return this->Percent;}
-
     int get_civilization();
 
+    bool isMatchResourceType(int resourceType);
+
+
+    /*******战斗相关*******/
     void init_BuildAttackAct(){ defencing = false; missionThrowTimer = 0; }
 
     bool isAttackBegin(){ return missionThrowTimer == 0;}
 
-    bool isMatchResourceType(int resourceType);
 
+    /***************状态与图像显示****************/
     double getFireImageX(){ return fireImageX; }
     double getFireImageY(){ return fireImageY; }
 
@@ -149,8 +163,8 @@ protected:
     static int BuildingMaxBlood[10];
     static int BuildingFundation[10];
     static int BuildingVision[10];
-
   /********************静态资源**************************/
+
 
     bool defencing = false;
     int missionThrowTimer = 0;
@@ -174,8 +188,6 @@ protected:
 
     int Finish=0;//0为未完成 1为完成
 
-//    int BuildingMaxBlood[7]={600,600,600,600,600,600,600};
-
     int actStatus[ACT_WINDOW_NUM_FREE];
 
     //存储建筑行动的预扣资源：
@@ -190,9 +202,9 @@ protected:
     double fireImageX;
     double fireImageY;
 
+
+    /***************状态与图像显示****************/
     void setFireNowRes();
-
-
 };
 
 #endif // BUILDING_H

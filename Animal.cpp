@@ -1,6 +1,6 @@
 ﻿#include "Animal.h"
 
- //以下为图片资源
+ //图片资源
 std::string Animal::Animalname[5]={"Tree","Gazelle","Elephant","Lion","Forest"};
 std::string Animal::Animalcarcassname[5]={"Fallen_Tree","Gazelle","Elephant","Lion","Forest_Stool"};
 std::string Animal::AnimalDisplayName[5]={"树","瞪羚","大象","狮子","树林"};
@@ -11,20 +11,30 @@ std::list<ImageResource>* Animal::Die[5][8];
 std::list<ImageResource>* Animal::Run[5][8];
 std::list<ImageResource>* Animal::Disappear[5][8];
 
+
+//音效
 std::string Animal::sound_click[5] = {\
     "", "", "Elephant_Stand", "Lion_Stand", ""\
 };
 
-//树， 瞪羚， 狮子， 大象， 森林
-int Animal::AnimalAtk[5] = { 0, 0, 2, 10, 0 };
-int Animal::AnimalFriendly[5] = { FRIENDLY_NULL, FRIENDLY_FRI, FRIENDLY_ENEMY, FRIENDLY_FENCY, FRIENDLY_NULL };
-int Animal::AnimalCnt[5] = { CNT_TREE, CNT_GAZELLE, CNT_LION, CNT_ELEPHANT, CNT_FOREST };
+
+//对象属性
+//树， 瞪羚， 大象， 狮子， 森林
+int Animal::AnimalMaxBlood[5] = { BLOOD_TREE, BLOOD_GAZELLE, BLOOD_ELEPHANT, BLOOD_LION, BLOOD_FARMER };
 int Animal::AnimalResouceSort[5] = { HUMAN_WOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_WOOD };
-int Animal::AnimalVision[5] = { 0, VISION_GAZELLE, VISION_LION, VISION_ELEPHANT, 0};
-int Animal::AnimalCrashLen[5] = { CRASHBOX_SINGLEBLOCK, CRASHBOX_SINGLEOB, CRASHBOX_SMALLOB, CRASHBOX_BIGOB, CRASHBOX_SMALLBLOCK };
+int Animal::AnimalCnt[5] = { CNT_TREE, CNT_GAZELLE, CNT_ELEPHANT, CNT_LION, CNT_FOREST };
+int Animal::AnimalNowresStep[5] = { 0, 0, NOWRES_TIMER_ELEPHANT, NOWRES_TIMER_LION, 0 };
+
+int Animal::AnimalVision[5] = { 0, VISION_GAZELLE, VISION_ELEPHANT, VISION_LION, 0};
+double Animal::AnimalCrashLen[5] = { CRASHBOX_SINGLEBLOCK, CRASHBOX_SINGLEOB, CRASHBOX_BIGOB, CRASHBOX_SMALLOB, CRASHBOX_SMALLBLOCK };
+double Animal::AnimalSpeed[5] = { 0, ANIMAL_SPEED, SPEED_ELEPHANT, ANIMAL_SPEED, 0 };
+
+int Animal::AnimalFriendly[5] = { FRIENDLY_NULL, FRIENDLY_FRI, FRIENDLY_FENCY, FRIENDLY_ENEMY, FRIENDLY_NULL };
+bool Animal::AnimalAttackable[5] = { false, false, true, true, false };
+int Animal::AnimalAtk[5] = { 0, 0, 10, 2, 0 };
 
 
-
+/************构造与析构*************/
 Animal::Animal(int Num, double DR, double UR)
 {
     this->Num=Num;
@@ -35,85 +45,9 @@ Animal::Animal(int Num, double DR, double UR)
     setPreviousDRUR(DR, UR);
 
     updateBlockByDetail();
-
     this->visible = 0;
 
-    this->Angle = rand()%8;
-    
-    //以下根据Num种类特判
-    if( this->Num == ANIMAL_LION ) 
-    {
-        atk = 2;
-        this->Friendly = FRIENDLY_ENEMY;
-        this->MaxCnt = CNT_LION;
-        resourceSort = HUMAN_STOCKFOOD;
-        this->MaxBlood = BLOOD_LION;
-        speed = ANIMAL_SPEED;
-        attackType = ATTACKTYPE_ANIMAL;
-        isAttackable = true;
-        vision = VISION_LION;
-        crashLength = CRASHBOX_SMALLOB;
-
-        nowres_step = NOWRES_TIMER_LION;
-    }
-    else if( this->Num == ANIMAL_GAZELLE )
-    {
-        Friendly = FRIENDLY_FRI;
-        this->MaxCnt = CNT_GAZELLE;
-        resourceSort = HUMAN_STOCKFOOD;
-        this->MaxBlood = BLOOD_GAZELLE;
-        speed = ANIMAL_SPEED;
-        crashLength = CRASHBOX_SINGLEOB;
-
-        vision = VISION_GAZELLE;
-    }
-    else if( this->Num == ANIMAL_ELEPHANT )
-    {
-        atk = 10;
-        Friendly = FRIENDLY_FENCY;
-        this->MaxCnt = CNT_ELEPHANT;
-        resourceSort = HUMAN_STOCKFOOD;
-        this->MaxBlood = BLOOD_ELEPHANT;
-        speed = SPEED_ELEPHANT;
-        attackType = ATTACKTYPE_ANIMAL;
-        isAttackable = true;
-        vision = VISION_ELEPHANT;
-        crashLength = CRASHBOX_BIGOB;
-        dis_Attack = DISTANCE_ATTACK_CLOSE_BIGOB;
-
-        nowres_step = NOWRES_TIMER_ELEPHANT;
-        isRangeAttack = true;
-    }
-    else if( this->Num == ANIMAL_TREE )
-    {
-        this->Angle = 0;
-        this->MaxCnt = CNT_TREE;
-        resourceSort = HUMAN_WOOD;
-        this->MaxBlood = BLOOD_TREE;
-        speed = 0;
-        moveAble = false;
-        crashLength = CRASHBOX_SINGLEBLOCK;
-
-        treeState = rand()%Stand[this->Num][this->Angle]->size();
-    }
-    else if( this->Num == ANIMAL_FOREST )
-    {
-        this->Angle = 0;
-        BlockSizeLen = SIZELEN_SMALL;
-        this->MaxCnt = CNT_FOREST;
-        resourceSort = HUMAN_WOOD;
-        this->MaxBlood = BLOOD_FOREST;
-        speed = 0;
-        moveAble = false;
-        treeState = rand()%Stand[this->Num][this->Angle]->size();
-        crashLength = CRASHBOX_SMALLBLOCK;
-    }
-    else incorrectNum = true;
-
-    setSideLenth();
-    this->Cnt = this->MaxCnt;
-    this->gatherable = false;
-    this->Blood = 1;
+    setAttribute();
 
     this->state = ANIMAL_STATE_IDLE;
     setNowRes();
@@ -124,6 +58,8 @@ Animal::Animal(int Num, double DR, double UR)
     g_globalNum++;
 }
 
+
+/************状态与图像显示*************/
 void Animal::nextframe()
 {
     if(isDie())
@@ -168,30 +104,6 @@ void Animal::nextframe()
         this->imageX=this->nowres->pix.width()/2.0;
         this->imageY=this->nowres->pix.width()/4.0;
     }
-}
-
-void Animal::requestSound_Die()
-{
-    if(!isTree())
-        soundQueue.push("Animal_Die");
-}
-
-bool Animal::isMonitorObject(Coordinate* judOb)
-{
-    int judNum = judOb->getNum(), judSort = judOb->getSort();
-    if(Num == ANIMAL_LION)
-        return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_GAZELLE);
-    if(Num == ANIMAL_GAZELLE)
-        return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_LION);
-    return false;
-}
-
-void Animal::requestSound_Attack()
-{
-    if(Num == ANIMAL_LION)
-        soundQueue.push("Lion_Attack");
-    else if(Num == ANIMAL_ELEPHANT)
-        soundQueue.push("Elephant_Attack");
 }
 
 void Animal::setNowRes()
@@ -241,6 +153,70 @@ void Animal::setNowRes()
     }
 }
 
+
+/*******状态与属性设置、获取*******/
+void Animal::setAttribute()
+{
+    if(Num < 0 || Num >= 5)
+    {
+        incorrectNum = true;
+        return;
+    }
+
+    MaxBlood = AnimalMaxBlood[Num];
+    resourceSort = AnimalResouceSort[Num];
+    MaxCnt = AnimalCnt[Num];
+    nowres_step = AnimalNowresStep[Num];
+
+    vision = AnimalVision[Num];
+    crashLength = AnimalCrashLen[Num];
+    speed = AnimalSpeed[Num];
+    Friendly = AnimalFriendly[Num];
+    isAttackable = AnimalAttackable[Num];
+    atk = AnimalAtk[Num];
+
+    this->Cnt = this->MaxCnt;
+    this->gatherable = false;
+    this->Blood = 1;
+
+    /***********特殊设定*************/
+    if(Num == ANIMAL_FOREST)
+        BlockSizeLen = SIZELEN_SMALL;
+
+    if(Num == ANIMAL_FOREST || Num == ANIMAL_TREE)
+    {
+        this->Angle = 0;
+
+        moveAble = false;
+        treeState = rand()%Stand[this->Num][this->Angle]->size();
+    }
+    else
+        this->Angle = rand()%8;
+
+    if(Num == ANIMAL_ELEPHANT)
+    {
+        dis_Attack = DISTANCE_ATTACK_CLOSE_BIGOB;
+        isRangeAttack = true;
+    }
+
+    if(Num == ANIMAL_ELEPHANT || Num == ANIMAL_LION)
+        attackType = ATTACKTYPE_ANIMAL;
+
+    setSideLenth();
+}
+
+bool Animal::isMonitorObject(Coordinate* judOb)
+{
+    int judNum = judOb->getNum(), judSort = judOb->getSort();
+    if(Num == ANIMAL_LION)
+        return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_GAZELLE);
+    if(Num == ANIMAL_GAZELLE)
+        return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_LION);
+    return false;
+}
+
+
+/*******战斗相关*******/
 int Animal::get_add_specialAttack()
 {
     int addition = 0;
@@ -256,6 +232,24 @@ int Animal::get_add_specialAttack()
     return addition;
 }
 
+
+/*******音乐与音效*******/
+void Animal::requestSound_Die()
+{
+    if(!isTree())
+        soundQueue.push("Animal_Die");
+}
+
+void Animal::requestSound_Attack()
+{
+    if(Num == ANIMAL_LION)
+        soundQueue.push("Lion_Attack");
+    else if(Num == ANIMAL_ELEPHANT)
+        soundQueue.push("Elephant_Attack");
+}
+
+
+/*******静态函数*******/
 void Animal::deallocateWalk(int i, int j)
 {
     delete Walk[i][j];

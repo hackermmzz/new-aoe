@@ -27,15 +27,10 @@ private:
 
     //以下为图片资源
     static std::list<ImageResource> *Walk[5][8];
-
     static std::list<ImageResource> *Stand[5][8];
-
     static std::list<ImageResource> *Attack[5][8];
-
     static std::list<ImageResource> *Die[5][8];
-
     static std::list<ImageResource> *Run[5][8];
-
     static std::list<ImageResource> *Disappear[5][8];
 
     static std::string Animalname[5];
@@ -44,13 +39,19 @@ private:
 
     static std::string sound_click[5];
 
+    static int AnimalMaxBlood[5];
+    static int AnimalResouceSort[5];
+    static int AnimalCnt[5];
+    static int AnimalVision[5];
+    static double AnimalSpeed[5];
+    static double AnimalCrashLen[5];
+    static int AnimalNowresStep[5];
+
     static int AnimalAtk[5];
     static int AnimalFriendly[5];
-    static int AnimalCnt[5];
-    static int AnimalResouceSort[5];
-    static int AnimalVision[5];
-    static int AnimalCrashLen[5];
+    static bool AnimalAttackable[5];
 
+    /*******音乐与音效*******/
     void requestSound_Die();
     void requestSound_Attack();
 
@@ -58,22 +59,32 @@ public:
     Animal(){}
     Animal(int Num,double DR,double UR);
   /**********************虚函数**************************/
+    int getSort(){return SORT_ANIMAL;}
+
+    /***************状态与图像显示****************/
+    void nextframe();
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK; }
-    bool isMonitorObject(Coordinate* judOb);
+    bool is_attackHit(){ return get_isActionEnd() && attack_OneCircle; }
+    void setNowRes();
 
+
+    /*******状态与属性设置、获取*******/
+    void setAttribute();
+    bool isMonitorObject(Coordinate* judOb);
     QString getChineseName(){ return QString::fromStdString(getAnimalDisplayName(Num)); }
 
+    double getSpeed(){ return ((int)changeToRun*1.5)*speed; }
+
+
+    /*******战斗相关*******/
+    double getDis_attack(){ return dis_Attack + (attackObject->getSideLength())/2.0; }
+    int get_add_specialAttack();
+
+
+    /*******音乐与音效*******/
     string getSound_Click(){return sound_click[Num];}
 
-    void nextframe();
-    int getSort(){return SORT_ANIMAL;}
-    void setNowRes();
-    double getDis_attack(){ return dis_Attack + (attackObject->getSideLength())/2.0; }
-
-    bool is_attackHit(){ return get_isActionEnd() && attack_OneCircle; }
-    double getSpeed(){ return ((int)changeToRun*1.5)*speed; }
-    int get_add_specialAttack();
 
     /***************指针强制转化****************/
     //若要将Animal类指针转化为父类指针,务必用以下函数!
@@ -83,6 +94,7 @@ public:
     void printer_ToAnimal(void** ptr){ *ptr = this; }
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
+
 
     static std::string getAnimalName(int index){return Animalname[index];}
     static std::string getAnimalcarcassname(int index){return Animalcarcassname[index];}
@@ -115,6 +127,8 @@ public:
     static void deallocateRun(int i, int j);
     static void deallocateDisappear(int num, int angle);
 
+
+    /*******状态与属性设置、获取*******/
     bool isTree(){ return !moveAble;}
     int get_Friendly(){ return Friendly; }
 };
