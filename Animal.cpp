@@ -15,19 +15,27 @@ std::string Animal::sound_click[5] = {\
     "", "", "Elephant_Stand", "Lion_Stand", ""\
 };
 
+//树， 瞪羚， 狮子， 大象， 森林
+int Animal::AnimalAtk[5] = { 0, 0, 2, 10, 0 };
+int Animal::AnimalFriendly[5] = { FRIENDLY_NULL, FRIENDLY_FRI, FRIENDLY_ENEMY, FRIENDLY_FENCY, FRIENDLY_NULL };
+int Animal::AnimalCnt[5] = { CNT_TREE, CNT_GAZELLE, CNT_LION, CNT_ELEPHANT, CNT_FOREST };
+int Animal::AnimalResouceSort[5] = { HUMAN_WOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_WOOD };
+int Animal::AnimalVision[5] = { 0, VISION_GAZELLE, VISION_LION, VISION_ELEPHANT, 0};
+int Animal::AnimalCrashLen[5] = { CRASHBOX_SINGLEBLOCK, CRASHBOX_SINGLEOB, CRASHBOX_SMALLOB, CRASHBOX_BIGOB, CRASHBOX_SMALLBLOCK };
+
+
+
 Animal::Animal(int Num, double DR, double UR)
 {
     this->Num=Num;
-    this->DR=DR;
-    this->UR=UR;
-    this->BlockDR = transBlock(this->DR);
-    this->BlockUR = transBlock(this->UR);
-    this->DR0=DR;
-    this->UR0=UR;
-    this->PredictedDR=DR;
-    this->PredictedUR=UR;
-    this->PreviousDR=DR;
-    this->PreviousUR=UR;
+
+    setDRUR(DR, UR);
+    setDR0UR0(DR, UR);
+    setPredictedDRUR(DR, UR);
+    setPreviousDRUR(DR, UR);
+
+    updateBlockByDetail();
+
     this->visible = 0;
 
     this->Angle = rand()%8;
@@ -109,9 +117,7 @@ Animal::Animal(int Num, double DR, double UR)
 
     this->state = ANIMAL_STATE_IDLE;
     setNowRes();
-
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 
     this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
@@ -170,6 +176,15 @@ void Animal::requestSound_Die()
         soundQueue.push("Animal_Die");
 }
 
+bool Animal::isMonitorObject(Coordinate* judOb)
+{
+    int judNum = judOb->getNum(), judSort = judOb->getSort();
+    if(Num == ANIMAL_LION)
+        return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_GAZELLE);
+    if(Num == ANIMAL_GAZELLE)
+        return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_LION);
+    return false;
+}
 
 void Animal::requestSound_Attack()
 {
@@ -239,4 +254,40 @@ int Animal::get_add_specialAttack()
     }
 
     return addition;
+}
+
+void Animal::deallocateWalk(int i, int j)
+{
+    delete Walk[i][j];
+    Walk[i][j] = nullptr;
+}
+
+void Animal::deallocateStand(int i, int j)
+{
+    delete Stand[i][j];
+    Stand[i][j] = nullptr;
+}
+
+void Animal::deallocateAttack(int i, int j)
+{
+    delete Attack[i][j];
+    Attack[i][j] = nullptr;
+}
+
+void Animal::deallocateDie(int i, int j)
+{
+    delete Die[i][j];
+    Die[i][j] = nullptr;
+}
+
+void Animal::deallocateRun(int i, int j)
+{
+    delete Run[i][j];
+    Run[i][j] = nullptr;
+}
+
+void Animal::deallocateDisappear(int num, int angle)
+{
+    delete Disappear[num][angle];
+    Disappear[num][angle] = nullptr;
 }

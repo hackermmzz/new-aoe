@@ -6,7 +6,7 @@
 #include <GlobalVariate.h>
 #include <Bloodhaver.h>
 
-class Animal:public MoveObject,public Resource,public BloodHaver
+class Animal:public MoveObject, public Resource, public BloodHaver
 {
 private:
     int Friendly=FRIENDLY_NULL;
@@ -44,22 +44,23 @@ private:
 
     static std::string sound_click[5];
 
+    static int AnimalAtk[5];
+    static int AnimalFriendly[5];
+    static int AnimalCnt[5];
+    static int AnimalResouceSort[5];
+    static int AnimalVision[5];
+    static int AnimalCrashLen[5];
+
     void requestSound_Die();
     void requestSound_Attack();
 
-    
 public:
     Animal(){}
     Animal(int Num,double DR,double UR);
   /**********************虚函数**************************/
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
-    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
-    bool isMonitorObject(Coordinate* judOb){
-        int judNum = judOb->getNum(),judSort = judOb->getSort();
-        if(Num == ANIMAL_LION) return judSort == SORT_ARMY||judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_GAZELLE);
-        if(Num == ANIMAL_GAZELLE) return judSort == SORT_ARMY||judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_LION);
-        return false;
-    }
+    bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK; }
+    bool isMonitorObject(Coordinate* judOb);
 
     QString getChineseName(){ return QString::fromStdString(getAnimalDisplayName(Num)); }
 
@@ -83,95 +84,36 @@ public:
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
 
-    static std::string getAnimalName(int index)
-    {
-        return Animalname[index];
-    }
-    static std::string getAnimalcarcassname(int index)
-    {
-        return Animalcarcassname[index];
-    }
-    static std::string getAnimalDisplayName(int index)
-    {
-        return AnimalDisplayName[index];
-    }
-    static std::list<ImageResource>* getRun(int i, int j) {
-        return Run[i][j];
-    }
-    static std::list<ImageResource>* getWalk(int i, int j) {
-        return Walk[i][j];
-    }
-    static std::list<ImageResource>* getStand(int i, int j) {
-        return Stand[i][j];
-    }
-    static std::list<ImageResource>* getAttack(int i, int j) {
-        return Attack[i][j];
-    }
-    static std::list<ImageResource>* getDie(int i, int j) {
-        return Die[i][j];
-    }
+    static std::string getAnimalName(int index){return Animalname[index];}
+    static std::string getAnimalcarcassname(int index){return Animalcarcassname[index];}
+    static std::string getAnimalDisplayName(int index){ return AnimalDisplayName[index]; }
+    static std::list<ImageResource>* getRun(int i, int j) {return Run[i][j];}
+    static std::list<ImageResource>* getWalk(int i, int j) {return Walk[i][j];}
+    static std::list<ImageResource>* getStand(int i, int j) {return Stand[i][j];}
+    static std::list<ImageResource>* getAttack(int i, int j){return Attack[i][j];}
+    static std::list<ImageResource>* getDie(int i, int j){return Die[i][j];}
     static std::list<ImageResource>* getDisappear(int num,int angle) { return Disappear[num][angle]; }
 
-    static void setRun(int i, int j, std::list<ImageResource>* newValue) {
-        Run[i][j] = newValue;
-    }
-    static void setWalk(int i, int j, std::list<ImageResource>* newValue) {
-        Walk[i][j] = newValue;
-    }
-    static void setStand(int i, int j, std::list<ImageResource>* newValue) {
-        Stand[i][j] = newValue;
-    }
-    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {
-        Attack[i][j] = newValue;
-    }
-    static void setDie(int i, int j, std::list<ImageResource>* newValue) {
-        Die[i][j] = newValue;
-    }
+    static void setRun(int i, int j, std::list<ImageResource>* newValue){Run[i][j] = newValue;}
+    static void setWalk(int i, int j, std::list<ImageResource>* newValue){Walk[i][j] = newValue;}
+    static void setStand(int i, int j, std::list<ImageResource>* newValue){Stand[i][j] = newValue;}
+    static void setAttack(int i, int j, std::list<ImageResource>* newValue){Attack[i][j] = newValue;}
+    static void setDie(int i, int j, std::list<ImageResource>* newValue){Die[i][j] = newValue;}
     static void setDisappear(int num, int angle, std::list<ImageResource>* newValue) {Disappear[num][angle] = newValue;}
 
-    static void allocateWalk(int i, int j) {
-        Walk[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateStand(int i, int j) {
-        Stand[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateAttack(int i, int j) {
-        Attack[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateDie(int i, int j) {
-        Die[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateRun(int i, int j) {
-        Run[i][j] = new std::list<ImageResource>;
-    }
+    static void allocateWalk(int i, int j){Walk[i][j] = new std::list<ImageResource>;}
+    static void allocateStand(int i, int j){Stand[i][j] = new std::list<ImageResource>;}
+    static void allocateAttack(int i, int j){Attack[i][j] = new std::list<ImageResource>;}
+    static void allocateDie(int i, int j){Die[i][j] = new std::list<ImageResource>;}
+    static void allocateRun(int i, int j){Run[i][j] = new std::list<ImageResource>;}
     static void allocateDisappear(int num, int angle) { Disappear[num][angle] = new std::list<ImageResource>;}
 
-    static void deallocateWalk(int i, int j) {
-        delete Walk[i][j];
-        Walk[i][j] = nullptr;
-    }
-    static void deallocateStand(int i, int j) {
-        delete Stand[i][j];
-        Stand[i][j] = nullptr;
-    }
-    static void deallocateAttack(int i, int j) {
-        delete Attack[i][j];
-        Attack[i][j] = nullptr;
-    }
-    static void deallocateDie(int i, int j) {
-        delete Die[i][j];
-        Die[i][j] = nullptr;
-    }
-    static void deallocateRun(int i, int j) {
-        delete Run[i][j];
-        Run[i][j] = nullptr;
-    }
-    static void deallocateDisappear(int num, int angle)
-    {
-        delete Disappear[num][angle];
-        Disappear[num][angle] = nullptr;
-    }
-
+    static void deallocateWalk(int i, int j);
+    static void deallocateStand(int i, int j);
+    static void deallocateAttack(int i, int j);
+    static void deallocateDie(int i, int j);
+    static void deallocateRun(int i, int j);
+    static void deallocateDisappear(int num, int angle);
 
     bool isTree(){ return !moveAble;}
     int get_Friendly(){ return Friendly; }

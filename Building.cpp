@@ -20,20 +20,28 @@ std::string Building::sound_click[10] = {\
 
 int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
 
+int Building::BuildingMaxBlood[10] = { BLOOD_BUILD_HOUSE,  BLOOD_BUILD_GRANARY, BLOOD_BUILD_CENTER, BLOOD_BUILD_STOCK, BLOOD_BUILD_FARM,\
+                                     BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE, BLOOD_BUILD_RANGE};
+
+int Building::BuildingFundation[10] = { FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,\
+                                      FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,};
+
+int Building::BuildingVision[10] = { VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,\
+                                   VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE};
+
 /********************静态资源**************************/
 bool is_cheatAction = false;
 extern Score usrScore;
 
 
 /********************构造与析构**************************/
-Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playerScience, int playerRepresent,int Percent)
+Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* playerScience, int playerRepresent, int Percent)
 {
     this->playerScience = playerScience;
     this->playerRepresent = playerRepresent;
 
     this->Num=Num;
-    this->BlockDR=BlockDR;
-    this->BlockUR=BlockUR;
+    setBlockDRUR(BlockDR, BlockUR);
     this->civ=civ;
     this->visible=1;
     this->imageH=(BlockDR-BlockUR)*BLOCKSIDELENGTH;
@@ -46,13 +54,11 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playe
     setDetailPointAttrb_FormBlock();
     setNowRes();
 
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
     this->globalNum=10000*SORT_BUILDING+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
 }
-/********************构造与析构**************************/
 
 
 /********************虚函数**************************/
@@ -137,66 +143,31 @@ void Building::setNowRes()
 
 void Building::setAttribute()
 {
+    MaxBlood = BuildingMaxBlood[Num];
+    Foundation = BuildingFundation[Num];
+    vision = BuildingVision[Num];
+
     //根据房屋种类设置相关信息
     switch (Num) {
     case BUILDING_CENTER:
-        MaxBlood = BLOOD_BUILD_CENTER;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_CENTER;
-        break;
     case BUILDING_HOME:
-        MaxBlood = BLOOD_BUILD_HOUSE;
-        Foundation=FOUNDATION_SMALL;
-        vision = VISION_HOME;
-        break;
     case BUILDING_STOCK:
-        MaxBlood = BLOOD_BUILD_STOCK;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_STOCK;
-        break;
     case BUILDING_GRANARY:
-        MaxBlood = BLOOD_BUILD_GRANARY;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_GRANARY;
-        break;
     case BUILDING_ARMYCAMP:
-        MaxBlood = BLOOD_BUILD_ARMYCAMP;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_ARMYCAMP;
-        break;
     case BUILDING_MARKET:
-        MaxBlood = BLOOD_BUILD_MARKET;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_MARKET;
-        break;
     case BUILDING_RANGE:
-        MaxBlood = BLOOD_BUILD_RANGE;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_RANGE;
-        break;
     case BUILDING_STABLE:
-        MaxBlood = BLOOD_BUILD_STABLE;
-        Foundation = FOUNDATION_MIDDLE;
-        vision = VISION_STABLE;
+    case BUILDING_WALL:
         break;
     case BUILDING_ARROWTOWER:
-        MaxBlood = BLOOD_BUILD_ARROWTOWER;
-        Foundation=FOUNDATION_SMALL;
         atk = ATK_BUILD_ARROWTOWER;
         defence_shoot = DEFSHOOT_BUILD_ARROWTOWER;
+        dis_Attack = DIS_ARROWTOWER;
         attackType = ATTACKTYPE_SHOOT;
         type_Missile = Missile_Arrow;
         missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
-        dis_Attack = DIS_ARROWTOWER;
-        vision = VISION_ARROWTOWER;
 
         isAttackable = true;
-        break;
-
-    case BUILDING_WALL:
-        MaxBlood = BLOOD_BUILD_WALL;
-        Foundation = FOUNDATION_SMALL;
-        defence_shoot = DEFSHOOT_BUILD_WALL;
         break;
     default:
         incorrectNum = true;
@@ -208,14 +179,14 @@ void Building::setAttribute()
 double Building::getDis_attack()
 {
     if(getNum() == BUILDING_ARROWTOWER)
-        return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType() ) )*BLOCKSIDELENGTH;
+        return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType()) )*BLOCKSIDELENGTH;
     else return 0;
 }
 
 int Building::getVision()
 {
     if(getNum() == BUILDING_ARROWTOWER)
-        return vision + playerScience->get_addition_DisAttack(getSort(),Num, 0 ,get_AttackType());
+        return vision + playerScience->get_addition_DisAttack(getSort(), Num, 0, get_AttackType());
     else
         return vision;
 }
@@ -231,7 +202,7 @@ int Building::get_civilization()
 bool Building::isMonitorObject(Coordinate* judOb)
 {
     if(Num == BUILDING_ARROWTOWER)
-        return judOb->isPlayerControl() && judOb->getPlayerRepresent()!= getPlayerRepresent();
+        return judOb->isPlayerControl() && judOb->getPlayerRepresent() != getPlayerRepresent();
 
     return false;
 }
@@ -269,8 +240,7 @@ void Building::nextframe()
             missionThrowTimer = missionThrowTimer == missionThrowStep ? 0 : missionThrowTimer+1;
     }
 
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 }
 
 void Building::init_Blood()
@@ -367,12 +337,12 @@ void Building::setActStatus(int wood , int food , int stone , int gold)
 {
     int actionName, actionNumber;
 
-    for(int position = 0 ; position<ACT_WINDOW_NUM_FREE;position++)
+    for(int position = 0; position<ACT_WINDOW_NUM_FREE; position++)
     {
         actionName = getActNames(position);
         actionNumber = ActNameToActNum(actionName);
 
-        if(actionNumber>-1 && !playerScience->get_isBuildActionAble(Num , actionNumber , get_civilization(),wood,food,stone,gold))
+        if(actionNumber>-1 && !playerScience->get_isBuildActionAble(Num, actionNumber, get_civilization(), wood, food, stone, gold))
             actStatus[position] = ACT_STATUS_DISABLED;
         else actStatus[position] = ACT_STATUS_ENABLED;
     }
@@ -408,5 +378,5 @@ double Building::get_retio_Build()
 double Building::get_retio_Action()
 {
     if(is_cheatAction) return 100.0;
-    else    return 100.0/playerScience->get_actTime(Num , actNum)/FRAMES_PER_SECOND;
+    else return 100.0/playerScience->get_actTime(Num, actNum)/FRAMES_PER_SECOND;
 }

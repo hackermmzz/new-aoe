@@ -9,7 +9,7 @@ class Building:public Coordinate,public BloodHaver
 {
 public:
     Building(){}
-    Building(int Num, int BlockDR, int BlockUR, int civ = CIVILIZATION_STONEAGE,Development* playerScience = NULL, int playerRepresent = MAXPLAYER , int Percent=100);
+    Building(int Num, int BlockDR, int BlockUR, int civ = CIVILIZATION_STONEAGE, Development* playerScience = NULL, int playerRepresent = MAXPLAYER, int Percent=100);
 
   /**********************虚函数**************************/
     int getSort(){return SORT_BUILDING;}
@@ -66,7 +66,6 @@ public:
 
     static void setActNames(int buildNum , int num, int name){ actNames[buildNum][num] = name; }
   /********************静态函数**************************/
-
 
 
   /********************action相关**************************/
@@ -146,6 +145,11 @@ protected:
     static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
 
     static string sound_click[10];
+
+    static int BuildingMaxBlood[10];
+    static int BuildingFundation[10];
+    static int BuildingVision[10];
+
   /********************静态资源**************************/
 
     bool defencing = false;
@@ -185,7 +189,6 @@ protected:
 
     double fireImageX;
     double fireImageY;
-
 
     void setFireNowRes();
 
