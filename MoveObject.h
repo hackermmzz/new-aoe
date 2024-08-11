@@ -76,6 +76,11 @@ protected:
 
     void update_moveDire( double dDR , double dUR );
 
+    void setDR0UR0( double DR0, double UR0 ){ this->DR0 = DR0; this->UR0 = UR0; }
+
+    void setPredictedDRUR( double PredictedDR, double PredictedUR){ this->PredictedDR = PredictedDR; this->PredictedUR = PredictedUR; }
+
+    void setPreviousDRUR( double PreviousDR, double PreviousUR ){ this->PreviousDR = PreviousDR; this->PreviousUR = PreviousUR; }
 public:
     bool stateCrash=false;//用于传递状态给tagGame 判断碰撞
 

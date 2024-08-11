@@ -3,7 +3,7 @@
 
 /**********地图可见性设置************/
 #define MAP_EXPLORE true
-#define MAP_VISIABLE false
+#define MAP_VISIABLE true
 
 
 /**********玩家初始资源设置************/
@@ -177,7 +177,7 @@
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_Manhattan_PathMove 0.01
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
-#define DISTANCE_ATTACK_CLOSE_BIGOB (12*gen5)
+#define DISTANCE_ATTACK_CLOSE_BIGOB (15*gen5)
 #define DISTANCE_HIT_TARGET 4
 
 //箭塔攻击距离
