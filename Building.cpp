@@ -3,6 +3,7 @@
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
 std::list<ImageResource>* Building::built[3][10];
+std::list<ImageResource>* Building::buildFire[3];
 
 std::string Building::Buildingname[4]={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
 std::string Building::Builtname[3][10]={{},
@@ -10,6 +11,8 @@ std::string Building::Builtname[3][10]={{},
                                        {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range"}
                                       };
 std::string Building::BuildDisplayName[10]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场"};
+
+std::string Building::BuildFireName[3] = { "S_Fire", "M_Fire", "B_Fire"};
 
 std::string Building::sound_click[10] = {\
     "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market","Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range"\
@@ -23,11 +26,6 @@ extern Score usrScore;
 
 
 /********************构造与析构**************************/
-Building::Building()
-{
-
-}
-
 Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playerScience, int playerRepresent,int Percent)
 {
     this->playerScience = playerScience;
@@ -58,7 +56,6 @@ Building::Building(int Num, int BlockDR, int BlockUR,int civ ,Development* playe
 
 
 /********************虚函数**************************/
-
 /**********设置*************/
 void Building::setAction( int actNum)
 {
@@ -66,7 +63,18 @@ void Building::setAction( int actNum)
 
     ActNumToActName();
     initActionPersent();
+    playerScience->BuildingActionExecuting(Num, actNum);
     actSpeed= get_retio_Action();
+}
+
+void Building::initAction()
+{
+    if(actSpeed != 0 && actNum != ACT_NULL)
+        playerScience->BuildingActionOverExecuting(Num, actNum);
+
+    actName = ACT_NULL;
+    actNum = ACT_NULL;
+    actSpeed = 0;
 }
 
 void Building::ActNumToActName()
@@ -114,7 +122,11 @@ void Building::setNowRes()
 {
     std::list<ImageResource>* tempNowlist = NULL;
     if(Percent<100) tempNowlist = Building::build[Foundation];
-    else tempNowlist = Building::built[get_civilization()][Num];
+    else
+    {
+        tempNowlist = Building::built[get_civilization()][Num];
+        setFireNowRes();
+    }
 
     if(tempNowlist != nowlist)
     {
@@ -193,16 +205,33 @@ void Building::setAttribute()
     }
 }
 
-bool Building::isMatchResourceType(int resourceType)
+double Building::getDis_attack()
 {
-    if(Num == BUILDING_CENTER)
-        return true;
+    if(getNum() == BUILDING_ARROWTOWER)
+        return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType() ) )*BLOCKSIDELENGTH;
+    else return 0;
+}
 
-    if(Num == BUILDING_STOCK && ( resourceType == HUMAN_WOOD || resourceType == HUMAN_GOLD || resourceType == HUMAN_STONE || resourceType == HUMAN_STOCKFOOD ))
-        return true;
+int Building::getVision()
+{
+    if(getNum() == BUILDING_ARROWTOWER)
+        return vision + playerScience->get_addition_DisAttack(getSort(),Num, 0 ,get_AttackType());
+    else
+        return vision;
+}
 
-    if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
-        return true;
+int Building::get_civilization()
+{
+    if(playerScience == NULL)
+        return CIVILIZATION_STONEAGE;
+    else
+        return playerScience->get_civilization();
+}
+
+bool Building::isMonitorObject(Coordinate* judOb)
+{
+    if(Num == BUILDING_ARROWTOWER)
+        return judOb->isPlayerControl() && judOb->getPlayerRepresent()!= getPlayerRepresent();
 
     return false;
 }
@@ -214,7 +243,7 @@ void Building::nextframe()
     if(Percent<100)
     {
         nowres = nowlist->begin();
-        advance(nowres , (int)(Percent/25));
+        advance(nowres, (int)(Percent/25));
     }
     else
     {
@@ -225,7 +254,19 @@ void Building::nextframe()
             initAttack_perCircle();
         }
 
-        if(defencing) missionThrowTimer = missionThrowTimer == missionThrowStep? 0: missionThrowTimer+1;
+        if(fireNowList != NULL)
+        {
+            fireNowRes++;
+
+            if(fireNowRes == fireNowList->end())
+                fireNowRes = fireNowList->begin();
+
+            this->fireImageX = fireNowRes->pix.width()/2.0;
+            this->fireImageY = fireNowRes->pix.width()/4.0;
+        }
+
+        if(defencing)
+            missionThrowTimer = missionThrowTimer == missionThrowStep ? 0 : missionThrowTimer+1;
     }
 
     this->imageX=this->nowres->pix.width()/2.0;
@@ -240,6 +281,46 @@ void Building::init_Blood()
 
 /********************虚函数**************************/
 
+
+/********************静态函数**************************/
+void Building::deallocatebuild(int i)
+{
+    delete build[i];
+    build[i] = nullptr;
+}
+
+void Building::deallocatebuilt(int i,int j)
+{
+    delete built[i][j];
+    built[i][j] = nullptr;
+}
+
+void Building::deallocatebuildFire(int type)
+{
+    if(buildFire[type]!=nullptr)
+    {
+        delete buildFire[type];
+        buildFire[type] = nullptr;
+    }
+}
+
+/********************静态函数**************************/
+
+
+//********************************************
+bool Building::isMatchResourceType(int resourceType)
+{
+    if(Num == BUILDING_CENTER)
+        return true;
+
+    if(Num == BUILDING_STOCK && ( resourceType == HUMAN_WOOD || resourceType == HUMAN_GOLD || resourceType == HUMAN_STONE || resourceType == HUMAN_STOCKFOOD ))
+        return true;
+
+    if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
+        return true;
+
+    return false;
+}
 
 void Building::update_Build()
 {
@@ -295,6 +376,27 @@ void Building::setActStatus(int wood , int food , int stone , int gold)
             actStatus[position] = ACT_STATUS_DISABLED;
         else actStatus[position] = ACT_STATUS_ENABLED;
     }
+}
+
+void Building::setFireNowRes()
+{
+    std::list<ImageResource>* tempNowlist = NULL;
+
+    if(Blood <= BUILDING_BLOOD_FIRE_BIG)
+        tempNowlist = buildFire[BUILDING_FIRE_BIG];
+    else if(Blood <= BUILDING_BLOOD_FIRE_MIDDLE)
+        tempNowlist = buildFire[BUILDING_FIRE_MIDDLE];
+    else if(Blood <= BUILDING_BLOOD_FIRE_SMALL)
+        tempNowlist = buildFire[BUILDING_FIRE_SMALL];
+
+    if(fireNowList != tempNowlist)
+    {
+        fireNowList = tempNowlist;
+        if(fireNowList != NULL)
+            fireNowRes = fireNowList->begin();
+    }
+
+    return;
 }
 
 double Building::get_retio_Build()

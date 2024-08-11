@@ -275,6 +275,12 @@ void MainWidget::initBuilding()
         }
     }
 
+    for(int type = 0; type < 3; type++)
+    {
+        Building::allocatebuildFire(type);
+        loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
+    }
+
     //市镇中心
     Building::setActNames(BUILDING_CENTER , 0 , ACT_CREATEFARMER);
     Building::setActNames(BUILDING_CENTER , 1 , ACT_UPGRADE_AGE);
@@ -558,6 +564,11 @@ void MainWidget::deleteBuilding()
         {
             Building::deallocatebuilt(i,j);
         }
+    }
+
+    for(int type = 0; type<3; type++)
+    {
+        Building::deallocatebuildFire(type);
     }
 }
 

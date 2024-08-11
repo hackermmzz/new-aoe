@@ -101,6 +101,9 @@ public:
     double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
     double get_actTime( int buildingNum, int actNum ){ return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
+    void BuildingActionExecuting(int buildNum, int actNum){ developLab[buildNum].actCon[actNum].beginExecute(); }
+    void BuildingActionOverExecuting(int buildNum, int actNum){ developLab[buildNum].actCon[actNum].overExecute(); }
+
     //获取升级次数/当前等级
     int getActLevel( int buildType , int actType ){ return developLab[buildType].actCon[actType].getPhaseTimes(); }
     int getBuildTimes( int buildType ){ return developLab[buildType].buildCon->getActTimes(); }
@@ -131,12 +134,7 @@ private:
 
     /*****************游戏进程信息*******************/
     //时代升级，进入下一时代
-    void civiChange()
-    {
-        civilization++;
-        if(playerRepresent == NOWPLAYERREPRESENT)
-            soundQueue.push("Age_Level_Up");
-    }
+    void civiChange();
 };
 
 #endif // DEVELOPMENT_H

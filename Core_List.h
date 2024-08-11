@@ -26,7 +26,7 @@ public:
     int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止
-    void eraseRelation(Coordinate* object){ relate_AllObject[object].isExist = false; } //指令因意外原因停止
+    void eraseRelation(Coordinate* object){ object->initAction(); relate_AllObject[object].isExist = false; } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
     /************关系表获取************/

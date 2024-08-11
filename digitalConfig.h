@@ -1,7 +1,19 @@
 #ifndef DIGITALCONFIG_H
 #define DIGITALCONFIG_H
 
-/********** 碰撞箱 **********/
+/**********地图可见性设置************/
+#define MAP_EXPLORE true
+#define MAP_VISIABLE false
+
+
+/**********玩家初始资源设置************/
+#define INITIAL_WOOD 200
+#define INITIAL_MEAT 200
+#define INITIAL_STONE 200
+#define INITIAL_GOLD 200
+
+
+/********** 碰撞箱大小 **********/
 #define CRASHBOX_SINGLEBLOCK 16.36
 #define CRASHBOX_SMALLBLOCK 34.21
 #define CRASHBOX_SMALL 32.72
@@ -11,7 +23,8 @@
 #define CRASHBOX_SMALLOB 8.925
 #define CRASHBOX_BIGOB 17.7
 
-/********** 建筑属性相关 **********/
+
+/********** 建筑属性相关设置 **********/
 /********** 建筑动作耗时 **********/  //单位为秒
 /********** 行动消耗资源 **********/
 /**市政中心**/
@@ -149,7 +162,7 @@
 #define VISION_ARROWTOWER 10
 #define DIS_BUILD_ARROWTOWER 5
 #define ATK_BUILD_ARROWTOWER 3
-#define DEFSHOOT_BUILD_ARROWTOWER 3
+#define DEFSHOOT_BUILD_ARROWTOWER 2
 #define BUILD_ARROWTOWER_STONE 150
 #define TIME_BUILD_ARROWTOWER 80
 
@@ -170,6 +183,7 @@
 //箭塔攻击距离
 #define DIS_ARROWTOWER 7
 
+
 /********** 攻击方式 **********/
 #define ATTACKTYPE_CANTATTACK -1
 #define ATTACKTYPE_ANIMAL 0
@@ -182,6 +196,7 @@
 #define ATTACKTYPE_CATAPULT 4
 //弩炮
 #define ATTACKTYPE_BALISTA 5
+
 
 /********** 军队类别 **********/
 //步兵
@@ -196,6 +211,7 @@
 #define ARMY_SIEGE 6
 //船
 #define ARMY_SHIP 7
+
 
 /********** 兵种类别 **********/
 #define AT_CLUBMAN 0
@@ -216,12 +232,15 @@
 //#define AT_CHARIOT 12
 //#define AT_ELEPHENT 13
 
+
 /********** 祭祀 **********/
 #define AT_PRIEST 51
+
 
 /********** 攻城工具 **********/
 #define AT_THROWER 61
 #define AT_BALLISTA 62
+
 
 /********** 船类别 **********/
 #define SHIP_FISHING 71
@@ -231,6 +250,7 @@
 #define SHIP_FIRE 75
 #define SHIP_CATAPUL 76
 #define SHIP_JUGGERNAUT 77
+
 
 /************士兵属性**************/
 //棍棒手
@@ -354,6 +374,7 @@
 #define DEFCLOSE_CAVALRY 0
 #define DEFSHOOT_CAVALRY 0
 
+
 /********** 飞行物投掷判断 **********/
 #define THROWMISSION_FARMER 25
 #define THROWMISSION_ARCHER 4
@@ -363,10 +384,12 @@
 
 #define THROWMISSION_ARROWTOWN_TIMER 25
 
+
 /********** 飞行物类别 **********/
 #define Missile_Spear 0
 #define Missile_Arrow 1
 #define Missile_Cobblestone 2
+
 
 /********** 飞行物属性 **********/
 #define Missile_Speed_Spear (4*HUMAN_SPEED)

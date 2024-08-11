@@ -310,12 +310,44 @@ bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civili
 void Development::set_civilization( int civ )
 {
     civilization = civ;
-    while(developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode!=NULL && developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode->civilization<civilization)
-    {
+    while(developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode!=NULL &&\
+          developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode->civilization<civilization)
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].shift();
+
+}
+
+/*****************游戏进程信息*******************/
+//时代升级，进入下一时代
+void Development::civiChange()
+{
+    civilization++;
+    if(playerRepresent == NOWPLAYERREPRESENT)
+        soundQueue.push("Age_Level_Up");
+}
+
+/***************************************************************/
+void Development::all_technology_tree()
+{
+    map< int , st_buildAction >::iterator iter = developLab.begin(),itere = developLab.end();
+    map<int , st_upgradeLab>::iterator iter1,iter1e;
+
+    while(iter != itere)
+    {
+        for(iter1 = iter->second.actCon.begin(),iter1e = iter->second.actCon.end(); iter1 != iter1e; iter1++)
+        {
+            while(iter1->second.nowExecuteNode != NULL)
+            {
+                if(iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode )
+                    break;
+
+                iter1->second.shift();
+            }
+        }
+
+        iter++;
     }
 }
-/***************************************************************/
+
 //初始化develop科技树
 void Development::init_DevelopLab()
 {
@@ -471,26 +503,4 @@ void Development::init_DevelopLab()
     //城墙
 //    developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
 //    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
-}
-
-void Development::all_technology_tree()
-{
-    map< int , st_buildAction >::iterator iter = developLab.begin(),itere = developLab.end();
-    map<int , st_upgradeLab>::iterator iter1,iter1e;
-
-    while(iter != itere)
-    {
-        for(iter1 = iter->second.actCon.begin(),iter1e = iter->second.actCon.end(); iter1 != iter1e; iter1++)
-        {
-            while(iter1->second.nowExecuteNode != NULL)
-            {
-                if(iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode )
-                    break;
-
-                iter1->second.shift();
-            }
-        }
-
-        iter++;
-    }
 }

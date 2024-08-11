@@ -3,11 +3,6 @@
 std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" , "Cobblestone"};
 std::list<ImageResource>* Missile::missile[NUMBER_MISSILE];
 
-Missile::Missile()
-{
-
-}
-
 Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight , Development* playerScience, int playerRepresent)
 {
     //划分玩家阵营
@@ -188,5 +183,15 @@ void Missile::get_AttackSponsor_Position(double& DR , double& UR)
     {
         DR = AttackSponsor->getDR();
         UR = AttackSponsor->getUR();
+    }
+}
+
+//攻击者死亡，设置missile的攻击发起者为NULL
+void Missile::deleteAttackerSponsor(Coordinate* attacker)
+{
+    if(attacker == AttackSponsor)
+    {
+        set_attackerDie();
+        AttackSponsor = NULL;
     }
 }
