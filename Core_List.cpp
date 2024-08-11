@@ -1045,12 +1045,12 @@ void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
     BloodHaver* blooder , *bloodee;
     Coordinate* judOb;
     attacker->printer_ToBloodHaver((void**)&blooder);
-    for(int x = -1 ; x<2; x++)
+    for(int x = -2 ; x<3; x++)
     {
-        for(int y = -1; y<2 ; y++)
+        for(int y = -2; y<3 ; y++)
         {
             bx = x+attacker->getBlockDR();
-            by = x+attacker->getBlockUR();
+            by = y+attacker->getBlockUR();
             if(bx < 0 || by < 0 || bx>=MAP_L|| by >= MAP_U) continue;
             size = theMap->map_Object[bx][by].size();
             bloodee = NULL;
