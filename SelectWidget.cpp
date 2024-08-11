@@ -476,7 +476,8 @@ void SelectWidget::refreshActs()
             //objIconSmall_ATK objText_ATK用于展示攻击力 objIconSmall objText表示携带资源或者防御
             Army* objArmy = (Army*)nowobject;
             ui->objName->setText(objArmy->getChineseName());
-            ui->objIcon->setPixmap(resMap["Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel())].front().scaled(110,110));
+            std::string buttonName = "Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel());
+            ui->objIcon->setPixmap(resMap[buttonName].front().scaled(110,110));
             ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); //攻击图标
             ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
             ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));

@@ -217,12 +217,14 @@ protected:
     /*******image资源相关信息*******/
     void initNowresTimer(){ nowres_changeRecord = 0; }
     bool isNowresShift();
+    void updateImageXYByNowRes();
 
 
     /*******坐标相关*******/
     void setDetailPointAttrb_FormBlock();
     void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
     void setDRUR( double DR, double UR ){ this->DR = DR; this->UR = UR; }
+    void setBlockDRUR( int BlockDR, int BlockUR ){ this->BlockDR = BlockDR; this->BlockUR = BlockUR; }
     void updateBlockByDetail(){ BlockDR = transBlock(DR); BlockUR = transBlock(UR); }
 
 };
