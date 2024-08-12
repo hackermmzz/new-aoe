@@ -20,7 +20,7 @@ std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;
 
 bool only_debug_Player0 = true;
-bool filterRepetitionMessage = false;
+bool filterRepetitionMessage = IS_FILTER_DEBUGMESSAGE;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 
@@ -507,9 +507,9 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content,int playerID)
 {
-    if(!only_debug_Player0 || playerID==0)
+    if(!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE)
     {
-        if( (debugMessageRecord[content] == 0 && filterRepetitionMessage) || color == "black"|| color == "green" )
+        if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
         {
             debugMassagePackage.push(st_DebugMassage(color, content));
             debugMessageRecord[content] = g_frame;

@@ -381,7 +381,7 @@
 #define ACT_BUILD_STABLE_NAME "建造马厩(花费:150木头)"
 #define ACT_RANGE_CREATE_BOWMAN_NAME "训练弓箭手(花费:40食物,20木头)"
 #define ACT_RESEARCH_WALL_NAME "研发:建造低级城墙"
-#define ACT_STABLE_CREATE_SCOUT_NAME "训练侦察骑兵(花费:100食物)"
+#define ACT_STABLE_CREATE_SCOUT_NAME "训练侦察骑兵(花费:60食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME "研发弓兵护甲:弓箭手近战防御+2(花费:100食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"

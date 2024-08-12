@@ -24,6 +24,7 @@
 #include "UsrAI.h"
 #include "EnemyAI.h"
 #include <ActWidget.h>
+#include <AboutDialog.h>
 
 namespace Ui {
 class MainWidget;
@@ -97,6 +98,8 @@ private slots:
 
     void responseMusicChange();
 
+    void on_option_2_clicked();
+
 signals:
     void mapmove();
     void startAI();
@@ -120,6 +123,7 @@ private:
     bool pause = false;
     Option *option = NULL;
     ActWidget *acts[ACT_WINDOW_NUM_FREE];
+    AboutDialog* aboutDialog = NULL;
 
     //****************Music*********************
     QSoundEffect* bgm = NULL;

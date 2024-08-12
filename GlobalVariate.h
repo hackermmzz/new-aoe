@@ -94,9 +94,9 @@ private:
     void addScore(int points,  const QString& message) {
         score += points;
         if(id==0)
-            call_debugText("blue", " 玩家"+message, 0);
+            call_debugText("blue", " 玩家"+message, REPRESENT_BOARDCAST_MESSAGE);
         else
-            call_debugText("red", " 敌方"+message, 0);
+            call_debugText("red", " 敌方"+message, REPRESENT_BOARDCAST_MESSAGE);
     }
 
 public:
