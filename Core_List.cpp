@@ -1,6 +1,4 @@
 #include "Core_list.h"
-extern Score usrScore;
-extern Score enemyScore;
 
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
@@ -856,27 +854,6 @@ void Core_List::object_FinishAction(Coordinate* object1)
         {
             relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildOb);
             relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResOb);
-
-            if(buildOb!=NULL && !buildOb->isConstructed())
-            {
-                std::string clickSound;
-
-                buildOb->initAction();
-
-                if(buildOb->getNum()==BUILDING_HOME||buildOb->getNum()==BUILDING_FARM)
-                    usrScore.update(_BUILDING1);
-                else
-                    usrScore.update(_BUILDING2);
-
-                player[object1->getPlayerRepresent()]->finishBuild(buildOb);
-                if(buildOb->getNum() == BUILDING_STOCK || buildOb->getNum() == BUILDING_GRANARY)
-                    resourceBuildingChange = true;
-
-                clickSound = buildOb->getSound_Click();
-
-                if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
-                    soundQueue.push(clickSound);
-            }
 
             if( buildResOb!=NULL &&  buildResOb->getNum() == BUILDING_FARM) //是农田
             {

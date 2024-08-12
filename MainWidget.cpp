@@ -84,6 +84,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
     connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
 
+    aboutDialog = new AboutDialog(this);
+    aboutDialog->hide();
+
 
     sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);
@@ -1147,3 +1150,8 @@ void MainWidget::buildInitialStock()
 }
 
 
+
+void MainWidget::on_option_2_clicked()
+{
+    aboutDialog->show();
+}

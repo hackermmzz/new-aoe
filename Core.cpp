@@ -197,6 +197,27 @@ void Core::updateByObject()
                 //更新视野 用户控制的对象
                 if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
+                if((*builditer)->isFinish() && !(*builditer)->isConstructed())
+                {
+                    std::string clickSound;
+
+                    (*builditer)->initAction();
+
+                    if((*builditer)->getNum()==BUILDING_HOME||(*builditer)->getNum()==BUILDING_FARM)
+                        usrScore.update(_BUILDING1);
+                    else
+                        usrScore.update(_BUILDING2);
+
+                    player[playerIndx]->finishBuild(*builditer);
+                    if((*builditer)->getNum() == BUILDING_STOCK || (*builditer)->getNum() == BUILDING_GRANARY)
+                        interactionList->resourceBuildHaveChange();
+
+                    clickSound = (*builditer)->getSound_Click();
+
+                    if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
+                        soundQueue.push(clickSound);
+                }
+
                 (*builditer)->nextframe();
 
                 builditer++;

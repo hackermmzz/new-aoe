@@ -2,6 +2,8 @@
 #define CORE_LIST_H
 
 #include <Core_CondiFunc.h>
+extern Score usrScore;
+extern Score enemyScore;
 
 class Core_List
 {
@@ -35,6 +37,7 @@ public:
     /************管理诱发行动************/
     void conduct_Attacked(Coordinate*);  //受到攻击而诱发
     void manageMontorAct(); //添加监视的object的相应行动
+    void resourceBuildHaveChange(){ this->resourceBuildingChange = true; }
 
 private:
     Map* theMap;    //地图信息
