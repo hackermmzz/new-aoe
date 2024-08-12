@@ -923,9 +923,6 @@ void Core_List::conduct_Attacked(Coordinate* object)
         attacker=attackee->getAvangeObject();
         if(attacker!=NULL)
         {
-            /*call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
-                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击",object->getPlayerRepresent());*/
-
              attackee->updateAvangeObjectPosition();
         }
         //设置攻击者坐标
