@@ -122,18 +122,20 @@ void EnemyAI::processData() {
              armystate[i]=WAITING;
              ChasingLock[i]=0;
         }
-    }
+    }  
     if(flag==1)
-        for(int i=0;i<AIfarmer;i++){
-            if(AIFSN[i]!=enemyInfo.enemy_farmers[i].SN)
-                kill++;
-        }
-    if(AIfarmer!=0&&g_frame>15){
+        for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
+            if(AIFSN[i]!=enemyInfo.enemy_farmers[i].SN&&AIFSN[i]!=0)
+               { kill++;
+                qDebug()<<kill<<g_frame<<"change";
+                 break;
+            }}
+    if(enemyInfo.enemy_farmers.size()!=0&&g_frame>15){
         flag=1;
-        for(int i=0;i<AIfarmer;i++){
+        for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             AIFSN[i]=enemyInfo.enemy_farmers[i].SN;
         }}
-    AIfarmer=enemyInfo.enemy_farmers.size();
+
     //更新波数
     if(g_frame==24000) mode=3;
     else if(g_frame==18000||kill>=8) mode=-2;
@@ -143,6 +145,7 @@ void EnemyAI::processData() {
     if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.enemy_buildings.size()==0){
         mode=4;
     }
+    qDebug()<<mode<<g_frame;
     //防止连续出兵
         if(g_frame>15&&enemyInfo.armies.size()!=sum){
             if(mode==1||mode==-1){
