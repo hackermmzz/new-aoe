@@ -55,7 +55,8 @@ SOURCES += \
     UsrAI.cpp \
     EnemyAI.cpp \
     ViewWidget.cpp \
-    Option.cpp
+    Option.cpp \
+    AboutDialog.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -89,10 +90,12 @@ HEADERS += \
     EnemyAI.h \
     ViewWidget.h \
     Option.h \
-    digitalConfig.h
+    digitalConfig.h \
+    AboutDialog.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
     SelectWidget.ui \
-    Option.ui
+    Option.ui \
+    AboutDialog.ui

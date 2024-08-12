@@ -1,9 +1,14 @@
 #ifndef DIGITALCONFIG_H
 #define DIGITALCONFIG_H
 
+/**********debug消息************/
+#define IS_FILTER_DEBUGMESSAGE false
+#define REPRESENT_BOARDCAST_MESSAGE -1
+
+
 /**********地图可见性设置************/
 #define MAP_EXPLORE true
-#define MAP_VISIABLE true
+#define MAP_VISIABLE false
 
 
 /**********玩家初始资源设置************/

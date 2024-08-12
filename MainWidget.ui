@@ -34,6 +34,7 @@
     <property name="font">
      <font>
       <pointsize>12</pointsize>
+      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -221,6 +222,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -240,6 +242,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -259,6 +262,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -278,6 +282,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -328,8 +333,8 @@
   <widget class="QLabel" name="version">
    <property name="geometry">
     <rect>
-     <x>760</x>
-     <y>910</y>
+     <x>1780</x>
+     <y>940</y>
      <width>121</width>
      <height>61</height>
     </rect>
@@ -374,6 +379,7 @@
    <property name="font">
     <font>
      <pointsize>15</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -442,11 +448,16 @@
   <widget class="QPushButton" name="option">
    <property name="geometry">
     <rect>
-     <x>760</x>
-     <y>850</y>
-     <width>80</width>
-     <height>50</height>
+     <x>770</x>
+     <y>840</y>
+     <width>110</width>
+     <height>60</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>华文行楷</family>
+    </font>
    </property>
    <property name="text">
     <string>设置</string>
@@ -477,6 +488,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -499,6 +511,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -518,6 +531,7 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
@@ -537,11 +551,30 @@
    <property name="font">
     <font>
      <pointsize>9</pointsize>
+     <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
    <property name="text">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#aa0000;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="option_2">
+   <property name="geometry">
+    <rect>
+     <x>770</x>
+     <y>920</y>
+     <width>110</width>
+     <height>60</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>华文行楷</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>关于我们</string>
    </property>
   </widget>
  </widget>

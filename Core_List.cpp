@@ -1,6 +1,4 @@
 #include "Core_list.h"
-extern Score usrScore;
-extern Score enemyScore;
 
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
@@ -614,6 +612,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
+    Animal* animalOb = NULL;
     MoveObject* moveOb = NULL;
     Missile* missile = NULL;
 
@@ -623,7 +622,16 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
     {        
-        if(!attacker->isAttacking()) attacker->setPreAttack();
+        if(!attacker->isAttacking())
+        {
+            object2->printer_ToAnimal((void**)&animalOb);
+            if(animalOb==NULL || !animalOb->isTree())
+            {
+                call_debugText("red"," "+object1->getChineseName()+"(编号:" + QString::number(object1->getglobalNum()) + \
+                               ")开始向"+object2->getChineseName()+"(编号："+QString::number(object2->getglobalNum())+")攻击", REPRESENT_BOARDCAST_MESSAGE);
+            }
+            attacker->setPreAttack();
+        }
         else
         {
             object1->printer_ToMoveObject((void**)&moveOb);
@@ -847,27 +855,6 @@ void Core_List::object_FinishAction(Coordinate* object1)
             relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildOb);
             relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResOb);
 
-            if(buildOb!=NULL && !buildOb->isConstructed())
-            {
-                std::string clickSound;
-
-                buildOb->initAction();
-
-                if(buildOb->getNum()==BUILDING_HOME||buildOb->getNum()==BUILDING_FARM)
-                    usrScore.update(_BUILDING1);
-                else
-                    usrScore.update(_BUILDING2);
-
-                player[object1->getPlayerRepresent()]->finishBuild(buildOb);
-                if(buildOb->getNum() == BUILDING_STOCK || buildOb->getNum() == BUILDING_GRANARY)
-                    resourceBuildingChange = true;
-
-                clickSound = buildOb->getSound_Click();
-
-                if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
-                    soundQueue.push(clickSound);
-            }
-
             if( buildResOb!=NULL &&  buildResOb->getNum() == BUILDING_FARM) //是农田
             {
                  object1->initAction();
@@ -923,9 +910,6 @@ void Core_List::conduct_Attacked(Coordinate* object)
         attacker=attackee->getAvangeObject();
         if(attacker!=NULL)
         {
-            /*call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
-                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击",object->getPlayerRepresent());*/
-
              attackee->updateAvangeObjectPosition();
         }
         //设置攻击者坐标
