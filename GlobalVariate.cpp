@@ -507,7 +507,7 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content,int playerID)
 {
-    if(!only_debug_Player0 || playerID==0)
+    if(!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE)
     {
         if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
         {

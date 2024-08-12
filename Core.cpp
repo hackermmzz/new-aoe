@@ -229,7 +229,7 @@ void Core::updateByObject()
                 if((*animaliter)->isDying())
                 {
                     if(!(*animaliter)->isTree())
-                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡",0);
+                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡", REPRESENT_BOARDCAST_MESSAGE);
 
                     interactionList->eraseRelation(*animaliter);
                 }
@@ -683,7 +683,7 @@ void Core::manageOrder(int id)
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
             ret=interactionList->addRelation(self,cur.DR,cur.UR,CoreEven_JustMoveTo);
-            if(ret == ACTION_SUCCESS&& id == 0)
+            if(ret == ACTION_SUCCESS&& id == NOWPLAYERREPRESENT)
                 call_debugText("green"," HumanMove:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 移动至 ("+QString::number(cur.DR)+","+QString::number(cur.UR)+")",id);
             break;
         }
@@ -710,7 +710,7 @@ void Core::manageOrder(int id)
                 case SORT_STATICRES:
                 case SORT_ANIMAL:
                     ret=interactionList->addRelation(self,obj,CoreEven_Gather);
-                    if(ret == ACTION_SUCCESS&& id == 0)
+                    if(ret == ACTION_SUCCESS&& id == NOWPLAYERREPRESENT)
                         call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     break;
                 case SORT_BUILDING:
@@ -807,7 +807,7 @@ void Core::manageOrder(int id)
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
             ret=interactionList->addRelation(self, cur.BlockDR, cur.BlockUR, CoreEven_CreatBuilding, true, cur.option);
-            if(ret == ACTION_SUCCESS && id == 0)
+            if(ret == ACTION_SUCCESS && id == NOWPLAYERREPRESENT)
                 call_debugText("green"," HumanBuild:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 开始在块坐标 ("+QString::number(cur.BlockDR)+","+QString::number(cur.BlockUR)+") 处建造 Building_"+ QString::number(cur.option),id);
             break;
         }
@@ -822,7 +822,7 @@ void Core::manageOrder(int id)
             }else{
                 ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
             }
-            if(ret == ACTION_SUCCESS&& id == 0)
+            if(ret == ACTION_SUCCESS&& id == NOWPLAYERREPRESENT)
                 call_debugText("green"," BuildAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 执行行动 ACTION_"+QString::number(cur.option),id);
             break;
         }
@@ -892,13 +892,19 @@ void Core::loadRelationMap()
 }
 
 
-void Core::resetNowObject_Click()
+void Core::resetNowObject_Click(bool isStop)
 {
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
+        if(isStop)
+        {
+            call_debugText("blue", " 细节坐标 ("+QString::number(mouseEvent->DR)+","+QString::number(mouseEvent->UR)\
+                           +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", REPRESENT_BOARDCAST_MESSAGE);
+        }
+
         nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
         if(nowobject!=NULL)
-            call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), 0);
+            call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), REPRESENT_BOARDCAST_MESSAGE);
         requestSound_Click(nowobject);
         sel->initActs();
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;

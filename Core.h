@@ -50,7 +50,7 @@ public:
     void suspendRelation(Coordinate * object){ interactionList->suspendRelation(object); }
     /************添加/删除表************/
 
-    void resetNowObject_Click();
+    void resetNowObject_Click(bool isStop = false);
     void requestSound_Click( Coordinate* object );
 private:
     Player** player;    //player信息

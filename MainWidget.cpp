@@ -1,7 +1,7 @@
 ﻿#include "MainWidget.h"
 #include "ui_MainWidget.h"
 
-int g_globalNum=1;
+int g_globalNum= rand()%11;
 int g_frame=0;
 int mapmoveFrequency = 1;
 extern Score usrScore;
@@ -774,10 +774,7 @@ void MainWidget::gameDataUpdate()
     }
     else
     {
-        call_debugText("blue", " 细节坐标 ("+QString::number(mouseEvent->DR)+","+QString::number(mouseEvent->UR)\
-                       +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", 0);
-
-        core->resetNowObject_Click();
+        core->resetNowObject_Click(pause);
     }
 
     makeSound();

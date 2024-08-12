@@ -614,6 +614,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
+    Animal* animalOb = NULL;
     MoveObject* moveOb = NULL;
     Missile* missile = NULL;
 
@@ -623,7 +624,16 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
     {        
-        if(!attacker->isAttacking()) attacker->setPreAttack();
+        if(!attacker->isAttacking())
+        {
+            object2->printer_ToAnimal((void**)&animalOb);
+            if(animalOb==NULL || !animalOb->isTree())
+            {
+                call_debugText("red"," "+object1->getChineseName()+"(编号:" + QString::number(object1->getglobalNum()) + \
+                               ")开始向"+object2->getChineseName()+"(编号："+QString::number(object2->getglobalNum())+")攻击", REPRESENT_BOARDCAST_MESSAGE);
+            }
+            attacker->setPreAttack();
+        }
         else
         {
             object1->printer_ToMoveObject((void**)&moveOb);
