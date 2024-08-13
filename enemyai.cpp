@@ -115,6 +115,9 @@ void EnemyAI::processData() {
                  pos_U[49]=enemyInfo.enemy_buildings[i].BlockUR;
             }
         }
+        for(int i=0;i<50;i++){
+            AIFSN[i]=0;
+        }
     }
     if(enemyInfo.armies.size()!=sum){
         for(int i=0;i<enemyInfo.armies.size();i++){
