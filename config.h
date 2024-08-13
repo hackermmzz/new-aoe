@@ -37,7 +37,7 @@
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.02"
+#define GAME_VERSION "v2.02a"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define GAME_LOSE_SEC 1500
 #define GOLD 10                         //金块资源数量
