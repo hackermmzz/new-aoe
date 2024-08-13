@@ -137,7 +137,7 @@ void EnemyAI::processData() {
         }}
 
     //更新波数
-    if(g_frame==24000) mode=3;
+    if(g_frame>=24000) mode=3;
     else if(g_frame==18000||kill>=8) mode=-2;
     else if(g_frame==15000) mode=2;
     else if(g_frame==10500||kill>=2)mode=-1;
