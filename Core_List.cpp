@@ -19,7 +19,7 @@ void Core_List::update()
 
     manageRelationList();
 
-    //若想知道微秒级的运行时间
+//    //若想知道微秒级的运行时间
 //    qint64 elapsedNanoseconds = timer4.nsecsElapsed();
 //    timerStand = elapsedNanoseconds/1000;
 //    qDebug() <<g_frame<< "manageRelationList:" << elapsedNanoseconds/1000<<"(ns)";
