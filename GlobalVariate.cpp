@@ -19,7 +19,7 @@ Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;
 
-bool only_debug_Player0 = true;
+bool only_debug_Player0 = IS_DEBUGTEXT_ONLYNOWPLAYER;
 bool filterRepetitionMessage = IS_FILTER_DEBUGMESSAGE;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};

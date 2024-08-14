@@ -69,7 +69,7 @@ static int seek(int Sort,int number){
             if(enemyInfo.enemy_buildings[i].Type==BUILDING_ARROWTOWER){
             temp=pow(pow(enemyInfo.armies[SN].BlockDR-enemyInfo.enemy_buildings[i].BlockDR, 2) + pow(enemyInfo.armies[SN].BlockUR-enemyInfo.enemy_buildings[i].BlockUR, 2), 0.5);
             if(temp<min){
-                min=temp;target=i+100;qDebug()<<target;
+                min=temp;target=i+100;/*qDebug()<<target;*/
             }}
         }
         if(target==151){
@@ -130,7 +130,7 @@ void EnemyAI::processData() {
         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             if(AIFSN[i]!=enemyInfo.enemy_farmers[i].SN&&AIFSN[i]!=0)
                { kill++;
-                qDebug()<<kill<<g_frame<<"change";
+//                qDebug()<<kill<<g_frame<<"change";
                  break;
             }}
     if(enemyInfo.enemy_farmers.size()!=0&&g_frame>15){
@@ -148,7 +148,7 @@ void EnemyAI::processData() {
     if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.enemy_buildings.size()==0){
         mode=4;
     }
-    qDebug()<<mode<<g_frame;
+//    qDebug()<<mode<<g_frame;
     //防止连续出兵
         if(g_frame>15&&enemyInfo.armies.size()!=sum){
             if(mode==1||mode==-1){

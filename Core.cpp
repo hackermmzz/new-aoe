@@ -704,7 +704,7 @@ void Core::manageOrder(int id)
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
             ret=interactionList->addRelation(self,cur.DR,cur.UR,CoreEven_JustMoveTo);
-            if(ret == ACTION_SUCCESS&& id == NOWPLAYERREPRESENT)
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," HumanMove:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 移动至 ("+QString::number(cur.DR)+","+QString::number(cur.UR)+")",id);
             break;
         }
@@ -731,7 +731,7 @@ void Core::manageOrder(int id)
                 case SORT_STATICRES:
                 case SORT_ANIMAL:
                     ret=interactionList->addRelation(self,obj,CoreEven_Gather);
-                    if(ret == ACTION_SUCCESS&& id == NOWPLAYERREPRESENT)
+                    if(ret == ACTION_SUCCESS)
                         call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     break;
                 case SORT_BUILDING:
@@ -745,13 +745,13 @@ void Core::manageOrder(int id)
                         else
                             ret=interactionList->addRelation(self , obj , CoreEven_FixBuilding);
 
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     else
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
@@ -763,12 +763,12 @@ void Core::manageOrder(int id)
                         if(((Building_Resource*)obj)->get_Gatherable()) ret=interactionList->addRelation(self,obj,CoreEven_Gather);
                         else ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
 
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }else
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS && id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
@@ -776,7 +776,7 @@ void Core::manageOrder(int id)
                     if(self->getPlayerRepresent() != obj->getPlayerRepresent())
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
@@ -813,7 +813,7 @@ void Core::manageOrder(int id)
                     if(self->getPlayerRepresent() != obj->getPlayerRepresent())
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS && id == 0)
+                        if(ret == ACTION_SUCCESS )
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                 default:
@@ -828,7 +828,7 @@ void Core::manageOrder(int id)
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
             ret=interactionList->addRelation(self, cur.BlockDR, cur.BlockUR, CoreEven_CreatBuilding, true, cur.option);
-            if(ret == ACTION_SUCCESS && id == NOWPLAYERREPRESENT)
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," HumanBuild:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 开始在块坐标 ("+QString::number(cur.BlockDR)+","+QString::number(cur.BlockUR)+") 处建造 Building_"+ QString::number(cur.option),id);
             break;
         }
@@ -843,7 +843,7 @@ void Core::manageOrder(int id)
             }else{
                 ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
             }
-            if(ret == ACTION_SUCCESS&& id == NOWPLAYERREPRESENT)
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," BuildAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 执行行动 ACTION_"+QString::number(cur.option),id);
             break;
         }
