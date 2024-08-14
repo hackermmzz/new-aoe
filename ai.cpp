@@ -1,5 +1,7 @@
 #include "AI.h"
 
+QString AI::AIName[NOWPLAYER] = { "UsrAI", "EnemyAI" };
+
 int AI::HumanMove(int SN, double DR0, double UR0){
     if(!isHuman(SN))
         return ACTION_INVALID_SN;

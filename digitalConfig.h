@@ -3,6 +3,7 @@
 
 /**********debug消息************/
 #define IS_FILTER_DEBUGMESSAGE false
+#define IS_DEBUGTEXT_ONLYNOWPLAYER false
 #define REPRESENT_BOARDCAST_MESSAGE -1
 
 
