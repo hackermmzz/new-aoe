@@ -1,7 +1,7 @@
 ﻿#include "MainWidget.h"
 #include "ui_MainWidget.h"
 
-int g_globalNum=1;
+int g_globalNum= rand()%11;
 int g_frame=0;
 int mapmoveFrequency = 1;
 extern Score usrScore;
@@ -83,6 +83,9 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
     connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
     connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
+
+    aboutDialog = new AboutDialog(this);
+    aboutDialog->hide();
 
 
     sel = new SelectWidget(this); // 设置左下角窗口
@@ -273,6 +276,12 @@ void MainWidget::initBuilding()
             Building::allocatebuilt(i,j);
             loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));
         }
+    }
+
+    for(int type = 0; type < 3; type++)
+    {
+        Building::allocatebuildFire(type);
+        loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
     }
 
     //市镇中心
@@ -559,6 +568,11 @@ void MainWidget::deleteBuilding()
             Building::deallocatebuilt(i,j);
         }
     }
+
+    for(int type = 0; type<3; type++)
+    {
+        Building::deallocatebuildFire(type);
+    }
 }
 
 // 删除动物资源
@@ -763,10 +777,7 @@ void MainWidget::gameDataUpdate()
     }
     else
     {
-        call_debugText("blue", " 细节坐标 ("+QString::number(mouseEvent->DR)+","+QString::number(mouseEvent->UR)\
-                       +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", 0);
-
-        core->resetNowObject_Click();
+        core->resetNowObject_Click(pause);
     }
 
     makeSound();
@@ -1139,3 +1150,8 @@ void MainWidget::buildInitialStock()
 }
 
 
+
+void MainWidget::on_option_2_clicked()
+{
+    aboutDialog->show();
+}

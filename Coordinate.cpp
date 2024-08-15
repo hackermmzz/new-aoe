@@ -2,31 +2,8 @@
 
 vector<Point> Coordinate::viewLab[5][12];
 
-Coordinate::Coordinate()
-{
 
-}
-
-void Coordinate::nextframe()
-{
-
-}
-
-int Coordinate::getSort()
-{
-    return SORT_COORDINATE;
-}
-
-int Coordinate::getMapHeightOffsetY()
-{
-    return MapHeightOffsetY;
-}
-
-void Coordinate::setMapHeightOffsetY(int m_MapHeightOffsetY)
-{
-    MapHeightOffsetY = m_MapHeightOffsetY;
-}
-
+/*******行动相关*******/
 int Coordinate::ActNameToActNum(int actName)
 {
     /**
@@ -65,12 +42,27 @@ int Coordinate::ActNameToActNum(int actName)
         return -1;
         break;
     }
+}
 
+//设置当前交互对象
+void Coordinate::set_interAct(int interSort, int interNum, bool interRepresent, bool interBui_builtUp)
+{
+    interactSort = interSort;
+    interactNum = interNum;
+    interact_sameRepresent = interRepresent;
+    interactBui_builtUp = interBui_builtUp;
+}
 
-
+void Coordinate::resetINterAct()
+{
+    interactSort = -1;
+    interactNum = -1;
+    interact_sameRepresent = false;
+    interactBui_builtUp = false;
 }
 
 
+/*******可见性相关*******/
 void Coordinate::setViewLab( int blockSize , int visionLen )
 {
     Point viewBlock ;
@@ -145,3 +137,44 @@ void Coordinate::addViewLab( vector<Point>& blockLab , int lx , int mx , int y ,
         blockLab.push_back(blockPoint_mirr);
     }
 }
+
+vector<Point> Coordinate::getViewLab()
+{
+    if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>0 && getVision() > 1)
+        setViewLab((int)BlockSizeLen , getVision());
+
+    return viewLab[(int)BlockSizeLen][getVision()];
+}
+
+
+/*******image资源相关信息*******/
+//用于限制nowres切换，以降低图像资源循环速度
+bool Coordinate::isNowresShift()
+{
+    if(nowres_step == nowres_changeRecord)
+    {
+        nowres_changeRecord = 0;
+        return true;
+    }
+    else
+    {
+        nowres_changeRecord++;
+        return false;
+    }
+}
+
+void Coordinate::updateImageXYByNowRes()
+{
+    this->imageX=this->nowres->pix.width()/2.0;
+    this->imageY=this->nowres->pix.width()/4.0;
+}
+
+/*******坐标相关*******/
+void Coordinate::setDetailPointAttrb_FormBlock()
+{
+    setDRUR( (BlockDR + BlockSizeLen/2.0)*BLOCKSIDELENGTH, (BlockUR + BlockSizeLen/2.0)*BLOCKSIDELENGTH );
+    setSideLenth();
+}
+
+
+

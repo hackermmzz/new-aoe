@@ -676,12 +676,16 @@ void Map::generateEnemy(){
     //第三组
     player[1]->addArmy(0,pos_L[2]-15,pos_U[2]-15);
     player[1]->addArmy(0,pos_L[2]+15,pos_U[2]+15);
+    player[1]->addArmy(0,pos_L[2]+15,pos_U[2]-15);
+    player[1]->addArmy(0,pos_L[2]-15,pos_U[2]+15);
     player[1]->addArmy(1,pos_L[2]-30,pos_U[2]+30);
     player[1]->addArmy(1,pos_L[2]+30,pos_U[2]-30);
-    player[1]->addArmy(2,pos_L[2]+30,pos_U[2]+45);
+    player[1]->addArmy(1,pos_L[2]+30,pos_U[2]-30);
+    player[1]->addArmy(1,pos_L[2]-30,pos_U[2]+30);
+    player[1]->addArmy(2,pos_L[2]+45,pos_U[2]+45);
     player[1]->addArmy(2,pos_L[2]-45,pos_U[2]-45);
-    player[1]->addArmy(3,pos_L[2]-60,pos_U[2]+60);
-    player[1]->addArmy(3,pos_L[2]+60,pos_U[2]-60);
+    player[1]->addArmy(2,pos_L[2]+45,pos_U[2]-45);
+    player[1]->addArmy(2,pos_L[2]+45,pos_U[2]-45);
     player[1]->addArmy(rand2+4,pos_L[2]-80,pos_U[2]+80);
 }
 
@@ -1979,23 +1983,41 @@ void Map::GenerateMapTxt(int MapJudge) {
         std::ofstream outMapFile("tmpMap.txt");
         if (outMapFile.is_open())
         {
+            for(int i = 0 ; i < MAP_L; i++)
+            {
+                outMapFile<<Gamemap[i][0];
+
+                for(int j = 1; j < MAP_U; j++)
+                {
+                    outMapFile<<' '<<Gamemap[i][j];
+                }
+                outMapFile<<"\n";
+            }
+            outMapFile << "\n"; //隔三行
+            outMapFile << "\n";
+            outMapFile << "\n";
+
             for (int i = 0; i < MAP_L; i++)
             {
-                for (int j = 0; j < MAP_U; j++)
+                outMapFile<<this->cell[i][0].getMapHeight();
+
+                for (int j = 1; j < MAP_U; j++)
                 {
-                    //                    outMapFile << Gamemap[i][j] << "\n";
-                    outMapFile << this->cell[i][j].getMapHeight() << ' ';
+                    outMapFile<< ' ' << this->cell[i][j].getMapHeight();
                 }
                 outMapFile << "\n";
             }
             outMapFile << "\n";
             outMapFile << "\n";
             outMapFile << "\n";
+
             for (int i = 0; i < 80; i++)
             {
-                for (int j = 0; j < 80; j++)
+                outMapFile<<m_heightMap[i][0];
+
+                for (int j = 1; j < 80; j++)
                 {
-                    outMapFile << m_heightMap[i][j] << ' ';
+                    outMapFile << ' ' << m_heightMap[i][j];
                 }
                 outMapFile << "\n";
             }
@@ -2015,22 +2037,48 @@ void Map::GenerateMapTxt(int MapJudge) {
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QTextStream in(&inputGameFile);
-            int j = 0, i = 0;
-            for (int T = 0; i < MAP_L * MAP_U; T++)
+            QString line;
+            QStringList lineList;
+
+            for(int i = 0; i<MAP_L; i++)
             {
-                QString line = in.readLine();
-                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-                j++;
-                if(j >= MAP_U)
+                line = in.readLine();
+                lineList = line.split(" ");
+
+                for(int j = 0; j<MAP_U; j++)
                 {
-                    j = 0;
-                    i++;
-                }
-                if(i >= MAP_L)
-                {
-                    break;
+                    Gamemap[i][j] = lineList[j].toInt();
                 }
             }
+            in.readLine();
+            in.readLine();
+            in.readLine();
+
+            for(int i = 0; i<MAP_L; i++)
+            {
+                line = in.readLine();
+                lineList = line.split(" ");
+
+                for(int j = 0; j<MAP_U; j++)
+                {
+                    this->cell[i][j].setMapHeight( lineList[j].toInt() );
+                }
+            }
+            in.readLine();
+            in.readLine();
+            in.readLine();
+
+            for(int i = 0; i<80; i++)
+            {
+                line = in.readLine();
+                lineList = line.split(" ");
+
+                for(int j = 0; j<80; j++)
+                {
+                    m_heightMap[i][j] = lineList[j].toInt();
+                }
+            }
+
             inputGameFile.close();
             qDebug() << "上一次的随机地图数据已读取到游戏内";
         }
@@ -2046,20 +2094,45 @@ void Map::GenerateMapTxt(int MapJudge) {
         if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QTextStream in(&inputGameFile);
-            int j = 0, i = 0;
-            for (int T = 0; i < MAP_L * MAP_U; T++)
+            QString line;
+            QStringList lineList;
+
+            for(int i = 0; i<MAP_L; i++)
             {
-                QString line = in.readLine();
-                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-                j++;
-                if(j >= MAP_U)
+                line = in.readLine();
+                lineList = line.split(" ");
+
+                for(int j = 0; j<MAP_U; j++)
                 {
-                    j = 0;
-                    i++;
+                    Gamemap[i][j] = lineList[j].toInt();
                 }
-                if(i >= MAP_L)
+            }
+            in.readLine();
+            in.readLine();
+            in.readLine();
+
+            for(int i = 0; i<MAP_L; i++)
+            {
+                line = in.readLine();
+                lineList = line.split(" ");
+
+                for(int j = 0; j<MAP_U; j++)
                 {
-                    break;
+                    this->cell[i][j].setMapHeight( lineList[j].toInt() );
+                }
+            }
+            in.readLine();
+            in.readLine();
+            in.readLine();
+
+            for(int i = 0; i<80; i++)
+            {
+                line = in.readLine();
+                lineList = line.split(" ");
+
+                for(int j = 0; j<80; j++)
+                {
+                    m_heightMap[i][j] = lineList[j].toInt();
                 }
             }
             inputGameFile.close();
@@ -2090,7 +2163,7 @@ double Map::tranU(double BlockU)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, true, false);    // 第二个参数修改为true时可令地图全部可见
+    InitCell(0, MAP_EXPLORE, MAP_VISIABLE);    // 第二个参数修改为true时可令地图全部可见
     // 资源绘制在MainWidget里完成
     while(!GenerateTerrain());  // 元胞自动机生成地图高度
     GenerateType();             // 通过高度差计算调用的地图块资源

@@ -20,6 +20,33 @@ void Core::gameUpdate()
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
+    updateByObject();
+
+    loadRelationMap();
+
+    //更新AI用的资源表，该资源表是User/Enemy的通用模板
+    theMap->reset_resMap_AI();
+
+    //刷新视野并处理区域探索结果
+    theMap->reset_ObjectExploreAndVisible();
+
+    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
+
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
+    {
+        if( mapmoveFrequency == 8) resetNowObject_Click();
+        else manageMouseEvent();
+    }
+
+    manageOrder(0);
+    manageOrder(1);
+
+    interactionList->update();
+
+}
+
+void Core::updateByObject()
+{
     //player管理的各个ob更新状态
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
@@ -28,8 +55,8 @@ void Core::gameUpdate()
         list<Missile*>::iterator missileiter = player[playerIndx]->missile.begin() , missileiterEnd = player[playerIndx]->missile.end();
 
         //更新human子类的状态
-        while(humaniter!=humaniterEnd)
-        {       
+        while(humaniter != humaniterEnd)
+        {
             //如果当前对象需要变换行动状态，如从采集浆果->移动
             if((*humaniter)->needTranState())
             {
@@ -80,7 +107,7 @@ void Core::gameUpdate()
                         double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
                         if(leftOffsetPercent > 1) leftOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
-//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                        //qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
                     }
                     // 右高左低：
                     else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
@@ -88,7 +115,7 @@ void Core::gameUpdate()
                         double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
                         if(rightOffsetPercent > 1) rightOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
-//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                        //qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
                     }
                     // 下高上低：
                     else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
@@ -96,7 +123,7 @@ void Core::gameUpdate()
                         double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
                         if(downOffsetPercent > 1) downOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
-//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                        //qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
                     }
                     // 上高下低：
                     else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
@@ -104,7 +131,7 @@ void Core::gameUpdate()
                         double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
                         if(upOffsetPercent > 1) upOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
-//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                        //qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                     }
                 }
                 // 平地
@@ -146,15 +173,17 @@ void Core::gameUpdate()
             }
         }
 
-        while(builditer!= builditerEnd)
+        while(builditer != builditerEnd)
         {
             interactionList->conduct_Attacked(*builditer);
-            if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
+            if((*builditer)->isDie() || ((*builditer)->getSort() == SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
                 if(!(*builditer)->isDie())
-                    call_debugText("green"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
+                    call_debugText("green"," "+(*builditer)->getChineseName()+\
+                                   "(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
                 else
-                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
+                    call_debugText("red"," "+(*builditer)->getChineseName()+\
+                                   "(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
 
                 g_Object[(*builditer)->getglobalNum()] = NULL;
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
@@ -168,13 +197,34 @@ void Core::gameUpdate()
                 //更新视野 用户控制的对象
                 if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
+                if((*builditer)->isFinish() && !(*builditer)->isConstructed())
+                {
+                    std::string clickSound;
+
+                    (*builditer)->initAction();
+
+                    if((*builditer)->getNum()==BUILDING_HOME||(*builditer)->getNum()==BUILDING_FARM)
+                        usrScore.update(_BUILDING1);
+                    else
+                        usrScore.update(_BUILDING2);
+
+                    player[playerIndx]->finishBuild(*builditer);
+                    if((*builditer)->getNum() == BUILDING_STOCK || (*builditer)->getNum() == BUILDING_GRANARY)
+                        interactionList->resourceBuildHaveChange();
+
+                    clickSound = (*builditer)->getSound_Click();
+
+                    if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
+                        soundQueue.push(clickSound);
+                }
+
                 (*builditer)->nextframe();
 
                 builditer++;
             }
         }
 
-        while(missileiter!=missileiterEnd)
+        while(missileiter != missileiterEnd)
         {
             if((*missileiter)->isNeedDelete())
             {
@@ -200,7 +250,7 @@ void Core::gameUpdate()
                 if((*animaliter)->isDying())
                 {
                     if(!(*animaliter)->isTree())
-                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡",0);
+                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡", REPRESENT_BOARDCAST_MESSAGE);
 
                     interactionList->eraseRelation(*animaliter);
                 }
@@ -274,28 +324,6 @@ void Core::gameUpdate()
             SRiter = theMap->deleteStaticRes(SRiter);
         }
     }
-
-    loadRelationMap();
-
-    //更新AI用的资源表，该资源表是User/Enemy的通用模板
-    theMap->reset_resMap_AI();
-
-    //刷新视野并处理区域探索结果
-    theMap->reset_ObjectExploreAndVisible();
-
-    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
-
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
-    {
-        if( mapmoveFrequency == 8) resetNowObject_Click();
-        else manageMouseEvent();
-    }
-
-    manageOrder(0);
-    manageOrder(1);
-
-    interactionList->update();
-
 }
 
 void Core::updateByPlayer(int id){
@@ -519,7 +547,7 @@ void Core::manageMouseEvent()
         if( object_click== NULL )
         {
             if( (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY)\
-                    && nowobject->getPlayerRepresent() == 0)
+                    && nowobject->getPlayerRepresent() == NOWPLAYERREPRESENT)
                 interactionList->addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
             mouseEvent->mouseEventType=NULL_MOUSEEVENT;
         }
@@ -531,7 +559,7 @@ void Core::manageMouseEvent()
             switch(nowobject->getSort())
             {
                 case SORT_FARMER:
-                    if(nowobject->getPlayerRepresent() != 0) break;
+                    if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT) break;
                     switch (object_click->getSort())
                     {
                         case SORT_STATICRES:
@@ -539,7 +567,7 @@ void Core::manageMouseEvent()
                             interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
                             break;
                         case SORT_Building_Resource:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             else
                             {
@@ -550,7 +578,7 @@ void Core::manageMouseEvent()
                             }
                             break;
                         case SORT_BUILDING:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             else
                             {
@@ -566,7 +594,7 @@ void Core::manageMouseEvent()
                             break;
                         case SORT_ARMY:
                         case SORT_FARMER:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:
@@ -575,7 +603,7 @@ void Core::manageMouseEvent()
                     break;
 
                 case SORT_ARMY:
-                    if(nowobject->getPlayerRepresent() != 0) break;
+                    if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT) break;
                     switch (object_click->getSort())
                     {
 //                        case SORT_ANIMAL:
@@ -595,7 +623,7 @@ void Core::manageMouseEvent()
                     break;
 
                 case SORT_BUILDING:
-                    if(nowobject->getPlayerRepresent() != 0 || nowobject->getNum()!= BUILDING_ARROWTOWER) break;
+                    if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT || nowobject->getNum()!= BUILDING_ARROWTOWER) break;
 
                     switch (object_click->getSort())
                     {
@@ -603,18 +631,18 @@ void Core::manageMouseEvent()
 //                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 //                            break;
                         case SORT_Building_Resource:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         case SORT_BUILDING:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             else
                                 interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
                             break;
                         case SORT_ARMY:
                         case SORT_FARMER:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:
@@ -676,7 +704,7 @@ void Core::manageOrder(int id)
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
             ret=interactionList->addRelation(self,cur.DR,cur.UR,CoreEven_JustMoveTo);
-            if(ret == ACTION_SUCCESS&& id == 0)
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," HumanMove:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 移动至 ("+QString::number(cur.DR)+","+QString::number(cur.UR)+")",id);
             break;
         }
@@ -703,7 +731,7 @@ void Core::manageOrder(int id)
                 case SORT_STATICRES:
                 case SORT_ANIMAL:
                     ret=interactionList->addRelation(self,obj,CoreEven_Gather);
-                    if(ret == ACTION_SUCCESS&& id == 0)
+                    if(ret == ACTION_SUCCESS)
                         call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     break;
                 case SORT_BUILDING:
@@ -717,13 +745,13 @@ void Core::manageOrder(int id)
                         else
                             ret=interactionList->addRelation(self , obj , CoreEven_FixBuilding);
 
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     else
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
@@ -735,12 +763,12 @@ void Core::manageOrder(int id)
                         if(((Building_Resource*)obj)->get_Gatherable()) ret=interactionList->addRelation(self,obj,CoreEven_Gather);
                         else ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
 
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }else
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS && id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
@@ -748,7 +776,7 @@ void Core::manageOrder(int id)
                     if(self->getPlayerRepresent() != obj->getPlayerRepresent())
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
+                        if(ret == ACTION_SUCCESS)
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                     break;
@@ -785,7 +813,7 @@ void Core::manageOrder(int id)
                     if(self->getPlayerRepresent() != obj->getPlayerRepresent())
                     {
                         ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS && id == 0)
+                        if(ret == ACTION_SUCCESS )
                             call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                     }
                 default:
@@ -799,8 +827,8 @@ void Core::manageOrder(int id)
             break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            ret=interactionList->addRelation(self,cur.BlockDR,cur.BlockUR,CoreEven_CreatBuilding,0,cur.option);
-            if(ret == ACTION_SUCCESS && id == 0)
+            ret=interactionList->addRelation(self, cur.BlockDR, cur.BlockUR, CoreEven_CreatBuilding, true, cur.option);
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," HumanBuild:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 开始在块坐标 ("+QString::number(cur.BlockDR)+","+QString::number(cur.BlockUR)+") 处建造 Building_"+ QString::number(cur.option),id);
             break;
         }
@@ -815,7 +843,7 @@ void Core::manageOrder(int id)
             }else{
                 ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
             }
-            if(ret == ACTION_SUCCESS&& id == 0)
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," BuildAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 执行行动 ACTION_"+QString::number(cur.option),id);
             break;
         }
@@ -885,13 +913,19 @@ void Core::loadRelationMap()
 }
 
 
-void Core::resetNowObject_Click()
+void Core::resetNowObject_Click(bool isStop)
 {
     if(mouseEvent->mouseEventType==LEFT_PRESS)
     {
+        if(isStop)
+        {
+            call_debugText("blue", " 细节坐标 ("+QString::number(mouseEvent->DR)+","+QString::number(mouseEvent->UR)\
+                           +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", REPRESENT_BOARDCAST_MESSAGE);
+        }
+
         nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
         if(nowobject!=NULL)
-            call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), 0);
+            call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), REPRESENT_BOARDCAST_MESSAGE);
         requestSound_Click(nowobject);
         sel->initActs();
         mouseEvent->mouseEventType=NULL_MOUSEEVENT;

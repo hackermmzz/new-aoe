@@ -19,7 +19,8 @@ Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;
 
-bool only_debug_Player0 = true;
+bool only_debug_Player0 = IS_DEBUGTEXT_ONLYNOWPLAYER;
+bool filterRepetitionMessage = IS_FILTER_DEBUGMESSAGE;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 
@@ -93,6 +94,16 @@ int InitImageResMap(QString path)
 
     }
     //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
+
+//查看rcc
+//    std::map<string, list<QPixmap>>::iterator iter,itere;
+//    iter = resMap.begin();
+//    itere = resMap.end();
+//    while(iter != itere)
+//    {
+//        qDebug()<<QString::fromStdString(iter->first);
+//        iter++;
+//    }
     return -1;
 }
 int InitSoundResMap(QString path)
@@ -496,9 +507,9 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content,int playerID)
 {
-    if(!only_debug_Player0 || playerID==0)
+    if(!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE)
     {
-        if(debugMessageRecord[content] == 0 || color == "black"|| color == "green")
+        if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
         {
             debugMassagePackage.push(st_DebugMassage(color, content));
             debugMessageRecord[content] = g_frame;

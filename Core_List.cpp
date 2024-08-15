@@ -1,6 +1,4 @@
 #include "Core_list.h"
-extern Score usrScore;
-extern Score enemyScore;
 
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
@@ -21,7 +19,7 @@ void Core_List::update()
 
     manageRelationList();
 
-    //若想知道微秒级的运行时间
+//    //若想知道微秒级的运行时间
 //    qint64 elapsedNanoseconds = timer4.nsecsElapsed();
 //    timerStand = elapsedNanoseconds/1000;
 //    qDebug() <<g_frame<< "manageRelationList:" << elapsedNanoseconds/1000<<"(ns)";
@@ -57,8 +55,8 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         if( eventType == CoreEven_FixBuilding && bloodGoalOb!=NULL && bloodGoalOb->isFullHp() ) //建筑不需要修理
             return ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX;
 
-        if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && buildGoalOb!=NULL \
-                && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
+        if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
+                && buildGoalOb!=NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
 
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
@@ -614,6 +612,7 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
     int extra_damage = 0;
     BloodHaver* attacker = NULL;    //攻击者
     BloodHaver* attackee = NULL;    //受攻击者
+    Animal* animalOb = NULL;
     MoveObject* moveOb = NULL;
     Missile* missile = NULL;
 
@@ -623,7 +622,16 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
 
     if(attackee != NULL && attacker!=NULL && attacker->canAttack())  //若指针均非空
     {        
-        if(!attacker->isAttacking()) attacker->setPreAttack();
+        if(!attacker->isAttacking())
+        {
+            object2->printer_ToAnimal((void**)&animalOb);
+            if(animalOb==NULL || !animalOb->isTree())
+            {
+                call_debugText("red"," "+object1->getChineseName()+"(编号:" + QString::number(object1->getglobalNum()) + \
+                               ")开始向"+object2->getChineseName()+"(编号："+QString::number(object2->getglobalNum())+")攻击", REPRESENT_BOARDCAST_MESSAGE);
+            }
+            attacker->setPreAttack();
+        }
         else
         {
             object1->printer_ToMoveObject((void**)&moveOb);
@@ -847,27 +855,6 @@ void Core_List::object_FinishAction(Coordinate* object1)
             relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildOb);
             relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResOb);
 
-            if(buildOb!=NULL && !buildOb->isConstructed())
-            {
-                std::string clickSound;
-
-                buildOb->initAction();
-
-                if(buildOb->getNum()==BUILDING_HOME||buildOb->getNum()==BUILDING_FARM)
-                    usrScore.update(_BUILDING1);
-                else
-                    usrScore.update(_BUILDING2);
-
-                player[object1->getPlayerRepresent()]->finishBuild(buildOb);
-                if(buildOb->getNum() == BUILDING_STOCK || buildOb->getNum() == BUILDING_GRANARY)
-                    resourceBuildingChange = true;
-
-                clickSound = buildOb->getSound_Click();
-
-                if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
-                    soundQueue.push(clickSound);
-            }
-
             if( buildResOb!=NULL &&  buildResOb->getNum() == BUILDING_FARM) //是农田
             {
                  object1->initAction();
@@ -923,9 +910,6 @@ void Core_List::conduct_Attacked(Coordinate* object)
         attacker=attackee->getAvangeObject();
         if(attacker!=NULL)
         {
-            /*call_debugText("red"," "+object->getChineseName()+"(编号:" + QString::number(object->getglobalNum()) + \
-                           ")被"+attacker->getChineseName()+"(编号："+QString::number(attacker->getglobalNum())+")攻击",object->getPlayerRepresent());*/
-
              attackee->updateAvangeObjectPosition();
         }
         //设置攻击者坐标
@@ -1045,12 +1029,12 @@ void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
     BloodHaver* blooder , *bloodee;
     Coordinate* judOb;
     attacker->printer_ToBloodHaver((void**)&blooder);
-    for(int x = -1 ; x<2; x++)
+    for(int x = -2 ; x<3; x++)
     {
-        for(int y = -1; y<2 ; y++)
+        for(int y = -2; y<3 ; y++)
         {
             bx = x+attacker->getBlockDR();
-            by = x+attacker->getBlockUR();
+            by = y+attacker->getBlockUR();
             if(bx < 0 || by < 0 || bx>=MAP_L|| by >= MAP_U) continue;
             size = theMap->map_Object[bx][by].size();
             bloodee = NULL;
@@ -1358,8 +1342,8 @@ void Core_List::initDetailList()
         overCondition.push_back(conditionF( condition_UniObjectDie, OPERATECON_OBJECT2 ));
         relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);   //向前跳转使用setLoop
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
         forcedInterrupCondition.clear();
         overCondition.clear();
     }
@@ -1409,8 +1393,8 @@ void Core_List::initDetailList()
         //资源被采集完毕后，若身上无资源，则直接停止
         relation_Event_static[CoreEven_Gather].setJump(8 , 12);
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
         forcedInterrupCondition.clear();
         overCondition.clear();
     }
@@ -1425,8 +1409,8 @@ void Core_List::initDetailList()
 
         relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
         forcedInterrupCondition.clear();
     }
 
@@ -1449,8 +1433,8 @@ void Core_List::initDetailList()
 
         relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
 
-        delete phaseList;
-        delete conditionList;
+        delete[] phaseList;
+        delete[] conditionList;
     }
 }
 
@@ -1522,7 +1506,7 @@ int Core_List::getNowPhaseNum(Coordinate* object)
             }
             return STATE_Gather_Static[nowPhaseNum];
         }
-    }else if(thisRelation.relationAct==CoreEven_FixBuilding&&obj!=NULL){
+    }else if(thisRelation.relationAct==CoreEven_FixBuilding && obj != NULL){
         Building* building=dynamic_cast<Building*>(obj);
         if(building->getPercent()<100){
             return STATE_CreateBuilding[nowPhaseNum];

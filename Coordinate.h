@@ -10,118 +10,139 @@
 class Coordinate
 {
 public:
-    Coordinate();
+    Coordinate(){}
 
   /**********************虚函数**************************/
-    virtual void nextframe();
-    virtual int getSort();
-    virtual bool isPlayerControl(){ return false; }
+    virtual int getSort(){return SORT_COORDINATE;}
 
-    virtual bool isMonitorObject(Coordinate* judOb){ return false; }
-
-
+    /*******状态与图像显示*******/
+    virtual void nextframe(){}
     virtual bool get_isActionEnd(){ return true; }
+    virtual void setNowRes(){ }
 
+
+    /*******player相关*******/
+    virtual bool isPlayerControl(){ return false; }
     virtual int getPlayerRepresent(){ return MAXPLAYER; }
 
+
+    /*******状态与属性设置、获取*******/
     virtual void setAttribute(){ }
-    virtual void setNowRes(){ }
     virtual int getVision(){ return vision; }
-
     virtual void resetCoreAttribute(){}
-
-    virtual void setAction( int actNum){ this->actNum = actNum; }
-    virtual void ActNumToActName(){ actName = actNum; }
-
+    //是否需要监视地图
+    virtual bool isMonitorObject(Coordinate* judOb){ return false; }
     virtual QString getChineseName(){ return ""; }
 
+
+    /*******行动相关*******/
+    virtual void setAction( int actNum){ this->actNum = actNum; }
+    virtual void ActNumToActName(){ actName = actNum; }
+    //重置行动record
+    virtual void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; }
+
+
+    /*******音乐与音效*******/
     virtual string getSound_Click(){return "";}
+
+
     /***************指针强制转化****************/
     //若类有多重继承时，指针强制转化为父类指针,务必用以下函数!
-    virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }   //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
-    virtual void printer_ToMoveObject(void** ptr){ *ptr = NULL; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
-    virtual void printer_ToHuman(void** ptr){ *ptr = NULL; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
-    virtual void printer_ToBloodHaver(void** ptr){ *ptr = NULL; }   //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
-    virtual void printer_ToResource(void** ptr){ *ptr = NULL; }     //传入ptr为Resource类指针的地址,需要强制转换为（void**）
+    //传入ptr为Coordinatel类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToCoordinate(void** ptr){ *ptr = this; }
+
+    //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToMoveObject(void** ptr){ *ptr = NULL; }
+
+    //传入ptr为Human类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToHuman(void** ptr){ *ptr = NULL; }
+
+    //传入ptr为BloodHaver类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToBloodHaver(void** ptr){ *ptr = NULL; }
+
+    //传入ptr为Resource类指针的地址,需要强制转换为（void**）
+    virtual void printer_ToResource(void** ptr){ *ptr = NULL; }
+
     virtual void printer_ToBuilding(void** ptr){ *ptr = NULL; }
+
     virtual void printer_ToBuilding_Resource(void **ptr){ *ptr = NULL; }
+
     virtual void printer_ToMissile(void** ptr){ *ptr = NULL; }
+
     virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
+
     virtual void printer_ToStaticRes(void**ptr){ *ptr = NULL; }
 
     /*************以上指针强制转化****************/
   /********************以上虚函数**************************/
+
+
+    /*******坐标相关*******/
     //获取坐标
     double getDR(){return this->DR;}
     double getUR(){return this->UR;}
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
-    double getCrashLength(){ return crashLength; }
 
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }
 
+    //获取中心点块坐标
+    Point getBlockPosition(){ return Point(transBlock(DR), transBlock(UR)); }
+
+    //获取两点间欧几里得距离
+    double getDis_E_Detail(Coordinate* __x){return countdistance(DR ,UR , __x->getDR() , __x->getUR());}
+    double getDis_E_Detail(Coordinate& __x){return countdistance(DR ,UR , __x.getDR() , __x.getUR());}
+
+    // 获取地图块高度导致的偏移量
+    int getMapHeightOffsetY(){ return MapHeightOffsetY; }
+    void setMapHeightOffsetY(int m_MapHeightOffsetY){ MapHeightOffsetY = m_MapHeightOffsetY; }
+
+    double getSideLength(){return this->SideLength;}
+    double get_BlockSizeLen(){ return BlockSizeLen; }
+
+    /*******可见性相关*******/
     void setExplored(int explored){ this->explored = explored; }
     void setvisible( int visible  ){ this->visible = visible; }
     int getexplored(){ return explored; }
     int getvisible(){ return (int)(visible||timer_Visible>0); }
     void visibleSomeTimes(){ timer_Visible = 250;}
+    vector<Point> getViewLab();
 
-    //获取中心点块坐标
-    Point getBlockPosition(){ return Point(transBlock(DR), transBlock(UR)); }
 
-    //获取两点间欧几里得距离
-    double getDis_E_Detail(Coordinate* __x){
-        return countdistance(DR ,UR , __x->getDR() , __x->getUR());
-    }
-    double getDis_E_Detail(Coordinate& __x){
-        return countdistance(DR ,UR , __x.getDR() , __x.getUR());
-    }
+    /*******碰撞相关*******/
+    double getCrashLength(){ return crashLength; }
 
-    // 获取地图块高度导致的偏移量
-    int getMapHeightOffsetY();
-    void setMapHeightOffsetY(int m_MapHeightOffsetY);
 
-    //image资源相关信息
+    /*******image资源相关信息*******/
     double getimageX(){return this->imageX;}
     double getimageY(){return this->imageY;}
-    double getSideLength(){return this->SideLength;}
     int getimageH(){return this->imageH;}
     std::list<ImageResource>::iterator getNowRes(){return this->nowres;}
 
-    //创建对象相关信息
+
+    /*******创建对象相关信息*******/
     int getglobalNum(){return this->globalNum;}
     int getNum(){return this->Num;}
     bool isIncorrect_Num(){ return incorrectNum; }  //判断当前Num在该类下是否正确
 
-    double get_BlockSizeLen(){ return BlockSizeLen; }
-//    double get_SideLen(){return SideLength;}
 
-    //设置当前交互对象
-    void set_interAct(int interSort , int interNum , bool interRepresent = false , bool interBui_builtUp=false)
-        { interactSort = interSort ; interactNum = interNum; interact_sameRepresent = interRepresent; interactBui_builtUp = interBui_builtUp; }
-
-    void resetINterAct(){ interactSort = -1; interactNum = -1; interact_sameRepresent = false; interactBui_builtUp = false; }
-
-    vector<Point> getViewLab(){
-        if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>0 && getVision() > 1) setViewLab((int)BlockSizeLen , getVision());
-
-        return viewLab[(int)BlockSizeLen][getVision()];
-    }
-
-/*****************act获取***************/
+    /*****************act相关***************/
     double getActPercent() {return this->actPercent;}
     double getActSpeed(){ return this->actSpeed;}
     int getActName(){return this->actName;}
-    void setActPercent(double actPercent){this->actPercent = actPercent;}
     int getActNum(){ return this->actNum;}
 
     int ActNameToActNum(int actName);
 
-    //重置行动record
-    void initAction(){ actName = ACT_NULL; actNum = ACT_NULL; actSpeed = 0; actPercent = 0; }
-/*****************act获取***************/
+    void initActionPersent(){ actPercent = 0; }
+
+    //设置当前交互对象
+    void set_interAct(int interSort , int interNum , bool interRepresent = false , bool interBui_builtUp=false);
+
+    void resetINterAct();
+
 
 protected:
     int Num;//对象在对应类中的编号
@@ -180,38 +201,31 @@ protected:
     /*****************act获取***************/
     double actPercent = 0;
     double actSpeed = 0;
-    int actName = 0;
+    int actName = ACT_NULL;
     //执行行动时的进度、速率和行动类型
-    int actNum=0;
+    int actNum=ACT_NULL;
     //动作类型的编号
     /*****************act获取***************/
 
+
+    /*******可见性相关*******/
     void time_BeVisible(){ timer_Visible--;}
-
-    void initNowresTimer(){ nowres_changeRecord = 0; }
-    bool isNowresShift(){   //用于限制nowres切换，以降低图像资源循环速度
-        if(nowres_step == nowres_changeRecord)
-        {
-            nowres_changeRecord = 0;
-            return true;
-        }
-        else
-        {
-            nowres_changeRecord++;
-            return false;
-        }
-    }
-
-    void setDetailPointAttrb_FormBlock()
-    {
-        DR = ( BlockDR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
-        UR = ( BlockUR + BlockSizeLen/2.0)*BLOCKSIDELENGTH;
-        setSideLenth();
-    }
-    void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
-
     static void setViewLab( int blockSize , int visionLen );
     static void addViewLab( vector<Point>& blockLab , int lx , int mx , int y , int y_mirr );
+
+
+    /*******image资源相关信息*******/
+    void initNowresTimer(){ nowres_changeRecord = 0; }
+    bool isNowresShift();
+    void updateImageXYByNowRes();
+
+
+    /*******坐标相关*******/
+    void setDetailPointAttrb_FormBlock();
+    void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
+    void setDRUR( double DR, double UR ){ this->DR = DR; this->UR = UR; }
+    void setBlockDRUR( int BlockDR, int BlockUR ){ this->BlockDR = BlockDR; this->BlockUR = BlockUR; }
+    void updateBlockByDetail(){ BlockDR = transBlock(DR); BlockUR = transBlock(UR); }
 
 };
 

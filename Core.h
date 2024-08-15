@@ -13,6 +13,7 @@ public:
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
     void gameUpdate();
+    void updateByObject();
     void infoShare();   //将游戏信息同步给AIGame
 
     void getPlayerNowResource( int playerRepresent, int& wood, int& food, int& stone, int& gold );
@@ -49,7 +50,7 @@ public:
     void suspendRelation(Coordinate * object){ interactionList->suspendRelation(object); }
     /************添加/删除表************/
 
-    void resetNowObject_Click();
+    void resetNowObject_Click(bool isStop = false);
     void requestSound_Click( Coordinate* object );
 private:
     Player** player;    //player信息
