@@ -37,7 +37,7 @@
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.02b"
+#define GAME_VERSION "v2.02c"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define GAME_LOSE_SEC 1500
 #define GOLD 10                         //金块资源数量
@@ -46,6 +46,8 @@
 #define MAXPLAYER 8
 #define NOWPLAYER 2
 #define NOWPLAYERREPRESENT 0
+#define INITIAL_FREQUENCY 1
+#define EXAMINE_MODE false
 
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度

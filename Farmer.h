@@ -193,7 +193,7 @@ private:
 
 
     void requestSound_Work();
-    void requestSound_Die(){soundQueue.push("Army_Die");}
+    void requestSound_Die(){if(isInWidget()) soundQueue.push("Army_Die");}
 };
 
 #endif // FARMER_H
