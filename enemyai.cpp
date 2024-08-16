@@ -489,10 +489,10 @@ void EnemyAI::processData() {
                timer[i]=g_frame;
           }
       }
-      if(mode==3){
-          qDebug()<<armystate[Hero];
-          qDebug()<<armystate[0]<<Lock[0];
-      }
+//      if(mode==3){
+//          qDebug()<<armystate[Hero];
+//          qDebug()<<armystate[0]<<Lock[0];
+//      }
 
     for(int i=0;i<5;i++) target[i]=151;
     return;
