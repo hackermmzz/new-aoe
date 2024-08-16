@@ -36,6 +36,7 @@ static int s;
 static int t;
 static int tar[50];
 static bool ifretreat[50];
+static int heroexist=0;
 static int seek(int Sort,int number){
     double temp=0;
     int SN=0;
@@ -88,14 +89,19 @@ void EnemyAI::processData() {
     enemyInfo=getInfo();
     s=0;
     t=0;
+    heroexist=0;
     //军队数据初始化
     for(int i=0;i<enemyInfo.armies.size();i++){
         if(enemyInfo.armies[i].Sort>=4){
             Hero=i;
+            heroexist=1;
             if(Hero!=Herotemp){
                 Blood[Hero]=Blood[Herotemp];
             }
         }
+    }
+    if(heroexist==0){
+        Hero=0;
     }
     if(g_frame==15){
         sum=enemyInfo.armies.size();
@@ -447,12 +453,12 @@ void EnemyAI::processData() {
               }
               else */
               if(enemyInfo.enemy_buildings[i].Type==BUILDING_ARROWTOWER){
-                  if(calDistance(enemyInfo.armies[sum-1].BlockDR,enemyInfo.armies[sum-1].BlockUR,enemyInfo.enemy_buildings[i].BlockDR,enemyInfo.enemy_buildings[i].BlockUR)<8*BLOCKSIDELENGTH){
+                  if(calDistance(enemyInfo.armies[Hero].BlockDR,enemyInfo.armies[Hero].BlockUR,enemyInfo.enemy_buildings[i].BlockDR,enemyInfo.enemy_buildings[i].BlockUR)<8*BLOCKSIDELENGTH){
                       Btarget[t]=enemyInfo.enemy_buildings[0].SN;t++;break;
                   }
               }
               else if(enemyInfo.enemy_buildings[i].Type==BUILDING_CENTER){
-                  if(calDistance(enemyInfo.armies[sum-1].BlockDR,enemyInfo.armies[sum-1].BlockUR,enemyInfo.enemy_buildings[i].BlockDR,enemyInfo.enemy_buildings[i].BlockUR)<8*BLOCKSIDELENGTH){
+                  if(calDistance(enemyInfo.armies[Hero].BlockDR,enemyInfo.armies[Hero].BlockUR,enemyInfo.enemy_buildings[i].BlockDR,enemyInfo.enemy_buildings[i].BlockUR)<8*BLOCKSIDELENGTH){
                       Btarget[0]=enemyInfo.enemy_buildings[0].SN;t++;break;
                   }
               }
@@ -489,11 +495,76 @@ void EnemyAI::processData() {
                timer[i]=g_frame;
           }
       }
-//      if(mode==3){
-//          qDebug()<<armystate[Hero];
-//          qDebug()<<armystate[0]<<Lock[0];
-//      }
+      if(mode==3){
+          qDebug()<<armystate[Hero];
+          qDebug()<<armystate[0]<<Lock[0];
+      }
+      if(mode==3&&Hero==0){
+          for(int i=0;i<enemyInfo.armies.size();i++){
+              if(armystate[i]!=ATTACK){
+                  armystate[i]=ATTACK;
+              }
+          }
+      }
+      if(mode==3&&Hero==0){
+          for(int i=0;i<enemyInfo.armies.size();i++){
+          if(nowState_Army==MOVEOBJECT_STATE_STAND&&Lock[i]==0){
+          if(enemyInfo.armies[i].Sort==2){
+              ChasingLock[i]=1;
+              int tar=target[2];
+              if(tar==151)
+              armystate[i]==WAITING;
+              else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                  HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+              else if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+              else if(enemyInfo.enemy_farmers.size()!=0) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+          if(tar!=151){    Lock[i]=1;
+              timer[i]=g_frame;
+              }}
+          else if(enemyInfo.armies[i].Sort==1)
+          {
+              int tar=target[1];
+              if(tar==151)
+              armystate[i]==WAITING;
+              else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                  HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+              else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+              else if(enemyInfo.enemy_farmers.size()!=0)HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+              if(tar!=151){    Lock[i]=1;
+                  timer[i]=g_frame;
+          }}
+          else if(enemyInfo.armies[i].Sort==3)
+          {
+              int tar=target[3];
+              if(tar==151)
+              armystate[i]==WAITING;
+              else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+              HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+              else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+              else if(enemyInfo.enemy_farmers.size()!=0)HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+              if(tar!=151){    Lock[i]=1;
+                  timer[i]=g_frame;
+          }}
+          else if(enemyInfo.armies[i].Sort==0){
 
+              int tar=target[0];
+              if(tar==151)
+              armystate[i]==WAITING;
+              else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)
+                  HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_buildings[tar-100].SN);
+
+              else  if(tar>=50&&enemyInfo.enemy_armies.size()!=0 ) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_armies[tar-50].SN);
+              else if(enemyInfo.enemy_farmers.size()!=0) HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[tar].SN);
+              if(tar!=151){    Lock[i]=1;
+                  timer[i]=g_frame;
+          }
+  }}
+          if ((g_frame - timer[i]) >= 15 && enemyInfo.armies[i].NowState ==MOVEOBJECT_STATE_STAND) {
+              Lock[i]=0;
+              timer[i] = 0;
+              armystate[i]=WAITING;
+                          }
+      }}
     for(int i=0;i<5;i++) target[i]=151;
     return;
     /*###########YOUR CODE ENDS HERE###########*/
