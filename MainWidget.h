@@ -119,6 +119,7 @@ private:
     void judgeVictory();
     bool isLoss();
     bool isWin();
+    void ScoreSave(string gameResult);
 
     bool pause = false;
     Option *option = NULL;
