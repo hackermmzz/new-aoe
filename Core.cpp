@@ -138,7 +138,6 @@ void Core::updateByObject()
                 else theHuman->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
             }
 
-
             if((*humaniter)->isDying())
             {
                 if((*humaniter)->get_isActionEnd())
@@ -171,6 +170,7 @@ void Core::updateByObject()
 
                 humaniter++;
             }
+
         }
 
         while(builditer != builditerEnd)

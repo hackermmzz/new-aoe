@@ -7,6 +7,14 @@ Core_List::Core_List(Map* theMap, Player* player[])
     this->player = player;
     initDetailList();
 }
+
+
+/** ********
+ * 函数：Core_List::update
+ * 参数：无；
+ * 内容：动态关系表更新，并更新相关辅助数据；
+ * 返回值：空。
+ */
 void Core_List::update()
 {
     //对正在监视的Object，进行行动处理
@@ -31,7 +39,17 @@ void Core_List::update()
 
 //****************************************************************************************
 //控制动态表
-//对人，命令不必手动中止，直接变更；当建筑正进行升级、造兵等行动，命令变更将被无视，必须手动中止当前命令后再下达新命令。
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体
+ *      object2: 行动的目标
+ *      envenType:  行动的类型，见常量表 “关系事件名称”
+ *      respond: true表示，本addRelation添加的行动不会被后续addRelation覆盖，除非在调用addRelation前调用suspendRelation取消object1的行动
+ *
+ * 内容：添加有两个对象（一个主体，一个目标）的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
+ *      对人，命令不必手动中止，直接变更；当建筑正进行升级、造兵等行动，命令变更将被无视，必须手动中止当前命令后再下达新命令。
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eventType, bool respond)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -105,7 +123,16 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
     return ACTION_INVALID_ISNTFREE;
 }
 
-//moveobject移动
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体
+ *      DR UR: 目标位置的细节坐标
+ *      envenType:  行动的类型，见常量表 “关系事件名称”，该函数保证eventType为CoreEven_JustMoveTo
+ *      respond: true表示，本addRelation添加的行动不会被后续addRelation覆盖，除非在调用addRelation前调用suspendRelation取消object1的行动
+ *
+ * 内容：添加moveobject对象进行移动的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -136,7 +163,16 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     return ACTION_INVALID_ISNTFREE;
 }
 
-//建造建筑地基
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体
+ *      BlockDR BlockUR: 目标位置的块坐标
+ *      envenType:  行动的类型，见常量表 “关系事件名称”，该函数保证eventType为CoreEven_CreatBuilding
+ *      respond: true表示，本addRelation添加的行动不会被后续addRelation覆盖，除非在调用addRelation前调用suspendRelation取消object1的行动
+ *
+ * 内容：进行建造建筑地基，如果建造地基成功，则调用addrelation重载添加object对地基对象进行修建的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -186,7 +222,15 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
     return ACTION_INVALID_ISNTFREE;
 }
 
-//添加building行动
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体，该重载保证object1为Building或其派生类的指针
+ *      envenType:  行动的类型，见常量表 “关系事件名称”
+ *      actNum: 建筑行动的编号，见常量表 “建筑动作”
+ *
+ * 内容：添加建筑的行动至关系表中，并返回该操作的结果（成功或相关错误）
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;

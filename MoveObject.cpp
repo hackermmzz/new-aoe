@@ -193,7 +193,7 @@ void MoveObject::updateMove()
         {0 , 7 , 6} \
     };
 
-    double dDR,dUR,dis,ratio;
+    double dDR = 0, dUR = 0, dis = 0, ratio = 0;
 
     if(isWalking() && (DR!=DR0||UR!=UR0))
     {
