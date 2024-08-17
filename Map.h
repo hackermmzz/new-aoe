@@ -20,8 +20,10 @@ public:
     // 随机生成资源（单个），并添加到地图中
     void generateResource();
 
-    // 生成城镇中心附近13*13的部分
     void generateCenter();
+
+    // 生成城镇中心附近13*13的部分
+    void generateCenterAround();
 
     //生成敌人
     void generateEnemy();
@@ -172,6 +174,7 @@ private:
     void InitFaultHandle();     // 初始化错误处理
     void InitCell(int Num, bool isExplored, bool isVisible);
     void GenerateMapTxt(int MapJudge);
+    void loadGenerateMapText(int MapJudge);
 
     double tranL(double BlockL);
     double tranU(double BlockU);
