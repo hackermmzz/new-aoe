@@ -481,15 +481,15 @@ void Map::generateResource() {
 
 }
 
+
 /*
- * 函数：Map::generateCenter；
+ * 函数：Map::generateCenter
  * 参数：无；
- * 内容：在地图中央13 * 13的部分单独生成市镇中心附近的资源；
+ * 内容：在地图中央生产市镇中心及初始村民；
  * 返回值：空。
  */
-void Map::generateCenter() {
-    srand(time(NULL));
-
+void Map::generateCenter()
+{
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
     player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
@@ -499,8 +499,6 @@ void Map::generateCenter() {
     player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
     player[0]->addFarmer((MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
 
-//    player[1]->addArmy(AT_CLUBMAN,(MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
-
     for(int i = MAP_L / 2 - 2; i <= MAP_L / 2 + 2; i++)
     {
         for(int j = MAP_U / 2 - 2; j <= MAP_U / 2 + 2; j++)
@@ -508,6 +506,18 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+}
+
+
+
+/*
+ * 函数：Map::generateCenterAround
+ * 参数：无；
+ * 内容：在地图中央13 * 13的部分单独生成市镇中心附近的资源；
+ * 返回值：空。
+ */
+void Map::generateCenterAround() {
+    srand(time(NULL));
 
     // 生成城镇中心附近9 * 9部分的1棵随机位置的树
     // flag：0表示未生成，1表示已生成
@@ -1974,7 +1984,7 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
 /*
  * 函数：Map::GenerateMapTxt；
  * 参数：获取启动参数，判断是否输出地图；
- * 内容：导出或读取地图txt文件；
+ * 内容：导出地图txt文件；
  * 返回值：空。
  */
 void Map::GenerateMapTxt(int MapJudge) {
@@ -2030,7 +2040,17 @@ void Map::GenerateMapTxt(int MapJudge) {
             qDebug() << "无法导出地图文件";
         }
     }
-    else if(MapJudge == 1)  // 读取上一次随机的地图
+}
+
+/*
+ * 函数：Map::loadGenerateMapText
+ * 参数：获取启动参数，判断是否载入地图；
+ * 内容：读取地图txt文件；
+ * 返回值：空。
+ */
+void Map::loadGenerateMapText(int MapJudge)
+{
+    if(MapJudge == 1)  // 读取上一次随机的地图
     {
         QFile inputGameFile("tmpMap.txt"); // 打开文本文件以读取数据
 
@@ -2048,6 +2068,8 @@ void Map::GenerateMapTxt(int MapJudge) {
                 for(int j = 0; j<MAP_U; j++)
                 {
                     Gamemap[i][j] = lineList[j].toInt();
+
+                    mapFlag[i][j] = (Gamemap[i][j] != 0);
                 }
             }
             in.readLine();
@@ -2080,6 +2102,7 @@ void Map::GenerateMapTxt(int MapJudge) {
             }
 
             inputGameFile.close();
+
             qDebug() << "上一次的随机地图数据已读取到游戏内";
         }
         else
@@ -2105,6 +2128,8 @@ void Map::GenerateMapTxt(int MapJudge) {
                 for(int j = 0; j<MAP_U; j++)
                 {
                     Gamemap[i][j] = lineList[j].toInt();
+
+                    mapFlag[i][j] = (Gamemap[i][j] != 0);
                 }
             }
             in.readLine();
@@ -2142,6 +2167,40 @@ void Map::GenerateMapTxt(int MapJudge) {
     }
 }
 
+
+/*
+ * 函数：Map::init；
+ * 参数：无；
+ * 内容：初始化地图的总函数；
+ * 返回值：空。
+ */
+void Map::init(int MapJudge) {
+    InitCell(0, MAP_EXPLORE, MAP_VISIABLE);    // 第二个参数修改为true时可令地图全部可见
+    // 资源绘制在MainWidget里完成
+
+    if(MapJudge != 1 && MapJudge != 2)
+        while(!GenerateTerrain());  // 元胞自动机生成地图高度
+    else
+        loadGenerateMapText(MapJudge);  //载入地图
+
+    GenerateType();             // 通过高度差计算调用的地图块资源
+    CalOffset();                // 计算偏移量
+    InitFaultHandle();          // 抛出地图生成中的错误
+//    generateLandforms();        // 在草地中生成小片沙漠
+
+    generateCenter();   //生成市镇中心
+    if(MapJudge != 1 && MapJudge != 2)
+    {
+        generateCenterAround();    //生成市镇中心附近资源
+        generateResources();       // 生成片状资源
+        generateResource();        // 生成独立资源
+    }
+    generateEnemy();          //生成敌人
+
+    GenerateMapTxt(MapJudge);   // 生成地图文件
+}
+
+
 double Map::tranL(double BlockL)
 {
     double L;
@@ -2155,25 +2214,3 @@ double Map::tranU(double BlockU)
     U = BlockU * BLOCKSIDELENGTH;
     return U;
 }
-
-/*
- * 函数：Map::init；
- * 参数：无；
- * 内容：初始化地图的总函数；
- * 返回值：空。
- */
-void Map::init(int MapJudge) {
-    InitCell(0, MAP_EXPLORE, MAP_VISIABLE);    // 第二个参数修改为true时可令地图全部可见
-    // 资源绘制在MainWidget里完成
-    while(!GenerateTerrain());  // 元胞自动机生成地图高度
-    GenerateType();             // 通过高度差计算调用的地图块资源
-    CalOffset();                // 计算偏移量
-    InitFaultHandle();          // 抛出地图生成中的错误
-//    generateLandforms();        // 在草地中生成小片沙漠
-    generateCenter();           // 生成市镇中心及附近资源
-    generateResources();        // 生成片状资源
-    generateResource();        // 生成独立资源
-    generateEnemy();          //生成敌人
-    GenerateMapTxt(MapJudge);   // 生成地图文件
-}
-

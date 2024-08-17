@@ -857,6 +857,19 @@ void Core::manageOrder(int id)
 }
 
 
+int Core::deleteSelf(Coordinate* object) //删除对象，返回错误码
+{
+    BloodHaver *bloodOb = NULL;
+
+    if(object->getPlayerRepresent()!=0) return ACTION_INVALID_SN;
+
+    object->printer_ToBloodHaver((void**) &bloodOb);
+    if(bloodOb && !bloodOb->isDie())
+        bloodOb->updateBlood(bloodOb->getMaxBlood());
+
+    return ACTION_SUCCESS;
+}
+
 //判断moveObject碰撞
 void Core::judge_Crush()
 {
@@ -947,7 +960,3 @@ void Core::requestSound_Click( Coordinate* object )
 
     return;
 }
-
-
-
-
