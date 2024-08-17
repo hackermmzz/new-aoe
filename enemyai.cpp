@@ -136,7 +136,7 @@ void EnemyAI::processData() {
              armystate[i]=WAITING;
              ChasingLock[i]=0;
         }
-    }  
+    }
     if(flag==1)
         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             if(AIFSN[i]!=enemyInfo.enemy_farmers[i].SN&&AIFSN[i]!=0)

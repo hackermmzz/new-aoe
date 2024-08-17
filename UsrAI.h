@@ -4,7 +4,6 @@
 extern tagGame tagUsrGame;
 extern ins UsrIns;
 /*##########请勿修改以上部分##########*/
-
 class UsrAI:public AI
 {
 public:
