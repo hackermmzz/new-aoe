@@ -51,7 +51,10 @@ private:
 
     Core* core = NULL;
 
-    void manageBuildBottom(int position, int actNum , int buildingNum );;
+    bool secondWidget_Build = false;
+
+    void manageBuildBottom(int position, int actNum , int buildingNum );
+    void showBuildActLab();
 public slots:
     void widgetAct(int num);
     int  aiAct(int actName,Coordinate* self);

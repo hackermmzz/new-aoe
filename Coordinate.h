@@ -144,6 +144,11 @@ public:
     void resetINterAct();
 
 
+    /*****************在窗口内***************/
+    void setInWidget(){ this->inWindow = 1; }
+    void setNotInWidget(){ this->inWindow = 0; }
+    bool isInWidget(){return this->inWindow == 1; }
+
 protected:
     int Num;//对象在对应类中的编号
     //比如building类下Num==0为小房子

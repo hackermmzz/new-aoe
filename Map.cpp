@@ -676,16 +676,16 @@ void Map::generateEnemy(){
     //第三组
     player[1]->addArmy(0,pos_L[2]-15,pos_U[2]-15);
     player[1]->addArmy(0,pos_L[2]+15,pos_U[2]+15);
-    player[1]->addArmy(0,pos_L[2]+15,pos_U[2]-15);
-    player[1]->addArmy(0,pos_L[2]-15,pos_U[2]+15);
-    player[1]->addArmy(1,pos_L[2]-30,pos_U[2]+30);
-    player[1]->addArmy(1,pos_L[2]+30,pos_U[2]-30);
-    player[1]->addArmy(1,pos_L[2]+30,pos_U[2]-30);
-    player[1]->addArmy(1,pos_L[2]-30,pos_U[2]+30);
-    player[1]->addArmy(2,pos_L[2]+45,pos_U[2]+45);
-    player[1]->addArmy(2,pos_L[2]-45,pos_U[2]-45);
-    player[1]->addArmy(2,pos_L[2]+45,pos_U[2]-45);
-    player[1]->addArmy(2,pos_L[2]+45,pos_U[2]-45);
+    player[1]->addArmy(0,pos_L[2]+30,pos_U[2]-30);
+    player[1]->addArmy(0,pos_L[2]-30,pos_U[2]+30);
+    player[1]->addArmy(1,pos_L[2]-45,pos_U[2]+45);
+    player[1]->addArmy(1,pos_L[2]+45,pos_U[2]-45);
+    player[1]->addArmy(1,pos_L[2]+60,pos_U[2]-60);
+    player[1]->addArmy(1,pos_L[2]-60,pos_U[2]+60);
+    player[1]->addArmy(2,pos_L[2]+75,pos_U[2]+75);
+    player[1]->addArmy(2,pos_L[2]-75,pos_U[2]-75);
+    player[1]->addArmy(2,pos_L[2]+90,pos_U[2]-90);
+    player[1]->addArmy(2,pos_L[2]+90,pos_U[2]-90);
     player[1]->addArmy(rand2+4,pos_L[2]-80,pos_U[2]+80);
 }
 

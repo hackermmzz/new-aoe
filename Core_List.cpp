@@ -937,7 +937,7 @@ void Core_List::conduct_Attacked(Coordinate* object)
             }
             else if(object->getSort() == SORT_FARMER)
             {
-                if(object->getPlayerRepresent() == NOWPLAYERREPRESENT)
+                if(object->getPlayerRepresent() == NOWPLAYERREPRESENT && object->isInWidget())
                     soundQueue.push("Villager_BeAttacked");
 
                 if(attacker!=NULL && (isObject_Free(object) || relate_AllObject[object].relationAct != CoreEven_Attacking \
@@ -1239,7 +1239,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         for(int i = 0; i<8 && !meetGoal; i++)
         {
             nextPoint = nowPoint + dire[i];
-            if(nextPoint.x<= 0 || nextPoint.y <= 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
+            if(nextPoint.x< 0 || nextPoint.y < 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
 
             //判断格子是否可走、未走过
             //斜线方向需要多判断马脚操作
@@ -1505,6 +1505,11 @@ int Core_List::getNowPhaseNum(Coordinate* object)
                 return HUMAN_STATE_DIGGING_GOLD;
             }
             return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_Building_Resource){
+            //对农田
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_FARMING;
+            }
         }
     }else if(thisRelation.relationAct==CoreEven_FixBuilding && obj != NULL){
         Building* building=dynamic_cast<Building*>(obj);

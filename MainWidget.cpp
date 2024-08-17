@@ -3,7 +3,7 @@
 
 int g_globalNum= rand()%11;
 int g_frame=0;
-int mapmoveFrequency = 1;
+int mapmoveFrequency = INITIAL_FREQUENCY;
 extern Score usrScore;
 extern Score enemyScore;
 std::map<int,Coordinate*> g_Object;
@@ -199,7 +199,14 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
         bgm->setLoopCount(QSoundEffect::Infinite);
 
 //        qDebug()<< (option->getMusic());
-        if(option->getMusic()) bgm->play();
+        responseMusicChange();
+    }
+
+    if(isExamining)
+    {
+        timer->setInterval(5);
+        mapmoveFrequency=8;
+        nowobject=NULL;
     }
 
 
@@ -822,9 +829,11 @@ void MainWidget::judgeVictory()
         debugText("blue"," 游戏失败，未达成目标。最终得分为:" + QString::number(usrScore.getScore()));
 
         //弹出胜利提示
-        if(QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
+        if( isExamining || QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
         {
 //            setLose();
+            ScoreSave("Lose");
+            this->close();
         }
     }
 
@@ -837,9 +846,11 @@ void MainWidget::judgeVictory()
         debugText("blue"," 游戏胜利。最终得分为:"+ QString::number(usrScore.getScore()) );
 
         //弹出胜利提示
-        if(QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
+        if( isExamining || QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
         {
 //            setWinning();
+            ScoreSave("Win");
+            this->close();
         }
     }
     else return;
@@ -847,7 +858,7 @@ void MainWidget::judgeVictory()
 
 void MainWidget::playSound(string soundType)
 {
-    if(SoundMap[soundType] == NULL) return;
+    if( isExamining || SoundMap[soundType] == NULL) return;
 
 //    if(SoundMap[soundType]->isFinished())
         SoundMap[soundType]->play();
@@ -874,6 +885,22 @@ void MainWidget::makeSound()
     return;
 }
 
+void MainWidget::ScoreSave(string gameResult)
+{
+    std::ofstream ScoreFile("GameScore.txt");
+    if (ScoreFile.is_open())
+    {
+        std::string score = QString::number(usrScore.getScore()).toStdString();
+        std::string time = QString::number(sel->getSecend()).toStdString();
+        ScoreFile << gameResult <<" "<< score << " " << time;
+        ScoreFile.close();
+    }
+    else
+    {
+        qDebug() << "open GameScore fail.";
+    }
+    return ;
+}
 //**************槽函数***************
 // 游戏帧更新
 void MainWidget::FrameUpdate()
@@ -896,7 +923,7 @@ void MainWidget::FrameUpdate()
         if(gameframe%2==0 || pause) paintUpdate();
     }
     else if(mapmoveFrequency==8){
-        if(gameframe%4==0 || pause) paintUpdate();
+        if(gameframe%3==0 || pause) paintUpdate();
     }
     else{
         qDebug()<<"Speed setting error";
@@ -945,10 +972,8 @@ void MainWidget::on_stopButton_clicked()
 
 void MainWidget::responseMusicChange()
 {
-    if(option->getMusic())
-    {
+    if( !isExamining && option->getMusic())
         bgm->play();
-    }
     else
         bgm->stop();
 }

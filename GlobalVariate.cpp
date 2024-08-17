@@ -7,6 +7,8 @@
 #include <QtWidgets>
 using namespace std;
 
+bool isExamining = EXAMINE_MODE;
+
 map<std::string, std::list<QPixmap>> resMap;
 map<string, QSoundEffect*> SoundMap;
 std::queue<string> soundQueue;
@@ -507,7 +509,7 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content,int playerID)
 {
-    if(!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE)
+    if( !isExamining && (!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE) )
     {
         if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
         {

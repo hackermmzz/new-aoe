@@ -78,7 +78,7 @@ void Farmer::nextframe()
         {
             if(nowres == nowlist->begin() && nowstate == MOVEOBJECT_STATE_ATTACK)
             {
-                if(state == FARMER_HUNTER)
+                if(state == FARMER_HUNTER && isInWidget())
                      soundQueue.push(sound_work[state]);
             }
 
@@ -217,6 +217,9 @@ void Farmer::updateState()
 
 void Farmer::requestSound_Work()
 {
+    if(!isInWidget())
+        return;
+
     if( nowstate == MOVEOBJECT_STATE_WORK &&\
         ( state == FARMER_LUMBER || state == FARMER_MINER || state == FARMER_WORKER|| state == FARMER_FARMER || state == FARMER_GATHERER )\
         || nowstate == MOVEOBJECT_STATE_ATTACK && state == FARMER_LUMBER

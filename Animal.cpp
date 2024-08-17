@@ -236,12 +236,18 @@ int Animal::get_add_specialAttack()
 /*******音乐与音效*******/
 void Animal::requestSound_Die()
 {
+    if(!isInWidget())
+        return;
+
     if(!isTree())
         soundQueue.push("Animal_Die");
 }
 
 void Animal::requestSound_Attack()
 {
+    if(!isInWidget())
+        return;
+
     if(Num == ANIMAL_LION)
         soundQueue.push("Lion_Attack");
     else if(Num == ANIMAL_ELEPHANT)

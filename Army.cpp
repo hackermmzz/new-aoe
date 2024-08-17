@@ -150,12 +150,15 @@ void Army::setNowRes()
 
 void Army::requestSound_Attack()
 {
-    if(Num == AT_IMPROVED|| Num == AT_BOWMAN)
+    if((Num == AT_IMPROVED|| Num == AT_BOWMAN) && isInWidget())
         soundQueue.push("Archer_Attack");
 }
 
 void Army::requestSound_Die()
 {
+    if(!isInWidget())
+        return;
+
     if(Num == AT_SCOUT)
         soundQueue.push("Scout_Die");
     else
@@ -164,7 +167,7 @@ void Army::requestSound_Die()
 
 void Army::requestSound_Walk()
 {
-    if(Num == AT_SCOUT)
+    if(Num == AT_SCOUT && isInWidget())
         soundQueue.push("Scout_Walk");
 }
 /***********************************************************/

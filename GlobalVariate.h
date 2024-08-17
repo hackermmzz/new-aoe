@@ -14,6 +14,8 @@
 
 using namespace std;
 class Coordinate;
+extern bool isExamining;
+
 extern bool AIfinished;
 extern bool INSfinshed;
 extern int g_globalNum;

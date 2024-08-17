@@ -87,6 +87,8 @@ void SelectWidget::frameUpdate()
 
 void SelectWidget::initActs()
 {
+    secondWidget_Build =false;
+
     //根据点击的对象初始化行动数组
     if(nowobject == NULL)
     {
@@ -292,12 +294,16 @@ void SelectWidget::refreshActs()
         {
             if(!mainPtr->player[0]->get_isBuildingShowAble(buildType) || !mainPtr->player[0]->get_isBuildingAble(buildType))
                 actionStatus[i] = ACT_STATUS_DISABLED;
+            else
+                actionStatus[i] = ACT_STATUS_ENABLED;
         }
 
         if(isBuildingAct)
         {
             if(!mainPtr->player[0]->get_isBuildActionAble(buildType , buildingActType))
                 actionStatus[i] = ACT_STATUS_DISABLED;
+            else
+                actionStatus[i] = ACT_STATUS_ENABLED;
         }
     }
 
@@ -306,6 +312,11 @@ void SelectWidget::refreshActs()
     {
         mainPtr->getActs(i)->setStatus(actionStatus[i]);//应用行动状态,mainPtr->getActs(i)即获取第i个按钮窗口
         mainPtr->getActs(i)->update();//刷新按钮显示状态
+    }
+
+    if(secondWidget_Build)
+    {
+        showBuildActLab();
     }
 
     //再进行快捷栏和状态栏显示更新(本窗口的内容)
@@ -593,19 +604,8 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     //建筑的按钮位置
     if(actName == ACT_BUILD)
     {
-
-        manageBuildBottom( 0 , ACT_BUILD_HOUSE , BUILDING_HOME );
-        manageBuildBottom( 1 , ACT_BUILD_GRANARY , BUILDING_GRANARY );
-        manageBuildBottom( 2 , ACT_BUILD_STOCK , BUILDING_STOCK);
-        manageBuildBottom( 3 , ACT_BUILD_MARKET , BUILDING_MARKET);
-        manageBuildBottom( 4 , ACT_BUILD_ARROWTOWER , BUILDING_ARROWTOWER );
-        manageBuildBottom( 5 , ACT_BUILD_ARMYCAMP , BUILDING_ARMYCAMP );
-        manageBuildBottom( 6 , ACT_BUILD_RANGE , BUILDING_RANGE );
-        manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
-        manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
-
-        actions[9] = ACT_BUILD_CANCEL;
-        actionStatus[9] = ACT_STATUS_ENABLED;
+        secondWidget_Build = true;
+        showBuildActLab();
     }
     else if(actName == ACT_BUILD_HOUSE){
         QApplication::restoreOverrideCursor();
@@ -711,10 +711,26 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     return ACTION_SUCCESS;
 }
 
+void SelectWidget::showBuildActLab()
+{
+    manageBuildBottom( 0 , ACT_BUILD_HOUSE , BUILDING_HOME );
+    manageBuildBottom( 1 , ACT_BUILD_GRANARY , BUILDING_GRANARY );
+    manageBuildBottom( 2 , ACT_BUILD_STOCK , BUILDING_STOCK);
+    manageBuildBottom( 3 , ACT_BUILD_MARKET , BUILDING_MARKET);
+    manageBuildBottom( 4 , ACT_BUILD_ARROWTOWER , BUILDING_ARROWTOWER );
+    manageBuildBottom( 5 , ACT_BUILD_ARMYCAMP , BUILDING_ARMYCAMP );
+    manageBuildBottom( 6 , ACT_BUILD_RANGE , BUILDING_RANGE );
+    manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
+    manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
+
+    actions[9] = ACT_BUILD_CANCEL;
+    actionStatus[9] = ACT_STATUS_ENABLED;
+}
+
 void SelectWidget::updateActs()
 {
   //遍历建筑更新活动列表
-     std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
+    std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
     int wood = mainPtr->player[0]->getWood();
     int food = mainPtr->player[0]->getFood();
     int stone = mainPtr->player[0]->getStone();
