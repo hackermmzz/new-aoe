@@ -244,10 +244,8 @@ bool condition_Object1_FullBackpack( Coordinate* , relation_Object& , int& ,bool
 bool condition_ObjectNearby( Coordinate* , relation_Object& , int& ,bool);
 //object目标能被采集
 bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int& ,bool);
-
 //object攻击进程
 bool condition_Object1_AttackingEnd(Coordinate* , relation_Object& ,int& ,bool);
-
 //取消判断无效的行动
 bool condition_UselessAction(Coordinate* , relation_Object& , int& ,bool);
 //****************************************************************************************

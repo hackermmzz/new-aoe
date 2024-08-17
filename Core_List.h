@@ -8,7 +8,7 @@ extern Score enemyScore;
 class Core_List
 {
 public:
-    Core_List(){ }
+    Core_List(){}
     Core_List(Map* theMap, Player* player[]);
     ~Core_List(){}
 
@@ -31,13 +31,18 @@ public:
     void eraseRelation(Coordinate* object){ object->initAction(); relate_AllObject[object].isExist = false; } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
+
+
     /************关系表获取************/
     int getNowPhaseNum(Coordinate* object); //获取当前object的行动阶段，用于将信息传递给AIGame
     int getObjectSN(Coordinate* object);   //获取当前object的目标SN，用于将信息传递给AIGame
+
+
     /************管理诱发行动************/
     void conduct_Attacked(Coordinate*);  //受到攻击而诱发
     void manageMontorAct(); //添加监视的object的相应行动
     void resourceBuildHaveChange(){ this->resourceBuildingChange = true; }
+
 
 private:
     Map* theMap;    //地图信息
@@ -52,14 +57,29 @@ private:
     bool resourceBuildingChange = false;
     bool needReset_resBuild = false;
 
+
+    /*********初始化***********/
     void initDetailList();
-    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int PlayerID, QString& chineseName);
-    Missile* creatMissile(Coordinate* , Coordinate*);
+
 
     /*********关系表相关维护***********/
     void manageRelation_deleteGoalOb( Coordinate* goalObject );
     void manageRelation_updateMassage( Coordinate* );
+
+
+
+    /*********辅助关系表维护***********/
     void findResourceBuiding( relation_Object& , list<Building*>&);
+    int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int PlayerID, QString& chineseName);
+    Missile* creatMissile(Coordinate* , Coordinate*);
+
+    void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
+
+    void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
+    void init_resetResBuild(){ needReset_resBuild = false; }
+
+    void requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject = NULL);
+
 
     /************控制行动************/
     void object_Move(Coordinate * object , double DR , double UR);  //控制移动
@@ -70,7 +90,7 @@ private:
     void object_FinishAction_Absolute(Coordinate*);
     void object_FinishAction(Coordinate*);
 
-    void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
+
     /************寻路相关************/
     void initMap_HaveJud(){ memset(map_HaveJud , 0 ,sizeof(map_HaveJud)); }
     void haveJud_Map_Move( int blockDR , int blockUR ){ map_HaveJud[blockDR][blockUR] = true; }
@@ -82,20 +102,10 @@ private:
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
 
-
-//    bool isValidPoint(const int (&map)[MAP_L][MAP_U], const Point& p);
-//    vector<Point> getAdjacentPoints(const int (&map)[MAP_L][MAP_U], const Point& p);
     stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate* goalOb = NULL);
-//    stack<Point> findPathAlternative(const int (&map)[MAP_L][MAP_U], const Point& start, const Point& destination);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
-
-    void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
-    void init_resetResBuild(){ needReset_resBuild = false; }
-
-    void requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject = NULL);
-
 };
 
 #endif // CORE_LIST_H

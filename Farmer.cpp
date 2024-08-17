@@ -112,20 +112,20 @@ void Farmer::nextframe()
         setNowRes();
     }
 
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 }
 
 
 void Farmer::setNowRes()
 {
     std::list<ImageResource> *templist = NULL;
+
     switch (this->nowstate) {
     case MOVEOBJECT_STATE_STAND:
         templist=this->Stand[this->state][this->Angle];
         break;
     case MOVEOBJECT_STATE_WALK:
-        if(get_MatchingOfResourceAndCarry() && resource != 0 && (resourceSort!=HUMAN_GRANARYFOOD||state == FARMER_FARMER ))
+        if(get_MatchingOfResourceAndCarry() && resource > 0 && resourceSort!=HUMAN_GRANARYFOOD)
             templist = this->Carry[this->resourceSort][this->Angle];
         else
             templist=this->Walk[this->state][this->Angle];

@@ -49,8 +49,11 @@ void ViewWidget::paintEvent(QPaintEvent *)
             int resU = (*resIter)->getUR() / 16 / gen5;
             int resY = 1.23 * (MAP_L + resL - resU);
             int resX = 3.55 * (resL + resU);
-            painter.fillRect(QRect(resX, resY, 6, 6), QBrush(Qt::gray));
 
+            if((*resIter)->getNum() == NUM_STATICRES_Bush)
+                painter.fillRect(QRect(resX, resY, 6, 6), QBrush(Qt::yellow));
+            else if((*resIter)->getNum() == NUM_STATICRES_Stone)
+                painter.fillRect(QRect(resX, resY, 6, 6), QBrush(Qt::gray));
         }
     }
     if(!enemyFarmerList->empty()){
