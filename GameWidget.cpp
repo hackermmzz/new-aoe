@@ -213,6 +213,12 @@ void GameWidget::paintEvent(QPaintEvent *)
             drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
                        (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
                        (*(*iter)->getNowRes()),(*iter)->getglobalNum());
+
+            if(judgeinWindow(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY()))
+                (*iter)->setInWidget();
+            else
+                (*iter)->setNotInWidget();
+
             iter++;
         }
     }
@@ -262,6 +268,15 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
             QApplication::restoreOverrideCursor();
         }
     }
+}
+
+bool GameWidget::judgeinWindow(double x, double y)
+{
+    if(x>0&&x<GAMEWIDGET_WIDTH&&y>0&&y<GAMEWIDGET_HEIGHT)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 void GameWidget::mouseReleaseEvent(QMouseEvent* event)
@@ -337,6 +352,7 @@ void GameWidget::drawmemory(int X, int Y, ImageResource res, int globalNum)
             int mx,my;
             mx=i+X;
             my=j+Y;
+
             if(mx>=0&&my>=0&&mx<GAMEWIDGET_WIDTH&&my<GAMEWIDGET_HEIGHT)//
             {
                 if(res.memorymap.getMemoryMap(i,j)!=0)

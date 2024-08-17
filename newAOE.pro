@@ -77,7 +77,6 @@ HEADERS += \
     Farmer.h \
     ActWidget.h \
     SelectWidget.h \
-    ActWidget.h \
     Development.h \
     Army.h \
     Bloodhaver.h \

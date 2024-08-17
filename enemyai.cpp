@@ -501,7 +501,6 @@ void EnemyAI::processData() {
           for(int i=0;i<enemyInfo.armies.size();i++){
               if(armystate[i]!=ATTACK){
                   armystate[i]=ATTACK;
-
               }
           }
       }

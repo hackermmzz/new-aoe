@@ -34,6 +34,8 @@ public:
     void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
 
+    bool judgeinWindow(double x, double y);
+
     int getBlockDR(){
         return BlockDR;
     }
