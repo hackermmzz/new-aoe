@@ -1557,6 +1557,12 @@ int Core_List::getNowPhaseNum(Coordinate* object)
                 return HUMAN_STATE_DIGGING_GOLD;
             }
             return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_Building_Resource){
+            //对农田
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_FARMING;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
         }
     }else if(thisRelation.relationAct==CoreEven_FixBuilding && obj != NULL){
         Building* building=dynamic_cast<Building*>(obj);
