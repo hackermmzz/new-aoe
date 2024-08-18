@@ -97,9 +97,12 @@ void EnemyAI::processData() {
             heroexist=1;
             if(Hero!=Herotemp){
                 Blood[Hero]=Blood[Herotemp];
+                armystate[Hero]=armystate[Herotemp];
+                Lock[Hero]=Lock[Herotemp];
             }
         }
     }
+    Herotemp=Hero;
     if(heroexist==0){
         Hero=0;
     }
@@ -425,7 +428,6 @@ void EnemyAI::processData() {
                 armystate[i]=WAITING;
                             }
        }
-
       if(mode==3&&armystate[Hero]==WAITING&&Hero!=0){
           for(int i=0;i<enemyInfo.armies.size();i++){
               if(armystate[i]==WAITING){
@@ -441,6 +443,8 @@ void EnemyAI::processData() {
               }}
       }
       if(mode==3&&Hero!=0){
+          qDebug()<<armystate[Hero]<<g_frame;
+          qDebug()<<armystate[Hero-1]<<g_frame;
           for(int i=0;i<enemyInfo.enemy_armies.size();i++){
               if(calDistance(enemyInfo.armies[Hero].BlockDR,enemyInfo.armies[Hero].BlockUR,enemyInfo.enemy_armies[i].BlockDR,enemyInfo.enemy_armies[i].BlockUR)<5*BLOCKSIDELENGTH){
                   Atarget[s]=enemyInfo.enemy_armies[i].SN;s++;
