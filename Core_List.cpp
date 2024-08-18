@@ -7,6 +7,14 @@ Core_List::Core_List(Map* theMap, Player* player[])
     this->player = player;
     initDetailList();
 }
+
+
+/** ********
+ * 函数：Core_List::update
+ * 参数：无；
+ * 内容：动态关系表更新，并更新相关辅助数据；
+ * 返回值：空。
+ */
 void Core_List::update()
 {
     //对正在监视的Object，进行行动处理
@@ -29,11 +37,20 @@ void Core_List::update()
 }
 
 
-
 //****************************************************************************************
 //控制动态表
-//对人，命令不必手动中止，直接变更；当建筑正进行升级、造兵等行动，命令变更将被无视，必须手动中止当前命令后再下达新命令。
-int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eventType , bool respond)
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体
+ *      object2: 行动的目标
+ *      envenType:  行动的类型，见常量表 “关系事件名称”
+ *      respond: true表示，本addRelation添加的行动不会被后续addRelation覆盖，除非在调用addRelation前调用suspendRelation取消object1的行动
+ *
+ * 内容：添加有两个对象（一个主体，一个目标）的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
+ *      对人，命令不必手动中止，直接变更；当建筑正进行升级、造兵等行动，命令变更将被无视，必须手动中止当前命令后再下达新命令。
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
+int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int eventType, bool respond)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
@@ -61,13 +78,15 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
 
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
-        if(object1->isPlayerControl() && object2->isPlayerControl()) isSameReprensent = object1->getPlayerRepresent() == object2->getPlayerRepresent();
-        else isSameReprensent = false;
+        if(object1->isPlayerControl() && object2->isPlayerControl())
+            isSameReprensent = object1->getPlayerRepresent() == object2->getPlayerRepresent();
+        else
+            isSameReprensent = false;
 
         if(object2->getSort() == SORT_BUILDING || object2->getSort() == SORT_Building_Resource)
-            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent , ((Building*)object2)->isConstructed());
+            object1->set_interAct(object2->getSort(), object2->getNum(), isSameReprensent, ((Building*)object2)->isConstructed());
         else
-            object1->set_interAct(object2->getSort() , object2->getNum(), isSameReprensent);
+            object1->set_interAct(object2->getSort(), object2->getNum(), isSameReprensent);
 
         //加入行动交互表
         if(eventType == CoreEven_Gather && object2->getSort() == SORT_BUILDING)
@@ -81,7 +100,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
             relate_AllObject[object1].distance_Record = 0;
         }
         else
-            relate_AllObject[object1] = relation_Object(object2 , eventType);
+            relate_AllObject[object1] = relation_Object(object2, eventType);
 
         relate_AllObject[object1].respondConduct = respond; //是否可由addrelation更改行动
 
@@ -104,6 +123,16 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
     return ACTION_INVALID_ISNTFREE;
 }
 
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体
+ *      DR UR: 目标位置的细节坐标
+ *      envenType:  行动的类型，见常量表 “关系事件名称”，该函数保证eventType为CoreEven_JustMoveTo
+ *      respond: true表示，本addRelation添加的行动不会被后续addRelation覆盖，除非在调用addRelation前调用suspendRelation取消object1的行动
+ *
+ * 内容：添加moveobject对象进行移动的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eventType , bool respond)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -134,7 +163,16 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
     return ACTION_INVALID_ISNTFREE;
 }
 
-//建造
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体
+ *      BlockDR BlockUR: 目标位置的块坐标
+ *      envenType:  行动的类型，见常量表 “关系事件名称”，该函数保证eventType为CoreEven_CreatBuilding
+ *      respond: true表示，本addRelation添加的行动不会被后续addRelation覆盖，除非在调用addRelation前调用suspendRelation取消object1的行动
+ *
+ * 内容：进行建造建筑地基，如果建造地基成功，则调用addrelation重载添加object对地基对象进行修建的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -184,7 +222,15 @@ int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int 
     return ACTION_INVALID_ISNTFREE;
 }
 
-//添加building行动
+/** ********
+ * 函数：Core_List::addRelation
+ * 参数：object1: 行动的主体，该重载保证object1为Building或其派生类的指针
+ *      envenType:  行动的类型，见常量表 “关系事件名称”
+ *      actNum: 建筑行动的编号，见常量表 “建筑动作”
+ *
+ * 内容：添加建筑的行动至关系表中，并返回该操作的结果（成功或相关错误）
+ * 返回值：动作返回编号及action错误码，详见常量表
+ */
 int Core_List::addRelation( Coordinate* object1, int evenType , int actNum )
 {
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
@@ -404,6 +450,7 @@ void Core_List::eraseObject(Coordinate* eraseOb)
     manageRelation_deleteGoalOb(eraseOb);
 }
 
+
 //****************************************************************************************
 //辅助动态表处理交互
 //查询最近的符合要求的建筑，并设置alterOB
@@ -486,16 +533,17 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
     return ACTION_SUCCESS;
 }
 
-int Core_List::getObjectSN(Coordinate* object){
+int Core_List::getObjectSN(Coordinate* object)
+{
     relation_Object& thisRelation=relate_AllObject[object];
-    if(thisRelation.isExist&&thisRelation.goalObject!=nullptr){
+
+    if(thisRelation.isExist && thisRelation.goalObject != nullptr)
         return thisRelation.goalObject->getglobalNum();
-    }else{
-        return -1;
-    }
+
+    return -1;
 }
 
-//音效
+//请求发出音效
 void Core_List::requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject)
 {
     if(object->getPlayerRepresent() != NOWPLAYERREPRESENT) return;
@@ -690,7 +738,8 @@ void Core_List::object_Attack(Coordinate* object1 ,Coordinate* object2)
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
 
         //更新得分
-        if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==1&&object2->getSort()==SORT_ARMY&&object1->getPlayerRepresent()==0){
+        if(!isDead&&attackee->isDie()&&object2->getPlayerRepresent()==1&&object2->getSort()==SORT_ARMY&&object1->getPlayerRepresent()==NOWPLAYERREPRESENT)
+        {
             if(object2->getNum()>3){
                 usrScore.update(_KILL10);
             }else{
@@ -888,6 +937,7 @@ void Core_List::object_FinishAction(Coordinate* object1)
     object_FinishAction_Absolute(object1);
 }
 
+
 //****************************************************************************************
 //处理受到攻击的诱发行动
 void Core_List::conduct_Attacked(Coordinate* object)
@@ -1057,6 +1107,7 @@ void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
     }
 
 }
+
 
 //**************************************************************
 //寻路相关
@@ -1285,6 +1336,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     return path;
 }
 
+
 //*************************************************************
 //行动预备处理
 //创建投掷物
@@ -1301,9 +1353,10 @@ Missile* Core_List::creatMissile(Coordinate* attacker ,Coordinate* attackee)
     if(judBuild!= NULL) playerRepresent = judBuild->getPlayerRepresent();
 
     if(playerRepresent<MAXPLAYER)
-        return player[playerRepresent]->addMissile(attacker , attackee , theMap->get_MapHeight(attacker->getBlockDR() , attacker->getBlockUR()));
+        return player[playerRepresent]->addMissile(attacker, attackee, theMap->get_MapHeight(attacker->getBlockDR(), attacker->getBlockUR()));
     else return NULL;
 }
+
 
 /**************************************************************/
 //建立行动细节的静态表
@@ -1318,12 +1371,10 @@ void Core_List::initDetailList()
     //行动：只移动*************************************
     {
         phaseList = new int(CoreDetail_Move);
-        conditionList = new ( conditionF )( conditionF(condition_ObjectNearby) );
-//        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
-//        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
-        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
+        conditionList = new (conditionF)( conditionF(condition_ObjectNearby) );
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction, OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase( 1 ,  phaseList, conditionList , forcedInterrupCondition );
+        relation_Event_static[CoreEven_JustMoveTo] = detail_EventPhase(1,  phaseList, conditionList, forcedInterrupCondition);
         relation_Event_static[CoreEven_JustMoveTo].setEnd_Absolute();
         delete phaseList;
         delete conditionList;
@@ -1333,14 +1384,13 @@ void Core_List::initDetailList()
 
     //行动: 攻击**************************************
     {
-        phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
-        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby , OPERATECON_NEAR_ATTACK_MOVE) ,  conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK)};
-//        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie,OPERATECON_OBJECT1));
-        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
+        phaseList = new int[2]{ CoreDetail_Move, CoreDetail_Attack };
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby, OPERATECON_NEAR_ATTACK_MOVE),  conditionF(condition_Object1_AttackingEnd, OPERATECON_NEAR_ATTACK)};
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction, OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2 , phaseList , conditionList , forcedInterrupCondition );
-        overCondition.push_back(conditionF( condition_UniObjectDie, OPERATECON_OBJECT2 ));
-        relation_Event_static[CoreEven_Attacking].setLoop(0,1,overCondition);   //向前跳转使用setLoop
+        relation_Event_static[CoreEven_Attacking] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
+        overCondition.push_back(conditionF(condition_UniObjectDie, OPERATECON_OBJECT2));
+        relation_Event_static[CoreEven_Attacking].setLoop(0, 1, overCondition);   //向前跳转使用setLoop
 
         delete[] phaseList;
         delete[] conditionList;
@@ -1351,47 +1401,47 @@ void Core_List::initDetailList()
 
     //行动：采集**************************************
     {
-        phaseList = new int[13]{/*0判断是否需要攻击*/ CoreDetail_JumpPhase, \
-                               /*1前往攻击目标*/CoreDetail_Move ,/*2攻击*/CoreDetail_Attack , /*3*/CoreDetail_JumpPhase ,\
-                               /*4前往资源建筑*/CoreDetail_Move ,  /*5资源放置*/CoreDetail_ResourceIn, /*6前往资源*/CoreDetail_Move,\
-                               /*7采集*/CoreDetail_Gather, /*资源被采集完毕，需要判断村民携带资源*/  /*8*/CoreDetail_JumpPhase ,\
-                               /*9前往资源建筑*/CoreDetail_Move ,  /*10资源放置*/CoreDetail_ResourceIn,/*11前往资源原位置*/CoreDetail_Move ,\
-                               /*12*/ CoreDetail_JumpPhase};
-        conditionList = new conditionF[13]{ conditionF( condition_AllTrue), \
-                /*1*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_ATTACK) ,    /*2*/conditionF(condition_Object1_AttackingEnd,OPERATECON_NEAR_ATTACK),\
-                /*3*/conditionF(condition_AllTrue) ,                                /*4*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK) , \
-                /*5*/conditionF(condition_Object1_EmptyBackpack),                   /*6*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
-                /*7*/conditionF(condition_Object1_FullBackpack) , \
-                /*8*/conditionF(condition_AllTrue),                                 /*9*/conditionF(condition_ObjectNearby,OPERATECON_NEARALTER_WORK),\
-                /*10*/conditionF(condition_Object1_EmptyBackpack),                   /*11*/conditionF(condition_ObjectNearby,OPERATECON_NEAR_WORK),\
-                /*12*/conditionF(condition_AllTrue)};
+        phaseList = new int[13]{/*0判断是否需要攻击*/CoreDetail_JumpPhase,\
+                                /*1前往攻击目标*/CoreDetail_Move,     /*2攻击*/CoreDetail_Attack,            /*3*/CoreDetail_JumpPhase,\
+                                /*4前往资源建筑*/CoreDetail_Move,     /*5资源放置*/CoreDetail_ResourceIn,     /*6前往资源*/CoreDetail_Move,\
+                                /*7采集*/CoreDetail_Gather,          /*资源被采集完毕，需要判断村民携带资源*/    /*8*/CoreDetail_JumpPhase,\
+                                /*9前往资源建筑*/CoreDetail_Move ,    /*10资源放置*/CoreDetail_ResourceIn,    /*11前往资源原位置*/CoreDetail_Move,\
+                                /*12*/ CoreDetail_JumpPhase
+        };
+        conditionList = new conditionF[13]{ conditionF( condition_AllTrue),\
+                /*1*/conditionF(condition_ObjectNearby, OPERATECON_NEAR_ATTACK),    /*2*/conditionF(condition_Object1_AttackingEnd, OPERATECON_NEAR_ATTACK),\
+                /*3*/conditionF(condition_AllTrue),                                /*4*/conditionF(condition_ObjectNearby, OPERATECON_NEARALTER_WORK),\
+                /*5*/conditionF(condition_Object1_EmptyBackpack),                   /*6*/conditionF(condition_ObjectNearby, OPERATECON_NEAR_WORK),\
+                /*7*/conditionF(condition_Object1_FullBackpack), \
+                /*8*/conditionF(condition_AllTrue),                                 /*9*/conditionF(condition_ObjectNearby, OPERATECON_NEARALTER_WORK),\
+                /*10*/conditionF(condition_Object1_EmptyBackpack),                   /*11*/conditionF(condition_ObjectNearby, OPERATECON_NEAR_WORK),\
+                /*12*/conditionF(condition_AllTrue)
+        };
 
-//        forcedInterrupCondition.push_back(conditionF(condition_UniObjectDie , OPERATECON_OBJECT1));
-//        forcedInterrupCondition.push_back(conditionF(condition_UniObjectUnderAttack , OPERATECON_OBJECT1));
-        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction, OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_Gather] = detail_EventPhase(13 , phaseList, conditionList,forcedInterrupCondition);
+        relation_Event_static[CoreEven_Gather] = detail_EventPhase(13, phaseList, conditionList, forcedInterrupCondition);
         //设置循环，1->2，攻击猎物直至可采集
-        overCondition.push_back(conditionF(condition_UniObjectNULL,OPERATECON_OBJECT2));
+        overCondition.push_back(conditionF(condition_UniObjectNULL, OPERATECON_OBJECT2));
         overCondition.push_back(conditionF(condition_Object2CanbeGather));
-        relation_Event_static[CoreEven_Gather].setLoop(1,2,overCondition);
+        relation_Event_static[CoreEven_Gather].setLoop(1, 2, overCondition);
         overCondition.clear();
         //设置循环，4->7，持续采集，目标无资源不可采集
-        overCondition.push_back(conditionF(condition_Object2CanbeGather,OPERATECON_OBJECT2,true));
-        relation_Event_static[CoreEven_Gather].setLoop(4,7,overCondition);
+        overCondition.push_back(conditionF(condition_Object2CanbeGather, OPERATECON_OBJECT2, true));
+        relation_Event_static[CoreEven_Gather].setLoop(4, 7, overCondition);
         overCondition.clear();
 
         //设置循环，9->12，用于最后一次返回资源建筑，若身上无资源，则直接停止
         overCondition.push_back(conditionF(condition_Object1_EmptyBackpack));
-        relation_Event_static[CoreEven_Gather].setLoop(9,12,overCondition);
+        relation_Event_static[CoreEven_Gather].setLoop(9, 12, overCondition);
         overCondition.clear();
 
         //行动起始，判断是否可直接采集
-        relation_Event_static[CoreEven_Gather].setJump(0,2);
+        relation_Event_static[CoreEven_Gather].setJump(0, 2);
         //猎物可采集后，跳转至前往资源
-        relation_Event_static[CoreEven_Gather].setJump(3,6);
+        relation_Event_static[CoreEven_Gather].setJump(3, 6);
         //资源被采集完毕后，若身上无资源，则直接停止
-        relation_Event_static[CoreEven_Gather].setJump(8 , 12);
+        relation_Event_static[CoreEven_Gather].setJump(8, 12);
 
         delete[] phaseList;
         delete[] conditionList;
@@ -1402,12 +1452,12 @@ void Core_List::initDetailList()
 
     //行动：修建建筑***********************************
     {
-        phaseList = new int[2]{CoreDetail_Move , CoreDetail_UpdateRatio };
-        conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby , OPERATECON_NEAR_WORK ) , conditionF( condition_UniObjectPercent , OPERATECON_OBJECT2 ) };
-        forcedInterrupCondition.push_back(conditionF(condition_UniObjectNULL,OPERATECON_OBJECT2));
-        forcedInterrupCondition.push_back(conditionF(condition_UselessAction,OPERATECON_TIMES_USELESSACT_MOVE));
+        phaseList = new int[2]{CoreDetail_Move, CoreDetail_UpdateRatio };
+        conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby, OPERATECON_NEAR_WORK ), conditionF( condition_UniObjectPercent, OPERATECON_OBJECT2 ) };
+        forcedInterrupCondition.push_back(conditionF(condition_UniObjectNULL, OPERATECON_OBJECT2));
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction, OPERATECON_TIMES_USELESSACT_MOVE));
 
-        relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
+        relation_Event_static[CoreEven_FixBuilding] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
 
         delete[] phaseList;
         delete[] conditionList;
@@ -1418,9 +1468,9 @@ void Core_List::initDetailList()
     //行动：建筑工作***********************************
     {
         phaseList = new int(CoreDetail_UpdateRatio);
-        conditionList = new (conditionF)( conditionF(condition_UniObjectPercent , OPERATECON_OBJECT1));
+        conditionList = new (conditionF)( conditionF(condition_UniObjectPercent, OPERATECON_OBJECT1));
 
-        relation_Event_static[CoreEven_BuildingAct] = detail_EventPhase(1 , phaseList , conditionList,forcedInterrupCondition);
+        relation_Event_static[CoreEven_BuildingAct] = detail_EventPhase(1, phaseList, conditionList, forcedInterrupCondition);
 
         delete phaseList;
         delete conditionList;
@@ -1428,16 +1478,18 @@ void Core_List::initDetailList()
 
     //行动：飞行物攻击*********************************
     {
-        phaseList = new int[2]{ CoreDetail_Move , CoreDetail_Attack };
+        phaseList = new int[2]{ CoreDetail_Move, CoreDetail_Attack };
         conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby, OPERATECON_NEAR_MISSILE ) , conditionF( condition_TimesFalse ) };
 
-        relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2 , phaseList , conditionList,forcedInterrupCondition);
+        relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
 
         delete[] phaseList;
         delete[] conditionList;
     }
 }
 
+
+/**************************************************************/
 int STATE_JustMoveTo[1]={HUMAN_STATE_JUSTWALKING};
 int STATE_Attacking[2]={HUMAN_STATE_GOTO_ATTACK,HUMAN_STATE_ATTACKING};
 int STATE_Gather[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJECT, \
@@ -1503,6 +1555,12 @@ int Core_List::getNowPhaseNum(Coordinate* object)
             //对金子
             if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
                 return HUMAN_STATE_DIGGING_GOLD;
+            }
+            return STATE_Gather_Static[nowPhaseNum];
+        }else if(obj->getSort()==SORT_Building_Resource){
+            //对农田
+            if(STATE_Gather_Static[nowPhaseNum]==HUMAN_STATE_GATHERING){
+                return HUMAN_STATE_FARMING;
             }
             return STATE_Gather_Static[nowPhaseNum];
         }

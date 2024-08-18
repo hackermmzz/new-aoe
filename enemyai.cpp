@@ -139,7 +139,7 @@ void EnemyAI::processData() {
              armystate[i]=WAITING;
              ChasingLock[i]=0;
         }
-    }  
+    }
     if(flag==1)
         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             if(AIFSN[i]!=enemyInfo.enemy_farmers[i].SN&&AIFSN[i]!=0)
@@ -228,7 +228,7 @@ void EnemyAI::processData() {
                  target[0]=seek(0,1);
                  if(target[0]>150) target[0]=seek(0,2);
                  if(target[0]>150) target[0]=seek(0,3);
-                 qDebug()<<target[0]<<g_frame;
+//                 qDebug()<<target[0]<<g_frame;
     }}
     else if(mode==2){
         for(int i=0;i<ATT2;i++){
@@ -308,7 +308,7 @@ void EnemyAI::processData() {
                }
            }
         //反击检查
-    qDebug()<<armystate[0]<<ChasingLock[0]<<armystate[1]<<ChasingLock[1]<<g_frame;
+//    qDebug()<<armystate[0]<<ChasingLock[0]<<armystate[1]<<ChasingLock[1]<<g_frame;
     if(mode!=3)
     for(int i=0;i<enemyInfo.armies.size();i++){
            if(ChasingLock[i]!=0&&armystate[i]!=CHASE)ChasingLock[i]=0;
@@ -338,7 +338,7 @@ void EnemyAI::processData() {
                      {
 
                          int tar=target[0];
-                         qDebug()<<tar<<"攻击对象";
+//                         qDebug()<<tar<<"攻击对象";
                          if(tar==151)
                          armystate[i]==WAITING;
                          else if(tar>=100&&enemyInfo.enemy_buildings.size()!=0)

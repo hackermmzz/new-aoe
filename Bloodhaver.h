@@ -41,7 +41,7 @@ public:
     /*********以上虚函数************/
 
     //判断死亡
-    bool isDie(){return Blood<=0;}
+    bool isDie(){return getBlood()<=0;}
     //判断满血（部分判断的边界条件）
     bool isFullHp(){ return Blood >= 1; }
     //判断是否受到了攻击
