@@ -161,7 +161,7 @@ private:
 
     double quantity_GatherOnce = 0.55;
 
-    int resourceSort;
+    int resourceSort = 0;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
     //eg:HUMAN_WOOD

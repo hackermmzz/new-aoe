@@ -9,8 +9,6 @@ class UsrAI:public AI
 public:
     UsrAI(){this->id=0;}
     ~UsrAI(){}
-
-
 private:
   /***************AI通信函数，请勿修改***************/
     void processData() override;

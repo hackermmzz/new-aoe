@@ -10,8 +10,11 @@ public:
     SelectWidget *sel = nullptr;
     Map* theMap;    //地图信息
 
+
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
+
+
     void gameUpdate();
     void updateByObject();
     void infoShare();   //将游戏信息同步给AIGame
@@ -27,20 +30,12 @@ public:
     //如果指定object和全局nowobject指向同一地址，则设置nowobject为NULL
     void deleteOb_setNowobNULL(Coordinate* deOb){ if(deOb == nowobject) nowobject = NULL; }
 
-    int deleteSelf(Coordinate* object) //删除对象，返回错误码
-    {
-        BloodHaver *bloodOb = NULL;
+    //删除对象，返回错误码
+    int deleteSelf(Coordinate* object);
 
-        if(object->getPlayerRepresent()!=0) return ACTION_INVALID_SN;
-
-        object->printer_ToBloodHaver((void**) &bloodOb);
-        if(bloodOb && !bloodOb->isDie())
-            bloodOb->updateBlood(bloodOb->getMaxBlood());
-
-        return ACTION_SUCCESS;
-    }
 
     /************添加/删除表************/
+    //供上层（selectWidget/mainWidget调用）
     int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true){ return interactionList->addRelation(object1,object2,eventType,respond); }
     int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,DR,UR,eventType,respond,type); }
     int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1){ return interactionList->addRelation(object1,BlockDR,BlockUR,eventType,respond,type); }
@@ -48,7 +43,7 @@ public:
     int addRelation( Coordinate* object1, int evenType , int actNum){ return interactionList->addRelation(object1,evenType,actNum); }
     //指令手动停止
     void suspendRelation(Coordinate * object){ interactionList->suspendRelation(object); }
-    /************添加/删除表************/
+
 
     void resetNowObject_Click(bool isStop = false);
     void requestSound_Click( Coordinate* object );
@@ -57,6 +52,7 @@ private:
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
     MouseEvent *mouseEvent; //记录当前鼠标事件
     Core_List* interactionList;
+
 
     void updateByPlayer(int id);  //更新tagGame
     void updateCommon(tagInfo* taginfo);//更新tagGame
