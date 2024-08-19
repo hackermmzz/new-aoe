@@ -349,6 +349,7 @@ private:
 public:
     void update(tagInfo* newinfo){
         //控制ins_ret的大小小于100，若大于100，则优先删除旧值
+        QMutexLocker locker(&Locker);
         if(this->Info!=NULL){
             while(Info->ins_ret.size()>100){
                 Info->ins_ret.erase(Info->ins_ret.begin());
@@ -356,7 +357,6 @@ public:
         }
         if(this->Info!=NULL)
             newinfo->ins_ret=this->Info->ins_ret;
-        QMutexLocker locker(&Locker);
         Info=newinfo;
     }
     void insertInsRet(int id,instruction ins){
