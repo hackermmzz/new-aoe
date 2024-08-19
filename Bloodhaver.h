@@ -58,7 +58,7 @@ public:
 
     //获取血量
     double getBloodPercent(){ return Blood; }
-    int getBlood(){ return (int)( Blood*getMaxBlood() ); }
+    int getBlood(){ return  ceil(Blood*getMaxBlood()); }
     //获取“复仇”目标
     Coordinate* getAvangeObject(){ return avangeObject; }
     //如果攻击方式需要投掷物，获取投掷物类型
