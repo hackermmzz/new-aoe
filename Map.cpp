@@ -586,7 +586,8 @@ void Map::generateEnemy(){
     for(int i=62;i>52&&dir!=2;i--){
         for(int j=10;j<20;j++){
             if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
-                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false&&mapFlag[i+2][j+2]==false&&mapFlag[i-2][j-2]==false&&mapFlag[i+2][j]==false&&mapFlag[i][j+2]==false&&mapFlag[i][j-2]==false
+                    &&mapFlag[i-2][j]==false&&mapFlag[i-2][j+2]==false&&mapFlag[i+2][j-2]==false)
             {pos_L[I]=i*BLOCKSIDELENGTH;
              pos_U[J]=j*BLOCKSIDELENGTH;
              num=1;
