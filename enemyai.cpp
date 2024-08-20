@@ -443,8 +443,8 @@ void EnemyAI::processData() {
               }}
       }
       if(mode==3&&Hero!=0){
-          qDebug()<<armystate[Hero]<<g_frame;
-          qDebug()<<armystate[Hero-1]<<g_frame;
+//          qDebug()<<armystate[Hero]<<g_frame;
+//          qDebug()<<armystate[Hero-1]<<g_frame;
           for(int i=0;i<enemyInfo.enemy_armies.size();i++){
               if(calDistance(enemyInfo.armies[Hero].BlockDR,enemyInfo.armies[Hero].BlockUR,enemyInfo.enemy_armies[i].BlockDR,enemyInfo.enemy_armies[i].BlockUR)<5*BLOCKSIDELENGTH){
                   Atarget[s]=enemyInfo.enemy_armies[i].SN;s++;
