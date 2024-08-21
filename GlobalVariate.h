@@ -328,6 +328,37 @@ struct tagInfo
     int Stone; // 石头数量
     int Gold; // 黄金数量
     int Human_MaxNum; // 最大人口数量
+
+    // Assignment operator
+    tagInfo& operator=(const tagInfo& other) {
+        if (this != &other) { // Check for self-assignment
+            buildings = other.buildings;
+            farmers = other.farmers;
+            armies = other.armies;
+            enemy_buildings = other.enemy_buildings;
+            enemy_farmers = other.enemy_farmers;
+            enemy_armies = other.enemy_armies;
+            resources = other.resources;
+            ins_ret = other.ins_ret;
+
+            // Deep copy theMap array
+            for (int i = 0; i < MAP_L; ++i) {
+                for (int j = 0; j < MAP_U; ++j) {
+                    theMap[i][j] = other.theMap[i][j];
+                }
+            }
+
+            GameFrame = other.GameFrame;
+            civilizationStage = other.civilizationStage;
+            Wood = other.Wood;
+            Meat = other.Meat;
+            Stone = other.Stone;
+            Gold = other.Gold;
+            Human_MaxNum = other.Human_MaxNum;
+        }
+        return *this;
+    }
+
     void clear(){
         buildings.clear();
         farmers.clear();
@@ -339,6 +370,7 @@ struct tagInfo
         ins_ret.clear();
     }
 };
+
 
 
 struct tagGame
@@ -363,14 +395,6 @@ public:
         QMutexLocker locker(&Locker);
         this->Info->ins_ret.insert(make_pair(id,ins.ret));
     }
-//    instruction getInsRet(int ins_id){
-//        QMutexLocker locker(&Locker);
-//        if(this->Info->ins_ret.find(ins_id)==this->Info->ins_ret.end()){
-//            return instruction();
-//        }else{
-//            return this->Info->ins_ret[ins_id];
-//        }
-//    }
     tagInfo getInfo(){
         QMutexLocker locker(&Locker);
         return *Info;
