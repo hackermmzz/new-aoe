@@ -872,7 +872,6 @@ void Core_List::object_RatioChange( Coordinate* object1, relation_Object& relati
     if(relation.relationAct == CoreEven_FixBuilding && buildGoalOb != NULL)
     {
         Farmer* farmer = (Farmer*)object1;
-
         if(!farmer->isWorking()) farmer->setPreWork();
         buildGoalOb->update_Build();
     }
