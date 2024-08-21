@@ -1,7 +1,7 @@
 ﻿#ifndef RESOURCE_H
 #define RESOURCE_H
 
-#include <config.h>
+#include "config.h"
 
 class Resource
 {

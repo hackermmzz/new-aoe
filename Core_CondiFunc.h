@@ -1,9 +1,9 @@
 #ifndef CORE_CONDIFUNC_H
 #define CORE_CONDIFUNC_H
 
-#include <GlobalVariate.h>
-#include <Map.h>
-#include <Player.h>
+#include "GlobalVariate.h"
+#include "Map.h"
+#include "Player.h"
 
 //****************************************************************************************
 //寻路相关

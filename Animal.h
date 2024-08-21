@@ -1,10 +1,10 @@
 ﻿#ifndef ANIMAL_H
 #define ANIMAL_H
 
-#include <MoveObject.h>
-#include <Resource.h>
-#include <GlobalVariate.h>
-#include <Bloodhaver.h>
+#include "MoveObject.h"
+#include "Resource.h"
+#include "GlobalVariate.h"
+#include "Bloodhaver.h"
 
 class Animal:public MoveObject, public Resource, public BloodHaver
 {

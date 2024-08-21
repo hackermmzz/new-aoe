@@ -1,7 +1,7 @@
 ﻿#ifndef FARMER_H
 #define FARMER_H
 
-#include <Human.h>
+#include "Human.h"
 
 class Farmer:public Human
 {

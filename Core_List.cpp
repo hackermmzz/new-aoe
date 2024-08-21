@@ -62,8 +62,10 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         Building* buildOb = NULL;
         Building* buildGoalOb = NULL;
         BloodHaver* bloodGoalOb = NULL;
+        MoveObject* moveOb = NULL;
         object1->printer_ToBloodHaver((void**)&bloodOb);
         object1->printer_ToBuilding((void**)&buildOb);
+        object1->printer_ToMoveObject((void**)&moveOb);
         object2->printer_ToBuilding((void**)&buildGoalOb);
         object2->printer_ToBloodHaver((void**)&bloodGoalOb);
         if( bloodOb != NULL && bloodOb->isDie()) return ACTION_INVALID_SN;
@@ -83,8 +85,8 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         else
             isSameReprensent = false;
 
-        if(object2->getSort() == SORT_BUILDING || object2->getSort() == SORT_Building_Resource)
-            object1->set_interAct(object2->getSort(), object2->getNum(), isSameReprensent, ((Building*)object2)->isConstructed());
+        if(buildGoalOb != NULL)
+            object1->set_interAct(object2->getSort(), object2->getNum(), isSameReprensent, buildGoalOb->isConstructed());
         else
             object1->set_interAct(object2->getSort(), object2->getNum(), isSameReprensent);
 
@@ -111,7 +113,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
                 relate_AllObject[object1].set_ResourceBuildingType();
             case CoreEven_Attacking:
                 relate_AllObject[object1].init_AttackAb(object1);
-                ((MoveObject*)object1)->beginRun();
+                if(moveOb!=NULL) moveOb->beginRun();
                 break;
             default:
                 break;
@@ -382,7 +384,7 @@ void Core_List::manageRelationList()
                     case CoreDetail_Move:
                         object1->printer_ToMoveObject((void**)& moveOb);
                         if(moveOb != NULL)
-                            ((MoveObject*)object1)->setPath(stack<Point>(),object1->getDR(),object1->getUR());
+                            moveOb->setPath(stack<Point>(),object1->getDR(),object1->getUR());
                         break;
                     case CoreDetail_Attack:
                         if(thisRelation.relationAct == CoreEven_MissileAttack) thisRelation.set_ExecutionTime(1);
@@ -840,39 +842,41 @@ void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& rel
         if(relation.alterOb == NULL) worker->setPreStand();
         else
         {
-            Farmer* worker = (Farmer*) object1;
-            if(relation.alterOb == NULL) worker->setPreStand();
-            else
-            {
-                player[worker->getPlayerRepresent()]->changeResource(worker->getResourceSort() , worker->getResourceNowHave());
-                //更新累计收集得分
-                switch(worker->getResourceSort()){
-                case HUMAN_WOOD:
-                    usrScore.update(_WOOD,worker->getResourceNowHave());
-                    break;
-                case HUMAN_STONE:
-                    usrScore.update(_STONE,worker->getResourceNowHave());
-                    break;
-                case HUMAN_GRANARYFOOD:
-                case HUMAN_STOCKFOOD:
-                    usrScore.update(_MEAT,worker->getResourceNowHave());
-                    break;
-                }
-                worker->update_resourceClear();
+            player[worker->getPlayerRepresent()]->changeResource(worker->getResourceSort() , worker->getResourceNowHave());
+            //更新累计收集得分
+            switch(worker->getResourceSort()){
+            case HUMAN_WOOD:
+                usrScore.update(_WOOD,worker->getResourceNowHave());
+                break;
+            case HUMAN_STONE:
+                usrScore.update(_STONE,worker->getResourceNowHave());
+                break;
+            case HUMAN_GRANARYFOOD:
+            case HUMAN_STOCKFOOD:
+                usrScore.update(_MEAT,worker->getResourceNowHave());
+                break;
             }
+            worker->update_resourceClear();
         }
     }
 }
 
 void Core_List::object_RatioChange( Coordinate* object1, relation_Object& relation)
 {
-    if(relation.relationAct == CoreEven_FixBuilding)
+    Building* buildOb = NULL;
+    Building* buildGoalOb = NULL;
+    object1->printer_ToBuilding((void**)& buildOb);
+    if(relation.goalObject != NULL)
+        relation.goalObject->printer_ToBuilding((void**)& buildGoalOb);
+
+    if(relation.relationAct == CoreEven_FixBuilding && buildGoalOb != NULL)
     {
-        if(!((Farmer*)object1)->isWorking()) ((Farmer*)object1)->setPreWork();
-        ((Building*)relation.goalObject)->update_Build();
+        Farmer* farmer = (Farmer*)object1;
+        if(!farmer->isWorking()) farmer->setPreWork();
+        buildGoalOb->update_Build();
     }
-    else if(relation.relationAct == CoreEven_BuildingAct)
-        ((Building*)object1)->update_Action();
+    else if(relation.relationAct == CoreEven_BuildingAct && buildOb != NULL)
+        buildOb->update_Action();
 }
 
 void Core_List::object_FinishAction_Absolute(Coordinate* object1)
@@ -893,33 +897,38 @@ void Core_List::object_FinishAction(Coordinate* object1)
 {
     Missile* misOb = NULL;
     Building* buildOb = NULL;
-    Building_Resource* buildResOb = NULL;
+//    Building* buildGoalOb = NULL;
+    Building_Resource* buildResGoalOb = NULL;
     vector<Point> Block_Free;
-    int num = -1;
+    int actNum = -1;
 
     switch(relate_AllObject[object1].relationAct){
     case CoreEven_FixBuilding:
         if( relate_AllObject[object1].goalObject!=NULL )
         {
-            relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildOb);
-            relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResOb);
+//            relate_AllObject[object1].goalObject->printer_ToBuilding((void**)&buildGoalOb);
+            relate_AllObject[object1].goalObject->printer_ToBuilding_Resource((void**)&buildResGoalOb);
 
-            if( buildResOb!=NULL &&  buildResOb->getNum() == BUILDING_FARM) //是农田
+            if( buildResGoalOb!=NULL &&  buildResGoalOb->getNum() == BUILDING_FARM) //是农田
             {
                  object1->initAction();
-                 addRelation(object1 , buildResOb ,CoreEven_Gather);
+                 addRelation(object1 , buildResGoalOb ,CoreEven_Gather);
                  return;
             }
         }
         break;
     case CoreEven_BuildingAct:
         Block_Free = theMap->findBlock_Free(object1);
-        player[((Building*)object1)->getPlayerRepresent()]->enforcementAction((Building*)object1,Block_Free);  //进行建筑行动的结果处理
-        num= object1->getActNum();
-        if(num==BUILDING_CENTER_CREATEFARMER || num==BUILDING_ARMYCAMP_CREATE_CLUBMAN
-          || num==BUILDING_ARMYCAMP_CREATE_SLINGER || num==BUILDING_RANGE_CREATE_BOWMAN)
+        object1->printer_ToBuilding((void**)& buildOb);
+
+        if(buildOb != NULL)
+            player[object1->getPlayerRepresent()]->enforcementAction(buildOb,Block_Free);  //进行建筑行动的结果处理
+
+        actNum= object1->getActNum();
+        if(actNum==BUILDING_CENTER_CREATEFARMER || actNum==BUILDING_ARMYCAMP_CREATE_CLUBMAN
+          || actNum==BUILDING_ARMYCAMP_CREATE_SLINGER || actNum==BUILDING_RANGE_CREATE_BOWMAN)
             usrScore.update(_HUMAN1);
-        else if(num==BUILDING_STABLE_CREATE_SCOUT)
+        else if(actNum==BUILDING_STABLE_CREATE_SCOUT)
             usrScore.update(_HUMAN2);
         else
             usrScore.update(_TECH);
