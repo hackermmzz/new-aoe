@@ -2,8 +2,8 @@
 #define OPTION_H
 
 #include <QDialog>
-#include <QPainter>
-#include <config.h>
+
+#include "config.h"
 namespace Ui {
 class Option;
 }

@@ -1111,13 +1111,13 @@ void MainWidget::clearDebugTextFile()
 //设置初始资源
 void MainWidget::buildInitialStock()
 {
-    int minBDR = MAP_L/2 - 9, minBUR = MAP_U/2 - 9;
-    int maxBDR = MAP_L/2 + 7, maxBUR = MAP_U/2 + 7;
+    int minBDR = MAP_L/2 - 10, minBUR = MAP_U/2 - 10;
+    int maxBDR = MAP_L/2 + 6, maxBUR = MAP_U/2 + 6;
     int lenth = 0,step;
     Point StockPoint,judPoint;
     vector<Point> findLab;
     bool tasking = true;
-    int labSize,treeNum,maxtreeNum = 0;
+    int labSize, treeNum, maxtreeNum = 0;
     int lx,ly,mx,my;
 
     map->loadBarrierMap(true);
@@ -1131,8 +1131,8 @@ void MainWidget::buildInitialStock()
             if(y==minBUR || y==maxBUR) step = 1;
             else step = lenth;
 
-            for(int x = minBDR; x<=maxBDR;x+=lenth)
-                if(!map->isBarrier(x,y,3) && map->isFlat(x,y,3)) findLab.push_back(Point(x,y));
+            for(int x = minBDR; x<=maxBDR; x+=lenth)
+                if(!map->isBarrier(x,y,5) && map->isFlat(x+1,y+1,3)) findLab.push_back(Point(x+1,y+1));
         }
 
         labSize = findLab.size();
@@ -1166,8 +1166,8 @@ void MainWidget::buildInitialStock()
         findLab.clear();
         minBDR = max(minBDR-1, 0);
         minBUR = max(minBUR-1, 0);
-        maxBDR = min(maxBDR+1, MAP_L);
-        maxBUR = min(maxBUR+1, MAP_U);
+        maxBDR = min(maxBDR+1, MAP_L-5);
+        maxBUR = min(maxBUR+1, MAP_U-5);
     }
 
     player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));

@@ -1,30 +1,15 @@
 ﻿#ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
-#include <QWidget>
-#include <QPainter>
-#include <Map.h>
-#include <qtimer.h>
-//#include <Player.h>
-#include <QTextBrowser>
-#include <GlobalVariate.h>
-#include <config.h>
-#include <QElapsedTimer>
-#include <stack>
-#include <queue>
-#include <QButtonGroup>
-#include <QMessageBox>
-
-#include <windows.h>
-#include <unordered_set>
-#include <SelectWidget.h>
-//#include <AboutDialog.h>
-#include <Option.h>
-#include <Core.h>
+#include "config.h"
+#include "SelectWidget.h"
+#include "Option.h"
+#include "Core.h"
 #include "UsrAI.h"
 #include "EnemyAI.h"
-#include <ActWidget.h>
-#include <AboutDialog.h>
+#include "ActWidget.h"
+#include "AboutDialog.h"
+#include "GlobalVariate.h"
 
 namespace Ui {
 class MainWidget;

@@ -251,7 +251,7 @@ void EnemyAI::processData() {
          for(int i=0;i<ATT1;i++)
              if(armystate[i]==WAITING||armystate[i]==RETREAT){ armystate[i]=ATTACK;
                  target[0]=seek(0,1);
-                 qDebug()<<"sus"<<g_frame;
+//                 qDebug()<<"sus"<<g_frame;
 //                 qDebug()<<target[0]<<g_frame;
     }}
     else if(mode==2){
@@ -354,7 +354,7 @@ void EnemyAI::processData() {
            }
     if(mode==3)
     for(int i=0;i<enemyInfo.armies.size();i++)
-    qDebug()<<armystate[i]<<Lock[i]<<ChasingLock[i]<<enemyInfo.armies[i].NowState<<enemyInfo.armies[i].Sort<<g_frame;
+//    qDebug()<<armystate[i]<<Lock[i]<<ChasingLock[i]<<enemyInfo.armies[i].NowState<<enemyInfo.armies[i].Sort<<g_frame;
         //反击检查
 //    qDebug()<<armystate[0]<<ChasingLock[0]<<armystate[1]<<ChasingLock[1]<<g_frame;
     for(int i=0;i<enemyInfo.armies.size();i++){
@@ -532,7 +532,7 @@ void EnemyAI::processData() {
               HumanAction(enemyInfo.armies[i].SN,Atarget[0]);
               Lock[i]=1;
               timer[i]=g_frame;
-              qDebug()<<"sus1"<<g_frame;
+//              qDebug()<<"sus1"<<g_frame;
           }
           if(armystate[i]==ATTACK&&Lock[i]==0&&s==0&&t>0)
              {     if(Btarget[0]!=0){
@@ -567,7 +567,7 @@ void EnemyAI::processData() {
           }
       if(mode==3)
       for(int i=0;i<enemyInfo.armies.size();i++)
-      qDebug()<<armystate[i]<<Lock[i]<<ChasingLock[i]<<enemyInfo.armies[i].NowState<<enemyInfo.armies[i].Sort<<g_frame;
+//      qDebug()<<armystate[i]<<Lock[i]<<ChasingLock[i]<<enemyInfo.armies[i].NowState<<enemyInfo.armies[i].Sort<<g_frame;
       if(mode==3&&Hero==0){
           for(int i=0;i<enemyInfo.armies.size();i++){
               if(armystate[i]!=ATTACK&&armystate[i]!=CHASE){

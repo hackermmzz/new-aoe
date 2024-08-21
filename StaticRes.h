@@ -1,8 +1,8 @@
 ﻿#ifndef STATICRES_H
 #define STATICRES_H
 
-#include <Coordinate.h>
-#include <Resource.h>
+#include "Coordinate.h"
+#include "Resource.h"
 
 class StaticRes:public Coordinate,public Resource
 {

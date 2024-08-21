@@ -1,7 +1,7 @@
 #ifndef CORE_LIST_H
 #define CORE_LIST_H
 
-#include <Core_CondiFunc.h>
+#include "Core_CondiFunc.h"
 extern Score usrScore;
 extern Score enemyScore;
 

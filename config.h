@@ -3,21 +3,13 @@
 
 #include <QWidget>
 #include <QPainter>
-#include <stack>
-#include <qtimer.h>
 #include <QTextBrowser>
 #include <QElapsedTimer>
-#include <stack>
-#include <queue>
 #include <QButtonGroup>
 #include <QMessageBox>
 #include <QThread>
-#include <Windows.h>
-#include <time.h>
-#include <map>
 #include <QPixmap>
 #include <QString>
-#include <list>
 #include <QDebug>
 #include <QDirIterator>
 #include <QDir>
@@ -27,11 +19,21 @@
 #include <QImage>
 #include <QObject>
 #include <QKeyEvent>
-//#include <QMediaPlayer>
+#include <qtimer.h>
+
+#include <stack>
+#include <queue>
+#include <list>
+#include <map>
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <digitalConfig.h>
+#include <unordered_set>
+
+#include <Windows.h>
+#include <time.h>
+
+#include "digitalConfig.h"
 
 
 /********** 游戏配置数据 **********/

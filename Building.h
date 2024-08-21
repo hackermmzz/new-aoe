@@ -1,9 +1,9 @@
 #ifndef BUILDING_H
 #define BUILDING_H
 
-#include <Coordinate.h>
-#include <Development.h>
-#include <Bloodhaver.h>
+#include "Coordinate.h"
+#include "Development.h"
+#include "Bloodhaver.h"
 
 class Building:public Coordinate,public BloodHaver
 {

@@ -1,11 +1,11 @@
 ﻿#ifndef PLAYER_H
 #define PLAYER_H
 
-#include <Missile.h>
-#include <Farmer.h>
-#include <Army.h>
-#include <Building.h>
-#include <Building_Resource.h>
+#include "Missile.h"
+#include "Farmer.h"
+#include "Army.h"
+#include "Building.h"
+#include "Building_Resource.h"
 
 class Player
 {

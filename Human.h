@@ -1,9 +1,9 @@
 ﻿#ifndef HUMAN_H
 #define HUMAN_H
 
-#include <MoveObject.h>
-#include <Development.h>
-#include <Bloodhaver.h>
+#include "MoveObject.h"
+#include "Development.h"
+#include "Bloodhaver.h"
 
 class Human:public MoveObject,public BloodHaver
 {

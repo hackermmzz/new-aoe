@@ -1,16 +1,10 @@
 #ifndef GLOBALVARIATE_H
 #define GLOBALVARIATE_H
 
-#include <map>
-#include <queue>
-#include <QPixmap>
-#include <QString>
-#include <list>
-#include <QSoundEffect>
-#include <config.h>
-#include <QTextBrowser>
-#include <QDebug>
 #include <QMutex>
+#include <QSoundEffect>
+
+#include "config.h"
 
 using namespace std;
 class Coordinate;
