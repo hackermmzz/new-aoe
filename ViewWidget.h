@@ -1,11 +1,14 @@
 ﻿#ifndef VIEWWIDGET_H
 #define VIEWWIDGET_H
+
 #include "Building.h"
 #include "Farmer.h"
 #include "Animal.h"
+#include "MainWidget.h"
+
 #include <QWidget>
 #include <QPainter>
-#include <MainWidget.h>
+
 class ViewWidget : public QWidget
 {
     Q_OBJECT

@@ -1,14 +1,10 @@
 #ifndef ACTWIDGET_H
 #define ACTWIDGET_H
 
-#include <QWidget>
-#include <QPainter>
 #include <config.h>
-#include <Player.h>
-#include <Map.h>
-#include <QKeyEvent>
-#include <QTextBrowser>
-#include <QDebug>
+#include "Player.h"
+#include "Map.h"
+
 class ActWidget : public QWidget
 {
     Q_OBJECT

@@ -3,7 +3,6 @@
 
 #include "config.h"
 #include <QDialog>
-#include <QPainter>
 
 namespace Ui {
 class AboutDialog;
