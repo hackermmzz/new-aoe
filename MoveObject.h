@@ -1,7 +1,7 @@
 ﻿#ifndef MOVEOBJECT_H
 #define MOVEOBJECT_H
 
-#include <Coordinate.h>
+#include "Coordinate.h"
 
 class MoveObject:public Coordinate
 {

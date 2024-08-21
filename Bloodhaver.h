@@ -1,7 +1,8 @@
 #ifndef BLOODHAVER_H
 #define BLOODHAVER_H
-#include <config.h>
-#include <Coordinate.h>
+
+#include "config.h"
+#include "Coordinate.h"
 
 //####################################################
 //BloodHaver类,用于管理一切与血量有关的数据,数据变化方式的定义
@@ -66,7 +67,7 @@ public:
     //获取“复仇”目标位置
     void get_AvangeObject_Position( double& DR, double& UR ){ DR = DR_avange; UR = UR_avange; }
 
-    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); }
+    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); if(Blood<0) Blood = 0; }
     //更新“复仇”目标的当前位置
     void updateAvangeObjectPosition(){ if(avangeObject!=NULL)
                                         { DR_avange = avangeObject->getDR(); UR_avange = avangeObject->getUR(); } }

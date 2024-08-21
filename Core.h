@@ -1,7 +1,7 @@
 ﻿#ifndef CORE_H
 #define CORE_H
 
-#include <Core_List.h>
+#include "Core_List.h"
 
 class SelectWidget;
 class Core

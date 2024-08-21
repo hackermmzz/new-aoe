@@ -1,11 +1,8 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H
 
-#include <QPixmap>
-#include <QDebug>
-#include <config.h>
-#include <QImage>
-#include <GlobalVariate.h>
+#include "config.h"
+#include "GlobalVariate.h"
 
 class Coordinate
 {

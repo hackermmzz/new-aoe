@@ -2,11 +2,13 @@
 #define GAMEWIDGET_H
 
 #include <QWidget>
-#include <MainWidget.h>
 #include <QDebug>
-#include <Coordinate.h>
 #include <QMouseEvent>
 #include <unordered_set>
+
+#include "MainWidget.h"
+#include "Coordinate.h"
+
 
 namespace Ui {
 class GameWidget;

@@ -1,12 +1,14 @@
 ﻿#ifndef MAP_H
 #define MAP_H
 
-#include <Block.h>
-#include <config.h>
-#include <StaticRes.h>
-#include <Animal.h>
-#include <Player.h>
 #include <cstring>
+
+#include "Block.h"
+#include "config.h"
+#include "StaticRes.h"
+#include "Animal.h"
+#include "Player.h"
+
 
 class Map
 {
@@ -68,7 +70,7 @@ public:
     {
         if(blockDR<0 || blockUR<0 || blockDR>=MAP_L || blockUR>=MAP_U)
         {
-            qDebug()<<"get_MapHeight overborder";
+            qDebug()<<"get_MapHeight overborder"<<" blockDR:"<<blockDR<<", blockUR:"<<blockUR;
             return 0;
         }
         else return cell[blockDR][blockUR].getMapHeight();

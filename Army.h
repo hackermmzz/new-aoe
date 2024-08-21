@@ -1,7 +1,7 @@
 ﻿#ifndef ARMY_H
 #define ARMY_H
 
-#include <Human.h>
+#include "Human.h"
 
 class Army : public Human
 {
