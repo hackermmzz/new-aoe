@@ -11,11 +11,6 @@ class UsrAI:public AI
 public:
     UsrAI(){this->id=0;}
     ~UsrAI(){}
-    void getdistance(int the_thing_to_get,int Type_of_thing,double x_start,double y_start);
-    void generatebacktobuild();
-    void positionofresource(int typeofresource);
-    void countbuilding();
-    void countarmies();
 
 private:
   /***************AI通信函数，请勿修改***************/
