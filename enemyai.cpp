@@ -143,8 +143,8 @@ void EnemyAI::processData() {
         for(int i=0;i<enemyInfo.enemy_farmers.size();i++){
             if(AIFSN[i]!=enemyInfo.enemy_farmers[i].SN&&AIFSN[i]!=0)
                { kill++;
+                break;
 //                qDebug()<<kill<<g_frame<<"change";
-                 break;
             }}
     if(enemyInfo.enemy_farmers.size()!=0&&g_frame>15){
         flag=1;
@@ -155,10 +155,9 @@ void EnemyAI::processData() {
             AIFSN[i]=0;
         }
     }
-
     //更新波数
     if(g_frame>=MODE3) mode=3;
-    else if(g_frame==MODE5||kill>=8) mode=-2;
+    else if(g_frame==MODE5||kill>=6) mode=-2;
     else if(g_frame>=MODE2&&g_frame<MODE5) mode=2;
     else if(g_frame==MODE4||kill>=2) mode=-1;
     else if(g_frame>=MODE1&&g_frame<MODE4) mode=1;
@@ -167,6 +166,7 @@ void EnemyAI::processData() {
     }
     if(g_frame==MODE2){
         ATT2+=ATT1;
+        kill=0;
         for(int i=0;i<enemyInfo.armies.size();i++){
             ifretreat[i]=false;
         }
@@ -391,8 +391,6 @@ void EnemyAI::processData() {
                    }
                }
            }
-    if(mode!=0)
-    qDebug()<<armystate[0]<<Lock[0]<<ChasingLock[0]<<g_frame;
       //攻击状态
       for(int i=0;i<enemyInfo.armies.size();i++)
       if(armystate[i]==ATTACK){
