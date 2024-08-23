@@ -207,8 +207,8 @@ void EnemyAI::processData() {
                 ATT2-=dif;
             }
     }
-        qDebug()<<armystate[0]<<ifretreat[0]<<g_frame;
-         qDebug()<<armystate[1]<<ifretreat[1]<<g_frame;
+//        qDebug()<<armystate[0]<<ifretreat[0]<<g_frame;
+//         qDebug()<<armystate[1]<<ifretreat[1]<<g_frame;
     //撤退
     if(mode==-1)
         for(int i=0;i<ATT1;i++)

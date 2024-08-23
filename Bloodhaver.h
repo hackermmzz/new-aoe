@@ -37,9 +37,8 @@ public:
     virtual int showDEF_Close_Addition(){ return 0; }
     virtual int showDEF_Shoot(){ return defence_shoot; }
     virtual int showDEF_Shoot_Addition(){ return 0; }
-
-
     /*********以上虚函数************/
+
 
     //判断死亡
     bool isDie(){return getBlood()<=0;}

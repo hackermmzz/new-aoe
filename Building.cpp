@@ -27,7 +27,7 @@ int Building::BuildingFundation[10] = { FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOU
                                       FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,};
 
 int Building::BuildingVision[10] = { VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,\
-                                   VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE};
+                                     VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE};
 
 /********************静态资源**************************/
 bool is_cheatAction = false;
@@ -297,7 +297,8 @@ void Building::update_Build()
         if(Percent>100) Percent = 100;
     }
 
-    Blood+=ratio/100;
+    if(!isDie())
+        Blood+=ratio/100;
 
     if(Blood>1) Blood = 1;
 }
