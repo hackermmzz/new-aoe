@@ -399,8 +399,8 @@
 
 /********** 飞行物属性 **********/
 #define Missile_Speed_Spear (4*HUMAN_SPEED)
-#define Missile_Speed_Arrow (7*HUMAN_SPEED)
-#define Missile_Speed_Cobblestone (7*HUMAN_SPEED)
+#define Missile_Speed_Arrow (9*HUMAN_SPEED)
+#define Missile_Speed_Cobblestone (9*HUMAN_SPEED)
 
 
 /********** 设置多少帧切换一次nowres **********/
