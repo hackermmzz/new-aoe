@@ -4,18 +4,13 @@ std::list<ImageResource>* StaticRes::staticResource[3];
 std::string StaticRes::StaticResname[3]={"Bush","Stone","GoldOre"};
 std::string StaticRes::StaticResDisplayName[3] = {"浆果丛","石头","金矿"};
 
-StaticRes::StaticRes()
-{
-
-}
 
 StaticRes::StaticRes(int Num, double DR, double UR)
 {
     this->Num=Num;
-    this->DR=DR;
-    this->UR=UR;
-    BlockDR = DR/BLOCKSIDELENGTH;
-    BlockUR = UR/BLOCKSIDELENGTH;
+
+    setDRUR(DR, UR);
+    updateBlockByDetail();
     setNowRes();
     setAttribute();
 
@@ -27,8 +22,7 @@ StaticRes::StaticRes(int Num, double DR, double UR)
 StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
 {
     this->Num=Num;
-    this->BlockDR=BlockDR;
-    this->BlockUR=BlockUR;
+    setBlockDRUR(BlockDR, BlockUR);
 
     setNowRes();
     setAttribute();
@@ -37,12 +31,6 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
     g_globalNum++;
-}
-
-void StaticRes::nextframe()
-{
-
-
 }
 
 void StaticRes::setAttribute()
@@ -81,7 +69,7 @@ void StaticRes::setNowRes()
     listLen = nowlist->size();
 
     nowres = next(nowlist->begin(), rand()%listLen);
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+
+    updateImageXYByNowRes();
     this->imageH=DR-UR;
 }
