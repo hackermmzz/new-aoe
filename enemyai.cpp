@@ -207,8 +207,8 @@ void EnemyAI::processData() {
                 ATT2-=dif;
             }
     }
-        qDebug()<<armystate[0]<<ifretreat[0]<<g_frame;
-         qDebug()<<armystate[1]<<ifretreat[1]<<g_frame;
+        qDebug()<<armystate[0]<<ChasingLock[0]<<g_frame;
+         qDebug()<<armystate[1]<<ChasingLock[1]<<g_frame;
     //撤退
     if(mode==-1)
         for(int i=0;i<ATT1;i++)
@@ -259,14 +259,14 @@ void EnemyAI::processData() {
     //根据波数启动军队,选定各兵种目标
     if(mode==1){
          for(int i=0;i<ATT1;i++)
-             if(armystate[i]==WAITING||armystate[i]==RETREAT||armystate[i]==DESTROY){ armystate[i]=ATTACK;
+             if(armystate[i]==WAITING||armystate[i]==RETREAT){ armystate[i]=ATTACK;
                  target[0]=seek(0,1);
 //                 qDebug()<<"sus"<<g_frame;
 //                 qDebug()<<target[0]<<g_frame;
     }}
     else if(mode==2){
         for(int i=0;i<ATT2;i++){
-            if(armystate[i]==WAITING||armystate[i]==RETREAT||armystate[i]==DESTROY){ armystate[i]=ATTACK;
+            if(armystate[i]==WAITING||armystate[i]==RETREAT){ armystate[i]=ATTACK;
                 if(enemyInfo.armies[i].Sort==1){
                     target[1]=seek(1,3);
                     if(target[1]>150) target[1]=seek(1,2);
@@ -368,7 +368,7 @@ void EnemyAI::processData() {
         //反击检查
 //    qDebug()<<armystate[0]<<ChasingLock[0]<<armystate[1]<<ChasingLock[1]<<g_frame;
     for(int i=0;i<enemyInfo.armies.size();i++){
-           if(ChasingLock[i]!=0&&armystate[i]!=CHASE)ChasingLock[i]=0;
+           if(ChasingLock[i]!=0&&(armystate[i]!=CHASE&&armystate[i]!=DESTROY))ChasingLock[i]=0;
            if(armystate[i]==CHASE){
 
                if(calDistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,chasestart_L[i],chasestart_U[i])>=200)
