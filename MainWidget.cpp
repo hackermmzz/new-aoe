@@ -46,11 +46,50 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
 {
+    qInfo()<<"主程序启动参数："<<MapJudge<<" 开始初始化...";
     ui->setupUi(this);
     // 初始化游戏资源
+    initGameResources();
+    // 初始化游戏元素
+    initGameElements();
+    // 初始化当前窗口属性
+    initWindowProperties();
+    // 初始化窗口选项属性
+    initOptions();
+    // 初始化游戏实体属性框（左下角）
+    initInfoPane();
+    // 初始化计时器
+    initGameTimer();
+    // 初始化玩家
+    initPlayers();
+    // 初始化地图
+    initMap(MapJudge);
+    // 设置内核
+    setupCore();
+    // 初始化AI
+    initAI();
+    // 设置鼠标追踪
+    setupMouseTracking();
+    // 设置信息栏文本颜色
+    setupTipLabel();
+    // 设置小地图
+    initViewMap();
+    // 设置背景音乐
+    initBGM();
+
+    debugText("blue"," 游戏开始");
+    qInfo()<<"初始化结束，游戏开始！";
+}
+
+//***************InitHelperFunctionBegin**************
+void MainWidget::initGameResources() {
+    qDebug()<<"游戏资源初始化...";
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
-    // 初始化游戏元素
+}
+
+void MainWidget::initGameElements() {
+    qDebug()<<"游戏元素初始化...";
     initBlock();
     initBuilding();
     initAnimal();
@@ -58,65 +97,23 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initFarmer();
     initArmy();
     initMissile();
+}
 
-    // 设置当前窗口属性
-    this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
-    this->setWindowTitle("Age Of Empires");     // 设置标题
-    this->setWindowIcon(QIcon());               // 设置图标（暂空）
+void MainWidget::initWindowProperties() {
+    qDebug()<<"游戏窗口初始化...";
+    this->setFixedSize(GAME_WIDTH, GAME_HEIGHT);
+    this->setWindowTitle("Age Of Empires");
+    this->setWindowIcon(QIcon());
+}
+
+void MainWidget::initOptions() {
+    qDebug()<<"窗口选项初始化...";
+    //“设置”选项卡
     option = new Option();
     option->setModal(true);
-    option->hide();
-
-//    connect(option->btnMusic,&QPushButton::clicked,this,&MainWidget::toggleMusic);
-//    connect(option->btnSound,&QPushButton::clicked,this,&MainWidget::toggleSound);
-//    connect(option->btnSelect,&QPushButton::clicked,this,&MainWidget::toggleSelect);
-//    connect(option->btnLine,&QPushButton::clicked,this,&MainWidget::toggleLine);
-//    connect(option->btnPos,&QPushButton::clicked,this,&MainWidget::togglePos);
-//    connect(option->btnOverlap,&QPushButton::clicked,this,&MainWidget::toggleShowOverlap);
-    option->btnSelect->hide();
-    option->btnLine->hide();
-    option->btnPos->hide();
-    option->btnOverlap->hide();
-    connect(ui->option,&QPushButton::clicked,option,&QDialog::show);
-    connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
-    connect(option, &Option::request_ClearDebugText, this, &MainWidget::clearDebugText);
-    connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
-    connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
-    connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
-
+    //“关于我们”选项卡
     aboutDialog = new AboutDialog(this);
-    aboutDialog->hide();
-
-
-    sel = new SelectWidget(this); // 设置左下角窗口
-    sel->move(20, 810);
-    sel->show();
-    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8 , ui->interact9 , ui->interact10};
-    for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
-    {
-        acts[i] = acts_[i];
-        acts[i]->setStatus(0);
-        acts[i]->setNum(i);
-        acts[i]->hide();
-        acts[i]->setAttribute(Qt::WA_Hover, true);
-        acts[i]->installEventFilter(this);
-    }
-    connect(ui->interact1,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact2,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact3,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact4,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact5,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact6,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact7,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact8,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact9,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->interact10,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
-    connect(ui->Game,SIGNAL(sendView(int,int,int)),sel,SLOT(getBuild(int,int,int)));
-    connect(sel,SIGNAL(sendBuildMode(int)),ui->Game,SLOT(setBuildMode(int)));
-    // 设定游戏计时器
-    timer = new QTimer(this);
-    timer->setTimerType(Qt::PreciseTimer);
-    timer->start(40);
+    //倍速按钮组
     pbuttonGroup = new QButtonGroup(this);
     pbuttonGroup->addButton(ui->radioButton_1,0);
     pbuttonGroup->addButton(ui->radioButton_2,1);
@@ -127,91 +124,139 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+    //绑定设置按钮
+    connect(ui->option, &QPushButton::clicked, option, &QDialog::show);
+    connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
+    connect(option, &Option::request_ClearDebugText, this, &MainWidget::clearDebugText);
+    connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
+    connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
+    connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
+    //隐藏组件
+    option->hide();
+    option->btnSelect->hide();
+    option->btnLine->hide();
+    option->btnPos->hide();
+    option->btnOverlap->hide();
+    aboutDialog->hide();
+}
+
+void MainWidget::initInfoPane() {
+    qDebug()<<"游戏实体属性框初始化...";
+    sel = new SelectWidget(this);
+    sel->move(20, 810);
+    sel->show();
+
+    ActWidget* acts_[ACT_WINDOW_NUM_FREE] = { ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8, ui->interact9, ui->interact10 };
+    for (int i = 0; i < ACT_WINDOW_NUM_FREE; i++) {
+        acts[i] = acts_[i];
+        acts[i]->setStatus(0);
+        acts[i]->setNum(i);
+        acts[i]->hide();
+        acts[i]->setAttribute(Qt::WA_Hover, true);
+        acts[i]->installEventFilter(this);
+        connect(acts[i], SIGNAL(actPress(int)), sel, SLOT(widgetAct(int)));
+    }
+
+    connect(ui->Game, SIGNAL(sendView(int, int, int)), sel, SLOT(getBuild(int, int, int)));
+    connect(sel, SIGNAL(sendBuildMode(int)), ui->Game, SLOT(setBuildMode(int)));
+}
+
+void MainWidget::initGameTimer() {
+    qDebug()<<"初始化计时器...";
+    timer = new QTimer(this);
+    timer->setTimerType(Qt::PreciseTimer);
+    timer->start(40);
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
-    //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+}
 
-    // 玩家开辟空间
-    for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
+void MainWidget::initPlayers() {
+    qDebug()<<"初始化玩家...";
+    // 开辟玩家空间
+    for (int i = 0; i < MAXPLAYER; i++) {
+        player[i] = new Player(i);
+    }
+    //设置初始科技
+    // player[0]->set_AllTechnology();
     player[1]->set_AllTechnology();
-//    player[0]->set_AllTechnology();
+    //设置初始时代
+    player[0]->setCiv(CIVILIZATION_TOOLAGE);
+    //设置初始资源
+    // player[0]->changeResource(2000,2000,2000,2000);
+    // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
+}
 
-    // 新建map对象并初始化
+void MainWidget::initMap(int MapJudge) {
+    qDebug()<<"初始化地图...";
     map = new Map;
-    //为map添加player指针
     map->setPlayer(player);
     map->init(MapJudge);
     map->init_Map_Height();
+
     // 内存图开辟空间
-    for(int i = 0;i < MEMORYROW; i++)
-    {
+    memorymap = new int*[MEMORYROW];
+    for (int i = 0; i < MEMORYROW; i++) {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
-    // 向地图中添加资源
-    initmap();
+    map->loadResource();
     buildInitialStock();
+}
 
-    core = new Core(map,player,memorymap,mouseEvent);
-    sel->setCore(core);
-    // AI初始化
-    UsrAi=new UsrAI();
-    EnemyAi=new EnemyAI();
-    connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
-    connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
+void MainWidget::initAI() {
+    qDebug()<<"初始化AI...";
+    UsrAi = new UsrAI();
+    EnemyAi = new EnemyAI();
+    connect(this, &MainWidget::startAI, UsrAi, &AI::startProcessing);
+    connect(this, &MainWidget::startAI, EnemyAi, &AI::startProcessing);
     connect(UsrAi, &AI::cheatAttack, EnemyAi, &EnemyAI::onWaveAttack);
     connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
     UsrAi->start();
     EnemyAi->start();
+}
 
+void MainWidget::setupCore() {
+    qDebug()<<"设置内核...";
+    core = new Core(map,player,memorymap,mouseEvent);
+    sel->setCore(core);
     core->sel = sel;
-    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+}
 
-    //设置user初始时代
-    player[0]->setCiv(CIVILIZATION_TOOLAGE);
-    //设置user初始资源
-//    player[0]->changeResource(2000,2000,2000,2000);
-//    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
-
-    // 设置鼠标追踪
+void MainWidget::setupMouseTracking() {
+    qDebug()<<"设置鼠标跟踪...";
     ui->Game->setMouseTracking(true);
-    ui->Game->setAttribute(Qt::WA_MouseTracking,true);
+    ui->Game->setAttribute(Qt::WA_MouseTracking, true);
     ui->Game->installEventFilter(this);
+}
 
-    // 设置提示颜色
+void MainWidget::setupTipLabel() {
+    qDebug()<<"设置信息栏文本颜色...";
     QPalette pe;
-    pe.setColor(QPalette::WindowText,Qt::green);
+    pe.setColor(QPalette::WindowText, Qt::green);
     ui->tip->setPalette(pe);
     tipLbl = ui->tip;
-    // 给小地图传递list
+}
+
+void MainWidget::initBGM() {
+    qDebug()<<"设置背景音乐...";
+    bgm = SoundMap["BGM"];
+    if (bgm != NULL) {
+        bgm->setLoopCount(QSoundEffect::Infinite);
+        responseMusicChange();
+    }
+}
+
+void MainWidget::initViewMap() {
+    qDebug()<<"设置小地图...";
     ui->mapView->setFriendlyFarmerList(&(player[0]->human));
     ui->mapView->setEnemyFarmerList(&(player[1]->human));
     ui->mapView->setFriendlyBuildList(&(player[0]->build));
     ui->mapView->setEnemyBuildList(&(player[1]->build));
     ui->mapView->setAnimalList(&(map->animal));
     ui->mapView->setResList(&(map->staticres));
-
-    // 创建 QSoundEffect 对象，指定音乐文件
-    bgm = SoundMap["BGM"];
-
-    // 设置循环播放
-    if(bgm != NULL)
-    {
-        bgm->setLoopCount(QSoundEffect::Infinite);
-
-//        qDebug()<< (option->getMusic());
-        responseMusicChange();
-    }
-
-    if(isExamining)
-    {
-        timer->setInterval(5);
-        mapmoveFrequency=8;
-        nowobject=NULL;
-    }
-
-
-    debugText("blue"," 游戏开始");
 }
+//**************InitHelperFunctionEnd**************
+
 
 // MainWidget析构函数
 MainWidget::~MainWidget()
@@ -245,14 +290,6 @@ void MainWidget::paintEvent(QPaintEvent *)
 
 }
 
-// 初始化地图
-MainWidget::initmap()
-{
-    if(map->loadResource()==0)
-    {
-        return 0;
-    }
-}
 
 // 初始化区块
 void MainWidget::initBlock()
@@ -788,6 +825,7 @@ void MainWidget::gameDataUpdate()
     }
 
     makeSound();
+
 }
 void MainWidget::paintUpdate()
 {

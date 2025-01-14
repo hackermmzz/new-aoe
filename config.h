@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QKeyEvent>
 #include <qtimer.h>
+#include "Logger.h"
 
 #include <stack>
 #include <queue>
