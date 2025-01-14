@@ -46,6 +46,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
 {
+    qInfo()<<"主程序启动参数："<<MapJudge<<" 开始初始化...";
     ui->setupUi(this);
     // 初始化游戏资源
     InitImageResMap(RESPATH);   // 图像资源
@@ -246,7 +247,7 @@ void MainWidget::paintEvent(QPaintEvent *)
 }
 
 // 初始化地图
-MainWidget::initmap()
+int MainWidget::initmap()
 {
     if(map->loadResource()==0)
     {

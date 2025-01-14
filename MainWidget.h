@@ -23,7 +23,7 @@ public:
     explicit MainWidget(int MapJudge, QWidget *parent = 0);
     ~MainWidget();
 
-    initmap();
+    int initmap();
     void paintEvent(QPaintEvent *);
     void initBlock();
     void initBuilding();
@@ -115,6 +115,7 @@ private:
     QSoundEffect* bgm = NULL;
 
     //****************Music*********************
+
 };
 
 #endif // MAINWIDGET_H
