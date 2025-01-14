@@ -116,6 +116,14 @@ private:
 
     //****************Music*********************
 
+    //***************InitHelperFunction**************
+    void initGameElements();
+    void initGameResources();
+    void initWindowProperties();
+    void initOptions();
+    void initInfoPane();
+    void initGameTimer();
+    void initPlayers();
 };
 
 #endif // MAINWIDGET_H

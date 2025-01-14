@@ -1,3 +1,7 @@
+///  基于
+///  https://github.com/VelazcoJD/QtLogging
+///  进行修改
+
 #include "Logger.h"
 #include <QDateTime>
 #include <QDir>
@@ -18,7 +22,7 @@ QHash<QtMsgType, QString> Logger::contextNames = {
 };
 
 Logger::LogLevel Logger::currentLogLevel = Logger::LogLevel::Debug;
-QElapsedTimer Logger::elapsedTimer;  // 记录启动时间
+QElapsedTimer Logger::elapsedTimer;  // 计时器
 
 void Logger::init(LogLevel level) {
     if (isInit) {
@@ -29,7 +33,7 @@ void Logger::init(LogLevel level) {
     currentLogLevel = level;
 
     // Start the elapsed timer
-    elapsedTimer.start();  // 记录启动时间
+    elapsedTimer.start();
 
     // Create log file
     logFile = new QFile;
@@ -60,7 +64,7 @@ void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, co
     }
 
     // Get the elapsed time in milliseconds
-    qint64 elapsedTime = elapsedTimer.elapsed();  // 获取自启动以来的时间（毫秒）
+    qint64 elapsedTime = elapsedTimer.elapsed();
 
     // Convert elapsed time to minutes, seconds, and milliseconds
     int minutes = static_cast<int>(elapsedTime / 60000);  // 60,000 ms = 1 minute

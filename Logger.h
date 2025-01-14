@@ -1,6 +1,10 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+///  基于
+///  https://github.com/VelazcoJD/QtLogging
+///  进行修改
+
 #include <QMessageLogContext>
 #include <QFile>
 #include <QHash>
