@@ -62,82 +62,26 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initGameTimer();
     // 初始化玩家
     initPlayers();
-
-
-    // 新建map对象并初始化
-    map = new Map;
-    //为map添加player指针
-    map->setPlayer(player);
-    map->init(MapJudge);
-    map->init_Map_Height();
-    // 内存图开辟空间
-    for(int i = 0;i < MEMORYROW; i++)
-    {
-        memorymap[i] = new int[MEMORYCOLUMN];
-    }
-    // 向地图中添加资源
-    initmap();
-    buildInitialStock();
-
-    core = new Core(map,player,memorymap,mouseEvent);
-    sel->setCore(core);
-    // AI初始化
-    UsrAi=new UsrAI();
-    EnemyAi=new EnemyAI();
-    connect(this,&MainWidget::startAI,UsrAi,&AI::startProcessing);
-    connect(this,&MainWidget::startAI,EnemyAi,&AI::startProcessing);
-    connect(UsrAi, &AI::cheatAttack, EnemyAi, &EnemyAI::onWaveAttack);
-    connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
-    UsrAi->start();
-    EnemyAi->start();
-
-    core->sel = sel;
-    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
-
-
+    // 初始化地图
+    initMap(MapJudge);
+    // 设置内核
+    setupCore();
+    // 初始化AI
+    initAI();
     // 设置鼠标追踪
-    ui->Game->setMouseTracking(true);
-    ui->Game->setAttribute(Qt::WA_MouseTracking,true);
-    ui->Game->installEventFilter(this);
-
-    // 设置提示颜色
-    QPalette pe;
-    pe.setColor(QPalette::WindowText,Qt::green);
-    ui->tip->setPalette(pe);
-    tipLbl = ui->tip;
-    // 给小地图传递list
-    ui->mapView->setFriendlyFarmerList(&(player[0]->human));
-    ui->mapView->setEnemyFarmerList(&(player[1]->human));
-    ui->mapView->setFriendlyBuildList(&(player[0]->build));
-    ui->mapView->setEnemyBuildList(&(player[1]->build));
-    ui->mapView->setAnimalList(&(map->animal));
-    ui->mapView->setResList(&(map->staticres));
-
-    // 创建 QSoundEffect 对象，指定音乐文件
-    bgm = SoundMap["BGM"];
-
-    // 设置循环播放
-    if(bgm != NULL)
-    {
-        bgm->setLoopCount(QSoundEffect::Infinite);
-
-//        qDebug()<< (option->getMusic());
-        responseMusicChange();
-    }
-
-    if(isExamining)
-    {
-        timer->setInterval(5);
-        mapmoveFrequency=8;
-        nowobject=NULL;
-    }
-
+    setupMouseTracking();
+    // 设置信息栏文本颜色
+    setupTipLabel();
+    // 设置小地图
+    initViewMap();
+    // 设置背景音乐
+    initBGM();
 
     debugText("blue"," 游戏开始");
     qInfo()<<"初始化结束，游戏开始！";
 }
 
-//***************InitHelperFunction**************
+//***************InitHelperFunctionBegin**************
 void MainWidget::initGameResources() {
     qDebug()<<"游戏资源初始化...";
     InitImageResMap(RESPATH);   // 图像资源
@@ -224,6 +168,7 @@ void MainWidget::initGameTimer() {
     timer->start(40);
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
+    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
 }
 
 void MainWidget::initPlayers() {
@@ -241,6 +186,77 @@ void MainWidget::initPlayers() {
     // player[0]->changeResource(2000,2000,2000,2000);
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
+
+void MainWidget::initMap(int MapJudge) {
+    qDebug()<<"初始化地图...";
+    map = new Map;
+    map->setPlayer(player);
+    map->init(MapJudge);
+    map->init_Map_Height();
+
+    // 内存图开辟空间
+    memorymap = new int*[MEMORYROW];
+    for (int i = 0; i < MEMORYROW; i++) {
+        memorymap[i] = new int[MEMORYCOLUMN];
+    }
+    map->loadResource();
+    buildInitialStock();
+}
+
+void MainWidget::initAI() {
+    qDebug()<<"初始化AI...";
+    UsrAi = new UsrAI();
+    EnemyAi = new EnemyAI();
+    connect(this, &MainWidget::startAI, UsrAi, &AI::startProcessing);
+    connect(this, &MainWidget::startAI, EnemyAi, &AI::startProcessing);
+    connect(UsrAi, &AI::cheatAttack, EnemyAi, &EnemyAI::onWaveAttack);
+    connect(UsrAi, &UsrAI::cheatRes, this, &MainWidget::cheat_Player0Resource);
+    UsrAi->start();
+    EnemyAi->start();
+}
+
+void MainWidget::setupCore() {
+    qDebug()<<"设置内核...";
+    core = new Core(map,player,memorymap,mouseEvent);
+    sel->setCore(core);
+    core->sel = sel;
+}
+
+void MainWidget::setupMouseTracking() {
+    qDebug()<<"设置鼠标跟踪...";
+    ui->Game->setMouseTracking(true);
+    ui->Game->setAttribute(Qt::WA_MouseTracking, true);
+    ui->Game->installEventFilter(this);
+}
+
+void MainWidget::setupTipLabel() {
+    qDebug()<<"设置信息栏文本颜色...";
+    QPalette pe;
+    pe.setColor(QPalette::WindowText, Qt::green);
+    ui->tip->setPalette(pe);
+    tipLbl = ui->tip;
+}
+
+void MainWidget::initBGM() {
+    qDebug()<<"设置背景音乐...";
+    bgm = SoundMap["BGM"];
+    if (bgm != NULL) {
+        bgm->setLoopCount(QSoundEffect::Infinite);
+        responseMusicChange();
+    }
+}
+
+void MainWidget::initViewMap() {
+    qDebug()<<"设置小地图...";
+    ui->mapView->setFriendlyFarmerList(&(player[0]->human));
+    ui->mapView->setEnemyFarmerList(&(player[1]->human));
+    ui->mapView->setFriendlyBuildList(&(player[0]->build));
+    ui->mapView->setEnemyBuildList(&(player[1]->build));
+    ui->mapView->setAnimalList(&(map->animal));
+    ui->mapView->setResList(&(map->staticres));
+}
+//**************InitHelperFunctionEnd**************
+
 
 // MainWidget析构函数
 MainWidget::~MainWidget()
@@ -274,14 +290,6 @@ void MainWidget::paintEvent(QPaintEvent *)
 
 }
 
-// 初始化地图
-int MainWidget::initmap()
-{
-    if(map->loadResource()==0)
-    {
-        return 0;
-    }
-}
 
 // 初始化区块
 void MainWidget::initBlock()
@@ -817,6 +825,7 @@ void MainWidget::gameDataUpdate()
     }
 
     makeSound();
+
 }
 void MainWidget::paintUpdate()
 {

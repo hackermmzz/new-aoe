@@ -10,6 +10,7 @@
 #include <QElapsedTimer>
 #include <QObject>
 #include <QDebug>
+#include "GlobalVariate.h"
 
 QFile* Logger::logFile = Q_NULLPTR;
 bool Logger::isInit = false;
@@ -47,7 +48,7 @@ void Logger::init(LogLevel level) {
     logFile->resize(0);
 
     Logger::isInit = true;
-    qInfo()<<"日志服务启动！日志级别："<<level;
+    qInfo()<<"日志服务启动！日志级别："+contextNames.value((static_cast<QtMsgType>(level)));
 }
 
 void Logger::clean() {
@@ -77,8 +78,9 @@ void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, co
                              .arg(seconds, 2, 10, QChar('0'))  // Ensure two digits for seconds
                              .arg(milliseconds, 3, 10, QChar('0'));  // Ensure three digits for milliseconds
 
-    QString log = QObject::tr("%1 | %2 | %3 | %4 | %5 | %6\n").
+    QString log = QObject::tr("%1 | %2 | %3 | %4 | %5 | %6 | %7\n").
                   arg(timeString).                           // 使用分钟:秒:毫秒格式
+                  arg(g_frame).                             // 当前帧数
                   arg(Logger::contextNames.value(type)).
                   arg(context.line).
                   arg(QString(context.file).

@@ -1524,7 +1524,7 @@ bool Map::addAnimal(int Num, double DR, double UR) {
  * 内容：随机生成资源；
  * 返回值：生成成功返回true。
  */
-bool Map::loadResource() {
+void Map::loadResource() {
     for(int i = 0; i < MAP_U; i++)
     {
         for(int j = 0; j < MAP_L; j++)
@@ -1565,7 +1565,6 @@ bool Map::loadResource() {
             mapFlag[i][j] = 0;
         }
     }
-    return true;
 }
 
 /*
