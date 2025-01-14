@@ -26,6 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    Logger.cpp \
         main.cpp \
         MainWidget.cpp \
     GameWidget.cpp \
@@ -59,6 +60,7 @@ SOURCES += \
     AboutDialog.cpp
 
 HEADERS += \
+    Logger.h \
         MainWidget.h \
     GameWidget.h \
     config.h \

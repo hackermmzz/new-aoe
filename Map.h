@@ -118,8 +118,8 @@ public:
     int addStaticRes(int Num, int BlockDR, int BlockUR);
 
     bool addAnimal(int Num,double DR,double UR);
-
-    bool loadResource();
+    //初始化地图资源
+    void loadResource();
 
     list<Animal*>::iterator deleteAnimal( list<Animal*>::iterator iterDele)
     {
