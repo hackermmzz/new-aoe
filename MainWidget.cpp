@@ -62,17 +62,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 设置当前窗口属性
     this->setFixedSize(GAME_WIDTH,GAME_HEIGHT); // 设置窗口大小
     this->setWindowTitle("Age Of Empires");     // 设置标题
-    this->setWindowIcon(QIcon());               // 设置图标（暂空）
+    this->setWindowIcon(QIcon("wlh.png"));               // 设置图标（暂空）
     option = new Option();
     option->setModal(true);
     option->hide();
-
-//    connect(option->btnMusic,&QPushButton::clicked,this,&MainWidget::toggleMusic);
-//    connect(option->btnSound,&QPushButton::clicked,this,&MainWidget::toggleSound);
-//    connect(option->btnSelect,&QPushButton::clicked,this,&MainWidget::toggleSelect);
-//    connect(option->btnLine,&QPushButton::clicked,this,&MainWidget::toggleLine);
-//    connect(option->btnPos,&QPushButton::clicked,this,&MainWidget::togglePos);
-//    connect(option->btnOverlap,&QPushButton::clicked,this,&MainWidget::toggleShowOverlap);
     option->btnSelect->hide();
     option->btnLine->hide();
     option->btnPos->hide();
@@ -129,8 +122,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
-    //    connect((const QObject*)core, SIGNAL(clickOnObject()), sel, SLOT(initActs()));
-
     // 玩家开辟空间
     for(int i = 0; i < MAXPLAYER; i++){player[i] = new Player(i);}
     player[1]->set_AllTechnology();
@@ -149,7 +140,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     }
     // 向地图中添加资源
     initmap();
-    buildInitialStock();
+   // buildInitialStock();
 
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
@@ -197,8 +188,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     if(bgm != NULL)
     {
         bgm->setLoopCount(QSoundEffect::Infinite);
-
-//        qDebug()<< (option->getMusic());
         responseMusicChange();
     }
 
@@ -278,7 +267,7 @@ void MainWidget::initBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<10;j++)
+        for(int j=0;j<11;j++)
         {
             Building::allocatebuilt(i,j);
             loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));

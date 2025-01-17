@@ -90,7 +90,7 @@ void Core::updateByObject()
                 // 斜坡
                 if(theMap->isSlope(blockDR, blockUR))
                 {
-                    if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
+                    if(curMapHeight!=MAPHEIGHT_OCEAN&&(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT))
                     {
                         qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
                         qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
@@ -99,7 +99,7 @@ void Core::updateByObject()
                     // 判断mapType以确定上升方向
                     int curMapType = theMap->cell[blockDR][blockUR].getMapType();
                     pair<double, double> curHumanCoor = {theHuman->getDR(), theHuman->getUR()};   // 当前人物细节坐标
-                    pair<double, double> curBlockCoor = {blockDR * 16.0 * gen5, blockUR * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+                    pair<double, double> curBlockCoor = {blockDR * BLOCKSIDELENGTH, blockUR * BLOCKSIDELENGTH}; // 当前人物所在格（最左端的）细节坐标
 
                     // 左高右低：
                     if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
@@ -134,7 +134,7 @@ void Core::updateByObject()
                         //qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                     }
                 }
-                // 平地
+                // 平地或者海洋
                 else theHuman->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
             }
 
@@ -884,7 +884,6 @@ void Core::judge_Crush()
     int labSize_jud = moveOb_judCrush.size(),labSize,obSize;
     MoveObject* judOb;
     Coordinate* barrierOb;
-
     for(int i = 0 ; i<labSize_jud; i++)
     {
         judOb = moveOb_judCrush[i];

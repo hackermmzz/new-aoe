@@ -56,8 +56,10 @@
 #define GAMEWIDGET_WIDTH 1440
 #define GAMEWIDGET_HEIGHT 751
 #define BLOCKSIDELENGTH (16*gen5)
-#define MAP_L 72
-#define MAP_U 72
+#define MAP_L 128
+#define MAP_U 128
+#define GENERATE_L (MAP_L+8)
+#define GENERATE_U (MAP_U+8)
 #define GAMEWIDGET_MIDBLOCKL 22
 #define GAMEWIDGET_MIDBLOCKU 0
 #define HUMAN_SPEED sqrt(5)
@@ -108,11 +110,12 @@
 #define MAPTYPE_L1_DOWNTOLU 11  // L1边（向左上凹陷）
 #define MAPTYPE_A2_DOWNTOU 12   // A2角（向上方凹陷）
 #define MAPTYPE_A0_UPTOD 13     // A0角（向下方凸起）
-
+#define MAPTYPE_OCEAN    14     //海洋
 
 /********** 地图块高度 **********/
 #define MAPHEIGHT_FLAT 0        // 地形高度
 #define MAPHEIGHT_MAX 5         // 最高地形高度
+#define MAPHEIGHT_OCEAN 9       //海洋的高度
 #define MAPHEIGHT_PERCENT 60    // 生成概率，范围0~100
 #define MAPHEIGHT_OPTCOUNT 20   // 生成高度时的优化次数，范围要求>=5
 #define CENTER_RADIUS   12      // 特判市镇中心附近平地的半径
@@ -162,9 +165,8 @@
 #define BUILDING_ARMYCAMP 7
 #define BUILDING_STABLE 8
 #define BUILDING_RANGE 9
-
-#define BUILDING_WALL 10
-
+#define BUILDING_DOCK 10
+#define BUILDING_WALL 11
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
 
@@ -228,7 +230,6 @@
 #define ANIMAL_ELEPHANT 2
 #define ANIMAL_LION 3
 #define ANIMAL_FOREST 4
-
 
 /********** 人物状态 **********/
 /*

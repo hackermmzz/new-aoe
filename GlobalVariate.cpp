@@ -90,11 +90,12 @@ int InitImageResMap(QString path)
         //        qDebug()<<"图片是所在List中第"<<fileName.right(7).left(3)<<"张";
 
         std::string tmpListName = imageMapName.toStdString();
-
-//        qDebug()<<filePath;
         resMap[tmpListName].push_back(QPixmap(filePath));
-
     }
+    ////////////////////////////////加载额外资源
+    resMap["Button_Dock"].push_back(QPixmap("res/Dock3.png"));
+    resMap["Dock"].push_back(QPixmap("res/Dock3.png"));
+    ////////////////////////////////
     //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
 
 //查看rcc

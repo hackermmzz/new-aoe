@@ -352,7 +352,8 @@ void SelectWidget::refreshActs()
             ui->objName->setText(QString::fromStdString(objBuilding->getDisplayName(buildType)));//设置显示名称
 
             //根据不同时代设置不同的图标
-            ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType)].front().scaled(110,110));
+            string name="Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType);
+            ui->objIcon->setPixmap(resMap[name].front().scaled(110,110));
 
             if(objBuilding->getActSpeed() != 0)
             {

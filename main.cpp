@@ -16,8 +16,7 @@ int main(int argc, char *argv[])
     {
         MapJudge = 2;
     }
-    MainWidget w(MapJudge);
+    MainWidget w(1);
     w.show();
-
     return a.exec();
 }
