@@ -2,32 +2,32 @@
 
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
-std::list<ImageResource>* Building::built[3][10];
+std::list<ImageResource>* Building::built[3][20];
 std::list<ImageResource>* Building::buildFire[3];
 
 std::string Building::Buildingname[4]={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
-std::string Building::Builtname[3][10]={{},
-                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range"},
-                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range"}
+std::string Building::Builtname[3][20]={{},
+                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock"},
+                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock"}
                                       };
-std::string Building::BuildDisplayName[10]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场"};
+std::string Building::BuildDisplayName[20]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场","船坞"};
 
 std::string Building::BuildFireName[3] = { "S_Fire", "M_Fire", "B_Fire"};
 
-std::string Building::sound_click[10] = {\
-    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market","Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range"\
+std::string Building::sound_click[20] = {\
+    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market","Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range","Click_Range"
 };
 
 int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
 
-int Building::BuildingMaxBlood[10] = { BLOOD_BUILD_HOUSE,  BLOOD_BUILD_GRANARY, BLOOD_BUILD_CENTER, BLOOD_BUILD_STOCK, BLOOD_BUILD_FARM,\
-                                     BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE, BLOOD_BUILD_RANGE};
+int Building::BuildingMaxBlood[20] = { BLOOD_BUILD_HOUSE,  BLOOD_BUILD_GRANARY, BLOOD_BUILD_CENTER, BLOOD_BUILD_STOCK, BLOOD_BUILD_FARM,\
+                                     BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE, BLOOD_BUILD_RANGE,BLOOD_BUILD_DOCK};
 
-int Building::BuildingFundation[10] = { FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,\
-                                      FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,};
+int Building::BuildingFundation[20] = { FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,\
+                                      FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,FOUNDATION_SMALL};
 
-int Building::BuildingVision[10] = { VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,\
-                                     VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE};
+int Building::BuildingVision[20] = { VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,\
+                                     VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE,VISION_DOCK};
 
 /********************静态资源**************************/
 bool is_cheatAction = false;
@@ -130,6 +130,7 @@ void Building::setAttribute()
     case BUILDING_RANGE:
     case BUILDING_STABLE:
     case BUILDING_WALL:
+    case BUILDING_DOCK:
         break;
     case BUILDING_ARROWTOWER:
         atk = ATK_BUILD_ARROWTOWER;
