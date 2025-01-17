@@ -57,7 +57,7 @@ SOURCES += \
     EnemyAI.cpp \
     ViewWidget.cpp \
     Option.cpp \
-    AboutDialog.cpp
+    AboutDialog.cpp \
 
 HEADERS += \
     Logger.h \
@@ -92,7 +92,8 @@ HEADERS += \
     ViewWidget.h \
     Option.h \
     digitalConfig.h \
-    AboutDialog.h
+    AboutDialog.h \
+    config.h \
 
 FORMS += \
         MainWidget.ui \
@@ -100,3 +101,5 @@ FORMS += \
     SelectWidget.ui \
     Option.ui \
     AboutDialog.ui
+
+
