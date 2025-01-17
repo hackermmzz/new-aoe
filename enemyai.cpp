@@ -166,6 +166,7 @@ void EnemyAI::processData() {
     if((enemyInfo.enemy_armies.size()+enemyInfo.enemy_farmers.size())+enemyInfo.enemy_buildings.size()==0){
         mode=4;
     }
+    if(g_frame<MODE1)kill=0;
     if(g_frame==MODE2){
         ATT2+=ATT1;
         kill=0;

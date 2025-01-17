@@ -12,6 +12,14 @@ class UsrAI:public AI
 public:
     UsrAI(){this->id=0;}
     ~UsrAI(){}
+    int find_home_xy(int &x, int &y,int tagmap[72][72]);
+    int find_barn_xy(int &x, int &y, int tagmap[72][72], int type);
+    void tree_min(int &x, int &y,int tagmap[72][72]);
+    int find_arrowtower_xy(int &x, int &y, int tagmap[72][72], int arrowtower);
+    int find_stock_xy(int &x, int &y,int tagmap[72][72]);
+    int stone_min(int &x, int &y,int tagmap[72][72]);
+    int find_armycamp_xy(int &x, int &y ,int tagmap[72][72]);
+    int find_farm_xy(int &x, int &y,int tagmap[72][72]);
 
     int getdis(int x,int y,int xx,int yy);
     bool issignaltree(int i);
