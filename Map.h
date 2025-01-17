@@ -39,7 +39,8 @@ public:
     // 判断地图块是否为斜坡
     bool isSlope(int BlockDR, int BlockUR);
 
-
+    void JudegCellType(int BlockDR,int BlockUR);
+    void CalCellOffset(int BlockDR,int BlockUR);
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
     void loadfindPathMap(MoveObject* moveOb);
@@ -177,7 +178,7 @@ private:
     void InitCell(int Num, bool isExplored, bool isVisible);
     void GenerateMapTxt(int MapJudge);
     void loadGenerateMapText(int MapJudge);
-
+    bool  CheckIsNearOcean(int x,int y);
     double tranL(double BlockL);
     double tranU(double BlockU);
 
@@ -188,7 +189,7 @@ private:
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
     Player** player;
-    short m_heightMap[80][80] = {{}};
+    short m_heightMap[GENERATE_L][GENERATE_L] = {{}};
     int Gamemap[MAP_L][MAP_U] = {};  // 地图资源二维数组
     bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
 

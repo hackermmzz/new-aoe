@@ -48,6 +48,7 @@ tagInfo myInFo;
 
 void UsrAI::processData()
 {
+    /*
     //写入你的代码
     myInFo=getInfo();
 
@@ -554,6 +555,7 @@ void UsrAI::processData()
         }
         outFile.close();
     }
+    */
 }
 
 int UsrAI::getdis(int x, int y, int xx, int yy)
@@ -664,6 +666,10 @@ int UsrAI::getbestx(int x)
             num++;
         }
     }
+    if(num==0){
+        qWarning()<<"num==0";
+        return 0;
+    }
     return xx/num;
 }
 
@@ -688,6 +694,11 @@ int UsrAI::getbesty(int x)
             num++;
         }
     }
+    if(num==0){
+        qWarning()<<"num==0";
+        return 0;
+    }
+
     return xx/num;
 }
 

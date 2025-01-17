@@ -315,7 +315,7 @@ void MainWidget::initBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<10;j++)
+        for(int j=0;j<11;j++)
         {
             Building::allocatebuilt(i,j);
             loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));

@@ -1,4 +1,4 @@
-#include "Option.h"
+﻿#include "Option.h"
 #include "ui_Option.h"
 
 Option::Option(QWidget *parent) :
@@ -23,7 +23,7 @@ Option::Option(QWidget *parent) :
 
     showText_Sound();
     showText_Music();
-
+    on_sound_clicked();
 }
 
 Option::~Option()
