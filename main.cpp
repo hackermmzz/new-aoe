@@ -26,6 +26,5 @@ int main(int argc, char *argv[])
 
     MainWidget w(mapJudge);
     w.show();
-
     return a.exec();
 }

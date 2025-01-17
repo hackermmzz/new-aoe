@@ -29,13 +29,6 @@ void GameWidget::paintEvent(QPaintEvent *)
     int x2;
     int y2;
 
-//    for(int i = 0; i < MAP_L; i++)
-//    {
-//        for(int j = 0; j < MAP_U; j++)
-//        {
-//            mainwidget->map->cell[i][j].Visible = false;
-//        }
-//    }
 
     for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 6; i++)
     {
@@ -57,49 +50,37 @@ void GameWidget::paintEvent(QPaintEvent *)
                 y2++;
                 continue;
             }
+            Block&block=mainwidget->map->cell[x2][y2];
+            int x,y,w,h;
+            QPixmap*pix=0;
             // 此处以下的drawPixmap函数中，添加偏移量OffsetX/Y以对齐各地块
-            if(i%2==0)
-            {
-                if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)
-//                    painter.drawPixmap(-32+64*j,-16+16*i,BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                {
-//                    qDebug() << -32+64*j + mainwidget->map->cell[x2][y2].getOffsetX() << ' ' << -16+16*i + mainwidget->map->cell[x2][y2].getOffsetY();
-                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                }
-                else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)
-                {
-//                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                }
-                else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)
-                {
-//                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                    painter.drawPixmap(-32+64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                }
+            if(i%2==0)x=-32+64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
+            if(i%2==1)x=64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
+            w=Block::block[block.Num]->front().pix.width(),h=Block::block[block.Num]->front().pix.height();
+            list<ImageResource>*targetList;
+            if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::block[block.Num];
+            else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::grayblock[block.Num];
+            else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)targetList=Block::blackblock[block.Num];
+            //如果没超出屏幕，那么绘制
+            auto InRect=[&](int x,int y,const QRect&rect)->bool{
+              if(x>=rect.x()&&x<=rect.x()+rect.width()&&y>=rect.y()&&y<=rect.y()+rect.height())return 1;
+              return 0;
+            };
+            QRect winRect(0,0,GAMEWIDGET_WIDTH,GAMEWIDGET_HEIGHT);
+            if((InRect(x,y,winRect)||InRect(x+w,y,winRect)||InRect(x+w,y+w,winRect)||InRect(x,y+w,winRect))){
+                //如果是海洋
+                if(block.getMapType()==MAPTYPE_OCEAN){
+                    static QPixmap*ocean=new QPixmap("wlh.png");
+                    pix=ocean;
+                }else pix=&(targetList->front().pix);
+                //绘制
+                if(pix)
+                painter.drawPixmap(x,y,w,h,*pix);
             }
-            if(i%2==1)
-            {
-                if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)
-//                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)
-                {
-//                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::grayblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                }
-                else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)
-                {
-//                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),BLOCKPIXEL_X,BLOCKPIXEL_Y,Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                    painter.drawPixmap(64*j + mainwidget->map->cell[x2][y2].getOffsetX(),-16+16*i + mainwidget->map->cell[x2][y2].getOffsetY(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.width(),Block::block[mainwidget->map->cell[x2][y2].Num]->front().pix.height(),Block::blackblock[mainwidget->map->cell[x2][y2].Num]->front().pix);
-                }
-            }
-            //test
-//            if(mainwidget->map->cell[x2][y2].getOffsetX() != 0 || mainwidget->map->cell[x2][y2].getOffsetY() != 0) qDebug() << x2 << ' ' << y2 << ' ' << mainwidget->map->cell[x2][y2].getOffsetX() << ' ' << mainwidget->map->cell[x2][y2].getOffsetY();
             x2++;
             y2++;
         }
     }
-
     //清除内存图内容
     emptymemorymap();
 
