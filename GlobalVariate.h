@@ -458,7 +458,7 @@ struct pixMemoryMap
         {
             for(int j=0;j<height/2;j++)
             {
-                if(j * width >= -height * (i - width/2))
+                if(j * width >= height * ( width/2-i))
                 {
                     setMemoryMap(i,j);
                 }

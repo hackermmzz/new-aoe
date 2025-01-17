@@ -148,21 +148,21 @@ public:
 protected:
   /********************静态资源**************************/
     static std::list<ImageResource> *build[4];//建设list
-    static std::list<ImageResource> *built[3][10]; //建设完成的list
+    static std::list<ImageResource> *built[3][20]; //建设完成的list
     static std::list<ImageResource> *buildFire[3];
 
     static std::string Buildingname[4];
-    static std::string Builtname[3][10];
-    static std::string BuildDisplayName[10];
+    static std::string Builtname[3][20];
+    static std::string BuildDisplayName[20];
     static std::string BuildFireName[3];
 
     static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
 
-    static string sound_click[10];
+    static string sound_click[20];
 
-    static int BuildingMaxBlood[10];
-    static int BuildingFundation[10];
-    static int BuildingVision[10];
+    static int BuildingMaxBlood[20];
+    static int BuildingFundation[20];
+    static int BuildingVision[20];
   /********************静态资源**************************/
 
 
