@@ -2,7 +2,7 @@
 #define SELECTWIDGET_H
 
 #include <QWidget>
-#include "MainWidget.h"
+
 #include "Coordinate.h"
 #include "Core.h"
 
@@ -22,7 +22,6 @@ public:
     void paintEvent(QPaintEvent *event);
     void refreshActs();
     void updateActs();
-
     void drawActs();
     int doActs(int actName,Coordinate* nowobject=::nowobject);
 
@@ -35,25 +34,14 @@ public:
     int actions[ACT_WINDOW_NUM_FREE] = {0};
 private:
     Ui::SelectWidget *ui;
-//    Building * objBuilding;
-//    Coores * objCoores;
-//    GameRes * objGameRes;
-//    Human * objHuman;
     int actionStatus[ACT_WINDOW_NUM_FREE] = {0};
     MainWidget *mainPtr;
 
-    //时间秒与帧
+    //时间秒与帧 用于显示右下角计时器
     int elapsedSec = 0;
     int elapsedFrame = 0;
 
-    int human_num = 0;
-    int build_hold_human_num = 0;
-    bool isGranaryBuilt = false;
-    bool isStockBuilt = false;
-    bool isMarketBuilt = false;
-
     Core* core = NULL;
-
     bool secondWidget_Build = false;
 
     void manageBuildBottom(int position, int actNum , int buildingNum );

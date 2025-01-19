@@ -1,5 +1,7 @@
 #include "SelectWidget.h"
 #include "Core.h"
+#include "EnemyAI.h"
+#include "UsrAI.h"
 
 tagInfo Buffer0[2];
 tagInfo Buffer1[2];

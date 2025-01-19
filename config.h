@@ -392,6 +392,7 @@
 #define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
+#define ACT_BUILD_DOCK_NAME "建造船坞(花费:xx木头)"
 #define ACT_NULL_NAME ""
 
 #define ACT_WINDOW_NUM_FREE 10
@@ -426,6 +427,7 @@
 #define ACT_BUILD_ARMYCAMP 58
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
+#define ACT_BUILD_DOCK 61
 
 #define ACT_STOP 100
 
