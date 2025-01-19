@@ -451,7 +451,7 @@
      <x>770</x>
      <y>840</y>
      <width>110</width>
-     <height>60</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
@@ -563,9 +563,9 @@
    <property name="geometry">
     <rect>
      <x>770</x>
-     <y>920</y>
+     <y>939</y>
      <width>110</width>
-     <height>60</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
@@ -575,6 +575,24 @@
    </property>
    <property name="text">
     <string>关于我们</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="option_3">
+   <property name="geometry">
+    <rect>
+     <x>770</x>
+     <y>890</y>
+     <width>110</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>华文行楷</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>编辑器</string>
    </property>
   </widget>
  </widget>

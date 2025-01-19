@@ -58,6 +58,7 @@ SOURCES += \
     ViewWidget.cpp \
     Option.cpp \
     AboutDialog.cpp \
+    editor.cpp
 
 HEADERS += \
     Logger.h \
@@ -94,12 +95,14 @@ HEADERS += \
     digitalConfig.h \
     AboutDialog.h \
     config.h \
+    editor.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
     SelectWidget.ui \
     Option.ui \
-    AboutDialog.ui
+    AboutDialog.ui \
+    editor.ui
 
 

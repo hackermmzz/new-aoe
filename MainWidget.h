@@ -10,6 +10,7 @@
 #include "ActWidget.h"
 #include "AboutDialog.h"
 #include "GlobalVariate.h"
+#include "editor.h"
 
 namespace Ui {
 class MainWidget;
@@ -71,6 +72,7 @@ private:
     Ui::MainWidget *ui;
     QTimer *timer;
     QButtonGroup *pbuttonGroup = NULL;
+    Editor *editor;
 //*******************************
 
 //****************输出框****************

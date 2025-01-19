@@ -113,6 +113,8 @@ void MainWidget::initOptions() {
     option->setModal(true);
     //“关于我们”选项卡
     aboutDialog = new AboutDialog(this);
+    //“编辑器”选项卡
+    editor=new Editor();
     //倍速按钮组
     pbuttonGroup = new QButtonGroup(this);
     pbuttonGroup->addButton(ui->radioButton_1,0);
@@ -131,6 +133,8 @@ void MainWidget::initOptions() {
     connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
     connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
     connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
+    //绑定编辑器按钮
+    connect(ui->option_3,&QPushButton::clicked,option_3,&Editor::onEditorButtonClick);
     //隐藏组件
     option->hide();
     option->btnSelect->hide();
