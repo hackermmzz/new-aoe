@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'GameWidget.ui'
 **
-** Created by: Qt User Interface Compiler version 5.15.17
+** Created by: Qt User Interface Compiler version 5.9.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -10,7 +10,10 @@
 #define UI_GAMEWIDGET_H
 
 #include <QtCore/QVariant>
+#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -22,7 +25,7 @@ public:
     void setupUi(QWidget *GameWidget)
     {
         if (GameWidget->objectName().isEmpty())
-            GameWidget->setObjectName(QString::fromUtf8("GameWidget"));
+            GameWidget->setObjectName(QStringLiteral("GameWidget"));
         GameWidget->resize(400, 300);
 
         retranslateUi(GameWidget);
@@ -32,7 +35,7 @@ public:
 
     void retranslateUi(QWidget *GameWidget)
     {
-        GameWidget->setWindowTitle(QCoreApplication::translate("GameWidget", "Form", nullptr));
+        GameWidget->setWindowTitle(QApplication::translate("GameWidget", "Form", Q_NULLPTR));
     } // retranslateUi
 
 };
