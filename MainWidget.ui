@@ -445,7 +445,7 @@
     <string>8×</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="option">
+  <widget class="QPushButton" name="option_1">
    <property name="geometry">
     <rect>
      <x>770</x>

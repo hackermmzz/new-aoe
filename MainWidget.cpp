@@ -127,14 +127,14 @@ void MainWidget::initOptions() {
     connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     //绑定设置按钮
-    connect(ui->option, &QPushButton::clicked, option, &QDialog::show);
+    connect(ui->option_1, &QPushButton::clicked, option, &QDialog::show);
     connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
     connect(option, &Option::request_ClearDebugText, this, &MainWidget::clearDebugText);
     connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
     connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
     connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
     //绑定编辑器按钮
-    connect(ui->option_3,&QPushButton::clicked,option_3,&Editor::onEditorButtonClick);
+    connect(ui->option_3,&QPushButton::clicked,editor,&Editor::onEditorButtonClick);
     //隐藏组件
     option->hide();
     option->btnSelect->hide();
