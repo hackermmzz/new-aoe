@@ -93,8 +93,12 @@ int InitImageResMap(QString path)
         resMap[tmpListName].push_back(QPixmap(filePath));
     }
     ////////////////////////////////加载额外资源
-    resMap["Button_Dock"].push_back(QPixmap("res/Dock3.png"));
-    resMap["Dock"].push_back(QPixmap("res/Dock3.png"));
+//    resMap["Button_Dock"].push_back(QPixmap(("res/Button_Dock.png"));
+//    resMap["Dock"].push_back(QPixmap("res/Dock3.png"));
+    for(auto&ele:resMap){
+            qDebug()<<ele.first.c_str();
+        }
+        exit(0);
     ////////////////////////////////
     //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
 
