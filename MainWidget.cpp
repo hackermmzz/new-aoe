@@ -204,7 +204,7 @@ void MainWidget::initMap(int MapJudge) {
 }
 
 void MainWidget::initAI() {
-    qDebug()<<"初始化AI...";
+    qDebug()<<"加载AI...";
     UsrAi = new UsrAI();
     EnemyAi = new EnemyAI();
     connect(this, &MainWidget::startAI, UsrAi, &AI::startProcessing);
@@ -216,7 +216,7 @@ void MainWidget::initAI() {
 }
 
 void MainWidget::setupCore() {
-    qDebug()<<"设置内核...";
+    qDebug()<<"加载内核...";
     core = new Core(map,player,memorymap,mouseEvent);
     sel->setCore(core);
     core->sel = sel;
@@ -238,7 +238,7 @@ void MainWidget::setupTipLabel() {
 }
 
 void MainWidget::initBGM() {
-    qDebug()<<"设置背景音乐...";
+    qDebug()<<"加载背景音乐...";
     bgm = SoundMap["BGM"];
     if (bgm != NULL) {
         bgm->setLoopCount(QSoundEffect::Infinite);
@@ -247,7 +247,7 @@ void MainWidget::initBGM() {
 }
 
 void MainWidget::initViewMap() {
-    qDebug()<<"设置小地图...";
+    qDebug()<<"初始化小地图...";
     ui->mapView->setFriendlyFarmerList(&(player[0]->human));
     ui->mapView->setEnemyFarmerList(&(player[1]->human));
     ui->mapView->setFriendlyBuildList(&(player[0]->build));
