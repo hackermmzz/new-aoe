@@ -167,6 +167,7 @@
 #define BUILDING_RANGE 9
 #define BUILDING_DOCK 10
 #define BUILDING_WALL 11
+
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
 #define BUILDING_FISH 11
@@ -384,6 +385,8 @@
 #define ACT_BUILD_FARM_NAME "建造农场(花费:75木头)(需要先建造市场)"
 #define ACT_BUILD_MARKET_NAME "建造市场(花费:150木头)(需要先建造谷仓)"
 #define ACT_BUILD_ARROWTOWER_NAME "建造箭塔(花费:150石头)(需要先在谷仓内升级科技)"
+#define ACT_BUILD_DOCK_NAME "建造船坞(花费:120木头)"
+
 #define ACT_ARMYCAMP_CREATE_CLUBMAN_NAME "训练棍棒兵(花费:50食物)"
 #define ACT_ARMYCAMP_CREATE_SLINGER_NAME "训练投石兵(花费:40食物,10石头)"
 #define ACT_ARMYCAMP_UPGRADE_CLUBMAN_NAME "升级为战斧(花费:100食物)"
@@ -399,7 +402,7 @@
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
 #define ACT_NULL_NAME ""
 
-#define ACT_WINDOW_NUM_FREE 10
+#define ACT_WINDOW_NUM_FREE 12
 
 #define ACT_NULL 0
 #define ACT_CREATEFARMER 1
@@ -431,6 +434,7 @@
 #define ACT_BUILD_ARMYCAMP 58
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
+#define ACT_BUILD_DOCK 61
 
 #define ACT_STOP 100
 

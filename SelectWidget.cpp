@@ -254,6 +254,10 @@ void SelectWidget::refreshActs()
                 isBuild = true;
                 buildType = BUILDING_STABLE;
                 break;
+             case ACT_BUILD_DOCK:
+                isBuild = true;
+                buildType = BUILDING_DOCK;
+                break;
 
             //建筑行动
             case ACT_CREATEFARMER:
@@ -662,6 +666,12 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_STABLE);
     }
+    else if(actName == ACT_BUILD_DOCK){
+        QApplication::restoreOverrideCursor();
+        QCursor my(resMap["Dock"].front());
+        QApplication::setOverrideCursor(my);
+        emit sendBuildMode(BUILDING_DOCK);
+    }
     else if(actName == ACT_BUILD_CANCEL)
     {
         QApplication::restoreOverrideCursor();
@@ -723,9 +733,9 @@ void SelectWidget::showBuildActLab()
     manageBuildBottom( 6 , ACT_BUILD_RANGE , BUILDING_RANGE );
     manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
     manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
-
-    actions[9] = ACT_BUILD_CANCEL;
-    actionStatus[9] = ACT_STATUS_ENABLED;
+    manageBuildBottom( 9 , ACT_BUILD_DOCK , BUILDING_DOCK );
+    actions[10] = ACT_BUILD_CANCEL;
+    actionStatus[10] = ACT_STATUS_ENABLED;
 }
 
 void SelectWidget::updateActs()
@@ -797,6 +807,7 @@ void SelectWidget::drawActs()
         else if(actions[i] == ACT_BUILD_ARMYCAMP) pix = resMap["Button_ArmyCamp"].front().scaled(80,80);
         else if(actions[i] == ACT_BUILD_RANGE) pix = resMap["Button_Range"].front().scaled(80,80);
         else if(actions[i] == ACT_BUILD_STABLE) pix = resMap["Button_Stable"].front().scaled(80,80);
+        else if(actions[i] == ACT_BUILD_DOCK) pix = resMap["Button_Dock"].front().scaled(80,80);
         mainPtr->getActs(i)->setPix(pix);
 
         //设置actions[i]为NULL,等于隐藏

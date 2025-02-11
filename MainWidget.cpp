@@ -24,6 +24,7 @@ std::map<int, std::string> actNames = {
     {ACT_BUILD_FARM, ACT_BUILD_FARM_NAME},
     {ACT_BUILD_MARKET, ACT_BUILD_MARKET_NAME},
     {ACT_BUILD_ARROWTOWER, ACT_BUILD_ARROWTOWER_NAME},
+    {ACT_BUILD_DOCK, ACT_BUILD_DOCK_NAME},
     {ACT_NULL, ACT_NULL_NAME},
     {ACT_ARMYCAMP_CREATE_CLUBMAN, ACT_ARMYCAMP_CREATE_CLUBMAN_NAME},
     {ACT_ARMYCAMP_CREATE_SLINGER, ACT_ARMYCAMP_CREATE_SLINGER_NAME},
@@ -84,7 +85,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     sel = new SelectWidget(this); // 设置左下角窗口
     sel->move(20, 810);
     sel->show();
-    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8 , ui->interact9 , ui->interact10};
+    ActWidget *acts_[ACT_WINDOW_NUM_FREE] = {ui->interact1, ui->interact2, ui->interact3, ui->interact4, ui->interact5, ui->interact6, ui->interact7, ui->interact8 , ui->interact9 , ui->interact10,ui->interact11,ui->interact12};
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         acts[i] = acts_[i];
@@ -104,6 +105,8 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     connect(ui->interact8,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
     connect(ui->interact9,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
     connect(ui->interact10,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact11,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
+    connect(ui->interact12,SIGNAL(actPress(int)),sel,SLOT(widgetAct(int)));
     connect(ui->Game,SIGNAL(sendView(int,int,int)),sel,SLOT(getBuild(int,int,int)));
     connect(sel,SIGNAL(sendBuildMode(int)),ui->Game,SLOT(setBuildMode(int)));
     // 设定游戏计时器
