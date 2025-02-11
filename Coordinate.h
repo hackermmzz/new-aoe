@@ -145,7 +145,8 @@ public:
     void setInWidget(){ this->inWindow = 1; }
     void setNotInWidget(){ this->inWindow = 0; }
     bool isInWidget(){return this->inWindow == 1; }
-
+    void setDRUR( double DR, double UR ){ this->DR = DR; this->UR = UR; }
+    void setBlockDRUR( int BlockDR, int BlockUR ){ this->BlockDR = BlockDR; this->BlockUR = BlockUR; }
 protected:
     int Num;//对象在对应类中的编号
     //比如building类下Num==0为小房子
@@ -225,8 +226,6 @@ protected:
     /*******坐标相关*******/
     void setDetailPointAttrb_FormBlock();
     void setSideLenth(){ SideLength = BlockSizeLen*BLOCKSIDELENGTH; }
-    void setDRUR( double DR, double UR ){ this->DR = DR; this->UR = UR; }
-    void setBlockDRUR( int BlockDR, int BlockUR ){ this->BlockDR = BlockDR; this->BlockUR = BlockUR; }
     void updateBlockByDetail(){ BlockDR = transBlock(DR); BlockUR = transBlock(UR); }
 
 };

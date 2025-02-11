@@ -248,6 +248,10 @@ bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int& ,bool);
 bool condition_Object1_AttackingEnd(Coordinate* , relation_Object& ,int& ,bool);
 //取消判断无效的行动
 bool condition_UselessAction(Coordinate* , relation_Object& , int& ,bool);
+//object目标已经被运输上船
+bool condition_Object2_Transported(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation);
+//判断object是否可以卸货
+bool condition_Object1_Unload(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation);
 //****************************************************************************************
 
 

@@ -29,6 +29,7 @@ public:
     int addHuman(int Num,double DR,double UR);
     Army* addArmy(int Num , double DR , double UR);
     int addFarmer(double DR,double UR);
+    int addShip(int Num,double DR,double UR);
     Missile* addMissile( Coordinate* attacker , Coordinate* attackee  , int beginHeight);
 
     //删除实例对象
@@ -89,7 +90,7 @@ public:
     void finishBuild( Building* buildBuilding );
 
     //控制建筑行动
-    void enforcementAction( Building* actBuild , vector<Point>Block_free );
+    void enforcementAction( Building* actBuild , vector<pair<Point,int>>Block_free );
 
     bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }
 

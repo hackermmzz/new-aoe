@@ -70,7 +70,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             if((InRect(x,y,winRect)||InRect(x+w,y,winRect)||InRect(x+w,y+w,winRect)||InRect(x,y+w,winRect))){
                 //如果是海洋
                 if(block.getMapType()==MAPTYPE_OCEAN){
-                    static QPixmap*ocean=new QPixmap("wlh.png");
+                    static QPixmap*ocean=new QPixmap(resMap["Sea_Deep"].front());
                     pix=ocean;
                 }else pix=&(targetList->front().pix);
                 //绘制
@@ -129,7 +129,7 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!h->empty()&&hiter!=h->end())
         {
             Coordinate *p=*hiter;
-            if((*hiter)->getvisible())
+            if((*hiter)->getvisible()&&!(*hiter)->getTransported())
                 insert(p,&drawlist);
             hiter++;
         }

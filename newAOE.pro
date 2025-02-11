@@ -26,7 +26,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    Logger.cpp \
         main.cpp \
         MainWidget.cpp \
     GameWidget.cpp \
@@ -57,11 +56,9 @@ SOURCES += \
     EnemyAI.cpp \
     ViewWidget.cpp \
     Option.cpp \
-    AboutDialog.cpp \
-    editor.cpp
+    AboutDialog.cpp
 
 HEADERS += \
-    Logger.h \
         MainWidget.h \
     GameWidget.h \
     config.h \
@@ -93,16 +90,11 @@ HEADERS += \
     ViewWidget.h \
     Option.h \
     digitalConfig.h \
-    AboutDialog.h \
-    config.h \
-    editor.h
+    AboutDialog.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
     SelectWidget.ui \
     Option.ui \
-    AboutDialog.ui \
-    editor.ui
-
-
+    AboutDialog.ui

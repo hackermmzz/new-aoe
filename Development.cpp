@@ -262,15 +262,16 @@ int Development::get_addition_MaxCnt( int sort , int type )
 {
     int addition = 0 , level = 0;
 
-    if(sort == SORT_Building_Resource && type == BUILDING_FARM)
+    if(sort == SORT_Building_Resource)
     {
         level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_FARM_UPGRADE);
-
-        switch (level) {
-        case 1:
-            addition+=BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD;
-        default:
-            break;
+        if(type == BUILDING_FARM||type==BUILDING_FISH){
+            switch (level) {
+            case 1:
+                addition+=BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD;
+            default:
+                break;
+            }
         }
     }
 
@@ -360,7 +361,7 @@ void Development::init_DevelopLab()
         //造村民
         newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
                                        0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
-        newNode->setCreatObjectAfterAction(SORT_FARMER );
+        newNode->setCreatObjectAfterAction(SORT_FARMER,FARMERTYPE_FARMER);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
 
@@ -503,4 +504,23 @@ void Development::init_DevelopLab()
     //城墙
 //    developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
 //    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
+    //船坞
+    {
+        developLab[BUILDING_DOCK].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILD_DOCK , BUILD_DOCK_WOOD);
+        newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_SAILING , BUILDING_DOCK_CREATE_SAILING_WOOD);
+        newNode->setCreatObjectAfterAction(SORT_FARMER,FARMERTYPE_SAILING);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].setHead(newNode);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].endNodeAsOver();
+
+        newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_WOOD_BOAT , BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD);
+        newNode->setCreatObjectAfterAction(SORT_FARMER),FARMERTYPE_WOOD_BOAT;
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_WOOD_BOAT].setHead(newNode);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_WOOD_BOAT].endNodeAsOver();
+
+        newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_SHIP , BUILDING_DOCK_CREATE_SHIP_WOOD);
+        newNode->setCreatObjectAfterAction(SORT_ARMY,AT_SHIP);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].setHead(newNode);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].endNodeAsOver();
+    }
+    //wlh友情提示：存在内存泄漏
 }

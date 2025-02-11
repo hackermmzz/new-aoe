@@ -92,9 +92,22 @@ int InitImageResMap(QString path)
         std::string tmpListName = imageMapName.toStdString();
         resMap[tmpListName].push_back(QPixmap(filePath));
     }
-    ////////////////////////////////加载额外资源
-    resMap["Button_Dock"].push_back(QPixmap("res/Dock3.png"));
-    resMap["Dock"].push_back(QPixmap("res/Dock3.png"));
+    ////////////////////////////////对资源进行额外操作
+    //对船的帧数进行调整
+    for(auto&ele:resMap){
+        string name=ele.first;
+        if(name.find("Ship")!=string::npos){
+            auto&list=ele.second;
+            auto tmp=list.front();
+            for(int i=0;i<10;++i)list.push_back(tmp);
+        }
+        else if(name.find("Sailing")!=string::npos){
+            auto&list=ele.second;
+            auto tmp=list.front();
+            for(int i=0;i<10;++i)list.push_back(tmp);
+        }
+    }
+
     ////////////////////////////////
     //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
 
@@ -443,6 +456,7 @@ bool isNear_Manhattan( double dr , double ur , double dr1  , double ur1 , double
 
 void flipResource(std::list<ImageResource> *currentlist, std::list<ImageResource> *targetlist)
 {
+    if(currentlist==0)return;
     targetlist->clear();
     std::list<ImageResource>::iterator iter = currentlist->begin();
     while (iter != currentlist->end())

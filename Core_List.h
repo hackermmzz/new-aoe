@@ -85,6 +85,8 @@ private:
     void object_Move(Coordinate * object , double DR , double UR);  //控制移动
     void object_Attack(Coordinate* , Coordinate* ); //控制因object1影响object2血量
     void object_Gather(Coordinate* , Coordinate* ); //控制采集
+    void object_Transport(Coordinate* , Coordinate* );//控制运输
+     void object_Unload(Coordinate* , Coordinate* );//控制运输
     void object_ResourceChange( Coordinate* , relation_Object& );
     void object_RatioChange( Coordinate* , relation_Object& );  //控制完成度变化
     void object_FinishAction_Absolute(Coordinate*);
@@ -102,7 +104,7 @@ private:
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
 
-    stack<Point> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate* goalOb = NULL);
+    pair<stack<Point>,array<double,2>> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate*object,Coordinate* goalOb);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}

@@ -575,3 +575,28 @@ bool condition_Object1_AttackingEnd(Coordinate* object1, relation_Object& relati
 
     return true;
 }
+
+bool condition_Object2_Transported(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation){
+    Human*human1=(Human*)object1,*human2=(Human*)(relation.goalObject);
+    return isNegation^(human2->getTransported());
+}
+
+bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, int &operate, bool isNegation)
+{
+    extern Map*GlobalMap;
+    Farmer*ship=(Farmer*)object1;
+    return ship->getHumanTransport().size()==0;
+    //寻找最近的陆地区块
+    static const int off[][2]={{-1,0},{-1,1},{-1,-1},{1,0},{1,-1},{1,1},{0,1},{0,-1}};
+    for(auto*o:off){
+        int L=o[0]+ship->getBlockDR(),U=o[1]+ship->getBlockUR();
+        if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
+            Block&block=GlobalMap->cell[L][U];
+            if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
+                double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
+                if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE)return true;
+            }
+        }
+    }
+    return false;
+}

@@ -56,7 +56,7 @@ public:
     bool isHaveObject(int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen);
     bool isFlat(Coordinate* judOb);
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
-    vector<Point> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
+    vector<pair<Point,int>> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
     vector<Point> findBlock_Free(Point blockPoint, int lenth);
     vector<Point> findBlock_Flat(int disLen = 1);
 
@@ -119,8 +119,8 @@ public:
     int addStaticRes(int Num, int BlockDR, int BlockUR);
 
     bool addAnimal(int Num,double DR,double UR);
-    //初始化地图资源
-    void loadResource();
+
+    bool loadResource();
 
     list<Animal*>::iterator deleteAnimal( list<Animal*>::iterator iterDele)
     {
@@ -136,7 +136,6 @@ public:
     
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
-
     int intmap[72][72]={};
 
     std::list<StaticRes *> staticres={};

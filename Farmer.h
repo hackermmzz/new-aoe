@@ -7,7 +7,7 @@ class Farmer:public Human
 {
 public:
     Farmer(){}
-    Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
+    Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER,int FarmerType=FARMERTYPE_FARMER);
 
   /**********************虚函数**************************/
     void nextframe();
@@ -18,7 +18,7 @@ public:
     int get_add_specialAttack();
     QString getChineseName(){ return "村民"; }
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
-
+    int get_farmerType(){return FarmerType;}
     string getSound_Click(){return sound_click;}
 
     /***************指针强制转化****************/
@@ -48,7 +48,7 @@ public:
     static std::list<ImageResource>* getAttack(int i, int j) {return Attack[i][j];}
     static std::list<ImageResource>* getDie(int i, int j) {return Die[i][j];}
     static std::list<ImageResource>* getDisappear(int state,int angle) { return Disappear[state][angle]; }
-
+    static std::list<ImageResource>* getShipStand(int i,int j){return ShipStand[i][j];}
     static void setCarry(int i, int j, std::list<ImageResource>* newValue) {Carry[i][j] = newValue;}
     static void setWork(int i, int j, std::list<ImageResource>* newValue) {Work[i][j] = newValue;}
     static void setWalk(int i, int j, std::list<ImageResource>* newValue) {Walk[i][j] = newValue;}
@@ -64,7 +64,7 @@ public:
     static void allocateAttack(int i, int j){Attack[i][j] = new std::list<ImageResource>;}
     static void allocateDie(int i, int j) {Die[i][j] = new std::list<ImageResource>;}
     static void allocateDisappear(int state, int angle) { Disappear[state][angle] = new std::list<ImageResource>;}
-
+    static void allocateShipStand(int i,int j){ShipStand[i][j]=new std::list<ImageResource>;}
     static void deallocateCarry(int i, int j) {
         delete Carry[i][j];
         Carry[i][j] = nullptr;
@@ -119,10 +119,13 @@ public:
     void set_ResourceSort( int sort ){ this->resourceSort = sort; }
     void update_addResource(){ resource+=quantity_GatherOnce; }
     void update_resourceClear(){ resource = 0; }
-
+    void update_transportHuman(Human*human){resource+=1;HumanTransport.push_back(human);}
     void updateState();
+    vector<Human *>& getHumanTransport();
 
 private:
+    vector<Human*>HumanTransport;
+    //携带的人类的SN
     int state;
     //指示状态 指示具体动作
     //暂定 	0为无职 1为樵夫 2为矿工 3为采集者 4为猎人 5为种地农民 6为工人
@@ -143,7 +146,8 @@ private:
      * 11代表人物遇到障碍物停止移动的状态
      * 后续补充
      */
-
+    int FarmerType;
+    //0表示普通的农民,其余表示船
     int holdResource=0;
     //0表示当前不抱有状态
 
@@ -184,7 +188,8 @@ private:
     static std::string FarmerCarry[5];
 
     std::string FarmerDisplayName[7]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人"};
-
+    /////////////船
+    static std::list<ImageResource>* ShipStand[10][8];
     //    std::string actName[1]={};
     //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
 

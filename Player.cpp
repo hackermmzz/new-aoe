@@ -31,7 +31,7 @@ Player::~Player()
 Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
 {
     Building *newbuilding = NULL;
-    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
+    if(Num == BUILDING_FARM||Num==BUILDING_FISH) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
     else newbuilding=new Building(Num,BlockDR,BlockUR, getCiv(), playerScience , represent , percent);
 
     build.push_back(newbuilding);
@@ -72,6 +72,19 @@ int Player::addFarmer(double DR, double UR)
 
     human.push_back(newfarmer);
     humanNumIncrease(newfarmer);
+    return 0;
+}
+
+int Player::addShip(int Num, double DR, double UR)
+{
+    Farmer *ship=new Farmer(DR,UR , playerScience , represent,Num);
+    call_debugText("blue"," 产生了新的船民(编号:" + QString::number(ship->getglobalNum()) + ")",represent);
+
+    if(g_frame > 10 && represent == NOWPLAYERREPRESENT)
+        soundQueue.push("Villager_Born");
+
+    human.push_back(ship);
+    humanNumIncrease(ship);
     return 0;
 }
 
@@ -145,6 +158,7 @@ void Player::changeResource( int resourceSort , int num  , bool negative)
         case HUMAN_STONE:
             stone+=num;
             break;
+        case HUMAN_DOCKFOOD:
         case HUMAN_GRANARYFOOD:
         case HUMAN_STOCKFOOD:
             food+=num;
@@ -183,7 +197,7 @@ void Player::changeResource_byBuildAction(Building* actbuilding , int buildact)
 
 //***************************************************************
 //控制建筑行动
-void Player::enforcementAction( Building* actBuild, vector<Point>Block_free  )
+void Player::enforcementAction( Building* actBuild, vector<pair<Point,int>>Block_free  )
 {
     /**
     *   传入： actBuild 指向进行行动的建筑的指针
@@ -208,12 +222,30 @@ void Player::enforcementAction( Building* actBuild, vector<Point>Block_free  )
 
     if(isNeedCreatObject)   //如果该行动需要造人
     {
+        //判断造出来的是不是船
+        bool isShip=false;
+        if((creatObjectSort==SORT_FARMER&&creatObjectNum!=FARMERTYPE_FARMER)||(creatObjectSort == SORT_ARMY&&creatObjectNum==AT_SHIP))
+            isShip=true;
         //对block_free中的点进行随机取点
-        if(Block_free.size()) block = Block_free[ rand()%Block_free.size() ];
-
+        vector<Point>satisfy;
+        for(auto&p:Block_free){
+            if((isShip^(p.second!=MAPTYPE_OCEAN))){
+                satisfy.push_back(p.first);
+            }
+        }
+        if(satisfy.size()==0)return;
+        Point block=satisfy[rand()%satisfy.size()];
         //创建相应对象
-        if(creatObjectSort == SORT_FARMER) addFarmer(trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
-        else if(creatObjectSort == SORT_ARMY) addArmy(creatObjectNum , trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
+        if(creatObjectSort == SORT_FARMER) {
+            if(creatObjectNum==FARMERTYPE_FARMER)
+                addFarmer(trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
+            else
+                addShip(creatObjectNum,trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
+        }
+        else if(creatObjectSort == SORT_ARMY)
+        {
+            addArmy(creatObjectNum , trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
+        }
     }
 }
 

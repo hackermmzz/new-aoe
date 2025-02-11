@@ -219,6 +219,7 @@ struct tagFarmer: public tagHuman
 {
     int ResourceSort; // 手持资源种类
     int Resource; // 手持资源数量
+    int FarmerSort;//农民的类型
     tagFarmer toEnemy(){
         Resource = -1;
         DR0= -1.0;

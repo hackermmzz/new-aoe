@@ -76,7 +76,6 @@ protected:
 
     void update_moveDire( double dDR , double dUR );
 
-    void setDR0UR0( double DR0, double UR0 ){ this->DR0 = DR0; this->UR0 = UR0; }
 
     void setPredictedDRUR( double PredictedDR, double PredictedUR){ this->PredictedDR = PredictedDR; this->PredictedUR = PredictedUR; }
 
@@ -92,7 +91,7 @@ public:
     bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
 
     void resetCoreAttribute(){ changeToRun = false; }
-
+    void setDR0UR0( double DR0, double UR0 ){ this->DR0 = DR0; this->UR0 = UR0; }
     virtual void updateMove();
     /***************指针强制转化****************/
     void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）

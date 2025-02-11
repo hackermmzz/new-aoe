@@ -65,6 +65,7 @@ private:
     void manageOrder(int id);     //指令添加
 
     void judge_Crush();
+    bool judge_CanTransPort(Coordinate*obj1,Coordinate*obj2);
 
 };
 

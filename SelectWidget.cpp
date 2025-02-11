@@ -1,6 +1,5 @@
 #include "SelectWidget.h"
 #include "ui_SelectWidget.h"
-#include "MainWidget.h"
 
 SelectWidget::SelectWidget(QWidget *parent) :
     QWidget(parent),
@@ -200,9 +199,15 @@ void SelectWidget::refreshActs()
     std::list<Human *>::iterator humanIt = mainPtr->player[0]->human.begin(), humanItTemp = humanIt;
 
     //当前人口
-    int human_num = mainPtr->player[0]->getHumanNum();
+    human_num = mainPtr->player[0]->getHumanNum();
     //当前人口上限
-    int build_hold_human_num =  mainPtr->player[0]->getMaxHumanNum();
+    build_hold_human_num =  mainPtr->player[0]->getMaxHumanNum();
+
+    //建成谷仓
+    isGranaryBuilt = mainPtr->player[0]->get_isBuildingHaveBuild(BUILDING_GRANARY);
+    //建成市场
+    isMarketBuilt = mainPtr->player[0]->get_isBuildingHaveBuild(BUILDING_MARKET);
+    isStockBuilt = mainPtr->player[0]->get_isBuildingHaveBuild(BUILDING_STOCK);
 
 
     //先进行行动状态更新(根据actions决定actionStatus数组)

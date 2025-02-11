@@ -7,7 +7,7 @@ std::list<ImageResource>* Farmer::Stand[7][8];
 std::list<ImageResource>* Farmer::Attack[7][8];
 std::list<ImageResource>* Farmer::Die[7][8];
 std::list<ImageResource>* Farmer::Disappear[7][8];
-
+std::list<ImageResource>* Farmer::ShipStand[10][8];
 
 std::string Farmer::FarmerName[7]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"};
 std::string Farmer::FarmerCarry[5]={"","CarryWood","CarryMeat","CarryStone","CarryGold"};
@@ -18,8 +18,9 @@ std::string Farmer::sound_work[7] = {\
     "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
 };
 
-Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent )
+Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent,int farmerType_)
 {
+    FarmerType=farmerType_;
     this->playerScience = playerScience;
     this->playerRepresent = playerRepresent;
 
@@ -55,7 +56,6 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
 
     isAttackable = true;
     type_Missile = Missile_Spear;
-//    this->Angle=0;
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -119,29 +119,36 @@ void Farmer::nextframe()
 void Farmer::setNowRes()
 {
     std::list<ImageResource> *templist = NULL;
-
+    if(FarmerType==FARMERTYPE_FARMER){
     switch (this->nowstate) {
-    case MOVEOBJECT_STATE_STAND:
-        templist=this->Stand[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_WALK:
-        if(get_MatchingOfResourceAndCarry() && resource > 0 && resourceSort!=HUMAN_GRANARYFOOD)
-            templist = this->Carry[this->resourceSort][this->Angle];
-        else
-            templist=this->Walk[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_ATTACK:
-        templist=this->Attack[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_WORK:
-        templist=this->Work[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_DIE:
-        if(changeToDisappear) templist = this->Disappear[this->state][this->Angle];
-        else templist = this->Die[this->state][this->Angle];
-        break;
-    default:
-        break;
+        case MOVEOBJECT_STATE_STAND:
+            templist=this->Stand[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_WALK:
+            if(get_MatchingOfResourceAndCarry() && resource > 0 && resourceSort!=HUMAN_GRANARYFOOD)
+                templist = this->Carry[this->resourceSort][this->Angle];
+            else
+                templist=this->Walk[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_ATTACK:
+            templist=this->Attack[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_WORK:
+            templist=this->Work[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_DIE:
+            if(changeToDisappear) templist = this->Disappear[this->state][this->Angle];
+            else templist = this->Die[this->state][this->Angle];
+            break;
+        default:
+            break;
+        }
+    }else if(FarmerType==FARMERTYPE_SAILING||FarmerType==FARMERTYPE_WOOD_BOAT){
+        switch (nowstate) {
+            case MOVEOBJECT_STATE_STAND:
+            templist=this->ShipStand[FarmerType][this->Angle];
+            break;
+        }
     }
     if(templist!=nowlist && templist)
     {
@@ -214,6 +221,12 @@ void Farmer::updateState()
         break;
     }
 }
+
+vector<Human *>& Farmer::getHumanTransport()
+{
+    return HumanTransport;
+}
+
 
 void Farmer::requestSound_Work()
 {

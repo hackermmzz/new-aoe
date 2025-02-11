@@ -77,7 +77,18 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
                 && buildGoalOb!=NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
-
+        if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
+            Farmer*f0=(Farmer*)object1;
+            Human*f1=(Human*)object2;
+            //如果满载,返回错误码
+            if(f0->getResourceNowHave()>=5)return ACTION_INVALID_FULLY_LOAD;
+            //如果两个相距太远，返回错误码
+            double dr0=f0->getDR(),ur0=f0->getUR(),dr1=f1->getDR(),ur1=f1->getUR();
+            double dr=dr1-dr0,ur=ur1-ur0;
+            if(dr*dr+ur*ur>=SHIP_ACT_MAX_DISTANCE){
+                return ACTION_INVALID_DISTANCE_FAR;
+            }
+    }
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if(object1->isPlayerControl() && object2->isPlayerControl())
@@ -118,7 +129,6 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
             default:
                 break;
         }
-
         requestSound_Action(object1, eventType, object2);
         return ACTION_SUCCESS;
     }
@@ -304,13 +314,11 @@ void Core_List::manageRelationList()
         {
             //更新object1对应表内信息
             manageRelation_updateMassage(object1);
-
             int& nowPhaseNum = thisRelation.nowPhaseNum;
             int exePhaseNum = nowPhaseNum;
             detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
             object2 = thisRelation.goalObject;
             conditionF* recordCondition;
-
             //该部分为强制中止行动部分代码
             list<conditionF>& forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
             list<conditionF>::iterator iter_list = forcedInterrupCondition.begin() , iter_liste = forcedInterrupCondition.end();
@@ -323,7 +331,6 @@ void Core_List::manageRelationList()
                 }
                 iter_list++;
             }
-
             //判断是否在loop中，是否需要中止
             if( thisDetailEven.isLoop(nowPhaseNum) )
             {
@@ -350,6 +357,12 @@ void Core_List::manageRelationList()
             {
                 switch (thisDetailEven.phaseList[nowPhaseNum])
                 {
+                    case CoreDetail_Unload:
+                        object_Unload(object1,object2);
+                        break;
+                    case CoreDetail_Transport:
+                        object_Transport(object1,object2);
+                        break;
                     case CoreDetail_Move:
                         if(thisRelation.isUseAlterGoal)object_Move(object1 , thisRelation.DR_alter , thisRelation.UR_alter);
                         else object_Move(object1 , thisRelation.DR_goal , thisRelation.UR_goal);
@@ -489,7 +502,7 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
     Building* tempBuild = NULL;
 
     //预创建
-    if(buildtype == BUILDING_FARM)
+    if(buildtype == BUILDING_FARM||buildtype==BUILDING_FARM)
     {
         Building_Resource* tempBuild_resource = new Building_Resource(buildtype,BlockDR,BlockUR);
         tempBuild = tempBuild_resource;
@@ -506,7 +519,7 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
     URD = BlockUR;
     URU = BlockUR + blockSideLength;
 
-    if(DRL<0 || DRR>71 || URD<0 || URU>71)
+    if(DRL<0 || DRR>MAP_L || URD<0 || URU>MAP_U)
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败,选中位置越界",playerID);
         return ACTION_INVALID_HUMANBUILD_OVERBORDER;
@@ -531,7 +544,37 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败:放置位置存在高度差或斜坡",playerID);
         return ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
     }
-
+    //判断是否建立在合适的位置
+    if(buildtype==BUILDING_FISH){//渔场只能建在海里
+        for(int i=0;i<blockSideLength;++i){
+            for(int j=0;j<blockSideLength;++j){
+                int l=i+BlockDR,u=j+BlockUR;
+                if(theMap->cell[l][u].getMapType()!=MAPTYPE_OCEAN)return ACTION_INVALID_POSITION_NOT_FIT;
+            }
+        }
+    }else{//其余的建筑必须建在陆地（但是船坞要特判）
+        for(int i=0;i<blockSideLength;++i){
+            for(int j=0;j<blockSideLength;++j){
+                int l=i+BlockDR,u=j+BlockUR;
+                if(theMap->cell[l][u].getMapType()==MAPTYPE_OCEAN)return ACTION_INVALID_POSITION_NOT_FIT;
+            }
+        }
+        if(buildtype==BUILDING_DOCK){//船坞只能建在沿岸
+            bool flag=0;
+            for(int i=-1+BlockDR;i<=BlockDR+blockSideLength;++i){
+                for(int j=-1+BlockUR;j<=BlockUR+blockSideLength;++j){
+                    if(i>=0&&i<MAP_L&&j>=0&&j<MAP_U){
+                        if(theMap->cell[i][j].getMapType()==MAPTYPE_OCEAN){
+                            flag=1;
+                            break;
+                        }
+                    }
+                }
+                if(flag)break;
+            }
+            if(!flag)return ACTION_INVALID_POSITION_NOT_FIT;
+        }
+    }
     return ACTION_SUCCESS;
 }
 
@@ -834,6 +877,57 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
     }
 }
 
+void Core_List::object_Transport(Coordinate *object1, Coordinate *object2)
+{
+    Farmer*human1=(Farmer*)object1;
+    Human*human2=(Human*)object2;
+    human2->setTransported(true);
+    human1->update_transportHuman(human2);
+    human1->set_ResourceSort(SORT_HUMAN);
+    suspendRelation(human2);
+}
+
+void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
+{
+    Farmer*ship=(Farmer*)object1;
+    //寻找没有障碍的陆地
+    extern Map*GlobalMap;
+    vector<array<double,2>>satisfy;
+    static const int off[][2]={{-1,0},{-1,1},{-1,-1},{1,0},{1,-1},{1,1},{0,1},{0,-1}};
+    for(auto*o:off){
+        int L=o[0]+ship->getBlockDR(),U=o[1]+ship->getBlockUR();
+        if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
+            Block&block=GlobalMap->cell[L][U];
+            if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
+                double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
+                if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE){
+                    satisfy.push_back({block.getDR(),block.getUR()});
+                }
+            }
+        }
+    }
+    //随机生成浮点数
+    static auto generateRandomDouble=[&](double min, double max) {
+        // 生成一个0到RAND_MAX之间的随机整数
+        double random = (double)rand() / RAND_MAX;
+        // 将随机整数映射到指定的范围
+        return min + random * (max - min);
+    };
+    //
+    if(satisfy.size()){
+        auto&&humans=ship->getHumanTransport();
+        for(Human*human:humans){
+            int idx=rand()%satisfy.size();
+            double targetDr=satisfy[idx][0],targetUr=satisfy[idx][1];
+            human->setPosForced(targetDr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0),targetUr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0));
+            human->setNowState(MOVEOBJECT_STATE_STAND);
+            human->setTransported(0);
+        }
+        ship->update_resourceClear();
+        humans.clear();
+    }
+}
+
 void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& relation)
 {
     if(relation.relationAct == CoreEven_Gather && object1->getSort() == SORT_FARMER)
@@ -851,6 +945,7 @@ void Core_List::object_ResourceChange( Coordinate* object1, relation_Object& rel
             case HUMAN_STONE:
                 usrScore.update(_STONE,worker->getResourceNowHave());
                 break;
+            case HUMAN_DOCKFOOD:
             case HUMAN_GRANARYFOOD:
             case HUMAN_STOCKFOOD:
                 usrScore.update(_MEAT,worker->getResourceNowHave());
@@ -899,7 +994,7 @@ void Core_List::object_FinishAction(Coordinate* object1)
     Building* buildOb = NULL;
 //    Building* buildGoalOb = NULL;
     Building_Resource* buildResGoalOb = NULL;
-    vector<Point> Block_Free;
+    vector<pair<Point,int>> Block_Free;
     int actNum = -1;
 
     switch(relate_AllObject[object1].relationAct){
@@ -1138,8 +1233,15 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
     }
 
     if(moveOb->getSort() == SORT_MISSILE) path.push(destination);
-    else path = findPath(theMap->findPathMap , theMap , start , destination , goalOb);
-
+    else{
+        auto&&ret= findPath(theMap->findPathMap , theMap , start , destination , moveOb,goalOb);
+        path=ret.first;
+        auto&dest=ret.second;
+        if(dest[0]<1e9){
+            DR0=dest[0];
+            UR0=dest[1];
+        }
+    }
     relate_AllObject[moveOb].nullPath = path.empty();
     moveOb->setPath(path,DR0,UR0);
 }
@@ -1198,7 +1300,7 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
     }
 }
 
-stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination , Coordinate* goalOb)
+pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination,Coordinate*object, Coordinate* goalOb)
 {
     //8个移动方向 <4为斜线方向，>=4为水平竖直方向
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
@@ -1209,13 +1311,28 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     vector<Point>::iterator oBiter,oBitere;
     Point nextPoint, nowPoint;
     pathNode* newPathNode = NULL , *findPathNode = NULL, *nowBestPathNode;
-    stack<pathNode*> lab_needDele;
+    vector<pathNode*> lab_needDele;
     lessHeap* nodeQue = new lessHeap();
     bool meetGoal = false;
 
     initMap_HaveJud();
     pathNode::setGoalPoint(destination.x,destination.y);    //设置寻路目标点
-
+    //判断是不是船
+    bool isShip=false;
+    if(object){
+       Human*ship=0;
+        object->printer_ToHuman((void**)&ship);
+        if(ship){
+            int sort=ship->getSort();
+            if(sort==SORT_FARMER){
+                if(((Farmer*)ship)->get_farmerType()!=FARMERTYPE_FARMER)isShip=1;
+            }
+            else if(sort==SORT_ARMY)
+            {
+                if(((Army*)ship)->getNum()==AT_SHIP)isShip=1;
+            }
+        }
+    }
     //起始点标记
     haveJud_Map_Move(start);
 
@@ -1274,12 +1391,12 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     }
 
     if(isNoPath)
-        return path;
+        return {path,{1e9,1e9}};
 
     goalMap[destination.x][destination.y] = true;
 
     newPathNode = new pathNode(start);
-    lab_needDele.push(newPathNode);
+    lab_needDele.push_back(newPathNode);
     nodeQue->addNode(newPathNode);
 
     if( goalMap[start.x][start.y] )
@@ -1292,7 +1409,7 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
     {
         nowBestPathNode = nodeQue->top()->value;
         nodeQue->pop();
-        if(nowBestPathNode->pathLength > 144) continue;
+        if(nowBestPathNode->pathLength > (MAP_L+MAP_U)) continue;
 
         nowPoint = nowBestPathNode->position;    //当前nowBestPathNode记录点的坐标
 
@@ -1300,20 +1417,20 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         {
             nextPoint = nowPoint + dire[i];
             if(nextPoint.x< 0 || nextPoint.y < 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
-
+            Block&block=theMap->cell[nextPoint.x][nextPoint.y];
+            bool isLand=block.getMapType()!=MAPTYPE_OCEAN;
             //判断格子是否可走、未走过
             //斜线方向需要多判断马脚操作
-            if( !(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] ||\
+            if((isLand^isShip))
+            if(!(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] ||\
                   i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])) )
             {
                 //创建新节点
                 newPathNode = new pathNode( nextPoint );
                 haveJud_Map_Move(nextPoint);
-                lab_needDele.push(newPathNode);
-
+                lab_needDele.push_back(newPathNode);
                 //为新节点增加前驱点信息,然后添加新节点到小根堆
                 nodeQue->addNode(nowBestPathNode->pushNode(newPathNode));
-
                 if( goalMap[nextPoint.x][nextPoint.y] )
                 {
                     meetGoal = true;
@@ -1323,26 +1440,49 @@ stack<Point> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *ma
         }
     }
 
-    if(meetGoal)
+    double dr0=1e9,ur0=1e9;
     {
+        //如果没有能有一条合法的路径到终点
+        if(!meetGoal){
+            //////////////选择离目的地最近的节点
+            for(auto*newPathNode:lab_needDele){
+                if(!findPathNode){
+                    findPathNode=newPathNode;
+                }else{
+                    auto&pos0=findPathNode->position;
+                    auto&pos1=newPathNode->position;
+                    double dr0=pos0.x-destination.x,ur0=pos0.y-destination.y;
+                    double dr1=pos1.x-destination.x,ur1=pos1.y-destination.y;
+                    if(dr0*dr0+ur0*ur0>dr1*dr1+ur1*ur1)findPathNode=newPathNode;
+                }
+            }
+            //////////////
+            MoveObject*obj=0;
+            object->printer_ToMoveObject((void**)&obj);
+            if(obj&&findPathNode)
+            {
+                dr0=(findPathNode->position.x+0.5)*BLOCKSIDELENGTH,ur0=(findPathNode->position.y+0.5)*BLOCKSIDELENGTH;
+            }
+        }
+        //
         while(findPathNode!=NULL)
         {
             path.push(findPathNode->position);
             findPathNode = findPathNode->preNode;
         }
         //当前所在格子不加入栈
+        if(path.size())
         path.pop();
     }
 
     //释放动态空间
     while(lab_needDele.size())
     {
-        delete lab_needDele.top();
-        lab_needDele.pop();
+        delete lab_needDele.back();
+        lab_needDele.pop_back();
     }
     delete nodeQue;
-
-    return path;
+    return {path,{dr0,ur0}};
 }
 
 
@@ -1492,6 +1632,22 @@ void Core_List::initDetailList()
 
         relation_Event_static[CoreEven_MissileAttack] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
 
+        delete[] phaseList;
+        delete[] conditionList;
+    }
+    //行动：运输人*********************************
+    {
+        phaseList = new int[1]{ CoreDetail_Transport };
+        conditionList = new conditionF[1]{ conditionF(condition_Object2_Transported)};
+        relation_Event_static[CoreEven_Transport] = detail_EventPhase(1, phaseList, conditionList, forcedInterrupCondition);
+        delete[] phaseList;
+        delete[] conditionList;
+    }
+    //行动：卸货*********************************
+    {
+        phaseList = new int[1]{ CoreDetail_Unload };
+        conditionList = new conditionF[1]{ conditionF(condition_Object1_Unload)};
+        relation_Event_static[CoreEven_UnLoad] = detail_EventPhase(1, phaseList, conditionList, forcedInterrupCondition);
         delete[] phaseList;
         delete[] conditionList;
     }

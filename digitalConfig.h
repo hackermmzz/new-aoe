@@ -131,6 +131,15 @@
 #define VISION_DOCK 4
 #define BUILD_DOCK_WOOD 120
 #define TIME_BUILD_DOCK 40
+/**生产战船**/
+#define BUILDING_DOCK_CREATE_SHIP_WOOD 60
+#define TIME_BUILDING_DOCK_CREATE_SHIP 30
+/**生产渔船**/
+#define BUILDING_DOCK_CREATE_SAILING_WOOD 60
+#define TIME_BUILDING_DOCK_CREATE_SAILING 30
+/**生产运输船**/
+#define BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD 60
+#define TIME_BUILDING_DOCK_CREATE_WOOD_BOAT 30
 //升级伐木（1级）
 #define BUILDING_MARKET_WOOD_UPGRADE_FOOD 120
 #define BUILDING_MARKET_WOOD_UPGRADE_WOOD 75
@@ -168,7 +177,12 @@
 #define VISION_FARM 4
 #define BUILD_FARM_WOOD 75
 #define TIME_BUILD_FARM 30
-
+/**渔场**/
+#define BLOOD_BUILD_FISH 50
+#define CNT_BUILD_FISH  250
+#define VISION_FISH 4
+#define BUILD_FISH_WOOD 75
+#define TIME_BUILD_FISH 30
 /**箭塔**/
 #define BLOOD_BUILD_ARROWTOWER 125
 #define VISION_ARROWTOWER 10
@@ -244,7 +258,7 @@
 //#define AT_CHARIOT 12
 //#define AT_ELEPHENT 13
 
-
+#define AT_SHIP 7
 /********** 祭祀 **********/
 #define AT_PRIEST 51
 
@@ -262,7 +276,12 @@
 #define SHIP_FIRE 75
 #define SHIP_CATAPUL 76
 #define SHIP_JUGGERNAUT 77
-
+/***********船可以和人互动的最大距离(平方)*********/
+#define SHIP_ACT_MAX_DISTANCE (BLOCKSIDELENGTH*BLOCKSIDELENGTH*4)
+/***********农民类型**********/
+#define FARMERTYPE_FARMER 0
+#define FARMERTYPE_WOOD_BOAT 1
+#define FARMERTYPE_SAILING 2
 
 /************士兵属性**************/
 //棍棒手
@@ -385,8 +404,15 @@
 #define ATK_CAVALRY 8
 #define DEFCLOSE_CAVALRY 0
 #define DEFSHOOT_CAVALRY 0
-
-
+//战船
+#define BLOOD_SHIP 300
+#define SPEED_SHIP (2/1.1*HUMAN_SPEED)
+#define VISION_SHIP 4
+#define ATK_SHIP 20
+#define DIS_SHIP 10
+#define INTERVAL_SHIP 1.4
+#define DEFCLOSE_SHIP 0
+#define DEFSHOOT_SHIP 0
 /********** 飞行物投掷判断 **********/
 #define THROWMISSION_FARMER 25
 #define THROWMISSION_ARCHER 4

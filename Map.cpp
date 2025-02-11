@@ -1,7 +1,10 @@
 #include "Map.h"
-
+///////////////////////////
+Map*GlobalMap;
+///////////////////////////
 Map::Map()
 {
+    GlobalMap=this;
     for(int i = 0; i < MAP_L; i++)
     {
         cell[i] = new Block[MAP_U];
@@ -1211,7 +1214,7 @@ bool Map::isFlat(int blockDR , int blockUR,int blockSideLen)
 }
 
 //该函数调用必须在barrierMap数组更新后
-vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind)
+vector<pair<Point,int>> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind)
 {
     int blockDR = object->getBlockDR(),blockUR = object->getBlockUR() , blockSideLen = object->get_BlockSizeLen();
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
@@ -1282,8 +1285,11 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
             }
         }
     }
-
-    return Block_Free;
+    vector<pair<Point,int>>ans;
+    for(auto&v:Block_Free){
+        ans.push_back({v,cell[v.x][v.y].getMapType()});
+    }
+    return ans;
 }
 
 vector<Point> Map::findBlock_Free(Point blockPoint, int lenth)
@@ -1661,7 +1667,7 @@ bool Map::addAnimal(int Num, double DR, double UR) {
  * 内容：随机生成资源；
  * 返回值：生成成功返回true。
  */
-void Map::loadResource() {
+bool Map::loadResource() {
     for(int i = 0; i < MAP_U; i++)
     {
         for(int j = 0; j < MAP_L; j++)
@@ -1695,6 +1701,7 @@ void Map::loadResource() {
             mapFlag[i][j] = 0;
         }
     }
+    return true;
 }
 
 /*
@@ -1978,6 +1985,8 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
             this->cell[i][j].Num = Num;
             this->cell[i][j].Explored = isExplored;
             this->cell[i][j].Visible = isVisible;    // 地图可见度
+            this->cell[i][j].setBlockDRUR(i,j);
+            this->cell[i][j].setDRUR(i*BLOCKSIDELENGTH,j*BLOCKSIDELENGTH);
         }
     }
 }
@@ -2089,7 +2098,13 @@ void Map::loadGenerateMapText(int MapJudge)
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
             double UR=obj["UR"].toDouble(),DR=obj["DR"].toDouble();
-            if(obj["Sort"].toString()=="Farmer")cur.addFarmer(DR,UR);
+            if(obj["Sort"].toString()=="Farmer")
+            {
+                int FarmerType=obj["FarmerType"].toInt();
+                if(FarmerType==FARMERTYPE_FARMER)
+                cur.addFarmer(DR,UR);
+                else cur.addShip(FarmerType,DR,UR);
+            }
             else cur.addArmy(obj["Num"].toInt(),DR,UR);
         }else if(key.contains("Animal")){
             addAnimal(obj["Num"].toInt(),obj["DR"].toDouble(),obj["UR"].toDouble());

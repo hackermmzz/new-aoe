@@ -20,7 +20,6 @@
 #include <QObject>
 #include <QKeyEvent>
 #include <qtimer.h>
-#include "Logger.h"
 
 #include <stack>
 #include <queue>
@@ -170,7 +169,7 @@
 #define BUILDING_WALL 11
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
-
+#define BUILDING_FISH 11
 
 /********** 建筑状态 **********/
 #define BUILDING_FREE 0 // 建筑状态为空闲（无工作）时用0表示
@@ -207,7 +206,10 @@
 #define BUILDING_STABLE_CREATE_SCOUT 17
 
 #define BUILDING_CANCEL 12
-
+//船坞
+#define BUILDING_DOCK_CREATE_SAILING 119
+#define BUILDING_DOCK_CREATE_WOOD_BOAT 120
+#define BUILDING_DOCK_CREATE_SHIP 515
 
 /********** 建筑动作命名 **********/
 #define BUILDING_GRANARY_ARROWTOWER_NAME "研发:建造箭塔(花费:50食物)"
@@ -274,8 +276,7 @@
 #define HUMAN_STONE 3
 #define HUMAN_GOLD 4
 #define HUMAN_GRANARYFOOD 5
-
-
+#define HUMAN_DOCKFOOD 6
 /********** AI函数 **********/
 //函数编号
 #define FUC_BUILDINGACTION 1
@@ -336,8 +337,12 @@
 #define ACTION_INVALID_HUMANBUILD_OVERLAP -44
 //建筑未解锁，未达成建筑条件
 #define ACTION_INVALID_HUMANBUILD_LOCK -45
-
-
+//距离相距太远
+#define ACTION_INVALID_DISTANCE_FAR -99
+//携带人物满了
+#define ACTION_INVALID_FULLY_LOAD -119
+//建筑放置的位置不合适
+#define ACTION_INVALID_POSITION_NOT_FIT -520
 /********** 资源种类 **********/
 /*
  * 如表 十进制位代表大的分类 个位代表他在大类中的具体编号
@@ -349,7 +354,7 @@
 #define RESOURCE_GAZELLE 71
 #define RESOURCE_ELEPHANT 72
 #define RESOURCE_LION 73
-
+#define RESOURCE_GOLD 99
 
 /********** 时代编号 **********/
 #define CIVILIZATION_STONEAGE 1
@@ -392,7 +397,6 @@
 #define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
-#define ACT_BUILD_DOCK_NAME "建造船坞(花费:xx木头)"
 #define ACT_NULL_NAME ""
 
 #define ACT_WINDOW_NUM_FREE 10
@@ -427,7 +431,6 @@
 #define ACT_BUILD_ARMYCAMP 58
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
-#define ACT_BUILD_DOCK 61
 
 #define ACT_STOP 100
 
@@ -554,7 +557,8 @@
 #define CoreEven_FixBuilding 5
 #define CoreEven_BuildingAct 6
 #define CoreEven_MissileAttack 7
-
+#define CoreEven_Transport 8
+#define CoreEven_UnLoad 9
 //####对一个关系事件，细节关系的最大数量
 #define CoreDetailLinkMaxNum 15
 //####细节环节名称
@@ -565,9 +569,9 @@
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
 #define CoreDetail_ResourceIn 3
-//#define CoreDetail_FindNextGoal 4
+#define CoreDetail_Transport 4
 #define CoreDetail_UpdateRatio 5
-
+#define CoreDetail_Unload 6
 
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 11111
