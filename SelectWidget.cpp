@@ -136,6 +136,10 @@ void SelectWidget::initActs()
     else if(type == SORT_FARMER)//人类
     {
         actions[0] = ACT_BUILD;
+        Farmer* human = (Farmer*)nowobject;
+        if(human->isShip()){
+            actions[0]=ACT_SHIP_LAY;
+        }
         for(int i = 1; i < ACT_WINDOW_NUM_FREE; i++)
         {
             actionStatus[i] = ACT_STATUS_DISABLED;
@@ -257,9 +261,6 @@ void SelectWidget::refreshActs()
              case ACT_BUILD_DOCK:
                 isBuild = true;
                 buildType = BUILDING_DOCK;
-                break;
-            case ACT_SHIP_LAY:
-            //货船卸货，目前不便判断按钮是否可用
                 break;
 
             //建筑行动
@@ -743,8 +744,9 @@ void SelectWidget::showBuildActLab()
     manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
     manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
     manageBuildBottom( 9 , ACT_BUILD_DOCK , BUILDING_DOCK );
-    actions[10] = ACT_BUILD_CANCEL;
-    actionStatus[10] = ACT_STATUS_ENABLED;
+
+    actions[11] = ACT_BUILD_CANCEL;
+    actionStatus[11] = ACT_STATUS_ENABLED;
 }
 
 void SelectWidget::updateActs()

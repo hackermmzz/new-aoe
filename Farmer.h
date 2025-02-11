@@ -122,6 +122,9 @@ public:
     void update_transportHuman(Human*human){resource+=1;HumanTransport.push_back(human);}
     void updateState();
     vector<Human *>& getHumanTransport();
+    bool isShip(){
+        return FarmerType!=0;
+    }
 
 private:
     vector<Human*>HumanTransport;
