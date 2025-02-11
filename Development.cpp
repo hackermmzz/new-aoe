@@ -513,7 +513,7 @@ void Development::init_DevelopLab()
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].endNodeAsOver();
 
         newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_WOOD_BOAT , BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD);
-        newNode->setCreatObjectAfterAction(SORT_FARMER),FARMERTYPE_WOOD_BOAT;
+        newNode->setCreatObjectAfterAction(SORT_FARMER,FARMERTYPE_WOOD_BOAT);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_WOOD_BOAT].setHead(newNode);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_WOOD_BOAT].endNodeAsOver();
 

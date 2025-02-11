@@ -39,7 +39,10 @@ std::map<int, std::string> actNames = {
     {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_RIDER, ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME},
     {ACT_STOCK_UPGRADE_USETOOL, ACT_STOCK_UPGRADE_USETOOL_NAME},
-
+    {ACT_DOCK_CREATE_SAILING, ACT_DOCK_CREATE_SAILING_NAME},
+    {ACT_DOCK_CREATE_WOOD_BOAT, ACT_DOCK_CREATE_WOOD_BOAT_NAME},
+    {ACT_DOCK_CREATE_SHIP, ACT_DOCK_CREATE_SHIP_NAME},
+    {ACT_SHIP_LAY, ACT_SHIP_LAY_NAME},
 };
 
 
@@ -163,7 +166,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //设置user初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置user初始资源
-//    player[0]->changeResource(2000,2000,2000,2000);
+    player[0]->changeResource(2000,2000,2000,2000);
 //    player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 
     // 设置鼠标追踪
@@ -305,6 +308,10 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_ARMYCAMP , 3 , ACT_ARMYCAMP_CREATE_SLINGER);
     Building::setActNames(BUILDING_RANGE , 0 , ACT_RANGE_CREATE_BOWMAN);
     Building::setActNames(BUILDING_STABLE , 0 , ACT_STABLE_CREATE_SCOUT);
+    //船坞
+    Building::setActNames(BUILDING_DOCK , 0 , ACT_DOCK_CREATE_SAILING);
+    Building::setActNames(BUILDING_DOCK , 1 , ACT_DOCK_CREATE_WOOD_BOAT);
+    Building::setActNames(BUILDING_DOCK , 2 , ACT_DOCK_CREATE_SHIP);
 }
 
 // 初始化动物

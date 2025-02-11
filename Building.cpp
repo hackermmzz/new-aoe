@@ -247,6 +247,12 @@ void Building::ActNumToActName()
     {
         if(actNum == BUILDING_STABLE_CREATE_SCOUT) actName =ACT_STABLE_CREATE_SCOUT;
     }
+    else if(Num == BUILDING_DOCK)
+    {
+        if(actNum == BUILDING_DOCK_CREATE_SAILING) actName =ACT_DOCK_CREATE_SAILING;
+        else if(actNum == BUILDING_DOCK_CREATE_WOOD_BOAT) actName = ACT_DOCK_CREATE_WOOD_BOAT;
+        else if(actNum == BUILDING_DOCK_CREATE_SHIP) actName = ACT_DOCK_CREATE_SHIP;
+    }
 }
 
 

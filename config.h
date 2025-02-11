@@ -212,6 +212,7 @@
 #define BUILDING_DOCK_CREATE_WOOD_BOAT 120
 #define BUILDING_DOCK_CREATE_SHIP 515
 
+
 /********** 建筑动作命名 **********/
 #define BUILDING_GRANARY_ARROWTOWER_NAME "研发:建造箭塔(花费:50食物)"
 #define BUILDING_CENTER_CREATEFARMER_NAME "创造村民(花费:50食物)"
@@ -386,6 +387,7 @@
 #define ACT_BUILD_MARKET_NAME "建造市场(花费:150木头)(需要先建造谷仓)"
 #define ACT_BUILD_ARROWTOWER_NAME "建造箭塔(花费:150石头)(需要先在谷仓内升级科技)"
 #define ACT_BUILD_DOCK_NAME "建造船坞(花费:120木头)"
+#define ACT_SHIP_LAY_NAME "卸货"
 
 #define ACT_ARMYCAMP_CREATE_CLUBMAN_NAME "训练棍棒兵(花费:50食物)"
 #define ACT_ARMYCAMP_CREATE_SLINGER_NAME "训练投石兵(花费:40食物,10石头)"
@@ -400,6 +402,9 @@
 #define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
+#define ACT_DOCK_CREATE_SAILING_NAME "建造帆船"
+#define ACT_DOCK_CREATE_WOOD_BOAT_NAME "建造木船"
+#define ACT_DOCK_CREATE_SHIP_NAME "建造货船"
 #define ACT_NULL_NAME ""
 
 #define ACT_WINDOW_NUM_FREE 12
@@ -422,6 +427,9 @@
 #define ACT_RANGE_CREATE_BOWMAN 16
 #define ACT_STABLE_CREATE_SCOUT 17
 #define ACT_RESEARCH_WALL 18
+#define ACT_DOCK_CREATE_SAILING 19
+#define ACT_DOCK_CREATE_WOOD_BOAT 20
+#define ACT_DOCK_CREATE_SHIP 21
 
 #define ACT_BUILD 50
 #define ACT_BUILD_HOUSE 51
@@ -435,6 +443,8 @@
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
 #define ACT_BUILD_DOCK 61
+
+#define ACT_SHIP_LAY 62
 
 #define ACT_STOP 100
 

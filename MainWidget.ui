@@ -477,11 +477,11 @@
     <string>关于我们</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>281</x>
-     <y>830</y>
+     <x>300</x>
+     <y>820</y>
      <width>461</width>
      <height>151</height>
     </rect>
