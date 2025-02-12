@@ -54,7 +54,10 @@ SOURCES += \
     Building_Resource.cpp \
     UsrAI.cpp \
     EnemyAI.cpp \
-    ViewWidget.cpp
+    ViewWidget.cpp \
+    Option.cpp \
+    AboutDialog.cpp \
+    Logger.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -75,7 +78,6 @@ HEADERS += \
     Farmer.h \
     ActWidget.h \
     SelectWidget.h \
-    ActWidget.h \
     Development.h \
     Army.h \
     Bloodhaver.h \
@@ -86,9 +88,15 @@ HEADERS += \
     Building_Resource.h \
     UsrAI.h \
     EnemyAI.h \
-    ViewWidget.h
+    ViewWidget.h \
+    Option.h \
+    digitalConfig.h \
+    AboutDialog.h \
+    Logger.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
-    SelectWidget.ui
+    SelectWidget.ui \
+    Option.ui \
+    AboutDialog.ui

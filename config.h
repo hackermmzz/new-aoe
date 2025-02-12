@@ -3,22 +3,13 @@
 
 #include <QWidget>
 #include <QPainter>
-#include <stack>
-#include <qtimer.h>
 #include <QTextBrowser>
 #include <QElapsedTimer>
-#include <stack>
-#include <queue>
 #include <QButtonGroup>
 #include <QMessageBox>
 #include <QThread>
-#include <Windows.h>
-#include <time.h>
-#include <map>
 #include <QPixmap>
 #include <QString>
-#include <list>
-//#include <QSound>
 #include <QDebug>
 #include <QDirIterator>
 #include <QDir>
@@ -28,15 +19,27 @@
 #include <QImage>
 #include <QObject>
 #include <QKeyEvent>
-//#include <QMediaPlayer>
+#include <qtimer.h>
+
+#include <stack>
+#include <queue>
+#include <list>
+#include <map>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <unordered_set>
+
+#include <Windows.h>
+#include <time.h>
+#include "Logger.h"
+#include "digitalConfig.h"
+
 
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.00"
+#define GAME_VERSION "v2.02g"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define GAME_LOSE_SEC 1500
 #define GOLD 10                         //金块资源数量
@@ -44,13 +47,19 @@
 #define gen5 sqrt(5)
 #define MAXPLAYER 8
 #define NOWPLAYER 2
+#define NOWPLAYERREPRESENT 0
+#define INITIAL_FREQUENCY 1
+#define EXAMINE_MODE false
+
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度
 #define GAMEWIDGET_WIDTH 1440
 #define GAMEWIDGET_HEIGHT 751
 #define BLOCKSIDELENGTH (16*gen5)
-#define MAP_L 72
-#define MAP_U 72
+#define MAP_L 128
+#define MAP_U 128
+#define GENERATE_L (MAP_L+8)
+#define GENERATE_U (MAP_U+8)
 #define GAMEWIDGET_MIDBLOCKL 22
 #define GAMEWIDGET_MIDBLOCKU 0
 #define HUMAN_SPEED sqrt(5)
@@ -72,6 +81,13 @@
 #define KEY_RIGHT 68
 #define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
 #define FRAMES_PER_SECOND 25    //每秒帧数
+#define OPTION_MUSIC true
+#define OPTION_SOUND true
+#define OPTION_SELECT false
+#define OPTION_LINE false
+#define OPTION_POS false
+#define OPTION_OVERLAP false
+
 
 /********** 地图块种类 **********/
 /* L0边为右上角，L0到L3顺时针排列 */
@@ -94,14 +110,17 @@
 #define MAPTYPE_L1_DOWNTOLU 11  // L1边（向左上凹陷）
 #define MAPTYPE_A2_DOWNTOU 12   // A2角（向上方凹陷）
 #define MAPTYPE_A0_UPTOD 13     // A0角（向下方凸起）
+#define MAPTYPE_OCEAN    14     //海洋
 
 /********** 地图块高度 **********/
 #define MAPHEIGHT_FLAT 0        // 地形高度
 #define MAPHEIGHT_MAX 5         // 最高地形高度
+#define MAPHEIGHT_OCEAN 9       //海洋的高度
 #define MAPHEIGHT_PERCENT 60    // 生成概率，范围0~100
 #define MAPHEIGHT_OPTCOUNT 20   // 生成高度时的优化次数，范围要求>=5
 #define CENTER_RADIUS   12      // 特判市镇中心附近平地的半径
 #define CENTER_DEVIATION 3      // 市镇中心坐标偏移量
+
 
 /********** 地图块样式 **********/
 #define MAPPATTERN_EMPTY 0      // 未定义样式
@@ -110,8 +129,10 @@
 #define MAPPATTERN_OCEAN 2      // 海洋/河流
 #define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
 
+
 /********** 地图块绘制偏移量 **********/
 #define DRAW_OFFSET -15
+
 
 /********** DebugText栏颜色 **********/
 #define COLOR_RED(STRING) QString("<font color=red>%1</font><font color=black> </font>").arg(STRING)
@@ -119,15 +140,16 @@
 #define COLOR_GREEN(STRING) QString("<font color=green>%1</font><font color=black> </font>").arg(STRING)
 #define COLOR_BLACK(STRING) QString("<font color=black>%1</font><font color=black> </font>").arg(STRING)
 
-/********** 碰撞箱 **********/
-#define CRASHBOX_SINGLEBLOCK 16.36
-#define CRASHBOX_SMALLBLOCK 34.21
-#define CRASHBOX_SMALL 32.72
-#define CRASHBOX_MIDDLE 50.57
-#define CRASHBOX_BIG 68.42
-#define CRASHBOX_SINGLEOB 5.96
-#define CRASHBOX_SMALLOB 8.925
-#define CRASHBOX_BIGOB 17.7
+
+/********** 建筑火焰种类 **********/
+#define BUILDING_FIRE_SMALL 0
+#define BUILDING_FIRE_MIDDLE 1
+#define BUILDING_FIRE_BIG 2
+
+#define BUILDING_BLOOD_FIRE_SMALL 0.75
+#define BUILDING_BLOOD_FIRE_MIDDLE 0.5
+#define BUILDING_BLOOD_FIRE_BIG 0.25
+
 
 /********** 建筑种类 **********/
 #define BUILDING_TYPE_MAXNUM 12
@@ -143,159 +165,16 @@
 #define BUILDING_ARMYCAMP 7
 #define BUILDING_STABLE 8
 #define BUILDING_RANGE 9
-
-#define BUILDING_WALL 10
+#define BUILDING_DOCK 10
+#define BUILDING_WALL 11
 
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
+#define BUILDING_FISH 11
 
 /********** 建筑状态 **********/
 #define BUILDING_FREE 0 // 建筑状态为空闲（无工作）时用0表示
 
-/********** 建筑属性相关 **********/
-/********** 建筑动作耗时 **********/  //单位为秒
-/********** 行动消耗资源 **********/
-/**市政中心**/
-#define BLOOD_BUILD_CENTER 600
-#define VISION_CENTER 4
-#define BUILD_CENTER_WOOD 200
-#define TIME_BUILD_CENTER 60
-//生产村民
-#define BUILDING_CENTER_CREATEFARMER_FOOD 50
-#define TIME_BUILDING_CENTER_CREATEFARMER 20
-//升级时代至工具时代
-#define BUILDING_CENTER_UPGRADE_FOOD 500
-#define TIME_BUILDING_CENTER_UPGRADE 60
-
-/**房子**/
-#define BLOOD_BUILD_HOUSE 75
-#define VISION_HOME 4
-#define BUILD_HOUSE_WOOD 30
-#define TIME_BUILD_HOME 20
-
-/**仓库**/
-#define BLOOD_BUILD_STOCK 350
-#define VISION_STOCK 4
-#define BUILD_STOCK_WOOD 120
-#define TIME_BUILD_STOCK 30
-//升级工具利用（1级）
-#define BUILDING_STOCK_UPGRADE_USETOOL_FOOD 100
-#define TIME_BUILDING_STOCK_UPGRADE_USETOOL 40
-#define BUILDING_STOCK_UPGRADE_USETOOL_ADDITION_ATKCLOSE 2
-//升级步兵护甲（1级）
-#define BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_FOOD 75
-#define TIME_BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY 40
-#define BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_ADDITION_DEFENSE_INFANTRY 2
-//升级弓兵护甲（1级）
-#define BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_FOOD 100
-#define TIME_BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER 40
-#define BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_ADDITION_DEFENSE_ARCHER 2
-//升级骑兵护甲（1级）
-#define BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_FOOD 125
-#define TIME_BUILDING_STOCK_UPGRADE_DEFENSE_RIDER 30
-#define BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_ADDITION_DEFENSE_RIDER 2
-
-/**谷仓**/
-#define BLOOD_BUILD_GRANARY 350
-#define VISION_GRANARY 4
-#define BUILD_GRANARY_WOOD 120
-#define TIME_BUILD_GRANARY 30
-//研发箭塔
-#define BUILDING_GRANARY_ARROWTOWER_FOOD 50
-#define TIME_BUILDING_GRANARY_RESEARCH_ARROWTOWER 10
-//研发城墙
-#define BUILDING_GRANARY_RESEARCH_WALL_FOOD 50
-#define TIME_BUILDING_GRANARY_RESEARCH_WALL 10
-
-/**兵营**/
-#define BLOOD_BUILD_ARMYCAMP 350
-#define VISION_ARMYCAMP 4
-#define BUILD_ARMYCAMP_WOOD 125
-#define TIME_BUILD_ARMYCAMP 30
-//生产棍棒兵
-#define BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD 50
-#define TIME_BUILDING_ARMYCAMP_CREATE_CLUBMAN 26
-//升级棍棒兵为斧头兵
-#define BUILDING_ARMYCAMP_UPGRADE_CLUBMAN_FOOD 100
-#define TIME_BUILDING_ARMYCAMP_UPGRADE_CLUBMAN 40
-//生产投石者
-#define BUILDING_ARMYCAMP_CREATE_SLINGER_FOOD 40
-#define BUILDING_ARMYCAMP_CREATE_SLINGER_STONE 10
-#define TIME_BUILDING_ARMYCAMP_CREATE_SLINGER 24
-
-/**靶场**/
-#define BLOOD_BUILD_RANGE 350
-#define VISION_RANGE 4
-#define BUILD_RANGE_WOOD 150
-#define TIME_BUILD_RANGE 40
-//生产弓箭手
-#define BUILDING_RANGE_CREATE_BOWMAN_FOOD 40
-#define BUILDING_RANGE_CREATE_BOWMAN_WOOD 20
-#define TIME_BUILDING_RANGE_CREATE_BOWMAN 30
-
-/**马厩**/
-#define BLOOD_BUILD_STABLE 350
-#define VISION_STABLE 4
-#define BUILD_STABLE_WOOD 150
-#define TIME_BUILD_STABLE 40
-//生产侦察骑兵
-#define BUILDING_STABLE_CREATE_SCOUT_FOOD 100
-#define TIME_BUILDING_STABLE_CREATE_SCOUT 30
-
-/**市场**/
-#define BLOOD_BUILD_MARKET 350
-#define VISION_MARKET 4
-#define BUILD_MARKET_WOOD 150
-#define TIME_BUILD_MARKET 40
-//升级伐木（1级）
-#define BUILDING_MARKET_WOOD_UPGRADE_FOOD 120
-#define BUILDING_MARKET_WOOD_UPGRADE_WOOD 75
-#define TIME_BUILDING_MARKET_UPGRADE_CUTTING 40
-#define BUILDING_MARKET_WOOD_UPGRADE_ADDITION_CARRY 2
-#define BUILDING_MARKET_WOOD_UPGRADE_ADDITION_DISSHOOT 1
-
-//升级采集石头（1级）
-#define BUILDING_MARKET_STONE_UPGRADE_FOOD 100
-#define BUILDING_MARKET_STONE_UPGRADE_STONE 50
-#define TIME_BUILDING_MARKET_UPGRADE_DIGGINGSOTNE 60
-#define BUILDING_MARKET_STONE_UPGRADE_ADDITION_CARRY 3
-#define BUILDING_MARKET_STONE_UPGRADE_ADDITION_SILNGERATK 1
-#define BUILDING_MARKET_STONE_UPGRADE_ADDITION_SILNGERDIS 1
-
-//升级金矿开采（1级）
-#define BUILDING_MARKET_GOLD_UPGRADE_FOOD 120
-#define BUILDING_MARKET_GOLD_UPGRADE_WOOD 100
-#define TIME_BUILDING_MARKET_UPGRADE_GOLD 60
-#define BUILDING_MARKET_GOLD_UPGRADE_ADDITION_CARRY 3
-
-//升级农田（1级）
-#define BUILDING_MARKET_FARM_UPGRADE_FOOD 200
-#define BUILDING_MARKET_FARM_UPGRADE_WOOD 50
-#define TIME_BUILDING_MARKET_UPGRADE_FARM 60
-#define BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD 75
-
-
-/**农场**/
-#define BLOOD_BUILD_FARM 50
-#define CNT_BUILD_FARM 250
-#define VISION_FARM 4
-#define BUILD_FARM_WOOD 75
-#define TIME_BUILD_FARM 30
-
-/**箭塔**/
-#define BLOOD_BUILD_ARROWTOWER 125
-#define VISION_ARROWTOWER 10
-#define DIS_BUILD_ARROWTOWER 5
-#define ATK_BUILD_ARROWTOWER 3
-#define DEFSHOOT_BUILD_ARROWTOWER 3
-#define BUILD_ARROWTOWER_STONE 150
-#define TIME_BUILD_ARROWTOWER 80
-
-/**城墙**/
-#define BLOOD_BUILD_WALL 200
-#define DEFSHOOT_BUILD_WALL 3
-#define BUILD_WALL_STONE 5
-#define TIME_BUILD_WALL 10
 
 /********** 建筑动作 **********/
 //市镇中心
@@ -328,6 +207,11 @@
 #define BUILDING_STABLE_CREATE_SCOUT 17
 
 #define BUILDING_CANCEL 12
+//船坞
+#define BUILDING_DOCK_CREATE_SAILING 119
+#define BUILDING_DOCK_CREATE_WOOD_BOAT 120
+#define BUILDING_DOCK_CREATE_SHIP 515
+
 
 /********** 建筑动作命名 **********/
 #define BUILDING_GRANARY_ARROWTOWER_NAME "研发:建造箭塔(花费:50食物)"
@@ -337,6 +221,7 @@
 #define BUILDING_MARKET_STONE_UPGRADE_NAME "研发石矿开采:采石+3(花费:100食物,50石头)"
 #define BUILDING_MARKET_FARM_UPGRADE_NAME "研发驯养动物:农场食物产量+75(花费:200食物,50木头)"
 #define BUILDING_ACTION_CANCEL_NAME "中止"
+
 
 /********** Coordinate子类中 Num值实际指代种类 **********/
 //资源
@@ -350,7 +235,6 @@
 #define ANIMAL_ELEPHANT 2
 #define ANIMAL_LION 3
 #define ANIMAL_FOREST 4
-
 
 /********** 人物状态 **********/
 /*
@@ -387,14 +271,14 @@
 #define HUMAN_STATE_BUTCHERING 13
 #define HUMAN_STATE_JUSTWALKING 14
 
+
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
 #define HUMAN_STOCKFOOD 2
 #define HUMAN_STONE 3
 #define HUMAN_GOLD 4
 #define HUMAN_GRANARYFOOD 5
-
-
+#define HUMAN_DOCKFOOD 6
 /********** AI函数 **********/
 //函数编号
 #define FUC_BUILDINGACTION 1
@@ -440,6 +324,9 @@
 //HumanMove
 
 //HumanAction
+//修理建筑，建筑不需要修理
+#define ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX -21
+#define ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH -22
 
 //HumanBuild
 //建筑位置有高度差
@@ -452,7 +339,12 @@
 #define ACTION_INVALID_HUMANBUILD_OVERLAP -44
 //建筑未解锁，未达成建筑条件
 #define ACTION_INVALID_HUMANBUILD_LOCK -45
-
+//距离相距太远
+#define ACTION_INVALID_DISTANCE_FAR -99
+//携带人物满了
+#define ACTION_INVALID_FULLY_LOAD -119
+//建筑放置的位置不合适
+#define ACTION_INVALID_POSITION_NOT_FIT -520
 /********** 资源种类 **********/
 /*
  * 如表 十进制位代表大的分类 个位代表他在大类中的具体编号
@@ -464,7 +356,7 @@
 #define RESOURCE_GAZELLE 71
 #define RESOURCE_ELEPHANT 72
 #define RESOURCE_LION 73
-
+#define RESOURCE_GOLD 99
 
 /********** 时代编号 **********/
 #define CIVILIZATION_STONEAGE 1
@@ -476,6 +368,7 @@
 #define ACT_STATUS_ENABLED 0
 #define ACT_STATUS_ANIME 1
 #define ACT_STATUS_DISABLED 2
+
 
 /********** 人物动作命名 **********/
 #define ACT_CREATEFARMER_NAME "创造村民(花费:50食物)"
@@ -493,6 +386,9 @@
 #define ACT_BUILD_FARM_NAME "建造农场(花费:75木头)(需要先建造市场)"
 #define ACT_BUILD_MARKET_NAME "建造市场(花费:150木头)(需要先建造谷仓)"
 #define ACT_BUILD_ARROWTOWER_NAME "建造箭塔(花费:150石头)(需要先在谷仓内升级科技)"
+#define ACT_BUILD_DOCK_NAME "建造船坞(花费:120木头)"
+#define ACT_SHIP_LAY_NAME "卸货"
+
 #define ACT_ARMYCAMP_CREATE_CLUBMAN_NAME "训练棍棒兵(花费:50食物)"
 #define ACT_ARMYCAMP_CREATE_SLINGER_NAME "训练投石兵(花费:40食物,10石头)"
 #define ACT_ARMYCAMP_UPGRADE_CLUBMAN_NAME "升级为战斧(花费:100食物)"
@@ -501,15 +397,17 @@
 #define ACT_BUILD_STABLE_NAME "建造马厩(花费:150木头)"
 #define ACT_RANGE_CREATE_BOWMAN_NAME "训练弓箭手(花费:40食物,20木头)"
 #define ACT_RESEARCH_WALL_NAME "研发:建造低级城墙"
-#define ACT_STABLE_CREATE_SCOUT_NAME "训练侦察骑兵(花费:100食物)"
+#define ACT_STABLE_CREATE_SCOUT_NAME "训练侦察骑兵(花费:60食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME "研发弓兵护甲:弓箭手近战防御+2(花费:100食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
+#define ACT_DOCK_CREATE_SAILING_NAME "建造帆船"
+#define ACT_DOCK_CREATE_WOOD_BOAT_NAME "建造木船"
+#define ACT_DOCK_CREATE_SHIP_NAME "建造货船"
 #define ACT_NULL_NAME ""
 
-
-#define ACT_WINDOW_NUM_FREE 10
+#define ACT_WINDOW_NUM_FREE 12
 
 #define ACT_NULL 0
 #define ACT_CREATEFARMER 1
@@ -529,6 +427,9 @@
 #define ACT_RANGE_CREATE_BOWMAN 16
 #define ACT_STABLE_CREATE_SCOUT 17
 #define ACT_RESEARCH_WALL 18
+#define ACT_DOCK_CREATE_SAILING 19
+#define ACT_DOCK_CREATE_WOOD_BOAT 20
+#define ACT_DOCK_CREATE_SHIP 21
 
 #define ACT_BUILD 50
 #define ACT_BUILD_HOUSE 51
@@ -541,8 +442,12 @@
 #define ACT_BUILD_ARMYCAMP 58
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
+#define ACT_BUILD_DOCK 61
+
+#define ACT_SHIP_LAY 62
 
 #define ACT_STOP 100
+
 
 /********** 对象视野 **********/
 //建筑的视野搬至建筑属性相关
@@ -550,6 +455,7 @@
 #define VISION_GAZELLE 2
 #define VISION_LION 3
 #define VISION_ELEPHANT 4
+
 
 /********** 地基编号 **********/
 #define FOUNDATION_SMALL 0
@@ -592,7 +498,6 @@
 #define BLOOD_FOREST 100
 
 #define SPEED_ELEPHANT (0.8 * ANIMAL_SPEED)
-
 
 #define CNT_TREE 75
 #define CNT_GAZELLE 150
@@ -652,8 +557,10 @@
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
 
+
 /********** 同Class中图像资源种类数 **********/
 #define NUMBER_MISSILE 3
+
 
 /********** Core静态表 **********/
 //####关系事件名称
@@ -664,8 +571,8 @@
 #define CoreEven_FixBuilding 5
 #define CoreEven_BuildingAct 6
 #define CoreEven_MissileAttack 7
-
-
+#define CoreEven_Transport 8
+#define CoreEven_UnLoad 9
 //####对一个关系事件，细节关系的最大数量
 #define CoreDetailLinkMaxNum 15
 //####细节环节名称
@@ -676,8 +583,9 @@
 #define CoreDetail_Attack 1
 #define CoreDetail_Gather 2
 #define CoreDetail_ResourceIn 3
-//#define CoreDetail_FindNextGoal 4
+#define CoreDetail_Transport 4
 #define CoreDetail_UpdateRatio 5
+#define CoreDetail_Unload 6
 
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 11111
@@ -704,205 +612,11 @@
 #define OPERATECON_TIMES_USELESSACT_MOVE 250
 
 
-/********** 距离常量 **********/
-#define DISTANCE_Manhattan_MoveEndNEAR 0.0001
-#define DISTANCE_Manhattan_PathMove 0.01
-#define DISTANCE_ATTACK_CLOSE (8*gen5)
-#define DISTANCE_ATTACK_CLOSE_BIGOB (12*gen5)
-#define DISTANCE_HIT_TARGET 4
-
-//箭塔攻击距离
-#define DIS_ARROWTOWER 7
-
 /********** 占地边长-块坐标常量 **********/
 #define SIZELEN_SINGEL 1
 #define SIZELEN_SMALL 2
 #define SIZELEN_MIDDLE 3
 #define SIZELEN_BIG 4
-
-/********** 攻击方式 **********/
-#define ATTACKTYPE_CANTATTACK -1
-#define ATTACKTYPE_ANIMAL 0
-#define ATTACKTYPE_CLOSE 1
-#define ATTACKTYPE_CLOSE_TOTREE 11
-#define ATTACKTYPE_SHOOT 2
-//转化
-#define ATTACKTYPE_CHANGE 3
-//投石车
-#define ATTACKTYPE_CATAPULT 4
-//弩炮
-#define ATTACKTYPE_BALISTA 5
-
-/********** 军队类别 **********/
-//步兵
-#define ARMY_INFANTRY 1
-//弓兵
-#define ARMY_ARCHER 3
-//骑兵
-#define ARMY_RIDER 4
-//祭
-#define ARMY_FLAMEN 5
-//攻城兵器
-#define ARMY_SIEGE 6
-//船
-#define ARMY_SHIP 7
-
-/********** 兵种类别 **********/
-#define AT_CLUBMAN 0
-#define AT_SLINGER 1
-#define AT_SWORDSMAN 4
-
-//#define AT_HOPLITE 3
-
-#define AT_BOWMAN 2
-#define AT_IMPROVED 5
-//#define AT_CHARIOTARCHER 6
-//#define AT_HORSE 7
-//#define AT_ELEPHENTARCHER 8
-
-#define AT_SCOUT 3
-#define AT_CAVALRY 6
-//#define AT_CAMEL 11
-//#define AT_CHARIOT 12
-//#define AT_ELEPHENT 13
-
-/********** 祭祀 **********/
-#define AT_PRIEST 51
-
-/********** 攻城工具 **********/
-#define AT_THROWER 61
-#define AT_BALLISTA 62
-
-/********** 船类别 **********/
-#define SHIP_FISHING 71
-#define SHIP_TRADE 73
-#define SHIP_TRANSPORT 72
-#define SHIP_SCOUT 74
-#define SHIP_FIRE 75
-#define SHIP_CATAPUL 76
-#define SHIP_JUGGERNAUT 77
-
-/************士兵属性**************/
-//棍棒手
-#define BLOOD_CLUBMAN1 40
-//村民表格中速度为1.1,设置为gen(5)
-#define SPEED_CLUBMAN1 (1.2/1.1*HUMAN_SPEED)
-#define VISION_CLUBMAN1 4
-#define DIS_CLUBMAN1 0
-#define INTERVAL_CLUBMAN1 1.5
-#define ATK_CLUBMAN1 3
-#define DEFCLOSE_CLUBMAN1 0
-#define DEFSHOOT_CLUBMAN1 0
-
-//刀斧手
-#define BLOOD_CLUBMAN2 50
-#define SPEED_CLUBMAN2 (1.2/1.1*HUMAN_SPEED)
-#define VISION_CLUBMAN2 4
-#define DIS_CLUBMAN2 0
-#define INTERVAL_CLUBMAN2 1.5
-#define ATK_CLUBMAN2 5
-#define DEFCLOSE_CLUBMAN2 0
-#define DEFSHOOT_CLUBMAN2 0
-
-//短剑手
-#define BLOOD_SHORTSWORDSMAN1 60
-#define SPEED_SHORTSWORDSMAN1 (1.2/1.1*HUMAN_SPEED)
-#define VISION_SHORTSWORDSMAN1 4
-#define DIS_SHORTSWORDSMAN1 0
-#define INTERVAL_SHORTSWORDSMAN1 1.5
-#define ATK_SHORTSWORSMAN1 7
-#define DEFCLOSE_SHORTSWORSMAN1 1
-#define DEFSHOOT_SHORTSWORSMAN1 0
-
-//阔剑手
-#define BLOOD_SHORTSWORDSMAN2 70
-#define SPEED_SHORTSWORDSMAN2 (1.2/1.1*HUMAN_SPEED)
-#define VISION_SHORTSWORDSMAN2 4
-#define DIS_SHORTSWORDSMAN2 0
-#define INTERVAL_SHORTSWORDSMAN2 1.5
-#define ATK_SHORTSWORSMAN2 9
-#define DEFCLOSE_SHORTSWORSMAN2 1
-#define DEFSHOOT_SHORTSWORSMAN2 0
-
-//长剑手
-#define BLOOD_SHORTSWORDSMAN3 80
-#define SPEED_SHORTSWORDSMAN3 (1.2/1.1*HUMAN_SPEED)
-#define VISION_SHORTSWORDSMAN3 4
-#define DIS_SHORTSWORDSMAN3 0
-#define INTERVAL_SHORTSWORDSMAN3 1.5
-#define ATK_SHORTSWORSMAN3 11
-#define DEFCLOSE_SHORTSWORSMAN3 2
-#define DEFSHOOT_SHORTSWORSMAN3 0
-
-//铁甲步兵
-#define BLOOD_SHORTSWORDSMAN4 160
-#define SPEED_SHORTSWORDSMAN4 (1.2/1.1*HUMAN_SPEED)
-#define VISION_SHORTSWORDSMAN4 4
-#define DIS_SHORTSWORDSMAN4 0
-#define INTERVAL_SHORTSWORDSMAN4 1.5
-#define ATK_SHORTSWORSMAN4 13
-#define DEFCLOSE_SHORTSWORSMAN4 2
-#define DEFSHOOT_SHORTSWORSMAN4 0
-
-//投石者
-#define BLOOD_SLINGER 25
-#define SPEED_SLINGER (1.2/1.1*HUMAN_SPEED)
-#define VISION_SLINGER 5
-#define DIS_SLINGER 4
-#define INTERVAL_SLINGER 1.5
-#define ATK_SLINGER 2
-#define DEFCLOSE_SLINGER 0
-#define DEFSHOOT_SLINGER 2
-
-//弓箭手
-#define BLOOD_BOWMAN 35
-#define SPEED_BOWMAN (1.2/1.1*HUMAN_SPEED)
-#define VISION_BOWMAN 7
-#define DIS_BOWMAN 5
-#define INTERVAL_BOWMAN 1.4
-#define ATK_BOWMAN 3
-#define DEFCLOSE_BOWMAN 0
-#define DEFSHOOT_BOWMAN 0
-
-//长弓手
-#define BLOOD_IMPROVEDBOWMAN1 40
-#define SPEED_IMPROVEDBOWMAN1 (1.2/1.1*HUMAN_SPEED)
-#define VISION_IMPROVEDBOWMAN1 8
-#define DIS_IMPROVEDBOWMAN1 6
-#define INTERVAL_IMPROVEDBOWMAN1 1.4
-#define ATK_IMPROVEDBOWMAN1 4
-#define DEFCLOSE_IMPROVEDBOWMAN1 0
-#define DEFSHOOT_IMPROVEDBOWMAN1 0
-
-//十字弓手
-#define BLOOD_IMPROVEDBOWMAN2 45
-#define SPEED_IMPROVEDBOWMAN2 (1.2/1.1*HUMAN_SPEED)
-#define VISION_IMPROVEDBOWMAN2 9
-#define DIS_IMPROVEDBOWMAN2 7
-#define INTERVAL_IMPROVEDBOWMAN2 1.4
-#define ATK_IMPROVEDBOWMAN2 5
-#define DEFCLOSE_IMPROVEDBOWMAN2 0
-#define DEFSHOOT_IMPROVEDBOWMAN2 0
-
-//侦察骑兵
-#define BLOOD_SCOUT 60
-#define SPEED_SCOUT (2/1.1*HUMAN_SPEED)
-#define VISION_SCOUT 8
-#define DIS_SCOUT 0
-#define INTERVAL_SCOUT 1.5
-#define ATK_SCOUT 3
-#define DEFCLOSE_SCOUT 0
-#define DEFSHOOT_SCOUT 0
-
-//骑兵
-#define BLOOD_CAVALRY 150
-#define SPEED_CAVALRY (2/1.1*HUMAN_SPEED)
-#define VISION_CAVALRY 4
-#define DIS_CAVALRY 0
-#define INTERVAL_CAVALRY 1.5
-#define ATK_CAVALRY 8
-#define DEFCLOSE_CAVALRY 0
-#define DEFSHOOT_CAVALRY 0
 
 
 /********** animal友好度 **********/
@@ -912,35 +626,6 @@
 #define FRIENDLY_FENCY 3
 
 
-/********** 飞行物投掷判断 **********/
-#define THROWMISSION_FARMER 25
-#define THROWMISSION_ARCHER 4
-#define THROWMISSION_IMPROVEDBOWMAN1 4
 
-#define THROWMISSION_SLINGER 5
-
-#define THROWMISSION_ARROWTOWN_TIMER 45
-
-/********** 飞行物类别 **********/
-#define Missile_Spear 0
-#define Missile_Arrow 1
-#define Missile_Cobblestone 2
-
-/********** 飞行物属性 **********/
-#define Missile_Speed_Spear (4*HUMAN_SPEED)
-#define Missile_Speed_Arrow (4*HUMAN_SPEED)
-#define Missile_Speed_Cobblestone (4*HUMAN_SPEED)
-
-/********** 设置多少帧切换一次nowres **********/
-#define NOWRES_TIMER_FARMER 1
-#define NOWRES_TIMER_CLUBMAN 1
-#define NOWRES_TIMER_BOWMAN 2
-#define NOWRES_TIMER_IMPROVEDBOWMAN1 2
-#define NOWRES_TIMER_SCOUT 2
-#define NOWRES_TIMER_CAVALRY 2
-#define NOWRES_TIMER_SLINGER 1
-#define NOWRES_TIMER_SWORSMAN 1
-#define NOWRES_TIMER_LION 1
-#define NOWRES_TIMER_ELEPHANT 1
 
 #endif // CONFIG_H

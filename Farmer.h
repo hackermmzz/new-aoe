@@ -1,23 +1,25 @@
 ﻿#ifndef FARMER_H
 #define FARMER_H
 
-#include <Human.h>
+#include "Human.h"
 
 class Farmer:public Human
 {
 public:
-    Farmer();
-    Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
+    Farmer(){}
+    Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER,int FarmerType=FARMERTYPE_FARMER);
 
   /**********************虚函数**************************/
     void nextframe();
     void setNowRes();
-    int getSort();
+    int getSort(){return SORT_FARMER;}
     double getDis_attack();
     int get_AttackType();
     int get_add_specialAttack();
     QString getChineseName(){ return "村民"; }
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
+    int get_farmerType(){return FarmerType;}
+    string getSound_Click(){return sound_click;}
 
     /***************指针强制转化****************/
     //若要将Farmer类指针转化为父类指针,务必用以下函数!
@@ -38,67 +40,31 @@ public:
         }
         return "";
     }
-    static std::list<ImageResource>* getCarry(int i, int j) {
-        return Carry[i][j];
-    }
-    static std::list<ImageResource>* getWork(int i, int j) {
-        return Work[i][j];
-    }
+    static std::list<ImageResource>* getCarry(int i, int j) {return Carry[i][j];}
+    static std::list<ImageResource>* getWork(int i, int j) {return Work[i][j];}
 
-    static std::list<ImageResource>* getWalk(int i, int j) {
-        return Walk[i][j];
-    }
-    static std::list<ImageResource>* getStand(int i, int j) {
-        return Stand[i][j];
-    }
-    static std::list<ImageResource>* getAttack(int i, int j) {
-        return Attack[i][j];
-    }
-    static std::list<ImageResource>* getDie(int i, int j) {
-        return Die[i][j];
-    }
+    static std::list<ImageResource>* getWalk(int i, int j) {return Walk[i][j];}
+    static std::list<ImageResource>* getStand(int i, int j) {return Stand[i][j];}
+    static std::list<ImageResource>* getAttack(int i, int j) {return Attack[i][j];}
+    static std::list<ImageResource>* getDie(int i, int j) {return Die[i][j];}
     static std::list<ImageResource>* getDisappear(int state,int angle) { return Disappear[state][angle]; }
-
-    static void setCarry(int i, int j, std::list<ImageResource>* newValue) {
-        Carry[i][j] = newValue;
-    }
-    static void setWork(int i, int j, std::list<ImageResource>* newValue) {
-        Work[i][j] = newValue;
-    }
-    static void setWalk(int i, int j, std::list<ImageResource>* newValue) {
-        Walk[i][j] = newValue;
-    }
-    static void setStand(int i, int j, std::list<ImageResource>* newValue) {
-        Stand[i][j] = newValue;
-    }
-    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {
-        Attack[i][j] = newValue;
-    }
-    static void setDie(int i, int j, std::list<ImageResource>* newValue) {
-        Die[i][j] = newValue;
-    }
+    static std::list<ImageResource>* getShipStand(int i,int j){return ShipStand[i][j];}
+    static void setCarry(int i, int j, std::list<ImageResource>* newValue) {Carry[i][j] = newValue;}
+    static void setWork(int i, int j, std::list<ImageResource>* newValue) {Work[i][j] = newValue;}
+    static void setWalk(int i, int j, std::list<ImageResource>* newValue) {Walk[i][j] = newValue;}
+    static void setStand(int i, int j, std::list<ImageResource>* newValue) {Stand[i][j] = newValue;}
+    static void setAttack(int i, int j, std::list<ImageResource>* newValue) {Attack[i][j] = newValue;}
+    static void setDie(int i, int j, std::list<ImageResource>* newValue) {Die[i][j] = newValue;}
     static void setDisappear(int state, int angle, std::list<ImageResource>* newValue) {Disappear[state][angle] = newValue;}
 
-    static void allocateCarry(int i, int j) {
-        Carry[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateWork(int i, int j) {
-        Work[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateWalk(int i, int j) {
-        Walk[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateStand(int i, int j) {
-        Stand[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateAttack(int i, int j) {
-        Attack[i][j] = new std::list<ImageResource>;
-    }
-    static void allocateDie(int i, int j) {
-        Die[i][j] = new std::list<ImageResource>;
-    }
+    static void allocateCarry(int i, int j) {Carry[i][j] = new std::list<ImageResource>;}
+    static void allocateWork(int i, int j){ Work[i][j] = new std::list<ImageResource>;}
+    static void allocateWalk(int i, int j) {Walk[i][j] = new std::list<ImageResource>;}
+    static void allocateStand(int i, int j) {Stand[i][j] = new std::list<ImageResource>;}
+    static void allocateAttack(int i, int j){Attack[i][j] = new std::list<ImageResource>;}
+    static void allocateDie(int i, int j) {Die[i][j] = new std::list<ImageResource>;}
     static void allocateDisappear(int state, int angle) { Disappear[state][angle] = new std::list<ImageResource>;}
-
+    static void allocateShipStand(int i,int j){ShipStand[i][j]=new std::list<ImageResource>;}
     static void deallocateCarry(int i, int j) {
         delete Carry[i][j];
         Carry[i][j] = nullptr;
@@ -130,18 +96,14 @@ public:
         Disappear[state][angle] = nullptr;
     }
 
-    std::string getDisplayName(int num)
-    {
-        return FarmerDisplayName[num];
-    }
-    int getState()
-    {
-        return state;
-    }
+    std::string getDisplayName(int num){return FarmerDisplayName[num];}
+
+    int getState(){return state;}
+
     double getResourceNowHave(){ return resource; }
     int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
     int getResourceSort(){ return resourceSort; }
-    double get_quantityGather(){ return quantity_GatherOnce; }
+    double get_quantityGather(){ return quantity_GatherOnce * playerScience->get_rate_ResorceGather(resourceSort); }
     bool get_isFullBackpack(){ return resource >= getResourceHave_Max(); }//用于普通情况下判断farmer是否满背包
     //用于采集时，考虑不同种类资源类型情况，判断farmer背包满
     bool get_isFullBackpack( int resourceSort ){ return resourceSort == this->resourceSort && resource >= getResourceHave_Max(); }
@@ -157,10 +119,16 @@ public:
     void set_ResourceSort( int sort ){ this->resourceSort = sort; }
     void update_addResource(){ resource+=quantity_GatherOnce; }
     void update_resourceClear(){ resource = 0; }
-
+    void update_transportHuman(Human*human){resource+=1;HumanTransport.push_back(human);}
     void updateState();
+    vector<Human *>& getHumanTransport();
+    bool isShip(){
+        return FarmerType!=0;
+    }
 
 private:
+    vector<Human*>HumanTransport;
+    //携带的人类的SN
     int state;
     //指示状态 指示具体动作
     //暂定 	0为无职 1为樵夫 2为矿工 3为采集者 4为猎人 5为种地农民 6为工人
@@ -181,7 +149,8 @@ private:
      * 11代表人物遇到障碍物停止移动的状态
      * 后续补充
      */
-
+    int FarmerType;
+    //0表示普通的农民,其余表示船
     int holdResource=0;
     //0表示当前不抱有状态
 
@@ -199,7 +168,7 @@ private:
 
     double quantity_GatherOnce = 0.55;
 
-    int resourceSort;
+    int resourceSort = 0;
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
     //eg:HUMAN_WOOD
@@ -220,10 +189,19 @@ private:
 
     static std::string FarmerName[7];
     static std::string FarmerCarry[5];
+
     std::string FarmerDisplayName[7]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人"};
+    /////////////船
+    static std::list<ImageResource>* ShipStand[10][8];
     //    std::string actName[1]={};
     //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
 
+    static string sound_click;
+    static std::string sound_work[7];
+
+
+    void requestSound_Work();
+    void requestSound_Die(){if(isInWidget()) soundQueue.push("Army_Die");}
 };
 
 #endif // FARMER_H

@@ -1,7 +1,7 @@
 ﻿#ifndef ARMY_H
 #define ARMY_H
 
-#include <Human.h>
+#include "Human.h"
 
 class Army : public Human
 {
@@ -28,12 +28,15 @@ public:
 
     QString getChineseName(){ return QString::fromStdString(getArmyDisplayNum(Num,getLevel())); }
 
+    string getSound_Click(){return click_sound;}
+
     int getATK();
     int getDEF(int attackType_got);
     double getDis_attack();
 
     //特攻,根据兵种不同,会有攻击力加成
     int get_add_specialAttack();
+
     //用于显示的战斗属性
     int showATK_Basic();
     int showATK_Addition(){return playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());}
@@ -51,14 +54,14 @@ public:
 
   /********************静态函数**************************/
     static std::string getArmyName(int num , int level) {
-        if (num >= 0 && num < 7 && level>=0&& level<2) {
+        if (num >= 0 && num < 8 && level>=0&& level<2) {
             return ArmyName[num][level];
         }
         return "";
     }
 
     static std::string getArmyDisplayNum(int num , int level) {
-        if (num >= 0 && num < 7&& level>=0&& level<2) {
+        if (num >= 0 && num <8&& level>=0&& level<2) {
             return ArmyDisplayName[num][level];
         }
         return "";
@@ -140,14 +143,21 @@ private:
 
 
     /*************静态成员************/
-    static std::list<ImageResource> *Walk[2][7][2][8];
-    static std::list<ImageResource> *Stand[2][7][2][8];
-    static std::list<ImageResource> *Attack[2][7][2][8];
-    static std::list<ImageResource> *Die[2][7][2][8];
-    static std::list<ImageResource> *Disappear[2][7][2][8];
-    static std::string ArmyName[7][2];
-    static std::string ArmyDisplayName[7][2];
+    static std::list<ImageResource> *Walk[2][20][2][8];
+    static std::list<ImageResource> *Stand[2][20][2][8];
+    static std::list<ImageResource> *Attack[2][20][2][8];
+    static std::list<ImageResource> *Die[2][20][2][8];
+    static std::list<ImageResource> *Disappear[2][20][2][8];
+    static std::string ArmyName[20][2];
+    static std::string ArmyDisplayName[20][2];
+
+    static string click_sound;
     /*************静态成员************/
+
+
+    void requestSound_Attack();
+    void requestSound_Die();
+    void requestSound_Walk();
 };
 
 #endif // ARMY_H

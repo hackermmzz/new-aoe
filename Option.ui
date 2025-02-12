@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Option</class>
+ <widget class="QDialog" name="Option">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QPushButton" name="exportHtml">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>60</y>
+     <width>271</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>导出Debug调试栏信息为HTML</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="exportTxt">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>60</y>
+     <width>271</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>导出Debug调试栏信息为TXT</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="textClear">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>150</y>
+     <width>271</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>清除当前调试栏信息</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="exportClear">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>150</y>
+     <width>271</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>清除导出目录下所有调试文件</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="music">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>119</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开启音乐</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="sound">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>20</y>
+     <width>119</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开启音效</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="select">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>240</y>
+     <width>271</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开启显示鼠标点击对象编号</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="showLine">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>240</y>
+     <width>271</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>显示格子边框线条</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="clickPos">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>320</y>
+     <width>271</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开启显示鼠标点击格子坐标</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="overlap">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>320</y>
+     <width>271</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开启显示建筑放置位置
+冲突细节位置</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

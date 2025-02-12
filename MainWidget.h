@@ -1,29 +1,15 @@
 ﻿#ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
-#include <QWidget>
-#include <QPainter>
-#include <Map.h>
-#include <qtimer.h>
-//#include <Player.h>
-#include <QTextBrowser>
-#include <GlobalVariate.h>
-#include <config.h>
-#include <QElapsedTimer>
-#include <stack>
-#include <queue>
-#include <QButtonGroup>
-#include <QMessageBox>
-
-#include <windows.h>
-#include <unordered_set>
-#include <SelectWidget.h>
-//#include <AboutDialog.h>
-//#include <Option.h>
-#include <Core.h>
+#include "config.h"
+#include "SelectWidget.h"
+#include "Option.h"
+#include "Core.h"
 #include "UsrAI.h"
 #include "EnemyAI.h"
-#include <ActWidget.h>
+#include "ActWidget.h"
+#include "AboutDialog.h"
+#include "GlobalVariate.h"
 
 namespace Ui {
 class MainWidget;
@@ -37,8 +23,93 @@ public:
     explicit MainWidget(int MapJudge, QWidget *parent = 0);
     ~MainWidget();
 
-    initmap();
+    Player* player[MAXPLAYER];
+    Map *map;
+    MouseEvent *mouseEvent=new MouseEvent();
+    int **memorymap=new int*[MEMORYROW];    //动态
+
+    //获取实体信息框的按钮
+    ActWidget* getActs(int num){return acts[num];}
+
+public slots:
+    void cheat_Player0Resource();
+private slots:
+    void FrameUpdate();
+    void onRadioClickSlot();
+    void on_stopButton_clicked();
+    void responseMusicChange();
+    void on_option_2_clicked();
+signals:
+    void mapmove();
+    void startAI();
+    void stopAI();
+private:
+    Core *core;
+    UsrAI* UsrAi;
+    EnemyAI *EnemyAi;
+
+//*************游戏更新*************
+    bool pause = false;
+    int gameframe = 0;
+    void gameDataUpdate();
+    void paintUpdate();
+    bool eventFilter(QObject *watched, QEvent *event);
+    //绘制窗口界面的图片
     void paintEvent(QPaintEvent *);
+    //更新UI信息
+    void statusUpdate();
+    //更新资源信息
+    void showPlayerResource(int playerRepresent);
+//*********************************
+
+//***********UI组件**************
+    SelectWidget *sel;
+    Option *option = NULL;
+    ActWidget *acts[ACT_WINDOW_NUM_FREE];
+    AboutDialog* aboutDialog = NULL;
+    QLabel *tipLbl =NULL;
+    Ui::MainWidget *ui;
+    QTimer *timer;
+    QButtonGroup *pbuttonGroup = NULL;
+//*******************************
+
+//****************输出框****************
+    void respond_DebugMessage();
+    void debugText(const QString& color,const QString& content);
+    void clearDebugText();
+    void exportDebugTextHtml();
+    void exportDebugTextTxt();
+    void clearDebugTextFile();
+//*****************************************
+
+//***************游戏结算*******************
+    void judgeVictory();
+    bool isLoss();
+    bool isWin();
+    void ScoreSave(string gameResult);
+//*****************************************
+
+//****************Music*********************
+    QSoundEffect* bgm = NULL;
+    void playSound(string soundType);   //音效
+    void makeSound();
+//*****************************************
+
+//***************InitHelperFunction**********
+    void initGameElements();
+    void initGameResources();
+    void initWindowProperties();
+    void initOptions();
+    void initInfoPane();
+    void initGameTimer();
+    void initPlayers();
+    void initMap(int MapJudge);
+    void initAI();
+    void setupCore();
+    void setupMouseTracking();
+    void setupTipLabel();
+    void initBGM();
+    void initViewMap();
     void initBlock();
     void initBuilding();
     void initAnimal();
@@ -46,7 +117,10 @@ public:
     void initFarmer();
     void initArmy();
     void initMissile();
+                  void buildInitialStock();
+//*****************************************
 
+//***************DeleteFunction************
     void deleteBlock();
     void deleteBuilding();
     void deleteAnimal();
@@ -54,91 +128,8 @@ public:
     void deleteFarmer();
     void deleteArmy();
     void deleteMissile();
-
-    //判断胜利
-//    void judgeVictory();
-
-
-    //**********************************************************
-    //输出框
-
-    void respond_DebugMessage();
-    void debugText(const QString& color,const QString& content);
-    void clearDebugText();
-
-
-    //**********************************************************
-
-    ActWidget* getActs(int num)
-    {
-        return acts[num];
-    }
-
-    void statusUpdate();
-    void showPlayerResource(int playerRepresent);
-
-    SelectWidget *sel;
-    Core *core;
-    UsrAI* UsrAi;
-    EnemyAI *EnemyAi;
-    bool eventFilter(QObject *watched, QEvent *event);
-    Map *map;
-    int **memorymap=new int*[MEMORYROW];//动态
-    Player* player[MAXPLAYER];
-    MouseEvent *mouseEvent=new MouseEvent();
-    QLabel *tipLbl =NULL;\
-
-public slots:
-    void cheat_Player0Resource();
-
-
-private slots:
-    void FrameUpdate();
-    void onRadioClickSlot();
-
-signals:
-    void mapmove();
-    void startAI();
-    void stopAI();
-private:
-    Ui::MainWidget *ui;
-    QTimer *timer;
-    QTimer *showTimer;
-    int gameframe = 0; // 游戏帧数初始化
-    QButtonGroup *pbuttonGroup = NULL;
-
-    void gameDataUpdate();
-    void paintUpdate();
-
-    void buildInitialStock();
-
-    void judgeVictory();
-    bool isLoss();
-    bool isWin();
-//    tagGame *Game=new tagGame;
-//    int Winnning=0;
-//    int Lose = 0;
-//    int flag=0;
-
-//    double *ArrowTowerBlockL=new double[3];
-//    double *ArrowTowerBlockU=new double[3];
-//    int ArrowTowerBuilt[3]={0,0,0};
-//    AI* worker;
-//    QThread* AIthread;
-//    time_t t,t0;
-//    int LastFrame = 0;
-//    int CollisionMap[72][72];
-
-//    std::list<Coordinate *> CollisionObject;
-//    std::list<Farmer *> *nowselectList=new std::list<Farmer *>;
-//    bool music = false;
-//    bool sound = false;
-//    bool pause = false;
-//    bool select = false;
-//    bool line = false;
-//    bool pos = false;
-//    bool showOverlap = true;
-    ActWidget *acts[ACT_WINDOW_NUM_FREE];
+//*****************************************
 };
+
 
 #endif // MAINWIDGET_H

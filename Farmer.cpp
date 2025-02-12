@@ -7,18 +7,20 @@ std::list<ImageResource>* Farmer::Stand[7][8];
 std::list<ImageResource>* Farmer::Attack[7][8];
 std::list<ImageResource>* Farmer::Die[7][8];
 std::list<ImageResource>* Farmer::Disappear[7][8];
-
+std::list<ImageResource>* Farmer::ShipStand[10][8];
 
 std::string Farmer::FarmerName[7]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"};
 std::string Farmer::FarmerCarry[5]={"","CarryWood","CarryMeat","CarryStone","CarryGold"};
 
-Farmer::Farmer()
-{
+string Farmer::sound_click = "Click_Villager";
 
-}
+std::string Farmer::sound_work[7] = {\
+    "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
+};
 
-Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent )
+Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent,int farmerType_)
 {
+    FarmerType=farmerType_;
     this->playerScience = playerScience;
     this->playerRepresent = playerRepresent;
 
@@ -54,7 +56,6 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
 
     isAttackable = true;
     type_Missile = Missile_Spear;
-//    this->Angle=0;
     setNowRes();
     this->imageX=this->nowres->pix.width()/2.0;
     this->imageY=this->nowres->pix.width()/4.0;
@@ -68,9 +69,19 @@ void Farmer::nextframe()
 {
     if(isDie())
     {
-        if( !isDying() ) setPreDie();
+        if( !isDying() )
+        {
+            setPreDie();
+            requestSound_Die();
+        }
         else if(!get_isActionEnd() && isNowresShift())
         {
+            if(nowres == nowlist->begin() && nowstate == MOVEOBJECT_STATE_ATTACK)
+            {
+                if(state == FARMER_HUNTER && isInWidget())
+                     soundQueue.push(sound_work[state]);
+            }
+
             nowres++;
             if( !changeToDisappear && get_isActionEnd())
             {
@@ -84,55 +95,60 @@ void Farmer::nextframe()
     else
     {
         updateState();
+
         if(isNowresShift())
         {
             nowres++;
             if(nowres==nowlist->end())
             {
+                requestSound_Work();
                 nowres=nowlist->begin();
                 initAttack_perCircle();
                 //读到最后回到最初
-            }
+            }            
         }
 
         updateMove();
         setNowRes();
     }
 
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 }
 
-int Farmer::getSort()
-{
-    return SORT_FARMER;
-}
 
 void Farmer::setNowRes()
 {
     std::list<ImageResource> *templist = NULL;
+    if(FarmerType==FARMERTYPE_FARMER){
     switch (this->nowstate) {
-    case MOVEOBJECT_STATE_STAND:
-        templist=this->Stand[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_WALK:
-        if(get_MatchingOfResourceAndCarry() && resource != 0 && (resourceSort!=HUMAN_GRANARYFOOD||state == FARMER_FARMER ))
-            templist = this->Carry[this->resourceSort][this->Angle];
-        else
-            templist=this->Walk[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_ATTACK:
-        templist=this->Attack[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_WORK:
-        templist=this->Work[this->state][this->Angle];
-        break;
-    case MOVEOBJECT_STATE_DIE:
-        if(changeToDisappear) templist = this->Disappear[this->state][this->Angle];
-        else templist = this->Die[this->state][this->Angle];
-        break;
-    default:
-        break;
+        case MOVEOBJECT_STATE_STAND:
+            templist=this->Stand[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_WALK:
+            if(get_MatchingOfResourceAndCarry() && resource > 0 && resourceSort!=HUMAN_GRANARYFOOD)
+                templist = this->Carry[this->resourceSort][this->Angle];
+            else
+                templist=this->Walk[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_ATTACK:
+            templist=this->Attack[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_WORK:
+            templist=this->Work[this->state][this->Angle];
+            break;
+        case MOVEOBJECT_STATE_DIE:
+            if(changeToDisappear) templist = this->Disappear[this->state][this->Angle];
+            else templist = this->Die[this->state][this->Angle];
+            break;
+        default:
+            break;
+        }
+    }else if(FarmerType==FARMERTYPE_SAILING||FarmerType==FARMERTYPE_WOOD_BOAT){
+        switch (nowstate) {
+            case MOVEOBJECT_STATE_STAND:
+            templist=this->ShipStand[FarmerType][this->Angle];
+            break;
+        }
     }
     if(templist!=nowlist && templist)
     {
@@ -150,7 +166,13 @@ double Farmer::getDis_attack()
     if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
     else dis = 0;
 
-    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0 ;
+    if(dis == 0)
+    {
+        dis = DISTANCE_ATTACK_CLOSE;
+
+        if(attackObject != NULL)
+            dis += (attackObject->getSideLength())/2.0 ;
+    }
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(), Num , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 
     return dis;
@@ -189,7 +211,8 @@ void Farmer::updateState()
     case SORT_Building_Resource:
         if(interactBui_builtUp)
         {
-            if(interactNum == BUILDING_FARM) setState(5);
+            if(interactNum == BUILDING_FARM)
+                setState(5);
         }
         else setState(6);
         break;
@@ -197,6 +220,24 @@ void Farmer::updateState()
         setState(0);
         break;
     }
+}
+
+vector<Human *>& Farmer::getHumanTransport()
+{
+    return HumanTransport;
+}
 
 
+void Farmer::requestSound_Work()
+{
+    if(!isInWidget())
+        return;
+
+    if( nowstate == MOVEOBJECT_STATE_WORK &&\
+        ( state == FARMER_LUMBER || state == FARMER_MINER || state == FARMER_WORKER|| state == FARMER_FARMER || state == FARMER_GATHERER )\
+        || nowstate == MOVEOBJECT_STATE_ATTACK && state == FARMER_LUMBER
+    )
+        soundQueue.push(sound_work[state]);
+
+    return;
 }

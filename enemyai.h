@@ -1,5 +1,6 @@
 #ifndef ENEMYAI_H
 #define ENEMYAI_H
+
 #include "AI.h"
 
 extern tagGame tagEnemyGame;

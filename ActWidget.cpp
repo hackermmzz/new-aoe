@@ -58,13 +58,14 @@ int ActWidget::getStatus()
 void ActWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    int size=70;//按钮边长
     if(status == 0)//普通状态
     {
-        painter.drawPixmap(0,0,80,80,pix);
+        painter.drawPixmap(0,0,size,size,pix);
         if(this->num < ACT_WINDOW_NUM_FREE)
         {
-            painter.fillRect(QRect(0, 0, 4, 80), QBrush(Qt::white));
-            painter.fillRect(QRect(4, 0, 76, 4), QBrush(Qt::gray));
+            painter.fillRect(QRect(0, 0, 4, size), QBrush(Qt::white));
+            painter.fillRect(QRect(4, 0, size-4, 4), QBrush(Qt::gray));
             painter.fillRect(QRect(2, 0, 2, 2), QBrush(Qt::gray));
         }
         this->show();
@@ -73,14 +74,14 @@ void ActWidget::paintEvent(QPaintEvent *)
     {
         if(this->num < ACT_WINDOW_NUM_FREE)
         {
-            painter.drawPixmap(4,4,76,76,pix);
-            painter.fillRect(QRect(0, 0, 4, 80), QBrush(Qt::white));
-            painter.fillRect(QRect(4, 0, 76, 4), QBrush(Qt::gray));
+            painter.drawPixmap(4,4,size-4,size-4,pix);
+            painter.fillRect(QRect(0, 0, 4, size), QBrush(Qt::white));
+            painter.fillRect(QRect(4, 0, size-4, 4), QBrush(Qt::gray));
             painter.fillRect(QRect(2, 0, 2, 2), QBrush(Qt::gray));
         }
         else
         {
-            painter.drawPixmap(0,0,120,120,pix);
+            painter.drawPixmap(0,0,size+40,size+40,pix);
         }
         this->show();
     }
@@ -88,10 +89,10 @@ void ActWidget::paintEvent(QPaintEvent *)
     {
         if(!pix.isNull())
         {
-            QImage img = pix.toImage().scaled(80, 80);
-            for(int i = 0; i < 80; i++)
+            QImage img = pix.toImage().scaled(size, size);
+            for(int i = 0; i < size; i++)
             {
-                for(int j = 0; j < 80; j++)
+                for(int j = 0; j < size; j++)
                 {
                     QColor clr = img.pixelColor(i, j);
                     int gray = clr.red() * 0.3 + clr.green() * 0.59 + clr.blue() * 0.11;
@@ -99,7 +100,7 @@ void ActWidget::paintEvent(QPaintEvent *)
                 }
             }
             pix = QPixmap::fromImage(img);
-            painter.drawPixmap(0,0,80,80,pix);
+            painter.drawPixmap(0,0,size,size,pix);
         }
     }
 }

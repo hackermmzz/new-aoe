@@ -1,7 +1,7 @@
 ﻿#ifndef RESOURCE_H
 #define RESOURCE_H
 
-#include <config.h>
+#include "config.h"
 
 class Resource
 {
@@ -13,7 +13,7 @@ public:
     virtual void printer_ToAnimal(void** ptr){ *ptr = NULL; }
     virtual void printer_ToBuilding_Resource(void** ptr){ *ptr = NULL; }
 
-    virtual bool isFarmerGatherable( void* farmer ){return true; }
+    virtual bool isFarmerGatherable( void* farmer ){return true;}
    /****************虚函数********************/
     bool get_Gatherable(){return gatherable;}
     int get_ResourceSort(){ return resourceSort; }

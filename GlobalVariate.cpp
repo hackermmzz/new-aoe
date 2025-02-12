@@ -7,18 +7,22 @@
 #include <QtWidgets>
 using namespace std;
 
+bool isExamining = EXAMINE_MODE;
+
 map<std::string, std::list<QPixmap>> resMap;
-map<string, QSound*> SoundMap;
+map<string, QSoundEffect*> SoundMap;
+std::queue<string> soundQueue;
 
 std::list<Coordinate*> drawlist;
 
-
+Score usrScore=Score(0);
+Score enemyScore=Score(1);
 Coordinate *nowobject=NULL;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;
 
-int ProcessDataWork = 0;
-bool only_debug_Player0 = true;
+bool only_debug_Player0 = IS_DEBUGTEXT_ONLYNOWPLAYER;
+bool filterRepetitionMessage = IS_FILTER_DEBUGMESSAGE;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 
@@ -71,7 +75,7 @@ int InitImageResMap(QString path)
         //debug用，可删
         QStringList ImageList;
         ImageList.append(filePath);
-        //        qDebug()<<filePath;
+
 
         //获取文件后缀
         QFileInfo testInfo(filePath);
@@ -87,9 +91,35 @@ int InitImageResMap(QString path)
 
         std::string tmpListName = imageMapName.toStdString();
         resMap[tmpListName].push_back(QPixmap(filePath));
-
     }
+    ////////////////////////////////对资源进行额外操作
+    //对船的帧数进行调整
+    for(auto&ele:resMap){
+        string name=ele.first;
+        if(name.find("Ship")!=string::npos){
+            auto&list=ele.second;
+            auto tmp=list.front();
+            for(int i=0;i<10;++i)list.push_back(tmp);
+        }
+        else if(name.find("Sailing")!=string::npos){
+            auto&list=ele.second;
+            auto tmp=list.front();
+            for(int i=0;i<10;++i)list.push_back(tmp);
+        }
+    }
+
+    ////////////////////////////////
     //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
+
+//查看rcc
+//    std::map<string, list<QPixmap>>::iterator iter,itere;
+//    iter = resMap.begin();
+//    itere = resMap.end();
+//    while(iter != itere)
+//    {
+//        qDebug()<<QString::fromStdString(iter->first);
+//        iter++;
+//    }
     return -1;
 }
 int InitSoundResMap(QString path)
@@ -118,7 +148,6 @@ int InitSoundResMap(QString path)
     }
 
     //获取分隔符
-    //QChar separator = QDir::separator();
     QChar separator = QChar('/');
 
     if(!path.contains(separator))
@@ -141,7 +170,7 @@ int InitSoundResMap(QString path)
         //debug用，可删
         QStringList SoundList;
         SoundList.append(filePath);
-//                qDebug()<<filePath;
+
 
         //获取文件后缀
         QFileInfo testInfo(filePath);
@@ -155,10 +184,19 @@ int InitSoundResMap(QString path)
         //        qDebug()<<"音频所对应String为："<<SoundMapName;
 
         std::string tmpMapName = SoundMapName.toStdString();
-        QSound *Psound = new QSound(filePath);
-        SoundMap.insert(map<string, QSound*>::value_type(tmpMapName, Psound));
+
+        int volume = 50;
+        QSoundEffect* qSoundEffect = new QSoundEffect();
+
+        filePath ="qrc"+filePath;
+
+        qSoundEffect->setSource(QUrl(filePath));
+        qSoundEffect->setVolume(volume);
+
+        SoundMap.insert(map<string, QSoundEffect*>::value_type(tmpMapName, qSoundEffect));
     }
-    //    qDebug()<<"return后自动调用析构函数，将函数内临时对象析构。";
+
+
     return -1;
 }
 
@@ -418,6 +456,7 @@ bool isNear_Manhattan( double dr , double ur , double dr1  , double ur1 , double
 
 void flipResource(std::list<ImageResource> *currentlist, std::list<ImageResource> *targetlist)
 {
+    if(currentlist==0)return;
     targetlist->clear();
     std::list<ImageResource>::iterator iter = currentlist->begin();
     while (iter != currentlist->end())
@@ -485,9 +524,9 @@ double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content,int playerID)
 {
-    if(!only_debug_Player0 || playerID==0)
+    if( !isExamining && (!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE) )
     {
-        if(debugMessageRecord[content] == 0 || color == "black"|| color == "green")
+        if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
         {
             debugMassagePackage.push(st_DebugMassage(color, content));
             debugMessageRecord[content] = g_frame;

@@ -78,20 +78,8 @@ void SelectWidget::paintEvent(QPaintEvent *event)
     }
 }
 
-void SelectWidget::timeUpdate()
-{
-    elapsedSec++;
-}
-
-void SelectWidget::setShowTimeFrame()
-{
-    elapsedFrame += 4;
-    if(elapsedFrame >= 100) elapsedFrame = 0;
-}
-
 void SelectWidget::frameUpdate()
 {
-    setShowTimeFrame(); //帧记录更新
     refreshActs();
     updateActs();
     drawActs();
@@ -99,6 +87,8 @@ void SelectWidget::frameUpdate()
 
 void SelectWidget::initActs()
 {
+    secondWidget_Build =false;
+
     //根据点击的对象初始化行动数组
     if(nowobject == NULL)
     {
@@ -146,6 +136,10 @@ void SelectWidget::initActs()
     else if(type == SORT_FARMER)//人类
     {
         actions[0] = ACT_BUILD;
+        Farmer* human = (Farmer*)nowobject;
+        if(human->isShip()){
+            actions[0]=ACT_SHIP_LAY;
+        }
         for(int i = 1; i < ACT_WINDOW_NUM_FREE; i++)
         {
             actionStatus[i] = ACT_STATUS_DISABLED;
@@ -264,6 +258,10 @@ void SelectWidget::refreshActs()
                 isBuild = true;
                 buildType = BUILDING_STABLE;
                 break;
+             case ACT_BUILD_DOCK:
+                isBuild = true;
+                buildType = BUILDING_DOCK;
+                break;
 
             //建筑行动
             case ACT_CREATEFARMER:
@@ -304,12 +302,16 @@ void SelectWidget::refreshActs()
         {
             if(!mainPtr->player[0]->get_isBuildingShowAble(buildType) || !mainPtr->player[0]->get_isBuildingAble(buildType))
                 actionStatus[i] = ACT_STATUS_DISABLED;
-        }
-
-        if(isBuildingAct)
+            else
+                actionStatus[i] = ACT_STATUS_ENABLED;
+        } else if(isBuildingAct)
         {
             if(!mainPtr->player[0]->get_isBuildActionAble(buildType , buildingActType))
                 actionStatus[i] = ACT_STATUS_DISABLED;
+            else
+                actionStatus[i] = ACT_STATUS_ENABLED;
+        } else{
+            actionStatus[i] = ACT_STATUS_ENABLED;
         }
     }
 
@@ -318,6 +320,11 @@ void SelectWidget::refreshActs()
     {
         mainPtr->getActs(i)->setStatus(actionStatus[i]);//应用行动状态,mainPtr->getActs(i)即获取第i个按钮窗口
         mainPtr->getActs(i)->update();//刷新按钮显示状态
+    }
+
+    if(secondWidget_Build)
+    {
+        showBuildActLab();
     }
 
     //再进行快捷栏和状态栏显示更新(本窗口的内容)
@@ -353,7 +360,8 @@ void SelectWidget::refreshActs()
             ui->objName->setText(QString::fromStdString(objBuilding->getDisplayName(buildType)));//设置显示名称
 
             //根据不同时代设置不同的图标
-            ui->objIcon->setPixmap(resMap["Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType)].front().scaled(110,110));
+            string name="Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType);
+            ui->objIcon->setPixmap(resMap[name].front().scaled(110,110));
 
             if(objBuilding->getActSpeed() != 0)
             {
@@ -488,7 +496,8 @@ void SelectWidget::refreshActs()
             //objIconSmall_ATK objText_ATK用于展示攻击力 objIconSmall objText表示携带资源或者防御
             Army* objArmy = (Army*)nowobject;
             ui->objName->setText(objArmy->getChineseName());
-            ui->objIcon->setPixmap(resMap["Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel())].front().scaled(110,110));
+            std::string buttonName = "Button_" + objArmy->getArmyName(objArmy->getNum(),objArmy->getLevel());
+            ui->objIcon->setPixmap(resMap[buttonName].front().scaled(110,110));
             ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); //攻击图标
             ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
             ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
@@ -604,19 +613,8 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     //建筑的按钮位置
     if(actName == ACT_BUILD)
     {
-
-        manageBuildBottom( 0 , ACT_BUILD_HOUSE , BUILDING_HOME );
-        manageBuildBottom( 1 , ACT_BUILD_GRANARY , BUILDING_GRANARY );
-        manageBuildBottom( 2 , ACT_BUILD_STOCK , BUILDING_STOCK);
-        manageBuildBottom( 3 , ACT_BUILD_MARKET , BUILDING_MARKET);
-        manageBuildBottom( 4 , ACT_BUILD_ARROWTOWER , BUILDING_ARROWTOWER );
-        manageBuildBottom( 5 , ACT_BUILD_ARMYCAMP , BUILDING_ARMYCAMP );
-        manageBuildBottom( 6 , ACT_BUILD_RANGE , BUILDING_RANGE );
-        manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
-        manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
-
-        actions[9] = ACT_BUILD_CANCEL;
-        actionStatus[9] = ACT_STATUS_ENABLED;
+        secondWidget_Build = true;
+        showBuildActLab();
     }
     else if(actName == ACT_BUILD_HOUSE){
         QApplication::restoreOverrideCursor();
@@ -672,11 +670,20 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
         QApplication::setOverrideCursor(my);
         emit sendBuildMode(BUILDING_STABLE);
     }
+    else if(actName == ACT_BUILD_DOCK){
+        QApplication::restoreOverrideCursor();
+        QCursor my(resMap["Dock"].front());
+        QApplication::setOverrideCursor(my);
+        emit sendBuildMode(BUILDING_DOCK);
+    }
     else if(actName == ACT_BUILD_CANCEL)
     {
         QApplication::restoreOverrideCursor();
         emit sendBuildMode(-1);
         initActs();
+    }
+    else if(actName == ACT_SHIP_LAY){
+        core->addRelation(nowobject ,nowobject , CoreEven_UnLoad);
     }
     else if(actName == ACT_CREATEFARMER){
         core->addRelation(nowobject , CoreEven_BuildingAct,BUILDING_CENTER_CREATEFARMER);
@@ -706,6 +713,9 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     else if(actName == ACT_ARMYCAMP_CREATE_SLINGER) core->addRelation(nowobject , CoreEven_BuildingAct , BUILDING_ARMYCAMP_CREATE_SLINGER);
     else if(actName == ACT_RANGE_CREATE_BOWMAN) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_RANGE_CREATE_BOWMAN);
     else if(actName == ACT_STABLE_CREATE_SCOUT) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_STABLE_CREATE_SCOUT);
+    else if(actName == ACT_DOCK_CREATE_SAILING) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_DOCK_CREATE_SAILING);
+    else if(actName == ACT_DOCK_CREATE_WOOD_BOAT) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_DOCK_CREATE_WOOD_BOAT);
+    else if(actName == ACT_DOCK_CREATE_SHIP) core->addRelation(nowobject,CoreEven_BuildingAct , BUILDING_DOCK_CREATE_SHIP);
     else if(actName == ACT_STOP)
     {
         if(nowobject!=NULL)
@@ -722,10 +732,27 @@ int SelectWidget::doActs(int actName,Coordinate* nowobject)
     return ACTION_SUCCESS;
 }
 
+void SelectWidget::showBuildActLab()
+{
+    manageBuildBottom( 0 , ACT_BUILD_HOUSE , BUILDING_HOME );
+    manageBuildBottom( 1 , ACT_BUILD_GRANARY , BUILDING_GRANARY );
+    manageBuildBottom( 2 , ACT_BUILD_STOCK , BUILDING_STOCK);
+    manageBuildBottom( 3 , ACT_BUILD_MARKET , BUILDING_MARKET);
+    manageBuildBottom( 4 , ACT_BUILD_ARROWTOWER , BUILDING_ARROWTOWER );
+    manageBuildBottom( 5 , ACT_BUILD_ARMYCAMP , BUILDING_ARMYCAMP );
+    manageBuildBottom( 6 , ACT_BUILD_RANGE , BUILDING_RANGE );
+    manageBuildBottom( 7 , ACT_BUILD_STABLE , BUILDING_STABLE );
+    manageBuildBottom( 8 , ACT_BUILD_FARM , BUILDING_FARM );
+    manageBuildBottom( 9 , ACT_BUILD_DOCK , BUILDING_DOCK );
+
+    actions[11] = ACT_BUILD_CANCEL;
+    actionStatus[11] = ACT_STATUS_ENABLED;
+}
+
 void SelectWidget::updateActs()
 {
   //遍历建筑更新活动列表
-     std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
+    std::list<Building *>::iterator buildIt = mainPtr->player[0]->build.begin();
     int wood = mainPtr->player[0]->getWood();
     int food = mainPtr->player[0]->getFood();
     int stone = mainPtr->player[0]->getStone();
@@ -746,21 +773,22 @@ void SelectWidget::drawActs()
     for(int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         QPixmap pix;
-        if(actions[i] == ACT_CREATEFARMER) pix = resMap["Button_Villager"].front().scaled(80, 80);
-        else if(actions[i] == ACT_STOP) pix = resMap["Button_Stop"].front().scaled(80, 80);
+        int size=70;
+        if(actions[i] == ACT_CREATEFARMER) pix = resMap["Button_Villager"].front().scaled(size, size);
+        else if(actions[i] == ACT_STOP) pix = resMap["Button_Stop"].front().scaled(size, size);
         /******升级技术*****/
-        else if(actions[i] == ACT_UPGRADE_AGE) pix = resMap["ButtonTech_Center1"].front().scaled(80,80);
-        else if(actions[i] == ACT_UPGRADE_FARM) pix = resMap["ButtonTech_Cow"].front().scaled(80,80);
-        else if(actions[i] == ACT_UPGRADE_STONE) pix = resMap["ButtonTech_Stone"].front().scaled(80,80);
-        else if(actions[i] == ACT_UPGRADE_WOOD) pix = resMap["ButtonTech_Lumber"].front().scaled(80,80);
-        else if(actions[i] == ACT_UPGRADE_TOWERBUILD) pix = resMap["ButtonTech_ArrowTower"].front().scaled(80,80);
+        else if(actions[i] == ACT_UPGRADE_AGE) pix = resMap["ButtonTech_Center1"].front().scaled(size,size);
+        else if(actions[i] == ACT_UPGRADE_FARM) pix = resMap["ButtonTech_Cow"].front().scaled(size,size);
+        else if(actions[i] == ACT_UPGRADE_STONE) pix = resMap["ButtonTech_Stone"].front().scaled(size,size);
+        else if(actions[i] == ACT_UPGRADE_WOOD) pix = resMap["ButtonTech_Lumber"].front().scaled(size,size);
+        else if(actions[i] == ACT_UPGRADE_TOWERBUILD) pix = resMap["ButtonTech_ArrowTower"].front().scaled(size,size);
         //仓库
-        else if(actions[i] == ACT_STOCK_UPGRADE_USETOOL) pix = resMap["ButtonTech_Spear"].front().scaled(80,80);
-        else if(actions[i] == ACT_STOCK_UPGRADE_DEFENSE_INFANTRY) pix = resMap["ButtonTech_Sword"].front().scaled(80,80);
-        else if(actions[i] == ACT_STOCK_UPGRADE_DEFENSE_ARCHER) pix = resMap["ButtonTech_Arrow"].front().scaled(80,80);
-        else if(actions[i] == ACT_STOCK_UPGRADE_DEFENSE_RIDER) pix = resMap["ButtonTech_Horse"].front().scaled(80,80);
+        else if(actions[i] == ACT_STOCK_UPGRADE_USETOOL) pix = resMap["ButtonTech_Spear"].front().scaled(size,size);
+        else if(actions[i] == ACT_STOCK_UPGRADE_DEFENSE_INFANTRY) pix = resMap["ButtonTech_Sword"].front().scaled(size,size);
+        else if(actions[i] == ACT_STOCK_UPGRADE_DEFENSE_ARCHER) pix = resMap["ButtonTech_Arrow"].front().scaled(size,size);
+        else if(actions[i] == ACT_STOCK_UPGRADE_DEFENSE_RIDER) pix = resMap["ButtonTech_Horse"].front().scaled(size,size);
         //兵营
-        else if(actions[i] == ACT_ARMYCAMP_UPGRADE_CLUBMAN) pix = resMap["ButtonTech_Axeman"].front().scaled(80,80);
+        else if(actions[i] == ACT_ARMYCAMP_UPGRADE_CLUBMAN) pix = resMap["ButtonTech_Axeman"].front().scaled(size,size);
 
         /******军队*****/
         else if(actions[i] == ACT_ARMYCAMP_CREATE_CLUBMAN)
@@ -768,29 +796,36 @@ void SelectWidget::drawActs()
             //部分兵种有等级——判断clubman等级，根据等级贴图
             switch ( (int)mainPtr->player[0]->get_buildActLevel(BUILDING_ARMYCAMP , BUILDING_ARMYCAMP_UPGRADE_CLUBMAN) ) {
             case 0: //初始
-                pix = resMap["Button_Clubman"].front().scaled(80,80);
+                pix = resMap["Button_Clubman"].front().scaled(size,size);
                 break;
             case 1: //1级
-                pix = resMap["Button_Axeman"].front().scaled(80,80);
+                pix = resMap["Button_Axeman"].front().scaled(size,size);
                 break;
             }
         }
-        else if(actions[i] == ACT_ARMYCAMP_CREATE_SLINGER) pix = resMap["Button_Slinger"].front().scaled(80,80);
-        else if(actions[i] == ACT_RANGE_CREATE_BOWMAN) pix = resMap["Button_Archer"].front().scaled(80,80);
-        else if(actions[i] == ACT_STABLE_CREATE_SCOUT) pix = resMap["Button_Scout"].front().scaled(80,80);
-
+        else if(actions[i] == ACT_ARMYCAMP_CREATE_SLINGER) pix = resMap["Button_Slinger"].front().scaled(size,size);
+        else if(actions[i] == ACT_RANGE_CREATE_BOWMAN) pix = resMap["Button_Archer"].front().scaled(size,size);
+        else if(actions[i] == ACT_STABLE_CREATE_SCOUT) pix = resMap["Button_Scout"].front().scaled(size,size);
+        /******船坞******/
+        else if(actions[i] == ACT_DOCK_CREATE_SAILING) pix = resMap["Button_Lay"].front().scaled(size,size);
+        else if(actions[i] == ACT_DOCK_CREATE_WOOD_BOAT) pix = resMap["Button_Lay"].front().scaled(size,size);
+        else if(actions[i] == ACT_DOCK_CREATE_SHIP) pix = resMap["Button_Lay"].front().scaled(size,size);
         /******建造*****/
-        else if(actions[i] == ACT_BUILD) pix = resMap["Button_Build"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_ARROWTOWER) pix = resMap["Button_ArrowTower"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_CANCEL) pix = resMap["Exit"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_FARM) pix = resMap["Button_Farm"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_GRANARY) pix = resMap["Button_Granary"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_HOUSE) pix = resMap["Button_House1"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_MARKET) pix = resMap["Button_Market"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_STOCK) pix = resMap["Button_Stock"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_ARMYCAMP) pix = resMap["Button_ArmyCamp"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_RANGE) pix = resMap["Button_Range"].front().scaled(80,80);
-        else if(actions[i] == ACT_BUILD_STABLE) pix = resMap["Button_Stable"].front().scaled(80,80);
+        else if(actions[i] == ACT_BUILD) pix = resMap["Button_Build"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_ARROWTOWER) pix = resMap["Button_ArrowTower"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_CANCEL) pix = resMap["Exit"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_FARM) pix = resMap["Button_Farm"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_GRANARY) pix = resMap["Button_Granary"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_HOUSE) pix = resMap["Button_House1"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_MARKET) pix = resMap["Button_Market"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_STOCK) pix = resMap["Button_Stock"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_ARMYCAMP) pix = resMap["Button_ArmyCamp"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_RANGE) pix = resMap["Button_Range"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_STABLE) pix = resMap["Button_Stable"].front().scaled(size,size);
+        else if(actions[i] == ACT_BUILD_DOCK) pix = resMap["Button_Dock"].front().scaled(size,size);
+        /******船******/
+        else if(actions[i] == ACT_SHIP_LAY) pix = resMap["Button_Lay"].front().scaled(size,size);
+
         mainPtr->getActs(i)->setPix(pix);
 
         //设置actions[i]为NULL,等于隐藏
