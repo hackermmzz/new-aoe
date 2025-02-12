@@ -2,13 +2,15 @@
 #define DEVELOPMENT_H
 
 #include <config.h>
-#include <GlobalVariate.h>
+#include "GlobalVariate.h"
 
 class Development
 {
 public:
     /************类的初始化***********/
     Development();
+    Development(int represent);
+
     //初始化科技树
     void init_DevelopLab();
     /************类的初始化***********/
@@ -19,7 +21,7 @@ public:
     double get_rate_Blood(int sort , int type);
     int get_addition_Blood( int sort , int type );
 
-    double get_rate_Attack( int sort , int type , int armyClass , int attackType );
+    double get_rate_Attack( int sort , int type , int armyClass , int attackType, int interSort = -1, int interNum = -1 );
     int get_addition_Attack( int sort , int type , int armyClass , int attackType );
 
     int get_addition_DisAttack( int sort, int type , int armyClass , int attackType );
@@ -31,6 +33,8 @@ public:
     /**************资源相关**************/
     int get_addition_ResourceSort( int resourceSort );
     int get_addition_MaxCnt( int sort , int type );
+    double get_rate_ResorceGather( int resourceSort );
+
    /******************加成信息*******************/
 
 
@@ -58,7 +62,7 @@ public:
     //当前能达到的最大人口数目
     int getHumanNumCanReach(){ return getMaxHumanNum()<humanNum_Top? getMaxHumanNum(): humanNum_Top; }
     //是否仍有空间添加人口
-    bool get_isHumanHaveSpace(){ return get_humanNum()<getHumanNumCanReach(); }
+    bool get_isHumanHaveSpace(){return get_humanNum()<getHumanNumCanReach(); }
 
     int get_centerNum(){ return centerNum; }
     /***************当前建筑信息*******************/
@@ -97,6 +101,9 @@ public:
     double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
     double get_actTime( int buildingNum, int actNum ){ return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
+    void BuildingActionExecuting(int buildNum, int actNum){ developLab[buildNum].actCon[actNum].beginExecute(); }
+    void BuildingActionOverExecuting(int buildNum, int actNum){ developLab[buildNum].actCon[actNum].overExecute(); }
+
     //获取升级次数/当前等级
     int getActLevel( int buildType , int actType ){ return developLab[buildType].actCon[actType].getPhaseTimes(); }
     int getBuildTimes( int buildType ){ return developLab[buildType].buildCon->getActTimes(); }
@@ -107,6 +114,7 @@ public:
 
 private:
     int civilization = CIVILIZATION_STONEAGE;
+    int playerRepresent = 0;
 
 
     //home数量，用于计算当前最大人口
@@ -126,7 +134,7 @@ private:
 
     /*****************游戏进程信息*******************/
     //时代升级，进入下一时代
-    void civiChange(){ civilization++; }
+    void civiChange();
 };
 
 #endif // DEVELOPMENT_H

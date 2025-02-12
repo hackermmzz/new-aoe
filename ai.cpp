@@ -1,5 +1,7 @@
 #include "AI.h"
 
+QString AI::AIName[NOWPLAYER] = { "UsrAI", "EnemyAI" };
+
 int AI::HumanMove(int SN, double DR0, double UR0){
     if(!isHuman(SN))
         return ACTION_INVALID_SN;
@@ -9,7 +11,7 @@ int AI::HumanMove(int SN, double DR0, double UR0){
 }
 
 int AI::HumanAction(int SN,int obSN){
-    if(!isHuman(SN))
+    if(!(isHuman(SN)||isBuilding(SN)) )
         return ACTION_INVALID_SN;
     return AddToIns(instruction(2,SN,obSN , true));
 }

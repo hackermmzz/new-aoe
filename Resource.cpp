@@ -19,6 +19,9 @@ int Resource::get_ReturnBuildingType()
     case HUMAN_GRANARYFOOD:
         buildingType = BUILDING_GRANARY;
         break;
+    case HUMAN_DOCKFOOD:
+        buildingType=BUILDING_DOCK;
+        break;
     default:
         buildingType = BUILDING_CENTER;
         break;

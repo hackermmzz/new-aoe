@@ -1,9 +1,9 @@
 #ifndef CORE_CONDIFUNC_H
 #define CORE_CONDIFUNC_H
 
-#include <GlobalVariate.h>
-#include <Map.h>
-#include <Player.h>
+#include "GlobalVariate.h"
+#include "Map.h"
+#include "Player.h"
 
 //****************************************************************************************
 //寻路相关
@@ -13,6 +13,8 @@ struct pathNode{
     static Point goalPoint;     //记录终点
     Point position; //当前点
     int cost_predict = 0 , cost_total = 0;
+
+    int pathLength = 1;
 
     pathNode* preNode = NULL;   //记录前驱点
 
@@ -94,8 +96,8 @@ struct relation_Object
     int nowPhaseNum = 0;    //记录当前行动所属的detail阶段
     double DR_goal,UR_goal , DR_alter , UR_alter;   //移动等目标位置，alter为暂时更改的目标的位置
     double DR_Predicted,UR_Predicted;   //object1下一步的移动位置
-    double crashLength_goal,crashLength_alter;
-    double distance_AllowWork , dis_AllowWork_alter;  //若goalObject为可工作对象，human对其的可工作距离（游戏中具体距离）
+    double crashLength_goal = 0,crashLength_alter = 0;
+    double distance_AllowWork = 0 , dis_AllowWork_alter = 0;  //若goalObject为可工作对象，human对其的可工作距离（游戏中具体距离）
     double distance_Record; //游戏中的距离的记录,为曼哈顿距离，用于更新relation
     double disAttack = 0;
     int height_Object = 0 , height_GoalObject = 0;
@@ -123,6 +125,9 @@ struct relation_Object
     relation_Object( Coordinate* goal , int eventClass);
     relation_Object(double DR_goal , double UR_goal , int eventClass );
 
+    void set_goalPoint(double DR, double UR){ DR_goal = DR; UR_goal = UR;}
+    void set_AlterPoint(double DR, double UR){ DR_alter = DR; UR_alter = UR;}
+
     void set_distance_AllowWork(){ distance_AllowWork = goalObject->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB; }
 
     void set_dis_AllowWork_alter(){ dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB; }
@@ -147,7 +152,11 @@ struct relation_Object
     bool is_ExecutionOver(){ return times_Execution == 0; }
 
     void useless(){ useless_norm ++; }
-    void useOnce(){ useless_norm = 0; }
+    void useOnce()
+    {
+        if(useless_norm < 1)useless_norm = 0;
+        else useless_norm --;
+    }
 
     void wait( int time ){ time_wait = time; }
     bool isWaiting(){ return time_wait>0;}
@@ -235,12 +244,14 @@ bool condition_Object1_FullBackpack( Coordinate* , relation_Object& , int& ,bool
 bool condition_ObjectNearby( Coordinate* , relation_Object& , int& ,bool);
 //object目标能被采集
 bool condition_Object2CanbeGather(Coordinate* , relation_Object& , int& ,bool);
-
 //object攻击进程
 bool condition_Object1_AttackingEnd(Coordinate* , relation_Object& ,int& ,bool);
-
 //取消判断无效的行动
 bool condition_UselessAction(Coordinate* , relation_Object& , int& ,bool);
+//object目标已经被运输上船
+bool condition_Object2_Transported(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation);
+//判断object是否可以卸货
+bool condition_Object1_Unload(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation);
 //****************************************************************************************
 
 

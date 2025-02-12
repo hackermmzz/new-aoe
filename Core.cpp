@@ -20,6 +20,31 @@ void Core::gameUpdate()
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
+    updateByObject();
+
+    loadRelationMap();
+
+    //更新AI用的资源表，该资源表是User/Enemy的通用模板
+    theMap->reset_resMap_AI();
+
+    //刷新视野并处理区域探索结果
+    theMap->reset_ObjectExploreAndVisible();
+
+    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
+
+    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT)
+    {
+        if( mapmoveFrequency == 8) resetNowObject_Click();
+        else manageMouseEvent();
+    }
+    manageOrder(0);
+    manageOrder(1);
+
+    interactionList->update();
+}
+
+void Core::updateByObject()
+{
     //player管理的各个ob更新状态
     for(int playerIndx = 0; playerIndx < MAXPLAYER ; playerIndx++)
     {
@@ -28,8 +53,8 @@ void Core::gameUpdate()
         list<Missile*>::iterator missileiter = player[playerIndx]->missile.begin() , missileiterEnd = player[playerIndx]->missile.end();
 
         //更新human子类的状态
-        while(humaniter!=humaniterEnd)
-        {       
+        while(humaniter != humaniterEnd)
+        {
             //如果当前对象需要变换行动状态，如从采集浆果->移动
             if((*humaniter)->needTranState())
             {
@@ -39,7 +64,8 @@ void Core::gameUpdate()
                 //需要变化的行动为“死亡”，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
-                    call_debugText("red",(*humaniter)->getChineseName()+"(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
+                    call_debugText("red"," "+(*humaniter)->getChineseName()+\
+                                   "(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
                     interactionList->eraseObject(*humaniter);
                     g_Object[(*humaniter)->getglobalNum()] = NULL;
@@ -55,59 +81,60 @@ void Core::gameUpdate()
             if((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
             {
                 // 更新人物Y轴偏移（伪三维）
-                int curMapHeight = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapHeight();
+                Human* theHuman = (*humaniter);
+                int blockDR = theHuman->getBlockDR(), blockUR = theHuman->getBlockUR();
+                int curMapHeight = theMap->cell[blockDR][blockUR].getMapHeight();
 
                 // 斜坡
-                if(theMap->isSlope((*humaniter)->getBlockDR(), (*humaniter)->getBlockUR()))
+                if(theMap->isSlope(blockDR, blockUR))
                 {
-                    if(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT)
+                    if(curMapHeight!=MAPHEIGHT_OCEAN&&(curMapHeight > MAPHEIGHT_MAX - 1 || curMapHeight < MAPHEIGHT_FLAT))
                     {
                         qDebug() << "ERROR: Calculation error in drawing human parts in the function gameUpdate()";
                         qDebug() << "gameUpdate()函数中绘制人类的部分计算错误";
                     }
 
                     // 判断mapType以确定上升方向
-                    int curMapType = theMap->cell[(*humaniter)->getBlockDR()][(*humaniter)->getBlockUR()].getMapType();
-                    pair<double, double> curHumanCoor = {(*humaniter)->getDR(), (*humaniter)->getUR()};   // 当前人物细节坐标
-                    pair<double, double> curBlockCoor = {(*humaniter)->getBlockDR() * 16.0 * gen5, (*humaniter)->getBlockUR() * 16.0 * gen5}; // 当前人物所在格（最左端的）细节坐标
+                    int curMapType = theMap->cell[blockDR][blockUR].getMapType();
+                    pair<double, double> curHumanCoor = {theHuman->getDR(), theHuman->getUR()};   // 当前人物细节坐标
+                    pair<double, double> curBlockCoor = {blockDR * BLOCKSIDELENGTH, blockUR * BLOCKSIDELENGTH}; // 当前人物所在格（最左端的）细节坐标
 
                     // 左高右低：
                     if(curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
                     {
                         double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
                         if(leftOffsetPercent > 1) leftOffsetPercent = 1;
-                       (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
-//                            qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
+                        //qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
                     }
                     // 右高左低：
                     else if(curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
                     {
                         double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
                         if(rightOffsetPercent > 1) rightOffsetPercent = 1;
-                       (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
-//                            qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
+                        //qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
                     }
                     // 下高上低：
                     else if(curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
                     {
                         double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
                         if(downOffsetPercent > 1) downOffsetPercent = 1;
-                        (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
-//                            qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
+                        //qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
                     }
                     // 上高下低：
                     else if(curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
                     {
                         double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
                         if(upOffsetPercent > 1) upOffsetPercent = 1;
-                        (*humaniter)->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
-//                            qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
+                        theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
+                        //qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                     }
                 }
-                // 平地
-                else (*humaniter)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
+                // 平地或者海洋
+                else theHuman->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
             }
-
 
             if((*humaniter)->isDying())
             {
@@ -128,9 +155,7 @@ void Core::gameUpdate()
 
                 interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->updateLU();
-
                 (*humaniter)->nextframe();
-
                 //移动后，记录当前位置
                 theMap->add_Map_Object(*humaniter);
                 //如果正在移动，需要判断碰撞，加入判断碰撞对象表
@@ -141,17 +166,20 @@ void Core::gameUpdate()
 
                 humaniter++;
             }
+
         }
 
-        while(builditer!= builditerEnd)
+        while(builditer != builditerEnd)
         {
             interactionList->conduct_Attacked(*builditer);
-            if((*builditer)->isDie()||( (*builditer)->getSort()== SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
+            if((*builditer)->isDie() || ((*builditer)->getSort() == SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
                 if(!(*builditer)->isDie())
-                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
+                    call_debugText("green"," "+(*builditer)->getChineseName()+\
+                                   "(编号:"+QString::number((*builditer)->getglobalNum())+")采集完成",(*builditer)->getPlayerRepresent());
                 else
-                    call_debugText("red"," "+(*builditer)->getChineseName()+"(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
+                    call_debugText("red"," "+(*builditer)->getChineseName()+\
+                                   "(编号:"+QString::number((*builditer)->getglobalNum())+")被摧毁",(*builditer)->getPlayerRepresent());
 
                 g_Object[(*builditer)->getglobalNum()] = NULL;
                 player[playerIndx]->deleteMissile_Attacker(*builditer);
@@ -165,21 +193,34 @@ void Core::gameUpdate()
                 //更新视野 用户控制的对象
                 if(playerIndx == 0)  theMap->reset_CellExplore(*builditer);
 
-//                if((*builditer)->getNum() == BUILDING_ARROWTOWER && get_IsObjectFree(*builditer))
-//                    theMap->add_Map_Vision(*builditer);
+                if((*builditer)->isFinish() && !(*builditer)->isConstructed())
+                {
+                    std::string clickSound;
+
+                    (*builditer)->initAction();
+
+                    if((*builditer)->getNum()==BUILDING_HOME||(*builditer)->getNum()==BUILDING_FARM)
+                        usrScore.update(_BUILDING1);
+                    else
+                        usrScore.update(_BUILDING2);
+
+                    player[playerIndx]->finishBuild(*builditer);
+                    if((*builditer)->getNum() == BUILDING_STOCK || (*builditer)->getNum() == BUILDING_GRANARY)
+                        interactionList->resourceBuildHaveChange();
+
+                    clickSound = (*builditer)->getSound_Click();
+
+                    if(!clickSound.empty()) //建筑建造完成时，出发一次点击音效
+                        soundQueue.push(clickSound);
+                }
+
                 (*builditer)->nextframe();
 
-//                if((*builditer)->getBlockDR() != INT_MAX && (*builditer)->getBlockUR() != INT_MAX)
-//                {
-//                    // 更新人物Y轴偏移（伪三维）
-//                    int curMapHeight = theMap->cell[(*builditer)->getBlockDR()][(*builditer)->getBlockUR()].getMapHeight();
-//                    (*builditer)->setMapHeightOffsetY(curMapHeight * DRAW_OFFSET);
-//                }
                 builditer++;
             }
         }
 
-        while(missileiter!=missileiterEnd)
+        while(missileiter != missileiterEnd)
         {
             if((*missileiter)->isNeedDelete())
             {
@@ -205,7 +246,7 @@ void Core::gameUpdate()
                 if((*animaliter)->isDying())
                 {
                     if(!(*animaliter)->isTree())
-                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡",0);
+                        call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号"+QString::number((*animaliter)->getglobalNum())+")死亡", REPRESENT_BOARDCAST_MESSAGE);
 
                     interactionList->eraseRelation(*animaliter);
                 }
@@ -238,7 +279,7 @@ void Core::gameUpdate()
         else if(!(*animaliter)->isDisappearing())
         {
             (*animaliter)->nextframe();
-            call_debugText("red"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
+            call_debugText("green"," "+(*animaliter)->getChineseName()+"(编号:"+QString::number((*animaliter)->getglobalNum())+")采集完成",0);
             g_Object[(*animaliter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*animaliter);   //行动表中animal设为null
             deleteOb_setNowobNULL(*animaliter);
@@ -271,7 +312,7 @@ void Core::gameUpdate()
         }
         else
         {
-            call_debugText("red"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成",0);
+            call_debugText("green"," "+(*SRiter)->getChineseName()+"(编号:"+QString::number((*SRiter)->getglobalNum())+")采集完成",0);
 
             g_Object[(*SRiter)->getglobalNum()] = NULL;
             interactionList->eraseObject(*SRiter);
@@ -279,20 +320,6 @@ void Core::gameUpdate()
             SRiter = theMap->deleteStaticRes(SRiter);
         }
     }
-
-    //更新AI用的资源表，该资源表是User/Enemy的通用模板
-    theMap->reset_resMap_AI();
-
-    theMap->reset_ObjectExploreAndVisible();    //刷新视野并处理区域探索结果
-
-    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
-
-    if(mouseEvent->mouseEventType!=NULL_MOUSEEVENT && mapmoveFrequency != 8) manageMouseEvent();
-
-    manageOrder(0);
-    manageOrder(1);
-
-    interactionList->update();
 }
 
 void Core::updateByPlayer(int id){
@@ -309,6 +336,7 @@ void Core::updateByPlayer(int id){
     //更新人口数据
     for(Human* human:self->human)
     {
+        //if(human->getTransported())continue;//如果人物被船运输了，那么不对外显示
         if(g_Object[human->getglobalNum()] == NULL) continue;
 
         tagHuman taghuman;
@@ -323,17 +351,16 @@ void Core::updateByPlayer(int id){
         taghuman.attack=human->getATK();
         taghuman.meleeDefense=human->getDEF(ATTACKTYPE_CLOSE);
         taghuman.rangedDefense=human->getDEF(ATTACKTYPE_SHOOT);
-        if(human->getSort()==HUMAN_STATE_IDLE){
-            taghuman.WorkObjectSN=-1;
-        }else{
-            taghuman.WorkObjectSN=interactionList->getObjectSN(human);
-        }
+
+        taghuman.WorkObjectSN=interactionList->getObjectSN(human);
+
         taghuman.DR0=human->getDR0();
         taghuman.UR0=human->getUR0();
         if(human->getSort()==SORT_FARMER){
             Farmer* farmer=static_cast<Farmer*> (human);
             tagFarmer tagfarmer;
             tagfarmer.cast_from(taghuman);
+            tagfarmer.FarmerSort=farmer->get_farmerType();
             tagfarmer.Resource=farmer->getResourceNowHave();
             if(tagfarmer.Resource==0){
                 tagfarmer.ResourceSort=-1;
@@ -423,6 +450,9 @@ void Core::updateByPlayer(int id){
             resource.Type=RESOURCE_STONE;
             resource.ProductSort=HUMAN_STONE;
             break;
+        case 2:
+            resource.Type=RESOURCE_GOLD;
+            resource.ProductSort=HUMAN_GOLD;
         default:
             resource.Type=-1;
             resource.ProductSort=-1;
@@ -442,7 +472,16 @@ void Core::updateByPlayer(int id){
         building.Blood=build->getBlood();
         building.MaxBlood=build->getMaxBlood();
         building.Percent=build->getPercent();
-        building.Project=build->getActNum();
+        if(build->getNum()==BUILDING_ARROWTOWER){
+            int obj=interactionList->getObjectSN(build);
+            if(build->isAttacking()&&obj!=-1){
+                building.Project=obj;
+            }else{
+                building.Project=0;
+            }
+        }else{
+            building.Project=build->getActNum();
+        }
         building.ProjectPercent=build->getActPercent();
         if(build->getSort()==SORT_Building_Resource){
             building.Type=BUILDING_FARM;
@@ -467,7 +506,7 @@ void Core::updateByPlayer(int id){
 void Core::updateCommon(tagInfo* taginfo){
     for (int i = 0; i < MAP_L; ++i) {
         for (int j = 0; j < MAP_U; ++j) {
-            taginfo->theMap[i][j] = theMap->map_Height[i][j];
+            taginfo->theMap[i][j] = theMap->cell[i][j].getMapHeight();
         }
     }
 }
@@ -503,62 +542,91 @@ void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int&
 void Core::manageMouseEvent()
 {
     Coordinate* object_click = g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
-    if(mouseEvent->mouseEventType==LEFT_PRESS)
-    {
-        nowobject=object_click;
-        sel->initActs();
-        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
-    }
+    resetNowObject_Click();
     if(mouseEvent->mouseEventType==RIGHT_PRESS && nowobject!=NULL)
     {
         if( object_click== NULL )
         {
             if( (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY)\
-                    && nowobject->getPlayerRepresent() == 0)
+                    && nowobject->getPlayerRepresent() == NOWPLAYERREPRESENT)
                 interactionList->addRelation(nowobject , mouseEvent->DR,mouseEvent->UR , CoreEven_JustMoveTo);
             mouseEvent->mouseEventType=NULL_MOUSEEVENT;
         }
         else
         {
+            Farmer* farmer = NULL;
+            Building* buildOb = NULL;
+
             switch(nowobject->getSort())
             {
                 case SORT_FARMER:
-                    if(nowobject->getPlayerRepresent() != 0) break;
-                    switch (object_click->getSort())
+                    if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT) break;
                     {
-                        case SORT_STATICRES:
-                        case SORT_ANIMAL:
-                            interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
-                            break;
-                        case SORT_Building_Resource:
-                            if(object_click->getPlayerRepresent() != 0)
-                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
-                            else
+                        int FarmerType=((Farmer*)nowobject)->get_farmerType();
+                        if(FarmerType==FARMERTYPE_FARMER)
+                        {
+                            switch (object_click->getSort())
                             {
-                                if(((Building_Resource*)nowobject)->get_Gatherable())
-                                    interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
-                                else
-                                    interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                                case SORT_STATICRES:
+                                case SORT_ANIMAL:
+                                    interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
+                                    break;
+                                case SORT_Building_Resource:
+                                    if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
+                                        interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                                    else
+                                    {
+                                        if(((Building_Resource*)object_click)->get_Gatherable())
+                                            interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
+                                        else
+                                            interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                                    }
+                                    break;
+                                case SORT_BUILDING:
+                                    if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
+                                        interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                                    else
+                                    {
+                                        farmer = (Farmer*)nowobject;
+                                        object_click->printer_ToBuilding((void**)&buildOb);
+
+                                        if(!farmer->get_isEmptyBackpack() && buildOb!=NULL && buildOb->isConstructed() &&\
+                                                buildOb->isMatchResourceType(farmer->getResourceSort()))
+                                            interactionList->addRelation(nowobject , object_click , CoreEven_Gather);
+                                        else
+                                            interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
+                                    }
+                                    break;
+                                case SORT_ARMY:
+                                case SORT_FARMER:
+                                    if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
+                                        interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                                    else if(object_click->getSort()==SORT_FARMER&&((Farmer*)object_click)->get_farmerType()==FARMERTYPE_WOOD_BOAT){//如果是木船则可以运输
+                                        interactionList->addRelation(nowobject,object_click,CoreEven_JustMoveTo);
+                                    }
+                                    break;
+                                default:
+                                    break;
                             }
-                            break;
-                        case SORT_BUILDING:
-                            if(object_click->getPlayerRepresent() != 0)
-                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
-                            else
-                                interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
-                            break;
-                        case SORT_ARMY:
-                        case SORT_FARMER:
-                            if(object_click->getPlayerRepresent() != 0)
-                                interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
-                            break;
-                        default:
-                            break;
+                        }else if(FarmerType==FARMERTYPE_WOOD_BOAT){
+                            if(object_click==nowobject){//卸甲，朕让你卸甲
+                                interactionList->addRelation(nowobject,object_click,CoreEven_UnLoad);
+                            }
+                            else if(judge_CanTransPort(nowobject,object_click)){
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Transport);
+                            }
+                        }else if(FARMERTYPE_SAILING){
+                            if(object_click->getPlayerRepresent() == NOWPLAYERREPRESENT&&object_click->getSort()==SORT_Building_Resource)
+                            {
+                                if(((Building_Resource*)object_click)->get_Gatherable())
+                                    interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
+                            }
+                        }
                     }
                     break;
 
                 case SORT_ARMY:
-                    if(nowobject->getPlayerRepresent() != 0) break;
+                    if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT) break;
                     switch (object_click->getSort())
                     {
 //                        case SORT_ANIMAL:
@@ -578,7 +646,7 @@ void Core::manageMouseEvent()
                     break;
 
                 case SORT_BUILDING:
-                    if(nowobject->getPlayerRepresent() != 0 || nowobject->getNum()!= BUILDING_ARROWTOWER) break;
+                    if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT || nowobject->getNum()!= BUILDING_ARROWTOWER) break;
 
                     switch (object_click->getSort())
                     {
@@ -586,18 +654,18 @@ void Core::manageMouseEvent()
 //                            interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 //                            break;
                         case SORT_Building_Resource:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         case SORT_BUILDING:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             else
                                 interactionList->addRelation(nowobject , object_click , CoreEven_FixBuilding);
                             break;
                         case SORT_ARMY:
                         case SORT_FARMER:
-                            if(object_click->getPlayerRepresent() != 0)
+                            if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                             break;
                         default:
@@ -605,7 +673,7 @@ void Core::manageMouseEvent()
                     }
                     break;
                 case SORT_ANIMAL:
-                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
+//                    if(object_click->getSort() == SORT_FARMER)  interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
 
                 default:
                     break;
@@ -622,15 +690,23 @@ void Core::manageOrder(int id)
 {
     ins* NowIns;
     tagGame* tagAIGame;
-    if(id==0){
+    Farmer* farmer = NULL;
+    Building* buildOb = NULL;
+    int FarmerType;
+    if(id==0)
+    {
         NowIns=&UsrIns;
         tagAIGame=&tagUsrGame;
-    }else{
+    }
+    else
+    {
         NowIns=&EnemyIns;
         tagAIGame=&tagEnemyGame;
     }
     NowIns->lock.lock();
-    while(!NowIns->instructions.empty()){
+
+    while(!NowIns->instructions.empty())
+    {
         instruction cur=NowIns->instructions.front();
         NowIns->instructions.pop();
         Coordinate* self=cur.self;
@@ -643,6 +719,7 @@ void Core::manageOrder(int id)
             tagAIGame->insertInsRet(cur.id,cur);
             continue;
         }
+
         switch (cur.type) {
         case 0:{    /// type 0:终止对象self的动作
             interactionList->suspendRelation(self);
@@ -650,7 +727,7 @@ void Core::manageOrder(int id)
         }
         case 1:{    /// type 1:命令村民self走向指定坐标L，U
             ret=interactionList->addRelation(self,cur.DR,cur.UR,CoreEven_JustMoveTo);
-            if(ret == ACTION_SUCCESS&& id == 0)
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," HumanMove:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 移动至 ("+QString::number(cur.DR)+","+QString::number(cur.UR)+")",id);
             break;
         }
@@ -662,97 +739,165 @@ void Core::manageOrder(int id)
                 break;
             }
             switch(self->getSort()){
-            case SORT_FARMER:
-                switch (obj->getSort()){
-                case SORT_STATICRES:
-                case SORT_ANIMAL:
-                    ret=interactionList->addRelation(self,obj,CoreEven_Gather);
-                    if(ret == ACTION_SUCCESS&& id == 0)
-                        call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
-                    break;
-                case SORT_BUILDING:
-                    if(self->getPlayerRepresent() == obj->getPlayerRepresent())
-                    {
-                        ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
-                        if(ret == ACTION_SUCCESS&& id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
-                    }
-                    else
-                    {
-                        ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
-                    }
-                    break;
-                case SORT_Building_Resource:
-                    if(self->getPlayerRepresent() == obj->getPlayerRepresent())
-                    {
-                        if(((Building*)obj)->isFinish()) ret=interactionList->addRelation(self,obj,CoreEven_Gather);
-                        else ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
-                        if(ret == ACTION_SUCCESS&& id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
-                    }else
-                    {
-                        ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
-                    }
-                    break;
-                case SORT_ARMY:
-                    if(self->getPlayerRepresent() != obj->getPlayerRepresent())
-                    {
-                        ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS&& id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
-                    }
-                    break;
-                default:
-                    break;
-                }
-                break;
-
-            case SORT_BUILDING:
-                if(self->getNum() != BUILDING_ARROWTOWER)
-                    break;
-            case SORT_ARMY:
-                switch (obj->getSort()){
-                case SORT_ANIMAL:
-                    ret=ACTION_INVALID_OBSN;
-                    // if(!((Animal*)obj)->isTree())
-                    // {
-                    //     ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                    //     if(ret == ACTION_SUCCESS&& id == 0)
-                    //         call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()));
-                    // }
-                    break;
-                case SORT_BUILDING:
-                case SORT_Building_Resource:
                 case SORT_FARMER:
-                case SORT_ARMY:
-                    if(self->getPlayerRepresent() != obj->getPlayerRepresent())
-                    {
-                        ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
-                        if(ret == ACTION_SUCCESS && id == 0)
-                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                    farmer = (Farmer*)self;
+                    FarmerType=farmer->get_farmerType();
+                    if(self==obj){
+                        ret=deleteSelf(self);
+                        if(ret == ACTION_SUCCESS){
+                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+"  被删除",id);
+                        }
+                        break;
                     }
+                    if(FarmerType==FARMERTYPE_FARMER){
+                        switch (obj->getSort()){
+                        case SORT_STATICRES:
+                        case SORT_ANIMAL:
+                            ret=interactionList->addRelation(self,obj,CoreEven_Gather);
+                            if(ret == ACTION_SUCCESS)
+                                call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            break;
+                        case SORT_BUILDING:
+                            if(self->getPlayerRepresent() == obj->getPlayerRepresent())
+                            {
+                                obj->printer_ToBuilding((void**)&buildOb);
+
+                                if(!farmer->get_isEmptyBackpack() && buildOb!=NULL && buildOb->isConstructed() \
+                                        && buildOb->isMatchResourceType(farmer->getResourceSort()))
+                                    ret=interactionList->addRelation(self , obj , CoreEven_Gather);
+                                else
+                                    ret=interactionList->addRelation(self , obj , CoreEven_FixBuilding);
+
+                                if(ret == ACTION_SUCCESS)
+                                    call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                            else
+                            {
+                                ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
+                                if(ret == ACTION_SUCCESS)
+                                    call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                            break;
+
+                        case SORT_Building_Resource:
+
+                            if(self->getPlayerRepresent() == obj->getPlayerRepresent())
+                            {
+                                if(((Building_Resource*)obj)->get_Gatherable()) ret=interactionList->addRelation(self,obj,CoreEven_Gather);
+                                else ret=interactionList->addRelation(self,obj,CoreEven_FixBuilding);
+
+                                if(ret == ACTION_SUCCESS)
+                                    call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置工作目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }else
+                            {
+                                ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
+                                if(ret == ACTION_SUCCESS)
+                                    call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                            break;
+                        case SORT_ARMY:
+                            if(self->getPlayerRepresent() != obj->getPlayerRepresent())
+                            {
+                                ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
+                                if(ret == ACTION_SUCCESS)
+                                    call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                            break;
+                        case SORT_FARMER:
+                            if(self->getPlayerRepresent()==obj->getPlayerRepresent()&&((Farmer*)obj)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
+                                ret=interactionList->addRelation(self,obj,CoreEven_JustMoveTo);
+                                if(ret == ACTION_SUCCESS)
+                                    call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 走向运输船 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                        default:
+                            break;
+                    }
+                    }
+                    else if(FarmerType==FARMERTYPE_WOOD_BOAT){
+                        if(self==obj){//卸甲凉快凉快
+                            ret=interactionList->addRelation(self,obj,CoreEven_UnLoad);
+                            if(ret==ACTION_SUCCESS){
+                                call_debugText("green"," HumanAction:"+self->getChineseName()+" "+"卸货",id);
+                            }
+                        }
+                        else if(self->getPlayerRepresent()==obj->getPlayerRepresent()&&judge_CanTransPort(self,obj)){
+                            ret=interactionList->addRelation(self,obj,CoreEven_Transport);
+                            if(ret==ACTION_SUCCESS){
+                                 call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 收纳 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                        }
+                    }
+                    else if(FarmerType==FARMERTYPE_SAILING){
+                        if(obj->getPlayerRepresent() == obj->getPlayerRepresent()&&obj->getSort()==SORT_Building_Resource)
+                        {
+                            if(((Building_Resource*)obj)->get_Gatherable())
+                                ret=interactionList->addRelation(nowobject,obj,CoreEven_Gather);
+                            if(ret==ACTION_SUCCESS){
+                                 call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 捕鱼 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                            }
+                        }
+                    }
+                    break;
+
+                case SORT_BUILDING:
+                    if(self->getNum() != BUILDING_ARROWTOWER)
+                        break;
+                case SORT_ARMY:
+                    if(self==obj&&self->getSort()==SORT_ARMY){
+                        ret=deleteSelf(self);
+                        if(ret == ACTION_SUCCESS){
+                            call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+"  被删除",id);
+                        }
+                        break;
+                    }
+                    switch (obj->getSort()){
+                    case SORT_ANIMAL:
+                        ret=ACTION_INVALID_OBSN;
+                        // if(!((Animal*)obj)->isTree())
+                        // {
+                        //     ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
+                        //     if(ret == ACTION_SUCCESS&& id == 0)
+                        //         call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()));
+                        // }
+                        break;
+                    case SORT_BUILDING:
+                    case SORT_Building_Resource:
+                    case SORT_FARMER:
+                    case SORT_ARMY:
+                        if(self->getPlayerRepresent() != obj->getPlayerRepresent())
+                        {
+                            ret=interactionList->addRelation(self,obj,CoreEven_Attacking );
+                            if(ret == ACTION_SUCCESS )
+                                call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 设置攻击目标为 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
+                        }
+                    default:
+                        break;
+                    }
+                    break;
                 default:
+                    ret = ACTION_INVALID_SN;
                     break;
                 }
                 break;
-            default:
-                break;
-            }
-            break;
         }
         case 3:{    ///type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
-            ret=interactionList->addRelation(self,cur.BlockDR,cur.BlockUR,CoreEven_CreatBuilding,0,cur.option);
-            if(ret == ACTION_SUCCESS && id == 0)
+            ret=interactionList->addRelation(self, cur.BlockDR, cur.BlockUR, CoreEven_CreatBuilding, true, cur.option);
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," HumanBuild:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 开始在块坐标 ("+QString::number(cur.BlockDR)+","+QString::number(cur.BlockUR)+") 处建造 Building_"+ QString::number(cur.option),id);
             break;
         }
         case 4:{    ///type 4:命令建筑self进行option工作
-            ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
-            if(ret == ACTION_SUCCESS&& id == 0)
+            if(cur.option==0){
+                if(self->getSort()!=SORT_BUILDING){
+                    ret=ACTION_INVALID_SN;
+                }else{
+                    interactionList->suspendRelation(self);
+                    ret=ACTION_SUCCESS;
+                }
+            }else{
+                ret=interactionList->addRelation(self,CoreEven_BuildingAct,cur.option);
+            }
+            if(ret == ACTION_SUCCESS)
                 call_debugText("green"," BuildAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 执行行动 ACTION_"+QString::number(cur.option),id);
             break;
         }
@@ -765,6 +910,19 @@ void Core::manageOrder(int id)
     NowIns->lock.unlock();
 }
 
+
+int Core::deleteSelf(Coordinate* object) //删除对象，返回错误码
+{
+    BloodHaver *bloodOb = NULL;
+
+    if(object->getPlayerRepresent()!=0) return ACTION_INVALID_SN;
+
+    object->printer_ToBloodHaver((void**) &bloodOb);
+    if(bloodOb && !bloodOb->isDie())
+        bloodOb->updateBlood(bloodOb->getMaxBlood());
+
+    return ACTION_SUCCESS;
+}
 
 //判断moveObject碰撞
 void Core::judge_Crush()
@@ -780,18 +938,16 @@ void Core::judge_Crush()
     int labSize_jud = moveOb_judCrush.size(),labSize,obSize;
     MoveObject* judOb;
     Coordinate* barrierOb;
-
     for(int i = 0 ; i<labSize_jud; i++)
     {
         judOb = moveOb_judCrush[i];
         judBlock = judOb->get_JudCrush_Block();
-
         labSize = judBlock.size();
         for(int j = 0 ; j<labSize; j++)
         {
             if(judOb->getCrashOb()!=NULL) break;
+            /////////////
             obSize = theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ].size();
-
             if(obSize == 0) continue;
             for(int k = 0 ; k < obSize; k++)
             {
@@ -803,7 +959,6 @@ void Core::judge_Crush()
 //                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
                 if(barrierOb->getSort() == SORT_STATICRES && barrierOb->getNum() == NUM_STATICRES_Bush) continue;   //浆果不碰撞
                 /****当前取消移动物体之间的碰撞******/
-
                 //判断碰撞，碰撞箱有重合
                 if(judOb->isCrash(barrierOb))break;
             }
@@ -811,4 +966,60 @@ void Core::judge_Crush()
     }
 
     moveOb_judCrush.clear();
+}
+
+bool Core::judge_CanTransPort(Coordinate *obj1, Coordinate *obj2)
+{
+    if(!obj1||!obj2)return false;
+    int sort1=obj1->getSort(),sort2=obj2->getSort();
+    if(sort1==SORT_FARMER&&(sort2==SORT_FARMER||sort2==SORT_ARMY)){
+        if(sort2==SORT_FARMER&&(((Farmer*)obj2)->get_farmerType()!=FARMERTYPE_FARMER))return false;
+        if(((Farmer*)obj1)->get_farmerType()!=FARMERTYPE_WOOD_BOAT)return false;
+        return true;
+    }
+    return false;
+}
+
+void Core::loadRelationMap()
+{
+    //更新寻路用障碍表
+    theMap->loadBarrierMap_ByObjectMap();
+    //更新寻路地图模板
+    theMap->loadfindPathMapTemperature();
+}
+
+
+void Core::resetNowObject_Click(bool isStop)
+{
+    if(mouseEvent->mouseEventType==LEFT_PRESS)
+    {
+        if(isStop)
+        {
+            call_debugText("blue", " 细节坐标 ("+QString::number(mouseEvent->DR)+","+QString::number(mouseEvent->UR)\
+                           +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", REPRESENT_BOARDCAST_MESSAGE);
+        }
+
+        nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+        if(nowobject!=NULL)
+            call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), REPRESENT_BOARDCAST_MESSAGE);
+        requestSound_Click(nowobject);
+        sel->initActs();
+        mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    }
+}
+
+void Core::requestSound_Click( Coordinate* object )
+{
+    if(nowobject == NULL) return;
+    Building* buildOb = NULL;
+    object->printer_ToBuilding((void**)&buildOb);
+
+    if(buildOb!=NULL && !buildOb->isFinish()) return;
+
+    std::string clickSound = object->getSound_Click();
+
+    if(!clickSound.empty())
+        soundQueue.push(clickSound);
+
+    return;
 }

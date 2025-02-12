@@ -31,3 +31,21 @@ int Human::getDEF(int attackType_got)
     return (int)(def * playerScience->get_rate_Defence(getSort(),Num,ARMY_INFANTRY , attackType_got) ) +\
             playerScience->get_addition_Defence(getSort() , Num , ARMY_INFANTRY , attackType_got);
 }
+
+void Human::setPosForced(double DR_, double UR_)
+{
+    PredictedDR=DR=DR_;
+    PredictedUR=UR=UR_;
+    BlockDR=DR/BLOCKSIDELENGTH;
+    BlockUR=UR/BLOCKSIDELENGTH;
+}
+
+bool Human::getTransported() const
+{
+    return transported;
+}
+
+void Human::setTransported(bool value)
+{
+    transported = value;
+}

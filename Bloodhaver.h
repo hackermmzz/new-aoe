@@ -1,7 +1,8 @@
 #ifndef BLOODHAVER_H
 #define BLOODHAVER_H
-#include <config.h>
-#include <Coordinate.h>
+
+#include "config.h"
+#include "Coordinate.h"
 
 //####################################################
 //BloodHaver类,用于管理一切与血量有关的数据,数据变化方式的定义
@@ -9,7 +10,7 @@
 class BloodHaver
 {
 public:
-    BloodHaver();
+    BloodHaver(){}
 
     /***********虚函数************/
     virtual void setPreAttack( ){ }
@@ -18,9 +19,7 @@ public:
 
     virtual int getATK(){ return atk+ get_add_specialAttack(); }
     virtual int get_add_specialAttack(){ return 0; }
-    virtual int getDEF(int attackType_got){  if(attackType_got == ATTACKTYPE_CLOSE) return defence_close;
-                                             else if(attackType_got == ATTACKTYPE_SHOOT) return defence_shoot;
-                                             else return 0;}
+    virtual int getDEF(int attackType_got);
     virtual double getDis_attack(){ return dis_Attack; }
     virtual int get_AttackType(){ return attackType; }
 
@@ -38,12 +37,11 @@ public:
     virtual int showDEF_Close_Addition(){ return 0; }
     virtual int showDEF_Shoot(){ return defence_shoot; }
     virtual int showDEF_Shoot_Addition(){ return 0; }
-
-
     /*********以上虚函数************/
 
+
     //判断死亡
-    bool isDie(){return Blood<=0;}
+    bool isDie(){return getBlood()<=0;}
     //判断满血（部分判断的边界条件）
     bool isFullHp(){ return Blood >= 1; }
     //判断是否受到了攻击
@@ -60,7 +58,7 @@ public:
 
     //获取血量
     double getBloodPercent(){ return Blood; }
-    int getBlood(){ return (int)( Blood*getMaxBlood() ); }
+    int getBlood(){ return  ceil(Blood*getMaxBlood()); }
     //获取“复仇”目标
     Coordinate* getAvangeObject(){ return avangeObject; }
     //如果攻击方式需要投掷物，获取投掷物类型
@@ -68,7 +66,7 @@ public:
     //获取“复仇”目标位置
     void get_AvangeObject_Position( double& DR, double& UR ){ DR = DR_avange; UR = UR_avange; }
 
-    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); }
+    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); if(Blood<0) Blood = 0; }
     //更新“复仇”目标的当前位置
     void updateAvangeObjectPosition(){ if(avangeObject!=NULL)
                                         { DR_avange = avangeObject->getDR(); UR_avange = avangeObject->getUR(); } }

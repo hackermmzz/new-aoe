@@ -1,15 +1,17 @@
 #ifndef USRAI_H
 #define USRAI_H
+
 #include "AI.h"
+
 extern tagGame tagUsrGame;
 extern ins UsrIns;
 /*##########请勿修改以上部分##########*/
-
 class UsrAI:public AI
 {
 public:
     UsrAI(){this->id=0;}
     ~UsrAI(){}
+
 
 private:
   /***************AI通信函数，请勿修改***************/

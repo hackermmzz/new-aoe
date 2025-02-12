@@ -1,9 +1,9 @@
 ﻿#ifndef HUMAN_H
 #define HUMAN_H
 
-#include <MoveObject.h>
-#include <Development.h>
-#include <Bloodhaver.h>
+#include "MoveObject.h"
+#include "Development.h"
+#include "Bloodhaver.h"
 
 class Human:public MoveObject,public BloodHaver
 {
@@ -41,15 +41,17 @@ public:
     //转化时使用
     void setPlayerScience( Development* science ){ this->playerScience = science; }
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
-
 //    int getType(){ return type; }
 
+    void setPosForced(double DR,double UR);
+    bool getTransported() const;
+    void setTransported(bool value);
 
 protected:
     Development* playerScience = NULL;
-//    int type = 0;
+    //    int type = 0;
     int playerRepresent;
-
+    bool transported=0;
     int phaseFromEnd_MissionAttack = 0;
 };
 

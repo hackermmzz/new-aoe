@@ -1,12 +1,14 @@
 ﻿#ifndef MAP_H
 #define MAP_H
 
-#include <Block.h>
-#include <config.h>
-#include <StaticRes.h>
-#include <Animal.h>
-#include <Player.h>
 #include <cstring>
+
+#include "Block.h"
+#include "config.h"
+#include "StaticRes.h"
+#include "Animal.h"
+#include "Player.h"
+
 
 class Map
 {
@@ -20,8 +22,10 @@ public:
     // 随机生成资源（单个），并添加到地图中
     void generateResource();
 
-    // 生成城镇中心附近13*13的部分
     void generateCenter();
+
+    // 生成城镇中心附近13*13的部分
+    void generateCenterAround();
 
     //生成敌人
     void generateEnemy();
@@ -35,12 +39,15 @@ public:
     // 判断地图块是否为斜坡
     bool isSlope(int BlockDR, int BlockUR);
 
-
+    void JudegCellType(int BlockDR,int BlockUR);
+    void CalCellOffset(int BlockDR,int BlockUR);
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
     void loadfindPathMap(MoveObject* moveOb);
+    void loadfindPathMapTemperature();
     //加载障碍物地图
-    void loadBarrierMap();
+    void loadBarrierMap(bool absolute = false);
+    void loadBarrierMap_ByObjectMap();
     /*********************寻路相关*******************/
     bool isBarrier(Point blockPoint,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );
@@ -49,7 +56,8 @@ public:
     bool isHaveObject(int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen);
     bool isFlat(Coordinate* judOb);
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
-    vector<Point> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
+    vector<pair<Point,int>> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
+    vector<Point> findBlock_Free(Point blockPoint, int lenth);
     vector<Point> findBlock_Flat(int disLen = 1);
 
     bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }
@@ -61,9 +69,9 @@ public:
 
     int get_MapHeight(int blockDR , int blockUR)
     {
-        if(blockDR<0 || blockUR<0 || blockDR>MAP_L || blockUR>MAP_U)
+        if(blockDR<0 || blockUR<0 || blockDR>=MAP_L || blockUR>=MAP_U)
         {
-            qDebug()<<"get_MapHeight overborder";
+            qDebug()<<"get_MapHeight overborder"<<" blockDR:"<<blockDR<<", blockUR:"<<blockUR;
             return 0;
         }
         else return cell[blockDR][blockUR].getMapHeight();
@@ -128,7 +136,6 @@ public:
     
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
-
     int intmap[72][72]={};
 
     std::list<StaticRes *> staticres={};
@@ -169,17 +176,19 @@ private:
     void InitFaultHandle();     // 初始化错误处理
     void InitCell(int Num, bool isExplored, bool isVisible);
     void GenerateMapTxt(int MapJudge);
-
+    void loadGenerateMapText(int MapJudge);
+    bool  CheckIsNearOcean(int x,int y);
     double tranL(double BlockL);
     double tranU(double BlockU);
 
     //寻路障碍地图
     void clearfindPathMap(){memset(findPathMap,0,sizeof(findPathMap));}
+    void clearfindPathMapTemperature(){memset(findPathMapTemperature,0,sizeof(findPathMapTemperature));}
     void clearBarrierMap(){ memset(barrierMap ,0 , sizeof(barrierMap)); }
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
     Player** player;
-    short m_heightMap[80][80] = {{}};
+    short m_heightMap[GENERATE_L][GENERATE_L] = {{}};
     int Gamemap[MAP_L][MAP_U] = {};  // 地图资源二维数组
     bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
 
@@ -190,6 +199,8 @@ private:
 
     //记录当前帧可见格子
     stack<Point> blockLab_Visible;
+
+    int findPathMapTemperature[MAXPLAYER][MAP_L][MAP_U] = {};
 };
 
 #endif // MAP_H

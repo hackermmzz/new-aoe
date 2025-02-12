@@ -2,11 +2,13 @@
 #define GAMEWIDGET_H
 
 #include <QWidget>
-#include <MainWidget.h>
 #include <QDebug>
-#include <Coordinate.h>
 #include <QMouseEvent>
 #include <unordered_set>
+
+#include "MainWidget.h"
+#include "Coordinate.h"
+
 
 namespace Ui {
 class GameWidget;
@@ -33,6 +35,8 @@ public:
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
     void drawmemory(int X, int Y, ImageResource res, int globalNum);
     void emptymemorymap();
+
+    bool judgeinWindow(double x, double y);
 
     int getBlockDR(){
         return BlockDR;

@@ -25,6 +25,7 @@ pathNode* pathNode::pushNode( pathNode* nextNode )
     nextNode->preNode = this;
     nextNode->cost_total = cost_total;
     nextNode->cost_total += costLab[ nextNode->position - this->position ];
+    nextNode->pathLength += this->pathLength;
 
     return nextNode;
 }
@@ -197,7 +198,8 @@ relation_Object::relation_Object( Coordinate* goal , int eventClass)
     isExist = true;
     goalObject = goal;
     relationAct = eventClass;
-    sort = goalObject->getSort();
+    if(goalObject!=NULL)
+        sort = goalObject->getSort();
     update_GoalPoint();
     init_AlterOb();
 }
@@ -206,8 +208,8 @@ relation_Object::relation_Object(double DR_goal , double UR_goal , int eventClas
 {
     isExist = true;
     goalObject = NULL;
-    this->DR_goal = DR_goal;
-    this->UR_goal = UR_goal;
+
+    set_goalPoint(DR_goal, UR_goal);
     relationAct = eventClass;
     init_AlterOb();
 }
@@ -215,9 +217,10 @@ relation_Object::relation_Object(double DR_goal , double UR_goal , int eventClas
 void relation_Object::set_ResourceBuildingType()
 {
     Resource* resource = NULL;
-    goalObject->printer_ToResource((void**)&resource);
+    if(goalObject != NULL)
+        goalObject->printer_ToResource((void**)&resource);
 
-    if( resource ==NULL )  resourceBuildingType = BUILDING_CENTER;
+    if( resource == NULL )  resourceBuildingType = BUILDING_CENTER;
     else resourceBuildingType = resource->get_ReturnBuildingType();
 }
 
@@ -248,8 +251,7 @@ void relation_Object::update_GoalPoint()
 {
     if(goalObject!= NULL)
     {
-        DR_goal = goalObject->getDR();
-        UR_goal = goalObject->getUR();
+        set_goalPoint(goalObject->getDR(), goalObject->getUR());
         crashLength_goal = goalObject->getCrashLength();
         set_distance_AllowWork();
     }
@@ -259,8 +261,7 @@ void relation_Object::update_Attrib_alter()
 {
     if(alterOb!= NULL)
     {
-        DR_alter = alterOb->getDR();
-        UR_alter = alterOb->getUR();
+        set_AlterPoint(alterOb->getDR(), alterOb->getUR());
         crashLength_alter = alterOb->getCrashLength();
         set_dis_AllowWork_alter();
     }
@@ -276,7 +277,9 @@ void relation_Object::init_AlterOb()
 void relation_Object::init_AttackAb( Coordinate* object1 )
 {
     BloodHaver* attacker = NULL;
-    object1->printer_ToBloodHaver((void**)&attacker);
+    if(object1!=NULL)
+        object1->printer_ToBloodHaver((void**)&attacker);
+
     if(attacker!=NULL)
     {
          attacker->setAttackObject(goalObject); //攻击者记录攻击目标, 用于对于army会计算特攻,farmer计算距离
@@ -396,12 +399,29 @@ bool condition_UniObjectNULL( Coordinate* object1, relation_Object& relation, in
 bool condition_UniObjectPercent(  Coordinate* object1, relation_Object& relation, int& operate, bool isNegation )
 {
     Coordinate* judge = NULL;
+    Building* buildOb = NULL;
     int relationAct = relation.relationAct;
     if(operate == OPERATECON_OBJECT1) judge = object1;
     else if(operate == OPERATECON_OBJECT2) judge = relation.goalObject;
 
-    if(relationAct == CoreEven_FixBuilding) return isNegation^(((Building*)judge)->isFullHp()&&((Building*)judge)->isFinish());
-    else if(relationAct == CoreEven_BuildingAct) return isNegation^((Building*)judge)->is_ActionFinish();
+    if(judge == NULL) return isNegation^true;
+
+    judge->printer_ToBuilding((void**)&buildOb);
+    if(buildOb != NULL)
+    {
+        if(relationAct == CoreEven_FixBuilding)
+            return isNegation^(buildOb->isFullHp()&& buildOb->isFinish());
+        else if(relationAct == CoreEven_BuildingAct)
+        {
+            int creatSort = -1, creatNum = -1;
+            bool needCreatOb = buildOb->isActionNeedCreatObject(creatSort, creatNum);
+
+            if(needCreatOb && (creatSort == SORT_ARMY || creatSort == SORT_FARMER))
+                return isNegation^(buildOb->is_ActionFinish() && buildOb->isRepresentHumanHaveSpace());
+            else
+                return isNegation^(buildOb->is_ActionFinish());
+        }
+    }
 
     return isNegation^true;
 }
@@ -499,7 +519,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     //对飞行物的距离判定进行特判
     if(operate == OPERATECON_NEAR_MISSILE)
     {
-        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 )<=dis )
+        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 ) <= dis+relation.goalObject->getCrashLength()/2.0 )
             ((Missile*)object1)->hitTarget();
         return isNegation^((Missile*)object1)->isMissileFinishTask();
     }
@@ -516,7 +536,6 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 //object目标能被采集
 bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation, int& operate , bool isNegation)
 {
-
     if(relation.goalObject != NULL)
     {
         //object2强制转化为Resource指针，若转化后仍为NULL，说明对象不包含Resource类的属性
@@ -555,4 +574,29 @@ bool condition_Object1_AttackingEnd(Coordinate* object1, relation_Object& relati
     }
 
     return true;
+}
+
+bool condition_Object2_Transported(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation){
+    Human*human1=(Human*)object1,*human2=(Human*)(relation.goalObject);
+    return isNegation^(human2->getTransported());
+}
+
+bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, int &operate, bool isNegation)
+{
+    extern Map*GlobalMap;
+    Farmer*ship=(Farmer*)object1;
+    return ship->getHumanTransport().size()==0;
+    //寻找最近的陆地区块
+    static const int off[][2]={{-1,0},{-1,1},{-1,-1},{1,0},{1,-1},{1,1},{0,1},{0,-1}};
+    for(auto*o:off){
+        int L=o[0]+ship->getBlockDR(),U=o[1]+ship->getBlockUR();
+        if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
+            Block&block=GlobalMap->cell[L][U];
+            if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
+                double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
+                if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE)return true;
+            }
+        }
+    }
+    return false;
 }

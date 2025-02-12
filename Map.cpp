@@ -1,7 +1,10 @@
 #include "Map.h"
-
+///////////////////////////
+Map*GlobalMap;
+///////////////////////////
 Map::Map()
 {
+    GlobalMap=this;
     for(int i = 0; i < MAP_L; i++)
     {
         cell[i] = new Block[MAP_U];
@@ -16,27 +19,6 @@ Map::~Map()
         delete[] cell[i];
     }
     delete[] cell;
-
-    //    // 清空 coores 列表并调用析构函数释放内存
-    //    for (auto it = coores.begin(); it != coores.end(); ++it)
-    //    {
-    //        delete *it;
-    //    }
-    //    coores.clear();
-
-    //    // 清空 animal 列表并调用析构函数释放内存
-    //    for (auto it = animal.begin(); it != animal.end(); ++it)
-    //    {
-    //        delete *it;
-    //    }
-    //    animal.clear();
-
-    //    // 清空 ruin 列表并调用析构函数释放内存
-    //    for (auto it = ruin.begin(); it != ruin.end(); ++it)
-    //    {
-    //        delete *it;
-    //    }
-    //    ruin.clear();
 }
 
 /*
@@ -481,15 +463,15 @@ void Map::generateResource() {
 
 }
 
+
 /*
- * 函数：Map::generateCenter；
+ * 函数：Map::generateCenter
  * 参数：无；
- * 内容：在地图中央13 * 13的部分单独生成市镇中心附近的资源；
+ * 内容：在地图中央生产市镇中心及初始村民；
  * 返回值：空。
  */
-void Map::generateCenter() {
-    srand(time(NULL));
-
+void Map::generateCenter()
+{
     // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
     Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
     player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
@@ -499,8 +481,6 @@ void Map::generateCenter() {
     player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
     player[0]->addFarmer((MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
 
-//    player[1]->addArmy(AT_CLUBMAN,(MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
-
     for(int i = MAP_L / 2 - 2; i <= MAP_L / 2 + 2; i++)
     {
         for(int j = MAP_U / 2 - 2; j <= MAP_U / 2 + 2; j++)
@@ -508,6 +488,18 @@ void Map::generateCenter() {
             mapFlag[i][j] = true;
         }
     }
+}
+
+
+
+/*
+ * 函数：Map::generateCenterAround
+ * 参数：无；
+ * 内容：在地图中央13 * 13的部分单独生成市镇中心附近的资源；
+ * 返回值：空。
+ */
+void Map::generateCenterAround() {
+    srand(time(NULL));
 
     // 生成城镇中心附近9 * 9部分的1棵随机位置的树
     // flag：0表示未生成，1表示已生成
@@ -569,14 +561,15 @@ void Map::generateEnemy(){
     int J=0;
     int num=0;
     int dir=0;
-    if(EL>=36&&EU>=36) dir=1;
-    else if(EL>=36&&EU<36) dir=2;
-    else if(EL<36&&EU<36) dir=3;
-    else if(EL<36&&EU>=36) dir=4;
-    for(int i=62;i>52&&dir!=2;i--){
+    if(EL>=MAP_L/2&&EU>=MAP_U/2) dir=1;
+    else if(EL>=MAP_L/2&&EU<MAP_U/2) dir=2;
+    else if(EL<MAP_L/2&&EU<MAP_U/2) dir=3;
+    else if(EL<MAP_L/2&&EU>=MAP_U/2) dir=4;
+    for(int i=MAP_L-10;i>MAP_L-20&&dir!=2;i--){
         for(int j=10;j<20;j++){
             if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
-                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
+                    &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false&&mapFlag[i+2][j+2]==false&&mapFlag[i-2][j-2]==false&&mapFlag[i+2][j]==false&&mapFlag[i][j+2]==false&&mapFlag[i][j-2]==false
+                    &&mapFlag[i-2][j]==false&&mapFlag[i-2][j+2]==false&&mapFlag[i+2][j-2]==false&&mapFlag[i-2][j+1]==false&&mapFlag[i+2][j-1]==false&&mapFlag[i+2][j+1]==false&&mapFlag[i-2][j-1]==false&&mapFlag[i-1][j+2]==false&&mapFlag[i+1][j-2]==false&&mapFlag[i+1][j+2]==false&&mapFlag[i-1][j-2]==false)
             {pos_L[I]=i*BLOCKSIDELENGTH;
              pos_U[J]=j*BLOCKSIDELENGTH;
              num=1;
@@ -601,8 +594,8 @@ void Map::generateEnemy(){
         }if(num==1) break;
     }
     num=0;
-    for(int i=62;i>52&&dir!=1;i--){
-        for(int j=62;j>52;j--){
+    for(int i=MAP_L-10;i>MAP_L-20&&dir!=1;i--){
+        for(int j=MAP_U-10;j>MAP_U-20;j--){
             if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
                     &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
             {pos_L[I]=i*BLOCKSIDELENGTH;
@@ -616,7 +609,7 @@ void Map::generateEnemy(){
     }
     num=0;
     for(int i=10;i<20&&dir!=4;i++){
-        for(int j=62;j>52;j--){
+        for(int j=MAP_U-10;j>MAP_U-20;j--){
             if (mapFlag[i][j]==false&&mapFlag[i+1][j+1]==false&&mapFlag[i-1][j-1]==false&&mapFlag[i+1][j]==false&&mapFlag[i][j+1]==false&&mapFlag[i][j-1]==false
                     &&mapFlag[i-1][j]==false&&mapFlag[i-1][j+1]==false&&mapFlag[i+1][j-1]==false)
             {pos_L[I]=i*BLOCKSIDELENGTH;
@@ -667,22 +660,26 @@ void Map::generateEnemy(){
     player[1]->addArmy(0,pos_L[0]-10,pos_U[0]-10);
     player[1]->addArmy(0,pos_L[0]+10,pos_U[0]+10);
     //第二组
-    player[1]->addArmy(0,pos_L[1]-10,pos_U[1]-10);
-    player[1]->addArmy(0,pos_L[1]+10,pos_U[1]+10);
-    player[1]->addArmy(0,pos_L[1]-20,pos_U[1]-20);
-    player[1]->addArmy(1,pos_L[1]-20,pos_U[1]+20);
-    player[1]->addArmy(1,pos_L[1]+30,pos_U[1]-30);
-    player[1]->addArmy(1,pos_L[1]+30,pos_U[1]+30);
+    player[1]->addArmy(1,pos_L[1]-15,pos_U[1]-15);
+    player[1]->addArmy(1,pos_L[1]+15,pos_U[1]+15);
+    player[1]->addArmy(3,pos_L[1]-30,pos_U[1]-30);
+    player[1]->addArmy(3,pos_L[1]-30,pos_U[1]+30);
+    player[1]->addArmy(2,pos_L[1]+45,pos_U[1]-45);
+    player[1]->addArmy(2,pos_L[1]+45,pos_U[1]+45);
     //第三组
-    player[1]->addArmy(2,pos_L[2]-10,pos_U[2]-10);
-    player[1]->addArmy(2,pos_L[2]+10,pos_U[2]+10);
-    player[1]->addArmy(2,pos_L[2]-20,pos_U[2]+20);
-    player[1]->addArmy(0,pos_L[2]+20,pos_U[2]-20);
-    player[1]->addArmy(0,pos_L[2]+30,pos_U[2]+30);
-    player[1]->addArmy(0,pos_L[2]-30,pos_U[2]-30);
-    player[1]->addArmy(1,pos_L[2]-40,pos_U[2]+40);
-    player[1]->addArmy(1,pos_L[2]+40,pos_U[2]-40);
-    player[1]->addArmy(rand2+4,pos_L[2]-60,pos_U[2]+60);
+    player[1]->addArmy(0,pos_L[2]-15,pos_U[2]-15);
+    player[1]->addArmy(0,pos_L[2]+15,pos_U[2]+15);
+    player[1]->addArmy(0,pos_L[2]+30,pos_U[2]-30);
+    player[1]->addArmy(0,pos_L[2]-30,pos_U[2]+30);
+    player[1]->addArmy(1,pos_L[2]-45,pos_U[2]+45);
+    player[1]->addArmy(1,pos_L[2]+45,pos_U[2]-45);
+    player[1]->addArmy(1,pos_L[2]+60,pos_U[2]-60);
+    player[1]->addArmy(1,pos_L[2]-60,pos_U[2]+60);
+    player[1]->addArmy(2,pos_L[2]+75,pos_U[2]+75);
+    player[1]->addArmy(2,pos_L[2]-75,pos_U[2]-75);
+    player[1]->addArmy(2,pos_L[2]+90,pos_U[2]-90);
+    player[1]->addArmy(2,pos_L[2]+90,pos_U[2]-90);
+    player[1]->addArmy(rand2+4,pos_L[2]-80,pos_U[2]+80);
 }
 
 /*
@@ -844,7 +841,165 @@ bool Map::isSlope(int BlockDR, int BlockUR)
     return true;
 }
 
-void Map::loadBarrierMap()
+void Map::JudegCellType(int BlockDR, int BlockUR)
+{
+    int i=BlockDR+4,j=BlockUR+4;
+    Block&block=this->cell[i-4][j-4];
+    //如果是海洋
+    if(block.getMapHeight()==MAPHEIGHT_OCEAN){
+        block.setMapType(MAPTYPE_OCEAN);
+        return;
+    }
+    //判断是否是接壤海的区块,如果是直接返回，因为海洋边缘只允许是平地
+    if(CheckIsNearOcean(i,j)){
+        block.setMapHeight(MAPHEIGHT_FLAT);
+        block.setMapType(MAPTYPE_OCEAN);
+        return;
+    }
+    // 判断四个角与中间区块的高度差
+    int heightDiffA = abs(m_heightMap[i][j] - m_heightMap[i - 1][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i - 1][j + 1]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j + 1]);
+    // 判断四条临边与中间区块的高度差
+    int heightDiffL = abs(m_heightMap[i][j] - m_heightMap[i - 1][j]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j]) + abs(m_heightMap[i][j] - m_heightMap[i][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i][j + 1]);
+    switch(heightDiffA)
+    {
+    case 1:
+        /*
+            * X X X
+            * X # X
+            * X X 1
+            */
+        if(m_heightMap[i + 1][j + 1] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A3_UPTOR);
+        }
+        /*
+            * X X X
+            * X # X
+            * 1 X X
+            */
+        else if(m_heightMap[i + 1][j - 1] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A2_DOWNTOU);
+        }
+        /*
+            * X X 1
+            * X # X
+            * X X X
+            */
+        else if(m_heightMap[i - 1][j + 1] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A2_UPTOU);
+        }
+        /*
+            * 1 X X
+            * X # X
+            * X X X
+            */
+        else if(m_heightMap[i - 1][j - 1] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A1_UPTOL);
+        }
+        break;
+    }
+
+    switch(heightDiffL)
+    {
+    case 2:
+        /*
+            * X 0 X
+            * 0 # 1
+            * X 1 X
+            */
+        if((m_heightMap[i + 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j + 1] - m_heightMap[i][j] == 1))
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A1_DOWNTOL);
+        }
+        /*
+             * X 1 X
+             * 1 # 0
+             * X 0 X
+             */
+        else if((m_heightMap[i - 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j - 1] - m_heightMap[i][j] == 1))
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A3_DOWNTOR);
+        }
+        /*
+             * X 1 X
+             * 0 # 1
+             * X 0 X
+             */
+        else if((m_heightMap[i - 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j + 1] - m_heightMap[i][j] == 1))
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A0_DOWNTOD);
+        }
+        /*
+             * X 0 X
+             * 1 # 0
+             * X 1 X
+             */
+        else if((m_heightMap[i + 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j - 1] - m_heightMap[i][j] == 1))
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_A0_DOWNTOD);
+        }
+        break;
+
+    case 1:
+        if(m_heightMap[i + 1][j] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_L3_UPTORD);
+        }
+        else if(m_heightMap[i - 1][j] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_L1_UPTOLU);
+        }
+        else if(m_heightMap[i][j + 1] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_L2_UPTORU);
+        }
+        else if(m_heightMap[i][j - 1] - m_heightMap[i][j] == 1)
+        {
+            this->cell[i - 4][j - 4].setMapType(MAPTYPE_L0_UPTOLD);
+        }
+        break;
+    }
+}
+
+void Map::CalCellOffset(int BlockDR, int BlockUR)
+{
+    int i=BlockDR,j=BlockUR;
+    Block&block=cell[i][j];
+    // 偏移
+    if(block.getMapHeight()>0)
+    {
+        this->cell[i][j].setOffsetY(DRAW_OFFSET * this->cell[i][j].getMapHeight());
+    }
+    if(block.getMapType() == 2 || block.getMapType() == 3 || block.getMapType() == 4 || block.getMapType() == 5 || block.getMapType() == 8 || block.getMapType() == 9)
+    {
+        this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + DRAW_OFFSET);
+    }
+
+    // 修整边界
+    if(this->cell[i][j].getMapType() == 10)
+    {
+        int t = this->cell[i][j].getOffsetX();
+        this->cell[i][j].setOffsetX(t - 1);
+    }
+    if(this->cell[i][j].getMapType() == 11)
+    {
+        int t = this->cell[i][j].getOffsetX();
+        this->cell[i][j].setOffsetX(t + 1);
+    }
+    if(this->cell[i][j].getMapType() == 13)
+    {
+        int t = this->cell[i][j].getOffsetY();
+        this->cell[i][j].setOffsetY(t + 1);
+    }
+    //如果是海洋，按照wlh的方式来偏移
+    if(block.getMapType()==MAPTYPE_OCEAN)
+        block.setOffsetY(2);
+}
+
+void Map::loadBarrierMap(bool absolute)
 {
     clearBarrierMap();
 
@@ -867,7 +1022,8 @@ void Map::loadBarrierMap()
             while(iter!=iterend)
             {
 //                CollisionObject.push_back((*ite));
-                setBarrier((*iter)->getBlockDR(),(*iter)->getBlockUR(),(*iter)->get_BlockSizeLen());
+                if(!(*iter)->isDie())
+                    setBarrier((*iter)->getBlockDR(),(*iter)->getBlockUR(),(*iter)->get_BlockSizeLen());
                 iter++;
             }
         }
@@ -879,7 +1035,7 @@ void Map::loadBarrierMap()
         std::list<StaticRes *>::iterator iter=staticres.begin() , iterend = staticres.end();
         while(iter!=iterend)
         {
-            if((*iter)->getNum() != NUM_STATICRES_Bush )
+            if( absolute || (*iter)->getNum() != NUM_STATICRES_Bush )
                 setBarrier((*iter)->getBlockDR() , (*iter)->getBlockUR() , (*iter)->get_BlockSizeLen());
             iter++;
         }
@@ -897,19 +1053,53 @@ void Map::loadBarrierMap()
     }
 }
 
+void Map::loadBarrierMap_ByObjectMap()
+{
+    clearBarrierMap();
+
+    int size;
+    Coordinate* object;
+    for(int x = 0; x<MAP_L; x++)
+        for(int y = 0 ; y<MAP_U; y++)
+        {
+            size = map_Object[x][y].size();
+            for(int i = 0; i<size; i++)
+            {
+                object = map_Object[x][y][i];
+                if(object->getSort() == SORT_STATICRES && object->getNum() == NUM_STATICRES_Bush)
+                    continue;
+
+                barrierMap[x][y] = 1;
+                break;
+            }
+        }
+    return;
+}
+
+
 void Map::loadfindPathMap(MoveObject* moveOb)
 {
-    bool studentPlayer = moveOb->getPlayerRepresent() == 0;
+    int represent = moveOb->getPlayerRepresent();
 
-    clearfindPathMap();
+    if(represent == MAXPLAYER)
+        represent = NOWPLAYER-1;
 
-    for (int i = 0; i < MAP_L; ++i)
-    {
-        for (int j = 0; j < MAP_U; ++j)
-        {
-            if( barrierMap[i][j] || studentPlayer && !cell[i][j].Explored) findPathMap[i][j] = 1;
-        }
-    }
+    memcpy(findPathMap, findPathMapTemperature[represent], sizeof(findPathMapTemperature[represent]));
+
+    return;
+}
+
+void Map::loadfindPathMapTemperature()
+{
+    clearfindPathMapTemperature();
+    for(int represent = 0; represent<NOWPLAYER; represent++)
+        for(int x=0; x<MAP_L; x++)
+            for(int y=0; y<MAP_U; y++)
+            {
+                if(barrierMap[x][y] || represent == NOWPLAYERREPRESENT && !cell[x][y].Explored)
+                    findPathMapTemperature[represent][x][y] = 1;
+            }
+    return;
 }
 
 //设置障碍物
@@ -1006,26 +1196,25 @@ bool Map::isFlat(Coordinate* judOb)
 bool Map::isFlat(int blockDR , int blockUR,int blockSideLen)
 {
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
-    int maxHight = map_Height[blockDR][blockUR] ,minHight = maxHight,tempHight;
+    int standard = map_Height[blockDR][blockUR] , tempHight;
+
+    if(standard == -1) return false;
 
     for(int x = blockDR; x<sideR; x++)
     {
         for(int y = blockUR; y<sideU;y++)
         {
-            tempHight = map_Height[blockDR][blockUR];
-            if(tempHight<minHight) minHight = tempHight;
-            else if(tempHight>maxHight) maxHight= tempHight;
+            tempHight = map_Height[x][y];
 
-            if(minHight == -1) return false;
+            if(tempHight != standard) return false;
         }
     }
 
-    if(maxHight==minHight) return true;
-    return false;
+    return true;
 }
 
 //该函数调用必须在barrierMap数组更新后
-vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind)
+vector<pair<Point,int>> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind)
 {
     int blockDR = object->getBlockDR(),blockUR = object->getBlockUR() , blockSideLen = object->get_BlockSizeLen();
     int sideR = blockDR+blockSideLen, sideU = blockUR+blockSideLen;
@@ -1096,6 +1285,38 @@ vector<Point> Map::findBlock_Free(Coordinate* object , int disLen, bool mustFind
             }
         }
     }
+    vector<pair<Point,int>>ans;
+    for(auto&v:Block_Free){
+        ans.push_back({v,cell[v.x][v.y].getMapType()});
+    }
+    return ans;
+}
+
+vector<Point> Map::findBlock_Free(Point blockPoint, int lenth)
+{
+    int blockDR = blockPoint.x, blockUR = blockPoint.y;
+
+    int bDRL = max(0,blockDR-lenth) , bURD = max(0,blockUR - lenth);
+    int bDRR = min(blockDR+1+lenth, MAP_L) , bURU = min(blockUR+1+lenth, MAP_U);
+
+    vector<Point> Block_Free;
+    Point tempPoint;
+
+    //在给定范围内找寻没有障碍物的格子
+    for(int x = bDRL; x<bDRR; x++)
+    {
+        for(int y = bURD; y<bURU;y++)
+        {
+            if(x == blockDR && y==blockUR) continue;
+
+            if(map_Object[x][y].empty())
+            {
+                tempPoint.x = x;
+                tempPoint.y = y;
+                Block_Free.push_back(tempPoint);
+            }
+        }
+    }
 
     return Block_Free;
 }
@@ -1161,27 +1382,6 @@ vector<Point> Map::findBlock_Flat(int disLen )
 
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
-//    int vision = object->getVision()-1;
-//    int blockSidelen = object->get_BlockSizeLen()-1;
-//    Point position;
-//    position.x = object->getBlockDR();
-//    position.y = object->getBlockUR();
-//    int mx = position.x + blockSidelen + vision, my = position.y+vision +blockSidelen;
-//    int lx = position.x-vision, ly = position.y-vision;
-//    vector<Point> blockLab;
-
-//    for(int x = lx; x<=mx;x++)
-//    {
-//        for(int y = ly; y<=my; y++)
-//        {
-//            if(vision>1 && ( x == lx ||x == mx) && ( y == ly || y == my )) continue;
-//            if(x<0 || y<0 || x >= MAP_L || y>=MAP_U) continue;
-
-//            blockLab.push_back(Point( x,y ));
-//        }
-//    }
-//    return blockLab;
-
     Point position(object->getBlockDR() , object->getBlockUR());
     Point visionPoint;
     vector<Point> blockLab = object->getViewLab();
@@ -1246,7 +1446,8 @@ void Map::add_Map_Vision( Coordinate* object )
      {
          for(int y = 0; y<MAP_U; y++)
          {
-            if(isSlope(x,y)) map_Height[x][y] = -1;
+            if(isSlope(x,y))
+                map_Height[x][y] = -1;
             else map_Height[x][y] = cell[x][y].getMapHeight();
          }
      }
@@ -1377,8 +1578,18 @@ void Map::reset_CellExplore(Coordinate* eye)
     * 输入：用户的控制对象，如Human、Building
     * 操作：根据用户输入的对象，设置视野内格子为已探索
     */
-    vector<Point> blockLab = get_ObjectVisionBlock(eye);
-    int size = blockLab.size();
+    vector<Point> blockLab;
+    int size;
+    Building* buildPrinter = NULL;
+
+    eye->printer_ToBuilding((void**)& buildPrinter);
+
+    if(!(buildPrinter == NULL || buildPrinter->isFinish()))
+        blockLab = get_ObjectBlock(eye);
+    else
+        blockLab = get_ObjectVisionBlock(eye);
+
+    size = blockLab.size();
 
     for(int i = 0 ; i<size; i++)
     {
@@ -1463,13 +1674,7 @@ bool Map::loadResource() {
         {
             if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapType() != MAPTYPE_FLAT) continue;
             int tOffsetX = 0, tOffsetY = 0;
-//            int tOffsetX = this->cell[i][j].getOffsetX(), tOffsetY = this->cell[i][j].getOffsetY();
-//            if(this->cell[i][j].getMapHeight() != 0) tOffsetX -= BLOCKSIDELENGTH / 2 * this->cell[i][j].getMapHeight() - BLOCKSIDELENGTH / 2;
-//            if(this->cell[i][j].getMapHeight() != 0) tOffsetY += BLOCKSIDELENGTH * (this->cell[i][j].getMapHeight());
-//            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapHeight() != 0) tOffsetX += BLOCKSIDELENGTH / 2, tOffsetY += BLOCKSIDELENGTH / 2;
-
             if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
-//            else if(Gamemap[i][j] == 6) addAnimal(3, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 狮子
             else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
             else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
             else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j)+BLOCKSIDELENGTH / 2 + tOffsetY); // 瞪羚
@@ -1478,7 +1683,6 @@ bool Map::loadResource() {
                 addAnimal(0, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH/2 + tOffsetY); // 树
             }
             else if(Gamemap[i][j] == 11) addAnimal(0, tranL(i) + BLOCKSIDELENGTH/2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH/2 + tOffsetY);
-            //                else if(Gamemap[i][j] == 9) player[0]->addBuilding(BUILDING_CENTER, 10, 10);  // 不能在这里生成市镇中心
             /*
                     种类：
                     0为空地；
@@ -1514,7 +1718,7 @@ int Map::CheckNeighborHigher(int x, int y, int currentCalHeight) {
     int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
     for(int i = 0; i < 8; i ++) {
         int tx = x + dx[i], ty = y + dy[i];
-        if(tx < 0 || ty < 0 || tx > 79 || ty > 79) continue;
+        if(tx < 0 || ty < 0 || tx > GENERATE_L || ty > GENERATE_U) continue;
         if(m_heightMap[tx][ty] == currentCalHeight) count ++;
     }
     return count;
@@ -1573,7 +1777,7 @@ bool Map::CheckBorder(int x, int y, int currentCalHeight) {
     int dy[24] = {-2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
     for(int i = 0; i < 24; i ++) {
         int tx = x + dx[i], ty = y + dy[i];
-        if(tx < 0 || ty < 0 || tx > 79 || ty > 79) continue;
+        if(tx < 0 || ty < 0 || tx > GENERATE_L || ty > GENERATE_L) continue;
         if(m_heightMap[tx][ty] <= currentCalHeight - 2) return false;
     }
     return true;
@@ -1607,8 +1811,8 @@ bool Map::GenerateTerrain() {
         default:
             break;
         }
-        for(int i = 0; i < 80; i ++)
-            for(int j = 0; j < 80; j ++) {
+        for(int i = 0; i < GENERATE_L; i ++)
+            for(int j = 0; j < GENERATE_U; j ++) {
                 if(rand() % 100 < percent && m_heightMap[i][j] == height - 1 && CheckBorder(i, j, height))
                     m_heightMap[i][j] ++;
             }
@@ -1624,8 +1828,8 @@ bool Map::GenerateTerrain() {
 
         for(int optCounter = 0; optCounter <= MAPHEIGHT_OPTCOUNT; optCounter ++)    // optCounter：当前优化次数
         {
-            for(int i = 0; i < 80; i ++)
-                for(int j = 0; j < 80; j ++) {
+            for(int i = 0; i < GENERATE_L; i ++)
+                for(int j = 0; j < GENERATE_U; j ++) {
                     int count = CheckNeighborHigher(i, j, height);
                     if(m_heightMap[i][j] == height && count < 4) m_heightMap[i][j] --;
                     else if(m_heightMap[i][j] == height - 1 && count >= 5) m_heightMap[i][j] ++;
@@ -1635,8 +1839,8 @@ bool Map::GenerateTerrain() {
                     }
                 }
             if(optCounter == MAPHEIGHT_OPTCOUNT / 2)
-                for(int i = 2; i < 78; i ++)
-                    for(int j = 2; j < 78; j ++) {
+                for(int i = 2; i < GENERATE_L-2; i ++)
+                    for(int j = 2; j < GENERATE_U-2; j ++) {
                         int count = CheckNeighborHigher(i, j, height);
                         if(m_heightMap[i][j] == height - 1 && count >= 2) {
                             if(m_heightMap[i - 1][j - 1] == height && m_heightMap[i + 1][j + 1] == height) {
@@ -1652,8 +1856,8 @@ bool Map::GenerateTerrain() {
         }
     }
 
-    for(int i = 2; i < 78; i ++) {
-        for(int j = 2; j < 78; j ++) {
+    for(int i = 2; i < GENERATE_L-2; i ++) {
+        for(int j = 2; j < GENERATE_U-2; j ++) {
             if(m_heightMap[i][j] > 5 || m_heightMap[i][j] < 0) {
                 qDebug() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap;
                 return false;
@@ -1662,8 +1866,8 @@ bool Map::GenerateTerrain() {
     }
 
     // 取中心高度值存入cell
-    for(int i = 4; i < 76; i ++)
-        for(int j = 4; j < 76; j ++)
+    for(int i = 4; i < GENERATE_L-4; i ++)
+        for(int j = 4; j < GENERATE_U-4; j ++)
             this->cell[i - 4][j - 4].setMapHeight(m_heightMap[i][j]);
     return true;
 }
@@ -1687,122 +1891,18 @@ void Map::GenerateType() {
     {
         for(int j = 4; j < MAP_U + 4; j++)
         {
-            // 判断四个角与中间区块的高度差
-            int heightDiffA = abs(m_heightMap[i][j] - m_heightMap[i - 1][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i - 1][j + 1]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j + 1]);
-            // 判断四条临边与中间区块的高度差
-            int heightDiffL = abs(m_heightMap[i][j] - m_heightMap[i - 1][j]) + abs(m_heightMap[i][j] - m_heightMap[i + 1][j]) + abs(m_heightMap[i][j] - m_heightMap[i][j - 1]) + abs(m_heightMap[i][j] - m_heightMap[i][j + 1]);
-            switch(heightDiffA)
-            {
-            case 1:
-                /*
-                    * X X X
-                    * X # X
-                    * X X 1
-                    */
-                if(m_heightMap[i + 1][j + 1] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A3_UPTOR);
-                }
-                /*
-                    * X X X
-                    * X # X
-                    * 1 X X
-                    */
-                else if(m_heightMap[i + 1][j - 1] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A2_DOWNTOU);
-                }
-                /*
-                    * X X 1
-                    * X # X
-                    * X X X
-                    */
-                else if(m_heightMap[i - 1][j + 1] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A2_UPTOU);
-                }
-                /*
-                    * 1 X X
-                    * X # X
-                    * X X X
-                    */
-                else if(m_heightMap[i - 1][j - 1] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A1_UPTOL);
-                }
-                break;
-            }
-
-            switch(heightDiffL)
-            {
-            case 2:
-                /*
-                    * X 0 X
-                    * 0 # 1
-                    * X 1 X
-                    */
-                if((m_heightMap[i + 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j + 1] - m_heightMap[i][j] == 1))
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A1_DOWNTOL);
-                }
-                /*
-                     * X 1 X
-                     * 1 # 0
-                     * X 0 X
-                     */
-                else if((m_heightMap[i - 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j - 1] - m_heightMap[i][j] == 1))
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A3_DOWNTOR);
-                }
-                /*
-                     * X 1 X
-                     * 0 # 1
-                     * X 0 X
-                     */
-                else if((m_heightMap[i - 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j + 1] - m_heightMap[i][j] == 1))
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A0_DOWNTOD);
-                }
-                /*
-                     * X 0 X
-                     * 1 # 0
-                     * X 1 X
-                     */
-                else if((m_heightMap[i + 1][j] - m_heightMap[i][j] == 1) && (m_heightMap[i][j - 1] - m_heightMap[i][j] == 1))
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_A0_DOWNTOD);
-                }
-                break;
-
-            case 1:
-                if(m_heightMap[i + 1][j] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L3_UPTORD);
-                }
-                else if(m_heightMap[i - 1][j] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L1_UPTOLU);
-                }
-                else if(m_heightMap[i][j + 1] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L2_UPTORU);
-                }
-                else if(m_heightMap[i][j - 1] - m_heightMap[i][j] == 1)
-                {
-                    this->cell[i - 4][j - 4].setMapType(MAPTYPE_L0_UPTOLD);
-                }
-                break;
-            }
+            JudegCellType(i-4,j-4);
         }
     }
 
     // 特殊处理（直接处理cell）
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U; j ++) {
-
+            Block&block=cell[i][j];
+            if(block.getMapType()==MAPTYPE_OCEAN||CheckIsNearOcean(i+4,j+4))continue;//如果是海洋或者周围是海洋就不要检测了
             int count = CheckNeighborType(i, j, MAPTYPE_A2_UPTOU) +
                     CheckNeighborType(i, j, MAPTYPE_L3_DOWNTORD) +
-                    CheckNeighborType(i, j, MAPTYPE_L0_DOWNTOLD);
+                    CheckNeighborType(i, j, MAPTYPE_L0_DOWNTOLD)+
             CheckNeighborType(i, j, MAPTYPE_A1_DOWNTOL) +
                     CheckNeighborType(i, j, MAPTYPE_A3_DOWNTOR);
             if(this->cell[i][j].getMapType() == MAPTYPE_A0_DOWNTOD && count == 0) {
@@ -1830,35 +1930,7 @@ void Map::GenerateType() {
 void Map::CalOffset() {
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U; j ++) {
-            // 偏移
-            if(this->cell[i][j].getMapHeight() > 0)
-            {
-                this->cell[i][j].setOffsetY(DRAW_OFFSET * this->cell[i][j].getMapHeight());
-            }
-            if(this->cell[i][j].getMapType() == 2 || this->cell[i][j].getMapType() == 3 || this->cell[i][j].getMapType() == 4 || this->cell[i][j].getMapType() == 5 || this->cell[i][j].getMapType() == 8 || this->cell[i][j].getMapType() == 9)
-            {
-                this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + DRAW_OFFSET);
-            }
-
-            // 修整边界
-            if(this->cell[i][j].getMapType() == 10)
-            {
-                int t = this->cell[i][j].getOffsetX();
-                this->cell[i][j].setOffsetX(t - 1);
-            }
-            if(this->cell[i][j].getMapType() == 11)
-            {
-                int t = this->cell[i][j].getOffsetX();
-                this->cell[i][j].setOffsetX(t + 1);
-            }
-            if(this->cell[i][j].getMapType() == 13)
-            {
-                int t = this->cell[i][j].getOffsetY();
-                this->cell[i][j].setOffsetY(t + 1);
-            }
-
-            // test
-            // if(this->cell[i][j].getMapType() != MAPTYPE_FLAT) this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() - 100);
+            CalCellOffset(i,j);
         }
     }
     return ;
@@ -1871,12 +1943,15 @@ void Map::CalOffset() {
  * 返回值：空。
  */
 void Map::InitFaultHandle() {
-    for(int i = 0; i < 72; i++)
+    for(int i = 0; i < MAP_L; i++)
     {
-        for(int j = 0; j < 72; j++)
+        for(int j = 0; j < MAP_U; j++)
         {
             this->cell[i][j].setMapPattern(0);
-            if(this->cell[i][j].getMapType() != 0 && this->cell[i][j].getMapType() != 1)
+            //如果是海洋直接设置Num为0
+            if(this->cell[i][j].getMapType()==MAPTYPE_OCEAN)this->cell[i][j].Num=0;
+            //
+            else if(this->cell[i][j].getMapType() != 0 && this->cell[i][j].getMapType() != 1)
             {
                 this->cell[i][j].Num = (this->cell[i][j].getMapPattern() + 1) * 15 + this->cell[i][j].getMapType();
             }
@@ -1910,6 +1985,8 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
             this->cell[i][j].Num = Num;
             this->cell[i][j].Explored = isExplored;
             this->cell[i][j].Visible = isVisible;    // 地图可见度
+            this->cell[i][j].setBlockDRUR(i,j);
+            this->cell[i][j].setDRUR(i*BLOCKSIDELENGTH,j*BLOCKSIDELENGTH);
         }
     }
 }
@@ -1917,7 +1994,7 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
 /*
  * 函数：Map::GenerateMapTxt；
  * 参数：获取启动参数，判断是否输出地图；
- * 内容：导出或读取地图txt文件；
+ * 内容：导出地图txt文件；
  * 返回值：空。
  */
 void Map::GenerateMapTxt(int MapJudge) {
@@ -1926,23 +2003,41 @@ void Map::GenerateMapTxt(int MapJudge) {
         std::ofstream outMapFile("tmpMap.txt");
         if (outMapFile.is_open())
         {
+            for(int i = 0 ; i < MAP_L; i++)
+            {
+                outMapFile<<Gamemap[i][0];
+
+                for(int j = 1; j < MAP_U; j++)
+                {
+                    outMapFile<<' '<<Gamemap[i][j];
+                }
+                outMapFile<<"\n";
+            }
+            outMapFile << "\n"; //隔三行
+            outMapFile << "\n";
+            outMapFile << "\n";
+
             for (int i = 0; i < MAP_L; i++)
             {
-                for (int j = 0; j < MAP_U; j++)
+                outMapFile<<this->cell[i][0].getMapHeight();
+
+                for (int j = 1; j < MAP_U; j++)
                 {
-                    //                    outMapFile << Gamemap[i][j] << "\n";
-                    outMapFile << this->cell[i][j].getMapHeight() << ' ';
+                    outMapFile<< ' ' << this->cell[i][j].getMapHeight();
                 }
                 outMapFile << "\n";
             }
             outMapFile << "\n";
             outMapFile << "\n";
             outMapFile << "\n";
-            for (int i = 0; i < 80; i++)
+
+            for (int i = 0; i < GENERATE_L; i++)
             {
-                for (int j = 0; j < 80; j++)
+                outMapFile<<m_heightMap[i][0];
+
+                for (int j = 1; j < GENERATE_U; j++)
                 {
-                    outMapFile << m_heightMap[i][j] << ' ';
+                    outMapFile << ' ' << m_heightMap[i][j];
                 }
                 outMapFile << "\n";
             }
@@ -1955,66 +2050,102 @@ void Map::GenerateMapTxt(int MapJudge) {
             qDebug() << "无法导出地图文件";
         }
     }
-    else if(MapJudge == 1)  // 读取上一次随机的地图
-    {
-        QFile inputGameFile("tmpMap.txt"); // 打开文本文件以读取数据
+}
 
-        if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            QTextStream in(&inputGameFile);
-            int j = 0, i = 0;
-            for (int T = 0; i < MAP_L * MAP_U; T++)
-            {
-                QString line = in.readLine();
-                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-                j++;
-                if(j >= MAP_U)
-                {
-                    j = 0;
-                    i++;
-                }
-                if(i >= MAP_L)
-                {
-                    break;
-                }
-            }
-            inputGameFile.close();
-            qDebug() << "上一次的随机地图数据已读取到游戏内";
+/*
+ * 函数：Map::loadGenerateMapText
+ * 参数：获取启动参数，判断是否载入地图；
+ * 内容：读取地图txt文件；
+ * 返回值：空。
+ */
+void Map::loadGenerateMapText(int MapJudge)
+{
+    QFile file("map.txt");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug()<<"文件打开错误";
+        return;
+    }
+    QJsonParseError * error = nullptr;
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll(),error);
+    if(error){
+        qDebug()<<"json error";
+        return;
+    }
+    file.close();
+    /////////////////////////////////开始解析
+    QJsonObject root=doc.object();
+    QStringList allKeys=root.keys();
+    for(QString&key:allKeys){
+        QJsonObject obj=root[key].toObject();
+        if(key.contains("Cell")){
+            int blockL=obj["BlockDR"].toInt(),blockU=obj["BlockUR"].toInt();
+            Block&block=cell[blockL][blockU];
+            block.Num=obj["Num"].toInt();
+            block.Visible=obj["Visible"].toBool();
+            block.Explored=obj["Explored"].toBool();
+            block.setMapType(obj["Type"].toInt());
+            block.setMapPattern(obj["Pattern"].toInt());
+            block.setMapHeight(obj["Height"].toInt());
+            block.setOffsetX(obj["OffsetX"].toInt());
+            block.setOffsetY(obj["OffsetY"].toInt());
+            block.setMapResource(obj["Resource"].toInt());
         }
-        else
-        {
-            qDebug() << "无法打开上一次的随机地图文件";
+        else if(key.contains("Building")){
+            Player&me=*(player[0]),&enemy=(*player[1]);
+            Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
+            cur.addBuilding(obj["Num"].toInt(),obj["BlockDR"].toInt(),obj["BlockUR"].toInt(),100);
+        }else if(key.contains("Human")){
+            Player&me=*(player[0]),&enemy=(*player[1]);
+            Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
+            double UR=obj["UR"].toDouble(),DR=obj["DR"].toDouble();
+            if(obj["Sort"].toString()=="Farmer")
+            {
+                int FarmerType=obj["FarmerType"].toInt();
+                if(FarmerType==FARMERTYPE_FARMER)
+                cur.addFarmer(DR,UR);
+                else cur.addShip(FarmerType,DR,UR);
+            }
+            else cur.addArmy(obj["Num"].toInt(),DR,UR);
+        }else if(key.contains("Animal")){
+            addAnimal(obj["Num"].toInt(),obj["DR"].toDouble(),obj["UR"].toDouble());
+        }else if(key.contains("StaticRes")){
+            addStaticRes(obj["Num"].toInt(),obj["BlockDR"].toInt(),obj["BlockUR"].toInt());
         }
     }
-    else if(MapJudge == 2)  // 读取确定的地图
-    {
-        QFile inputGameFile("gameMap.txt"); // 打开文本文件以读取数据
-
-        if (inputGameFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            QTextStream in(&inputGameFile);
-            int j = 0, i = 0;
-            for (int T = 0; i < MAP_L * MAP_U; T++)
-            {
-                QString line = in.readLine();
-                Gamemap[i][j] = line.toInt(); // 将每行的整数值存储到数组中
-                j++;
-                if(j >= MAP_U)
-                {
-                    j = 0;
-                    i++;
-                }
-                if(i >= MAP_L)
-                {
-                    break;
-                }
-            }
-            inputGameFile.close();
-            qDebug() << "固定地图数据已读取到游戏内";
+    //赋值m_heightMap
+    memset(m_heightMap,0,sizeof(m_heightMap));
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            m_heightMap[i+4][j+4]=cell[i][j].getMapHeight();
         }
-        else qDebug() << "无法打开固定地图文件";
     }
 }
+
+bool Map::CheckIsNearOcean(int x, int y)
+{
+    //检查周围3*3区域是不是有海洋
+    for(int i=-1;i<=1;++i){
+        for(int j=-1;j<=1;++j){
+            int ii=i+x,jj=j+y;
+            if(ii<0||jj<0||ii>=GENERATE_L||jj>=GENERATE_U)continue;
+            if(m_heightMap[i][j]==MAPHEIGHT_OCEAN)return 1;
+        }
+    }
+    return 0;
+}
+
+
+/*
+ * 函数：Map::init；
+ * 参数：无；
+ * 内容：初始化地图的总函数；
+ * 返回值：空。
+ */
+void Map::init(int MapJudge) {
+    InitCell(0, MAP_EXPLORE, true);    // 第二个参数修改为true时可令地图全部可见
+    loadGenerateMapText(MapJudge);  //载入地图
+}
+
 
 double Map::tranL(double BlockL)
 {
@@ -2029,25 +2160,3 @@ double Map::tranU(double BlockU)
     U = BlockU * BLOCKSIDELENGTH;
     return U;
 }
-
-/*
- * 函数：Map::init；
- * 参数：无；
- * 内容：初始化地图的总函数；
- * 返回值：空。
- */
-void Map::init(int MapJudge) {
-    InitCell(0, true, true);    // 第二个参数修改为true时可令地图全部可见
-    // 资源绘制在MainWidget里完成
-    while(!GenerateTerrain());  // 元胞自动机生成地图高度
-    GenerateType();             // 通过高度差计算调用的地图块资源
-    CalOffset();                // 计算偏移量
-    InitFaultHandle();          // 抛出地图生成中的错误
-//    generateLandforms();        // 在草地中生成小片沙漠
-    generateCenter();           // 生成市镇中心及附近资源
-    generateResources();        // 生成片状资源
-    generateResource();        // 生成独立资源
-    generateEnemy();          //生成敌人
-    GenerateMapTxt(MapJudge);   // 生成地图文件
-}
-

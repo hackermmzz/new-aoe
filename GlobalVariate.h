@@ -1,19 +1,15 @@
 #ifndef GLOBALVARIATE_H
 #define GLOBALVARIATE_H
 
-#include <map>
-#include <queue>
-#include <QPixmap>
-#include <QString>
-#include <list>
-#include <QSound>
-#include <config.h>
-#include <QTextBrowser>
-#include <QDebug>
 #include <QMutex>
+#include <QSoundEffect>
+
+#include "config.h"
 
 using namespace std;
 class Coordinate;
+extern bool isExamining;
+
 extern bool AIfinished;
 extern bool INSfinshed;
 extern int g_globalNum;
@@ -29,9 +25,9 @@ extern int Food[5][5][5];
 extern int Stone[5][5][5];
 extern int g_frame;
 extern QTextBrowser* g_DebugText;
-extern int ProcessDataWork;
 extern map<string, list<QPixmap>> resMap;
-extern map<string, QSound*> SoundMap;
+extern map<string, QSoundEffect*> SoundMap;
+extern std::queue<string> soundQueue;
 
 extern std::list<Coordinate*> drawlist;
 
@@ -49,11 +45,119 @@ struct st_DebugMassage{
         this->content = content;
     }
 };
+void call_debugText(QString color, QString content, int playerID);
 
 extern std::queue<st_DebugMassage>debugMassagePackage;
 extern bool only_debug_Player0;
+extern bool filterRepetitionMessage;
 extern std::map<QString , int>debugMessageRecord;
 
+enum ScoreType {
+    _WOOD= 0,
+    _STONE,
+    _MEAT,
+
+    _BERRY,
+    _GAZELLE,
+    _ELEPHANT,
+    _FARM,
+    _ISWOOD,
+    _ISSTONE,
+
+    _TECH,
+    _BUILDING1,
+    _BUILDING2,
+    _HUMAN1,
+    _HUMAN2,
+
+    _KILL2,
+    _KILL10,
+
+    _DESTORY2,
+    _DESTORY4,
+    _DESTORY5,
+    _DESTORY10,
+
+    SCORE_TYPE_COUNT
+};
+
+struct Score {
+private:
+    int id;
+    int score;
+    int scoreTypes[SCORE_TYPE_COUNT] = {0};
+
+    void addScore(int points,  const QString& message) {
+        score += points;
+        if(id==0)
+            call_debugText("blue", " 玩家"+message, REPRESENT_BOARDCAST_MESSAGE);
+        else
+            call_debugText("red", " 敌方"+message, REPRESENT_BOARDCAST_MESSAGE);
+    }
+
+public:
+    Score(int id) : id(id), score(0) {}
+    int getScore(){
+        return score;
+    }
+    void update(int type,int num=1) {
+        if (type <=_ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
+            addScore(5, " 采集到新资源，分数+5");
+        }
+
+        if (type > _MEAT && type <=_ISSTONE) {
+            scoreTypes[type]=scoreTypes[type]|1;
+            return;
+        }
+
+        int before=scoreTypes[type]/100;
+        scoreTypes[type]+=num;
+
+        if (type <= _MEAT) {
+            int after=scoreTypes[type]/100;
+            int change=after-before;
+            while(change>0){
+                addScore(1, " 单种资源收集满100个，分数+1");
+                change--;
+            }
+        }
+
+        switch (type) {
+        case _TECH:
+            addScore(2, " 解锁新科技，分数+2");
+            break;
+        case _HUMAN1:
+            addScore(1, " 生产农民或普通兵种，分数+1");
+            break;
+        case _HUMAN2:
+            addScore(2, " 生产骑兵，分数+2");
+            break;
+        case _BUILDING1:
+            addScore(1, " 建造住房或农田，分数+1");
+            break;
+        case _BUILDING2:
+            addScore(2, " 建造一般建筑，分数+2");
+            break;
+        case _KILL2:
+            addScore(2, " 击杀一般敌人，分数+2");
+            break;
+        case _DESTORY2:
+            addScore(2, " 摧毁房屋或农田，分数+2");
+            break;
+        case _DESTORY4:
+            addScore(4, " 摧毁一般建筑，分数+4");
+            break;
+        case _DESTORY5:
+            addScore(5, " 摧毁箭塔，分数+5");
+            break;
+        case _DESTORY10:
+            addScore(10, " 摧毁主营，分数+10");
+            break;
+        default:
+            break;
+        }
+    }
+};
 
 struct tagBuilding
 {
@@ -115,6 +219,7 @@ struct tagFarmer: public tagHuman
 {
     int ResourceSort; // 手持资源种类
     int Resource; // 手持资源数量
+    int FarmerSort;//农民的类型
     tagFarmer toEnemy(){
         Resource = -1;
         DR0= -1.0;
@@ -218,6 +323,37 @@ struct tagInfo
     int Stone; // 石头数量
     int Gold; // 黄金数量
     int Human_MaxNum; // 最大人口数量
+
+    // Assignment operator
+    tagInfo& operator=(const tagInfo& other) {
+        if (this != &other) { // Check for self-assignment
+            buildings = other.buildings;
+            farmers = other.farmers;
+            armies = other.armies;
+            enemy_buildings = other.enemy_buildings;
+            enemy_farmers = other.enemy_farmers;
+            enemy_armies = other.enemy_armies;
+            resources = other.resources;
+            ins_ret = other.ins_ret;
+
+            // Deep copy theMap array
+            for (int i = 0; i < MAP_L; ++i) {
+                for (int j = 0; j < MAP_U; ++j) {
+                    theMap[i][j] = other.theMap[i][j];
+                }
+            }
+
+            GameFrame = other.GameFrame;
+            civilizationStage = other.civilizationStage;
+            Wood = other.Wood;
+            Meat = other.Meat;
+            Stone = other.Stone;
+            Gold = other.Gold;
+            Human_MaxNum = other.Human_MaxNum;
+        }
+        return *this;
+    }
+
     void clear(){
         buildings.clear();
         farmers.clear();
@@ -231,6 +367,7 @@ struct tagInfo
 };
 
 
+
 struct tagGame
 {
 private:
@@ -238,29 +375,21 @@ private:
     QMutex Locker;
 public:
     void update(tagInfo* newinfo){
-        //控制ins_ret的大小小于10，若大于10，则优先删除旧值
+        //控制ins_ret的大小小于100，若大于100，则优先删除旧值
+        QMutexLocker locker(&Locker);
         if(this->Info!=NULL){
-            while(Info->ins_ret.size()>10){
+            while(Info->ins_ret.size()>100){
                 Info->ins_ret.erase(Info->ins_ret.begin());
             }
         }
         if(this->Info!=NULL)
             newinfo->ins_ret=this->Info->ins_ret;
-        QMutexLocker locker(&Locker);
         Info=newinfo;
     }
     void insertInsRet(int id,instruction ins){
         QMutexLocker locker(&Locker);
         this->Info->ins_ret.insert(make_pair(id,ins.ret));
     }
-//    instruction getInsRet(int ins_id){
-//        QMutexLocker locker(&Locker);
-//        if(this->Info->ins_ret.find(ins_id)==this->Info->ins_ret.end()){
-//            return instruction();
-//        }else{
-//            return this->Info->ins_ret[ins_id];
-//        }
-//    }
     tagInfo getInfo(){
         QMutexLocker locker(&Locker);
         return *Info;
@@ -330,7 +459,7 @@ struct pixMemoryMap
         {
             for(int j=0;j<height/2;j++)
             {
-                if(j * width >= -height * (i - width/2))
+                if(j * width >= height * ( width/2-i))
                 {
                     setMemoryMap(i,j);
                 }
@@ -490,6 +619,7 @@ struct conditionDevelop
 struct st_upgradeLab{
     conditionDevelop *headAct = NULL , *nowExecuteNode = NULL , *endNode = NULL;
     int haveFinishedPhaseNum = 0;
+    bool nowExecuting = false;
 
     st_upgradeLab(){}
     ~st_upgradeLab()
@@ -519,6 +649,7 @@ struct st_upgradeLab{
     {
         if(nowExecuteNode!=NULL)
         {
+            overExecute();
             haveFinishedPhaseNum++;
             nowExecuteNode = nowExecuteNode->nextDevAction;
         }
@@ -528,11 +659,14 @@ struct st_upgradeLab{
     bool isShowAble( int nowcivilization )
     {
         if(nowExecuteNode == NULL) return false;
-        else return nowExecuteNode->isShowable(nowcivilization);
+        else return nowExecuteNode->isShowable(nowcivilization) && ( !nowExecuting || nowExecuteNode == nowExecuteNode->nextDevAction ) ;
     }
 
     //当前行动是否可执行
     bool executable( int nowcivilization,int wood,int food,int stone,int gold ){ return isShowAble(nowcivilization) && nowExecuteNode->executable(wood , food, stone,gold) ; }
+
+    void beginExecute(){ this->nowExecuting = true; }
+    void overExecute(){ this->nowExecuting = false; }
 
     //获取当前行动列表执行过几轮（一个链node算一轮）
     int getPhaseTimes(){return this->haveFinishedPhaseNum;}
@@ -611,7 +745,7 @@ void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirro
 
 double trans_BlockPointToDetailCenter( int p );
 
-void call_debugText(QString color, QString content, int playerID);
+
 
 int sgn(double __x);
 

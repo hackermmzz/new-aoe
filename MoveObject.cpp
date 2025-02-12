@@ -119,7 +119,7 @@ void MoveObject::setUR0(double UR0)
 
 void MoveObject::pathOptimize( Point addPoint )
 {
-    Point nextBlockPoint = Point(nextBlockDR,nextBlockUR);
+    Point nextBlockPoint = get_NextBlockPoint();
     path.push(nextBlockPoint);
     if(!(addPoint == nextBlockPoint))
         path.push(addPoint);
@@ -193,7 +193,7 @@ void MoveObject::updateMove()
         {0 , 7 , 6} \
     };
 
-    double dDR,dUR,dis,ratio;
+    double dDR = 0, dUR = 0, dis = 0, ratio = 0;
 
     if(isWalking() && (DR!=DR0||UR!=UR0))
     {
@@ -222,7 +222,7 @@ void MoveObject::updateMove()
             update_moveDire(nextBlockDR - PreviousBlockDR , nextBlockUR - PreviousBlockUR);
             change_Angel(d_lab[dMove_BDR + 1][dMove_BUR + 1]);
             update_PredictPoint();
-            jud_ArrivePhaseGoal(dDR , dUR , DISTANCE_Manhattan_PathMove);
+            jud_ArrivePhaseGoal(dDR , dUR ,0.005);
         }
         else
         {

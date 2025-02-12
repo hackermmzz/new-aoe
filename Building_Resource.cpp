@@ -13,14 +13,14 @@ void Building_Resource::nextframe()
     else
     {
         if(!gatherable) changeToGatherAble();
+
         nowres++;
-        if(nowres==nowlist->end())  nowres=nowlist->begin(); //读到最后回到最初
+        if(nowres==nowlist->end())
+            nowres=nowlist->begin(); //读到最后回到最初
     }
 
     initGatherer();
-
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 }
 
 void Building_Resource::setAttribute()
@@ -41,6 +41,15 @@ void Building_Resource::setAttribute()
         resourceSort = HUMAN_GRANARYFOOD;
         gatherable = false;
         vision = VISION_FARM;
+        incorrectNum = false;
+        setMaxCnt();
+    }else if(Num == BUILDING_FISH)
+    {
+        MaxBlood = BLOOD_BUILD_FISH;
+        Foundation=FOUNDATION_MIDDLE;
+        resourceSort = HUMAN_DOCKFOOD;
+        gatherable = false;
+        vision = VISION_FISH;
         incorrectNum = false;
         setMaxCnt();
     }
@@ -64,9 +73,9 @@ bool Building_Resource::isGathererAsLandlord(Coordinate* gatherer)
 
 void Building_Resource::setMaxCnt()
 {
-    if(Num == BUILDING_FARM)
+    if(Num == BUILDING_FARM||Num==BUILDING_FISH)
     {
         if(playerScience == NULL) MaxCnt = CNT_BUILD_FARM;
-        else MaxCnt = CNT_BUILD_FARM+playerScience->get_addition_MaxCnt(getSort(),Num);
+        else MaxCnt = CNT_BUILD_FARM + playerScience->get_addition_MaxCnt(getSort(),Num);
     }
 }

@@ -1,30 +1,34 @@
 ﻿#include "Army.h"
 
 //[playerrepresent][num][leve][angel]
-std::list<ImageResource>* Army::Walk[2][7][2][8];
-std::list<ImageResource>* Army::Disappear[2][7][2][8];
-std::list<ImageResource>* Army::Stand[2][7][2][8];
-std::list<ImageResource>* Army::Attack[2][7][2][8];
-std::list<ImageResource>* Army::Die[2][7][2][8];
+std::list<ImageResource>* Army::Walk[2][20][2][8];
+std::list<ImageResource>* Army::Disappear[2][20][2][8];
+std::list<ImageResource>* Army::Stand[2][20][2][8];
+std::list<ImageResource>* Army::Attack[2][20][2][8];
+std::list<ImageResource>* Army::Die[2][20][2][8];
 
 //[num][level]
-std::string Army::ArmyName[7][2]={{"Clubman","Axeman"},
+std::string Army::ArmyName[20][2]={{"Clubman","Axeman"},
                                   {"Slinger","Slinger"},
                                   {"Archer","Archer"},
                                   {"Scout","Scout"},
                                   {"Sworder","Sworder"},
                                   {"ImprovedArcher","ImprovedArcher"},
-                                  {"Cavalry","Cavalry"}
+                                  {"Cavalry","Cavalry"},
+                                  {"Ship","Ship"}
                                  };
 
-std::string Army::ArmyDisplayName[7][2]={{"棍棒兵","刀斧兵"},
+std::string Army::ArmyDisplayName[20][2]={{"棍棒兵","刀斧兵"},
                                          {"投石兵","投石兵"},
                                          {"弓箭手","弓箭手"},
                                          {"侦察骑兵","侦察骑兵"},
                                          {"Prof.Yan","Prof.Yan"},
                                          {"Prof.Lou","Prof.Lou"},
-                                         {"Prof.Lu","Prof.Lu"}
+                                         {"Prof.Lu","Prof.Lu"},
+                                         {"Prof.Wang","Prof.Wang"},
                                         };
+
+string Army::click_sound = "Click_Army";
 
 Army::Army()
 {
@@ -38,29 +42,24 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     this->playerRepresent = playerRepresent;
 
     this->Num = Num;
-    this->Blood=1;
+
     setAttribute();
-    this->Angle=rand()%8;
-    this->DR=DR;
-    this->UR=UR;
-    this->BlockDR=DR/BLOCKSIDELENGTH;
-    this->BlockUR=UR/BLOCKSIDELENGTH;
+
+    setDRUR(DR, UR);
+    updateBlockByDetail();
 
     setSideLenth();
     this->nextBlockDR=BlockDR;
     this->nextBlockUR=BlockUR;
-    this->PredictedDR=DR;
-    this->PredictedUR=UR;
-    this->PreviousDR=DR;
-    this->PreviousUR=UR;
-    this->DR0=DR;
-    this->UR0=UR;
+    setPredictedDRUR(DR, UR);
+    setPreviousDRUR(DR, UR);
+    setDR0UR0(DR, UR);
+
     this->nowstate=MOVEOBJECT_STATE_STAND;
     isAttackable = true;
 
     setNowRes();
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
     this->imageH=DR-UR;
 
     //设置SN信息
@@ -74,7 +73,11 @@ void Army::nextframe()
 {
     if(isDie())
     {
-        if( !isDying() ) setPreDie();
+        if( !isDying() )
+        {
+             setPreDie();
+             requestSound_Die();
+        }
         else if(!get_isActionEnd() && isNowresShift())
         {
             nowres++;
@@ -90,6 +93,14 @@ void Army::nextframe()
     {
         if(isNowresShift())
         {
+            if(nowres == nowlist->begin())
+            {
+                if(nowstate == MOVEOBJECT_STATE_ATTACK)
+                    requestSound_Attack();
+                else if(nowobject == this && nowstate == MOVEOBJECT_STATE_WALK && playerRepresent == NOWPLAYERREPRESENT)
+                    requestSound_Walk();
+            }
+
             nowres++;
             if(nowres==nowlist->end())
             {
@@ -105,30 +116,33 @@ void Army::nextframe()
 
     if(playerRepresent != 0 && timer_Visible>0) time_BeVisible();
 
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    updateImageXYByNowRes();
 }
 
 void Army::setNowRes()
 {
     std::list<ImageResource> *templist = NULL;
-
-    switch (this->nowstate) {
-    case MOVEOBJECT_STATE_STAND:
+    if(Num==AT_SHIP){
         templist =this->Stand[playerRepresent][Num][getLevel()][Angle];
-        break;
-    case MOVEOBJECT_STATE_WALK:
-        templist =this->Walk[playerRepresent][Num][getLevel()][Angle];
-        break;
-    case MOVEOBJECT_STATE_ATTACK:
-        templist =this->Attack[playerRepresent][Num][getLevel()][Angle];
-        break;
-    case MOVEOBJECT_STATE_DIE:
-        if(changeToDisappear) templist = this->Disappear[playerRepresent][Num][getLevel()][Angle];
-        else templist =this->Die[playerRepresent][Num][getLevel()][Angle];
-        break;
-    default:
-        break;
+    }
+    else{
+        switch (this->nowstate) {
+        case MOVEOBJECT_STATE_STAND:
+            templist =this->Stand[playerRepresent][Num][getLevel()][Angle];
+            break;
+        case MOVEOBJECT_STATE_WALK:
+            templist =this->Walk[playerRepresent][Num][getLevel()][Angle];
+            break;
+        case MOVEOBJECT_STATE_ATTACK:
+            templist =this->Attack[playerRepresent][Num][getLevel()][Angle];
+            break;
+        case MOVEOBJECT_STATE_DIE:
+            if(changeToDisappear) templist = this->Disappear[playerRepresent][Num][getLevel()][Angle];
+            else templist =this->Die[playerRepresent][Num][getLevel()][Angle];
+            break;
+        default:
+            break;
+        }
     }
     if(templist!= nowlist)
     {
@@ -139,6 +153,29 @@ void Army::setNowRes()
     }
 }
 
+
+void Army::requestSound_Attack()
+{
+    if((Num == AT_IMPROVED|| Num == AT_BOWMAN) && isInWidget())
+        soundQueue.push("Archer_Attack");
+}
+
+void Army::requestSound_Die()
+{
+    if(!isInWidget())
+        return;
+
+    if(Num == AT_SCOUT)
+        soundQueue.push("Scout_Die");
+    else
+        soundQueue.push("Army_Die");
+}
+
+void Army::requestSound_Walk()
+{
+    if(Num == AT_SCOUT && isInWidget())
+        soundQueue.push("Scout_Walk");
+}
 /***********************************************************/
 //获取军队的各项数据
 //移速
@@ -183,8 +220,11 @@ int Army::getATK()
     else atkValue = atk;
 
     //再atkValue基础上,计算player及科技带来的加成,并返回
-    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType())) + \
-             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+//    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType()), interactSort, interactNum) + \
+//             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+
+    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType(), interactSort, interactNum)) + \
+            get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力
@@ -260,30 +300,35 @@ int Army::get_add_specialAttack()
 
     if(Num == AT_SLINGER)
     {
-        if(interactSort == SORT_ARMY)
+       /* if(interactSort == SORT_ARMY)
         {
             if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
         }
-        else if( interactSort == SORT_BUILDING)
+        else */if( interactSort == SORT_BUILDING)
         {
             if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
-                addition += 7;
+                addition += DEFSHOOT_BUILD_ARROWTOWER;
         }
     }
-    else if(Num == AT_CAVALRY)
-    {
-        if(interactSort == SORT_ARMY)
-        {
-            if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN)
-                addition+=5;
-        }
+//    else if(Num == AT_CAVALRY)
+//    {
+//        if(interactSort == SORT_ARMY)
+//        {
+//            if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN)
+//                addition+=5;
+//        }
 
-    }
+//    }
+
     return addition;
 }
 /***********************************************************/
+
+
 void Army::setAttribute()
 {
+    this->Blood=1;
+    this->Angle=rand()%8;
     //设置军队属性
     switch (Num) {
     case AT_CLUBMAN:        //棍棒兵,可升级1次
@@ -448,6 +493,28 @@ void Army::setAttribute()
         crashLength = CRASHBOX_SMALLOB;
 
         nowres_step = NOWRES_TIMER_CAVALRY;
+        break;
+    case AT_SHIP:           //战船
+        upgradable = false;
+        dependBuildNum = BUILDING_DOCK;
+        armyClass = ARMY_ARCHER;
+        attackType = ATTACKTYPE_SHOOT;
+
+        MaxBlood = BLOOD_SHIP;
+        speed = SPEED_SHIP;
+        vision = VISION_SHIP;
+        atk = ATK_SHIP;
+        dis_Attack = DIS_SHIP;
+        inter_Attack = INTERVAL_SHIP;
+        defence_close = DEFCLOSE_SHIP;
+        defence_shoot = DEFSHOOT_SHIP;
+
+        crashLength = CRASHBOX_SINGLEOB;
+
+        type_Missile = Missile_Arrow;
+        phaseFromEnd_MissionAttack = THROWMISSION_ARCHER;
+
+        nowres_step = NOWRES_TIMER_IMPROVEDBOWMAN1;
         break;
     default:
         incorrectNum = true;

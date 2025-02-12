@@ -52,7 +52,9 @@ protected:
             if(stopThread)
                 return;
             if (g_frame > 10) {
+                ProcessDataWork = 1;
                 processData();
+                ProcessDataWork = 0;
             }
             condition.wait(&mutex);
         }
@@ -76,6 +78,7 @@ private:
     QMutex mutex;
     QWaitCondition condition;
     bool stopThread = false;
+    static QString AIName[NOWPLAYER];
 
     bool isHuman(int SN) {
         int type = SN / 10000;
@@ -83,24 +86,41 @@ private:
     }
 
     bool isBuilding(int SN) {
-        return g_Object[SN] && SN / 10000 == SORT_BUILDING;
+        int sort = SN / 10000 ;
+        return g_Object[SN] && (sort == SORT_BUILDING || sort == SORT_Building_Resource);
     }
 
 public:
-    double calDistance(double DR1, double UR1, double DR2, double UR2) {
+    int ProcessDataWork = 0;
+
+    double calDistance(double DR1, double UR1, double DR2, double UR2)
+    {
         return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5);
     }
 
-    void DebugText(std::string debugStr) {
-        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::fromStdString(debugStr), id);
+    void DebugText(std::string debugStr)
+    {
+        call_debugText("black", " " + AIName[id] + "打印：" + QString::fromStdString(debugStr), id);
     }
 
-    void DebugText(int debugInt) {
-        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugInt), id);
+    void DebugText(QString debugStr)
+    {
+        call_debugText("black", " " + AIName[id] + "打印：" + debugStr, id);
+    }
+    void DebugText(char* debugStr)
+    {
+        call_debugText("black", " " + AIName[id] + "打印：" + QString::fromUtf8(debugStr), id);
     }
 
-    void DebugText(double debugDouble) {
-        call_debugText("black", " AI" + QString::number(id) + "打印：" + QString::number(debugDouble), id);
+
+    void DebugText(int debugInt)
+    {
+        call_debugText("black", " " + AIName[id] + "打印：" + QString::number(debugInt), id);
+    }
+
+    void DebugText(double debugDouble)
+    {
+        call_debugText("black", " " + AIName[id] + "打印：" + QString::number(debugDouble), id);
     }
 signals:
     void cheatRes();

@@ -1,11 +1,11 @@
 ﻿#ifndef PLAYER_H
 #define PLAYER_H
 
-#include <Missile.h>
-#include <Farmer.h>
-#include <Army.h>
-#include <Building.h>
-#include <Building_Resource.h>
+#include "Missile.h"
+#include "Farmer.h"
+#include "Army.h"
+#include "Building.h"
+#include "Building_Resource.h"
 
 class Player
 {
@@ -29,6 +29,7 @@ public:
     int addHuman(int Num,double DR,double UR);
     Army* addArmy(int Num , double DR , double UR);
     int addFarmer(double DR,double UR);
+    int addShip(int Num,double DR,double UR);
     Missile* addMissile( Coordinate* attacker , Coordinate* attackee  , int beginHeight);
 
     //删除实例对象
@@ -78,7 +79,7 @@ public:
     bool get_isBuildingAble( int buildNum ){ return playerScience->get_isBuildingAble(buildNum,wood,food,stone,gold); }
     //判断建筑行动是否能进行的函数中，内含了判断行动是否能显示。
     bool get_isBuildActionAble( Building* actBuild,int actNum, int* oper = NULL ){ return playerScience->get_isBuildActionAble(actBuild->getNum(),actNum,getCiv(),wood,food,stone,gold, oper); }
-    bool get_isBuildActionAble(int buildType , int actNum, int* oper = NULL){ return playerScience->get_isBuildActionAble(buildType , actNum , getCiv() , wood , food , stone , gold , oper); }
+    bool get_isBuildActionAble( int buildType, int actNum, int* oper = NULL){ return playerScience->get_isBuildActionAble(buildType , actNum , getCiv() , wood , food , stone , gold , oper); }
     bool get_isBuildActionShowAble( int buildNum , int actNum ){ return playerScience->get_isBuildActionShowAble(buildNum,actNum,getCiv());}
 
     bool get_buildActLevel( int buildNum , int actNum ){ return playerScience->getActLevel(buildNum , actNum); }
@@ -89,7 +90,7 @@ public:
     void finishBuild( Building* buildBuilding );
 
     //控制建筑行动
-    void enforcementAction( Building* actBuild , vector<Point>Block_free );
+    void enforcementAction( Building* actBuild , vector<pair<Point,int>>Block_free );
 
     bool get_isBuildingHaveBuild( int buildNum ){ return playerScience->getBuildTimes(buildNum)>0; }
 
@@ -99,30 +100,6 @@ public:
 
     void set_AllTechnology(){ playerScience->all_technology_tree(); }
 
-
-    //获取科技树
-//    bool *getmarketResearch()
-//    {
-//        return this->marketResearch;
-//    }
-
-
-//    bool getArrowTowerUnlocked()
-//    {
-//        return this->isArrowTowerUnlocked;
-//    }
-//    void setArrowTowerUnlocked(bool flag)
-//    {
-//        this->isArrowTowerUnlocked = flag;
-//    }
-//    bool getMarketResearch(int num)
-//    {
-//        return marketResearch[num];
-//    }
-//    void setMarketResearch(int num, bool flag)
-//    {
-//        this->marketResearch[num] = flag;
-//    }
     int getScore()
     {
         return this->score;
@@ -132,15 +109,6 @@ public:
         this->score = score;
     }
 
-
-//    void setCheatMaxHumanNum(bool flag)
-//    {
-//        this->cheatMaxHumanNum = flag;
-//    }
-//    bool getCheatMaxHumanNum()
-//    {
-//        return this->cheatMaxHumanNum;
-//    }
     void setStartScores(int type)
     {
         this->startScores[type] = true;
@@ -156,6 +124,8 @@ public:
     void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
 
     int get_centerNum(){ return playerScience->get_centerNum(); }
+
+    void beginAttack();
 private:
     int represent;  //player阵营
 
@@ -165,12 +135,13 @@ private:
     //人口容量
 //    int maxHumanNum=0;  //人口上限
 
+    int attackFrame = 0;
 
     //所拥有的四个资源
-    int wood=200;
-    int food=200;
-    int stone=150;
-    int gold=0;
+    int wood=INITIAL_WOOD;
+    int food=INITIAL_MEAT;
+    int stone=INITIAL_STONE;
+    int gold=INITIAL_GOLD;
     int score=0;    //得分
 
     //研究技术进度与成果

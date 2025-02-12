@@ -4,6 +4,11 @@ Development::Development()
 {
     init_DevelopLab();
 }
+Development::Development(int represent)
+{
+    playerRepresent = represent;
+    init_DevelopLab();
+}
 
 double Development::get_rate_Move(int sort , int type)
 {
@@ -33,9 +38,15 @@ int Development::get_addition_Blood( int sort , int type )
 
 /***************************************************************/
 //攻击倍率加成
-double Development::get_rate_Attack( int sort , int type , int armyClass , int attackType )
+double Development::get_rate_Attack( int sort , int type , int armyClass , int attackType, int interSort, int interNum )
 {
     double rate = 1;
+
+    if(interSort!=-1 && interNum!=-1)
+    {
+        if(interSort == SORT_BUILDING && sort == SORT_ARMY && (type == AT_SWORDSMAN || type == AT_CAVALRY || type == AT_IMPROVED))
+            rate = 2;
+    }
 
     return rate;
 }
@@ -207,19 +218,60 @@ int Development::get_addition_ResourceSort( int resourceSort )
     return addition;
 }
 
+double Development::get_rate_ResorceGather( int resourceSort )
+{
+    int rate = 1;
+
+    int level = 0;
+    if(resourceSort == HUMAN_WOOD)  //对搬运wood加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_WOOD_UPGRADE);
+        switch (level) {
+        case 1:
+            rate+=BUILDING_MARKET_WOOD_UPGRADE_ADDITION_GATHERRATE;
+        default:
+            break;
+        }
+    }
+    else if(resourceSort == HUMAN_STONE)    //对搬运stone加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_STONE_UPGRADE);
+        switch (level) {
+        case 1:
+            rate+=BUILDING_MARKET_STONE_UPGRADE_ADDITION_GATHERRATE;
+        default:
+            break;
+        }
+    }
+    else if(resourceSort == HUMAN_GOLD)     //对搬运gold加成
+    {
+        level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_GOLD_UPGRADE);
+        switch (level) {
+        case 1:
+            rate+=BUILDING_MARKET_GOLD_UPGRADE_ADDITION_GATHERRATE;
+        default:
+            break;
+        }
+    }
+
+    return rate;
+}
+
+
 int Development::get_addition_MaxCnt( int sort , int type )
 {
     int addition = 0 , level = 0;
 
-    if(sort == SORT_Building_Resource && type == BUILDING_FARM)
+    if(sort == SORT_Building_Resource)
     {
         level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_FARM_UPGRADE);
-
-        switch (level) {
-        case 1:
-            addition+=BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD;
-        default:
-            break;
+        if(type == BUILDING_FARM||type==BUILDING_FISH){
+            switch (level) {
+            case 1:
+                addition+=BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD;
+            default:
+                break;
+            }
         }
     }
 
@@ -259,12 +311,44 @@ bool Development::get_isBuildActionAble( int buildingNum, int actNum, int civili
 void Development::set_civilization( int civ )
 {
     civilization = civ;
-    while(developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode!=NULL && developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode->civilization<civilization)
-    {
+    while(developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode!=NULL &&\
+          developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode->civilization<civilization)
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].shift();
+
+}
+
+/*****************游戏进程信息*******************/
+//时代升级，进入下一时代
+void Development::civiChange()
+{
+    civilization++;
+    if(playerRepresent == NOWPLAYERREPRESENT)
+        soundQueue.push("Age_Level_Up");
+}
+
+/***************************************************************/
+void Development::all_technology_tree()
+{
+    map< int , st_buildAction >::iterator iter = developLab.begin(),itere = developLab.end();
+    map<int , st_upgradeLab>::iterator iter1,iter1e;
+
+    while(iter != itere)
+    {
+        for(iter1 = iter->second.actCon.begin(),iter1e = iter->second.actCon.end(); iter1 != iter1e; iter1++)
+        {
+            while(iter1->second.nowExecuteNode != NULL)
+            {
+                if(iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode )
+                    break;
+
+                iter1->second.shift();
+            }
+        }
+
+        iter++;
     }
 }
-/***************************************************************/
+
 //初始化develop科技树
 void Development::init_DevelopLab()
 {
@@ -277,7 +361,7 @@ void Development::init_DevelopLab()
         //造村民
         newNode = new conditionDevelop(CIVILIZATION_STONEAGE , BUILDING_CENTER , TIME_BUILDING_CENTER_CREATEFARMER,\
                                        0 ,BUILDING_CENTER_CREATEFARMER_FOOD );
-        newNode->setCreatObjectAfterAction(SORT_FARMER );
+        newNode->setCreatObjectAfterAction(SORT_FARMER,FARMERTYPE_FARMER);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
 
@@ -420,26 +504,23 @@ void Development::init_DevelopLab()
     //城墙
 //    developLab[BUILDING_WALL].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_WALL, TIME_BUILD_WALL , 0 , 0 , BUILD_WALL_STONE);
 //    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
-}
-
-void Development::all_technology_tree()
-{
-    map< int , st_buildAction >::iterator iter = developLab.begin(),itere = developLab.end();
-    map<int , st_upgradeLab>::iterator iter1,iter1e;
-
-    while(iter != itere)
+    //船坞
     {
-        for(iter1 = iter->second.actCon.begin(),iter1e = iter->second.actCon.end(); iter1 != iter1e; iter1++)
-        {
-            while(iter1->second.nowExecuteNode != NULL)
-            {
-                if(iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode )
-                    break;
+        developLab[BUILDING_DOCK].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILD_DOCK , BUILD_DOCK_WOOD);
+        newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_SAILING , BUILDING_DOCK_CREATE_SAILING_WOOD);
+        newNode->setCreatObjectAfterAction(SORT_FARMER,FARMERTYPE_SAILING);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].setHead(newNode);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].endNodeAsOver();
 
-                iter1->second.shift();
-            }
-        }
+        newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_WOOD_BOAT , BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD);
+        newNode->setCreatObjectAfterAction(SORT_FARMER,FARMERTYPE_WOOD_BOAT);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_WOOD_BOAT].setHead(newNode);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_WOOD_BOAT].endNodeAsOver();
 
-        iter++;
+        newNode=new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_DOCK , TIME_BUILDING_DOCK_CREATE_SHIP , BUILDING_DOCK_CREATE_SHIP_WOOD);
+        newNode->setCreatObjectAfterAction(SORT_ARMY,AT_SHIP);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].setHead(newNode);
+        developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].endNodeAsOver();
     }
+    //wlh友情提示：存在内存泄漏
 }
