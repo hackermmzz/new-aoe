@@ -361,7 +361,14 @@ void SelectWidget::refreshActs()
 
             //根据不同时代设置不同的图标
             string name="Button_"+objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType);
-            ui->objIcon->setPixmap(resMap[name].front().scaled(110,110));
+            if (resMap.find(name) != resMap.end() && !resMap[name].empty()) {
+                // 如果找到了对应的图片，设置该图片
+                ui->objIcon->setPixmap(resMap[name].front().scaled(110, 110));
+            } else {
+                // 如果没有找到对应的图片，使用默认图片
+                ui->objIcon->setPixmap(resMap["Button"].front().scaled(110, 110));
+            }
+
 
             if(objBuilding->getActSpeed() != 0)
             {
@@ -421,6 +428,14 @@ void SelectWidget::refreshActs()
                         ui->objText->setText(QString::number((int)(farm->get_Cnt())));
                         ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
                     }
+                }else if(objBuilding->getNum() == BUILDING_FISH)
+                {
+                    Building_Resource* fish=(Building_Resource*) objBuilding;
+                    if(fish->get_Cnt()>0)
+                    {
+                        ui->objText->setText(QString::number((int)(fish->get_Cnt())));
+                        ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
+                    }
                 }
 
             }
@@ -458,9 +473,25 @@ void SelectWidget::refreshActs()
         { //objIconSmall_ATK objText_ATK用于展示攻击力 objIconSmall objText表示携带资源 objIconSmall_DEF和objText_DEF表示防御（近战和远程分开）
             Farmer *objFarmer = (Farmer *)(nowobject);
             int num = objFarmer->getState();//获取工作状态并显示对应名称
-            QString name = QString::fromStdString(objFarmer->getDisplayName(num));
+            QString name;
+
+            switch (objFarmer->get_farmerType()) {
+            case 0:
+                ui->objIcon->setPixmap(resMap["Button_Village"].front().scaled(110,110));
+                name = QString::fromStdString(objFarmer->getDisplayName(num));
+                break;
+            case 1:
+                ui->objIcon->setPixmap(resMap["Button"].front().scaled(110,110));
+                name="运输船";
+                break;
+            case 2:
+                ui->objIcon->setPixmap(resMap["Button_Wood_Boat"].front().scaled(110,110));
+                name="木船";
+                break;
+            default:
+                break;
+            }
             ui->objName->setText(name);
-            ui->objIcon->setPixmap(resMap["Button_Village"].front().scaled(110,110));
 
             if(objFarmer->getState() == 0 || objFarmer->getState() == 4)
             {
@@ -471,9 +502,11 @@ void SelectWidget::refreshActs()
             }
 
             if(objFarmer->getResourceSort() == HUMAN_WOOD) ui->objIconSmall->setPixmap(resMap["Icon_Wood"].front());
-            else if(objFarmer->getResourceSort() == HUMAN_GRANARYFOOD || objFarmer->getResourceSort() == HUMAN_STOCKFOOD)
+            else if(objFarmer->getResourceSort() == HUMAN_GRANARYFOOD || objFarmer->getResourceSort() == HUMAN_STOCKFOOD||objFarmer->getResourceSort() == HUMAN_DOCKFOOD)
                 ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
             else if(objFarmer->getResourceSort() == HUMAN_STONE) ui->objIconSmall->setPixmap(resMap["Icon_Stone"].front());
+            //运输船显示运载人口
+            else if(objFarmer->get_farmerType()==1) ui->objIconSmall->setPixmap(resMap["SmallIcon_People"].front());
 
             //如果当前村民没有资源
             if(objFarmer->getResourceNowHave() == 0)
