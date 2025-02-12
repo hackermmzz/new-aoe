@@ -32,7 +32,7 @@
 
 #include <Windows.h>
 #include <time.h>
-
+#include "Logger.h"
 #include "digitalConfig.h"
 
 
