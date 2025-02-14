@@ -1,8 +1,8 @@
 ﻿#include "StaticRes.h"
 
-std::list<ImageResource>* StaticRes::staticResource[3];
-std::string StaticRes::StaticResname[3]={"Bush","Stone","GoldOre"};
-std::string StaticRes::StaticResDisplayName[3] = {"浆果丛","石头","金矿"};
+std::list<ImageResource>* StaticRes::staticResource[10];
+std::string StaticRes::StaticResname[10]={"Bush","Stone","GoldOre","Fish"};
+std::string StaticRes::StaticResDisplayName[10] = {"浆果丛","石头","金矿","渔场"};
 
 
 StaticRes::StaticRes(int Num, double DR, double UR)
@@ -33,6 +33,13 @@ StaticRes::StaticRes(int Num, int BlockDR, int BlockUR)
     g_globalNum++;
 }
 
+void StaticRes::nextframe(){
+    //只有渔场才能动态更新每一帧
+    if(Num!=NUM_STATICRES_Fish)return;
+    nowres=next(nowres);
+    if(nowres==nowlist->end())nowres=nowlist->begin();
+}
+
 void StaticRes::setAttribute()
 {
     switch(Num){
@@ -51,6 +58,12 @@ void StaticRes::setAttribute()
     case NUM_STATICRES_GoldOre:
         MaxCnt = CNT_GOLDORE;
         resourceSort = HUMAN_GOLD;
+        BlockSizeLen = SIZELEN_SMALL;
+        crashLength = CRASHBOX_SMALLBLOCK;
+        break;
+    case NUM_STATICRES_Fish:
+        MaxCnt = CNT_FISH;
+        resourceSort = HUMAN_DOCKFOOD;
         BlockSizeLen = SIZELEN_SMALL;
         crashLength = CRASHBOX_SMALLBLOCK;
         break;

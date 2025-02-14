@@ -428,14 +428,6 @@ void SelectWidget::refreshActs()
                         ui->objText->setText(QString::number((int)(farm->get_Cnt())));
                         ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
                     }
-                }else if(objBuilding->getNum() == BUILDING_FISH)
-                {
-                    Building_Resource* fish=(Building_Resource*) objBuilding;
-                    if(fish->get_Cnt()>0)
-                    {
-                        ui->objText->setText(QString::number((int)(fish->get_Cnt())));
-                        ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
-                    }
                 }
 
             }

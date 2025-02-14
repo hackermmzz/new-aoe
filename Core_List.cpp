@@ -77,7 +77,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
                 && buildGoalOb!=NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
-        if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
+        /*if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
             Farmer*f0=(Farmer*)object1;
             Human*f1=(Human*)object2;
             //如果满载,返回错误码
@@ -88,7 +88,7 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
             if(dr*dr+ur*ur>=SHIP_ACT_MAX_DISTANCE){
                 return ACTION_INVALID_DISTANCE_FAR;
             }
-    }
+        }*/
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if(object1->isPlayerControl() && object2->isPlayerControl())
@@ -161,8 +161,26 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
         {
             if(DR<0) DR = 0;
             if(UR<0) UR = 0;
-            if(DR>71.9*BLOCKSIDELENGTH) DR = 71.9*BLOCKSIDELENGTH;
-            if(UR>71.9*BLOCKSIDELENGTH) UR = 71.9*BLOCKSIDELENGTH;
+            if(DR>MAP_L*BLOCKSIDELENGTH) DR = MAP_L*BLOCKSIDELENGTH;
+            if(UR>MAP_U*BLOCKSIDELENGTH) UR = MAP_U*BLOCKSIDELENGTH;
+            //如果是运输船,并且指定的位置是岸边,且当前载有人物大于等于1,那么执行卸货动作
+            if(object1->getSort()==SORT_FARMER&&((Farmer*)object1)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
+                Farmer*obj=(Farmer*)object1;
+                if(obj->getResourceNowHave()>0){
+                    int blockDR=DR/BLOCKSIDELENGTH;
+                    int blockUR=UR/BLOCKSIDELENGTH;
+                    //如果是岸边,执行卸货的行动
+                    if(blockDR<MAP_L&&blockUR<MAP_U&&theMap->cell[blockDR][blockUR].getMapType()!=MAPTYPE_OCEAN){
+                        //寻找直线上的岸边,作为目的地
+                        Point target=GetCoastInLine({blockDR,blockUR},{object1->getBlockDR(),object1->getBlockUR()});
+                        DR=(target.x+0.5)*BLOCKSIDELENGTH;
+                        UR=(target.y+0.5)*BLOCKSIDELENGTH;
+                        //
+                        eventType=CoreEven_UnLoad;
+                    }
+                }
+            }
+            //
             relate_AllObject[object1] = relation_Object(DR , UR , eventType);
             relate_AllObject[object1].respondConduct = respond;
             relate_AllObject[object1].sort = SORT_COORDINATE;
@@ -539,20 +557,13 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
         return ACTION_INVALID_HUMANBUILD_OVERLAP;
     }
 
-    if(!theMap->isFlat(BlockDR, BlockUR, blockSideLength))
+    if(!theMap->isFlat(BlockDR, BlockUR, blockSideLength)&&buildtype!=BUILDING_DOCK)
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败:放置位置存在高度差或斜坡",playerID);
         return ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
     }
     //判断是否建立在合适的位置
-    if(buildtype==BUILDING_FISH){//渔场只能建在海里
-        for(int i=0;i<blockSideLength;++i){
-            for(int j=0;j<blockSideLength;++j){
-                int l=i+BlockDR,u=j+BlockUR;
-                if(theMap->cell[l][u].getMapType()!=MAPTYPE_OCEAN)return ACTION_INVALID_POSITION_NOT_FIT;
-            }
-        }
-    }else{//其余的建筑必须建在陆地（但是船坞要特判）
+    {//其余的建筑必须建在陆地（但是船坞要特判）
         for(int i=0;i<blockSideLength;++i){
             for(int j=0;j<blockSideLength;++j){
                 int l=i+BlockDR,u=j+BlockUR;
@@ -879,12 +890,12 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
 
 void Core_List::object_Transport(Coordinate *object1, Coordinate *object2)
 {
-    Farmer*human1=(Farmer*)object1;
-    Human*human2=(Human*)object2;
-    human2->setTransported(true);
-    human1->update_transportHuman(human2);
-    human1->set_ResourceSort(SORT_HUMAN);
-    suspendRelation(human2);
+    Human*human1=(Human*)object1;
+    Farmer*human2=(Farmer*)object2;
+    human1->setTransported(true);
+    human2->update_transportHuman(human1);
+    human2->set_ResourceSort(SORT_HUMAN);
+    suspendRelation(human1);
 }
 
 void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
@@ -1485,6 +1496,55 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     return {path,{dr0,ur0}};
 }
 
+Point Core_List::GetCoastInLine(const Point &point0, const Point &point1)
+{
+    if(checkIsCoast(point0.x,point0.y))return point0;
+    //以下是直线段的绘制
+    int x1 = point0.x, y1 = point0.y, x2 = point1.x, y2 = point1.y;
+    int dx = x2 - x1, dy = y2 - y1;
+    int s1 = (dx >= 0 ? 1 : -1), s2 = (dy >= 0 ? 1 : -1);
+    dx = abs(dx);
+    dy = abs(dy);
+    int xbase = x1, ybase = y1;
+    if (dx >= dy)
+    {
+        int e = (dy << 1) - dx, deta1 = dy << 1, deta2 = (dy - dx) << 1;
+        while (xbase != x2)
+        {
+            if (e >= 0)//y方向增量为1
+                xbase += s1, ybase += s2, e += deta2;
+            else xbase += s1, e += deta1;
+            if(checkIsCoast(xbase,ybase))return {xbase,ybase};
+        }
+
+    }
+    else
+    {
+        int e = (dx << 1) - dy, deta1 = dx << 1, deta2 = (dx - dy) << 1;
+        while (ybase != y2)
+        {
+            if (e >= 0)//x方向增量为1
+                xbase += s1, ybase += s2, e += deta2;
+            else ybase += s2, e += deta1;
+            if(checkIsCoast(xbase,ybase))return {xbase,ybase};
+        }
+    }
+    return point1;
+}
+
+bool Core_List::checkIsCoast(int x, int y)
+{
+    if(x<0||y<0||x>=MAP_L||y>=MAP_U)return 0;
+    if(theMap->cell[x][y].getMapType()==MAPTYPE_OCEAN)return 0;
+    const static int offset[][2]={{0,-1},{0,1},{-1,0},{1,0}};
+    for(auto*o:offset){
+        int i=o[0]+x,j=o[1]+y;
+        if(i<0||i<0||i>=MAP_L||i>=MAP_U)continue;
+        if(theMap->cell[i][j].getMapType()==MAPTYPE_OCEAN)return 1;
+    }
+    return 0;
+}
+
 
 //*************************************************************
 //行动预备处理
@@ -1637,17 +1697,17 @@ void Core_List::initDetailList()
     }
     //行动：运输人*********************************
     {
-        phaseList = new int[1]{ CoreDetail_Transport };
-        conditionList = new conditionF[1]{ conditionF(condition_Object2_Transported)};
-        relation_Event_static[CoreEven_Transport] = detail_EventPhase(1, phaseList, conditionList, forcedInterrupCondition);
+        phaseList = new int[2]{ CoreDetail_Move,CoreDetail_Transport };
+        conditionList = new conditionF[2]{conditionF(condition_ObjectNearby,OPERATECON_NEAR_UNLOAD),conditionF(condition_Object2_Transported)};
+        relation_Event_static[CoreEven_Transport] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
         delete[] phaseList;
         delete[] conditionList;
     }
     //行动：卸货*********************************
     {
-        phaseList = new int[1]{ CoreDetail_Unload };
-        conditionList = new conditionF[1]{ conditionF(condition_Object1_Unload)};
-        relation_Event_static[CoreEven_UnLoad] = detail_EventPhase(1, phaseList, conditionList, forcedInterrupCondition);
+        phaseList = new int[2]{ CoreDetail_Move,CoreDetail_Unload };
+        conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby,OPERATECON_NEAR_UNLOAD),conditionF(condition_Object1_Unload)};
+        relation_Event_static[CoreEven_UnLoad] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
         delete[] phaseList;
         delete[] conditionList;
     }

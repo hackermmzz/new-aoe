@@ -319,7 +319,7 @@ void MainWidget::initBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<12;j++)
+        for(int j=0;j<11;j++)
         {
             Building::allocatebuilt(i,j);
             loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));
@@ -426,7 +426,7 @@ void MainWidget::initAnimal()
 // 初始化不可移动的资源
 void MainWidget::initStaticResource()
 {
-    for(int num = 0; num<3; num++)
+    for(int num = 0; num<4; num++)
     {
         StaticRes::allocateStaticResource(num);
         loadResource(StaticRes::getStaticResName(num) , StaticRes::getStaticResource(num));

@@ -506,7 +506,9 @@ void Core::updateByPlayer(int id){
 void Core::updateCommon(tagInfo* taginfo){
     for (int i = 0; i < MAP_L; ++i) {
         for (int j = 0; j < MAP_U; ++j) {
-            taginfo->theMap[i][j] = theMap->cell[i][j].getMapHeight();
+            int height= theMap->cell[i][j].getMapHeight();
+            taginfo->theMap[i][j].height =theMap->map_Height[i][j];
+            taginfo->theMap[i][j].type=height==MAPHEIGHT_OCEAN?MAPPATTERN_OCEAN:MAPPATTERN_GRASS;
         }
     }
 }
@@ -602,24 +604,20 @@ void Core::manageMouseEvent()
                                     if(object_click->getPlayerRepresent() != NOWPLAYERREPRESENT)
                                         interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                                     else if(object_click->getSort()==SORT_FARMER&&((Farmer*)object_click)->get_farmerType()==FARMERTYPE_WOOD_BOAT){//如果是木船则可以运输
-                                        interactionList->addRelation(nowobject,object_click,CoreEven_JustMoveTo);
+                                        interactionList->addRelation(nowobject,object_click,CoreEven_Transport);
                                     }
                                     break;
                                 default:
                                     break;
                             }
-                        }else if(FarmerType==FARMERTYPE_WOOD_BOAT){
-                            if(object_click==nowobject){//卸甲，朕让你卸甲
-                                interactionList->addRelation(nowobject,object_click,CoreEven_UnLoad);
-                            }
-                            else if(judge_CanTransPort(nowobject,object_click)){
-                                interactionList->addRelation(nowobject,object_click,CoreEven_Transport);
-                            }
                         }else if(FARMERTYPE_SAILING){
-                            if(object_click->getPlayerRepresent() == NOWPLAYERREPRESENT&&object_click->getSort()==SORT_Building_Resource)
+                            if(object_click->getSort()==SORT_STATICRES)
                             {
-                                if(((Building_Resource*)object_click)->get_Gatherable())
-                                    interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
+                                StaticRes*res=(StaticRes*)object_click;
+                                if(res->getNum()==NUM_STATICRES_Fish){
+                                    if(((Building_Resource*)object_click)->get_Gatherable())
+                                        interactionList->addRelation(nowobject,object_click,CoreEven_Gather);
+                                }
                             }
                         }
                     }
@@ -805,7 +803,7 @@ void Core::manageOrder(int id)
                             break;
                         case SORT_FARMER:
                             if(self->getPlayerRepresent()==obj->getPlayerRepresent()&&((Farmer*)obj)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
-                                ret=interactionList->addRelation(self,obj,CoreEven_JustMoveTo);
+                                ret=interactionList->addRelation(self,obj,CoreEven_Transport);
                                 if(ret == ACTION_SUCCESS)
                                     call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 走向运输船 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                             }
@@ -814,13 +812,7 @@ void Core::manageOrder(int id)
                     }
                     }
                     else if(FarmerType==FARMERTYPE_WOOD_BOAT){
-                        if(self==obj){//卸甲凉快凉快
-                            ret=interactionList->addRelation(self,obj,CoreEven_UnLoad);
-                            if(ret==ACTION_SUCCESS){
-                                call_debugText("green"," HumanAction:"+self->getChineseName()+" "+"卸货",id);
-                            }
-                        }
-                        else if(self->getPlayerRepresent()==obj->getPlayerRepresent()&&judge_CanTransPort(self,obj)){
+                        if(self->getPlayerRepresent()==obj->getPlayerRepresent()&&judge_CanTransPort(self,obj)){
                             ret=interactionList->addRelation(self,obj,CoreEven_Transport);
                             if(ret==ACTION_SUCCESS){
                                  call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 收纳 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
@@ -828,10 +820,9 @@ void Core::manageOrder(int id)
                         }
                     }
                     else if(FarmerType==FARMERTYPE_SAILING){
-                        if(obj->getPlayerRepresent() == obj->getPlayerRepresent()&&obj->getSort()==SORT_Building_Resource)
+                        if(obj->getSort()==SORT_STATICRES&&obj->getNum()==NUM_STATICRES_Fish)
                         {
-                            if(((Building_Resource*)obj)->get_Gatherable())
-                                ret=interactionList->addRelation(nowobject,obj,CoreEven_Gather);
+                            ret=interactionList->addRelation(nowobject,obj,CoreEven_Gather);
                             if(ret==ACTION_SUCCESS){
                                  call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 捕鱼 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                             }
@@ -947,17 +938,18 @@ void Core::judge_Crush()
         {
             if(judOb->getCrashOb()!=NULL) break;
             /////////////
-            obSize = theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ].size();
+            auto&v=theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ];
+            obSize = v.size();
             if(obSize == 0) continue;
             for(int k = 0 ; k < obSize; k++)
             {
-                barrierOb = theMap->map_Object[ (int)judBlock[j].x ][ (int)judBlock[j].y ][k];
+                barrierOb = v[k];
                 if(judOb == barrierOb ) continue;
 
                 /****当前取消移动物体之间的碰撞******/
 //                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
 //                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
-                if(barrierOb->getSort() == SORT_STATICRES && barrierOb->getNum() == NUM_STATICRES_Bush) continue;   //浆果不碰撞
+                if(barrierOb->getSort() == SORT_STATICRES && (barrierOb->getNum() == NUM_STATICRES_Bush||barrierOb->getNum()==NUM_STATICRES_Fish)) continue;   //浆果和渔场不碰撞
                 /****当前取消移动物体之间的碰撞******/
                 //判断碰撞，碰撞箱有重合
                 if(judOb->isCrash(barrierOb))break;

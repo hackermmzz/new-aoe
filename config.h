@@ -170,7 +170,6 @@
 
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
-#define BUILDING_FISH 11
 
 /********** 建筑状态 **********/
 #define BUILDING_FREE 0 // 建筑状态为空闲（无工作）时用0表示
@@ -228,7 +227,7 @@
 #define NUM_STATICRES_Bush 0
 #define NUM_STATICRES_Stone 1
 #define NUM_STATICRES_GoldOre 2
-
+#define NUM_STATICRES_Fish 3
 //动物
 #define ANIMAL_TREE 0
 #define ANIMAL_GAZELLE 1
@@ -509,6 +508,7 @@
 #define CNT_STONE 250
 #define CNT_GOLDORE 200
 #define CNT_FOREST 300
+#define CNT_FISH 200
 
 #define ANIMAL_ATTACKRANGE_LION 10
 #define ANIMAL_ATTACKRANGE_ELEPHANT 10
@@ -598,6 +598,7 @@
 #define OPERATECON_NEAR_WORK 10002
 #define OPERATECON_NEAR_MISSILE 10003
 #define OPERATECON_NEAR_ATTACK_MOVE 10004
+#define OPERATECON_NEAR_UNLOAD 10005
 
 #define OPERATECON_NEARALTER_ABSOLUTE 20000
 #define OPERATECON_NEARALTER_WORK 20002

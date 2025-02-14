@@ -31,7 +31,7 @@ Player::~Player()
 Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
 {
     Building *newbuilding = NULL;
-    if(Num == BUILDING_FARM||Num==BUILDING_FISH) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
+    if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
     else newbuilding=new Building(Num,BlockDR,BlockUR, getCiv(), playerScience , represent , percent);
 
     build.push_back(newbuilding);

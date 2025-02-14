@@ -177,12 +177,6 @@
 #define VISION_FARM 4
 #define BUILD_FARM_WOOD 75
 #define TIME_BUILD_FARM 30
-/**渔场**/
-#define BLOOD_BUILD_FISH 50
-#define CNT_BUILD_FISH  250
-#define VISION_FISH 4
-#define BUILD_FISH_WOOD 75
-#define TIME_BUILD_FISH 30
 /**箭塔**/
 #define BLOOD_BUILD_ARROWTOWER 125
 #define VISION_ARROWTOWER 10
@@ -202,10 +196,10 @@
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_Manhattan_PathMove 0.01
+#define DISTANCE_Manhattan_Unload BLOCKSIDELENGTH*1.5
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
 #define DISTANCE_ATTACK_CLOSE_BIGOB (15*gen5)
 #define DISTANCE_HIT_TARGET 4
-
 //箭塔攻击距离
 #define DIS_ARROWTOWER 7
 
@@ -277,7 +271,7 @@
 #define SHIP_CATAPUL 76
 #define SHIP_JUGGERNAUT 77
 /***********船可以和人互动的最大距离(平方)*********/
-#define SHIP_ACT_MAX_DISTANCE (BLOCKSIDELENGTH*BLOCKSIDELENGTH*4)
+#define SHIP_ACT_MAX_DISTANCE (DISTANCE_Manhattan_Unload*DISTANCE_Manhattan_Unload)
 /***********农民类型**********/
 #define FARMERTYPE_FARMER 0
 #define FARMERTYPE_WOOD_BOAT 1

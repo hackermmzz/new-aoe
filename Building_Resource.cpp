@@ -43,15 +43,6 @@ void Building_Resource::setAttribute()
         vision = VISION_FARM;
         incorrectNum = false;
         setMaxCnt();
-    }else if(Num == BUILDING_FISH)
-    {
-        MaxBlood = BLOOD_BUILD_FISH;
-        Foundation=FOUNDATION_MIDDLE;
-        resourceSort = HUMAN_DOCKFOOD;
-        gatherable = false;
-        vision = VISION_FISH;
-        incorrectNum = false;
-        setMaxCnt();
     }
     else incorrectNum = true;
     Cnt = MaxCnt;
@@ -73,7 +64,7 @@ bool Building_Resource::isGathererAsLandlord(Coordinate* gatherer)
 
 void Building_Resource::setMaxCnt()
 {
-    if(Num == BUILDING_FARM||Num==BUILDING_FISH)
+    if(Num == BUILDING_FARM)
     {
         if(playerScience == NULL) MaxCnt = CNT_BUILD_FARM;
         else MaxCnt = CNT_BUILD_FARM + playerScience->get_addition_MaxCnt(getSort(),Num);

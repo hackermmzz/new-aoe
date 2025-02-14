@@ -479,6 +479,9 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     {
         switch (operate)
         {
+            case OPERATECON_NEAR_UNLOAD:
+                dis=DISTANCE_Manhattan_Unload;
+                break;
             case OPERATECON_NEAR_ABSOLUTE:
                 dis = DISTANCE_Manhattan_MoveEndNEAR;
                 break;
@@ -523,7 +526,8 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
             ((Missile*)object1)->hitTarget();
         return isNegation^((Missile*)object1)->isMissileFinishTask();
     }
-
+    //对渔场资源进行特判（考虑到建在岸边的渔场农民采集会出现问题，直接在这里对这种情况特判即可）
+    //
     //一般性距离判断（使用曼哈顿距离）
     if(isNear_Manhattan(dr1 ,ur1 , dr2 , ur2 , dis) /*|| isNear_Manhattan(predr,preur,dr2,ur2,dis_r)*/)
     {
@@ -577,8 +581,8 @@ bool condition_Object1_AttackingEnd(Coordinate* object1, relation_Object& relati
 }
 
 bool condition_Object2_Transported(Coordinate*object1,relation_Object&relation,int&operate,bool isNegation){
-    Human*human1=(Human*)object1,*human2=(Human*)(relation.goalObject);
-    return isNegation^(human2->getTransported());
+    Human*human1=(Human*)object1;
+    return isNegation^(human1->getTransported());
 }
 
 bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, int &operate, bool isNegation)
@@ -592,6 +596,7 @@ bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, in
         int L=o[0]+ship->getBlockDR(),U=o[1]+ship->getBlockUR();
         if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
             Block&block=GlobalMap->cell[L][U];
+
             if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
                 double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
                 if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE)return true;
@@ -600,3 +605,4 @@ bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, in
     }
     return false;
 }
+

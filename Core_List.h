@@ -108,6 +108,8 @@ private:
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
+    Point GetCoastInLine(const Point&point0,const Point&point1);
+    bool checkIsCoast(int x,int y);
 };
 
 #endif // CORE_LIST_H

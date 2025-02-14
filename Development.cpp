@@ -265,7 +265,7 @@ int Development::get_addition_MaxCnt( int sort , int type )
     if(sort == SORT_Building_Resource)
     {
         level = getActLevel(BUILDING_MARKET , BUILDING_MARKET_FARM_UPGRADE);
-        if(type == BUILDING_FARM||type==BUILDING_FISH){
+        if(type == BUILDING_FARM){
             switch (level) {
             case 1:
                 addition+=BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD;
