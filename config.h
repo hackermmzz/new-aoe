@@ -356,6 +356,7 @@
 #define RESOURCE_ELEPHANT 72
 #define RESOURCE_LION 73
 #define RESOURCE_GOLD 99
+#define RESOURCE_FISH 119
 
 /********** 时代编号 **********/
 #define CIVILIZATION_STONEAGE 1

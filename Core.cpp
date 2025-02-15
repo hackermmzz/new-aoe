@@ -453,6 +453,11 @@ void Core::updateByPlayer(int id){
         case 2:
             resource.Type=RESOURCE_GOLD;
             resource.ProductSort=HUMAN_GOLD;
+            break;
+        case 3:
+            resource.Type=RESOURCE_FISH;
+            resource.ProductSort=HUMAN_DOCKFOOD;
+            break;
         default:
             resource.Type=-1;
             resource.ProductSort=-1;
