@@ -128,9 +128,13 @@ struct relation_Object
     void set_goalPoint(double DR, double UR){ DR_goal = DR; UR_goal = UR;}
     void set_AlterPoint(double DR, double UR){ DR_alter = DR; UR_alter = UR;}
 
-    void set_distance_AllowWork(){ distance_AllowWork = goalObject->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB; }
+    void set_distance_AllowWork(){
+        distance_AllowWork = goalObject->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
+        if(goalObject->getNum()==BUILDING_DOCK)
+            distance_AllowWork=goalObject->getSideLength();
+    }
 
-    void set_dis_AllowWork_alter(){ dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB; }
+    void set_dis_AllowWork_alter(){dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;}
 
     //如果goalObject是Resource的子类，则根据资源种类设置对应资源建筑的类型
     void set_ResourceBuildingType();

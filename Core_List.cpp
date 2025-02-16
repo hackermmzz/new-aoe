@@ -512,6 +512,19 @@ void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>
     if(optimum!=NULL) relation.set_AlterOb(optimum , dis_opti);
 }
 
+bool Core_List::canBuildDock(int BlockDR, int BlockUR,int w)
+{
+    //只能建在海洋里面
+    for(int i=0;i<w;++i){
+        for(int j=0;j<w;++j){
+            int ii=i+BlockDR,jj=j+BlockUR;
+            if(ii<0||ii>=MAP_L||jj<0||jj>=MAP_U)return 0;
+            if(theMap->cell[ii][jj].getMapType()!=MAPTYPE_OCEAN)return 0;
+        }
+    }
+    return 1;
+}
+
 //判断是否可以建造建筑
 int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int playerID, QString& chineseName)
 {
@@ -520,7 +533,7 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
     Building* tempBuild = NULL;
 
     //预创建
-    if(buildtype == BUILDING_FARM||buildtype==BUILDING_FARM)
+    if(buildtype == BUILDING_FARM)
     {
         Building_Resource* tempBuild_resource = new Building_Resource(buildtype,BlockDR,BlockUR);
         tempBuild = tempBuild_resource;
@@ -557,34 +570,27 @@ int Core_List::is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,in
         return ACTION_INVALID_HUMANBUILD_OVERLAP;
     }
 
-    if(!theMap->isFlat(BlockDR, BlockUR, blockSideLength)&&buildtype!=BUILDING_DOCK)
+    if(buildtype!=BUILDING_DOCK&&!theMap->isFlat(BlockDR, BlockUR, blockSideLength))
     {
         call_debugText("red"," 在("+QString::number(BlockDR)+","+QString::number(BlockUR)+")建造"+chineseName+" 建造失败:放置位置存在高度差或斜坡",playerID);
         return ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH;
     }
     //判断是否建立在合适的位置
-    {//其余的建筑必须建在陆地（但是船坞要特判）
-        for(int i=0;i<blockSideLength;++i){
-            for(int j=0;j<blockSideLength;++j){
-                int l=i+BlockDR,u=j+BlockUR;
-                if(theMap->cell[l][u].getMapType()==MAPTYPE_OCEAN)return ACTION_INVALID_POSITION_NOT_FIT;
-            }
+    {
+        if(buildtype==BUILDING_DOCK){
+            if(!canBuildDock(BlockDR,BlockUR,blockSideLength))
+                return ACTION_INVALID_POSITION_NOT_FIT;
         }
-        if(buildtype==BUILDING_DOCK){//船坞只能建在沿岸
-            bool flag=0;
-            for(int i=-1+BlockDR;i<=BlockDR+blockSideLength;++i){
-                for(int j=-1+BlockUR;j<=BlockUR+blockSideLength;++j){
-                    if(i>=0&&i<MAP_L&&j>=0&&j<MAP_U){
-                        if(theMap->cell[i][j].getMapType()==MAPTYPE_OCEAN){
-                            flag=1;
-                            break;
-                        }
-                    }
+        //其余的建筑必须建在陆地
+        else{
+            for(int i=0;i<blockSideLength;++i){
+                for(int j=0;j<blockSideLength;++j){
+                    int l=i+BlockDR,u=j+BlockUR;
+                    if(theMap->cell[l][u].getMapType()==MAPTYPE_OCEAN)return ACTION_INVALID_POSITION_NOT_FIT;
                 }
-                if(flag)break;
             }
-            if(!flag)return ACTION_INVALID_POSITION_NOT_FIT;
         }
+
     }
     return ACTION_SUCCESS;
 }
