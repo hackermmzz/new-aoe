@@ -69,7 +69,7 @@ private:
 
 
     /*********辅助关系表维护***********/
-    void findResourceBuiding( relation_Object& , list<Building*>&);
+    void findResourceBuiding( relation_Object& , list<Building*>&,Coordinate*obj1=0);
     bool canBuildDock(int BlockDR,int BlockUR,int w);
     int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int PlayerID, QString& chineseName);
     Missile* creatMissile(Coordinate* , Coordinate*);

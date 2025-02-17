@@ -827,7 +827,7 @@ void Core::manageOrder(int id)
                     else if(FarmerType==FARMERTYPE_SAILING){
                         if(obj->getSort()==SORT_STATICRES&&obj->getNum()==NUM_STATICRES_Fish)
                         {
-                            ret=interactionList->addRelation(nowobject,obj,CoreEven_Gather);
+                            ret=interactionList->addRelation(self,obj,CoreEven_Gather);
                             if(ret==ACTION_SUCCESS){
                                  call_debugText("green"," HumanAction:"+self->getChineseName()+" "+QString::number(self->getglobalNum())+" 捕鱼 "+ obj->getChineseName() +" "+ QString::number(obj->getglobalNum()),id);
                             }

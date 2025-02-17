@@ -205,8 +205,11 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
  */
 int Core_List::addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond , int type)
 {
+    //必须是农民才能建造
     if(object1 == NULL) return ACTION_INVALID_NULLWORKER;
-
+    if(object1->getSort()!=SORT_FARMER)return ACTION_INVALID_SN;
+    if(((Farmer*)object1)->get_farmerType()!=FARMERTYPE_FARMER)return ACTION_INVALID_SN;
+    //
     if(relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
 
     if(! relate_AllObject[object1].isExist )
@@ -465,7 +468,7 @@ void Core_List::manageRelation_updateMassage( Coordinate* object1 )
 
     if(relation.alterOb == NULL || needReset_resBuild)
     {
-        if(relation.needResourceBuilding) findResourceBuiding( relation ,  player[object1->getPlayerRepresent()]->build);
+        if(relation.needResourceBuilding) findResourceBuiding( relation ,  player[object1->getPlayerRepresent()]->build,object1);
     }
 
     relation.reset_Object1Predicted(object1);
@@ -487,18 +490,20 @@ void Core_List::eraseObject(Coordinate* eraseOb)
 //****************************************************************************************
 //辅助动态表处理交互
 //查询最近的符合要求的建筑，并设置alterOB
-void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>& building)
+void Core_List::findResourceBuiding( relation_Object& relation , list<Building*>& building,Coordinate*obj1)
 {
     int type = relation.resourceBuildingType;
     double dis, dis_opti = relation.distance_Record , dr = relation.DR_goal , ur =relation.UR_goal;
     Building* judeBuild, *optimum = NULL;
 
     list<Building*>::iterator iterNow = building.begin() , iterEnd = building.end();
-
+    //如果是渔船，只能选择船坞
+    bool flag=!(obj1&&obj1->getSort()==SORT_FARMER&&((Farmer*)obj1)->get_farmerType()==FARMERTYPE_SAILING);
+    //
     while( iterNow != iterEnd )
     {
         judeBuild = *iterNow;
-        if( judeBuild->isFinish() &&(judeBuild->getNum() == BUILDING_CENTER || judeBuild->getNum() == type))
+        if( judeBuild->isFinish() &&((judeBuild->getNum() == BUILDING_CENTER&&flag) || judeBuild->getNum() == type))
         {
             dis = calculateManhattanDistance(dr,ur,judeBuild->getDR(),judeBuild->getUR());
             if(dis < dis_opti)

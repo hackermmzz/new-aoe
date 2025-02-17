@@ -56,7 +56,7 @@ private:
     pair<int,int> FindNearstBeachToBuild(int houseType,int x,int y,int reserved);
     bool CheckSea(int x,int y);
     //void SailingAttack();
-   // void Fish();
+    void Fish();
     //pair<int x,int y>FindNearstSea(int x,int y);
 };
 

@@ -32,14 +32,14 @@ void UsrAI::processData()
      //CreateArmy();
     // GoToWork();
 
-     BuildDock();
+    // BuildDock();
      //PickGold();
      //GuoHe();
      //UpdateWeapon();
      //PickFish();
     // CreatBoat();
      //SailingAttack();
-    // Fish();
+     Fish();
 
 }
 void UsrAI::ditu(){
@@ -266,7 +266,30 @@ pair<int,int> UsrAI::FindNearstBeachToBuild(int houseType,int x,int y,int reserv
         }
         return res;
 
+}
+
+void UsrAI::Fish()
+{
+    static bool init=1;
+    if(init){
+        init=0;
+        tagFarmer farmer;
+        for(tagFarmer&f:info.farmers){
+            if(f.FarmerSort==FARMERTYPE_SAILING){
+                farmer=f;
+                break;
+            }
+        }
+        tagResource rsc;
+        for(tagResource&res:info.resources){
+            if(res.Type==RESOURCE_FISH){
+                rsc=res;
+                break;
+            }
+        }
+        HumanAction(farmer.SN,rsc.SN);
     }
+}
 
 void UsrAI::BuildDock(){
     static tagFarmer farmer[1];
