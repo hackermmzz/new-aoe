@@ -19,14 +19,33 @@ bool IsCangkuBuild=false;
 bool UpdateToFTB;
 bool IsGuoHe;
 bool IsGuCangBuilt;
+int ret=999;
 
 void UsrAI::processData()
 {
-    info=getInfo();
-    tagBuilding center=info.buildings.front();
-        CenterX=center.BlockDR,CenterY=center.BlockUR;
-     ditu();
-     CreateFarmer();
+//    info=getInfo();
+//    tagBuilding center=info.buildings.front();
+//        CenterX=center.BlockDR,CenterY=center.BlockUR;
+//     ditu();
+//     CreateFarmer();
+
+//     if(ret==999){
+//         for (int i = 0; i < info.buildings.size(); ++i) {
+//             tagBuilding& h = info.buildings[i];
+//             if (h.Type == BUILDING_DOCK && h.Percent == 100){
+//                 ret =BuildingAction(h.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
+//                 break;
+//             }
+//         }
+
+//     }
+//     auto it = info.ins_ret.find(ret);
+//     if (it!= info.ins_ret.end()) {
+//         std::cout << it->second << std::endl;
+//     } else {
+//         std::cout << "未找到对应键值" << std::endl;
+//     }
+
     // BuildHome();
     // CutDownTree();
      //CreateArmy();
@@ -37,7 +56,7 @@ void UsrAI::processData()
      //GuoHe();
      //UpdateWeapon();
      //PickFish();
-    // CreatBoat();
+//     CreatBoat();
      //SailingAttack();
      Fish();
 
@@ -386,6 +405,7 @@ void UsrAI::CreatBoat(){
                    if (WBcnt < 8){
                        if(info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {//运输船
                        BuildingAction(h.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
+                       cout<<"build wood boat"<<endl;
                        WBcnt++;
                        }
                    }else
