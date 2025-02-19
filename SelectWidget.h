@@ -33,12 +33,9 @@ public:
     //获取debug窗口显示时间
     QString getShowTime();
     int actions[ACT_WINDOW_NUM_FREE] = {0};
+    QMap<int, QString> actionResourceMap;
 private:
     Ui::SelectWidget *ui;
-//    Building * objBuilding;
-//    Coores * objCoores;
-//    GameRes * objGameRes;
-//    Human * objHuman;
     int actionStatus[ACT_WINDOW_NUM_FREE] = {0};
     MainWidget *mainPtr;
 
@@ -58,6 +55,7 @@ private:
 
     void manageBuildBottom(int position, int actNum , int buildingNum );
     void showBuildActLab();
+    void initActionResourceMap();   // 定义动作类型与资源映射
 public slots:
     void widgetAct(int num);
     int  aiAct(int actName,Coordinate* self);
