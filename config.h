@@ -79,7 +79,7 @@
 #define KEY_LEFT 65
 #define KEY_DOWN 83
 #define KEY_RIGHT 68
-#define BLOCK_COUNT 29      // Block种类计数，包括所有种类和样式的地图块数量
+#define BLOCK_COUNT 40     // Block种类计数，包括所有种类和样式的地图块数量
 #define FRAMES_PER_SECOND 25    //每秒帧数
 #define OPTION_MUSIC true
 #define OPTION_SOUND true
