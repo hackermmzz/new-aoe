@@ -1,0 +1,69 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.qrc": "xml",
+      "*.ui": "xml",
+      "*.qss": "css",
+      "*.pro": "makefile",
+      "*.pri": "makefile"
+    },
+    "C_Cpp.default.includePath": [
+      "${workspaceFolder}/**",
+      "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/**",
+      "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtCore",
+      "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtGui",
+      "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtWidgets",
+      "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtMultimedia"
+    ],
+    "C_Cpp.default.compilerPath": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/g++.exe",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++11",
+    "C_Cpp.default.intelliSenseMode": "gcc-x86",
+    "C_Cpp.autocomplete": "Default",
+    "C_Cpp.suggestSnippets": true,
+    "C_Cpp.intelliSenseEngine": "Default",
+    "C_Cpp.enhancedColorization": "Enabled",
+    "C_Cpp.default.defines": [
+      "QT_CORE_LIB",
+      "QT_GUI_LIB",
+      "QT_WIDGETS_LIB",
+      "QT_MULTIMEDIA_LIB"
+    ],
+    "terminal.integrated.env.windows": {
+      "PATH": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin;C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin;${env:PATH}"
+    },
+    "terminal.integrated.profiles.windows": {
+      "PowerShell": {
+        "source": "PowerShell",
+        "icon": "terminal-powershell",
+        "args": ["-NoProfile", "-ExecutionPolicy", "Bypass"]
+      },
+      "Command Prompt": {
+        "path": [
+          "${env:windir}\\Sysnative\\cmd.exe",
+          "${env:windir}\\System32\\cmd.exe"
+        ],
+        "args": [],
+        "icon": "terminal-cmd"
+      }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.cpptools",
+      "ms-vscode.cpptools-extension-pack",
+      "ms-vscode.cpptools-themes",
+      "twxs.cmake",
+      "hbenl.vscode-test-explorer",
+      "xaver.clang-format"
+    ]
+  }
+}

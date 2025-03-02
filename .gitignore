@@ -1,2 +1,37 @@
 *.orig
 *.user*
+
+# Qt相关临时文件
+Makefile*
+*.o
+*.obj
+moc_*
+ui_*.h
+qrc_*.cpp
+object_script.*
+*.qmake.stash
+*.rcc
+*.pro.user*
+
+# 构建目录
+debug/
+release/
+build/
+
+# 日志文件
+*.log
+
+# VS Code相关文件
+.vscode/BROWSE.VC.DB*
+.vscode/ipch/
+.vscode/.browse*
+
+# 系统相关文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.bak
+*.tmp
+*.temp
+*~
