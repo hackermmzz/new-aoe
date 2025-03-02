@@ -1,4 +1,6 @@
 #include "Map.h"
+#include <tuple>
+#include <unordered_map>
 ///////////////////////////
 Map*GlobalMap;
 ///////////////////////////
@@ -701,6 +703,77 @@ void Map::genDesert(int i, int j, int number, int Map[][74]) {
     }
     return ;
 }
+void Map::refineShore() {
+    // 创建临时地图：海洋标记为1，陆地标记为0
+    int tempMap[MAP_L][MAP_U] = {0};
+    for (int i = 0; i < MAP_L; ++i) {
+        for (int j = 0; j < MAP_U; ++j) {
+            tempMap[i][j] = (cell[i][j].getMapType() == MAPTYPE_OCEAN) ? 1 : 0;
+        }
+    }
+
+    // 定义方向编码到地形类型Num的映射，包括新增的类型
+    const std::unordered_map<int, int> codeToNum = {
+        // 上为海洋
+        {0b0010, 29},
+        // 左上为海洋
+        {0b0011, 30},
+        // 右下为海洋
+        {0b1100, 31},
+        // 右上为海洋
+        {0b0110, 32},
+        // 左为海洋
+        {0b0001, 37},
+        // 右为海洋
+        {0b0100, 38},
+        // 下为海洋
+        {0b1000, 39}
+    };
+
+    // 遍历处理每个单元格
+    for (int i = 0; i < MAP_L; ++i) {
+        for (int j = 0; j < MAP_U; ++j) {
+            if (tempMap[i][j] == 0) { // 仅处理陆地单元格
+                // 检查四个方向
+                int up = (i + 1 < MAP_L) ? tempMap[i + 1][j] : 0;
+                int right = (j + 1 < MAP_U) ? tempMap[i][j + 1] : 0;
+                int down = (i - 1 >= 0) ? tempMap[i - 1][j] : 0;
+                int left = (j - 1 >= 0) ? tempMap[i][j - 1] : 0;
+
+                // 检查四个角落
+                int upRight = (i + 1 < MAP_L && j + 1 < MAP_U) ? tempMap[i + 1][j + 1] : 0;
+                int upLeft = (i + 1 < MAP_L && j - 1 >= 0) ? tempMap[i + 1][j - 1] : 0;
+                int downRight = (i - 1 >= 0 && j + 1 < MAP_U) ? tempMap[i - 1][j + 1] : 0;
+                int downLeft = (i - 1 >= 0 && j - 1 >= 0) ? tempMap[i - 1][j - 1] : 0;
+
+                // 计算基本方向编码（下、右、上、左）
+                int dirCode = (down << 3) | (right << 2) | (up << 1) | left;
+
+                // 特殊情况处理：角落
+                if (upRight && !up && !right) {
+                    cell[i][j].Num = 36; // 右上角
+                }
+                else if (upLeft && !up && !left) {
+                    cell[i][j].Num = 34; // 左上角
+                }
+                else if (downRight && !down && !right) {
+                    cell[i][j].Num = 35; // 右下角
+                }
+                else if (downLeft && !down && !left) {
+                    cell[i][j].Num = 33; // 左下角
+                }
+                // 如果不是特殊的角落情况，使用基本方向编码查找
+                else {
+                    auto it = codeToNum.find(dirCode);
+                    if (it != codeToNum.end()) {
+                        cell[i][j].Num = it->second;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 /*
  * 函数：generateLandforms；
@@ -1429,17 +1502,6 @@ void Map::add_Map_Vision( Coordinate* object )
     return;
 }
 
-//void Map::clearfindPathMap() {
-//    for (int i = 0; i < MAP_L; ++i)
-//    {
-//        for (int j = 0; j < MAP_U; ++j)
-//        {
-//            findPathMap[i][j] = 0;
-//        }
-//    }
-//}
-
-
  void Map::init_Map_Height()
  {
      for(int x = 0; x<MAP_L; x++)
@@ -1834,7 +1896,7 @@ bool Map::GenerateTerrain() {
                     if(m_heightMap[i][j] == height && count < 4) m_heightMap[i][j] --;
                     else if(m_heightMap[i][j] == height - 1 && count >= 5) m_heightMap[i][j] ++;
                     if(m_heightMap[i][j] > 5 || m_heightMap[i][j] < 0) {
-                        qDebug() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap[i][j];
+                        qWarning() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap[i][j];
                         return false;
                     }
                 }
@@ -1859,7 +1921,7 @@ bool Map::GenerateTerrain() {
     for(int i = 2; i < GENERATE_L-2; i ++) {
         for(int j = 2; j < GENERATE_U-2; j ++) {
             if(m_heightMap[i][j] > 5 || m_heightMap[i][j] < 0) {
-                qDebug() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap;
+                qWarning() << "Map::GenerateTerrain() ERROR：m_heightMap[" << i << "][" << j << "] == " << m_heightMap;
                 return false;
             }
         }
@@ -2062,13 +2124,13 @@ void Map::loadGenerateMapText(int MapJudge)
 {
     QFile file("map.txt");
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        qDebug()<<"文件打开错误";
+        qWarning()<<"文件打开错误";
         return;
     }
     QJsonParseError * error = nullptr;
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll(),error);
     if(error){
-        qDebug()<<"json error";
+        qWarning()<<"json error";
         return;
     }
     file.close();
@@ -2144,6 +2206,7 @@ bool Map::CheckIsNearOcean(int x, int y)
 void Map::init(int MapJudge) {
     InitCell(0, MAP_EXPLORE, true);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText(MapJudge);  //载入地图
+//    refineShore();
 }
 
 
