@@ -48,6 +48,7 @@ public:
     //加载障碍物地图
     void loadBarrierMap(bool absolute = false);
     void loadBarrierMap_ByObjectMap();
+    bool CanCrush(Coordinate*object);
     /*********************寻路相关*******************/
     bool isBarrier(Point blockPoint,int blockSideLen = 1 );
     bool isBarrier( int blockDR , int blockUR, int &bDR_barrier , int &bUR_barrier ,int blockSideLen = 1 );

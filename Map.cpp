@@ -1066,14 +1066,24 @@ void Map::loadBarrierMap_ByObjectMap()
             for(int i = 0; i<size; i++)
             {
                 object = map_Object[x][y][i];
-                if(object->getSort() == SORT_STATICRES && (object->getNum() == NUM_STATICRES_Bush||object->getNum()==NUM_STATICRES_Fish))
-                    continue;
-
+                if(CanCrush(object)==0)continue;
                 barrierMap[x][y] = 1;
                 break;
             }
         }
     return;
+}
+
+bool Map::CanCrush(Coordinate *object)
+{
+    if(object->getSort() == SORT_STATICRES && (object->getNum() == NUM_STATICRES_Bush||object->getNum()==NUM_STATICRES_Fish))
+        return 0;
+    if(object->getSort()==SORT_FARMER||object->getSort()==SORT_ARMY||object->getSort()==SORT_HUMAN){
+        Human*human=(Human*)object;
+        if(human->getTransported())
+            return 0;
+    }
+    return 1;
 }
 
 
