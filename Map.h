@@ -35,6 +35,8 @@ public:
 
     // 生成不同地貌
     void generateLandforms();
+    // 重绘海岸
+    void refineShore();
 
     // 判断地图块是否为斜坡
     bool isSlope(int BlockDR, int BlockUR);

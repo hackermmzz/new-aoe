@@ -47,25 +47,30 @@ public:
 
     void resetNowObject_Click(bool isStop = false);
     void requestSound_Click( Coordinate* object );
+
+    void updateByPlayer(int id);  //更新tagGame
+    void updateCommon(tagInfo* taginfo);//更新tagGame
+
+    void judge_Crush();
+    bool judge_CanTransPort(Coordinate*obj1,Coordinate*obj2);
+
+    void loadRelationMap();
+
+    /************管理添加表************/
+    void manageMouseEvent();    //鼠标添加
+    void manageOrder(int id);     //指令添加
+
 private:
     Player** player;    //player信息
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
     MouseEvent *mouseEvent; //记录当前鼠标事件
     Core_List* interactionList;
-
-
-    void updateByPlayer(int id);  //更新tagGame
-    void updateCommon(tagInfo* taginfo);//更新tagGame
-
-    void loadRelationMap();
-
     vector<MoveObject*> moveOb_judCrush;
-    /************管理添加表************/
-    void manageMouseEvent();    //鼠标添加
-    void manageOrder(int id);     //指令添加
-
-    void judge_Crush();
-    bool judge_CanTransPort(Coordinate*obj1,Coordinate*obj2);
+    
+    void logActionResult(int ret, Coordinate* self, Coordinate* obj, int actionType, int option, QString desc, int id);
+    int handleFarmerAction(Coordinate* self, Coordinate* obj, int id);
+    int handleMilitaryAction(Coordinate* self, Coordinate* obj, int id);
+    int handleBuildingAction(Coordinate* self, int option, int id);
 
 };
 
