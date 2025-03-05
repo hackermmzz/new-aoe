@@ -120,86 +120,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="ActWidget" name="interact3" native="true">
-   <property name="geometry">
-    <rect>
-     <x>480</x>
-     <y>810</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact8" native="true">
-   <property name="geometry">
-    <rect>
-     <x>480</x>
-     <y>900</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact5" native="true">
-   <property name="geometry">
-    <rect>
-     <x>660</x>
-     <y>810</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact2" native="true">
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>810</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact1" native="true">
-   <property name="geometry">
-    <rect>
-     <x>300</x>
-     <y>810</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact4" native="true">
-   <property name="geometry">
-    <rect>
-     <x>570</x>
-     <y>810</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact6" native="true">
-   <property name="geometry">
-    <rect>
-     <x>300</x>
-     <y>900</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact7" native="true">
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>900</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLCDNumber" name="lcdNumber">
    <property name="geometry">
     <rect>
@@ -288,26 +208,6 @@
    </property>
    <property name="text">
     <string/>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact9" native="true">
-   <property name="geometry">
-    <rect>
-     <x>570</x>
-     <y>900</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="ActWidget" name="interact10" native="true">
-   <property name="geometry">
-    <rect>
-     <x>660</x>
-     <y>900</y>
-     <width>81</width>
-     <height>81</height>
-    </rect>
    </property>
   </widget>
   <widget class="QTextBrowser" name="DebugTexter">
@@ -576,6 +476,54 @@
    <property name="text">
     <string>关于我们</string>
    </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>820</y>
+     <width>461</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="ActWidget" name="interact1" native="true"/>
+    </item>
+    <item row="0" column="1">
+     <widget class="ActWidget" name="interact2" native="true"/>
+    </item>
+    <item row="0" column="2">
+     <widget class="ActWidget" name="interact3" native="true"/>
+    </item>
+    <item row="0" column="3">
+     <widget class="ActWidget" name="interact4" native="true"/>
+    </item>
+    <item row="0" column="4">
+     <widget class="ActWidget" name="interact5" native="true"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="ActWidget" name="interact7" native="true"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="ActWidget" name="interact8" native="true"/>
+    </item>
+    <item row="1" column="2">
+     <widget class="ActWidget" name="interact9" native="true"/>
+    </item>
+    <item row="1" column="3">
+     <widget class="ActWidget" name="interact10" native="true"/>
+    </item>
+    <item row="1" column="4">
+     <widget class="ActWidget" name="interact11" native="true"/>
+    </item>
+    <item row="1" column="5">
+     <widget class="ActWidget" name="interact12" native="true"/>
+    </item>
+    <item row="0" column="5">
+     <widget class="ActWidget" name="interact6" native="true"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

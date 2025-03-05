@@ -1,5 +1,8 @@
 INPUT(
+<<<<<<< HEAD
 ./release\Logger.o
+=======
+>>>>>>> 37a1a2af495adb996219d9390e45aa515020703e
 ./release\main.o
 ./release\MainWidget.o
 ./release\GameWidget.o
@@ -31,6 +34,10 @@ INPUT(
 ./release\ViewWidget.o
 ./release\Option.o
 ./release\AboutDialog.o
+<<<<<<< HEAD
+=======
+./release\Logger.o
+>>>>>>> 37a1a2af495adb996219d9390e45aa515020703e
 ./release\moc_MainWidget.o
 ./release\moc_GameWidget.o
 ./release\moc_ActWidget.o

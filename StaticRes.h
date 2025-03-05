@@ -19,7 +19,7 @@ public:
     StaticRes(int Num, int BlockDR, int BlockUR);
 
   /**********************虚函数**************************/
-    void nextframe(){}
+    void nextframe();
     int getSort(){return SORT_STATICRES;}
 
     QString getChineseName(){ return QString::fromStdString(getStaticResDisplayName(Num)); }
@@ -50,9 +50,9 @@ public:
   /**********************以上静态函数**************************/
 
 private:
-    static std::string StaticResDisplayName[3];
-    static std::string StaticResname[3];
-    static std::list<ImageResource> *staticResource[3]; //存储image资源的链表
+    static std::string StaticResDisplayName[10];
+    static std::string StaticResname[10];
+    static std::list<ImageResource> *staticResource[10]; //存储image资源的链表
 };
 
 #endif // STATICRES_H

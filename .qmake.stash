@@ -1,4 +1,5 @@
 QMAKE_CXX.INCDIRS = \
+<<<<<<< HEAD
     D:/Downloads/qt/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include \
     D:/Downloads/qt/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include-fixed \
     D:/Downloads/qt/Tools/mingw530_32/i686-w64-mingw32/include \
@@ -10,6 +11,19 @@ QMAKE_CXX.LIBDIRS = \
     D:/Downloads/qt/Tools/mingw530_32/lib/gcc \
     D:/Downloads/qt/Tools/mingw530_32/i686-w64-mingw32/lib \
     D:/Downloads/qt/Tools/mingw530_32/lib
+=======
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include-fixed \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/i686-w64-mingw32/include \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/i686-w64-mingw32/include/c++ \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/i686-w64-mingw32/include/c++/i686-w64-mingw32 \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/i686-w64-mingw32/include/c++/backward
+QMAKE_CXX.LIBDIRS = \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0 \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/lib/gcc \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/i686-w64-mingw32/lib \
+    C:/Qt/Qt5.9.2/Tools/mingw530_32/lib
+>>>>>>> 37a1a2af495adb996219d9390e45aa515020703e
 QMAKE_CXX.QT_COMPILER_STDCXX = 199711L
 QMAKE_CXX.QMAKE_GCC_MAJOR_VERSION = 5
 QMAKE_CXX.QMAKE_GCC_MINOR_VERSION = 3

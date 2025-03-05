@@ -219,6 +219,7 @@ struct tagFarmer: public tagHuman
 {
     int ResourceSort; // 手持资源种类
     int Resource; // 手持资源数量
+    int FarmerSort;//农民的类型
     tagFarmer toEnemy(){
         Resource = -1;
         DR0= -1.0;
@@ -304,6 +305,10 @@ struct tagMap
         remain = -1;
     }
 };
+struct tagTerrain{
+  int height;
+   int type;
+};
 struct tagInfo
 {
     vector<tagBuilding> buildings; // 我方建筑列表
@@ -314,7 +319,7 @@ struct tagInfo
     vector<tagArmy> enemy_armies; // 敌方军队列表
     vector<tagResource> resources; // 资源列表
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
-    int theMap[MAP_L][MAP_U]; // 高程图
+    tagTerrain theMap[MAP_L][MAP_U]; // 高程图
     int GameFrame; // 游戏帧数
     int civilizationStage; // 文明阶段
     int Wood; // 木材数量

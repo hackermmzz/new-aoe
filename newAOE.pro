@@ -26,7 +26,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    Logger.cpp \
         main.cpp \
         MainWidget.cpp \
     GameWidget.cpp \
@@ -58,9 +57,9 @@ SOURCES += \
     ViewWidget.cpp \
     Option.cpp \
     AboutDialog.cpp \
+    Logger.cpp
 
 HEADERS += \
-    Logger.h \
         MainWidget.h \
     GameWidget.h \
     config.h \
@@ -93,7 +92,7 @@ HEADERS += \
     Option.h \
     digitalConfig.h \
     AboutDialog.h \
-    config.h \
+    Logger.h
 
 FORMS += \
         MainWidget.ui \
@@ -101,5 +100,3 @@ FORMS += \
     SelectWidget.ui \
     Option.ui \
     AboutDialog.ui
-
-

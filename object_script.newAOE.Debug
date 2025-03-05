@@ -1,5 +1,8 @@
 INPUT(
+<<<<<<< HEAD
 ./debug\Logger.o
+=======
+>>>>>>> 37a1a2af495adb996219d9390e45aa515020703e
 ./debug\main.o
 ./debug\MainWidget.o
 ./debug\GameWidget.o
@@ -31,6 +34,10 @@ INPUT(
 ./debug\ViewWidget.o
 ./debug\Option.o
 ./debug\AboutDialog.o
+<<<<<<< HEAD
+=======
+./debug\Logger.o
+>>>>>>> 37a1a2af495adb996219d9390e45aa515020703e
 ./debug\moc_MainWidget.o
 ./debug\moc_GameWidget.o
 ./debug\moc_ActWidget.o
