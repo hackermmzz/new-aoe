@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Qt Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/debug/newAOE.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "qmake & make"
+    },
+    {
+      "name": "Qt Release",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/release/newAOE.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "qmake & make release"
+    }
+  ]
+}
