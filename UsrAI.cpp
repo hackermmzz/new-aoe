@@ -23,11 +23,17 @@ int ret=999;
 
 void UsrAI::processData()
 {
+
+    /*
+    //写入你的代码
+    myInFo=getInfo();
+=======
 //    info=getInfo();
 //    tagBuilding center=info.buildings.front();
 //        CenterX=center.BlockDR,CenterY=center.BlockUR;
 //     ditu();
 //     CreateFarmer();
+>>>>>>> 37a1a2af495adb996219d9390e45aa515020703e
 
 //     if(ret==999){
 //         for (int i = 0; i < info.buildings.size(); ++i) {
