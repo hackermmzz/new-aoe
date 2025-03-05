@@ -473,7 +473,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 
         dr2 = relation.DR_alter;
         ur2 = relation.UR_alter;
-//        dis_r+=relation.crashLength_alter;
+//      dis_r+=relation.crashLength_alter;
     }
     else
     {

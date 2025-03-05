@@ -25,6 +25,7 @@ build/
 .vscode/BROWSE.VC.DB*
 .vscode/ipch/
 .vscode/.browse*
+.bat
 
 # 系统相关文件
 .DS_Store

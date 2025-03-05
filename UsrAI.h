@@ -30,34 +30,6 @@ private:
     {
         tagUsrGame.clearInsRet();
     }
-  /***************AI閫氫俊鍑芥暟锛岃鍕夸慨鏀?**************/
-    void BuildHome();//閫犳埧瀛?
-    void ditu();//鍦板浘
-    tagFarmer GetFarmer();//閫犲啘姘?
-    void GetFarmer(tagFarmer&sn);//鎵惧啘姘?
-    void RecycleFarmer(tagFarmer&farmer);
-    int GetBuildingWidth(int Type,int reservced);
-    pair<int,int>GetFittestBlockToBuildHouse(int houseType,int x,int y,int interval,int reserved0,int reserved1);
-    bool CheckTaretBlockCanBuildTargetTypeBuilding(int houseType,int x,int y,int interval);
-    pair<int,int>GetResourceCenter(vector<tagResource>&rsc);
-    void  CreateFarmer();
-    void CutDownTree();
-    //void CreateArmy();
-    void GoToWork();
-    bool CheckCanBuildDock( int l, int u);
-    void BuildDock();
-    void PickGold();
-    //void GuoHe();
-   // void UpdateWeapon();
-    void PickFish();
-   // pair<int,int>GetBlockToBuildDock(int houseType,int x,int y);
-    pair<int,int>FindNearstBeach(int x,int y);
-    void CreatBoat();
-    pair<int,int> FindNearstBeachToBuild(int houseType,int x,int y,int reserved);
-    bool CheckSea(int x,int y);
-    //void SailingAttack();
-    void Fish();
-    //pair<int x,int y>FindNearstSea(int x,int y);
 };
 
 

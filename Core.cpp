@@ -545,6 +545,8 @@ void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int&
     gold = player[playerRepresent]->getGold();
 }
 
+
+
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
@@ -1104,7 +1106,7 @@ void Core::judge_Crush()
                 /****当前取消移动物体之间的碰撞******/
 //                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
 //                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
-                if(barrierOb->getSort() == SORT_STATICRES && (barrierOb->getNum() == NUM_STATICRES_Bush||barrierOb->getNum()==NUM_STATICRES_Fish)) continue;   //浆果和渔场不碰撞
+                if(!theMap->CanCrush(barrierOb))continue;
                 /****当前取消移动物体之间的碰撞******/
                 //判断碰撞，碰撞箱有重合
                 if(judOb->isCrash(barrierOb))break;
