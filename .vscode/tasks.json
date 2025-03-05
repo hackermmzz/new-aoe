@@ -1,0 +1,97 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "qmake",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/qmake.exe",
+      "args": ["-spec", "win32-g++", "CONFIG+=debug", "CONFIG+=qml_debug"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "make",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/mingw32-make.exe",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "dependsOn": ["qmake"]
+    },
+    {
+      "label": "make release",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/mingw32-make.exe",
+      "args": ["release"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "dependsOn": ["qmake"]
+    },
+    {
+      "label": "qmake & make",
+      "dependsOrder": "sequence",
+      "dependsOn": ["qmake", "make"],
+      "problemMatcher": []
+    },
+    {
+      "label": "qmake & make release",
+      "dependsOrder": "sequence",
+      "dependsOn": ["qmake", "make release"],
+      "problemMatcher": []
+    },
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/mingw32-make.exe",
+      "args": ["clean"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Qt Designer",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/designer.exe",
+      "args": [],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Qt Assistant",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/assistant.exe",
+      "args": [],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate UI Headers",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/uic.exe",
+      "args": [
+        "-o",
+        "${fileDirname}/ui_${fileBasenameNoExtension}.h",
+        "${file}"
+      ],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

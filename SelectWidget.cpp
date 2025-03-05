@@ -860,7 +860,6 @@ void SelectWidget::drawActs()
             }
         } else {
             actionKey = "Button"; // 默认值
-            qWarning() << "Unknown action type:" << actions[i];
         }
 
         std::string actionKeyStd = actionKey.toStdString();
