@@ -81,8 +81,8 @@
 #define KEY_RIGHT 68
 #define BLOCK_COUNT 40     // Block种类计数，包括所有种类和样式的地图块数量
 #define FRAMES_PER_SECOND 25    //每秒帧数
-#define OPTION_MUSIC true
-#define OPTION_SOUND true
+#define OPTION_MUSIC false
+#define OPTION_SOUND false
 #define OPTION_SELECT false
 #define OPTION_LINE false
 #define OPTION_POS false
