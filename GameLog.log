@@ -1,17 +1,153 @@
-00:00:000 | 0 |   Info   | 51 | Logger.cpp | init | "æ—¥å¿—æœåŠ¡å¯åŠ¨ï¼æ—¥å¿—çº§åˆ«ï¼š Debug  "
-00:00:000 | 0 |   Info   | 53 | MainWidget.cpp | MainWidget | ä¸»ç¨‹åºå¯åŠ¨å‚æ•°ï¼š 0  å¼€å§‹åˆå§‹åŒ–...
-00:00:091 | 0 |  Debug   | 90 | MainWidget.cpp | initGameResources | æ¸¸æˆèµ„æºåˆå§‹åŒ–...
-00:04:809 | 0 |  Debug   | 96 | MainWidget.cpp | initGameElements | æ¸¸æˆå…ƒç´ åˆå§‹åŒ–...
-00:06:002 | 0 |  Debug   | 107 | MainWidget.cpp | initWindowProperties | æ¸¸æˆçª—å£åˆå§‹åŒ–...
-00:06:002 | 0 |  Debug   | 114 | MainWidget.cpp | initOptions | çª—å£é€‰é¡¹åˆå§‹åŒ–...
-00:06:025 | 0 |  Debug   | 148 | MainWidget.cpp | initInfoPane | æ¸¸æˆå®ä½“å±æ€§æ¡†åˆå§‹åŒ–...
-00:06:046 | 0 |  Debug   | 169 | MainWidget.cpp | initGameTimer | åˆå§‹åŒ–è®¡æ—¶å™¨...
-00:06:049 | 0 |  Debug   | 179 | MainWidget.cpp | initPlayers | åˆå§‹åŒ–ç©å®¶...
-00:06:073 | 0 |  Debug   | 195 | MainWidget.cpp | initMap | åˆå§‹åŒ–åœ°å›¾...
-00:07:468 | 0 |  Debug   | 223 | MainWidget.cpp | setupCore | åŠ è½½å†…æ ¸...
-00:07:468 | 0 |  Debug   | 211 | MainWidget.cpp | initAI | åŠ è½½AI...
-00:07:468 | 0 |  Debug   | 230 | MainWidget.cpp | setupMouseTracking | è®¾ç½®é¼ æ ‡è·Ÿè¸ª...
-00:07:469 | 0 |  Debug   | 237 | MainWidget.cpp | setupTipLabel | è®¾ç½®ä¿¡æ¯æ æ–‡æœ¬é¢œè‰²...
-00:07:470 | 0 |  Debug   | 254 | MainWidget.cpp | initViewMap | åˆå§‹åŒ–å°åœ°å›¾...
-00:07:470 | 0 |  Debug   | 245 | MainWidget.cpp | initBGM | åŠ è½½èƒŒæ™¯éŸ³ä¹...
-00:07:471 | 0 |   Info   | 85 | MainWidget.cpp | MainWidget | åˆå§‹åŒ–ç»“æŸï¼Œæ¸¸æˆå¼€å§‹ï¼
+00:00:000 | 0 |   Info   | 51 | Logger.cpp | init | "ÈÕÖ¾·şÎñÆô¶¯£¡ÈÕÖ¾¼¶±ğ£º Debug  "
+00:00:000 | 0 |   Info   | 53 | MainWidget.cpp | MainWidget | Ö÷³ÌĞòÆô¶¯²ÎÊı£º 0  ¿ªÊ¼³õÊ¼»¯...
+00:00:022 | 0 |  Debug   | 90 | MainWidget.cpp | initGameResources | ÓÎÏ·×ÊÔ´³õÊ¼»¯...
+00:01:312 | 0 |  Debug   | 96 | MainWidget.cpp | initGameElements | ÓÎÏ·ÔªËØ³õÊ¼»¯...
+00:02:309 | 0 |  Debug   | 107 | MainWidget.cpp | initWindowProperties | ÓÎÏ·´°¿Ú³õÊ¼»¯...
+00:02:309 | 0 |  Debug   | 114 | MainWidget.cpp | initOptions | ´°¿ÚÑ¡Ïî³õÊ¼»¯...
+00:02:315 | 0 |  Debug   | 148 | MainWidget.cpp | initInfoPane | ÓÎÏ·ÊµÌåÊôĞÔ¿ò³õÊ¼»¯...
+00:02:315 | 0 |  Debug   | 169 | MainWidget.cpp | initGameTimer | ³õÊ¼»¯¼ÆÊ±Æ÷...
+00:02:315 | 0 |  Debug   | 179 | MainWidget.cpp | initPlayers | ³õÊ¼»¯Íæ¼Ò...
+00:02:315 | 0 |  Debug   | 195 | MainWidget.cpp | initMap | ³õÊ¼»¯µØÍ¼...
+00:02:452 | 0 |  Debug   | 223 | MainWidget.cpp | setupCore | ¼ÓÔØÄÚºË...
+00:02:453 | 0 |  Debug   | 211 | MainWidget.cpp | initAI | ¼ÓÔØAI...
+00:02:453 | 0 |  Debug   | 230 | MainWidget.cpp | setupMouseTracking | ÉèÖÃÊó±ê¸ú×Ù...
+00:02:453 | 0 |  Debug   | 237 | MainWidget.cpp | setupTipLabel | ÉèÖÃĞÅÏ¢À¸ÎÄ±¾ÑÕÉ«...
+00:02:453 | 0 |  Debug   | 254 | MainWidget.cpp | initViewMap | ³õÊ¼»¯Ğ¡µØÍ¼...
+00:02:453 | 0 |  Debug   | 245 | MainWidget.cpp | initBGM | ¼ÓÔØ±³¾°ÒôÀÖ...
+00:02:453 | 0 |   Info   | 85 | MainWidget.cpp | MainWidget | ³õÊ¼»¯½áÊø£¬ÓÎÏ·¿ªÊ¼£¡
+00:07:676 | 16 |   Info   | 1054 | Core.cpp | manageOrder | 1 ºÅÍæ¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:07:676 | 16 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??Íæ¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:11:970 | 266 |  Debug   | 198 | EnemyAI.cpp | processData | 266
+00:11:970 | 266 |  Debug   | 198 | EnemyAI.cpp | processData | 266
+00:12:003 | 268 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?Íæ¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:12:003 | 268 |   Info   | 1054 | Core.cpp | manageOrder | 1 Íæ¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:15:259 | 518 |  Debug   | 198 | EnemyAI.cpp | processData | 518
+00:15:259 | 518 |  Debug   | 198 | EnemyAI.cpp | processData | 518
+00:15:269 | 520 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:15:269 | 520 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:18:695 | 770 |  Debug   | 198 | EnemyAI.cpp | processData | 770
+00:18:695 | 770 |  Debug   | 198 | EnemyAI.cpp | processData | 770
+00:18:730 | 772 |   Info   | 1054 | Core.cpp | manageOrder | 1 ¼ÒÖ¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:18:730 | 772 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??Ö¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:21:808 | 1022 |  Debug   | 198 | EnemyAI.cpp | processData | 1022
+00:21:809 | 1022 |  Debug   | 198 | EnemyAI.cpp | processData | 1022
+00:21:842 | 1024 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?Ö¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:21:842 | 1024 |   Info   | 1054 | Core.cpp | manageOrder | 1 Ö¸Áî£º Ö´ĞĞ³É¹¦ 
+
+00:25:015 | 1274 |  Debug   | 198 | EnemyAI.cpp | processData | 1274
+00:25:015 | 1274 |  Debug   | 198 | EnemyAI.cpp | processData | 1274
+00:25:046 | 1276 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??Áî£º Ö´ĞĞ³É¹¦ 
+
+00:25:046 | 1276 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?Áî£º Ö´ĞĞ³É¹¦ 
+
+00:29:094 | 1526 |  Debug   | 198 | EnemyAI.cpp | processData | 1526
+00:29:094 | 1526 |  Debug   | 198 | EnemyAI.cpp | processData | 1526
+00:29:124 | 1528 |   Info   | 1054 | Core.cpp | manageOrder | 1 Áî£º Ö´ĞĞ³É¹¦ 
+
+00:29:125 | 1528 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??£º Ö´ĞĞ³É¹¦ 
+
+00:33:867 | 1778 |  Debug   | 198 | EnemyAI.cpp | processData | 1778
+00:33:867 | 1778 |  Debug   | 198 | EnemyAI.cpp | processData | 1778
+00:33:874 | 1780 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?£º Ö´ĞĞ³É¹¦ 
+
+00:33:874 | 1780 |   Info   | 1054 | Core.cpp | manageOrder | 1 £º Ö´ĞĞ³É¹¦ 
+
+00:37:881 | 2030 |  Debug   | 198 | EnemyAI.cpp | processData | 2030
+00:37:881 | 2030 |  Debug   | 198 | EnemyAI.cpp | processData | 2030
+00:37:913 | 2032 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?? Ö´ĞĞ³É¹¦ 
+
+00:37:913 | 2032 |   Info   | 1054 | Core.cpp | manageOrder | 1 ? Ö´ĞĞ³É¹¦ 
+
+00:40:936 | 2282 |  Debug   | 198 | EnemyAI.cpp | processData | 2282
+00:40:936 | 2282 |  Debug   | 198 | EnemyAI.cpp | processData | 2282
+00:40:967 | 2284 |   Info   | 1054 | Core.cpp | manageOrder | 1  Ö´ĞĞ³É¹¦ 
+
+00:40:967 | 2284 |   Info   | 1054 | Core.cpp | manageOrder | 1 Ö´ĞĞÊ§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:44:029 | 2534 |  Debug   | 198 | EnemyAI.cpp | processData | 2534
+00:44:029 | 2534 |  Debug   | 198 | EnemyAI.cpp | processData | 2534
+00:44:062 | 2536 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??ĞĞÊ§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:44:062 | 2536 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?ĞĞÊ§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:47:319 | 2786 |  Debug   | 198 | EnemyAI.cpp | processData | 2786
+00:47:319 | 2786 |  Debug   | 198 | EnemyAI.cpp | processData | 2786
+00:47:351 | 2788 |   Info   | 1054 | Core.cpp | manageOrder | 1 ĞĞÊ§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:47:351 | 2788 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??Ê§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:52:393 | 3038 |  Debug   | 198 | EnemyAI.cpp | processData | 3038
+00:52:393 | 3038 |  Debug   | 198 | EnemyAI.cpp | processData | 3038
+00:52:442 | 3040 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?Ê§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:52:442 | 3040 |   Info   | 1054 | Core.cpp | manageOrder | 1 Ê§°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:56:331 | 3290 |  Debug   | 198 | EnemyAI.cpp | processData | 3290
+00:56:331 | 3290 |  Debug   | 198 | EnemyAI.cpp | processData | 3290
+00:56:363 | 3292 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+00:56:363 | 3292 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?°Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:00:204 | 3542 |  Debug   | 198 | EnemyAI.cpp | processData | 3542
+01:00:204 | 3542 |  Debug   | 198 | EnemyAI.cpp | processData | 3542
+01:00:213 | 3544 |   Info   | 1054 | Core.cpp | manageOrder | 1 °Ü£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:00:213 | 3544 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:04:309 | 3794 |  Debug   | 198 | EnemyAI.cpp | processData | 3794
+01:04:309 | 3794 |  Debug   | 198 | EnemyAI.cpp | processData | 3794
+01:04:318 | 3796 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?£¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:04:318 | 3796 |   Info   | 1054 | Core.cpp | manageOrder | 1 £¬´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:07:526 | 4046 |  Debug   | 198 | EnemyAI.cpp | processData | 4046
+01:07:526 | 4046 |  Debug   | 198 | EnemyAI.cpp | processData | 4046
+01:07:557 | 4048 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:07:557 | 4048 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:11:483 | 4298 |  Debug   | 198 | EnemyAI.cpp | processData | 4298
+01:11:483 | 4298 |  Debug   | 198 | EnemyAI.cpp | processData | 4298
+01:11:521 | 4300 |   Info   | 1054 | Core.cpp | manageOrder | 1 ´íÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:11:521 | 4300 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??ÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:15:064 | 4550 |  Debug   | 198 | EnemyAI.cpp | processData | 4550
+01:15:064 | 4550 |  Debug   | 198 | EnemyAI.cpp | processData | 4550
+01:15:104 | 4552 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?ÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:15:104 | 4552 |   Info   | 1054 | Core.cpp | manageOrder | 1 ÎóÂë£º Ö´ĞĞ³É¹¦ 
+
+01:19:207 | 4802 |  Debug   | 198 | EnemyAI.cpp | processData | 4802
+01:19:207 | 4802 |  Debug   | 198 | EnemyAI.cpp | processData | 4802
+01:19:215 | 4804 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??Âë£º Ö´ĞĞ³É¹¦ 
+
+01:19:215 | 4804 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?Âë£º Ö´ĞĞ³É¹¦ 
+
+01:23:302 | 5054 |  Debug   | 198 | EnemyAI.cpp | processData | 5054
+01:23:302 | 5054 |  Debug   | 198 | EnemyAI.cpp | processData | 5054
+01:23:334 | 5056 |   Info   | 1054 | Core.cpp | manageOrder | 1 Âë£º Ö´ĞĞ³É¹¦ 
+
+01:23:334 | 5056 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??£º Ö´ĞĞ³É¹¦ 
+
+01:27:374 | 5306 |  Debug   | 198 | EnemyAI.cpp | processData | 5306
+01:27:374 | 5306 |  Debug   | 198 | EnemyAI.cpp | processData | 5306
+01:27:386 | 5308 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?£º Ö´ĞĞ³É¹¦ 
+
+01:27:386 | 5308 |   Info   | 1054 | Core.cpp | manageOrder | 1 £º Ö´ĞĞ³É¹¦ 
+
+01:31:495 | 5558 |  Debug   | 198 | EnemyAI.cpp | processData | 5558
+01:31:496 | 5558 |  Debug   | 198 | EnemyAI.cpp | processData | 5558
+01:31:531 | 5560 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?? Ö´ĞĞ³É¹¦ 
+
+01:31:531 | 5560 |   Info   | 1054 | Core.cpp | manageOrder | 1 ? Ö´ĞĞ³É¹¦ 
+
