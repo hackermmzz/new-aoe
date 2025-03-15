@@ -1,6 +1,7 @@
 #include "Map.h"
 #include <tuple>
 #include <unordered_map>
+#include <iostream>
 ///////////////////////////
 Map*GlobalMap;
 ///////////////////////////
@@ -703,6 +704,100 @@ void Map::genDesert(int i, int j, int number, int Map[][74]) {
     }
     return ;
 }
+
+// 海-陆边界 编码到地块类型的映射
+// 使用8位编码系统，包含所有8个方向
+// 位模式: [左下角|右下角|右上角|左上角|下|右|上|左]
+const std::map<int, int> OceanCodeToNum = {
+    // 基本方向
+    {0b00000001, 37},     // 左
+    {0b00000010, 29},     // 上
+    {0b00000100, 38},     // 右
+    {0b00001000, 39},     // 下
+    // 组合方向
+    {0b00000011, 30},     // 左上
+    {0b00000110, 32},     // 右上
+    {0b00001001, 40},     // 左下
+    {0b00001100, 31},     // 右下
+    // 单个角落
+    {0b00010000, 34},     // 左上角
+    {0b00100000, 36},     // 右上角
+    {0b01000000, 35},     // 右下角
+    {0b10000000, 33}      // 左下角
+};
+// 沙地-草地边界 编码到地块类型的映射
+const std::map<int, int> SandCodeToNum = {
+    // 基本方向
+    {0b00000001, 8},     // 左
+    {0b00000010, 15},     // 上
+    {0b00000100, 2},     // 右
+    {0b00001000, 6},     // 下
+    // 组合方向
+    {0b00000011, 10},     // 左上
+    {0b00000110, 5},     // 右上
+    {0b00001001, 4},     // 左下
+    {0b00001100, 13},     // 右下*
+    // 单个角落
+    {0b00010000, 14},     // 左上角
+    {0b00100000, 12},     // 右上角
+    {0b01000000, 13},     // 右下角
+    {0b10000000, 4}      // 左下角*
+};
+
+/**
+ * 函数：Map::drawEdge；
+ * 参数：tempMap[MAP_L][MAP_U]——地形标记地图；
+ *      codeToNum——编码到地块类型的映射；方向为类型2相对类型1的方位；
+ *      MapType1——类型1；
+ *      MapType2——类型2；
+ *      MapType3——在tempMap中标记边界地形为MapType3；
+ * 内容：绘制地形交界；
+ * 返回值：空。
+ */
+void Map::drawEdge(int tempMap[MAP_L][MAP_U] ,std::map<int, int> codeToNum,int MapType1,int MapType2,int MapType3) {
+    for (int i = 0; i < MAP_L; ++i) {
+        for (int j = 0; j < MAP_U; ++j) {
+            if (tempMap[i][j] == MapType1) { // 仅处理陆地单元格
+                // 检查八个方向
+                int left = (i > 0) ? tempMap[i-1][j]==MapType2 : 0;
+                int up = (j+1 < MAP_U) ? tempMap[i][j+1]==MapType2 : 0;
+                int right = (i+1 < MAP_L) ? tempMap[i+1][j]==MapType2 : 0;
+                int down = (j > 0) ? tempMap[i][j-1]==MapType2 : 0;
+                int upLeft = (i > 0 && j+1 < MAP_U) ? tempMap[i-1][j+1]==MapType2 : 0;
+                int upRight = (i + 1 < MAP_L && j + 1 < MAP_U) ? tempMap[i + 1][j + 1]==MapType2 : 0;
+                int downRight = (i + 1 < MAP_L && j - 1 >= 0) ? tempMap[i + 1][j - 1]==MapType2 : 0;
+                int downLeft = (i - 1 >= 0 && j - 1 >= 0) ? tempMap[i - 1][j - 1]==MapType2 : 0;
+                
+                // 先只计算主方向（上下左右）的编码
+                int mainDirCode = (left << 0) | (up << 1) | (right << 2) | (down << 3);
+                
+                // 先查找主方向的地块类型
+                auto it = codeToNum.find(mainDirCode);
+                if (it != codeToNum.end()) {
+                    cell[i][j].Num = it->second;
+                    tempMap[i][j] = MapType3; // 将更新过的tempMap设为MapType3
+                } else {
+                    // 如果主方向没有匹配，再考虑角落方向
+                    int cornerDirCode = 0;
+                    
+                    // 检查角落方向
+                    if (upLeft && !up && !left) cornerDirCode |= 0b00010000;  // 左上角
+                    if (upRight && !up && !right) cornerDirCode |= 0b00100000;  // 右上角
+                    if (downRight && !down && !right) cornerDirCode |= 0b01000000;  // 右下角
+                    if (downLeft && !down && !left) cornerDirCode |= 0b10000000;  // 左下角
+                    
+                    // 查找角落方向的地块类型
+                    it = codeToNum.find(cornerDirCode);
+                    if (it != codeToNum.end()) {
+                        cell[i][j].Num = it->second;
+                        tempMap[i][j] = MapType3; // 将更新过的tempMap设为MapType3
+                    }
+                }
+            } //if(tempMap[i][j] == 0)
+        } //for(int j = 0; j < MAP_U; ++j)
+    } //for(int i = 0; i < MAP_L; ++i)
+}
+
 void Map::refineShore() {
     // 创建临时地图：海洋标记为1，陆地标记为0
     int tempMap[MAP_L][MAP_U] = {0};    //tempMap[左右][上下]
@@ -711,69 +806,8 @@ void Map::refineShore() {
             tempMap[i][j] = (cell[i][j].getMapType() == MAPTYPE_OCEAN) ? 1 : 0;
         }
     }
-
-    // 定义方向编码到地形类型Num的映射
-    const std::unordered_map<int, int> codeToNum = {
-        // 上为海洋
-        {0b0010, 29},
-        // 左、上为海洋
-        {0b0011, 30},
-        // 右、下为海洋
-        {0b1100, 31},
-        // 右、上为海洋
-        {0b0110, 32},
-        // 左、下为海洋
-        {0b1001, 40},
-        // 左为海洋
-        {0b0001, 37},
-        // 右为海洋
-        {0b0100, 38},
-        // 下为海洋
-        {0b1000, 39}
-    };
-
-    // 遍历处理每个单元格
-    for (int i = 0; i < MAP_L; ++i) {
-        for (int j = 0; j < MAP_U; ++j) {
-            if (tempMap[i][j] == 0) { // 仅处理陆地单元格
-                // 检查四个方向
-                int right = (i + 1 < MAP_L) ? tempMap[i + 1][j] : 0;
-                int up = (j + 1 < MAP_U) ? tempMap[i][j + 1] : 0;
-                int left = (i - 1 >= 0) ? tempMap[i - 1][j] : 0;
-                int down = (j - 1 >= 0) ? tempMap[i][j - 1] : 0;
-
-                // 检查四个角落
-                int upRight = (i + 1 < MAP_L && j + 1 < MAP_U) ? tempMap[i + 1][j + 1] : 0;
-                int upLeft = (i - 1 >= 0 && j + 1 < MAP_U) ? tempMap[i - 1][j + 1] : 0;
-                int downRight = (i + 1 < MAP_L && j - 1 >=0) ? tempMap[i + 1][j - 1] : 0;
-                int downLeft = (i - 1 >= 0 && j - 1 >= 0) ? tempMap[i - 1][j - 1] : 0;
-
-                // 计算基本方向编码（下、右、上、左）
-                int dirCode = (down << 3) | (right << 2) | (up << 1) | left;
-
-                // 检查斜对角，如果斜对角为海洋，则直接设置为对应类型
-                if (upRight && !up && !right) {
-                    cell[i][j].Num = 36; // 右上角
-                }
-                else if (upLeft && !up && !left) {
-                    cell[i][j].Num = 34; // 左上角
-                }
-                else if (downRight && !down && !right) {
-                    cell[i][j].Num = 35; // 右下角
-                }
-                else if (downLeft && !down && !left) {
-                    cell[i][j].Num = 33; // 左下角
-                }
-                // 如果斜对角没有海洋，使用基本方向编码设置地块类型
-                else {
-                    auto it = codeToNum.find(dirCode);
-                    if (it != codeToNum.end()) {
-                        cell[i][j].Num = it->second;
-                    }
-                }
-            }
-        }
-    }
+    drawEdge(tempMap, OceanCodeToNum, 0, 1, 2);  // 绘制海洋边缘，陆地是0，海洋是1，海滩被标记为2
+    drawEdge(tempMap, SandCodeToNum, 0, 2, 3);  // 绘制沙地边缘，陆地是0，沙地是2，边界被标记为2
 }
 
 
