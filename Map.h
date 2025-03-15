@@ -190,6 +190,9 @@ private:
     void clearBarrierMap(){ memset(barrierMap ,0 , sizeof(barrierMap)); }
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
+    void drawEdge(int tempMap[MAP_L][MAP_U],std::map<int, int> codeToNum,int MapType1,int MapType2,int MapType3);  // 绘制地形交界
+
+
     Player** player;
     short m_heightMap[GENERATE_L][GENERATE_L] = {{}};
     int Gamemap[MAP_L][MAP_U] = {};  // 地图资源二维数组
