@@ -76,18 +76,20 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
                 && buildGoalOb!=NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
-        /*if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
-            Farmer*f0=(Farmer*)object1;
-            Human*f1=(Human*)object2;
+        if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
+            Farmer*f0=(Farmer*)object2;
+            Human*f1=(Human*)object1;
             //如果满载,返回错误码
             if(f0->getResourceNowHave()>=5)return ACTION_INVALID_FULLY_LOAD;
             //如果两个相距太远，返回错误码
+            /*
             double dr0=f0->getDR(),ur0=f0->getUR(),dr1=f1->getDR(),ur1=f1->getUR();
             double dr=dr1-dr0,ur=ur1-ur0;
             if(dr*dr+ur*ur>=SHIP_ACT_MAX_DISTANCE){
                 return ACTION_INVALID_DISTANCE_FAR;
             }
-        }*/
+            */
+        }
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if(object1->isPlayerControl() && object2->isPlayerControl())
@@ -902,9 +904,11 @@ void Core_List::object_Transport(Coordinate *object1, Coordinate *object2)
 {
     Human*human1=(Human*)object1;
     Farmer*human2=(Farmer*)object2;
-    human1->setTransported(true);
-    human2->update_transportHuman(human1);
-    human2->set_ResourceSort(SORT_HUMAN);
+    if(human2->getResourceNowHave()<5){
+        human1->setTransported(true);
+        human2->update_transportHuman(human1);
+        human2->set_ResourceSort(SORT_HUMAN);
+    }
     suspendRelation(human1);
 }
 

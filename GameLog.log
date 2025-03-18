@@ -1,17 +1,198 @@
 00:00:000 | 0 |   Info   | 51 | Logger.cpp | init | "日志服务启动！日志级别： Debug  "
 00:00:000 | 0 |   Info   | 53 | MainWidget.cpp | MainWidget | 主程序启动参数： 0  开始初始化...
 00:00:015 | 0 |  Debug   | 93 | MainWidget.cpp | initGameResources | 游戏资源初始化...
-00:01:119 | 0 |  Debug   | 99 | MainWidget.cpp | initGameElements | 游戏元素初始化...
-00:01:977 | 0 |  Debug   | 110 | MainWidget.cpp | initWindowProperties | 游戏窗口初始化...
-00:01:977 | 0 |  Debug   | 117 | MainWidget.cpp | initOptions | 窗口选项初始化...
-00:01:984 | 0 |  Debug   | 151 | MainWidget.cpp | initInfoPane | 游戏实体属性框初始化...
-00:01:985 | 0 |  Debug   | 172 | MainWidget.cpp | initGameTimer | 初始化计时器...
-00:01:985 | 0 |  Debug   | 182 | MainWidget.cpp | initPlayers | 初始化玩家...
-00:01:985 | 0 |  Debug   | 198 | MainWidget.cpp | initMap | 初始化地图...
-00:02:093 | 0 |  Debug   | 226 | MainWidget.cpp | setupCore | 加载内核...
-00:02:093 | 0 |  Debug   | 214 | MainWidget.cpp | initAI | 加载AI...
-00:02:093 | 0 |  Debug   | 233 | MainWidget.cpp | setupMouseTracking | 设置鼠标跟踪...
-00:02:093 | 0 |  Debug   | 240 | MainWidget.cpp | setupTipLabel | 设置信息栏文本颜色...
-00:02:093 | 0 |  Debug   | 257 | MainWidget.cpp | initViewMap | 初始化小地图...
-00:02:093 | 0 |  Debug   | 248 | MainWidget.cpp | initBGM | 加载背景音乐...
-00:02:093 | 0 |   Info   | 88 | MainWidget.cpp | MainWidget | 初始化结束，游戏开始！
+00:01:109 | 0 |  Debug   | 99 | MainWidget.cpp | initGameElements | 游戏元素初始化...
+00:01:987 | 0 |  Debug   | 110 | MainWidget.cpp | initWindowProperties | 游戏窗口初始化...
+00:01:987 | 0 |  Debug   | 117 | MainWidget.cpp | initOptions | 窗口选项初始化...
+00:01:993 | 0 |  Debug   | 151 | MainWidget.cpp | initInfoPane | 游戏实体属性框初始化...
+00:01:993 | 0 |  Debug   | 172 | MainWidget.cpp | initGameTimer | 初始化计时器...
+00:01:993 | 0 |  Debug   | 182 | MainWidget.cpp | initPlayers | 初始化玩家...
+00:01:993 | 0 |  Debug   | 198 | MainWidget.cpp | initMap | 初始化地图...
+00:02:110 | 0 |  Debug   | 226 | MainWidget.cpp | setupCore | 加载内核...
+00:02:110 | 0 |  Debug   | 214 | MainWidget.cpp | initAI | 加载AI...
+00:02:110 | 0 |  Debug   | 233 | MainWidget.cpp | setupMouseTracking | 设置鼠标跟踪...
+00:02:110 | 0 |  Debug   | 240 | MainWidget.cpp | setupTipLabel | 设置信息栏文本颜色...
+00:02:110 | 0 |  Debug   | 257 | MainWidget.cpp | initViewMap | 初始化小地图...
+00:02:110 | 0 |  Debug   | 248 | MainWidget.cpp | initBGM | 加载背景音乐...
+00:02:110 | 0 |   Info   | 88 | MainWidget.cpp | MainWidget | 初始化结束，游戏开始！
+01:01:298 | 2066 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:301 | 2067 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:334 | 2068 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:337 | 2069 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:369 | 2070 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:372 | 2071 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:376 | 2072 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:408 | 2073 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:410 | 2074 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:415 | 2075 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:445 | 2076 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:454 | 2077 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:456 | 2078 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:488 | 2079 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:490 | 2080 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:495 | 2081 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:527 | 2082 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:531 | 2083 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:535 | 2084 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:566 | 2085 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:574 | 2086 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:576 | 2087 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:606 | 2088 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:614 | 2089 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:616 | 2090 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:649 | 2091 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:652 | 2092 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:656 | 2093 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:687 | 2094 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:706 | 2095 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:714 | 2096 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:716 | 2097 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:746 | 2098 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:751 | 2099 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:783 | 2100 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:786 | 2101 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:792 | 2102 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:795 | 2103 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:825 | 2104 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:844 | 2105 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:847 | 2106 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:879 | 2107 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:881 | 2108 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:913 | 2109 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:916 | 2110 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:920 | 2111 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:951 | 2112 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:960 | 2113 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:966 | 2114 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:01:997 | 2115 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:001 | 2116 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:006 | 2117 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:037 | 2118 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:040 | 2119 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:045 | 2120 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:075 | 2121 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:080 | 2122 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:085 | 2123 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:116 | 2124 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:122 | 2125 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:126 | 2126 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:157 | 2127 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:166 | 2128 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:170 | 2129 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:201 | 2130 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:205 | 2131 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:213 | 2132 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:215 | 2133 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:245 | 2134 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:254 | 2135 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:284 | 2136 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:286 | 2137 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:290 | 2138 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:320 | 2139 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:326 | 2140 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:330 | 2141 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:360 | 2142 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:368 | 2143 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:370 | 2144 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:400 | 2145 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:431 | 2146 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:435 | 2147 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:466 | 2148 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:472 | 2149 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:475 | 2150 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:507 | 2151 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:514 | 2152 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:516 | 2153 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:548 | 2154 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:551 | 2155 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:556 | 2156 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:587 | 2157 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:593 | 2158 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:02:597 | 2159 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:751 | 2912 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:756 | 2913 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:790 | 2914 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:799 | 2915 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:801 | 2916 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:832 | 2917 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:839 | 2918 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:842 | 2919 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:873 | 2920 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:876 | 2921 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:907 | 2922 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:914 | 2923 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:916 | 2924 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:947 | 2925 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:951 | 2926 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:955 | 2927 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:985 | 2928 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:993 | 2929 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:12:995 | 2930 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:025 | 2931 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:031 | 2932 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:035 | 2933 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:065 | 2934 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:072 | 2935 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:075 | 2936 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:105 | 2937 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:110 | 2938 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:117 | 2939 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:147 | 2940 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:151 | 2941 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:159 | 2942 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:161 | 2943 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:191 | 2944 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:197 | 2945 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:228 | 2946 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:231 | 2947 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:235 | 2948 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:266 | 2949 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:272 | 2950 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:275 | 2951 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:305 | 2952 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:310 | 2953 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:317 | 2954 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:348 | 2955 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:351 | 2956 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:355 | 2957 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:386 | 2958 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:393 | 2959 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:396 | 2960 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:426 | 2961 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:433 | 2962 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:436 | 2963 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:466 | 2964 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:472 | 2965 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:476 | 2966 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:508 | 2967 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:511 | 2968 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:515 | 2969 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:546 | 2970 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:552 | 2971 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:558 | 2972 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:561 | 2973 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:592 | 2974 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:595 | 2975 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:626 | 2976 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:632 | 2977 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:637 | 2978 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:668 | 2979 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:670 | 2980 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:676 | 2981 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:707 | 2982 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:714 | 2983 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:716 | 2984 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:747 | 2985 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:751 | 2986 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:755 | 2987 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:785 | 2988 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:794 | 2989 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:796 | 2990 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:826 | 2991 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:830 | 2992 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:838 | 2993 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:840 | 2994 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:871 | 2995 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:876 | 2996 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:908 | 2997 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
+01:13:911 | 2998 | Warning  | 872 | SelectWidget.cpp | drawActs | Resource for action 19 not found. Using default Button.
