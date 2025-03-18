@@ -10,7 +10,7 @@
 #include "ActWidget.h"
 #include "AboutDialog.h"
 #include "GlobalVariate.h"
-
+#include"soudplaythread.h"
 namespace Ui {
 class MainWidget;
 }
@@ -47,7 +47,7 @@ private:
     Core *core;
     UsrAI* UsrAi;
     EnemyAI *EnemyAi;
-
+    SoudPlayThread*soundPlayThread;
 //*************游戏更新*************
     bool pause = false;
     int gameframe = 0;
@@ -91,7 +91,8 @@ private:
 
 //****************Music*********************
     QSoundEffect* bgm = NULL;
-    void playSound(string soundType);   //音效
+    void playSound();   //音效
+    void playSound(string s);
     void makeSound();
 //*****************************************
 

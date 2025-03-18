@@ -1196,16 +1196,14 @@ bool Map::CanCrush(Coordinate *object)
 }
 
 
-void Map::loadfindPathMap(MoveObject* moveOb)
+Map::TypeRef Map::loadfindPathMap(MoveObject* moveOb)
 {
     int represent = moveOb->getPlayerRepresent();
 
     if(represent == MAXPLAYER)
         represent = NOWPLAYER-1;
-
-    memcpy(findPathMap, findPathMapTemperature[represent], sizeof(findPathMapTemperature[represent]));
-
-    return;
+    return findPathMapTemperature[represent];
+   // memcpy(findPathMap, findPathMapTemperature[represent], sizeof(findPathMapTemperature[represent]));
 }
 
 void Map::loadfindPathMapTemperature()

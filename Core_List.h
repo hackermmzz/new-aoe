@@ -2,6 +2,10 @@
 #define CORE_LIST_H
 
 #include "Core_CondiFunc.h"
+#include<iostream>
+#include <unordered_set>
+#include<set>
+using namespace std;
 extern Score usrScore;
 extern Score enemyScore;
 

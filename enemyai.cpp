@@ -127,6 +127,7 @@ static int Pathfind(int a,int b){
     }
 
 void EnemyAI::processData() {
+    return;
      /*##########YOUR CODE BEGINS HERE##########*/
      enemyInfo=getInfo();
      s=0;

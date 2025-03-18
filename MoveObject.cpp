@@ -53,7 +53,7 @@ void MoveObject::change_Angel(int Angel_new)
 
 //*****************************路径相关*********************************
 //路径设置
-void MoveObject::setPath(stack<Point> path , double goalDR, double goalUR)
+void MoveObject::setPath(const stack<Point>&path , double goalDR, double goalUR)
 {
     setdestination(goalDR,goalUR);
     if(!path.empty())
