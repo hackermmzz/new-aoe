@@ -1,153 +1,17 @@
 00:00:000 | 0 |   Info   | 51 | Logger.cpp | init | "日志服务启动！日志级别： Debug  "
 00:00:000 | 0 |   Info   | 53 | MainWidget.cpp | MainWidget | 主程序启动参数： 0  开始初始化...
-00:00:022 | 0 |  Debug   | 90 | MainWidget.cpp | initGameResources | 游戏资源初始化...
-00:01:312 | 0 |  Debug   | 96 | MainWidget.cpp | initGameElements | 游戏元素初始化...
-00:02:309 | 0 |  Debug   | 107 | MainWidget.cpp | initWindowProperties | 游戏窗口初始化...
-00:02:309 | 0 |  Debug   | 114 | MainWidget.cpp | initOptions | 窗口选项初始化...
-00:02:315 | 0 |  Debug   | 148 | MainWidget.cpp | initInfoPane | 游戏实体属性框初始化...
-00:02:315 | 0 |  Debug   | 169 | MainWidget.cpp | initGameTimer | 初始化计时器...
-00:02:315 | 0 |  Debug   | 179 | MainWidget.cpp | initPlayers | 初始化玩家...
-00:02:315 | 0 |  Debug   | 195 | MainWidget.cpp | initMap | 初始化地图...
-00:02:452 | 0 |  Debug   | 223 | MainWidget.cpp | setupCore | 加载内核...
-00:02:453 | 0 |  Debug   | 211 | MainWidget.cpp | initAI | 加载AI...
-00:02:453 | 0 |  Debug   | 230 | MainWidget.cpp | setupMouseTracking | 设置鼠标跟踪...
-00:02:453 | 0 |  Debug   | 237 | MainWidget.cpp | setupTipLabel | 设置信息栏文本颜色...
-00:02:453 | 0 |  Debug   | 254 | MainWidget.cpp | initViewMap | 初始化小地图...
-00:02:453 | 0 |  Debug   | 245 | MainWidget.cpp | initBGM | 加载背景音乐...
-00:02:453 | 0 |   Info   | 85 | MainWidget.cpp | MainWidget | 初始化结束，游戏开始！
-00:07:676 | 16 |   Info   | 1054 | Core.cpp | manageOrder | 1 号玩家指令： 执行成功 
-
-00:07:676 | 16 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??玩家指令： 执行成功 
-
-00:11:970 | 266 |  Debug   | 198 | EnemyAI.cpp | processData | 266
-00:11:970 | 266 |  Debug   | 198 | EnemyAI.cpp | processData | 266
-00:12:003 | 268 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?玩家指令： 执行成功 
-
-00:12:003 | 268 |   Info   | 1054 | Core.cpp | manageOrder | 1 玩家指令： 执行成功 
-
-00:15:259 | 518 |  Debug   | 198 | EnemyAI.cpp | processData | 518
-00:15:259 | 518 |  Debug   | 198 | EnemyAI.cpp | processData | 518
-00:15:269 | 520 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??家指令： 执行成功 
-
-00:15:269 | 520 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?家指令： 执行成功 
-
-00:18:695 | 770 |  Debug   | 198 | EnemyAI.cpp | processData | 770
-00:18:695 | 770 |  Debug   | 198 | EnemyAI.cpp | processData | 770
-00:18:730 | 772 |   Info   | 1054 | Core.cpp | manageOrder | 1 家指令： 执行成功 
-
-00:18:730 | 772 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??指令： 执行成功 
-
-00:21:808 | 1022 |  Debug   | 198 | EnemyAI.cpp | processData | 1022
-00:21:809 | 1022 |  Debug   | 198 | EnemyAI.cpp | processData | 1022
-00:21:842 | 1024 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?指令： 执行成功 
-
-00:21:842 | 1024 |   Info   | 1054 | Core.cpp | manageOrder | 1 指令： 执行成功 
-
-00:25:015 | 1274 |  Debug   | 198 | EnemyAI.cpp | processData | 1274
-00:25:015 | 1274 |  Debug   | 198 | EnemyAI.cpp | processData | 1274
-00:25:046 | 1276 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??令： 执行成功 
-
-00:25:046 | 1276 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?令： 执行成功 
-
-00:29:094 | 1526 |  Debug   | 198 | EnemyAI.cpp | processData | 1526
-00:29:094 | 1526 |  Debug   | 198 | EnemyAI.cpp | processData | 1526
-00:29:124 | 1528 |   Info   | 1054 | Core.cpp | manageOrder | 1 令： 执行成功 
-
-00:29:125 | 1528 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??： 执行成功 
-
-00:33:867 | 1778 |  Debug   | 198 | EnemyAI.cpp | processData | 1778
-00:33:867 | 1778 |  Debug   | 198 | EnemyAI.cpp | processData | 1778
-00:33:874 | 1780 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?： 执行成功 
-
-00:33:874 | 1780 |   Info   | 1054 | Core.cpp | manageOrder | 1 ： 执行成功 
-
-00:37:881 | 2030 |  Debug   | 198 | EnemyAI.cpp | processData | 2030
-00:37:881 | 2030 |  Debug   | 198 | EnemyAI.cpp | processData | 2030
-00:37:913 | 2032 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?? 执行成功 
-
-00:37:913 | 2032 |   Info   | 1054 | Core.cpp | manageOrder | 1 ? 执行成功 
-
-00:40:936 | 2282 |  Debug   | 198 | EnemyAI.cpp | processData | 2282
-00:40:936 | 2282 |  Debug   | 198 | EnemyAI.cpp | processData | 2282
-00:40:967 | 2284 |   Info   | 1054 | Core.cpp | manageOrder | 1  执行成功 
-
-00:40:967 | 2284 |   Info   | 1054 | Core.cpp | manageOrder | 1 执行失败，错误码： 执行成功 
-
-00:44:029 | 2534 |  Debug   | 198 | EnemyAI.cpp | processData | 2534
-00:44:029 | 2534 |  Debug   | 198 | EnemyAI.cpp | processData | 2534
-00:44:062 | 2536 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??行失败，错误码： 执行成功 
-
-00:44:062 | 2536 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?行失败，错误码： 执行成功 
-
-00:47:319 | 2786 |  Debug   | 198 | EnemyAI.cpp | processData | 2786
-00:47:319 | 2786 |  Debug   | 198 | EnemyAI.cpp | processData | 2786
-00:47:351 | 2788 |   Info   | 1054 | Core.cpp | manageOrder | 1 行失败，错误码： 执行成功 
-
-00:47:351 | 2788 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??失败，错误码： 执行成功 
-
-00:52:393 | 3038 |  Debug   | 198 | EnemyAI.cpp | processData | 3038
-00:52:393 | 3038 |  Debug   | 198 | EnemyAI.cpp | processData | 3038
-00:52:442 | 3040 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?失败，错误码： 执行成功 
-
-00:52:442 | 3040 |   Info   | 1054 | Core.cpp | manageOrder | 1 失败，错误码： 执行成功 
-
-00:56:331 | 3290 |  Debug   | 198 | EnemyAI.cpp | processData | 3290
-00:56:331 | 3290 |  Debug   | 198 | EnemyAI.cpp | processData | 3290
-00:56:363 | 3292 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??败，错误码： 执行成功 
-
-00:56:363 | 3292 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?败，错误码： 执行成功 
-
-01:00:204 | 3542 |  Debug   | 198 | EnemyAI.cpp | processData | 3542
-01:00:204 | 3542 |  Debug   | 198 | EnemyAI.cpp | processData | 3542
-01:00:213 | 3544 |   Info   | 1054 | Core.cpp | manageOrder | 1 败，错误码： 执行成功 
-
-01:00:213 | 3544 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??，错误码： 执行成功 
-
-01:04:309 | 3794 |  Debug   | 198 | EnemyAI.cpp | processData | 3794
-01:04:309 | 3794 |  Debug   | 198 | EnemyAI.cpp | processData | 3794
-01:04:318 | 3796 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?，错误码： 执行成功 
-
-01:04:318 | 3796 |   Info   | 1054 | Core.cpp | manageOrder | 1 ，错误码： 执行成功 
-
-01:07:526 | 4046 |  Debug   | 198 | EnemyAI.cpp | processData | 4046
-01:07:526 | 4046 |  Debug   | 198 | EnemyAI.cpp | processData | 4046
-01:07:557 | 4048 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??错误码： 执行成功 
-
-01:07:557 | 4048 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?错误码： 执行成功 
-
-01:11:483 | 4298 |  Debug   | 198 | EnemyAI.cpp | processData | 4298
-01:11:483 | 4298 |  Debug   | 198 | EnemyAI.cpp | processData | 4298
-01:11:521 | 4300 |   Info   | 1054 | Core.cpp | manageOrder | 1 错误码： 执行成功 
-
-01:11:521 | 4300 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??误码： 执行成功 
-
-01:15:064 | 4550 |  Debug   | 198 | EnemyAI.cpp | processData | 4550
-01:15:064 | 4550 |  Debug   | 198 | EnemyAI.cpp | processData | 4550
-01:15:104 | 4552 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?误码： 执行成功 
-
-01:15:104 | 4552 |   Info   | 1054 | Core.cpp | manageOrder | 1 误码： 执行成功 
-
-01:19:207 | 4802 |  Debug   | 198 | EnemyAI.cpp | processData | 4802
-01:19:207 | 4802 |  Debug   | 198 | EnemyAI.cpp | processData | 4802
-01:19:215 | 4804 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??码： 执行成功 
-
-01:19:215 | 4804 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?码： 执行成功 
-
-01:23:302 | 5054 |  Debug   | 198 | EnemyAI.cpp | processData | 5054
-01:23:302 | 5054 |  Debug   | 198 | EnemyAI.cpp | processData | 5054
-01:23:334 | 5056 |   Info   | 1054 | Core.cpp | manageOrder | 1 码： 执行成功 
-
-01:23:334 | 5056 |   Info   | 1054 | Core.cpp | manageOrder | 1 ??： 执行成功 
-
-01:27:374 | 5306 |  Debug   | 198 | EnemyAI.cpp | processData | 5306
-01:27:374 | 5306 |  Debug   | 198 | EnemyAI.cpp | processData | 5306
-01:27:386 | 5308 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?： 执行成功 
-
-01:27:386 | 5308 |   Info   | 1054 | Core.cpp | manageOrder | 1 ： 执行成功 
-
-01:31:495 | 5558 |  Debug   | 198 | EnemyAI.cpp | processData | 5558
-01:31:496 | 5558 |  Debug   | 198 | EnemyAI.cpp | processData | 5558
-01:31:531 | 5560 |   Info   | 1054 | Core.cpp | manageOrder | 1 ?? 执行成功 
-
-01:31:531 | 5560 |   Info   | 1054 | Core.cpp | manageOrder | 1 ? 执行成功 
-
+00:00:058 | 0 |  Debug   | 90 | MainWidget.cpp | initGameResources | 游戏资源初始化...
+00:01:349 | 0 |  Debug   | 96 | MainWidget.cpp | initGameElements | 游戏元素初始化...
+00:02:350 | 0 |  Debug   | 107 | MainWidget.cpp | initWindowProperties | 游戏窗口初始化...
+00:02:350 | 0 |  Debug   | 114 | MainWidget.cpp | initOptions | 窗口选项初始化...
+00:02:356 | 0 |  Debug   | 148 | MainWidget.cpp | initInfoPane | 游戏实体属性框初始化...
+00:02:356 | 0 |  Debug   | 169 | MainWidget.cpp | initGameTimer | 初始化计时器...
+00:02:357 | 0 |  Debug   | 179 | MainWidget.cpp | initPlayers | 初始化玩家...
+00:02:357 | 0 |  Debug   | 195 | MainWidget.cpp | initMap | 初始化地图...
+00:02:495 | 0 |  Debug   | 223 | MainWidget.cpp | setupCore | 加载内核...
+00:02:495 | 0 |  Debug   | 211 | MainWidget.cpp | initAI | 加载AI...
+00:02:495 | 0 |  Debug   | 230 | MainWidget.cpp | setupMouseTracking | 设置鼠标跟踪...
+00:02:495 | 0 |  Debug   | 237 | MainWidget.cpp | setupTipLabel | 设置信息栏文本颜色...
+00:02:495 | 0 |  Debug   | 254 | MainWidget.cpp | initViewMap | 初始化小地图...
+00:02:495 | 0 |  Debug   | 245 | MainWidget.cpp | initBGM | 加载背景音乐...
+00:02:495 | 0 |   Info   | 85 | MainWidget.cpp | MainWidget | 初始化结束，游戏开始！

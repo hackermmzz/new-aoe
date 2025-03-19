@@ -15,45 +15,26 @@ ins EnemyIns;
 #define MODE4 30000
 tagInfo enemyInfo;
 static int mode = -3;
-static int Attacktimer=0;
-static int target[5]={151,151,151,151,151};
 static double pos_L[50] = {0};
 static double pos_U[50] = {0};
 static int armystate[50] = {0};
 static int Blood[50] = {0};
-static double chasestart_L[50] = {0};
-static double chasestart_U[50] = {0};
 static int Lock[50];
 static int timer[50] = {0};
-static int ATT1=2;
-static int ATT2=6;
 static int ChasingLock[50]={0};
-static int AIfarmer;
-static int AIFSN[50];
 static int sum;
-static int Aroundsum=-1;
-static int flag=0;
-static int kill=0;
-static int base=0;
-static long Atarget[50];
-static long Btarget[50];
 static int s;
 static int Pathn;
 static int Pathset=1;
 static int t;
 static int tar[50];
 static bool ifretreat[50];
-static int tempBtarget[2]={0,0};
 static long Chasingtar[50];
 static int Pathnum=0;
 static int Path[100][2];
 static int point1[15][2]={{48,10},{56,11},{57,20},{55,30},{50,40},{44,50},{35,59},{27,69},{28,76},{32,82},{27,90},{22,100},{19,110},{15,118},{5,121}};
 static int AroundLock[50];
-static int Pathclock=0;
 static long visible[100];
-static double Dis[100];
-static double LastDR=0;
-static double LastUR=0;
 static void seekenemy(){
     int n=0;
     for(int i=0;i<enemyInfo.armies.size();i++){
@@ -66,6 +47,24 @@ static void seekenemy(){
           }
         }
     }
+}
+static void aroundseekenemy(int i){
+    if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort==7){
+        for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
+          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
+          if(temp<3.0){
+           mode=5;
+          }
+        }
+    }
+    else if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort!=7){
+        for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
+          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
+          if(temp<3.0){
+           mode=6;
+          }
+}
+}
 }
 static int seek(int Sort,int number){
     double temp=0;
@@ -128,76 +127,112 @@ static int Pathfind(int a,int b){
 
 void EnemyAI::processData() {
      /*##########YOUR CODE BEGINS HERE##########*/
-     enemyInfo=getInfo();
-     s=0;
-     t=0;
-     if(g_frame==15){
-         Pathnum=Pathfind(enemyInfo.buildings[0].BlockDR,enemyInfo.buildings[0].BlockUR);
-     }
+//     enemyInfo=getInfo();
+//     s=0;
+//     t=0;
+//     if(g_frame==15){
+//         Pathnum=Pathfind(enemyInfo.buildings[0].BlockDR,enemyInfo.buildings[0].BlockUR);
+//     }
 
 
-     //军队数据初始化
-     if(g_frame==15){
-         sum=enemyInfo.armies.size();
-         for(int i=0;i<enemyInfo.armies.size();i++){
-             Chasingtar[i]=0;
-             Blood[i]=enemyInfo.armies[i].Blood;
-             timer[i]=0;
-             Lock[i]=0;
-             ifretreat[i]=false;
-             armystate[i]=WAITING;
- //            qDebug()<<Blood[i];
-             pos_L[i]=enemyInfo.armies[i].DR;
-             pos_U[i]=enemyInfo.armies[i].UR;
-             ChasingLock[i]=0;
-             tar[i]=0;
-         }
-         for(int i=0;i<enemyInfo.enemy_buildings.size();i++){
-             if(enemyInfo.enemy_buildings[i].Type==BUILDING_CENTER)
-               {  pos_L[49]=enemyInfo.enemy_buildings[i].BlockDR;
-                  pos_U[49]=enemyInfo.enemy_buildings[i].BlockUR;
-             }
-         }
-     }
-     //更新波数
-     if(g_frame==MODE4) mode=4;
-     else if(g_frame==MODE3) mode=3;
-     else if(g_frame==MODE2) mode=2;
-     else if(g_frame==MODE1) {mode=1;
-     }
+//     //军队数据初始化
+//     if(g_frame==15){
+//         sum=enemyInfo.armies.size();
+//         for(int i=0;i<enemyInfo.armies.size();i++){
+//             Chasingtar[i]=0;
+//             Blood[i]=enemyInfo.armies[i].Blood;
+//             timer[i]=0;
+//             Lock[i]=0;
+//             ifretreat[i]=false;
+//             armystate[i]=WAITING;
+// //            qDebug()<<Blood[i];
+//             pos_L[i]=enemyInfo.armies[i].DR;
+//             pos_U[i]=enemyInfo.armies[i].UR;
+//             ChasingLock[i]=0;
+//             tar[i]=0;
+//         }
+//         for(int i=0;i<enemyInfo.enemy_buildings.size();i++){
+//             if(enemyInfo.enemy_buildings[i].Type==BUILDING_CENTER)
+//               {  pos_L[49]=enemyInfo.enemy_buildings[i].BlockDR;
+//                  pos_U[49]=enemyInfo.enemy_buildings[i].BlockUR;
+//             }
+//         }
+//     }
+//     //更新波数
+//     if(g_frame==MODE4) mode=4;
+//     else if(g_frame==MODE3) mode=3;
+//     else if(g_frame==MODE2) mode=2;
+//     else if(g_frame==MODE1) {mode=1;
+//     }
+//     //巡逻进攻
+//     if(mode==5){
+//         for(int i=0;i<enemyInfo.enemy_armies.size();i++){
+//             if(enemyInfo.enemy_armies[i].Sort==7)
+//             armystate[i]==ATTACK;
+//         }
+//     }
+//     if(mode==6){
+//         for(int i=0;i<enemyInfo.enemy_armies.size();i++){
+//             if(enemyInfo.enemy_armies[i].Sort!=7)
+//             armystate[i]==ATTACK;
+//         }
+//     }
 
-     if(g_frame%50==0){
-         seekenemy();
-     }
-     double mindis=9999;
-     //陆地巡逻
-     if(g_frame==MODE1){
-     for(int i=0;i<enemyInfo.armies.size();i++){
-         if(enemyInfo.armies[i].Sort==3){
-             armystate[i]=AROUND;
-             }
-     }}
-     for(int i=0;i<enemyInfo.armies.size();i++){
-         int a=0;
-     if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==0){
-         timer[i]=g_frame;
-         if(a%2==0)
-         HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*35,Path[Pathn][1]*35);
-         else HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*35-1,Path[Pathn][1]*35-1);
- //        else HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*33,Path[Pathn][1]*33);
-         AroundLock[i]=1;
-         a++;
-     }
-     else if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==1){
-         if(g_frame-timer[i]>400){
-             AroundLock[i]=0;
-             Pathn+=Pathset;
-             if(Pathn==15||Pathn==0){
-             Pathset=-1*Pathset;
-             }
-             qDebug()<<g_frame;
-         }
-     }}
+//     if(g_frame%50==0){
+//         seekenemy();
+//     }
+//     double mindis=9999;
+//     //陆地巡逻
+//     if(g_frame==MODE1){
+//     for(int i=0;i<enemyInfo.armies.size();i++){
+//         if(enemyInfo.armies[i].Sort==3){
+//             armystate[i]=AROUND;
+//             }
+//     }
+//     for(int i=enemyInfo.armies.size();i>0;i--){
+//         if(enemyInfo.armies[i].Sort==7){
+//             armystate[i]=AROUND;
+//             break;
+//         }
+//     }
+//     }
+//     for(int i=0;i<enemyInfo.armies.size();i++){
+//         int a=0;
+//     if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==0&&enemyInfo.armies[i].Sort==3){
+//         timer[i]=g_frame;
+//         if(a%2==0)
+//         HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*35,Path[Pathn][1]*35);
+//         else HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*35-1,Path[Pathn][1]*35-1);
+// //        else HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*33,Path[Pathn][1]*33);
+//         AroundLock[i]=1;
+//         a++;
+//     }
+//     else if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==0&&enemyInfo.armies[i].Sort==7){
+//          timer[i]=g_frame;
+//          HumanMove(enemyInfo.armies[i].SN,(Path[Pathn][0]+4)*37,(Path[Pathn][1]+4)*37);
+//          AroundLock[i]=1;
+//     }
+//     else if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==1){
+//         if(g_frame-timer[i]>400){
+//             AroundLock[i]=0;
+//             Pathn+=Pathset;
+//             if(Pathn==15||Pathn==0){
+//             Pathset=-1*Pathset;
+//             }
+//         }
+//     }}
+//     for(int i=0;i<enemyInfo.armies.size();i++){
+//         if(armystate[i]==AROUND)aroundseekenemy(i);
+//     }
+
+
+
+
+
+
+
+
+
 
 //     if(enemyInfo.armies.size()!=sum){
 // //        sum=enemyInfo.armies.size();
