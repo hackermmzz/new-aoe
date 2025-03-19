@@ -80,7 +80,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     initViewMap();
     // 设置背景音乐
     initBGM();
-
+    //开辟音乐播放线程
+    soundPlayThread=(new SoudPlayThread);
+    soundPlayThread->start();
+    //
     debugText("blue"," 游戏开始");
     qInfo()<<"初始化结束，游戏开始！";
 }
@@ -916,16 +919,17 @@ void MainWidget::judgeVictory()
     else return;
 }
 
-void MainWidget::playSound(string soundType)
+void MainWidget::playSound()
 {
-    if( isExamining || SoundMap[soundType] == NULL) return;
-
-//    if(SoundMap[soundType]->isFinished())
-        SoundMap[soundType]->play();
-
+    if(isExamining) return;
+    soundPlayThread->AddSound(soundQueue);
     return;
 }
-
+void MainWidget::playSound(string s){
+    if(isExamining||SoundMap[s]==0) return;
+    SoundMap[s]->play();
+    return;
+}
 void MainWidget::makeSound()
 {
     if(soundQueue.empty()) return;
@@ -936,11 +940,7 @@ void MainWidget::makeSound()
         swap(empty, soundQueue);
     }
 
-    while(soundQueue.size())
-    {
-        playSound(soundQueue.front());
-        soundQueue.pop();
-    }
+    playSound();
 
     return;
 }
@@ -995,23 +995,24 @@ void MainWidget::FrameUpdate()
 }
 void MainWidget::onRadioClickSlot()
 {
+    static int interval=40;
     switch(pbuttonGroup->checkedId())
     {
     case 0:
-        timer->setInterval(40);
+        timer->setInterval(interval);
         mapmoveFrequency=1;
         break;
     case 1:
-        timer->setInterval(20);
         mapmoveFrequency=2;
+        timer->setInterval(interval/mapmoveFrequency);
         break;
     case 2:
-        timer->setInterval(10);
         mapmoveFrequency=4;
+        timer->setInterval(interval/mapmoveFrequency);
         break;
     case 3:
-        timer->setInterval(5);
         mapmoveFrequency=8;
+        timer->setInterval(interval/mapmoveFrequency);
         nowobject=NULL;
         break;
     }

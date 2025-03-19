@@ -2,6 +2,10 @@
 #define CORE_LIST_H
 
 #include "Core_CondiFunc.h"
+#include<iostream>
+#include <unordered_set>
+#include<set>
+using namespace std;
 extern Score usrScore;
 extern Score enemyScore;
 
@@ -51,8 +55,8 @@ private:
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     //寻路相关
-    bool map_HaveJud[MAP_L][MAP_U];
-    bool goalMap[MAP_L][MAP_U];
+    int map_HaveJud[MAP_L][MAP_U];
+    int goalMap[MAP_L][MAP_U];
 
     bool resourceBuildingChange = false;
     bool needReset_resBuild = false;

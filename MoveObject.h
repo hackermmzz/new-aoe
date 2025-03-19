@@ -133,7 +133,7 @@ public:
     void adjustAngle(double goalDR,double goalUR){ Angle = calculateAngle(goalDR,goalUR); }
     //*****路劲设置相关*****
     //设置寻路得到的路劲
-    void setPath(stack<Point> path , double goalDR, double goalUR);
+    void setPath(const stack<Point>&path , double goalDR, double goalUR);
     //获取路径
     stack<Point> getPath(){return this->path;}
     int getPath_size(){ return path.size(); }

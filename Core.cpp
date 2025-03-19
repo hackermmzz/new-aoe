@@ -1,11 +1,13 @@
 #include "SelectWidget.h"
 #include "Core.h"
-
+#include <QDateTime>
 tagInfo Buffer0[2];
 tagInfo Buffer1[2];
 int buff=0;
 tagInfo* currentBuff;
-
+Coordinate* Core::objCapture;
+int Core::objClickedCaptureState;
+MouseEvent Core::mouseEventStore;
 Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent)
 {
     this->theMap = theMap;  //mainWidget的map对象
@@ -21,7 +23,6 @@ void Core::gameUpdate()
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
     updateByObject();
-
     loadRelationMap();
 
     //更新AI用的资源表，该资源表是User/Enemy的通用模板
@@ -550,7 +551,22 @@ void Core::getPlayerNowResource( int playerRepresent, int& wood, int& food, int&
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
-    Coordinate* object_click = g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+    Coordinate* object_click=0;
+    //状态0表示当前可以去捕获新的点击对象
+    if(objClickedCaptureState==0){
+        mouseEventStore=*mouseEvent;
+        objClickedCaptureState=1;
+        return;
+    }
+    //当前正在捕获对象
+    else if(objClickedCaptureState==1){
+        return;
+    }
+    //捕捉到对象
+    else if(objClickedCaptureState==2){
+        objClickedCaptureState=0;
+        object_click=objCapture;
+    }
     resetNowObject_Click();
     if(mouseEvent->mouseEventType==RIGHT_PRESS && nowobject!=NULL)
     {
@@ -644,6 +660,9 @@ void Core::manageMouseEvent()
                         case SORT_FARMER:
                             if(object_click->getPlayerRepresent() != nowobject->getPlayerRepresent())
                                 interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                            else if(object_click->getSort()==SORT_FARMER&&((Farmer*)object_click)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
+                                interactionList->addRelation(nowobject,object_click,CoreEven_Transport);
+                            }
                             break;
                         default:
                             break;
@@ -872,6 +891,10 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
     case SORT_BUILDING:
     case SORT_Building_Resource:
     case SORT_FARMER:
+        if(obj->getPlayerRepresent()==self->getPlayerRepresent()&&obj->getSort()==SORT_FARMER&&((Farmer*)obj)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
+            interactionList->addRelation(self,obj,CoreEven_Transport);
+        }
+        break;
     case SORT_ARMY:
         if(self->getPlayerRepresent() != obj->getPlayerRepresent()) {
             ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
@@ -1148,7 +1171,7 @@ void Core::resetNowObject_Click(bool isStop)
                            +"), 块坐标 (" + QString::number((int)(mouseEvent->DR/BLOCKSIDELENGTH))+","+QString::number((int)(mouseEvent->UR/BLOCKSIDELENGTH))+")", REPRESENT_BOARDCAST_MESSAGE);
         }
 
-        nowobject=g_Object[memorymap[mouseEvent->memoryMapX][mouseEvent->memoryMapY]];
+        nowobject=objCapture;
         if(nowobject!=NULL)
             call_debugText("blue"," 点击对象为："+nowobject->getChineseName()+", SN:"+ QString::number(nowobject->getglobalNum()), REPRESENT_BOARDCAST_MESSAGE);
         requestSound_Click(nowobject);

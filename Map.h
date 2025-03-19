@@ -45,7 +45,9 @@ public:
     void CalCellOffset(int BlockDR,int BlockUR);
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
-    void loadfindPathMap(MoveObject* moveOb);
+    using Type=int[MAP_L][MAP_U];
+    using TypeRef=Type&;
+    TypeRef loadfindPathMap(MoveObject* moveOb);
     void loadfindPathMapTemperature();
     //加载障碍物地图
     void loadBarrierMap(bool absolute = false);
