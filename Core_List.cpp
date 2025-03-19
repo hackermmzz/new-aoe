@@ -1330,6 +1330,7 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
 
 pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination,Coordinate*object, Coordinate* goalOb)
 {
+    static unsigned long long mask=0;
     using Data=array<int,2>;
     //8个移动方向 <4为斜线方向，>=4为水平竖直方向
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
@@ -1338,9 +1339,9 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     static vector<Data>vis;
     stack<Point> path;
     bool meetGoal = false;
-
-    initMap_HaveJud();
-    memset(goalMap,0,sizeof(goalMap));
+    ++mask;//把寻路掩码递增1
+    //initMap_HaveJud();
+    //memset(goalMap,0,sizeof(goalMap));
     //判断是不是船
     bool isShip=false;
     if(object){
@@ -1358,7 +1359,7 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
         }
     }
     //起始点标记
-    map_HaveJud[start.x][start.y] = true;
+    map_HaveJud[start.x][start.y] = mask;
     bool isNoPath = true;
     int ix,iy,jx,jy;
     //标记终点
@@ -1368,7 +1369,7 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
         for(Point&p:objectBlock){
             ix = p.x;
             iy = p.y;
-            goalMap[ix][iy] = true;
+            goalMap[ix][iy] = mask;
             if(!isNoPath)
                 continue;
             for(int i = 4; i<8; i++)
@@ -1389,7 +1390,7 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     {
         ix = destination.x;
         iy = destination.y;
-        goalMap[ix][iy] = true;
+        goalMap[ix][iy] = mask;
 
         for(int i = 4; i<8; i++)
         {
@@ -1407,8 +1408,8 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
 
     if(isNoPath)
         return {path,{1e9,1e9}};
-    goalMap[destination.x][destination.y] = true;
-    if( goalMap[start.x][start.y] )
+    goalMap[destination.x][destination.y] = mask;
+    if( goalMap[start.x][start.y]==mask )
     {
         meetGoal = true;
     }
@@ -1432,13 +1433,13 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
                     //判断格子是否可走、未走过
                     //斜线方向需要多判断马脚操作
                     if(isLand^isShip){
-                        if(!(map_HaveJud[x][y] || findPathMap[x][y] && !goalMap[x][y] ||\
+                        if(!(map_HaveJud[x][y]==mask || findPathMap[x][y] && goalMap[x][y]!=mask ||\
                              i<4 && (findPathMap[x][p[1]]||findPathMap[p[0]][y]))){
                             preNode[x][y]={p[0],p[1]};
                             qu.push({x,y});
                             vis.push_back({x,y});
-                            map_HaveJud[x][y]=1;
-                            if(goalMap[x][y]){
+                            map_HaveJud[x][y]=mask;
+                            if(goalMap[x][y]==mask){
                                 meetGoal=1;
                                 targetPoint={x,y};
                             }
