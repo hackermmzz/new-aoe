@@ -995,23 +995,24 @@ void MainWidget::FrameUpdate()
 }
 void MainWidget::onRadioClickSlot()
 {
+    static int interval=40;
     switch(pbuttonGroup->checkedId())
     {
     case 0:
-        timer->setInterval(40);
+        timer->setInterval(interval);
         mapmoveFrequency=1;
         break;
     case 1:
-        timer->setInterval(20);
         mapmoveFrequency=2;
+        timer->setInterval(interval/mapmoveFrequency);
         break;
     case 2:
-        timer->setInterval(10);
         mapmoveFrequency=4;
+        timer->setInterval(interval/mapmoveFrequency);
         break;
     case 3:
-        timer->setInterval(5);
         mapmoveFrequency=8;
+        timer->setInterval(interval/mapmoveFrequency);
         nowobject=NULL;
         break;
     }
