@@ -8,7 +8,7 @@
 
 #include "MainWidget.h"
 #include "Coordinate.h"
-
+#include"Core.h"
 
 namespace Ui {
 class GameWidget;
@@ -33,7 +33,7 @@ public:
     int tranUR(int X, int Y);
 
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
-    void drawmemory(int X, int Y, ImageResource res, int globalNum);
+    void drawmemory(int X, int Y,  ImageResource&res, int globalNum);
     void emptymemorymap();
 
     bool judgeinWindow(double x, double y);

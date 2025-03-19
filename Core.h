@@ -66,12 +66,16 @@ private:
     MouseEvent *mouseEvent; //记录当前鼠标事件
     Core_List* interactionList;
     vector<MoveObject*> moveOb_judCrush;
-    
+    //
     void logActionResult(int ret, Coordinate* self, Coordinate* obj, int actionType, int option, QString desc, int id);
     int handleFarmerAction(Coordinate* self, Coordinate* obj, int id);
     int handleMilitaryAction(Coordinate* self, Coordinate* obj, int id);
     int handleBuildingAction(Coordinate* self, int option, int id);
-
+public:
+    //延迟获取到点击的对象
+    static  Coordinate*objCapture;
+    static int objClickedCaptureState;
+    static MouseEvent mouseEventStore;
 };
 
 #endif // CORE_H

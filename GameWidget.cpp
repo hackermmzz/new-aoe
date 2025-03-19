@@ -1,7 +1,7 @@
 ﻿#include "GameWidget.h"
 #include "ui_GameWidget.h"
 #include "Map.h"
-
+#include <QDateTime>
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GameWidget)
@@ -17,12 +17,21 @@ GameWidget::~GameWidget()
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {
+
     QPainter painter(this);
 
     painter.setPen(Qt::black);
 
     painter.fillRect(rect(), Qt::black);
-
+    //检测点x y是否落在屏幕内
+    static QRect winRect(0,0,GAMEWIDGET_WIDTH,GAMEWIDGET_HEIGHT);
+    static auto InRect=[&](int x,int y)->bool{
+      if(x>=winRect.x()&&x<=winRect.x()+winRect.width()&&y>=winRect.y()&&y<=winRect.y()+winRect.height())return 1;
+      return 0;
+    };
+    static auto RectInRect=[&](int x,int y,int w,int h)->bool{
+        return (InRect(x,y)||InRect(x+w,y)||InRect(x+w,y+h)||InRect(x,y+h));
+    };
     //地图绘制部分
     int x1=BlockDR;//x1，y1作为参考坐标，用来每次循环初始化x2，y2的值
     int y1=BlockUR;//x2，y2则是引导绘制，用来实际判断cell中的内容
@@ -62,12 +71,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::grayblock[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)targetList=Block::blackblock[block.Num];
             //如果没超出屏幕，那么绘制
-            auto InRect=[&](int x,int y,const QRect&rect)->bool{
-              if(x>=rect.x()&&x<=rect.x()+rect.width()&&y>=rect.y()&&y<=rect.y()+rect.height())return 1;
-              return 0;
-            };
-            QRect winRect(0,0,GAMEWIDGET_WIDTH,GAMEWIDGET_HEIGHT);
-            if((InRect(x,y,winRect)||InRect(x+w,y,winRect)||InRect(x+w,y+w,winRect)||InRect(x,y+w,winRect))){
+            if(RectInRect(x,y,w,h)){
                 //如果是海洋
                 if(block.getMapType()==MAPTYPE_OCEAN){
                     static QPixmap*ocean=new QPixmap(resMap["Sea_Deep"].front());
@@ -83,10 +87,17 @@ void GameWidget::paintEvent(QPaintEvent *)
     }
     //清除内存图内容
     emptymemorymap();
-
     //绘制列表清空
     drawlist.clear();
-
+    static auto CheckInScreen=[&](Coordinate*coor)->bool{
+        int tx = tranX(coor->getDR()-DR, coor->getUR()-UR), ty = tranY(coor->getDR()-DR, coor->getUR()-UR);
+        // BlockDR、BlockUR
+        int tmpBlockDR = coor->getDR() / BLOCKSIDELENGTH, tmpBlockUR = coor->getUR() / BLOCKSIDELENGTH;
+        int x=tx - coor->getimageX() + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX();
+        int y=coor->getimageY() - coor->getNowRes()->pix.height() + ty +  mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
+        int w=coor->getNowRes()->pix.width(),h=coor->getNowRes()->pix.height();
+        return RectInRect(x,y,w,h);
+    };
     //地图资源相关 树木石块等
     std::list<StaticRes*> *sr=&mainwidget->map->staticres;
     if(!sr->empty())
@@ -94,8 +105,9 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<StaticRes*>::iterator sriter=sr->begin();
         while(sriter!=sr->end())
         {
-            if((*sriter)->getexplored())
+            if(CheckInScreen(*sriter)&&(*sriter)->getexplored())
                 insert((*sriter),&drawlist);
+            else (*sriter)->setNotInWidget();
             sriter++;
         }
     }
@@ -105,12 +117,12 @@ void GameWidget::paintEvent(QPaintEvent *)
         std::list<Animal *>::iterator ariter=ar->begin();
         while(ariter!=ar->end())
         {
-            if((*ariter)->getexplored())
+            if(CheckInScreen(*ariter)&&(*ariter)->getexplored())
                 insert((*ariter),&drawlist);
+            else (*ariter)->setNotInWidget();
             ariter++;
         }
     }
-
     //玩家的建筑部分 人物部分
     for(int i=0;i<MAXPLAYER;i++)
     {
@@ -119,8 +131,9 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!b->empty()&&biter!=b->end())
         {
             Coordinate *p=*biter;
-            if((*biter)->getvisible())
+            if(CheckInScreen(*biter)&&(*biter)->getvisible())
                 insert(p,&drawlist);
+            else (*biter)->setNotInWidget();
             biter++;
         }
 
@@ -129,8 +142,9 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!h->empty()&&hiter!=h->end())
         {
             Coordinate *p=*hiter;
-            if((*hiter)->getvisible()&&!(*hiter)->getTransported())
+            if(CheckInScreen(*hiter)&&(*hiter)->getvisible()&&!(*hiter)->getTransported())
                 insert(p,&drawlist);
+            else (*hiter)->setNotInWidget();
             hiter++;
         }
 
@@ -160,8 +174,6 @@ void GameWidget::paintEvent(QPaintEvent *)
         diamond << QPointF(X, Y+height/2);
         painter.drawPolygon(diamond);
     }
-
-
     Building* buildOb = NULL;
     //drawlist正常绘制
     if(!drawlist.empty())
@@ -173,12 +185,10 @@ void GameWidget::paintEvent(QPaintEvent *)
             int tx = tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR), ty = tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR);
             // BlockDR、BlockUR
             int tmpBlockDR = (*iter)->getDR() / BLOCKSIDELENGTH, tmpBlockUR = (*iter)->getUR() / BLOCKSIDELENGTH;
-            painter.drawPixmap(tx - (*iter)->getimageX() + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX(),
-                               (*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + ty + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
-                               (*iter)->getNowRes()->pix.width(),
-                               (*iter)->getNowRes()->pix.height(),
-                               (*iter)->getNowRes()->pix);
-
+            int x=tx - (*iter)->getimageX() + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX();
+            int y=(*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + ty +  mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
+            int w=(*iter)->getNowRes()->pix.width(),h=(*iter)->getNowRes()->pix.height();
+            painter.drawPixmap(x,y,w,h,(*iter)->getNowRes()->pix);
             (*iter)->printer_ToBuilding((void**)&buildOb);
             if(buildOb != NULL && buildOb->getFireNowList() != NULL)
             {
@@ -191,17 +201,23 @@ void GameWidget::paintEvent(QPaintEvent *)
                 );
             }
 
-            drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
-                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
-                       (*(*iter)->getNowRes()),(*iter)->getglobalNum());
-
-            if(judgeinWindow(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY()))
-                (*iter)->setInWidget();
-            else
-                (*iter)->setNotInWidget();
-
+            if(Core::objClickedCaptureState==1){//如果需要捕捉点击对象
+                int xx=Core::mouseEventStore.memoryMapX,yy=Core::mouseEventStore.memoryMapY;
+                int x=tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX();
+                int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
+                if(xx>=x/4&&xx<=(x+w)/4&&yy>=y/4&&yy<=(y+h)/4){
+                    Core::objClickedCaptureState=2;
+                    Core::objCapture=*iter;
+                }
+            }
+            (*iter)->setInWidget();
             iter++;
         }
+    }
+
+    if(Core::objClickedCaptureState==1){
+        Core::objClickedCaptureState=2;
+        Core::objCapture=0;
     }
 }
 
@@ -324,7 +340,7 @@ void GameWidget::insert(Coordinate *p, std::list<Coordinate *> *drawlist)
 }
 
 //绘制内存图
-void GameWidget::drawmemory(int X, int Y, ImageResource res, int globalNum)
+void GameWidget::drawmemory(int X, int Y,  ImageResource&res, int globalNum)
 {
     for(int i=0;i<res.pix.width();i++)
     {
