@@ -45,7 +45,9 @@ public:
     void CalCellOffset(int BlockDR,int BlockUR);
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
-    void loadfindPathMap(MoveObject* moveOb);
+    using Type=int[MAP_L][MAP_U];
+    using TypeRef=Type&;
+    TypeRef loadfindPathMap(MoveObject* moveOb);
     void loadfindPathMapTemperature();
     //加载障碍物地图
     void loadBarrierMap(bool absolute = false);
@@ -189,6 +191,9 @@ private:
     void clearfindPathMapTemperature(){memset(findPathMapTemperature,0,sizeof(findPathMapTemperature));}
     void clearBarrierMap(){ memset(barrierMap ,0 , sizeof(barrierMap)); }
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
+
+    void drawEdge(int tempMap[MAP_L][MAP_U],std::map<int, int> codeToNum,int MapType1,int MapType2,int MapType3);  // 绘制地形交界
+
 
     Player** player;
     short m_heightMap[GENERATE_L][GENERATE_L] = {{}};

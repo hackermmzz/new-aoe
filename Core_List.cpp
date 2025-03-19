@@ -1,5 +1,4 @@
 #include "Core_list.h"
-
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
@@ -77,18 +76,20 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
         if(eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
                 && buildGoalOb!=NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
-        /*if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
-            Farmer*f0=(Farmer*)object1;
-            Human*f1=(Human*)object2;
+        if(eventType ==CoreEven_Transport){//运输船运输人必须保持距离合适
+            Farmer*f0=(Farmer*)object2;
+            Human*f1=(Human*)object1;
             //如果满载,返回错误码
             if(f0->getResourceNowHave()>=5)return ACTION_INVALID_FULLY_LOAD;
             //如果两个相距太远，返回错误码
+            /*
             double dr0=f0->getDR(),ur0=f0->getUR(),dr1=f1->getDR(),ur1=f1->getUR();
             double dr=dr1-dr0,ur=ur1-ur0;
             if(dr*dr+ur*ur>=SHIP_ACT_MAX_DISTANCE){
                 return ACTION_INVALID_DISTANCE_FAR;
             }
-        }*/
+            */
+        }
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if(object1->isPlayerControl() && object2->isPlayerControl())
@@ -686,7 +687,7 @@ void Core_List::object_Move(Coordinate * object , double DR , double UR)
             thisDR = moveObject->getDR();
             thisUR = moveObject->getUR();
 
-            if( thisDR == DR0 && thisUR == UR0 && (DR0!=DR || UR0!= UR) || countdistance(DR0,UR0,DR,UR) > 107 )
+            if( thisDR == DR0 && thisUR == UR0 && (DR0!=DR || UR0!= UR) || countdistance(DR0,UR0,DR,UR) > 1e7 )
             {
                 //为moveObject设置路径
                 setPath(moveObject, goalOb, DR, UR);
@@ -903,9 +904,11 @@ void Core_List::object_Transport(Coordinate *object1, Coordinate *object2)
 {
     Human*human1=(Human*)object1;
     Farmer*human2=(Farmer*)object2;
-    human1->setTransported(true);
-    human2->update_transportHuman(human1);
-    human2->set_ResourceSort(SORT_HUMAN);
+    if(human2->getResourceNowHave()<5){
+        human1->setTransported(true);
+        human2->update_transportHuman(human1);
+        human2->set_ResourceSort(SORT_HUMAN);
+    }
     suspendRelation(human1);
 }
 
@@ -1245,18 +1248,20 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
     Point crashBlockPoint;
     stack<Point> path;
 
-    theMap->loadfindPathMap(moveOb);
-//    theMap->findPathMap[destination.x][destination.y] = 0;
+    auto&findPathMap=theMap->loadfindPathMap(moveOb);
+    int*pre=0,preval=0;//用于恢复寻路模板
     if(relate_AllObject[moveOb].crashPointLab.size())   //如果之前经历了碰撞，将碰撞处设为障碍物
     {
         crashBlockPoint = relate_AllObject[moveOb].crashPointLab.top();
         relate_AllObject[moveOb].crashPointLab.pop();
-        theMap->findPathMap[crashBlockPoint.x][crashBlockPoint.y] = 1;
+        pre=&findPathMap[crashBlockPoint.x][crashBlockPoint.y];
+        preval=*pre;
+        *pre=1;
     }
 
     if(moveOb->getSort() == SORT_MISSILE) path.push(destination);
     else{
-        auto&&ret= findPath(theMap->findPathMap , theMap , start , destination , moveOb,goalOb);
+        auto&&ret= findPath(findPathMap , theMap , start , destination , moveOb,goalOb);
         path=ret.first;
         auto&dest=ret.second;
         if(dest[0]<1e9){
@@ -1264,6 +1269,7 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
             UR0=dest[1];
         }
     }
+    if(pre)*pre=preval;//恢复寻路模板
     relate_AllObject[moveOb].nullPath = path.empty();
     moveOb->setPath(path,DR0,UR0);
 }
@@ -1324,21 +1330,18 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
 
 pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination,Coordinate*object, Coordinate* goalOb)
 {
+    static unsigned long long mask=0;
+    using Data=array<int,2>;
     //8个移动方向 <4为斜线方向，>=4为水平竖直方向
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
                              Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
-
+    static vector<vector<Data>> preNode(MAP_L,vector<Data>(MAP_U));
+    static vector<Data>vis;
     stack<Point> path;
-    vector<Point> objectBlock;
-    vector<Point>::iterator oBiter,oBitere;
-    Point nextPoint, nowPoint;
-    pathNode* newPathNode = NULL , *findPathNode = NULL, *nowBestPathNode;
-    vector<pathNode*> lab_needDele;
-    lessHeap* nodeQue = new lessHeap();
     bool meetGoal = false;
-
-    initMap_HaveJud();
-    pathNode::setGoalPoint(destination.x,destination.y);    //设置寻路目标点
+    ++mask;//把寻路掩码递增1
+    //initMap_HaveJud();
+    //memset(goalMap,0,sizeof(goalMap));
     //判断是不是船
     bool isShip=false;
     if(object){
@@ -1356,28 +1359,19 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
         }
     }
     //起始点标记
-    haveJud_Map_Move(start);
-
-    memset(goalMap , 0 , sizeof(goalMap));
-
+    map_HaveJud[start.x][start.y] = mask;
     bool isNoPath = true;
     int ix,iy,jx,jy;
     //标记终点
     if(goalOb != NULL)
     {
-        objectBlock = map->get_ObjectBlock(goalOb);
-        oBiter = objectBlock.begin();
-        oBitere = objectBlock.end();
-        while(oBiter != oBitere)
-        {
-            ix = (*oBiter).x;
-            iy = (*oBiter).y;
-            goalMap[ix][iy] = true;
-
-            oBiter++;
+        auto&&objectBlock = map->get_ObjectBlock(goalOb);
+        for(Point&p:objectBlock){
+            ix = p.x;
+            iy = p.y;
+            goalMap[ix][iy] = mask;
             if(!isNoPath)
                 continue;
-
             for(int i = 4; i<8; i++)
             {
                 jx = ix + dire[i].x;
@@ -1396,7 +1390,7 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     {
         ix = destination.x;
         iy = destination.y;
-        goalMap[ix][iy] = true;
+        goalMap[ix][iy] = mask;
 
         for(int i = 4; i<8; i++)
         {
@@ -1414,96 +1408,82 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
 
     if(isNoPath)
         return {path,{1e9,1e9}};
-
-    goalMap[destination.x][destination.y] = true;
-
-    newPathNode = new pathNode(start);
-    lab_needDele.push_back(newPathNode);
-    nodeQue->addNode(newPathNode);
-
-    if( goalMap[start.x][start.y] )
+    goalMap[destination.x][destination.y] = mask;
+    if( goalMap[start.x][start.y]==mask )
     {
         meetGoal = true;
-        findPathNode = newPathNode;
     }
-
-    while( nodeQue->top() && !meetGoal)    //nowBestPathNode记录当前节点
-    {
-        nowBestPathNode = nodeQue->top()->value;
-        nodeQue->pop();
-        if(nowBestPathNode->pathLength > (MAP_L+MAP_U)) continue;
-
-        nowPoint = nowBestPathNode->position;    //当前nowBestPathNode记录点的坐标
-
-        for(int i = 0; i<8 && !meetGoal; i++)
-        {
-            nextPoint = nowPoint + dire[i];
-            if(nextPoint.x< 0 || nextPoint.y < 0 || nextPoint.x >= MAP_L || nextPoint.y >= MAP_U) continue;
-            Block&block=theMap->cell[nextPoint.x][nextPoint.y];
-            bool isLand=block.getMapType()!=MAPTYPE_OCEAN;
-            //判断格子是否可走、未走过
-            //斜线方向需要多判断马脚操作
-            if((isLand^isShip))
-            if(!(isHaveJud(nextPoint) || findPathMap[nextPoint.x][nextPoint.y] && !goalMap[nextPoint.x][nextPoint.y] ||\
-                  i<4 && (findPathMap[nextPoint.x][nowPoint.y]||findPathMap[nowPoint.x][nextPoint.y])) )
-            {
-                //创建新节点
-                newPathNode = new pathNode( nextPoint );
-                haveJud_Map_Move(nextPoint);
-                lab_needDele.push_back(newPathNode);
-                //为新节点增加前驱点信息,然后添加新节点到小根堆
-                nodeQue->addNode(nowBestPathNode->pushNode(newPathNode));
-                if( goalMap[nextPoint.x][nextPoint.y] )
-                {
-                    meetGoal = true;
-                    findPathNode = newPathNode;
+    queue<Data>qu;
+    qu.push({start.x,start.y});
+    Data targetPoint={start.x,start.y};
+    vis.clear();
+    vis.push_back({start.x,start.y});
+    preNode[start.x][start.y]={-1,-1};
+    while(!qu.empty()&&!meetGoal){
+        int size=qu.size();
+        while(size--){
+            auto p=qu.front();
+            qu.pop();
+            for(int i=0;i<8;++i){
+                auto&offset=dire[i];
+                int x=p[0]+offset.x,y=p[1]+offset.y;
+                if(x>=0&&y>=0&&x<MAP_L&&y<MAP_U){
+                    Block&block=theMap->cell[x][y];
+                    bool isLand=block.getMapType()!=MAPTYPE_OCEAN;
+                    //判断格子是否可走、未走过
+                    //斜线方向需要多判断马脚操作
+                    if(isLand^isShip){
+                        if(!(map_HaveJud[x][y]==mask || findPathMap[x][y] && goalMap[x][y]!=mask ||\
+                             i<4 && (findPathMap[x][p[1]]||findPathMap[p[0]][y]))){
+                            preNode[x][y]={p[0],p[1]};
+                            qu.push({x,y});
+                            vis.push_back({x,y});
+                            map_HaveJud[x][y]=mask;
+                            if(goalMap[x][y]==mask){
+                                meetGoal=1;
+                                targetPoint={x,y};
+                            }
+                        }
+                    }
                 }
+                if(meetGoal)break;
             }
+            if(meetGoal)break;
         }
     }
-
     double dr0=1e9,ur0=1e9;
     {
         //如果没有能有一条合法的路径到终点
         if(!meetGoal){
+            targetPoint={-119,-119};
             //////////////选择离目的地最近的节点
-            for(auto*newPathNode:lab_needDele){
-                if(!findPathNode){
-                    findPathNode=newPathNode;
+            for(Data&point:vis){
+                if(targetPoint[0]==-119){
+                    targetPoint=point;
                 }else{
-                    auto&pos0=findPathNode->position;
-                    auto&pos1=newPathNode->position;
-                    double dr0=pos0.x-destination.x,ur0=pos0.y-destination.y;
-                    double dr1=pos1.x-destination.x,ur1=pos1.y-destination.y;
-                    if(dr0*dr0+ur0*ur0>dr1*dr1+ur1*ur1)findPathNode=newPathNode;
+                    double dr0=point[0]-destination.x,ur0=point[1]-destination.y;
+                    double dr1=targetPoint[0]-destination.x,ur1=targetPoint[1]-destination.y;
+                    if(dr0*dr0+ur0*ur0<dr1*dr1+ur1*ur1)targetPoint=point;
                 }
             }
             //////////////
             MoveObject*obj=0;
             object->printer_ToMoveObject((void**)&obj);
-            if(obj&&findPathNode)
+            if(obj&&targetPoint[0]!=-119)
             {
-                dr0=(findPathNode->position.x+0.5)*BLOCKSIDELENGTH,ur0=(findPathNode->position.y+0.5)*BLOCKSIDELENGTH;
+                dr0=(targetPoint[0]+0.5)*BLOCKSIDELENGTH,ur0=(targetPoint[1]+0.5)*BLOCKSIDELENGTH;
             }
         }
         //
-        while(findPathNode!=NULL)
+        while(targetPoint[0]!=-1)
         {
-            path.push(findPathNode->position);
-            findPathNode = findPathNode->preNode;
+            path.push(Point{targetPoint[0],targetPoint[1]});
+            targetPoint=preNode[targetPoint[0]][targetPoint[1]];
         }
         //当前所在格子不加入栈
         if(path.size())
         path.pop();
     }
-
-    //释放动态空间
-    while(lab_needDele.size())
-    {
-        delete lab_needDele.back();
-        lab_needDele.pop_back();
-    }
-    delete nodeQue;
     return {path,{dr0,ur0}};
 }
 
