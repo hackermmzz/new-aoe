@@ -13,11 +13,11 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="export_map">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>50</y>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -26,11 +26,11 @@
     <string>导出地图</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox">
+  <widget class="QComboBox" name="land_height">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>50</y>
+     <x>330</x>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -46,11 +46,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_2">
+  <widget class="QComboBox" name="player_building_and_source">
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>50</y>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -58,6 +58,11 @@
    <item>
     <property name="text">
      <string>玩家市中心</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家运输船</string>
     </property>
    </item>
    <item>
@@ -96,11 +101,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_3">
+  <widget class="QComboBox" name="ai_building_and_resource">
    <property name="geometry">
     <rect>
      <x>660</x>
-     <y>50</y>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -126,11 +131,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_4">
+  <widget class="QComboBox" name="player_human">
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>50</y>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -161,11 +166,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_5">
+  <widget class="QComboBox" name="ai_human">
    <property name="geometry">
     <rect>
      <x>770</x>
-     <y>50</y>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -191,11 +196,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_6">
+  <widget class="QComboBox" name="resource">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>50</y>
+     <x>990</x>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -216,11 +221,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_7">
+  <widget class="QComboBox" name="animal">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>50</y>
+     <x>880</x>
+     <y>40</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -238,6 +243,39 @@
    <item>
     <property name="text">
      <string>大象</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>删除对象</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>草地</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>海洋</string>
     </property>
    </item>
   </widget>
