@@ -10,7 +10,10 @@
 #include "ActWidget.h"
 #include "AboutDialog.h"
 #include "GlobalVariate.h"
-#include"soudplaythread.h"
+#include "soudplaythread.h"
+#include "Editor.h"
+#include "ui_Editor.h"
+
 namespace Ui {
 class MainWidget;
 }
@@ -30,6 +33,8 @@ public:
 
     //获取实体信息框的按钮
     ActWidget* getActs(int num){return acts[num];}
+
+    Editor* editor;
 
 public slots:
     void cheat_Player0Resource();

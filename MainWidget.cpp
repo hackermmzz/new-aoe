@@ -1,5 +1,6 @@
 ﻿#include "MainWidget.h"
 #include "ui_MainWidget.h"
+#include "ui_Editor.h"
 
 int g_globalNum= rand()%11;
 int g_frame=0;
@@ -86,6 +87,10 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     //
     debugText("blue"," 游戏开始");
     qInfo()<<"初始化结束，游戏开始！";
+
+    // 编辑器相关内容显示
+    editor = new Editor(this);
+    editor -> show();
 }
 
 //***************InitHelperFunctionBegin**************
