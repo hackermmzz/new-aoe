@@ -34,7 +34,42 @@ public:
     //获取实体信息框的按钮
     ActWidget* getActs(int num){return acts[num];}
 
+    // 编辑器相关内容
     Editor* editor;
+    int currentSelected;  // 用于记录当前的选择的内容
+    // 枚举编辑器中的功能键
+    enum EditorElement{
+        DELETEOBJECT,
+        FLAT,
+        OCEAN,
+        HIGHTERLAND,
+        LOWERLAND,
+        PLAYERDOWNTOWN,
+        PLAYERTRANSPORTSHIP,
+        PLAYERFISHERY,
+        PLAYERWARSHIP,
+        PLAYERDOCK,
+        PLAYERFISHINGBOAT,
+        PLAYERREPOSITORY,
+        PLAYERARROWTOWER,
+        PLAYERBARRACKS,
+        PLAYERFARMER,
+        PLAYERCLUBMAN,
+        PLAYERAXEMAN,
+        PLAYERSCOUT,
+        PLAYERBOWMAN,
+        AIWARSHIP,
+        AIARROWTOWER,
+        AICLUBMAN,
+        AIAXEMAN,
+        AISCOUT,
+        AIBOWMAN,
+        GAZELLE,
+        LION,
+        ELEPHANT,
+        STONM,
+        GOLDORE
+    };
 
 public slots:
     void cheat_Player0Resource();
@@ -77,6 +112,11 @@ private:
     QTimer *timer;
     QButtonGroup *pbuttonGroup = NULL;
 //*******************************
+
+//****************编辑器*****************
+    void ExportCurrentState(const char*file);
+
+//**************************************
 
 //****************输出框****************
     void respond_DebugMessage();

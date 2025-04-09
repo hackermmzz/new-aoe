@@ -37,6 +37,11 @@
    </property>
    <item>
     <property name="text">
+     <string>地皮高度</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>提升高度</string>
     </property>
    </item>
@@ -118,16 +123,6 @@
    <item>
     <property name="text">
      <string>敌方战船</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string/>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string/>
     </property>
    </item>
   </widget>
@@ -246,7 +241,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="delete_object">
    <property name="geometry">
     <rect>
      <x>110</x>
@@ -259,7 +254,7 @@
     <string>删除对象</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox">
+  <widget class="QComboBox" name="land_type">
    <property name="geometry">
     <rect>
      <x>220</x>
@@ -268,6 +263,11 @@
      <height>51</height>
     </rect>
    </property>
+   <item>
+    <property name="text">
+     <string>地皮类型</string>
+    </property>
+   </item>
    <item>
     <property name="text">
      <string>草地</string>

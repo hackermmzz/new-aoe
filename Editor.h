@@ -14,8 +14,6 @@ class Editor : public QWidget
 public:
     explicit Editor(QWidget *parent = 0);
     ~Editor();
-
-private:
     Ui::Editor *ui;
 };
 

@@ -1,6 +1,7 @@
 ﻿#include "MainWidget.h"
 #include "ui_MainWidget.h"
 #include "ui_Editor.h"
+#include <iostream>
 
 int g_globalNum= rand()%11;
 int g_frame=0;
@@ -88,9 +89,130 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     debugText("blue"," 游戏开始");
     qInfo()<<"初始化结束，游戏开始！";
 
-    // 编辑器相关内容显示
+    // 创建编辑器
     editor = new Editor(this);
-    editor -> show();
+
+    // 显示编辑器
+    editor->show();
+    qDebug("启用编辑器");
+
+    connect(editor->ui->export_map,QPushButton::clicked,this,[=](){this->ExportCurrentState("map.txt");}); // 导出地图
+    connect(editor->ui->delete_object,QPushButton::clicked,this,[=](){
+        call_debugText("green"," 删除资源/建筑 索引:",DELETEOBJECT);
+        this->currentSelected = DELETEOBJECT;
+    });
+    // 连接 QComboBox 的 currentIndexChanged 信号
+    connect(editor->ui->land_type,QOverload<const QString &>::of(&QComboBox::currentIndexChanged), this, [=](const QString &text) {
+        // 获取当前选中的选项索引
+        QString selectedText = text;
+        if(text == "草地") this->currentSelected = FLAT;
+        else if(text == "海洋") this->currentSelected = OCEAN;
+        if(text != "地皮类型") call_debugText("green", " 建造"+text,0);
+    });
+
+
+}
+
+//******************导出地图*******************
+void MainWidget::ExportCurrentState(const char*fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qDebug() << "can't open error!";
+        return;
+
+    }
+    QTextStream stream(&file);
+    //////////////保存cell图
+    /*
+    int Num;
+    bool Visible=false;//是否可见
+    bool Explored=false;//是否被探索
+    int Type;               // 地图块种类（地形凹凸）
+    int Pattern;            // 地图块样式（草地、沙漠等）
+    int Height;             // 地图块高度
+    int OffsetX, OffsetY;   // 地图块偏移量
+    int Resource;           // 地图块存放的资源类型（默认为无资源，即空地）
+    */
+    QJsonObject root;
+    for(int i=0,idx=0;i<MAP_L;++i)
+        for(int j=0;j<MAP_U;++j){
+            Block&cell=map->cell[i][j];
+            QJsonObject obj;
+            obj.insert("BlockDR",i);
+            obj.insert("BlockUR",j);
+            obj.insert("Num",cell.Num);
+            obj.insert("Visible",cell.Visible);
+            obj.insert("Explored",cell.Explored);
+            obj.insert("Type",cell.getMapType());
+            obj.insert("Pattern",cell.getMapPattern());
+            obj.insert("Height",cell.getMapHeight());
+            obj.insert("OffsetX",cell.getOffsetX());
+            obj.insert("OffsetY",cell.getOffsetY());
+            obj.insert("Resource",cell.getMapResource());
+            root.insert("Cell_"+QString::number(idx++),obj);
+    }
+    //////////////保存building
+    int building_idx=0;
+    for(Building*build:player[0]->build){
+        QJsonObject obj;
+        obj.insert("BlockDR",build->getBlockDR());
+        obj.insert("BlockUR",build->getBlockUR());
+        obj.insert("Num",build->getNum());
+        obj.insert("Own","WLH");
+        root.insert("Building_"+QString::number(building_idx++),obj);
+    }
+    for(Building*build:player[1]->build){
+        QJsonObject obj;
+        obj.insert("BlockDR",build->getBlockDR());
+        obj.insert("BlockUR",build->getBlockUR());
+        obj.insert("Num",build->getNum());
+        obj.insert("Own","LZ");
+        root.insert("Building_"+QString::number(building_idx++),obj);
+    }
+    ////////////////保存人物
+    int Human_idx=0;
+    for(Human*human:player[0]->human){
+        QJsonObject obj;
+        obj.insert("DR",human->getDR());
+        obj.insert("UR",human->getUR());
+        obj.insert("Num",human->getNum());
+        obj.insert("Sort",human->getSort()==SORT_FARMER?"Farmer":"Army");
+        obj.insert("FarmerType",human->getSort()==SORT_FARMER?((Farmer*)human)->get_farmerType():-1);
+        obj.insert("Own","WLH");
+        root.insert("Human_"+QString::number(Human_idx++),obj);
+    }
+    for(Human*human:player[1]->human){
+        QJsonObject obj;
+        obj.insert("DR",human->getDR());
+        obj.insert("UR",human->getUR());
+        obj.insert("Num",human->getNum());
+        obj.insert("Sort",human->getSort()==SORT_FARMER?"Farmer":"Army");
+        obj.insert("Own","LZ");
+        root.insert("Human_"+QString::number(Human_idx++),obj);
+    }
+    /////////////////保存静态资源
+    int res_idx=0;
+    for(StaticRes*res:map->staticres){
+        QJsonObject obj;
+        obj.insert("BlockDR",res->getBlockDR());
+        obj.insert("BlockUR",res->getBlockUR());
+        obj.insert("Num",res->getNum());
+        root.insert("StaticRes_"+QString::number(res_idx++),obj);
+    }
+    //////////////////保存动物
+    int animal_idx=0;
+    for(Animal*animal:map->animal){
+        QJsonObject obj;
+        obj.insert("DR",animal->getDR());
+        obj.insert("UR",animal->getUR());
+        obj.insert("Num",animal->getNum());
+        root.insert("Animal_"+QString::number(animal_idx++),obj);
+    }
+    /////////////////////////////
+    QJsonDocument doc(root);
+    stream<<doc.toJson();
+    file.close();
 }
 
 //***************InitHelperFunctionBegin**************
