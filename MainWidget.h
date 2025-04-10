@@ -72,6 +72,8 @@ public:
         GOLDORE
     };
 
+    bool leftMousePress;
+
 public slots:
     void cheat_Player0Resource();
 private slots:
@@ -89,6 +91,7 @@ private:
     UsrAI* UsrAi;
     EnemyAI *EnemyAi;
     SoudPlayThread*soundPlayThread;
+
 //*************游戏更新*************
     bool pause = false;
     int gameframe = 0;
@@ -115,7 +118,19 @@ private:
 //*******************************
 
 //****************编辑器*****************
+    void SaveCurrentState();
     void ExportCurrentState(const char*file);
+    void updateEditor();
+    void HigherLand(int blockL,int blockU,int height);
+    void LowerLand(int blockL,int blockU,int height);
+    void MakeOcean(int blockL,int blockU);
+    void DeleteOcean(int blockL,int blockU);
+    void MakeTree(double DR,double UR);
+    void MakeStaticRes(int blockL,int blockU,int type);
+    void MakeAnimal(double DR,double UR,int type);
+    void MakeBuilding(int blockL,int blockU,int type);
+    void MakeHuman(double DR,double UR,int type);
+    void clearArea(int blockL, int blockU, int radius = 1);  // 清空指定区域资源
 
 //**************************************
 

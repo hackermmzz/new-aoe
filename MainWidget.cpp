@@ -2,6 +2,7 @@
 #include "ui_MainWidget.h"
 #include "ui_Editor.h"
 #include <iostream>
+#include <QString>
 
 int g_globalNum= rand()%11;
 int g_frame=0;
@@ -94,7 +95,6 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 显示编辑器
     editor->show();
-    qDebug("启用编辑器");
 
     // 导出地图
     connect(editor->ui->export_map,QPushButton::clicked,this,[=](){
@@ -274,6 +274,432 @@ void MainWidget::ExportCurrentState(const char*fileName)
     stream<<doc.toJson();
     file.close();
 }
+
+
+void MainWidget::updateEditor()
+{
+    static int preHeight = -1;
+    static int needSave =1;
+    // 如果左边一直被摁住
+    if(leftMousePress){
+        QPoint globalPos = QCursor::pos();
+        QPoint localPos = mapFromGlobal(globalPos);
+        double DR = ui->Game->tranDR(localPos.x(),localPos.y())+ui->Game->DR;
+        double UR = ui->Game->tranUR(localPos.x(),localPos.y())+ui->Game->UR;
+        int L=DR/BLOCKSIDELENGTH,U=UR/BLOCKSIDELENGTH;
+        if(L<0||L>=MAP_L||U<0||U>=MAP_U)return;
+        if(needSave){
+            needSave=0;
+            SaveCurrentState();
+        }
+        switch (currentSelected) {
+            case HIGHTERLAND:
+                if(preHeight==-1)preHeight=map->cell[L][U].getMapHeight()+1;
+                HigherLand(L,U,preHeight);
+                break;
+            case OCEAN:
+                MakeOcean(L,U);
+                break;
+           case LOWERLAND:
+                if(preHeight==-1)preHeight=map->cell[L][U].getMapHeight()-1;
+                if(preHeight>=0)LowerLand(L,U,preHeight);
+                break;
+           case DELETEOBJECT:
+                clearArea(L,U);
+                break;
+           case FLAT:
+                DeleteOcean(L,U);
+                break;
+           default:
+                needSave=1;
+                delete ui->Game->RollBackState();
+                break;
+        }
+    }
+    else {
+        needSave=1;
+        preHeight=-1;
+    }
+    // 单击生成
+    if(mouseEvent->mouseEventType==LEFT_PRESS){
+        int L=mouseEvent->DR/BLOCKSIDELENGTH,U=mouseEvent->UR/BLOCKSIDELENGTH;
+        if(L<0||L>=MAP_L||U<0||U>=MAP_U)return;
+        SaveCurrentState();
+        //
+        switch (currentSelected) {
+        case TREE:
+            MakeTree(mouseEvent->DR,mouseEvent->UR);
+            break;
+        case GOLDORE:
+            MakeStaticRes(L,U,GOLDORE);
+            break;
+        case STONM:
+            MakeStaticRes(L,U,STONM);
+            break;
+        case ELEPHANT:
+            MakeAnimal(mouseEvent->DR,mouseEvent->UR,ELEPHANT);
+            break;
+        case LION:
+            MakeAnimal(mouseEvent->DR,mouseEvent->UR,LION);
+            break;
+        case GAZELLE:
+            MakeAnimal(mouseEvent->DR,mouseEvent->UR,GAZELLE);
+            break;
+        case PLAYERDOWNTOWN:
+            MakeBuilding(L,U,PLAYERDOWNTOWN);
+            break;
+        case AIARROWTOWER:
+            MakeBuilding(L,U,AIARROWTOWER);
+            break;
+        case PLAYERFARMER:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,PLAYERFARMER);
+            break;
+        case AICLUBMAN:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,AICLUBMAN);
+            break;
+        case AIBOWMAN:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,AIBOWMAN);
+            break;
+        case AISCOUT:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,AISCOUT);
+            break;
+        case PLAYERDOCK:
+            MakeBuilding(L,U,PLAYERDOCK);
+            break;
+        case AIWARSHIP:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,AIWARSHIP);
+            break;
+        case PLAYERFISHINGBOAT:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,PLAYERFISHINGBOAT);
+            break;
+        case PLAYERTRANSPORTSHIP:
+            MakeHuman(mouseEvent->DR,mouseEvent->UR,PLAYERTRANSPORTSHIP);
+            break;
+        case PLAYERFISHERY:
+            MakeStaticRes(L,U,PLAYERFISHERY);
+            break;
+        default:
+            delete ui->Game->RollBackState();
+            break;
+        }
+    }else if(mouseEvent->mouseEventType==RIGHT_PRESS)currentSelected=-1;
+    mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+}
+
+void MainWidget::clearArea(int blockL, int blockU, int radius) {
+    // 保存当前状态以支持撤销
+    SaveCurrentState();
+
+    // 清空静态资源（金矿、石堆）
+    auto& staticResList = map->staticres;
+    auto itStatic = staticResList.begin();
+    while (itStatic != staticResList.end()) {
+        int x = (*itStatic)->getBlockDR();
+        int y = (*itStatic)->getBlockUR();
+        if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
+            delete *itStatic;
+            itStatic = staticResList.erase(itStatic);
+        } else {
+            ++itStatic;
+        }
+    }
+
+    // 清空动物（树、瞪羚等）
+    auto& animalList = map->animal;
+    auto itAnimal = animalList.begin();
+    while (itAnimal != animalList.end()) {
+        int x = (*itAnimal)->getBlockDR();
+        int y = (*itAnimal)->getBlockUR();
+        if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
+            delete *itAnimal;
+            itAnimal = animalList.erase(itAnimal);
+        } else {
+            ++itAnimal;
+        }
+    }
+
+    // 清空玩家建筑
+    for (int i = 0; i < MAXPLAYER; ++i) {
+        auto& buildList = player[i]->build;
+        auto itBuild = buildList.begin();
+        while (itBuild != buildList.end()) {
+            int x = (*itBuild)->getBlockDR();
+            int y = (*itBuild)->getBlockUR();
+            if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
+                delete *itBuild;
+                itBuild = buildList.erase(itBuild);
+            } else {
+                ++itBuild;
+            }
+        }
+    }
+
+    // 更新障碍物地图和资源地图
+    map->loadBarrierMap(true);
+    map->reset_resMap_AI();
+    ui->Game->update();  // 触发界面重绘
+}
+
+void MainWidget::SaveCurrentState()
+{
+    GameState*state=new GameState;
+    ////////////////////////
+    //保存地形
+    for(int i=0;i<MAP_L;++i)for(int j=0;j<MAP_U;++j)state->cell[i][j]=map->cell[i][j];
+    for(int i=0;i<GENERATE_L;++i)for(int j=0;j<GENERATE_U;++j)state->m_heightMap[i][j]=map->m_heightMap[i][j];
+    //保存我方人物信息
+    {
+        Player*p=player[0];
+        state->myBuilding=p->build;
+        state->myHuman=p->human;
+    }
+    //保存敌方信息
+    {
+        Player*p=player[1];
+        state->myBuilding=p->build;
+        state->myHuman=p->human;
+    }
+    state->myHuman=player[0]->human;
+    state->myBuilding=player[0]->build;
+    state->enemyHuman=player[1]->human;
+    state->enemyBuilding=player[1]->build;
+    state->animal=map->animal;
+    state->resource=map->staticres;
+    //
+    ////////////////////////
+    ui->Game->SaveCurrentState(state);
+}
+
+
+void MainWidget::HigherLand(int blockL, int blockU,int height)
+{
+    static const int width=3;
+    static const int half=width/2;
+    /////////////////////////////////////先去检查能不能去拔高(即周围不能有比他高，或者比他矮低于1的方块)
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                for(int i=-2;i<=2;++i){
+                    for(int j=-2;j<=2;++j){
+                        int l=ll+i,u=uu+j;
+                        if(l>=0&&u>=0&&l<MAP_L&&u<MAP_U){
+                            int h1=map->cell[l][u].getMapHeight();
+                            if(height<h1||height-h1>1)return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /////////////////////////////////////
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                map->m_heightMap[ll+4][uu+4]=height;
+                map->cell[ll][uu].setMapHeight(height);
+                map->cell[ll][uu].reset();
+            }
+        }
+    }
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            map->cell[i][j].resetOffset();
+        }
+    }
+    map->GenerateType();
+    map->CalOffset();
+    map->InitFaultHandle();
+    ///////////////////////////////////////////////
+}
+
+void MainWidget::LowerLand(int blockL, int blockU, int height)
+{
+    static const int width=3;
+    static const int half=width/2;
+    /////////////////////////////////////先去检查能不能去压低
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                for(int i=-2;i<=2;++i){
+                    for(int j=-2;j<=2;++j){
+                        int l=ll+i,u=uu+j;
+                        if(l>=0&&u>=0&&l<MAP_L&&u<MAP_U){
+                            int h1=map->cell[l][u].getMapHeight();
+                            if(height>h1||h1-height>1)return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /////////////////////////////////////
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                map->m_heightMap[ll+4][uu+4]=height;
+                map->cell[ll][uu].setMapHeight(height);
+                map->cell[ll][uu].reset();
+            }
+        }
+    }
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            map->cell[i][j].resetOffset();
+        }
+    }
+    ///////////////////////////////////////////////
+    map->GenerateType();
+    map->CalOffset();
+    map->InitFaultHandle();
+    ///////////////////////////////////////////////
+}
+
+void MainWidget::MakeOcean(int blockL, int blockU)
+{
+    static const int width=3;
+    static const int half=width/2;
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                map->m_heightMap[ll+4][uu+4]=MAPHEIGHT_OCEAN;
+                map->cell[ll][uu].setMapHeight(MAPHEIGHT_OCEAN);
+                map->cell[ll][uu].setOffsetX(0);
+                map->cell[ll][uu].setOffsetY(0);
+            }
+        }
+    }
+    map->GenerateType();
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                map->CalCellOffset(ll,uu);
+            }
+        }
+    }
+    map->InitFaultHandle();
+}
+
+
+void MainWidget::DeleteOcean(int blockL, int blockU)
+{
+    static const int width=3;
+    static const int half=width/2;
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                map->m_heightMap[ll+4][uu+4]=MAPHEIGHT_FLAT;
+                map->cell[ll][uu].setMapHeight(MAPHEIGHT_FLAT);
+                map->cell[ll][uu].setOffsetX(0);
+                map->cell[ll][uu].setOffsetY(0);
+                map->ResetMapType(ll,uu);
+            }
+        }
+    }
+
+    map->GenerateType();
+    for(int i=-half;i<=half;++i){
+        for(int j=-half;j<=half;++j){
+            int ll=blockL+i,uu=blockU+j;
+            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
+                map->CalCellOffset(ll,uu);
+            }
+        }
+    }
+    map->InitFaultHandle();
+}
+
+void MainWidget::MakeTree(double DR, double UR)
+{
+    static const float minus=1.0;
+    std::list<Animal*>&list=map->animal;
+    //去判断该位置是不是已经种了树了
+    int L=DR/BLOCKSIDELENGTH,U=UR/BLOCKSIDELENGTH;
+    for(Animal*res:list){
+        if(res->getBlockDR()==L&&res->getBlockUR()==U) return;
+    }
+    map->addAnimal(0, DR, UR); // 树
+}
+
+void MainWidget::MakeStaticRes(int blockL, int blockU, int type)
+{
+    //////////////////////////////去重
+    for(StaticRes*res:map->staticres){
+        if(res->getBlockDR()==blockL&&res->getBlockUR()==blockU) return;
+    }
+    //////////////////////////////
+    if(type==GOLDORE)
+    {
+        map->addStaticRes(2,blockL,blockU);
+    }
+    else if(type==STONM)
+    {
+        map->addStaticRes(1,blockL,blockU);
+    }
+    else if(type==PLAYERFISHERY)
+    {
+        map->addStaticRes(3,blockL,blockU);
+    }
+}
+
+void MainWidget::MakeAnimal(double DR, double UR, int type)
+{
+
+    int finalType=-1;
+    if(type==ELEPHANT)finalType=2;
+    else if(type==LION)finalType=3;
+    else if(type==GAZELLE)finalType=1;
+    /////////////////////////////////
+    if(finalType!=-1)
+        map->addAnimal(finalType,DR,UR);
+}
+
+void MainWidget::MakeBuilding(int blockL, int blockU, int type)
+{
+    for(Building*build:player[0]->build){
+        if(build->getBlockDR()==blockL&&build->getBlockUR()==blockU)return;
+    }
+    for(Building*build:player[1]->build){
+        if(build->getBlockDR()==blockL&&build->getBlockUR()==blockU)return;
+    }
+    //////////////////判断类型
+    if(type==PLAYERDOWNTOWN){
+        player[0]->addBuilding(BUILDING_CENTER,blockL,blockU,100);
+    }
+    else if(type==AIARROWTOWER){
+        player[1]->addBuilding(BUILDING_ARROWTOWER,blockL,blockU,100);
+    }
+    else if(type==PLAYERDOCK){
+        player[0]->addBuilding(BUILDING_DOCK,blockL,blockU,100);
+    }
+}
+
+void MainWidget::MakeHuman(double DR, double UR, int type)
+{
+    if(type==PLAYERFARMER){
+        player[0]->addFarmer(DR,UR);
+    }else if(type==AISCOUT){
+        player[1]->addArmy(AT_SCOUT,DR,UR);
+    }else if(type==AICLUBMAN){
+        player[1]->addArmy(AT_CLUBMAN,DR,UR);
+    }else if(type==AIBOWMAN){
+        player[1]->addArmy(AT_BOWMAN,DR,UR);
+    }else if(type==AIWARSHIP){
+        player[1]->addArmy(AT_SHIP,DR,UR);
+    }else if(type==PLAYERFISHINGBOAT){
+        player[0]->addShip(FARMERTYPE_WOOD_BOAT,DR,UR);
+    }else if(type==PLAYERTRANSPORTSHIP){
+        player[0]->addShip(FARMERTYPE_SAILING,DR,UR);
+    }
+}
+
+
 
 //***************InitHelperFunctionBegin**************
 void MainWidget::initGameResources() {
@@ -1042,6 +1468,10 @@ void MainWidget::gameDataUpdate()
 void MainWidget::paintUpdate()
 {
     statusUpdate();
+
+    //判断是否以新编辑模式启动
+    updateEditor();
+
     ui->Game->update();
     ui->mapView->update();
     ui->tip->update();

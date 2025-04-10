@@ -2253,6 +2253,12 @@ void Map::init(int MapJudge) {
     refineShore();
 }
 
+void Map::ResetMapType(int blockL, int blockU)
+{
+    int i = blockL,j = blockU;
+    Block& block = cell[i][j];
+    this->cell[i][j].setMapType(MAPTYPE_FLAT);
+}
 
 double Map::tranL(double BlockL)
 {
