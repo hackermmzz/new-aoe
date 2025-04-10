@@ -91,10 +91,11 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     qInfo()<<"初始化结束，游戏开始！";
 
     // 创建编辑器
-    editor = new Editor(this);
+     editor = new Editor(this);
 
     // 显示编辑器
     editor->show();
+    editor->hide();
 
     // 导出地图
     connect(editor->ui->export_map,QPushButton::clicked,this,[=](){
