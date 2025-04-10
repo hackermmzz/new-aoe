@@ -96,9 +96,13 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     editor->show();
     qDebug("启用编辑器");
 
-    connect(editor->ui->export_map,QPushButton::clicked,this,[=](){this->ExportCurrentState("map.txt");}); // 导出地图
+    // 导出地图
+    connect(editor->ui->export_map,QPushButton::clicked,this,[=](){
+        this->ExportCurrentState("map.txt");
+        call_debugText ("green"," 导出地图",0);
+    });
     connect(editor->ui->delete_object,QPushButton::clicked,this,[=](){
-        call_debugText("green"," 删除资源/建筑 索引:",DELETEOBJECT);
+        call_debugText("green"," 删除资源/建筑",0);
         this->currentSelected = DELETEOBJECT;
     });
     // 连接 QComboBox 的 currentIndexChanged 信号
@@ -107,7 +111,63 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
         QString selectedText = text;
         if(text == "草地") this->currentSelected = FLAT;
         else if(text == "海洋") this->currentSelected = OCEAN;
-        if(text != "地皮类型") call_debugText("green", " 建造"+text,0);
+        if(text != "地皮类型") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->land_height,QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "提升高度") this->currentSelected = HIGHTERLAND;
+        else if( text == "降低高度") this->currentSelected = LOWERLAND;
+        if(text != "地皮高度") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->player_building_and_source,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "玩家市中心") this->currentSelected = PLAYERDOWNTOWN;
+        else if( text == "玩家运输船") this->currentSelected = PLAYERTRANSPORTSHIP;
+        else if( text == "玩家渔船") this->currentSelected = PLAYERFISHINGBOAT;
+        else if( text == "玩家船坞") this->currentSelected = PLAYERDOCK;
+        else if( text == "玩家战船") this->currentSelected = PLAYERWARSHIP;
+        else if( text == "玩家仓库") this->currentSelected = PLAYERREPOSITORY;
+        else if( text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
+        else if( text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
+        else if( text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
+        if(text != "玩家资源/建筑") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->player_human,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "玩家农民") this->currentSelected = PLAYERFARMER;
+        else if( text == "玩家棍棒兵") this->currentSelected = PLAYERCLUBMAN;
+        else if( text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
+        else if( text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
+        else if( text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
+        if(text != "玩家人物") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->ai_building_and_resource,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "地方战船") this->currentSelected = AIWARSHIP;
+        else if( text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
+        if(text != "敌方资源/建筑") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->ai_human,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "敌方棍棒兵") this->currentSelected = AICLUBMAN;
+        else if( text == "地方斧头兵") this->currentSelected = AIAXEMAN;
+        else if( text == "地方侦察兵") this->currentSelected = AISCOUT;
+        else if( text == "地方弓箭手") this->currentSelected = AIBOWMAN;
+        if(text != "敌方人物") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->animal,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "瞪羚") this->currentSelected = GAZELLE;
+        else if( text == "狮子") this->currentSelected = LION;
+        else if( text == "大象") this->currentSelected = ELEPHANT;
+        if(text != "动物") call_debugText("green", " "+text,0);
+    });
+    connect(editor->ui->resource,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        QString selectedText = text;
+        if(text == "树木") this->currentSelected = TREE;
+        else if( text == "石头") this->currentSelected = STONM;
+        else if( text == "金矿") this->currentSelected = GOLDORE;
+        if(text != "公立资源") call_debugText("green", " "+text,0);
     });
 
 

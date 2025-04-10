@@ -67,6 +67,7 @@ public:
         GAZELLE,
         LION,
         ELEPHANT,
+        TREE,
         STONM,
         GOLDORE
     };
