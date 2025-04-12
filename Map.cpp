@@ -473,25 +473,25 @@ void Map::generateResource() {
  * 内容：在地图中央生产市镇中心及初始村民；
  * 返回值：空。
  */
-void Map::generateCenter()
-{
-    // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
-    Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
-    player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
+//void Map::generateCenter()
+//{
+//    // 生成城镇中心，以3 * 3的左上角表示城镇中心真正的放置位置
+//    Gamemap[MAP_L / 2 - 1][MAP_U / 2 - 1] = 9;
+//    player[0]->addBuilding(BUILDING_CENTER,MAP_L / 2 - 1,MAP_L / 2 - 1,100);
 
-    //添加初始村民
-    player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 + 1.5)*BLOCKSIDELENGTH);
-    player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
-    player[0]->addFarmer((MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
+//    //添加初始村民
+//    player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 + 1.5)*BLOCKSIDELENGTH);
+//    player[0]->addFarmer((MAP_L / 2 - 1.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
+//    player[0]->addFarmer((MAP_L / 2 + 2.5)*BLOCKSIDELENGTH,(MAP_L / 2 - 1.5)*BLOCKSIDELENGTH);
 
-    for(int i = MAP_L / 2 - 2; i <= MAP_L / 2 + 2; i++)
-    {
-        for(int j = MAP_U / 2 - 2; j <= MAP_U / 2 + 2; j++)
-        {
-            mapFlag[i][j] = true;
-        }
-    }
-}
+//    for(int i = MAP_L / 2 - 2; i <= MAP_L / 2 + 2; i++)
+//    {
+//        for(int j = MAP_U / 2 - 2; j <= MAP_U / 2 + 2; j++)
+//        {
+//            mapFlag[i][j] = true;
+//        }
+//    }
+//}
 
 
 
@@ -1586,83 +1586,98 @@ void Map::add_Map_Vision( Coordinate* object )
 //更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
 void Map::reset_resMap_AI()
 {
-    int siz;
-    int sort,Num;
-    Animal* animalPrinter = NULL;
-    StaticRes* stResPrinter = NULL;
-    for(int x = 0;x<MAP_L;x++)
-    {
-        for(int y = 0 ; y<MAP_U;y++)
+    try {
+        int siz;
+        int sort,Num;
+        Animal* animalPrinter = NULL;
+        StaticRes* stResPrinter = NULL;
+        for(int x = 0;x<MAP_L;x++)
         {
-            if(!resMap_AI[x][y].explore)
+            for(int y = 0 ; y<MAP_U;y++)
             {
-                resMap_AI[x][y].explore = true;
-                resMap_AI[x][y].high = cell[x][y].getMapHeight();
+                if(!resMap_AI[x][y].explore)
+                {
+                    resMap_AI[x][y].explore = true;
+                    resMap_AI[x][y].high = cell[x][y].getMapHeight();
+                }
+                if(!map_Object[x][y].empty())
+                {
+                    siz = map_Object[x][y].size();
+                    resMap_AI[x][y].clear_r();  //清除资源信息
+
+                    //重新设置资源信息
+                    for(int z = 0; z<siz; z++)
+                    {
+                        if(map_Object[x][y][z] != NULL)
+                        {
+                            sort = map_Object[x][y][z]->getSort();
+                            Num = map_Object[x][y][z]->getNum();
+                        }
+
+                        if(sort == SORT_ANIMAL && map_Object[x][y][z] != NULL)
+                        {
+                            switch (Num) {
+                            case ANIMAL_GAZELLE:
+                                resMap_AI[x][y].type = RESOURCE_GAZELLE;
+                                break;
+                            case ANIMAL_LION:
+                                resMap_AI[x][y].type = RESOURCE_LION;
+                                break;
+                            case ANIMAL_ELEPHANT:
+                                resMap_AI[x][y].type = RESOURCE_ELEPHANT;
+                                break;
+                            case ANIMAL_TREE:
+                            case ANIMAL_FOREST:
+                                resMap_AI[x][y].type = RESOURCE_TREE;
+                                break;
+                            default:
+                                break;
+                            }
+
+                            map_Object[x][y][z]->printer_ToAnimal((void**)&animalPrinter);
+                            if(animalPrinter != NULL)
+                            {
+                                resMap_AI[x][y].fundation = animalPrinter->get_BlockSizeLen();
+                                resMap_AI[x][y].SN = animalPrinter->getglobalNum();
+                                resMap_AI[x][y].ResType = animalPrinter->get_ResourceSort();
+                                resMap_AI[x][y].remain = animalPrinter->get_Cnt();
+                            }
+                        }
+                        else if(sort == SORT_STATICRES && map_Object[x][y][z] != NULL)
+                        {
+                            switch (Num) {
+                            case NUM_STATICRES_Bush:
+                                resMap_AI[x][y].type = RESOURCE_BUSH;
+                                break;
+                            case NUM_STATICRES_Stone:
+                                resMap_AI[x][y].type = RESOURCE_STONE;
+                                break;
+                            default:
+                                break;
+                            }
+
+                            map_Object[x][y][z]->printer_ToStaticRes((void**)&stResPrinter);
+                            if( stResPrinter != NULL)
+                            {
+                                resMap_AI[x][y].fundation = stResPrinter->get_BlockSizeLen();
+                                resMap_AI[x][y].SN = stResPrinter->getglobalNum();
+                                resMap_AI[x][y].ResType = stResPrinter->get_ResourceSort();
+                                resMap_AI[x][y].remain = stResPrinter->get_Cnt();
+                            }
+                        }
+                    }
+                }
             }
 
-            siz = map_Object[x][y].size();
-            resMap_AI[x][y].clear_r();  //清除资源信息
-
-            //重新设置资源信息
-            for(int z = 0; z<siz; z++)
-            {
-                sort = map_Object[x][y][z]->getSort();
-                Num = map_Object[x][y][z]->getNum();
-
-                if(sort == SORT_ANIMAL)
-                {
-                    switch (Num) {
-                    case ANIMAL_GAZELLE:
-                        resMap_AI[x][y].type = RESOURCE_GAZELLE;
-                        break;
-                    case ANIMAL_LION:
-                        resMap_AI[x][y].type = RESOURCE_LION;
-                        break;
-                    case ANIMAL_ELEPHANT:
-                        resMap_AI[x][y].type = RESOURCE_ELEPHANT;
-                        break;
-                    case ANIMAL_TREE:
-                    case ANIMAL_FOREST:
-                        resMap_AI[x][y].type = RESOURCE_TREE;
-                        break;
-                    default:
-                        break;
-                    }
-
-                    map_Object[x][y][z]->printer_ToAnimal((void**)&animalPrinter);
-
-                    resMap_AI[x][y].fundation = animalPrinter->get_BlockSizeLen();
-                    resMap_AI[x][y].SN = animalPrinter->getglobalNum();
-                    resMap_AI[x][y].ResType = animalPrinter->get_ResourceSort();
-                    resMap_AI[x][y].remain = animalPrinter->get_Cnt();
-                }
-                else if(sort == SORT_STATICRES)
-                {
-                    switch (Num) {
-                    case NUM_STATICRES_Bush:
-                        resMap_AI[x][y].type = RESOURCE_BUSH;
-                        break;
-                    case NUM_STATICRES_Stone:
-                        resMap_AI[x][y].type = RESOURCE_STONE;
-                        break;
-                    default:
-                        break;
-                    }
-
-                    map_Object[x][y][z]->printer_ToStaticRes((void**)&stResPrinter);
-
-                    resMap_AI[x][y].fundation = stResPrinter->get_BlockSizeLen();
-                    resMap_AI[x][y].SN = stResPrinter->getglobalNum();
-                    resMap_AI[x][y].ResType = stResPrinter->get_ResourceSort();
-                    resMap_AI[x][y].remain = stResPrinter->get_Cnt();
-                }
-            }
         }
 
+        reset_resMap_ForUserAndEnemy();
+        return;
     }
-
-    reset_resMap_ForUserAndEnemy();
-    return;
+    catch (std::bad_alloc& ba)
+    {
+        std::cerr << "std::bad_alloc caught: " << ba.what() << '\n';
+    }
 }
 
 void Map::reset_resMap_ForUserAndEnemy()
@@ -2253,6 +2268,12 @@ void Map::init(int MapJudge) {
     refineShore();
 }
 
+void Map::ResetMapType(int blockL, int blockU)
+{
+    int i = blockL,j = blockU;
+    Block& block = cell[i][j];
+    this->cell[i][j].setMapType(MAPTYPE_FLAT);
+}
 
 double Map::tranL(double BlockL)
 {

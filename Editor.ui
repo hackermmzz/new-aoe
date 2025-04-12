@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Editor</class>
+ <widget class="QWidget" name="Editor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1500</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="export_map">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>导出地图</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="land_height">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>地皮高度</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>提升高度</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>降低高度</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="player_building_and_source">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>玩家资源/建筑</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家市中心</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家运输船</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家渔场</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家战船</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家船坞</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家渔船</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家仓库</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家箭塔</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家兵营</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="ai_building_and_resource">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>敌方资源/建筑</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方箭塔</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方战船</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="player_human">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>玩家人物</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家农民</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家棍棒兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家斧头兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家侦察兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家弓箭手</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="ai_human">
+   <property name="geometry">
+    <rect>
+     <x>770</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>敌方人物</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方棍棒兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方斧头兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方弓箭手</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方侦察兵</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="resource">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>公立资源</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>树木</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>石头</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>金矿</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="animal">
+   <property name="geometry">
+    <rect>
+     <x>880</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>动物</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>瞪羚</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>狮子</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>大象</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="delete_object">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>删除对象</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="land_type">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>地皮类型</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>草地</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>海洋</string>
+    </property>
+   </item>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

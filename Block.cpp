@@ -61,6 +61,18 @@ Block::Block()
     this->Resource = RESOURCE_EMPTY;
 }
 
+void Block::reset()
+{
+    resetOffset();
+    setMapType(MAPTYPE_FLAT);
+}
+
+void Block::resetOffset()
+{
+    setOffsetX(0);
+    setOffsetY(0);
+}
+
 void Block::nextframe()
 {
 
