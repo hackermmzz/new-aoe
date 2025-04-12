@@ -2,12 +2,14 @@
 #include "ui_GameWidget.h"
 #include "Map.h"
 #include <QDateTime>
+
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GameWidget)
 {
     ui->setupUi(this);
     mainwidget=(MainWidget*)this->parentWidget();
+    setFocusPolicy(Qt::StrongFocus);
     connect(mainwidget,SIGNAL(mapmove()),this,SLOT(movemap()));
 }
 
@@ -23,6 +25,7 @@ void GameWidget::paintEvent(QPaintEvent *)
     painter.setPen(Qt::black);
 
     painter.fillRect(rect(), Qt::black);
+
     //检测点x y是否落在屏幕内
     static QRect winRect(0,0,GAMEWIDGET_WIDTH,GAMEWIDGET_HEIGHT);
     static auto InRect=[&](int x,int y)->bool{
@@ -32,6 +35,7 @@ void GameWidget::paintEvent(QPaintEvent *)
     static auto RectInRect=[&](int x,int y,int w,int h)->bool{
         return (InRect(x,y)||InRect(x+w,y)||InRect(x+w,y+h)||InRect(x,y+h));
     };
+
     //地图绘制部分
     int x1=BlockDR;//x1，y1作为参考坐标，用来每次循环初始化x2，y2的值
     int y1=BlockUR;//x2，y2则是引导绘制，用来实际判断cell中的内容
@@ -85,8 +89,10 @@ void GameWidget::paintEvent(QPaintEvent *)
             y2++;
         }
     }
+
     //清除内存图内容
     emptymemorymap();
+
     //绘制列表清空
     drawlist.clear();
     static auto CheckInScreen=[&](Coordinate*coor)->bool{
@@ -98,6 +104,7 @@ void GameWidget::paintEvent(QPaintEvent *)
         int w=coor->getNowRes()->pix.width(),h=coor->getNowRes()->pix.height();
         return RectInRect(x,y,w,h);
     };
+
     //地图资源相关 树木石块等
     std::list<StaticRes*> *sr=&mainwidget->map->staticres;
     if(!sr->empty())
@@ -221,16 +228,69 @@ void GameWidget::paintEvent(QPaintEvent *)
     }
 }
 
+void GameWidget::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_Z){
+        //回滚状态
+        ResumePreState();
+    }
+}
+
+
+void GameWidget::SaveCurrentState(void *state)
+{
+    const static int MAXSIZE=119;//最多回滚119次
+    if(AllState.size()>MAXSIZE)AllState.pop_back();
+    AllState.push_front(state);
+}
+
+void *GameWidget::RollBackState()
+{
+    if(AllState.size()==0)return 0;
+    auto ans=AllState.front();
+    AllState.pop_front();
+    return ans;
+}
+
+void GameWidget::ResumePreState()
+{
+    GameState*state=(GameState*)RollBackState();
+    if(state==0)return;
+    //////////////////////
+    auto&cell=mainwidget->map->cell;
+    auto&heightMap=mainwidget->map->m_heightMap;
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            cell[i][j]=(state->cell)[i][j];
+        }
+    }
+
+    for(int i=0;i<GENERATE_L;++i){
+        for(int j=0;j<GENERATE_U;++j){
+            heightMap[i][j]=(state->m_heightMap)[i][j];
+        }
+    }
+
+    mainwidget->player[0]->human=state->myHuman;
+    mainwidget->player[0]->build=state->myBuilding;
+    mainwidget->player[1]->human=state->enemyHuman;
+    mainwidget->player[1]->build=state->enemyBuilding;
+    mainwidget->map->animal=state->animal;
+    mainwidget->map->staticres=state->resource;
+    ////释放内存
+    delete state;
+}
+
 void GameWidget::mousePressEvent(QMouseEvent *event)
 {
     if(event->button()==Qt::LeftButton)
     {
+        mainwidget->leftMousePress=1;
         mainwidget->mouseEvent->memoryMapX=event->x()/4;
         mainwidget->mouseEvent->memoryMapY=event->y()/4;
         mainwidget->mouseEvent->mouseEventType=LEFT_PRESS;
         mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
         mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
-
         if(buildMode >= 0){
             int hoverDR = (tranDR(event->x(), event->y()) + DR) / BLOCKSIDELENGTH;
             int hoverUR = (tranUR(event->x(), event->y()) + UR) / BLOCKSIDELENGTH;
@@ -278,7 +338,8 @@ bool GameWidget::judgeinWindow(double x, double y)
 
 void GameWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-
+    mainwidget->mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    mainwidget->leftMousePress=0;
 }
 
 //坐标间的相互转化

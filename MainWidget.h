@@ -10,7 +10,10 @@
 #include "ActWidget.h"
 #include "AboutDialog.h"
 #include "GlobalVariate.h"
-#include"soudplaythread.h"
+#include "soudplaythread.h"
+#include "Editor.h"
+#include "ui_Editor.h"
+
 namespace Ui {
 class MainWidget;
 }
@@ -31,6 +34,46 @@ public:
     //获取实体信息框的按钮
     ActWidget* getActs(int num){return acts[num];}
 
+    // 编辑器相关内容
+    Editor* editor;
+    int currentSelected;  // 用于记录当前的选择的内容
+    // 枚举编辑器中的功能键
+    enum EditorElement{
+        DELETEOBJECT,
+        FLAT,
+        OCEAN,
+        HIGHTERLAND,
+        LOWERLAND,
+        PLAYERDOWNTOWN,
+        PLAYERTRANSPORTSHIP,
+        PLAYERFISHERY,
+        PLAYERWARSHIP,
+        PLAYERDOCK,
+        PLAYERFISHINGBOAT,
+        PLAYERREPOSITORY,
+        PLAYERARROWTOWER,
+        PLAYERBARRACKS,
+        PLAYERFARMER,
+        PLAYERCLUBMAN,
+        PLAYERAXEMAN,
+        PLAYERSCOUT,
+        PLAYERBOWMAN,
+        AIWARSHIP,
+        AIARROWTOWER,
+        AICLUBMAN,
+        AIAXEMAN,
+        AISCOUT,
+        AIBOWMAN,
+        GAZELLE,
+        LION,
+        ELEPHANT,
+        TREE,
+        STONM,
+        GOLDORE
+    };
+
+    bool leftMousePress;
+
 public slots:
     void cheat_Player0Resource();
 private slots:
@@ -48,6 +91,7 @@ private:
     UsrAI* UsrAi;
     EnemyAI *EnemyAi;
     SoudPlayThread*soundPlayThread;
+
 //*************游戏更新*************
     bool pause = false;
     int gameframe = 0;
@@ -72,6 +116,23 @@ private:
     QTimer *timer;
     QButtonGroup *pbuttonGroup = NULL;
 //*******************************
+
+//****************编辑器*****************
+    void SaveCurrentState();
+    void ExportCurrentState(const char*file);
+    void updateEditor();
+    void HigherLand(int blockL,int blockU,int height);
+    void LowerLand(int blockL,int blockU,int height);
+    void MakeOcean(int blockL,int blockU);
+    void DeleteOcean(int blockL,int blockU);
+    void MakeTree(double DR,double UR);
+    void MakeStaticRes(int blockL,int blockU,int type);
+    void MakeAnimal(double DR,double UR,int type);
+    void MakeBuilding(int blockL,int blockU,int type);
+    void MakeHuman(double DR,double UR,int type);
+    void clearArea(int blockL, int blockU, int radius = 1);  // 清空指定区域资源
+
+//**************************************
 
 //****************输出框****************
     void respond_DebugMessage();

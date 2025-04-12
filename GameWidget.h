@@ -8,7 +8,18 @@
 
 #include "MainWidget.h"
 #include "Coordinate.h"
-#include"Core.h"
+#include "Core.h"
+
+struct GameState{
+    short m_heightMap[GENERATE_L][GENERATE_U];
+    Block cell[MAP_L][MAP_U];
+    std::list<Building*>myBuilding;
+    std::list<Human*>myHuman;
+    std::list<Building*>enemyBuilding;
+    std::list<Human*>enemyHuman;
+    std::list<Animal*>animal;
+    std::list<StaticRes*>resource;
+};
 
 namespace Ui {
 class GameWidget;
@@ -25,7 +36,10 @@ public:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-//    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event);
+    void SaveCurrentState(void*state);
+    void *RollBackState();
+    void ResumePreState();
 
     int tranX(int DR, int UR);
     int tranY(int DR,int UR);
@@ -44,15 +58,6 @@ public:
     int getBlockUR(){
         return BlockUR;
     }
-
-private slots:
-    void movemap();
-    void UpdateData();
-    void setBuildMode(int buildMode);
-signals:
-    void sendView(int BlockL, int BlockU, int num);
-
-private:
     Ui::GameWidget *ui;
 
     int BlockDR=13;//左上角对应地图的坐标
@@ -75,6 +80,15 @@ private:
     bool showLine = false;
     int buildMode = -1;
 //    bool pos = false;
+    deque<void*>AllState;
+
+private slots:
+    void movemap();
+    void UpdateData();
+    void setBuildMode(int buildMode);
+signals:
+    void sendView(int BlockL, int BlockU, int num);
+
 };
 
 #endif // GAMEWIDGET_H

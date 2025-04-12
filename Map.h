@@ -170,7 +170,7 @@ public:
     void reset_resMap_ForUserAndEnemy();
     /************************************/
 
-private:
+public:
     int CheckNeighborHigher(int x, int y, int currentCalHeight);
     int CheckNeighborType(int x, int y, int selectType);
     int CheckNeighborForest(int x, int y, int forestCell[][FOREST_GENERATE_U]);
@@ -180,6 +180,7 @@ private:
     void CalOffset();           // 计算每个Block的偏移量
     void InitFaultHandle();     // 初始化错误处理
     void InitCell(int Num, bool isExplored, bool isVisible);
+    void ResetMapType(int blockL, int blockU);
     void GenerateMapTxt(int MapJudge);
     void loadGenerateMapText(int MapJudge);
     bool  CheckIsNearOcean(int x,int y);
