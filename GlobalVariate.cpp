@@ -515,6 +515,7 @@ void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirro
 
     dr = dr_mirror+dr_deta/total*dis;
     ur = ur_mirror+ur_deta/total*dis;
+
 }
 
 double trans_BlockPointToDetailCenter( int p )
