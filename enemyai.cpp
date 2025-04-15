@@ -61,16 +61,33 @@ static void seekenemy(){
 static void aroundseekenemy(int i){
     if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort==7){
         for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
-          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
-          if(temp<3.0){
+          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[j].BlockUR, 2), 0.5);
+          if(temp<14){
            mode=5;
           }
         }
     }
-    else if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort!=7){
+    else if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort==7){
+        for(int j=0;j<enemyInfo.enemy_armies.size();j++){
+          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_armies[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_armies[j].BlockUR, 2), 0.5);
+          if(temp<14){
+           mode=5;
+          }
+}
+}
+
+    if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort!=7){
         for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
           double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
-          if(temp<3.0){
+          if(temp<14){
+           mode=6;
+          }
+        }
+    }
+    else if(armystate[i]==AROUND&&enemyInfo.armies[i].Sort!=7){
+        for(int j=0;j<enemyInfo.enemy_armies.size();j++){
+          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_armies[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_armies[0].BlockUR, 2), 0.5);
+          if(temp<14){
            mode=6;
           }
 }
@@ -176,7 +193,9 @@ void EnemyAI::processData() {
      else if(g_frame==MODE3) mode=3;
      else if(g_frame==MODE2) mode=2;
      else if(g_frame==MODE1) {mode=1;
+
      }
+     qDebug()<<mode<<g_frame;
      //巡逻进攻
      if(mode==5){
          for(int i=0;i<enemyInfo.enemy_armies.size();i++){
@@ -200,7 +219,7 @@ void EnemyAI::processData() {
              armystate[i]=AROUND;
              }
      }
-     for(int i=enemyInfo.armies.size();i>0;i--){
+     for(int i=0;i<enemyInfo.armies.size();i++){
          if(enemyInfo.armies[i].Sort==7){
              armystate[i]=AROUND;
              break;
@@ -248,7 +267,8 @@ void EnemyAI::processData() {
 
      }
      for(int i=0;i<enemyInfo.armies.size();i++){
-         if(armystate[i]==AROUND)aroundseekenemy(i);
+         if(armystate[i]==AROUND){aroundseekenemy(i);
+         qDebug()<<"success"<<g_frame;}
      }
 
 
@@ -459,7 +479,7 @@ void EnemyAI::processData() {
  //                   }
  //               }
  //           }
-       //攻击状态
+//       //攻击状态
 //       for(int i=0;i<enemyInfo.armies.size();i++)
 //       if(armystate[i]==ATTACK){
 //             if(mode==1){
@@ -549,12 +569,12 @@ void EnemyAI::processData() {
 //         }
 //              }}
 
- //            if ((g_frame - timer[i]) >= 15 && enemyInfo.armies[i].NowState ==MOVEOBJECT_STATE_STAND) {
- //                Lock[i]=0;
- //                timer[i] = 0;
- //                armystate[i]=WAITING;
- //                            }
- //       }
+//             if ((g_frame - timer[i]) >= 15 && enemyInfo.armies[i].NowState ==MOVEOBJECT_STATE_STAND) {
+//                 Lock[i]=0;
+//                 timer[i] = 0;
+//                 armystate[i]=WAITING;
+//                             }
+//        }
 
  ////      if(mode==3){
  //////          qDebug()<<armystate[Hero]<<g_frame;
