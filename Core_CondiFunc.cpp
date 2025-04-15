@@ -1,5 +1,5 @@
 #include "Core_CondiFunc.h"
-
+#include"iostream"
 //****************************************************************************************
 //寻路用结构体
 Point pathNode::goalPoint = Point(0,0);
@@ -455,7 +455,18 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     double dis = 1e6;
     BloodHaver* attacker = NULL;
     int heightAdd = 0;
-
+    //对上船的人需要特殊判定，如果此时船满了，那么不再去靠近船
+    if(relation.goalObject){
+        Human*obj=0;
+        relation.goalObject->printer_ToHuman((void**)&obj);
+        if(obj){
+            Farmer*ship=(Farmer*)obj;
+            if(ship->get_farmerType()==FARMERTYPE_WOOD_BOAT){
+                if(ship->getResourceNowHave()>=5)
+                    return true;
+            }
+        }
+    }
     if(operate/OPERATECHANGE == OPERATECON_MOVEALTER)
     {
         if(!relation.isUseAlterGoal) relation.isUseAlterGoal = true;
