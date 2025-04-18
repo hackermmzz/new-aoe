@@ -67,6 +67,8 @@ public:
     }
 
     void nextframe();
+    void reset();
+    void resetOffset();
 
     // 用于分辨地块种类的变量
     int Num;

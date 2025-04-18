@@ -38,6 +38,8 @@ void Human::setPosForced(double DR_, double UR_)
     PredictedUR=UR=UR_;
     BlockDR=DR/BLOCKSIDELENGTH;
     BlockUR=UR/BLOCKSIDELENGTH;
+    DR0=DR_;
+    UR0=UR_;
 }
 
 bool Human::getTransported() const

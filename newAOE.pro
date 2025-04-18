@@ -59,7 +59,8 @@ SOURCES += \
     AboutDialog.cpp \
     Logger.cpp \
     soudplaythread.cpp \
-    mmzztree.cpp
+    mmzztree.cpp \
+    Editor.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -96,11 +97,13 @@ HEADERS += \
     AboutDialog.h \
     Logger.h \
     soudplaythread.h \
-    mmzztree.h
+    mmzztree.h \
+    Editor.h
 
 FORMS += \
         MainWidget.ui \
     GameWidget.ui \
     SelectWidget.ui \
     Option.ui \
-    AboutDialog.ui
+    AboutDialog.ui \
+    Editor.ui

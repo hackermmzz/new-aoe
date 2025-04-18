@@ -113,8 +113,9 @@ int Core_List::addRelation( Coordinate * object1, Coordinate * object2, int even
             relate_AllObject[object1].update_Attrib_alter();
             relate_AllObject[object1].distance_Record = 0;
         }
-        else
+        else{
             relate_AllObject[object1] = relation_Object(object2, eventType);
+        }
 
         relate_AllObject[object1].respondConduct = respond; //是否可由addrelation更改行动
 
@@ -918,14 +919,16 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
     //寻找没有障碍的陆地
     extern Map*GlobalMap;
     vector<array<double,2>>satisfy;
-    static const int off[][2]={{-1,0},{-1,1},{-1,-1},{1,0},{1,-1},{1,1},{0,1},{0,-1}};
-    for(auto*o:off){
-        int L=o[0]+ship->getBlockDR(),U=o[1]+ship->getBlockUR();
+    for(int i=-2;i<=2;++i)
+    for(int j=-2;j<=2;++j)
+    {
+        int L=i+ship->getBlockDR(),U=j+ship->getBlockUR();
         if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
             Block&block=GlobalMap->cell[L][U];
             if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
                 double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
-                if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE){
+                //if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE)
+                {
                     satisfy.push_back({block.getDR(),block.getUR()});
                 }
             }
@@ -939,6 +942,7 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
         return min + random * (max - min);
     };
     //
+    cout<<satisfy.size()<<endl;
     if(satisfy.size()){
         auto&&humans=ship->getHumanTransport();
         for(Human*human:humans){
@@ -947,6 +951,7 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
             human->setPosForced(targetDr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0),targetUr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0));
             human->setNowState(MOVEOBJECT_STATE_STAND);
             human->setTransported(0);
+            human->setPreStand();
         }
         ship->update_resourceClear();
         humans.clear();
@@ -1187,9 +1192,25 @@ void Core_List::manageMontorAct()
         {
             if(ob_m->getSort() == SORT_ANIMAL && ob_m->getNum() == ANIMAL_GAZELLE)
             {
+                static const double dis=3.5*BLOCKSIDELENGTH;
                 dr = ob_ed->getDR();
                 ur = ob_ed->getUR();
-                calMirrorPoint(dr,ur,ob_m->getDR(),ob_m->getUR(),3.5*BLOCKSIDELENGTH);
+                calMirrorPoint(dr,ur,ob_m->getDR(),ob_m->getUR(),dis);
+                //对计算出来的位置进行判断，如果是海洋，那么随机选100次点直到满足
+                bool flag=1;
+                int loopCnt=0;
+                do{
+                    flag=0;
+                    int L=dr/BLOCKSIDELENGTH,U=ur/BLOCKSIDELENGTH;
+                    if(L>=0&&U>=0&&L<MAP_L&&U<MAP_U&&theMap->cell[L][U].getMapType()==MAPTYPE_OCEAN){
+                       double dir0=rand()*1.0/RAND_MAX;
+                       double dir1=sqrt(1.0-dir0*dir0);
+                      dr=ob_m->getDR()+dir0*dis;
+                      ur=ob_m->getUR()+dir1*dis;
+                    }
+                    ++loopCnt;
+                }while(flag&&loopCnt<=100);
+                //
                 suspendRelation(ob_m);
                 if(addRelation(ob_m,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS) ((MoveObject*)ob_m)->beginRun();
             }
