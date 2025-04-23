@@ -627,7 +627,10 @@
 #define FRIENDLY_ENEMY 2
 #define FRIENDLY_FENCY 3
 
-
-
+/********** 兵种状态 **********/
+#define ARMY_STATE_DEFAULT 0
+#define ARMY_STATE_AROUND 1
+#define ARMY_STATE_DEFENSE 2
+#define ARMY_STATE_ATTACK 3
 
 #endif // CONFIG_H

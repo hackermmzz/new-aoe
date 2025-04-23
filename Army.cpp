@@ -56,7 +56,11 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     setDR0UR0(DR, UR);
 
     this->nowstate=MOVEOBJECT_STATE_STAND;
+    this->status=ARMY_STATE_DEFAULT;
     isAttackable = true;
+    this->status=0;
+    this->ifAttack=false;
+    this->timelock=15;
 
     setNowRes();
     updateImageXYByNowRes();
@@ -68,6 +72,47 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     g_globalNum++;
 }
 
+Army::Army(double DR,double UR,int Num ,int status, Development* playerScience, int playerRepresent,int starttime,int finishtime,double dDR,double dUR)
+{
+    //设置科技树和阵营
+    this->playerScience = playerScience;
+    this->playerRepresent = playerRepresent;
+
+    this->Num = Num;
+
+    setAttribute();
+
+    setDRUR(DR, UR);
+    updateBlockByDetail();
+
+    setSideLenth();
+    this->nextBlockDR=BlockDR;
+    this->nextBlockUR=BlockUR;
+    setPredictedDRUR(DR, UR);
+    setPreviousDRUR(DR, UR);
+    setDR0UR0(DR, UR);
+
+    this->nowstate=MOVEOBJECT_STATE_STAND;
+    this->status=status;
+    this->starttime=starttime;
+    this->finishtime=finishtime;
+    this->destinaDR=dDR;
+    this->destinaUR=dUR;
+    this->startpointDR=DR;
+    this->startpointUR=UR;
+    this->ifAttack=false;
+    this->timelock=15;
+    isAttackable = true;
+
+    setNowRes();
+    updateImageXYByNowRes();
+    this->imageH=DR-UR;
+
+    //设置SN信息
+    this->globalNum=10000*getSort()+g_globalNum;
+    g_Object.insert({this->globalNum,this});
+    g_globalNum++;
+}
 
 void Army::nextframe()
 {
@@ -322,9 +367,37 @@ int Army::get_add_specialAttack()
 
     return addition;
 }
+/*********************军队自动化参数*****************************/
+int Army::getstatus(){
+    return this->status;
+}
+int Army::getstarttime(){
+    return this->starttime;
+}
+int Army::getfinishtime(){
+    return this->finishtime;
+}
+double Army::getstartpointDR(){
+    return this->startpointDR;
+}
+double Army::getstartpointUR(){
+      return this->startpointUR;
+}
+double Army::getdestinaDR(){
+    return this->destinaDR;
+}
+double Army::getdestinaUR(){
+     return this->destinaUR;
+}
+bool Army::getifAttack(){
+    return this->ifAttack;
+}
+int Army::gettimelock(){
+    return this->timelock;
+}
+
+
 /***********************************************************/
-
-
 void Army::setAttribute()
 {
     this->Blood=1;
