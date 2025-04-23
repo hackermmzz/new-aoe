@@ -1172,10 +1172,11 @@ void Core::resetNowObject_Click(bool isStop)
         }
 
         nowobject=objCapture;
-        if(nowobject!=NULL)
+        if(nowobject!=NULL){
             call_debugText("blue", " 点击对象为：" + nowobject->getChineseName() + ", SN:" + QString::number(nowobject->getglobalNum()), REPRESENT_BOARDCAST_MESSAGE);
-        if (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY) {
-            call_debugText("blue", " nowState: " + QString::number(this->interactionList->getNowPhaseNum(nowobject)), REPRESENT_BOARDCAST_MESSAGE);
+            if (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY) {
+                call_debugText("blue", " nowState: " + QString::number(this->interactionList->getNowPhaseNum(nowobject)), REPRESENT_BOARDCAST_MESSAGE);
+            }
         }
 
         requestSound_Click(nowobject);
