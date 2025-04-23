@@ -384,7 +384,7 @@ void MainWidget::updateEditor()
             break;
         }
     }else if(mouseEvent->mouseEventType==RIGHT_PRESS)currentSelected=-1;
-    mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    // mouseEvent->mouseEventType=NULL_MOUSEEVENT;
 }
 
 void MainWidget::clearArea(int blockL, int blockU, int radius) {

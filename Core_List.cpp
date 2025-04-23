@@ -1808,7 +1808,11 @@ int Core_List::getNowPhaseNum(Coordinate* object)
         }else{
             return STATE_FixBuilding[nowPhaseNum];
         }
-    }else{
+    }
+    else if (thisRelation.relationAct == CoreEven_Transport) {
+        return HUMAN_STATE_GOTO_OBJECT;
+    }
+    else {
         return HUMAN_STATE_IDLE;
     }
 
