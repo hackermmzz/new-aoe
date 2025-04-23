@@ -59,7 +59,6 @@ SOURCES += \
     AboutDialog.cpp \
     Logger.cpp \
     soudplaythread.cpp \
-    mmzztree.cpp \
     Editor.cpp
 
 HEADERS += \
@@ -97,7 +96,6 @@ HEADERS += \
     AboutDialog.h \
     Logger.h \
     soudplaythread.h \
-    mmzztree.h \
     Editor.h
 
 FORMS += \
