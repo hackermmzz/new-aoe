@@ -2229,7 +2229,7 @@ void Map::loadGenerateMapText(int MapJudge)
                 cur.addFarmer(DR,UR);
                 else cur.addShip(FarmerType,DR,UR);
             }
-            else cur.addArmy(obj["Num"].toInt(),DR,UR);
+           // else cur.addArmy(obj["Num"].toInt(),DR,UR);
         }else if(key.contains("Animal")){
             addAnimal(obj["Num"].toInt(),obj["DR"].toDouble(),obj["UR"].toDouble());
         }else if(key.contains("StaticRes")){
@@ -2268,6 +2268,46 @@ bool Map::CheckIsNearOcean(int x, int y)
 void Map::init(int MapJudge) {
     InitCell(0, MAP_EXPLORE, true);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText(MapJudge);  //载入地图
+    Player&enemy=(*player[1]);
+    enemy.addArmyAROUND(3,1800,30,1,300,10000,1800,800);
+    enemy.addArmyAROUND(3,1700,1000,1,300,10000,1500,1800);
+    enemy.addArmyAROUND(3,1500,2000,1,300,10000,1400,2900);
+    enemy.addArmyAROUND(3,1400,3100,1,300,10000,800,3800);
+    enemy.addArmyAROUND(3,700,3800,1,300,10000,30,3800);
+    enemy.addArmyAROUND(7,2000,350,1,300,10000,2000,20);
+    enemy.addArmyAROUND(7,2000,700,1,300,10000,2000,400);
+    enemy.addArmyAROUND(7,2400,900,1,300,10000,2400,1300);
+    enemy.addArmyAROUND(7,2300,1500,1,300,10000,2300,1900);
+    enemy.addArmyAROUND(7,2000,2200,1,300,10000,2000,2500);
+    enemy.addArmyAROUND(7,2000,2600,1,300,10000,2000,2900);
+    enemy.addArmyAROUND(7,1700,3000,ARMY_STATE_AROUND,300,10000,1700,3400);
+    enemy.addArmyAROUND(7,1200,3600,1,300,10000,1200,3900);
+    enemy.addArmyAROUND(7,800,4300,1,300,10000,500,4300);
+    enemy.addArmyAROUND(7,450,4300,1,300,10000,100,4300);
+    enemy.addArmyATTACK(0,1000,2025,3,3000,37500);
+    enemy.addArmyATTACK(0,1000,2050,3,3000,37500);
+    enemy.addArmyATTACK(0,1000,2075,3,3000,37500);
+    enemy.addArmyATTACK(0,1000,2100,3,3000,37500);
+    enemy.addArmyATTACK(1,1025,2000,3,3000,37500);
+    enemy.addArmyATTACK(1,1050,2000,3,3000,37500);
+    enemy.addArmyATTACK(1,1075,2000,3,3000,37500);
+    enemy.addArmyATTACK(1,1100,2000,3,3000,37500);
+    enemy.addArmyATTACK(2,1025,2025,3,3000,37500);
+    enemy.addArmyATTACK(2,1025,2050,3,3000,37500);
+    enemy.addArmyATTACK(2,1050,2025,3,3000,37500);
+    enemy.addArmyATTACK(2,1050,2050,3,3000,37500);
+    enemy.addArmyDEFENSE(0,500,1600,2);
+    enemy.addArmyDEFENSE(0,500,1625,2);
+    enemy.addArmyDEFENSE(0,500,1650,2);
+    enemy.addArmyDEFENSE(0,500,1675,2);
+    enemy.addArmyDEFENSE(1,525,1600,2);
+    enemy.addArmyDEFENSE(1,550,1600,2);
+    enemy.addArmyDEFENSE(1,575,1600,2);
+    enemy.addArmyDEFENSE(1,600,1600,2);
+    enemy.addArmyDEFENSE(2,525,1625,2);
+    enemy.addArmyDEFENSE(2,525,1650,2);
+    enemy.addArmyDEFENSE(2,550,1625,2);
+    enemy.addArmyDEFENSE(2,550,1650,2);
     refineShore();
 }
 

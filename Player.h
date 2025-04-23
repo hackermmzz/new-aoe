@@ -28,6 +28,9 @@ public:
     Building* addBuilding(int Num,int BlockDR,int BlockUR , double percent = 0);
     int addHuman(int Num,double DR,double UR);
     Army* addArmy(int Num , double DR , double UR);
+    Army* addArmyAROUND(int Num,double DR,double UR,int status,int starttime,int finishtime,double dDR,double dUR);
+    Army* addArmyDEFENSE(int Num,double DR,double UR,int status);
+    Army* addArmyATTACK(int Num,double DR,double UR,int status,int starttime,int finishtime);
     int addFarmer(double DR,double UR);
     int addShip(int Num,double DR,double UR);
     Missile* addMissile( Coordinate* attacker , Coordinate* attackee  , int beginHeight);
