@@ -172,9 +172,10 @@ void SelectWidget::initActs()
     }
     else if(type == SORT_FARMER)//人类
     {
-        actions[0] = ACT_BUILD;
         Farmer* human = (Farmer*)nowobject;
-        if(human->isShip()){
+        if(!human->isShip())
+            actions[0] = ACT_BUILD;
+        if(human->isShip()&&human->get_farmerType()==1){
             actions[0]=ACT_SHIP_LAY;
         }
         for(int i = 1; i < ACT_WINDOW_NUM_FREE; i++)
