@@ -231,6 +231,15 @@ struct tagFarmer: public tagHuman
 struct tagArmy: public tagHuman
 {
     int Sort; // 军队种类
+    int status;
+    int starttime;
+    int finishtime;
+    double startpointDR;
+    double startpointUR;
+    double destinaDR;
+    double destinaUR;
+    bool ifAttack;
+    int timelock;
     tagArmy toEnemy(){
         DR0 = -1.0;
         UR0 = -1.0;

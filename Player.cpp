@@ -62,6 +62,39 @@ Army* Player::addArmy(int Num , double DR , double UR)
     return newArmy;
 }
 
+Army* Player::addArmyAROUND(int Num,double DR,double UR,int status,int starttime,int finishtime,double dDR,double dUR){
+    Army *newArmy = new Army(DR , UR, Num ,status,playerScience , represent,starttime,finishtime,dDR,dUR);
+    call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
+
+    if(g_frame > 10 && represent == NOWPLAYERREPRESENT)
+        soundQueue.push("Army_Born");
+
+    human.push_back(newArmy);
+    humanNumIncrease(newArmy);
+    return newArmy;
+}
+Army* Player::addArmyDEFENSE(int Num,double DR,double UR,int status){
+    Army *newArmy = new Army(DR , UR, Num ,status,playerScience , represent);
+    call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
+
+    if(g_frame > 10 && represent == NOWPLAYERREPRESENT)
+        soundQueue.push("Army_Born");
+
+    human.push_back(newArmy);
+    humanNumIncrease(newArmy);
+    return newArmy;
+}
+Army* Player::addArmyATTACK(int Num,double DR,double UR,int status,int starttime,int finishtime){
+    Army *newArmy = new Army(DR , UR, Num ,status,playerScience , represent,starttime,finishtime);
+    call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
+
+    if(g_frame > 10 && represent == NOWPLAYERREPRESENT)
+        soundQueue.push("Army_Born");
+
+    human.push_back(newArmy);
+    humanNumIncrease(newArmy);
+    return newArmy;
+}
 int Player::addFarmer(double DR, double UR)
 {
     Farmer *newfarmer=new Farmer(DR,UR , playerScience , represent);

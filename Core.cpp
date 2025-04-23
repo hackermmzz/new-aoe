@@ -381,6 +381,15 @@ void Core::updateByPlayer(int id){
             tagArmy tagarmy;
             tagarmy.cast_from(taghuman);
             tagarmy.Sort=army->getNum();
+            tagarmy.status=army->getstatus();
+            tagarmy.starttime=army->getstarttime();
+            tagarmy.finishtime=army->getfinishtime();
+            tagarmy.startpointDR=army->getstartpointDR();
+            tagarmy.startpointUR=army->getstartpointUR();
+            tagarmy.destinaDR=army->getdestinaDR();
+            tagarmy.destinaUR=army->getdestinaUR();
+            tagarmy.ifAttack=army->getifAttack();
+            tagarmy.timelock=army->gettimelock();
             taginfo.armies.push_back(tagarmy);
             //同步更新其他ai的信息
             for(int i=0;i<NOWPLAYER;i++)

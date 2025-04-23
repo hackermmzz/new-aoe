@@ -8,8 +8,10 @@ class Army : public Human
 public:
     Army();
     Army(double DR,double UR,int type , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
+    Army(double DR,double UR,int type ,int status, Development* playerScience=NULL, int playerRepresent=MAXPLAYER,int starttime=15,int finishtime=37500,double dDR=0,double dUR=0);
     ~Army();
-
+    bool ifAttack;
+    int timelock;
   /**********************虚函数**************************/
     void nextframe();
     void setNowRes();
@@ -33,6 +35,16 @@ public:
     int getATK();
     int getDEF(int attackType_got);
     double getDis_attack();
+    //军队自动化
+    int getstatus();
+    int getstarttime();
+    int getfinishtime();
+    double getstartpointDR();
+    double getstartpointUR();
+    double getdestinaDR();
+    double getdestinaUR();
+    bool getifAttack();
+    int gettimelock();
 
     //特攻,根据兵种不同,会有攻击力加成
     int get_add_specialAttack();
@@ -126,6 +138,13 @@ private:
     bool upgradable = false;
     int dependBuildNum;
     int dependBuildAct;
+    int status;
+    int starttime;
+    int finishtime;
+    double startpointDR;
+    double startpointUR;
+    double destinaDR;
+    double destinaUR;
 
     /*****************/
     //该部分数组存储可升级的兵种的属性,下标0表示初始兵种,下标又即升级次数
