@@ -2305,6 +2305,7 @@ void Map::init(int MapJudge) {
     enemy.addArmyDEFENSE(2,525,1650,2);
     enemy.addArmyDEFENSE(2,550,1625,2);
     enemy.addArmyDEFENSE(2,550,1650,2);
+    enemy.addArmy(3,3500,3500);
     refineShore();
 }
 

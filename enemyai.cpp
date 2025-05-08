@@ -23,6 +23,7 @@ static vector <int> timerv;
 static vector <bool>ifAttackv;
 static vector <int> Army;
 static vector <int> Farmer;
+static vector <int> Ship;
 static vector <int> Arrowtower;
 static vector <int> Building;
 static vector <int> Defend;
@@ -56,31 +57,42 @@ static int mode = -3;
 //static int AroundLock[50];
 //static int point2[12][2]={{58,8},{57,18},{68,27},{67,43},{58,56},{51,67},{51,77},{43,88},{32,98},{21,120},{11,120},{2,120}};
 //static long visible[100];
+bool isElementExists(const std::vector<int>& vec, int element) {
+    for (int i : vec) {
+        if (i == element) {
+            return true;
+        }
+    }
+    return false;
+}
 static void seekenemy(){
     for(int i=0;i<enemyInfo.armies.size();i++){
         if(enemyInfo.armies[i].status!=2){
         for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
-          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
-          if(temp<14){
-
+          double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[j].BlockUR, 2), 0.5);
+          if(temp<10){
+              if (!isElementExists(Farmer, enemyInfo.enemy_farmers[j].SN))
               Farmer.push_back(enemyInfo.enemy_farmers[j].SN);
 
           }
         }
         for(int j=0;j<enemyInfo.enemy_armies.size();j++){
           double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_armies[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_armies[j].BlockUR, 2), 0.5);
-          if(temp<14){
+          if(temp<10){
 
+              if (!isElementExists(Army,enemyInfo.enemy_armies[j].SN))
               Army.push_back(enemyInfo.enemy_armies[j].SN);
           }
 }
         for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
           double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_buildings[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_buildings[j].BlockUR, 2), 0.5);
-          if(temp<14&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
+          if(temp<10&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
 
+              if (!isElementExists(Building,enemyInfo.enemy_buildings[j].SN))
               Building.push_back(enemyInfo.enemy_buildings[j].SN);
           }
-          else if(temp<14&&enemyInfo.enemy_buildings[j].Type==BUILDING_ARROWTOWER){
+          else if(temp<10&&enemyInfo.enemy_buildings[j].Type==BUILDING_ARROWTOWER){
+              if (!isElementExists(Arrowtower,enemyInfo.enemy_buildings[j].SN))
               Arrowtower.push_back(enemyInfo.enemy_buildings[j].SN);
           }
 }
@@ -88,23 +100,25 @@ static void seekenemy(){
         else if(enemyInfo.armies[i].status==2){
             for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
               double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
-              if(temp<14){
-
+              if(temp<10){
+                  if (!isElementExists(Defend,enemyInfo.enemy_farmers[j].SN))
                   Defend.push_back(enemyInfo.enemy_farmers[j].SN);
 
               }
             }
             for(int j=0;j<enemyInfo.enemy_armies.size();j++){
               double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_armies[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_armies[j].BlockUR, 2), 0.5);
-              if(temp<14){
+              if(temp<10){
 
+                   if (!isElementExists(Defend,enemyInfo.enemy_armies[j].SN))
                   Defend.push_back(enemyInfo.enemy_armies[j].SN);
               }
     }
             for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
               double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_buildings[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_buildings[j].BlockUR, 2), 0.5);
-              if(temp<14&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
+              if(temp<10&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
 
+                  if (!isElementExists(Defend,enemyInfo.enemy_buildings[j].SN))
                   Defend.push_back(enemyInfo.enemy_buildings[j].SN);
               }}
         }
@@ -113,25 +127,26 @@ static void seekenemy(){
 static void ifATTACK(){
     if(Army.size()!=0||Farmer.size()!=0||Building.size()!=0||Arrowtower.size()!=0){
         for(int i=0;i<enemyInfo.armies.size();i++){
-            if(enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3){
+            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3)&&ifAttack[i]==false){
                 ifAttack[i]=true;
+                qDebug()<<"进攻";
             }
         }
     }else{
         for(int i=0;i<enemyInfo.armies.size();i++)
-            if(enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3){
+            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3)&&ifAttack[i]==true){
                 ifAttack[i]=false;
             }
     }
     if(Defend.size()!=0){
         for(int i=0;i<enemyInfo.armies.size();i++){
-            if(enemyInfo.armies[i].status==2){
+            if(enemyInfo.armies[i].status==2&&ifAttack[i]==false){
                 ifAttack[i]=true;
             }
         }}
         else {
             for(int i=0;i<enemyInfo.armies.size();i++){
-                if(enemyInfo.armies[i].status==2){
+                if(enemyInfo.armies[i].status==2&&ifAttack[i]==true){
                     ifAttack[i]=false;
                 }
             }
@@ -140,7 +155,7 @@ static void ifATTACK(){
 
 void EnemyAI::Around(){
     for(int i=0;i<enemyInfo.armies.size();i++){
-    if(g_frame-timer[i]>350&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==false)
+    if(g_frame-timer[i]>350&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==false){
             if(around[i]==0){
             HumanMove(enemyInfo.armies[i].SN,enemyInfo.armies[i].destinaDR,enemyInfo.armies[i].destinaUR);
             timer[i]=g_frame;
@@ -151,43 +166,44 @@ void EnemyAI::Around(){
             timer[i]=g_frame;
              around[i]=1-around[i];
             }
-
-}
+}}
 }
 void EnemyAI::Attack(){
-    for(int i=0;i<enemyInfo.armies.size();i++){
-        if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==true){
-            if(Farmer.size()!=0){
-                HumanAction(enemyInfo.armies[i].SN,Farmer.front());
-            }
-            else if(Army.size()!=0){
-                 HumanAction(enemyInfo.armies[i].SN,Army.front());
-            }
-            else if(Building.size()!=0){
-                 HumanAction(enemyInfo.armies[i].SN,Building.front());
-            }
-            timer[i]=g_frame;
-
-        }
-        else if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==DEFENSE&&ifAttack[i]==true){
-            if(Defend.size()!=0){
-                HumanAction(enemyInfo.armies[i].SN,Defend.front());
-                timer[i]=g_frame;
-            }
-        }
-        else if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==ATTACK&&ifAttack[i]==true){
-            if(Building.size()!=0){
-                             HumanAction(enemyInfo.armies[i].SN,Building.front());
-                        }
-            else if(Army.size()!=0){
-                 HumanAction(enemyInfo.armies[i].SN,Army.front());
-            }
-            else if(Farmer.size()!=0){
-                HumanAction(enemyInfo.armies[i].SN,Farmer.front());
-            }
-            timer[i]=g_frame;
-        }
-    }
+//    for(int i=0;i<enemyInfo.armies.size();i++){
+//        qDebug()<<timer[i]<<enemyInfo.armies[i].status;
+//        if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==true){
+//            qDebug()<<"TryAttack";
+//            if(Farmer.size()!=0){
+//                HumanAction(enemyInfo.armies[i].SN,Farmer.back());
+//                qDebug()<<Farmer.back();
+//            }
+//            else if(Army.size()!=0){
+//                 HumanAction(enemyInfo.armies[i].SN,Army.back());
+//            }
+//            else if(Building.size()!=0){
+//                 HumanAction(enemyInfo.armies[i].SN,Building.back());
+//            }
+//            timer[i]=g_frame;
+//        }
+//        else if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==DEFENSE&&ifAttack[i]==true){
+//            if(Defend.size()!=0){
+//                HumanAction(enemyInfo.armies[i].SN,Defend.back());
+//                timer[i]=g_frame;
+//            }
+//        }
+//        else if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==ATTACK&&ifAttack[i]==true){
+//            if(Building.size()!=0){
+//                             HumanAction(enemyInfo.armies[i].SN,Building.back());
+//                        }
+//            else if(Army.size()!=0){
+//                 HumanAction(enemyInfo.armies[i].SN,Army.back());
+//            }
+//            else if(Farmer.size()!=0){
+//                HumanAction(enemyInfo.armies[i].SN,Farmer.back());
+//            }
+//            timer[i]=g_frame;
+//        }
+//    }
 
 }
 void check(){
@@ -227,11 +243,59 @@ void EnemyAI::processData() {
 //         }
      }
      if(g_frame>15){
-     Around();
-//     seekenemy();
-//     ifATTACK();
-//     Attack();
 //     check();
+
+         Around();
+//         seekenemy();
+         ifATTACK();
+        if(g_frame%500==0)
+        for(int i=0;i<enemyInfo.armies.size();i++){
+                 if(enemyInfo.armies[i].DR==3500&&enemyInfo.armies[i].UR==3500){
+                     qDebug()<<g_frame<<enemyInfo.armies[i].DR<<enemyInfo.armies[i].UR<<enemyInfo.enemy_farmers[0].SN;
+                     HumanAction(enemyInfo.armies[i].SN,enemyInfo.enemy_farmers[0].SN);
+                      qDebug()<<enemyInfo.armies[i].WorkObjectSN;
+
+                 }
+
+             }
+         }
+//         for(int i=0;i<enemyInfo.armies.size();i++){
+//             qDebug()<<timer[i]<<enemyInfo.armies[i].status;
+//             if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==true){
+//                 qDebug()<<"TryAttack";
+//                 if(Farmer.size()!=0){
+//                     HumanAction(enemyInfo.armies[i].SN,Farmer.back());
+//                     qDebug()<<Farmer.back();
+//                 }
+//                 else if(Army.size()!=0){
+//                      HumanAction(enemyInfo.armies[i].SN,Army.back());
+//                 }
+//                 else if(Building.size()!=0){
+//                      HumanAction(enemyInfo.armies[i].SN,Building.back());
+//                 }
+//                 timer[i]=g_frame;
+//             }
+//             else if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==DEFENSE&&ifAttack[i]==true){
+//                 if(Defend.size()!=0){
+//                     HumanAction(enemyInfo.armies[i].SN,Defend.back());
+//                     timer[i]=g_frame;
+//                 }
+//             }
+//             else if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==ATTACK&&ifAttack[i]==true){
+//                 if(Building.size()!=0){
+//                                  HumanAction(enemyInfo.armies[i].SN,Building.back());
+//                             }
+//                 else if(Army.size()!=0){
+//                      HumanAction(enemyInfo.armies[i].SN,Army.back());
+//                 }
+//                 else if(Farmer.size()!=0){
+//                     HumanAction(enemyInfo.armies[i].SN,Farmer.back());
+//                 }
+//                 timer[i]=g_frame;
+//             }
+//         }
+
+
 }
      //更新波数
 //     if(g_frame==MODE4) mode=4;
@@ -800,7 +864,7 @@ void EnemyAI::processData() {
  //    Btarget[1]=0;
  //    return;
      /*###########YOUR CODE ENDS HERE###########*/
-}
+
 void EnemyAI::onWaveAttack(int wave) {
     // TODO: 发起第wave波进攻
     if (wave < 1 || wave > 3) {
