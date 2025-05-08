@@ -1849,7 +1849,7 @@ void MainWidget::buildInitialStock()
         maxBUR = min(maxBUR+1, MAP_U-5);
     }
 
-    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
+//    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
     return;
 }
 
