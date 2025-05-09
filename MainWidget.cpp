@@ -1,4 +1,4 @@
-﻿#include "MainWidget.h"
+#include "MainWidget.h"
 #include "ui_MainWidget.h"
 #include "ui_Editor.h"
 #include <iostream>
