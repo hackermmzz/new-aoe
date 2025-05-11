@@ -1,618 +1,426 @@
 #include "UsrAI.h"
+#include <iostream>
 tagGame tagUsrGame;
 ins UsrIns;
-/*##########璇峰嬁淇敼浠ヤ笂閮ㄥ垎##########*/
-#include "set"
-#include "QDebug"
-#include<iostream>
-#include <queue>
-#include <utility>
-using namespace std;
-using Pos=pair<int,int>;
-double mid=64*BLOCKSIDELENGTH;
-int house;
-int id_Wrong_lastFrame = -1;
-int Map[128][128];
-int CenterX,CenterY;
+/*##########DO NOT MODIFY THE CODE ABOVE##########*/
+
+// 全局变量定义
 tagInfo info;
-set<int>FarmerbeUsed;
-//bool DockIsBuild;
-bool IsCangkuBuild=false;
-bool UpdateToFTB;
-bool IsGuoHe;
-bool IsGuCangBuilt;
-int ret=999;
-int home_x ,home_y;
-int tmp = 1;
-int max_human;
-int SAIcnt=0,Shipcnt=0,WBcnt=0;
+int building_num[20]; // 包括未完工的建筑
+std::vector<int> building_sn[20]; // 只记录已完工的建筑
+std::vector<int> idle_human_sn;
+std::vector<int> human_sn;
+std::vector<int> idle_ship_sn;
+std::vector<int> ship_sn;
+char mmap[MAP_L][MAP_U]; //-:空地 h:建筑 w:资源 i:人 o:海洋
 const int dx[4] = {0, 0, -1, 1};
 const int dy[4] = {-1, 1, 0, 0};
+int center_x, center_y;
+int obj_x, obj_y;
+map<int, int> building_size{
+    {BUILDING_HOME,2},
+    {BUILDING_CENTER,4},
+    {BUILDING_GRANARY,3},
+    {BUILDING_MARKET,3},
+    {BUILDING_STOCK,3},
+    {BUILDING_DOCK,2},
+};
 
-static int dis_1=1e8-1;
-static int dis_2=1e8-1;
+inline int tran(int x) {
+    return (double) x * BLOCKSIDELENGTH+BLOCKSIDELENGTH/2;
+}
+
+inline int tran(double x) {
+    return (int) (x / BLOCKSIDELENGTH);
+}
+
+
+void updateMap(int type,int sx,int sy) {
+    int size = building_size[type];
+    for(int i=sx;i<sx+size;i++){
+        for(int j=sy;j<sy+size;j++){
+            mmap[i][j] = 'h';
+        }
+    }
+}
+
+// 更新游戏信息
+void updateInfo(){
+    // 初始化
+    memset(building_num,0,sizeof(building_num));
+    for (int i = 0; i < 20; i++) {
+        building_sn[i].clear();
+    }
+
+    // 更新地图信息
+    for (int i = 0; i < MAP_L; i++) {
+        for (int j = 0; j < MAP_U; j++) {
+            if (info.theMap[i][j].type == MAPPATTERN_OCEAN) {
+                mmap[i][j] = 'o';
+            } else {
+                mmap[i][j] = '-';
+            }
+        }
+    }
+
+    // 更新建筑信息
+    for (auto& building : info.buildings) {
+        building_num[building.Type]++;
+        updateMap(building.Type,building.BlockDR,building.BlockUR);
+        if(building.Percent == 100){
+            building_sn[building.Type].push_back(building.SN);
+        }
+        if(building.Type == BUILDING_CENTER){
+            center_x = building.BlockDR;
+            center_y = building.BlockUR;
+        }
+    }
+    // 更新村民信息
+    idle_human_sn.clear();
+    idle_ship_sn.clear();
+    human_sn.clear();
+    ship_sn.clear();
+    for(auto& human : info.farmers){
+        mmap[human.BlockDR][human.BlockUR] = 'i';
+        human_sn.push_back(human.SN);
+        if(human.NowState == HUMAN_STATE_IDLE&&human.FarmerSort==0){ //0表示普通农民
+            idle_human_sn.push_back(human.SN);
+        }
+        if(human.FarmerSort==1){ //1表示运输船
+            ship_sn.push_back(human.SN);
+        }
+    }
+    // 更新资源信息
+    for(auto& resource : info.resources){
+        mmap[resource.BlockDR][resource.BlockUR] = 'w';
+        if(resource.Type == RESOURCE_GOLD){
+            obj_x = resource.BlockDR;
+            obj_y = resource.BlockUR;
+        }
+    }
+
+}
+
+// 以sx，sy为中心向外搜索面积为size*size的空地，x,y返回空地左下角坐标
+int getEmptyBlock(int sx, int sy, int* x, int* y, int type) {
+    // 获取建筑大小
+    if (building_size.find(type) == building_size.end()) {
+        return -1; // 不支持的建筑类型
+    }
+    int size = building_size[type];
+    bool need_ocean = (type == BUILDING_DOCK);
+
+    int buffer = 4; // 缓冲区大小，对所有建筑都适用
+    int searchSize = size + buffer; // 建筑大小加缓冲区
+
+    // 螺旋式向外搜索，最大搜索半径为maxRadius
+    int maxRadius = 40;
+    for(int radius = 0; radius <= maxRadius; radius++) {
+        // 遍历当前半径的正方形圈
+        for(int offsetX = -radius; offsetX <= radius; offsetX++) {
+            for(int offsetY = -radius; offsetY <= radius; offsetY++) {
+                // 仅检查当前圈的边缘
+                if (radius > 0 && abs(offsetX) < radius && abs(offsetY) < radius) {
+                    continue;
+                }
+
+                int startX = sx + offsetX;
+                int startY = sy + offsetY;
+
+                // 检查边界
+                if (startX < 0 || startX + searchSize > MAP_L || startY < 0 || startY + searchSize > MAP_U) {
+                    continue;
+                }
+
+                bool isAvailable = true;
+
+                // 计算建筑本体的起始坐标（加上缓冲区的一半）
+                int buildingStartX = startX + buffer / 2;
+                int buildingStartY = startY + buffer / 2;
+
+                if (need_ocean) {
+                    // 对于码头：首先检查建筑本体是否全部在海洋中
+                    for (int i = 0; i < size; i++) {
+                        for (int j = 0; j < size; j++) {
+                            int checkX = buildingStartX + i;
+                            int checkY = buildingStartY + j;
+                            // 检查是否是海洋
+                            if (mmap[checkX][checkY] != 'o') {
+                                isAvailable = false;
+                                break;
+                            }
+                        }
+                        if (!isAvailable) break;
+                    }
+
+                    // 如果建筑本体在海洋中，检查是否至少有一格与陆地相邻
+                    if (isAvailable) {
+                        bool adjacent_to_land = false;
+
+                        // 只检查建筑本体的边界格子
+                        for (int i = 0; i < size && !adjacent_to_land; i++) {
+                            for (int j = 0; j < size && !adjacent_to_land; j++) {
+                                // 只检查边界格子
+                                if (i > 0 && i < size - 1 && j > 0 && j < size - 1) {
+                                    continue; // 跳过内部格子
+                                }
+
+                                int bx = buildingStartX + i;
+                                int by = buildingStartY + j;
+
+                                // 检查当前格子的四个方向
+                                for (int dir = 0; dir < 4; dir++) {
+                                    int ni = bx + dx[dir];
+                                    int nj = by + dy[dir];
+
+                                    if (ni >= 0 && ni < MAP_L && nj >= 0 && nj < MAP_U) {
+                                        // 检查是否是可用的陆地
+                                        if (mmap[ni][nj] == '-') {
+                                            adjacent_to_land = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // 如果没有相邻的陆地，则该位置不可用
+                        if (!adjacent_to_land) {
+                            isAvailable = false;
+                        }
+                    }
+
+                    // 对于码头，最后检查整个区域（包括缓冲区）是否没有被占用
+                    if (isAvailable) {
+                        for (int i = 0; i < searchSize; i++) {
+                            for (int j = 0; j < searchSize; j++) {
+                                int checkX = startX + i;
+                                int checkY = startY + j;
+                                // 检查此位置是否已被占用（除了海洋外）
+                                if (mmap[checkX][checkY] != 'o' && mmap[checkX][checkY] != '-') {
+                                    isAvailable = false;
+                                    break;
+                                }
+                            }
+                            if (!isAvailable) break;
+                        }
+                    }
+                } else {
+                    // 对于普通建筑，检查是否所有格子及缓冲区都是可用的陆地
+                    for (int i = 0; i < searchSize; i++) {
+                        for (int j = 0; j < searchSize; j++) {
+                            int checkX = startX + i;
+                            int checkY = startY + j;
+                            if (info.theMap[checkX][checkY].height == -1 || mmap[checkX][checkY] != '-') {
+                                isAvailable = false;
+                                break;
+                            }
+                        }
+                        if (!isAvailable) break;
+                    }
+                }
+
+                if (isAvailable) {
+                    // 返回建筑的实际放置位置（去掉缓冲区的一半）
+                    *x = startX + buffer / 2;
+                    *y = startY + buffer / 2;
+                    return 1; // 返回1表示成功找到空地
+                }
+            }
+        }
+    }
+
+    // 未找到合适的空地
+    return -1;
+}
+
+void outputMap() {
+    //输出高程图到文件test/hmap.txt
+    FILE* f = fopen("test/hmap.txt", "w");
+    if (f) {
+        for(int i=0;i<MAP_L;i++){
+            for(int j=0;j<MAP_U;j++){
+                fprintf(f, "%d", info.theMap[i][j].height);
+            }
+            fprintf(f, "\n");
+        }
+        fclose(f);
+    }
+
+    //输出mmap到文件test/mmap.txt
+    f = fopen("test/mmap.txt", "w");
+    if (f) {
+        for(int i=0;i<MAP_L;i++){
+            for(int j=0;j<MAP_U;j++){
+                fprintf(f, "%c", mmap[i][j]);
+            }
+            fprintf(f, "\n");
+        }
+        fclose(f);
+    }
+
+}
+
+// 尝试建造建筑
+bool UsrAI::tryBuildBuilding(int buildingType, int requiredWood, int maxCount, int reqiredBuilding) {
+    if(reqiredBuilding != -1 && building_sn[reqiredBuilding].empty()){
+        return false;
+    }
+    // 检查建筑数量、木材和空闲村民
+    if(building_num[buildingType] < maxCount && info.Wood >= requiredWood && !idle_human_sn.empty()){
+        // 找出一个空闲村民
+        int humanSN = idle_human_sn.back();
+        // 寻找一块适合建造的空地
+        int x, y;
+        if(getEmptyBlock(center_x, center_y, &x, &y, buildingType) > 0){
+            // 向村民发出建造指令
+            HumanBuild(humanSN, buildingType, x, y);
+            idle_human_sn.pop_back();
+            updateMap(buildingType, x, y);
+
+            return true;
+        }
+    }
+    return false;
+}
+
+bool near_land(int x, int y) {
+    // 只检查四个方向（上、下、左、右）
+    for (int dir = 0; dir < 4; dir++) {
+        int nx = x + dx[dir];
+        int ny = y + dy[dir];
+
+        // 检查边界和是否是陆地
+        if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && mmap[nx][ny] == '-') {
+            return true;
+        }
+    }
+    return false;
+}
+
+// 使用BFS找到最近的符合条件的水域
+void find_near_land(int x, int y, int* x_out, int* y_out) {
+    queue<pair<int, int>> q;
+    bool visited[MAP_L][MAP_U];
+    memset(visited, false, sizeof(visited));
+
+    // 从起点开始
+    q.push(make_pair(x, y));
+    visited[x][y] = true;
+
+    while (!q.empty()) {
+        pair<int, int> curr = q.front();
+        q.pop();
+
+        int curr_x = curr.first;
+        int curr_y = curr.second;
+
+        // 如果当前格子是水域，检查周围是否有陆地
+        if (mmap[curr_x][curr_y] == 'o') {
+            bool has_land_nearby = false;
+
+            // 检查四个方向
+            for (int dir = 0; dir < 4; dir++) {
+                int nx = curr_x + dx[dir];
+                int ny = curr_y + dy[dir];
+
+                if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U) {
+                    // 如果旁边有陆地，标记找到了
+                    if (mmap[nx][ny] == '-') {
+                        has_land_nearby = true;
+                        break;
+                    }
+                }
+            }
+
+            // 如果这个水域旁边有陆地，返回该位置
+            if (has_land_nearby) {
+                *x_out = curr_x;
+                *y_out = curr_y;
+                return;
+            }
+        }
+
+        // 向四个方向扩展
+        for (int dir = 0; dir < 4; dir++) {
+            int nx = curr_x + dx[dir];
+            int ny = curr_y + dy[dir];
+
+            // 检查边界和是否已访问
+            if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && !visited[nx][ny]) {
+                q.push(make_pair(nx, ny));
+                visited[nx][ny] = true;
+            }
+        }
+    }
+
+    // 如果没找到，返回原位置
+    *x_out = x;
+    *y_out = y;
+}
 
 void UsrAI::processData()
 {
-    info=getInfo();
-    ditu();
-    max_human=4;
-    for(int i=0;i<info.buildings.size();i++){
-        tagBuilding h=info.buildings[i];
-        if(h.Type==BUILDING_CENTER){
-            CenterX = h.BlockDR;
-            CenterY = h.BlockUR;
-        }
-    }
-    for(int i = 0;i<info.buildings.size();i++){
-        tagBuilding h=info.buildings[i];
-        if(h.Type==BUILDING_HOME){
-            max_human+=4;
-        }
-    }
-    BuildHome();
-    CreateFarmer();
-    BuildDock();
-    CreatBoat();
-   // CutDownTree();
-   // Guohe();
-    KillEnemy();
-    Fish();
-    KillFish();
-    GoToBoat();
-    //FindNearstBeach(CenterX,CenterY);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UsrAI::ditu(){
-    static int x = 0;
-    static int y = 0;
-    for(;x<MAP_L;x++){
-        for(;y<MAP_U;y++){
-            Map[x][y]=info.theMap[x][y].height;
-        }
-    }
-    for(int i=0;i<info.resources.size();++i)
-    {
-        tagResource rsc=info.resources[i];
-        tagBuilding e;
-        int x=rsc.BlockDR,y=rsc.BlockUR;
-        Map[x][y]=5;
-     }
-    for(int i=0;i<info.farmers.size();++i)
-    {
-        tagFarmer farmer=info.farmers[i];
-        int x=farmer.BlockDR,y=farmer.BlockUR;
-        Map[x][y]=5;
-    }
-    for(int i=0;i<info.buildings.size();++i)
-    {
-        tagBuilding building=info.buildings[i];
-        int x=building.BlockDR,y=building.BlockUR;
-        for(int i=0;i<3;i++)
-        {
-            for(int j=0;j<3;j++)
-            {
-                Map[i+x][j+y]=5;
-            }
-        }
-    }
-    for(int i =0;i<info.armies.size();i++){
-        tagArmy armies = info.armies[i];
-        int x = armies.BlockDR,y=armies.UR;
-        Map[x][y]=5;
-    }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UsrAI::BuildHome(){
-    static tagFarmer farmer;
-    static int MaxCnt=10;
-    static bool init=1;
-    if(init)init=0,farmer.SN=-154;
-    int curcnt=0;
-    for(int i=0;i<info.buildings.size();++i)
-    {
-        tagBuilding home=info.buildings[i];
-        if(home.Percent==100&&home.Type==BUILDING_HOME)++curcnt;
-    }
-    if(curcnt>=MaxCnt)
-    {
-        RecycleFarmer(farmer);
+    // 获取地图信息
+    info = getInfo();
+    if (info.GameFrame % 10 != 0) {
         return;
     }
-    if(info.Wood<BUILD_HOUSE_WOOD)return;
-    ////////////////////////////////
-    GetFarmer(farmer);
-    if(farmer.WorkObjectSN!=-1)return;
-    Pos pos=GetFittestBlockToBuildHouse(BUILDING_HOME,CenterX,CenterY);
-    HumanBuild(farmer.SN,BUILDING_HOME,pos.first,pos.second);//pos.first,pos.second
-}
 
-
-void UsrAI::RecycleFarmer(tagFarmer &farmer)
-{
-    FarmerbeUsed.erase(farmer.SN);
-    farmer.SN=-1;
-}
-
-void UsrAI::GetFarmer(tagFarmer &farmer)
-{
-    bool find=0;
-    for(auto&f:info.farmers)
-        if(f.SN==farmer.SN)
-        {
-            find=1;
-            farmer=f;
-            break;
-        }
-    if(!find)
-        farmer=GetFarmer();
-}
-
-tagFarmer UsrAI::GetFarmer()
-{
-    for(tagFarmer&farmer:info.farmers)
-    {
-        if(farmer.WorkObjectSN==-1&&FarmerbeUsed.count(farmer.SN)==0)
-        {
-            FarmerbeUsed.insert(farmer.SN);
-            return farmer;
-        }
-    }
-    tagFarmer farmer;
-    farmer.SN=-1;
-    return farmer;
-}
-
-pair<int, int> UsrAI::GetFittestBlockToBuildHouse(int houseType, int x, int y)
-{
-   //int w=GetBuildingWidth(houseType);
-   int dis=1e8+10;
-   pair<int,int>res={-456,-789};
-   for(int i=0;i<MAP_L;++i)
-   {
-       for(int j=0;j<MAP_U;++j)
-       {
-           bool t=CheckTaretBlockCanBuildTargetTypeBuilding(houseType,i,j);
-           if((t==1))
-           {
-               //int a=i-x;//i+w/2-x
-               //int b=j-y;//j+w/2-y
-               int dd=abs(j-y)+abs(i-x);
-               if(dd<dis)
-               {
-                   res={i,j};
-                   dis=dd;
-               }
-           }
-       }
-   }
-   return res;
-}
-
-/*int UsrAI::GetBuildingWidth(int Type)
-{
-    if(Type==BUILDING_DOCK)return 2;
-    if(Type==BUILDING_HOME)return 2;
-    return 3;
-}*/
-
-bool UsrAI::CheckTaretBlockCanBuildTargetTypeBuilding(int houseType, int x, int y)
-{
-    int h=info.theMap[x][y].height;
-    if((h<0&&houseType!=BUILDING_DOCK)||h>4)return 0;
-    for(int i=0;i<3;i++)
-    {
-        for(int j=0;j<3;j++)
-        {
-            int xx=x+i,yy=y+j;
-            if(xx>=MAP_L)return 0;
-            if(yy>=MAP_U)return 0;
-            if(xx>=0&&yy>=0&&Map[xx][yy]!=h)return 0;
-        }
-    }
-    return 1;
-}
-
-void UsrAI::CreateFarmer()
-{
-    for(int i=0;i<info.buildings.size();i++){
-        tagBuilding h=info.buildings[i];
-            if(h.Type==BUILDING_CENTER&&h.Project==ACT_NULL&&info.Meat>=BUILDING_CENTER_CREATEFARMER_FOOD&&info.farmers.size()<20){
-                BuildingAction(h.SN,BUILDING_CENTER_CREATEFARMER);
-        }
-    }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UsrAI::BuildDock(){
-    static tagFarmer farmer1;
-    GetFarmer(farmer1);
-    static int Max=5;
-    int cnt=0;
-    static bool init=1;
-    if(init){
-        init=0;
-        farmer1.SN=-154;
-    }
-
-
-    for(int i=0;i<info.buildings.size();++i){
-        tagBuilding h=info.buildings[i];
-        if(h.Type==BUILDING_DOCK){
-            if(h.Percent==100){
-                //DockIsBuild=1;
-                cnt++;
+    updateInfo();
+    // outputMap();
+    /*
+    // 按优先级尝试建造各种建筑
+    tryBuildBuilding(BUILDING_HOME, BUILD_HOUSE_WOOD, 5,-1);
+    tryBuildBuilding(BUILDING_GRANARY, BUILD_GRANARY_WOOD, 1,-1);
+    tryBuildBuilding(BUILDING_MARKET, BUILD_MARKET_WOOD, 1,BUILDING_GRANARY);
+    tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 2,-1); //对岸已经有一个仓库了
+    tryBuildBuilding(BUILDING_DOCK, BUILD_DOCK_WOOD, 2, -1); // 尝试建造码头
+    // 处理建筑行为
+    for (auto& building : info.buildings) {
+        if(building.Type == BUILDING_CENTER){
+            if(building.Project == 0&&human_sn.size()<info.Human_MaxNum&&info.Meat>=BUILDING_CENTER_CREATEFARMER_FOOD){
+                BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
             }
         }
-    }
-    if(cnt>=Max){
-        RecycleFarmer(farmer1);
-        return;
-    }
-    if(info.Wood<BUILD_DOCK_WOOD)   return;
-    //GetFarmer(farmer[0]);
-    //cout<<farmer[0].SN<<endl;
-    if(farmer1.WorkObjectSN!=-1)    return;
-    if(farmer1.FarmerSort!=FARMERTYPE_FARMER)   return;
-    Pos p=FindNearstBeachToBuild(BUILDING_DOCK,CenterX,CenterY);
-    // cout<<p.first<<" "<<p.second<<endl;
-    HumanBuild(farmer1.SN,BUILDING_DOCK,p.first,p.second);
-}
-
-pair<int,int> UsrAI::FindNearstBeachToBuild(int houseType,int x,int y){
-        int dis = 1e8 + 10;
-        pair<int, int> res = {-1, -1};
-        for (int i = 0; i < MAP_L; ++i) {
-            for (int j = 0; j < MAP_U; ++j) {
-                bool f=CheckCanBuildDock(i,j);
-                if((f==1)){
-                    int dd=abs(j-y)+abs(i-x);
-                    if (dd < dis) {
-                        res = {i, j};
-                        dis = dd;
-                    }
-                }
+        if(building.Type == BUILDING_DOCK){
+            if(building.Project == 0&&ship_sn.size()<1&&info.Wood>=BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD){
+                BuildingAction(building.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
             }
-        }
-        return res;
-}
-
-bool UsrAI::CheckCanBuildDock(int x, int y){
-    for(int i=0;i<2;i++){
-        for(int j=0;j<2;j++){
-            int ii=i+x,jj=j+y;
-            if(ii<0||ii>=MAP_L||jj<0||jj>=MAP_U)return 0;
-            if(info.theMap[ii][jj].type!=MAPPATTERN_OCEAN)return 0;
-            if(Map[ii][jj]==5) return 0;
-        }
-    }
-    for(int i=-1;i<3;i++){
-        for(int j=-1;j<3;j++){
-            int ii=i+x,jj=j+y;
-            /*if(ii==x&&jj==y)continue;
-            if(ii==x&&jj==y+1)continue;
-            if(ii==x+1&&jj==y)continue;
-            if(ii==x+1&&jj==y+1)continue;*/
-            if(info.theMap[ii][jj].type==MAPPATTERN_GRASS)  return 1;
-        }
-    }
-    return 0;
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UsrAI::CreatBoat(){
-    /*for(int i = 0;i<info.farmers.size();i++){
-        if(info.farmers[i].FarmerSort==FARMERTYPE_WOOD_BOAT){
-            WBcnt++;
-        }
-        if(info.farmers[i].FarmerSort==FARMERTYPE_SAILING){
-            SAIcnt++;
-        }
-    }
-    for(int i = 0;i<info.armies.size();i++){
-        if(info.armies[i].Sort==ARMY_SHIP){
-            Shipcnt++;
         }
     }*/
-    int left_human=max_human-info.farmers.size()-Shipcnt-SAIcnt-WBcnt-5;
-    //cout<<"WBcut:"<<WBcnt<<"    ";
-   // cout<<"saicnt:"<<SAIcnt<<"    ";
-    //cout<<"shipcut:"<<Shipcnt<<"    ";
 
-    for (int i = 0; i < info.buildings.size(); i++) {
-        tagBuilding& h = info.buildings[i];
-        if (h.Type == BUILDING_DOCK && h.Percent == 100) {
-            if (h.Project == ACT_NULL&&left_human>0) {
-                if (WBcnt < 5){
-                    if(info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {
-                        BuildingAction(h.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
-                        WBcnt++;
-                    }
-                }
-                else if (SAIcnt < 5 ){
-                    if(info.Wood >= BUILDING_DOCK_CREATE_SAILING_WOOD) {
-                        BuildingAction(h.SN, BUILDING_DOCK_CREATE_SAILING);
-                        SAIcnt++;
-                    }
-                }
-                else if (Shipcnt < 5){
-                    if(info.Wood >= BUILDING_DOCK_CREATE_SHIP_WOOD) {
-                        BuildingAction(h.SN, BUILDING_DOCK_CREATE_SHIP);
-                        Shipcnt++;
-                    }
-                }
+    // cout<<info.farmers[0].NowState<<endl;
+    for (auto& ship : info.farmers) {
+        if (ship.FarmerSort == FARMERTYPE_WOOD_BOAT ) {
+            cout << ship.Resource << endl;
+           // break;
+        }
+    }
+    /*
+    for (auto& ship : info.farmers) {
+        if (ship.FarmerSort == 1 && ship.NowState == HUMAN_STATE_IDLE) {
+
+            if (near_land(ship.BlockDR, ship.BlockUR) && ship.Resource <= 5&&idle_human_sn.size()>0) {
+                // 如果船靠岸，并且载人小于5，则让村民上船
+                HumanAction(idle_human_sn.back(), ship.SN);
+                idle_human_sn.pop_back();
+            }else if (ship.Resource == 5) {
+                // 如果船载满5人，则让船去目的地
+                int x, y;
+                getEmptyBlock(obj_x, obj_y, &x, &y, BUILDING_HOME); // 找到金子附近的空地作为船的目的地
+                HumanMove(ship.SN, tran(x), tran(y));
+            }else{
+                // 如果船载人小于5，并且不在岸上，则让船靠岸
+                int x, y;
+                find_near_land(ship.BlockDR, ship.BlockUR, &x, &y);
+                HumanMove(ship.SN, tran(x), tran(y));
             }
+
         }
     }
+    */
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*void UsrAI::CutDownTree()
-{
-    vector<tagResource>trees;
-    for(auto&rsc:info.resources)
-    {
-        if(rsc.Type==RESOURCE_TREE)
-        {
-            trees.push_back(rsc);
-        }
-    }
-    sort(trees.begin(),trees.end(),[&](const tagResource&r0,const tagResource&r1)
-    {
-        float x=CenterX*BLOCKSIDELENGTH,y=CenterY*BLOCKSIDELENGTH;
-        float x0=r0.DR-x,y0=r0.UR-y;
-        float x1=r1.DR-x,y1=r1.UR-y;
-        return x0*x0+y0*y0<x1*x1+y1*y1;
-    });
-    int idx=0;
-    for(int i=0;i<info.farmers.size();++i)
-    {
-        tagFarmer&f=info.farmers[i];
-        if(FarmerbeUsed.count(f.SN)==0&&f.WorkObjectSN==-1)
-        {
-            HumanAction(f.SN,trees[(idx++)].SN);
-            if(idx>=trees.size())idx=0;
-        }
-    }
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-tagFarmer UsrAI::boat(){
-    for(tagFarmer&farmer:info.farmers)
-    {
-        if(farmer.NowState==-1&&FarmerbeUsed.count(farmer.SN)==0)
-        {
-            if(farmer.FarmerSort==FARMERTYPE_WOOD_BOAT){
-                FarmerbeUsed.insert(farmer.SN);
-                return farmer;
-            }
-        }
-    }
-    tagFarmer farmer;
-    farmer.SN=-1;
-    return farmer;
-}
-void UsrAI::boat(tagFarmer&farmer){
-    bool find=0;
-    for(auto&f:info.farmers)
-        if(f.SN==farmer.SN){
-            find=1;
-            farmer=f;
-            break;
-        }
-    if(!find){
-        farmer=boat();
-    }
-}
-
-
-bool UsrAI::CheckSea(int x,int y){
-    if(info.theMap[x][y].type!=MAPPATTERN_OCEAN){
-        return 0;
-    }
-    for(int i=-1;i<=1;++i){
-        for(int j=-1;j<=1;++j){
-            if(i==0&&j==0) continue;
-            int nx=x+i;
-            int ny=y+j;
-            if (nx < 0 || nx >= MAP_L || ny < 0 || ny >= MAP_U) continue;
-            if(Map[nx][ny]==5)  return 0;
-            if(info.theMap[nx][ny].type!=MAPPATTERN_OCEAN)
-            return 1;
-        }
-    }
-    return 0;
-}
-
-pair<double,double>UsrAI::FindNearstBeach(int x,int y){
-    pair<int,int>nearest={-789,-456};
-    int mindis=1e8+10;
-    for(int i=0;i<MAP_L-1;i++){
-        for(int j=0;j<MAP_U-1;j++){
-            bool t=CheckSea(i,j);
-            if(t){
-               int dis=abs(i-x)+abs(j-y);
-                if(dis<mindis){
-                    mindis=dis;
-                    nearest={i,j};
-                }
-            }
-        }
-    }
-   return nearest;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void UsrAI::Fish()
-{
-
-    vector<tagResource>fishs;
-    for(auto&rsc:info.resources)
-    {
-        if(rsc.Type==RESOURCE_FISH)
-        {
-            fishs.push_back(rsc);
-        }
-    }
-    sort(fishs.begin(),fishs.end(),[&](const tagResource&r0,const tagResource&r1)
-    {
-        float x=CenterX*BLOCKSIDELENGTH,y=CenterY*BLOCKSIDELENGTH;
-        float x0=r0.DR-x,y0=r0.UR-y;
-        float x1=r1.DR-x,y1=r1.UR-y;
-        return x0*x0+y0*y0<x1*x1+y1*y1;
-    });
-    int idx=0;
-    for(int i=0;i<info.farmers.size();++i)
-    {
-        tagFarmer&f=info.farmers[i];
-        if(f.FarmerSort==FARMERTYPE_SAILING){
-        if(FarmerbeUsed.count(f.SN)==0&&f.WorkObjectSN==-1)
-        {
-            HumanAction(f.SN,fishs[(idx++)].SN);
-            if(idx>=fishs.size())idx=0;
-        }
-    }
-    }
-
-}
-////////////////////////////////////////////////////////////////////
-void UsrAI::KillEnemy()
-{
-    auto&enemy=info.enemy_armies;
-    auto&army=info.armies;
-    if(army.size()==0)return;
-    if(enemy.size()==0)return;
-    ////////////////////////////////
-    for(auto&a:army)
-    {
-        if(a.WorkObjectSN==-1)
-        {
-            int tarGetSn=-1;
-            float MinDis=1e8+10;
-            for(auto&e:enemy)
-            {
-                float dd=calDistance(a.DR,a.UR,e.DR,e.UR);
-                if(dd<MinDis)
-                {
-                    tarGetSn=e.SN;
-                    MinDis=dd;
-                }
-            }
-            HumanAction(a.SN,tarGetSn);
-        }
-    }
-}
-
-void UsrAI::KillFish(){
-    vector<tagResource>fish;
-    for(auto&rsc:info.resources)
-    {
-        if(rsc.Type==RESOURCE_FISH)
-        {
-            fish.push_back(rsc);
-        }
-    }
-    sort(fish.begin(),fish.end(),[&](const tagResource&r0,const tagResource&r1)
-    {
-        float x=CenterX*BLOCKSIDELENGTH,y=CenterY*BLOCKSIDELENGTH;
-        float x0=r0.DR-x,y0=r0.UR-y;
-        float x1=r1.DR-x,y1=r1.UR-y;
-        return x0*x0+y0*y0<x1*x1+y1*y1;
-    });
-    int idx=0;
-    static tagFarmer farmer[4];
-    static bool init=1;
-    if(init){
-        init=0;
-        for(int i=0;i<info.farmers.size();i++){
-            info.farmers[i].SN=-1;
-        }
-    }
-        GetFarmer(farmer[0]);
-        if(FarmerbeUsed.count(farmer[0].SN)==0&&farmer[0].WorkObjectSN==-1&&farmer[0].FarmerSort==FARMERTYPE_FARMER)
-        {
-            HumanAction(farmer[0].SN,fish[(idx++)].SN);
-            if(idx>=fish.size())idx=0;
-        }
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pair<double,double>UsrAI::FindNearstGold(double x,double y){
-    pair<double,double>nearest={-789,-456};
-    int mindis=1e8+10;
-    for(int i=0;i<info.resources.size();i++){
-        if(info.resources[i].Type==RESOURCE_GOLD){
-            int gold_x=info.resources[i].DR;
-            int gold_y=info.resources[i].UR;
-               int dis=abs(gold_x-x)+abs(gold_y-y);
-                if(dis<mindis){
-                    mindis=dis;
-                    nearest={gold_x,gold_y};
-                }
-            }
-        }
-   return nearest;
-}
-void UsrAI::GoToBoat(){
-    Pos nearestGold = FindNearstGold(CenterX ,CenterY);
-    Pos nearestBeach = FindNearstBeach(CenterX,CenterY);
-    static bool IsGuoHe=0;
-    vector<int> farmersOnBoat;
-    for(int i=0;i<info.farmers.size();i++){
-        tagFarmer&boat = info.farmers[i];
-        if (boat.FarmerSort == FARMERTYPE_WOOD_BOAT && boat.NowState == 0) {
-            static  bool init=1;
-            if(init){
-                init=0;
-            HumanMove(boat.SN,(nearestBeach.first+0.5)*BLOCKSIDELENGTH,(nearestBeach.second+0.5)*BLOCKSIDELENGTH);
-            }
-           // cout<<boat.NowState;
-           // cout<<(nearestBeach.first+0.5)*BLOCKSIDELENGTH<<" "<<(nearestBeach.second+0.5)*BLOCKSIDELENGTH<<endl;
-            for (int j = 0; j < info.farmers.size(); ++j) {
-                tagFarmer& f = info.farmers[j];
-                if (f.WorkObjectSN == -1&&f.FarmerSort == FARMERTYPE_FARMER ){
-                    HumanAction(f.SN, boat.SN);
-                    farmersOnBoat.push_back(f.SN);
-                            //cout<<boat.Resource;
-                    if (boat.Resource >=5){//计算船上的人数
-                         HumanMove(boat.SN, 1943.98, 726.991);
-                         IsGuoHe=1;
-                         cout<<(nearestGold.first+0.5)*BLOCKSIDELENGTH<<" "<< (nearestGold.second+0.5)*BLOCKSIDELENGTH<<endl;
-                      }
-                    }
-                }
-            }
-        //}
-       if(boat.FarmerSort==FARMERTYPE_WOOD_BOAT) break;//把上船的人全都放到一个容器里，到了岸边再把容器里的人释放出来让他们去采金子
-    }
-    if(IsGuoHe){
-        vector<tagResource>golds;
-           for(auto&rsc:info.resources)
-           {
-               if(rsc.Type==RESOURCE_GOLD)
-               {
-                   golds.push_back(rsc);
-               }
-           }
-           sort(golds.begin(),golds.end(),[&](const tagResource&r0,const tagResource&r1)
-           {
-               float x=CenterX*BLOCKSIDELENGTH,y=CenterY*BLOCKSIDELENGTH;
-               float x0=r0.DR-x,y0=r0.UR-y;
-               float x1=r1.DR-x,y1=r1.UR-y;
-               return x0*x0+y0*y0<x1*x1+y1*y1;
-           });
-           int idx=0;
-           for(int sn:farmersOnBoat)
-           {
-                 HumanAction(sn,golds[(idx++)].SN);
-                   if(idx>=golds.size())idx=0;
-               }
-        }
-    //}
-}
-
-
 
 
 

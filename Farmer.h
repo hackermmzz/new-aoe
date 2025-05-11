@@ -29,13 +29,13 @@ public:
 
 
     static std::string getFarmerName(int index) {
-        if (index >= 0 && index < 7) {
+        if (index >= 0 && index < 8) {
             return FarmerName[index];
         }
         return "";
     }
     static std::string getFarmerCarry(int index) {
-        if (index >= 0 && index < 5) {
+        if (index >= 0 && index < 7) {
             return FarmerCarry[index];
         }
         return "";
@@ -56,7 +56,6 @@ public:
     static void setAttack(int i, int j, std::list<ImageResource>* newValue) {Attack[i][j] = newValue;}
     static void setDie(int i, int j, std::list<ImageResource>* newValue) {Die[i][j] = newValue;}
     static void setDisappear(int state, int angle, std::list<ImageResource>* newValue) {Disappear[state][angle] = newValue;}
-
     static void allocateCarry(int i, int j) {Carry[i][j] = new std::list<ImageResource>;}
     static void allocateWork(int i, int j){ Work[i][j] = new std::list<ImageResource>;}
     static void allocateWalk(int i, int j) {Walk[i][j] = new std::list<ImageResource>;}
@@ -95,7 +94,6 @@ public:
         delete Disappear[state][angle];
         Disappear[state][angle] = nullptr;
     }
-
     std::string getDisplayName(int num){return FarmerDisplayName[num];}
 
     int getState(){return state;}
@@ -114,7 +112,8 @@ public:
     bool get_MatchingOfResourceAndCarry(){ return (state == FARMER_LUMBER && resourceSort == HUMAN_WOOD)\
                                          || (state == FARMER_MINER && (resourceSort == HUMAN_STONE || resourceSort == HUMAN_GOLD ))\
                                          || ((state == FARMER_GATHERER|| state == FARMER_FARMER) && resourceSort == HUMAN_GRANARYFOOD) \
-                                         || (state == FARMER_HUNTER && resourceSort == HUMAN_STOCKFOOD) ;}
+                                         || (state == FARMER_HUNTER && resourceSort == HUMAN_STOCKFOOD)
+                                           ||(state==FARMER_FISHER&&resourceSort==HUMAN_DOCKFOOD); }
     void setState( int state ){ this->state = state; }
     void set_ResourceSort( int sort ){ this->resourceSort = sort; }
     void update_addResource(){ resource+=quantity_GatherOnce; }
@@ -172,25 +171,24 @@ private:
     //指示所携带资源的类型
     //1指代木头 2指代肉 3指代石头 4指代金子
     //eg:HUMAN_WOOD
+    static std::list<ImageResource> *Walk[8][8];
 
-    static std::list<ImageResource> *Walk[7][8];
+    static std::list<ImageResource> *Work[8][8];
 
-    static std::list<ImageResource> *Work[7][8];
+    static std::list<ImageResource> *Stand[8][8];
 
-    static std::list<ImageResource> *Stand[7][8];
+    static std::list<ImageResource> *Attack[8][8];
 
-    static std::list<ImageResource> *Attack[7][8];
+    static std::list<ImageResource> *Die[8][8];
 
-    static std::list<ImageResource> *Die[7][8];
+    static std::list<ImageResource> *Carry[7][8];
 
-    static std::list<ImageResource> *Carry[5][8];
+    static std::list<ImageResource> *Disappear[8][8];
 
-    static std::list<ImageResource> *Disappear[7][8];
+    static std::string FarmerName[8];
+    static std::string FarmerCarry[7];
 
-    static std::string FarmerName[7];
-    static std::string FarmerCarry[5];
-
-    std::string FarmerDisplayName[7]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人"};
+    std::string FarmerDisplayName[8]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人","渔民"};
     /////////////船
     static std::list<ImageResource>* ShipStand[10][8];
     //    std::string actName[1]={};

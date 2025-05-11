@@ -196,7 +196,8 @@
 /********** 距离常量 **********/
 #define DISTANCE_Manhattan_MoveEndNEAR 0.0001
 #define DISTANCE_Manhattan_PathMove 0.01
-#define DISTANCE_Manhattan_Unload BLOCKSIDELENGTH*1.5
+#define DISTANCE_Manhattan_Unload (BLOCKSIDELENGTH*1.2)
+#define DISTANCE_Manhattan_Transport (DISTANCE_Manhattan_Unload*1.2)
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
 #define DISTANCE_ATTACK_CLOSE_BIGOB (15*gen5)
 #define DISTANCE_HIT_TARGET 4

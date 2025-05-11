@@ -1,16 +1,15 @@
 ﻿#include "Farmer.h"
 
-std::list<ImageResource>* Farmer::Carry[5][8];
-std::list<ImageResource>* Farmer::Walk[7][8];
-std::list<ImageResource>* Farmer::Work[7][8];
-std::list<ImageResource>* Farmer::Stand[7][8];
-std::list<ImageResource>* Farmer::Attack[7][8];
-std::list<ImageResource>* Farmer::Die[7][8];
-std::list<ImageResource>* Farmer::Disappear[7][8];
+std::list<ImageResource>* Farmer::Carry[7][8];
+std::list<ImageResource>* Farmer::Walk[8][8];
+std::list<ImageResource>* Farmer::Work[8][8];
+std::list<ImageResource>* Farmer::Stand[8][8];
+std::list<ImageResource>* Farmer::Attack[8][8];
+std::list<ImageResource>* Farmer::Die[8][8];
+std::list<ImageResource>* Farmer::Disappear[8][8];
 std::list<ImageResource>* Farmer::ShipStand[10][8];
-
-std::string Farmer::FarmerName[7]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"};
-std::string Farmer::FarmerCarry[5]={"","CarryWood","CarryMeat","CarryStone","CarryGold"};
+std::string Farmer::FarmerName[8]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker","Fisher"};
+std::string Farmer::FarmerCarry[7]={"","CarryWood","CarryMeat","CarryStone","CarryGold","","CarryFish"};
 
 string Farmer::sound_click = "Click_Villager";
 
@@ -144,8 +143,9 @@ void Farmer::setNowRes()
             break;
         }
     }else if(FarmerType==FARMERTYPE_SAILING||FarmerType==FARMERTYPE_WOOD_BOAT){
-        switch (nowstate) {
-            case MOVEOBJECT_STATE_STAND:
+        switch (nowstate)
+        {
+            case MOVEOBJECT_STATE_STAND:case MOVEOBJECT_STATE_WALK:case MOVEOBJECT_STATE_ATTACK:case MOVEOBJECT_STATE_WORK:
             templist=this->ShipStand[FarmerType][this->Angle];
             break;
         }
@@ -196,29 +196,32 @@ int Farmer::get_add_specialAttack()
 
 void Farmer::updateState()
 {
-    switch (interactSort) {
-    case SORT_ANIMAL:
-        if(interactNum ==ANIMAL_TREE || interactNum==ANIMAL_FOREST) setState(1);
-        else setState(4);
-        break;
-    case SORT_BUILDING:
-        setState(6);
-        break;
-    case SORT_STATICRES:
-        if(interactNum == NUM_STATICRES_Bush) setState(2);
-        else setState(3);
-        break;
-    case SORT_Building_Resource:
-        if(interactBui_builtUp)
-        {
-            if(interactNum == BUILDING_FARM)
-                setState(5);
+    if(FarmerType==FARMERTYPE_FARMER){
+        switch (interactSort) {
+        case SORT_ANIMAL:
+            if(interactNum ==ANIMAL_TREE || interactNum==ANIMAL_FOREST) setState(1);
+            else setState(4);
+            break;
+        case SORT_BUILDING:
+            setState(6);
+            break;
+        case SORT_STATICRES:
+            if(interactNum == NUM_STATICRES_Bush) setState(2);
+            else if(interactNum==NUM_STATICRES_Fish)setState(FARMER_FISHER);
+            else setState(3);
+            break;
+        case SORT_Building_Resource:
+            if(interactBui_builtUp)
+            {
+                if(interactNum == BUILDING_FARM)
+                    setState(5);
+            }
+            else setState(6);
+            break;
+        default:
+            setState(0);
+            break;
         }
-        else setState(6);
-        break;
-    default:
-        setState(0);
-        break;
     }
 }
 

@@ -642,7 +642,7 @@ void Core::manageMouseEvent()
                                 default:
                                     break;
                             }
-                        }else if(FARMERTYPE_SAILING){
+                        }else if(FarmerType==FARMERTYPE_SAILING){
                             if(object_click->getSort()==SORT_STATICRES)
                             {
                                 StaticRes*res=(StaticRes*)object_click;
@@ -901,7 +901,10 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
     case SORT_Building_Resource:
     case SORT_FARMER:
         if(obj->getPlayerRepresent()==self->getPlayerRepresent()&&obj->getSort()==SORT_FARMER&&((Farmer*)obj)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
-            interactionList->addRelation(self,obj,CoreEven_Transport);
+            ret=interactionList->addRelation(self,obj,CoreEven_Transport);
+        }
+        else if(obj->getPlayerRepresent()!=self->getPlayerRepresent()){
+            ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
         }
         break;
     case SORT_ARMY:

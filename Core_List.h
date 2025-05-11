@@ -5,6 +5,7 @@
 #include<iostream>
 #include <unordered_set>
 #include<set>
+#include<queue>
 using namespace std;
 extern Score usrScore;
 extern Score enemyScore;

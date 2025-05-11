@@ -165,18 +165,20 @@ int Core_List::addRelation( Coordinate * object1, double DR , double UR, int eve
             if(UR<0) UR = 0;
             if(DR>MAP_L*BLOCKSIDELENGTH) DR = MAP_L*BLOCKSIDELENGTH;
             if(UR>MAP_U*BLOCKSIDELENGTH) UR = MAP_U*BLOCKSIDELENGTH;
-            //如果是运输船,并且指定的位置是岸边,且当前载有人物大于等于1,那么执行卸货动作
+            //如果是运输船,并且指定的位置是岸边,那么执行卸货动作(就算木有人也执行卸货,反正就多一个细节罢了)
             if(object1->getSort()==SORT_FARMER&&((Farmer*)object1)->get_farmerType()==FARMERTYPE_WOOD_BOAT){
                 Farmer*obj=(Farmer*)object1;
-                if(obj->getResourceNowHave()>0){
+                {
                     int blockDR=DR/BLOCKSIDELENGTH;
                     int blockUR=UR/BLOCKSIDELENGTH;
                     //如果是岸边,执行卸货的行动
                     if(blockDR<MAP_L&&blockUR<MAP_U&&theMap->cell[blockDR][blockUR].getMapType()!=MAPTYPE_OCEAN){
-                        //寻找直线上的岸边,作为目的地
+                        //寻找直线上的岸边,作为目的地(这个功能先不实现，因为有bug)
+                        /*
                         Point target=GetCoastInLine({blockDR,blockUR},{object1->getBlockDR(),object1->getBlockUR()});
                         DR=(target.x+0.5)*BLOCKSIDELENGTH;
                         UR=(target.y+0.5)*BLOCKSIDELENGTH;
+                        */
                         //
                         eventType=CoreEven_UnLoad;
                     }
@@ -919,8 +921,8 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
     //寻找没有障碍的陆地
     extern Map*GlobalMap;
     vector<array<double,2>>satisfy;
-    for(int i=-2;i<=2;++i)
-    for(int j=-2;j<=2;++j)
+    for(int i=-UNLOAD_RADIAN;i<=UNLOAD_RADIAN;++i)
+    for(int j=-UNLOAD_RADIAN;j<=UNLOAD_RADIAN;++j)
     {
         int L=i+ship->getBlockDR(),U=j+ship->getBlockUR();
         if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
@@ -942,7 +944,6 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
         return min + random * (max - min);
     };
     //
-    cout<<satisfy.size()<<endl;
     if(satisfy.size()){
         auto&&humans=ship->getHumanTransport();
         for(Human*human:humans){
@@ -1356,8 +1357,10 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     //8个移动方向 <4为斜线方向，>=4为水平竖直方向
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
                              Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1)};
-    static vector<vector<Data>> preNode(MAP_L,vector<Data>(MAP_U));
+    static vector<vector<Data>> preNode(MAP_L+1,vector<Data>(MAP_U+1));
+    static vector<vector<float>>mndis(MAP_L+1,vector<float>(MAP_U+1));
     static vector<Data>vis;
+    static float Sqrt2=sqrt(2.0);
     stack<Point> path;
     bool meetGoal = false;
     ++mask;//把寻路掩码递增1
@@ -1434,44 +1437,49 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     {
         meetGoal = true;
     }
-    queue<Data>qu;
-    qu.push({start.x,start.y});
+    using Info=tuple<float,int,int>;
+    priority_queue<Info,vector<Info>,greater<Info>>qu;//这里我采用dijstra算法寻路,因为很明显斜着的路劲和直走的路径的全值是不一样的
+    qu.push(Info{0.0f,start.x,start.y});
+    mndis[start.x][start.y]=0.0;
     Data targetPoint={start.x,start.y};
     vis.clear();
     vis.push_back({start.x,start.y});
     preNode[start.x][start.y]={-1,-1};
-    while(!qu.empty()&&!meetGoal){
-        int size=qu.size();
-        while(size--){
-            auto p=qu.front();
-            qu.pop();
-            for(int i=0;i<8;++i){
-                auto&offset=dire[i];
-                int x=p[0]+offset.x,y=p[1]+offset.y;
-                if(x>=0&&y>=0&&x<MAP_L&&y<MAP_U){
-                    Block&block=theMap->cell[x][y];
-                    bool isLand=block.getMapType()!=MAPTYPE_OCEAN;
-                    //判断格子是否可走、未走过
-                    //斜线方向需要多判断马脚操作
-                    if(isLand^isShip){
-                        if(!(map_HaveJud[x][y]==mask || findPathMap[x][y] && goalMap[x][y]!=mask ||\
-                             i<4 && (findPathMap[x][p[1]]||findPathMap[p[0]][y]))){
-                            preNode[x][y]={p[0],p[1]};
-                            qu.push({x,y});
-                            vis.push_back({x,y});
-                            map_HaveJud[x][y]=mask;
-                            if(goalMap[x][y]==mask){
-                                meetGoal=1;
-                                targetPoint={x,y};
-                            }
+    while(!qu.empty()&&!meetGoal)
+    {
+        auto p=qu.top();
+        float d=get<0>(p);
+        int x=get<1>(p),y=get<2>(p);
+        qu.pop();
+        if(d>mndis[x][y])continue;
+        for(int i=0;i<8;++i){
+            auto&offset=dire[i];
+            int xx=x+offset.x,yy=y+offset.y;
+            if(xx>=0&&yy>=0&&xx<MAP_L&&yy<MAP_U){
+                Block&block=theMap->cell[xx][yy];
+                bool isLand=block.getMapType()!=MAPTYPE_OCEAN;
+                float dd=d+(i<4?Sqrt2:1.0f);
+                //判断格子是否可走、未走过
+                //斜线方向需要多判断马脚操作
+                if(isLand^isShip){
+                    if((map_HaveJud[xx][yy]!=mask||mndis[xx][yy]>dd)&&!(findPathMap[xx][yy] && goalMap[xx][yy]!=mask ||i<4 && (findPathMap[xx][y]||findPathMap[x][yy]))){
+                        preNode[xx][yy]={x,y};
+                        qu.push(Info{dd,xx,yy});
+                        mndis[xx][yy]=dd;
+                        vis.push_back({xx,yy});
+                        map_HaveJud[xx][yy]=mask;
+                        if(goalMap[xx][yy]==mask){
+                            meetGoal=1;
+                            targetPoint={xx,yy};
                         }
                     }
                 }
-                if(meetGoal)break;
             }
             if(meetGoal)break;
         }
+        if(meetGoal)break;
     }
+
     double dr0=1e9,ur0=1e9;
     {
         //如果没有能有一条合法的路径到终点
@@ -1699,6 +1707,7 @@ void Core_List::initDetailList()
 
     //行动：飞行物攻击*********************************
     {
+
         phaseList = new int[2]{ CoreDetail_Move, CoreDetail_Attack };
         conditionList = new conditionF[2]{ conditionF( condition_ObjectNearby, OPERATECON_NEAR_MISSILE ) , conditionF( condition_TimesFalse ) };
 
@@ -1709,17 +1718,21 @@ void Core_List::initDetailList()
     }
     //行动：运输人*********************************
     {
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction, OPERATECON_TIMES_USELESSACT_MOVE));
         phaseList = new int[2]{ CoreDetail_Move,CoreDetail_Transport };
-        conditionList = new conditionF[2]{conditionF(condition_ObjectNearby,OPERATECON_NEAR_UNLOAD),conditionF(condition_Object2_Transported)};
+        conditionList = new conditionF[2]{conditionF(condition_ObjectNearby,OPERATECON_NEAR_TRANSPORT),conditionF(condition_Object2_Transported)};
         relation_Event_static[CoreEven_Transport] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
+        forcedInterrupCondition.clear();
         delete[] phaseList;
         delete[] conditionList;
     }
     //行动：卸货*********************************
     {
+        forcedInterrupCondition.push_back(conditionF(condition_UselessAction, OPERATECON_TIMES_USELESSACT_MOVE));
         phaseList = new int[2]{ CoreDetail_Move,CoreDetail_Unload };
         conditionList = new conditionF[2]{ conditionF(condition_ObjectNearby,OPERATECON_NEAR_UNLOAD),conditionF(condition_Object1_Unload)};
         relation_Event_static[CoreEven_UnLoad] = detail_EventPhase(2, phaseList, conditionList, forcedInterrupCondition);
+        forcedInterrupCondition.clear();
         delete[] phaseList;
         delete[] conditionList;
     }
@@ -1744,7 +1757,7 @@ int STATE_Gather_Static[13]={/*0判断是否需要攻击*/ HUMAN_STATE_GOTO_OBJE
 
 int STATE_FixBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_FIXING};
 int STATE_CreateBuilding[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_BUILDING};
-
+int STATE_TRANSPORT[2]={HUMAN_STATE_GOTO_OBJECT,HUMAN_STATE_TRANSPORTED};
 int Core_List::getNowPhaseNum(Coordinate* object)
 {
     ///获取当前object的行动阶段，用于将信息传递给AIGame
@@ -1757,7 +1770,13 @@ int Core_List::getNowPhaseNum(Coordinate* object)
 
     if(thisRelation.relationAct==CoreEven_JustMoveTo){
         return HUMAN_STATE_JUSTWALKING;
-    }else if(thisRelation.relationAct==CoreEven_Attacking){
+    } else if (thisRelation.relationAct == CoreEven_Transport) {
+        return STATE_TRANSPORT[nowPhaseNum];
+    }
+    else if(thisRelation.relationAct==CoreEven_UnLoad){
+        return HUMAN_STATE_JUSTWALKING;
+    }
+    else if(thisRelation.relationAct==CoreEven_Attacking){
         return STATE_Attacking[nowPhaseNum];
     }else if(thisRelation.relationAct==CoreEven_Gather){
         if(obj==NULL){
@@ -1808,9 +1827,6 @@ int Core_List::getNowPhaseNum(Coordinate* object)
         }else{
             return STATE_FixBuilding[nowPhaseNum];
         }
-    }
-    else if (thisRelation.relationAct == CoreEven_Transport) {
-        return HUMAN_STATE_GOTO_OBJECT;
     }
     else {
         return HUMAN_STATE_IDLE;
