@@ -1,10 +1,12 @@
 {
   "files.associations": {
+    "*.dbclient-js": "javascript",
     "*.qrc": "xml",
     "*.ui": "xml",
     "*.qss": "css",
     "*.pro": "makefile",
-    "*.pri": "makefile"
+    "*.pri": "makefile",
+    "ostream": "cpp"
   },
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
