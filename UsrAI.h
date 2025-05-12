@@ -8,7 +8,7 @@ extern ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 
 class UsrAI:public AI
-{/*##########DO NOT MODIFY THE CODE IN THE CLASS##########*/
+{
 public:
     UsrAI(){this->id=0;}
     ~UsrAI(){}
@@ -30,10 +30,10 @@ private:
         tagUsrGame.clearInsRet();
     }
     /*##########DO NOT MODIFY THE CODE IN THE CLASS##########*/
-    bool tryBuildBuilding(int buildingType, int requiredWood, int maxCount, int reqiredBuilding);
+    bool tryBuildBuilding(int buildingType, int requiredWood, int maxCount, int reqiredBuilding,int is_settler=0);
 };
 
 /*##########YOUR CODE BEGINS HERE##########*/
-
+    
 /*##########YOUR CODE ENDS HERE##########*/
 #endif // USRAI_H
