@@ -337,7 +337,7 @@ void Core::updateByPlayer(int id){
     //更新人口数据
     for(Human* human:self->human)
     {
-        //if(human->getTransported())continue;//如果人物被船运输了，那么不对外显示
+        if(human->getTransported())continue;//如果人物被船运输了，那么不对外显示
         if(g_Object[human->getglobalNum()] == NULL) continue;
 
         tagHuman taghuman;

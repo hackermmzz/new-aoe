@@ -1,10 +1,12 @@
 {
   "files.associations": {
+    "*.dbclient-js": "javascript",
     "*.qrc": "xml",
     "*.ui": "xml",
     "*.qss": "css",
     "*.pro": "makefile",
-    "*.pri": "makefile"
+    "*.pri": "makefile",
+    "ostream": "cpp"
   },
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
@@ -56,5 +58,21 @@
       "icon": "terminal-cmd"
     }
   },
-  "terminal.integrated.defaultProfile.windows": "PowerShell"
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "problems.showCurrentInStatus": true,
+  "problems.autoReveal": true,
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.dimInactiveRegions": true,
+  "C_Cpp.codeAnalysis.runAutomatically": true,
+  "C_Cpp.loggingLevel": "Information",
+  "C_Cpp.formatting": "vcFormat",
+  "C_Cpp.default.enableConfigurationSquiggles": true,
+  "C_Cpp.workspaceSymbols": "All",
+  "C_Cpp.debugShortcut": true,
+  "debug.internalConsoleOptions": "openOnSessionStart",
+  "debug.openDebug": "openOnDebugBreak",
+  "debug.showBreakpointsInOverviewRuler": true,
+  "debug.inlineValues": true,
+  "editor.codeLens": true,
+  "task.problemMatchers.neverPrompt": false
 }

@@ -404,9 +404,9 @@
 #define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME "研发步兵护甲:近战单位近战防御+2(花费:75食物)"
 #define ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME "研发骑兵护甲:骑兵近战防御+2(花费:125食物)"
 #define ACT_STOCK_UPGRADE_USETOOL_NAME "研发工具使用:近战单位攻击+2(花费:100食物)"
-#define ACT_DOCK_CREATE_SAILING_NAME "建造帆船"
-#define ACT_DOCK_CREATE_WOOD_BOAT_NAME "建造木船"
-#define ACT_DOCK_CREATE_SHIP_NAME "建造货船"
+#define ACT_DOCK_CREATE_SAILING_NAME "建造渔船"
+#define ACT_DOCK_CREATE_WOOD_BOAT_NAME "建造运输船"
+#define ACT_DOCK_CREATE_SHIP_NAME "建造战船"
 #define ACT_NULL_NAME ""
 
 #define ACT_WINDOW_NUM_FREE 12

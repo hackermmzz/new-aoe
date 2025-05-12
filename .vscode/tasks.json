@@ -19,8 +19,23 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": [],
-      "dependsOn": ["qmake"]
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "dependsOn": ["qmake"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "label": "make release",
@@ -30,20 +45,53 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": [],
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
       "dependsOn": ["qmake"]
     },
     {
       "label": "qmake & make",
       "dependsOrder": "sequence",
       "dependsOn": ["qmake", "make"],
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
     },
     {
       "label": "qmake & make release",
       "dependsOrder": "sequence",
       "dependsOn": ["qmake", "make release"],
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
     },
     {
       "label": "clean",
@@ -90,7 +138,31 @@
       "problemMatcher": [],
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Capture Link Errors",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Capturing linking errors"],
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": [
+          {
+            "regexp": "^(.*)\\(\\.(\\w+)\\+0x[0-9a-f]+\\):\\s+In\\s+function\\s+`(.*)':$",
+            "file": 1,
+            "message": 3
+          },
+          {
+            "regexp": "^(.*):([0-9]+):\\s+multiple\\s+definition\\s+of\\s+`(.*)'$",
+            "file": 1,
+            "line": 2,
+            "message": 3,
+            "severity": "error"
+          }
+        ]
       }
     }
   ]
