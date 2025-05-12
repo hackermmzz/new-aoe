@@ -1,7 +1,11 @@
 #include "UsrAI.h"
 #include <iostream>
+#include <iostream>
 tagGame tagUsrGame;
 ins UsrIns;
+/*##########DO NOT MODIFY THE CODE ABOVE##########*/
+
+// 全局变量定义
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 
 // 全局变量定义
@@ -13,8 +17,40 @@ std::vector<int> human_sn;
 std::vector<int> idle_ship_sn;
 std::vector<int> ship_sn;
 char mmap[MAP_L][MAP_U]; //-:空地 h:建筑 w:资源 i:人 o:海洋
+int building_num[20]; // 包括未完工的建筑
+std::vector<int> building_sn[20]; // 只记录已完工的建筑
+std::vector<int> idle_human_sn;
+std::vector<int> human_sn;
+std::vector<int> idle_ship_sn;
+std::vector<int> ship_sn;
+char mmap[MAP_L][MAP_U]; //-:空地 h:建筑 w:资源 i:人 o:海洋
 const int dx[4] = {0, 0, -1, 1};
 const int dy[4] = {-1, 1, 0, 0};
+int center_x, center_y;
+int obj_x, obj_y;
+map<int, int> building_size{
+    {BUILDING_HOME,2},
+    {BUILDING_CENTER,4},
+    {BUILDING_GRANARY,3},
+    {BUILDING_MARKET,3},
+    {BUILDING_STOCK,3},
+    {BUILDING_DOCK,2},
+};
+
+inline int tran(int x) {
+    return (double) x * BLOCKSIDELENGTH+BLOCKSIDELENGTH/2;
+}
+
+inline int tran(double x) {
+    return (int) (x / BLOCKSIDELENGTH);
+}
+
+
+void updateMap(int type,int sx,int sy) {
+    int size = building_size[type];
+    for(int i=sx;i<sx+size;i++){
+        for(int j=sy;j<sy+size;j++){
+            mmap[i][j] = 'h';
 int center_x, center_y;
 int obj_x, obj_y;
 map<int, int> building_size{

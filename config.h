@@ -56,6 +56,7 @@
 #define GAMEWIDGET_WIDTH 1440
 #define GAMEWIDGET_HEIGHT 751
 #define BLOCKSIDELENGTH (16*gen5)
+#define UNLOAD_RADIAN  2                //卸货时候寻找合适的陆地的半径
 #define MAP_L 128
 #define MAP_U 128
 #define GENERATE_L (MAP_L+8)
@@ -252,6 +253,7 @@
  * 12代表种地
  * 13代表正在采集肉的状态
  * 14代表正在走向目的地的状态
+ * 15代表被船运输中
  * 后续补充
  */
 #define HUMAN_STATE_IDLE 0
@@ -269,7 +271,7 @@
 #define HUMAN_STATE_FARMING 12
 #define HUMAN_STATE_BUTCHERING 13
 #define HUMAN_STATE_JUSTWALKING 14
-
+#define HUMAN_STATE_TRANSPORTED 15
 
 /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
@@ -277,7 +279,7 @@
 #define HUMAN_STONE 3
 #define HUMAN_GOLD 4
 #define HUMAN_GRANARYFOOD 5
-#define HUMAN_DOCKFOOD 6
+#define HUMAN_DOCKFOOD 6 //也就是鱼肉
 /********** AI函数 **********/
 //函数编号
 #define FUC_BUILDINGACTION 1
@@ -521,6 +523,7 @@
 #define FARMER_HUNTER 4
 #define FARMER_FARMER 5
 #define FARMER_WORKER 6
+#define FARMER_FISHER 7
 
 #define FARMER_CARRYLIMIT_WOOD 10
 #define FARMER_CARRYLIMIT_FOOD 10
@@ -547,7 +550,6 @@
 
 #define MOVEOBJECT_STATE_WORK 5
 #define MOVEOBJECT_STATE_RUN 6
-
 #define ATTACKVALUE_FARMER 3
 
 #define HOUSE_HUMAN_NUM 4
@@ -600,6 +602,7 @@
 #define OPERATECON_NEAR_MISSILE 10003
 #define OPERATECON_NEAR_ATTACK_MOVE 10004
 #define OPERATECON_NEAR_UNLOAD 10005
+#define OPERATECON_NEAR_TRANSPORT 10006
 
 #define OPERATECON_NEARALTER_ABSOLUTE 20000
 #define OPERATECON_NEARALTER_WORK 20002
@@ -627,7 +630,10 @@
 #define FRIENDLY_ENEMY 2
 #define FRIENDLY_FENCY 3
 
-
-
+/********** 兵种状态 **********/
+#define ARMY_STATE_DEFAULT 0
+#define ARMY_STATE_AROUND 1
+#define ARMY_STATE_DEFENSE 2
+#define ARMY_STATE_ATTACK 3
 
 #endif // CONFIG_H

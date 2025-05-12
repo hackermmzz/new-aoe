@@ -132,9 +132,15 @@ struct relation_Object
         distance_AllowWork = goalObject->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
         if(goalObject->getNum()==BUILDING_DOCK)
             distance_AllowWork=goalObject->getSideLength();
+        else if(goalObject->getNum()==NUM_STATICRES_Fish)
+            distance_AllowWork=goalObject->getSideLength()*1.2;
     }
 
-    void set_dis_AllowWork_alter(){dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;}
+    void set_dis_AllowWork_alter(){
+        dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
+        if(alterOb->getNum()==BUILDING_DOCK)
+            dis_AllowWork_alter=goalObject->getSideLength();
+    }
 
     //如果goalObject是Resource的子类，则根据资源种类设置对应资源建筑的类型
     void set_ResourceBuildingType();

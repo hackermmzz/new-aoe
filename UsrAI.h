@@ -7,7 +7,10 @@ extern tagGame tagUsrGame;
 extern ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 
+/*##########DO NOT MODIFY THE CODE ABOVE##########*/
+
 class UsrAI:public AI
+{/*##########DO NOT MODIFY THE CODE IN THE CLASS##########*/
 {/*##########DO NOT MODIFY THE CODE IN THE CLASS##########*/
 public:
     UsrAI(){this->id=0;}

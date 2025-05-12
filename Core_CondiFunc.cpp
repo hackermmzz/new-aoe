@@ -493,6 +493,9 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
             case OPERATECON_NEAR_UNLOAD:
                 dis=DISTANCE_Manhattan_Unload;
                 break;
+            case OPERATECON_NEAR_TRANSPORT:
+                dis=DISTANCE_Manhattan_Transport;
+                break;
             case OPERATECON_NEAR_ABSOLUTE:
                 dis = DISTANCE_Manhattan_MoveEndNEAR;
                 break;
@@ -602,9 +605,10 @@ bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, in
     Farmer*ship=(Farmer*)object1;
     return ship->getHumanTransport().size()==0;
     //寻找最近的陆地区块
-    static const int off[][2]={{-1,0},{-1,1},{-1,-1},{1,0},{1,-1},{1,1},{0,1},{0,-1}};
-    for(auto*o:off){
-        int L=o[0]+ship->getBlockDR(),U=o[1]+ship->getBlockUR();
+    for(int i=-UNLOAD_RADIAN;i<=UNLOAD_RADIAN;++i)
+        for(int j=-UNLOAD_RADIAN;j<=UNLOAD_RADIAN;++j)
+    {
+        int L=i+ship->getBlockDR(),U=j+ship->getBlockUR();
         if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
             Block&block=GlobalMap->cell[L][U];
 

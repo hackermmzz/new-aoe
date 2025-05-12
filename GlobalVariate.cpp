@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QtWidgets>
+#include<iostream>
 using namespace std;
 
 bool isExamining = EXAMINE_MODE;
@@ -379,6 +380,7 @@ int Stone[5][5][5] =
 
 void loadResource(std::string name, std::list<ImageResource> *targetlist)
 {
+    //
     targetlist->clear();
     auto temp=&resMap[name];
     auto index=temp->begin();

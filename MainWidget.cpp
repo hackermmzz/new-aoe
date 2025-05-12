@@ -1,4 +1,4 @@
-﻿#include "MainWidget.h"
+#include "MainWidget.h"
 #include "ui_MainWidget.h"
 #include "ui_Editor.h"
 #include <iostream>
@@ -1054,9 +1054,9 @@ void MainWidget::initStaticResource()
 void MainWidget::initFarmer()
 {
     //加载素材
-    //"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker"
+    //"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker","Fisher"
 
-    for(int statei=0;statei<7;statei++)
+    for(int statei=0;statei<8;statei++)
     {
         for(int i=0;i<=4;i++)
         {
@@ -1082,7 +1082,7 @@ void MainWidget::initFarmer()
         }
     }
     // Work
-    for(int statei=0;statei<7;statei++)
+    for(int statei=0;statei<8;statei++)
     {
         if(statei==0)
         {
@@ -1100,7 +1100,7 @@ void MainWidget::initFarmer()
         }
     }
     // Attack
-    for(int statei=0;statei<7;statei++)
+    for(int statei=0;statei<8;statei++)
     {
         if(statei==2||statei==3||statei==5||statei==6)
         {
@@ -1118,9 +1118,9 @@ void MainWidget::initFarmer()
         }
     }
     // Carry 考虑如何对接
-    for(int statei=0;statei<=4;statei++)
+    for(int statei=0;statei<=6;statei++)
     {
-        if(statei==0)
+        if(statei==0||statei==5)
         {
             continue;
         }
@@ -1849,7 +1849,7 @@ void MainWidget::buildInitialStock()
         maxBUR = min(maxBUR+1, MAP_U-5);
     }
 
-    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
+//    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
     return;
 }
 
