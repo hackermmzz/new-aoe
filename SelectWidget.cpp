@@ -535,12 +535,12 @@ void SelectWidget::refreshActs()
                 name = QString::fromStdString(objFarmer->getDisplayName(num));
                 break;
             case 1:
-                ui->objIcon->setPixmap(resMap["Button"].front().scaled(110,110));
+                ui->objIcon->setPixmap(resMap["Button_Wood_Boat"].front().scaled(110,110));
                 name="运输船";
                 break;
             case 2:
-                ui->objIcon->setPixmap(resMap["Button_Wood_Boat"].front().scaled(110,110));
-                name="木船";
+                ui->objIcon->setPixmap(resMap["Button_Sailing"].front().scaled(110,110));
+                name="渔船";
                 break;
             default:
                 break;
@@ -567,11 +567,12 @@ void SelectWidget::refreshActs()
             {
                 ui->objIconSmall->setPixmap(QPixmap());
                 ui->objText->setText("");
-            }
-            else
-            {
+            }else if (objFarmer->get_farmerType() != 0) {
+                ui->objText->setText(QString::number((int)(objFarmer->getResourceNowHave()))+"/5 ");
+            }else {
                 ui->objText->setText(QString::number((int)(objFarmer->getResourceNowHave())));
             }
+            
             //设置血量
             ui->objHp->setText(QString::number(objFarmer->getBlood()) + "/" + QString::number(objFarmer->getMaxBlood()));
             this->update();
