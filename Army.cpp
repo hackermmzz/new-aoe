@@ -168,7 +168,13 @@ void Army::setNowRes()
 {
     std::list<ImageResource> *templist = NULL;
     if(Num==AT_SHIP){
-        templist =this->Stand[playerRepresent][Num][getLevel()][Angle];
+        switch(this->nowstate){
+        case MOVEOBJECT_STATE_STAND:case MOVEOBJECT_STATE_WALK:case MOVEOBJECT_STATE_ATTACK:
+            templist =this->Stand[playerRepresent][Num][getLevel()][Angle];
+            break;
+        default:
+                break;
+        }
     }
     else{
         switch (this->nowstate) {

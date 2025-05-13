@@ -950,9 +950,9 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
             int idx=rand()%satisfy.size();
             double targetDr=satisfy[idx][0],targetUr=satisfy[idx][1];
             human->setPosForced(targetDr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0),targetUr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0));
+            human->setPreStand();
             human->setNowState(MOVEOBJECT_STATE_STAND);
             human->setTransported(0);
-            human->setPreStand();
         }
         ship->update_resourceClear();
         humans.clear();

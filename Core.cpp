@@ -1,6 +1,7 @@
 #include "SelectWidget.h"
 #include "Core.h"
 #include <QDateTime>
+#include<iostream>
 tagInfo Buffer0[2];
 tagInfo Buffer1[2];
 int buff=0;
@@ -65,6 +66,19 @@ void Core::updateByObject()
                 //需要变化的行动为"死亡"，在交互行动表中将其删除
                 if((*humaniter)->isDying())
                 {
+                    //判断是否是运输船，如果是，运输船里面的人都得死
+                    {
+                        Human&human=**humaniter;
+                        if(human.getSort()==SORT_FARMER){
+                            Farmer&farmer=*(Farmer*)&human;
+                            if(farmer.get_farmerType()==FARMERTYPE_WOOD_BOAT){
+                                for(Human*human:farmer.getHumanTransport()){
+                                    human->setPreDie();//把状态设置为死亡状态
+                                }
+                            }
+                        }
+                    }
+                    //
                     call_debugText("red"," "+(*humaniter)->getChineseName()+\
                                    "(编号"+QString::number((*humaniter)->getglobalNum())+")死亡",(*humaniter)->getPlayerRepresent());
                     //在交互行动表中将其删除——删除其作为主体的行动、其作为目标的行动中将目标设置为NULL
@@ -659,10 +673,6 @@ void Core::manageMouseEvent()
                     if(nowobject->getPlayerRepresent() != NOWPLAYERREPRESENT) break;
                     switch (object_click->getSort())
                     {
-//                        case SORT_ANIMAL:
-//                            if(!((Animal*)object_click)->isTree())
-//                                interactionList->addRelation(nowobject , object_click , CoreEven_Attacking );
-//                            break;
                         case SORT_Building_Resource:
                         case SORT_BUILDING:
                         case SORT_ARMY:
@@ -976,7 +986,6 @@ void Core::manageOrder(int id)
     }
     
     NowIns->lock.lock();
-
     while(!NowIns->instructions.empty()) {
         instruction cur = NowIns->instructions.front();
         NowIns->instructions.pop();
