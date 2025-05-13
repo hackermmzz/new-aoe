@@ -928,18 +928,14 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
         if(L>=0&&L<MAP_L&&U>=0&&U<MAP_U){
             Block&block=GlobalMap->cell[L][U];
             if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
-                double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
-                //if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE)
-                {
-                    satisfy.push_back({block.getDR(),block.getUR()});
-                }
+                   satisfy.push_back({block.getDR(),block.getUR()});
             }
         }
     }
     //随机生成浮点数
     static auto generateRandomDouble=[&](double min, double max) {
         // 生成一个0到RAND_MAX之间的随机整数
-        double random = (double)rand() / RAND_MAX;
+        double random =rand()*1.0 / RAND_MAX;
         // 将随机整数映射到指定的范围
         return min + random * (max - min);
     };
@@ -949,7 +945,7 @@ void Core_List::object_Unload(Coordinate *object1, Coordinate *object2)
         for(Human*human:humans){
             int idx=rand()%satisfy.size();
             double targetDr=satisfy[idx][0],targetUr=satisfy[idx][1];
-            human->setPosForced(targetDr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0),targetUr+generateRandomDouble(0.0,BLOCKSIDELENGTH-1.0));
+            human->setPosForced(targetDr+generateRandomDouble(1.0,BLOCKSIDELENGTH-1.0),targetUr+generateRandomDouble(1.0,BLOCKSIDELENGTH-1.0));
             human->setPreStand();
             human->setNowState(MOVEOBJECT_STATE_STAND);
             human->setTransported(0);
@@ -1198,22 +1194,26 @@ void Core_List::manageMontorAct()
                 ur = ob_ed->getUR();
                 calMirrorPoint(dr,ur,ob_m->getDR(),ob_m->getUR(),dis);
                 //对计算出来的位置进行判断，如果是海洋，那么随机选100次点直到满足
-                bool flag=1;
+                bool flag=0;
                 int loopCnt=0;
                 do{
-                    flag=0;
                     int L=dr/BLOCKSIDELENGTH,U=ur/BLOCKSIDELENGTH;
                     if(L>=0&&U>=0&&L<MAP_L&&U<MAP_U&&theMap->cell[L][U].getMapType()==MAPTYPE_OCEAN){
                        double dir0=rand()*1.0/RAND_MAX;
                        double dir1=sqrt(1.0-dir0*dir0);
                       dr=ob_m->getDR()+dir0*dis;
                       ur=ob_m->getUR()+dir1*dis;
+                      flag=1;
                     }
+                    else flag=0;
                     ++loopCnt;
                 }while(flag&&loopCnt<=100);
-                //
-                suspendRelation(ob_m);
-                if(addRelation(ob_m,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS) ((MoveObject*)ob_m)->beginRun();
+                //如果找到了合适的点
+                if(!flag){
+                    suspendRelation(ob_m);
+                    if(addRelation(ob_m,dr,ur,CoreEven_JustMoveTo,false) == ACTION_SUCCESS)
+                        ((MoveObject*)ob_m)->beginRun();
+                }
             }
             else addRelation(ob_m , ob_ed , CoreEven_Attacking);
         }

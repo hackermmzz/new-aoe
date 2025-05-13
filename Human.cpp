@@ -36,10 +36,7 @@ void Human::setPosForced(double DR_, double UR_)
 {
     PredictedDR=DR=DR_;
     PredictedUR=UR=UR_;
-    BlockDR=DR/BLOCKSIDELENGTH;
-    BlockUR=UR/BLOCKSIDELENGTH;
-    DR0=DR_;
-    UR0=UR_;
+    setPath(stack<Point>(),DR_,UR_);
 }
 
 bool Human::getTransported() const
