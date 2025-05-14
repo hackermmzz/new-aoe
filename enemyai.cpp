@@ -14,6 +14,13 @@ ins EnemyIns;
 #define MODE2 15000
 #define MODE3 22500
 #define MODE4 30000
+#define VECTORARMY 1
+#define VECTORFARMER 2
+#define VECTORSHIP 3
+#define VECTORBOAT 4
+#define VECTORARROWTOWER 5
+#define VECTORDEFEND 6
+#define VECTORBUILDING 7
 tagInfo enemyInfo;
 //-----------新参数--------------//
 static int around[100];
@@ -24,6 +31,7 @@ static vector <bool>ifAttackv;
 static vector <int> Army;
 static vector <int> Farmer;
 static vector <int> Ship;
+static vector <int> Boat;
 static vector <int> Arrowtower;
 static vector <int> Building;
 static vector <int> Defend;
@@ -70,28 +78,30 @@ static void seekenemy(){
         if(enemyInfo.armies[i].status!=2){
         for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
           double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[j].BlockUR, 2), 0.5);
-          if(temp<10){
-              if (!isElementExists(Farmer, enemyInfo.enemy_farmers[j].SN))
+          if(temp<15){
+              qDebug()<<enemyInfo.enemy_farmers[j].FarmerSort<<g_frame;
+              if (enemyInfo.enemy_farmers[j].FarmerSort==0&&!isElementExists(Farmer, enemyInfo.enemy_farmers[j].SN)){
               Farmer.push_back(enemyInfo.enemy_farmers[j].SN);
-
-          }
+              }else if(enemyInfo.enemy_farmers[j].FarmerSort!=0&&!isElementExists(Boat,enemyInfo.enemy_farmers[j].SN))
+             {Boat.push_back(enemyInfo.enemy_farmers[j].SN);
+          }}
         }
         for(int j=0;j<enemyInfo.enemy_armies.size();j++){
           double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_armies[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_armies[j].BlockUR, 2), 0.5);
-          if(temp<10){
-
-              if (!isElementExists(Army,enemyInfo.enemy_armies[j].SN))
-              Army.push_back(enemyInfo.enemy_armies[j].SN);
-          }
-}
+          if(temp<15){
+              if (enemyInfo.enemy_armies[j].Sort!=7&&!isElementExists(Army,enemyInfo.enemy_armies[j].SN)){
+              Army.push_back(enemyInfo.enemy_armies[j].SN);}
+              else if(enemyInfo.enemy_armies[j].Sort==7&&!isElementExists(Ship,enemyInfo.enemy_armies[j].SN))
+              {Ship.push_back(enemyInfo.enemy_armies[j].SN);
+}}}
         for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
           double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_buildings[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_buildings[j].BlockUR, 2), 0.5);
-          if(temp<10&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
+          if(temp<15&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
 
               if (!isElementExists(Building,enemyInfo.enemy_buildings[j].SN))
               Building.push_back(enemyInfo.enemy_buildings[j].SN);
           }
-          else if(temp<10&&enemyInfo.enemy_buildings[j].Type==BUILDING_ARROWTOWER){
+          else if(temp<15&&enemyInfo.enemy_buildings[j].Type==BUILDING_ARROWTOWER){
               if (!isElementExists(Arrowtower,enemyInfo.enemy_buildings[j].SN))
               Arrowtower.push_back(enemyInfo.enemy_buildings[j].SN);
           }
@@ -100,7 +110,7 @@ static void seekenemy(){
         else if(enemyInfo.armies[i].status==2){
             for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
               double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_farmers[0].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_farmers[0].BlockUR, 2), 0.5);
-              if(temp<10){
+              if(temp<15){
                   if (!isElementExists(Defend,enemyInfo.enemy_farmers[j].SN))
                   Defend.push_back(enemyInfo.enemy_farmers[j].SN);
 
@@ -108,7 +118,7 @@ static void seekenemy(){
             }
             for(int j=0;j<enemyInfo.enemy_armies.size();j++){
               double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_armies[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_armies[j].BlockUR, 2), 0.5);
-              if(temp<10){
+              if(temp<15){
 
                    if (!isElementExists(Defend,enemyInfo.enemy_armies[j].SN))
                   Defend.push_back(enemyInfo.enemy_armies[j].SN);
@@ -116,7 +126,7 @@ static void seekenemy(){
     }
             for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
               double temp=pow(pow(enemyInfo.armies[i].BlockDR-enemyInfo.enemy_buildings[j].BlockDR, 2) + pow(enemyInfo.armies[i].BlockUR-enemyInfo.enemy_buildings[j].BlockUR, 2), 0.5);
-              if(temp<10&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
+              if(temp<15&&enemyInfo.enemy_buildings[j].Type!=BUILDING_ARROWTOWER){
 
                   if (!isElementExists(Defend,enemyInfo.enemy_buildings[j].SN))
                   Defend.push_back(enemyInfo.enemy_buildings[j].SN);
@@ -127,14 +137,25 @@ static void seekenemy(){
 static void ifATTACK(){
     if(Army.size()!=0||Farmer.size()!=0||Building.size()!=0||Arrowtower.size()!=0){
         for(int i=0;i<enemyInfo.armies.size();i++){
-            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3)&&ifAttack[i]==false){
+            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3&&enemyInfo.armies[i].Sort!=7)&&ifAttack[i]==false){
                 ifAttack[i]=true;
-                qDebug()<<"进攻";
             }
         }
     }else{
         for(int i=0;i<enemyInfo.armies.size();i++)
-            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3)&&ifAttack[i]==true){
+            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3&&enemyInfo.armies[i].Sort!=7)&&ifAttack[i]==true){
+                ifAttack[i]=false;
+            }
+    }
+    if(Ship.size()!=0||Boat.size()!=0){
+        for(int i=0;i<enemyInfo.armies.size();i++){
+            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3&&enemyInfo.armies[i].Sort==7)&&ifAttack[i]==false){
+                ifAttack[i]=true;
+            }
+        }
+    }else{
+        for(int i=0;i<enemyInfo.armies.size();i++)
+            if((enemyInfo.armies[i].status==1||enemyInfo.armies[i].status==3&&enemyInfo.armies[i].Sort==7)&&ifAttack[i]==true){
                 ifAttack[i]=false;
             }
     }
@@ -160,50 +181,57 @@ void EnemyAI::Around(){
             HumanMove(enemyInfo.armies[i].SN,enemyInfo.armies[i].destinaDR,enemyInfo.armies[i].destinaUR);
             timer[i]=g_frame;
              around[i]=1-around[i];
-            qDebug()<<enemyInfo.armies[i].timelock<<around[i];
             }else if(around[i]==1){
             HumanMove(enemyInfo.armies[i].SN,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR);
             timer[i]=g_frame;
              around[i]=1-around[i];
             }
-}}
+}
+}
 }
 void EnemyAI::Attack(){
-//    for(int i=0;i<enemyInfo.armies.size();i++){
-//        qDebug()<<timer[i]<<enemyInfo.armies[i].status;
-//        if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==true){
-//            qDebug()<<"TryAttack";
-//            if(Farmer.size()!=0){
-//                HumanAction(enemyInfo.armies[i].SN,Farmer.back());
-//                qDebug()<<Farmer.back();
-//            }
-//            else if(Army.size()!=0){
-//                 HumanAction(enemyInfo.armies[i].SN,Army.back());
-//            }
-//            else if(Building.size()!=0){
-//                 HumanAction(enemyInfo.armies[i].SN,Building.back());
-//            }
-//            timer[i]=g_frame;
-//        }
-//        else if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==DEFENSE&&ifAttack[i]==true){
-//            if(Defend.size()!=0){
-//                HumanAction(enemyInfo.armies[i].SN,Defend.back());
-//                timer[i]=g_frame;
-//            }
-//        }
-//        else if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==ATTACK&&ifAttack[i]==true){
-//            if(Building.size()!=0){
-//                             HumanAction(enemyInfo.armies[i].SN,Building.back());
-//                        }
-//            else if(Army.size()!=0){
-//                 HumanAction(enemyInfo.armies[i].SN,Army.back());
-//            }
-//            else if(Farmer.size()!=0){
-//                HumanAction(enemyInfo.armies[i].SN,Farmer.back());
-//            }
-//            timer[i]=g_frame;
-//        }
-//    }
+    for(int i=0;i<enemyInfo.armies.size();i++){
+        if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==AROUND&&ifAttack[i]==true){
+            if(enemyInfo.armies[i].Sort!=7){
+            if(Farmer.size()!=0){
+                HumanAction(enemyInfo.armies[i].SN,Farmer.back());
+            }
+            else if(Army.size()!=0){
+                 HumanAction(enemyInfo.armies[i].SN,Army.back());
+            }
+            else if(Building.size()!=0){
+                 HumanAction(enemyInfo.armies[i].SN,Building.back());
+            }}
+            else if(enemyInfo.armies[i].Sort==7){
+                if(Boat.size()!=0){
+                    HumanAction(enemyInfo.armies[i].SN,Boat.back());
+                    qDebug()<<"山海";
+                }
+                else if(Ship.size()!=0){
+                    HumanAction(enemyInfo.armies[i].SN,Ship.back());
+                }
+            }
+            timer[i]=g_frame;
+        }
+        else if(g_frame-timer[i]>250&&enemyInfo.armies[i].status==DEFENSE&&ifAttack[i]==true){
+            if(Defend.size()!=0){
+                HumanAction(enemyInfo.armies[i].SN,Defend.back());
+                timer[i]=g_frame;
+            }
+        }
+        else if(g_frame-timer[i]>125&&enemyInfo.armies[i].status==ATTACK&&ifAttack[i]==true){
+            if(Building.size()!=0){
+                             HumanAction(enemyInfo.armies[i].SN,Building.back());
+                        }
+            else if(Army.size()!=0){
+                 HumanAction(enemyInfo.armies[i].SN,Army.back());
+            }
+            else if(Farmer.size()!=0){
+                HumanAction(enemyInfo.armies[i].SN,Farmer.back());
+            }
+            timer[i]=g_frame;
+        }
+    }
 
 }
 void check(){
@@ -214,10 +242,166 @@ void check(){
         }
     }
 }
-void EnemyAI::processData() {
-
+void ifDead(vector <int> x,int sort){
+    if(x.size()>0)
+    switch(sort){
+    case VECTORFARMER:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
+                if(x[i]==enemyInfo.enemy_farmers[j].SN&&enemyInfo.enemy_farmers[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+    case VECTORARMY:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_armies.size();j++){
+                if(x[i]==enemyInfo.enemy_armies[j].SN&&enemyInfo.enemy_armies[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+     case VECTORBOAT:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_farmers.size();j++){
+                if(x[i]==enemyInfo.enemy_farmers[j].SN&&enemyInfo.enemy_farmers[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+     case VECTORSHIP:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_armies.size();j++){
+                if(x[i]==enemyInfo.enemy_armies[j].SN&&enemyInfo.enemy_armies[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+     case VECTORARROWTOWER:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
+                if(x[i]==enemyInfo.enemy_buildings[j].SN&&enemyInfo.enemy_buildings[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+     case VECTORBUILDING:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_buildings.size();j++){
+                if(x[i]==enemyInfo.enemy_buildings[j].SN&&enemyInfo.enemy_buildings[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+     case VECTORDEFEND:
+        for(int i=0;i<x.size();i++){
+            for(int j=0;j<enemyInfo.enemy_armies.size();j++){
+                if(x[i]==enemyInfo.enemy_armies[j].SN&&enemyInfo.enemy_armies[j].Blood==0)
+                    x.erase(x.begin()+i);
+            }
+        }
+}
 
 }
+void EnemyAI::processData() {
+    enemyInfo=getInfo();
+    int nowState_Army=0;
+     //军队数据初始化
+     if(g_frame==50){
+         sum=enemyInfo.armies.size();
+         for(int i=0;i<enemyInfo.armies.size();i++){
+             timerv.push_back(0);
+             ifAttackv.push_back(false);
+            }
+     }
+        if(g_frame>50){
+            check();
+            Around();
+            seekenemy();
+            ifATTACK();
+            Attack();
+              }
+        if(g_frame>50&&g_frame%15==0){
+            ifDead(Farmer,VECTORFARMER);
+            ifDead(Army,VECTORARMY);
+            ifDead(Boat,VECTORBOAT);
+            ifDead(Ship,VECTORSHIP);
+            ifDead(Defend,VECTORDEFEND);
+            ifDead(Arrowtower,VECTORARROWTOWER);
+            ifDead(Building,VECTORBUILDING);
+        }
+if(Boat.size()!=0) qDebug()<<g_frame;
+}
+
+//    if(mode==5){
+//            for(int i=0;i<enemyInfo.enemy_armies.size();i++){
+//                if(enemyInfo.enemy_armies[i].Sort==7)
+//                armystate[i]==ATTACK;
+//            }
+//        }
+//        if(mode==6){
+//            for(int i=0;i<enemyInfo.enemy_armies.size();i++){
+//                if(enemyInfo.enemy_armies[i].Sort!=7)
+//                armystate[i]==ATTACK;
+//            }
+//        }
+//        if(g_frame%50==0){
+//            seekenemy();
+//        }
+//        //陆地巡逻
+//        if(g_frame==MODE1){
+//        for(int i=0;i<enemyInfo.armies.size();i++){
+//            if(enemyInfo.armies[i].Sort==3){
+//                armystate[i]=AROUND;
+//                }
+//        }
+//        for(int i=0;i<enemyInfo.armies.size();i++){
+//            if(enemyInfo.armies[i].Sort==7){
+//                armystate[i]=AROUND;
+//                break;
+//            }
+//        }
+//        }
+//        for(int i=0;i<enemyInfo.armies.size();i++){
+//        if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==0&&enemyInfo.armies[i].Sort==3){
+//            timer[i]=g_frame;
+//            if(a%2==0)
+//            HumanMove(enemyInfo.armies[i].SN,Pathcar[Pathn][0]*35,Pathcar[Pathn][1]*35);
+//            else HumanMove(enemyInfo.armies[i].SN,(Pathcar[Pathn][0]*35)-1,(Pathcar[Pathn][1]*35)-1);
+//    //        else HumanMove(enemyInfo.armies[i].SN,Path[Pathn][0]*33,Path[Pathn][1]*33);
+//            AroundLock[i]=1;
+//            a++;
+//        }
+//        else if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==0&&enemyInfo.armies[i].Sort==7){
+//             timer[i]=g_frame;
+//             HumanMove(enemyInfo.armies[i].SN,(Pathboat[Pathb][0])*35,(Pathboat[Pathb][1])*35);
+//             AroundLock[i]=1;
+//             c++;
+//        }
+//        else if(mode>=1&&mode<4&&armystate[i]==AROUND&&AroundLock[i]==1){
+//            if(g_frame-timer[i]>400){
+//                AroundLock[i]=0;
+//            }
+//        }
+//        if(a-b==2){
+//            b=a;
+//            Pathn+=Pathnset;
+//            if(Pathn==12||Pathn==0){
+//            Pathnset=-1*Pathnset;
+//            Pathn+=Pathnset;
+//            }
+//        }
+//        if(c-d==1){
+//            d=c;
+//            Pathb+=Pathbset;
+//            if(Pathb==12||Pathb==0){
+//            Pathbset=-1*Pathbset;
+//            Pathb+=Pathbset;
+//            }
+
+//        }
+
+//        }
+//        for(int i=0;i<enemyInfo.armies.size();i++){
+//            if(armystate[i]==AROUND){aroundseekenemy(i);
+//            qDebug()<<"success"<<g_frame;}
+//        }
+
+
      //更新波数
 //     if(g_frame==MODE4) mode=4;
 //     else if(g_frame==MODE3) mode=3;
@@ -785,7 +969,6 @@ void EnemyAI::processData() {
  //    Btarget[1]=0;
  //    return;
      /*###########YOUR CODE ENDS HERE###########*/
-
 void EnemyAI::onWaveAttack(int wave) {
     // TODO: 发起第wave波进攻
     if (wave < 1 || wave > 3) {

@@ -605,7 +605,7 @@ void UsrAI::processData()
     if (info.GameFrame % 5 != 0) {
         return;
     }
-
+    if(g_frame==15)qDebug()<<"1";
     updateInfo();
     // outputMap();
 
