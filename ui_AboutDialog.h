@@ -31,11 +31,13 @@ public:
     QWidget *scrollAreaWidgetContents;
     QGridLayout *gridLayout;
     QLabel *nameLabel;
+    QLabel *member2;
     QLabel *versionLabel;
     QLabel *teacherLabel;
     QLabel *memberLabel;
     QLabel *member1;
-    QLabel *member2;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label;
 
     void setupUi(QDialog *AboutDialog)
     {
@@ -49,7 +51,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 580, 480));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 586, 486));
         gridLayout = new QGridLayout(scrollAreaWidgetContents);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         nameLabel = new QLabel(scrollAreaWidgetContents);
@@ -61,6 +63,12 @@ public:
         nameLabel->setFont(font);
 
         gridLayout->addWidget(nameLabel, 0, 0, 1, 1);
+
+        member2 = new QLabel(scrollAreaWidgetContents);
+        member2->setObjectName(QStringLiteral("member2"));
+        member2->setFont(font);
+
+        gridLayout->addWidget(member2, 4, 0, 1, 2);
 
         versionLabel = new QLabel(scrollAreaWidgetContents);
         versionLabel->setObjectName(QStringLiteral("versionLabel"));
@@ -86,11 +94,22 @@ public:
 
         gridLayout->addWidget(member1, 3, 0, 1, 2);
 
-        member2 = new QLabel(scrollAreaWidgetContents);
-        member2->setObjectName(QStringLiteral("member2"));
-        member2->setFont(font);
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        label = new QLabel(scrollAreaWidgetContents);
+        label->setObjectName(QStringLiteral("label"));
+        QFont font1;
+        font1.setFamily(QStringLiteral("Agency FB"));
+        font1.setBold(true);
+        font1.setItalic(false);
+        font1.setUnderline(false);
+        font1.setWeight(75);
+        label->setFont(font1);
 
-        gridLayout->addWidget(member2, 4, 0, 1, 2);
+        horizontalLayout_2->addWidget(label);
+
+
+        gridLayout->addLayout(horizontalLayout_2, 5, 0, 1, 1);
 
         scrollArea->setWidget(scrollAreaWidgetContents);
 
@@ -106,11 +125,12 @@ public:
     {
         AboutDialog->setWindowTitle(QApplication::translate("AboutDialog", "Dialog", Q_NULLPTR));
         nameLabel->setText(QApplication::translate("AboutDialog", "\351\241\271\347\233\256\345\220\215\347\247\260\357\274\232", Q_NULLPTR));
+        member2->setText(QApplication::translate("AboutDialog", "v1.10-v2.02g\357\274\232         \346\262\210\345\215\223\350\257\272  \350\203\241\344\270\200\346\245\240  \350\214\203\345\256\207\346\201\222", Q_NULLPTR));
         versionLabel->setText(QApplication::translate("AboutDialog", "\345\275\223\345\211\215\347\211\210\346\234\254\357\274\232", Q_NULLPTR));
         teacherLabel->setText(QApplication::translate("AboutDialog", "\346\214\207\345\257\274\350\200\201\345\270\210\357\274\232  \345\250\204\351\234\207", Q_NULLPTR));
         memberLabel->setText(QApplication::translate("AboutDialog", "\345\274\200\345\217\221\344\272\272\345\221\230\357\274\232", Q_NULLPTR));
         member1->setText(QApplication::translate("AboutDialog", "v0.99-v1.03gbeta\357\274\232  \350\265\265\345\256\207\351\243\236  \345\272\204\346\230\216\345\223\262  \345\274\240\345\256\207\345\270\206", Q_NULLPTR));
-        member2->setText(QApplication::translate("AboutDialog", "v1.10-v2.02g\357\274\232         \346\262\210\345\215\223\350\257\272  \350\203\241\344\270\200\346\245\240  \350\214\203\345\256\207\346\201\222", Q_NULLPTR));
+        label->setText(QApplication::translate("AboutDialog", "v2.02g-v3.0            \346\261\252\347\253\213\346\264\252 \346\233\276\346\226\207\350\275\251 \345\255\231\346\235\250", Q_NULLPTR));
     } // retranslateUi
 
 };

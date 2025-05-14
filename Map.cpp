@@ -1412,14 +1412,15 @@ vector<pair<Point,int>> Map::findBlock_Free(Coordinate* object , int disLen, boo
     return ans;
 }
 
-vector<Point> Map::findBlock_Free(Point blockPoint, int lenth)
+vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool land)
 {
     int blockDR = blockPoint.x, blockUR = blockPoint.y;
 
     int bDRL = max(0,blockDR-lenth) , bURD = max(0,blockUR - lenth);
     int bDRR = min(blockDR+1+lenth, MAP_L) , bURU = min(blockUR+1+lenth, MAP_U);
 
-    vector<Point> Block_Free;
+    static vector<Point> Block_Free;
+    Block_Free.clear();
     Point tempPoint;
 
     //在给定范围内找寻没有障碍物的格子
@@ -1428,8 +1429,8 @@ vector<Point> Map::findBlock_Free(Point blockPoint, int lenth)
         for(int y = bURD; y<bURU;y++)
         {
             if(x == blockDR && y==blockUR) continue;
-
-            if(map_Object[x][y].empty())
+            bool ocean=cell[x][y].getMapType()==MAPTYPE_OCEAN;
+            if(map_Object[x][y].empty()&&(ocean^land))
             {
                 tempPoint.x = x;
                 tempPoint.y = y;

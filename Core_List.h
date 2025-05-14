@@ -109,7 +109,7 @@ private:
     void setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0);
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
-
+    bool JudgeMoveObjIsShip(MoveObject*moveOb);
     pair<stack<Point>,array<double,2>> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate*object,Coordinate* goalOb);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}

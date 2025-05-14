@@ -20,6 +20,7 @@ Core::Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent
 
 void Core::gameUpdate()
 {
+
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
@@ -975,7 +976,7 @@ void Core::manageOrder(int id)
 {
     ins* NowIns;
     tagGame* tagAIGame;
-    
+    Player*self=player[id];
     if(id == 0) {
         NowIns = &UsrIns;
         tagAIGame = &tagUsrGame;
@@ -984,9 +985,11 @@ void Core::manageOrder(int id)
         NowIns = &EnemyIns;
         tagAIGame = &tagEnemyGame;
     }
-    
     NowIns->lock.lock();
-    while(!NowIns->instructions.empty()) {
+    //获取可以发起指令的所有对象数量(也就是说，就算ai给再多指令，我每一帧只处理ObjCnt这么多指令)
+    int ObjCnt=self->build.size()+self->human.size();//目前貌似只有建筑和人才可以当指令主体
+    //
+    while(!NowIns->instructions.empty()&&ObjCnt--) {
         instruction cur = NowIns->instructions.front();
         NowIns->instructions.pop();
         Coordinate* self = cur.self;

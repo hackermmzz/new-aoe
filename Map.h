@@ -62,7 +62,7 @@ public:
     bool isFlat(Coordinate* judOb);
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
     vector<pair<Point,int>> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
-    vector<Point> findBlock_Free(Point blockPoint, int lenth);
+    vector<Point>& findBlock_Free(Point blockPoint, int lenth,bool land);
     vector<Point> findBlock_Flat(int disLen = 1);
 
     bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }

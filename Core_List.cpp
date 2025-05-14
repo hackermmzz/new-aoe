@@ -1299,7 +1299,6 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
 void Core_List::crashHandle(MoveObject* moveOb)
 {
     Point PreviousPoint, nextBlockPoint;
-    vector<Point> blockLab_canMove;
 
     //处理碰撞
     moveOb->GoBackLU();
@@ -1322,7 +1321,10 @@ void Core_List::crashHandle(MoveObject* moveOb)
 
         if(moveOb->is_MoveFirstStep() || PreviousPoint == nextBlockPoint)
         {
-            blockLab_canMove = theMap->findBlock_Free(nextBlockPoint, 1);
+            //判断对象是否是船
+            bool ship=JudgeMoveObjIsShip(moveOb);
+            //
+            auto&blockLab_canMove = theMap->findBlock_Free(nextBlockPoint, 1,!ship);
 
             if(blockLab_canMove.size()) PreviousPoint = blockLab_canMove[rand()%blockLab_canMove.size()];
         }
@@ -1348,6 +1350,25 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
         if(rand() % 8 > 0) moveOb->setPath(stack<Point>(),moveOb->getDR(),moveOb->getUR());
         if(!moveOb->isStand()) moveOb->setPreStand();
     }
+}
+
+bool Core_List::JudgeMoveObjIsShip(MoveObject *moveOb)
+{
+    bool ship=0;
+    {
+        Human*human=0;moveOb->printer_ToHuman((void**)&human);
+        if(human){
+            if(human->getSort()==SORT_ARMY){
+                Army*army=(Army*)human;
+                if(army->getNum()==AT_SHIP)ship=1;
+            }else if(human->getSort()==SORT_FARMER){
+                Farmer*farmer=(Farmer*)human;
+                if(farmer->get_farmerType()==FARMERTYPE_SAILING||farmer->get_farmerType()==FARMERTYPE_WOOD_BOAT)
+                    ship=1;
+            }
+        }
+    }
+    return ship;
 }
 
 pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination,Coordinate*object, Coordinate* goalOb)

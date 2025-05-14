@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>580</width>
-        <height>480</height>
+        <width>586</width>
+        <height>486</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout">
@@ -40,6 +40,20 @@
          </property>
          <property name="text">
           <string>项目名称：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QLabel" name="member2">
+         <property name="font">
+          <font>
+           <family>Agency FB</family>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>v1.10-v2.02g：         沈卓诺  胡一楠  范宇恒</string>
          </property>
         </widget>
        </item>
@@ -99,19 +113,25 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QLabel" name="member2">
-         <property name="font">
-          <font>
-           <family>Agency FB</family>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>v1.10-v2.02g：         沈卓诺  胡一楠  范宇恒</string>
-         </property>
-        </widget>
+       <item row="5" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <family>Agency FB</family>
+             <weight>75</weight>
+             <italic>false</italic>
+             <bold>true</bold>
+             <underline>false</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>v2.02g-v3.0            汪立洪 曾文轩 孙杨</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
