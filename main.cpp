@@ -2,9 +2,10 @@
 #include <QApplication>
 #include <QMap>
 #include "Logger.h"
-
-int main(int argc, char* argv[])
+////////////////
+int main(int argc, char *argv[])
 {
+    //
     QApplication a(argc, argv);
     QResource::registerResource("./res.rcc");
     Logger::init(Logger::LogLevel::Debug);

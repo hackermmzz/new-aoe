@@ -25,7 +25,6 @@ void Core_List::update()
 //    timer4.start();
 
     manageRelationList();
-
 //    //若想知道微秒级的运行时间
 //    qint64 elapsedNanoseconds = timer4.nsecsElapsed();
 //    timerStand = elapsedNanoseconds/1000;
@@ -326,6 +325,7 @@ void Core_List::suspendRelation(Coordinate * object)
 
 void Core_List::manageRelationList()
 {
+
     Coordinate* object1;
     Coordinate* object2;
 
@@ -376,7 +376,7 @@ void Core_List::manageRelationList()
             //判断是否需要切换当前阶段
             if( nowPhaseNum < thisDetailEven.phaseAmount && recordCondition->condition(object1,thisRelation , recordCondition->variableArgu,recordCondition->isNegation))
                 nowPhaseNum = thisDetailEven.changeLinkedList[nowPhaseNum];
-
+            //
             //实际执行行动
             if(nowPhaseNum == exePhaseNum)  //nowphase变化后，防止提前行动。变化后的行动在下一帧开始做
             {
@@ -449,18 +449,40 @@ void Core_List::manageRelation_deleteGoalOb( Coordinate* goalObject )
     //遍历整个动态表，删除goalObject
     while(iterNow != iterEnd)
     {       
+        bool flag=0;
         if(iterNow->second.goalObject == goalObject)
         {
+            flag=1;
             iterNow->second.update_GoalPoint();
             iterNow->second.goalObject = NULL;
         }
 
         if(iterNow->second.alterOb == goalObject)
         {
+            flag=1;
             iterNow->second.update_Attrib_alter();
             iterNow->second.init_AlterOb();
         }
-
+        //////把这个关系表直接取消
+        if(flag)
+        {
+            Coordinate*coord=iterNow->first;
+            //对于飞行物类别,不需要这样,因为他要射到目的地才行
+            void*missile=0;
+            coord->printer_ToMissile((void**)(&missile));
+            if(missile)continue;
+            iterNow->second.isExist=false;
+            //对于Human类对象,需要对其路径重置
+            Human*obj=0;
+            coord->printer_ToHuman((void**)(&obj));
+            if(obj){
+                obj->setPosForced(obj->getDR(),obj->getUR());
+                obj->setPreStand();
+                obj->setNowState(MOVEOBJECT_STATE_STAND);
+                obj->setTransported(0);
+            }
+        }
+        //////
         iterNow++;
     }
 }
@@ -905,6 +927,7 @@ void Core_List::object_Gather(Coordinate* object1 , Coordinate* object2)
 
 void Core_List::object_Transport(Coordinate *object1, Coordinate *object2)
 {
+    //
     Human*human1=(Human*)object1;
     Farmer*human2=(Farmer*)object2;
     if(human2->getResourceNowHave()<5){
@@ -1264,6 +1287,7 @@ void Core_List::deal_RangeAttack( Coordinate* attacker , Coordinate* attackee )
 //寻路相关
 void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0)
 {
+
     //设置起点
     Point start = Point(tranBlockDR(moveOb->getDR()),tranBlockUR(moveOb->getUR()));
     Point destination =  Point(tranBlockDR(DR0),tranBlockUR(UR0));
@@ -1371,8 +1395,9 @@ bool Core_List::JudgeMoveObjIsShip(MoveObject *moveOb)
     return ship;
 }
 
-pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, const Point &destination,Coordinate*object, Coordinate* goalOb)
+pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[MAP_L][MAP_U], Map *map, const Point &start, Point destination,Coordinate*object, Coordinate* goalOb)
 {
+    /////////////////////////////////////////////////////////
     static unsigned long long mask=0;
     using Data=array<int,2>;
     //8个移动方向 <4为斜线方向，>=4为水平竖直方向
@@ -1381,9 +1406,17 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     static vector<vector<Data>> preNode(MAP_L+1,vector<Data>(MAP_U+1));
     static vector<vector<float>>mndis(MAP_L+1,vector<float>(MAP_U+1));
     static vector<Data>vis;
-    static float Sqrt2=sqrt(2.0);
+    static double Sqrt2=sqrt(2.0);
+    static vector<Data>goalPoint;
+    /////////////////////////////////////////////////////////启发函数
+    static auto PredictDistance=[&](const Data&start,const Data&end)->double{
+        return abs(end[0]-start[0])+abs(end[1]-start[1]);
+    };
+    /////////////////////////////////////////////////////////
+    goalPoint.clear();
     stack<Point> path;
     bool meetGoal = false;
+    double dr0=1e9,ur0=1e9;
     ++mask;//把寻路掩码递增1
     //initMap_HaveJud();
     //memset(goalMap,0,sizeof(goalMap));
@@ -1403,6 +1436,23 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
             }
         }
     }
+    //预处理能否到达
+    Point end=goalOb?Point(goalOb->getBlockDR(),goalOb->getBlockUR()):Point(destination.x,destination.y);
+    Point res=GetSameBlockInLine(start,end);
+    //如果res!=end，说明不可达，也就是目的地变成res了
+    if(res.x!=end.x||res.y!=end.y)
+    {
+        dr0=(res.x+0.5)*BLOCKSIDELENGTH;
+        ur0=(res.y+0.5)*BLOCKSIDELENGTH;
+        destination=res,goalOb=0;
+    }
+    //判断目的地和起点是否位于同一个连通块,如果不在，那么正向寻找一个最优点
+    if(map->blockIndex[start.x][start.y]!=map->blockIndex[res.x][res.y]){
+        Point res=GetSameBlockInLineNearest(start,end);
+        dr0=(res.x+0.5)*BLOCKSIDELENGTH;
+        ur0=(res.y+0.5)*BLOCKSIDELENGTH;
+        destination=res,goalOb=0;
+    }
     //起始点标记
     map_HaveJud[start.x][start.y] = mask;
     bool isNoPath = true;
@@ -1415,6 +1465,7 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
             ix = p.x;
             iy = p.y;
             goalMap[ix][iy] = mask;
+            goalPoint.push_back({ix,iy});
             if(!isNoPath)
                 continue;
             for(int i = 4; i<8; i++)
@@ -1436,7 +1487,7 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
         ix = destination.x;
         iy = destination.y;
         goalMap[ix][iy] = mask;
-
+        goalPoint.push_back({ix,iy});
         for(int i = 4; i<8; i++)
         {
             jx = ix + dire[i].x;
@@ -1458,8 +1509,8 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     {
         meetGoal = true;
     }
-    using Info=tuple<float,int,int>;
-    priority_queue<Info,vector<Info>,greater<Info>>qu;//这里我采用dijstra算法寻路,因为很明显斜着的路劲和直走的路径的全值是不一样的
+    using Info=tuple<double,int,int>;
+    priority_queue<Info,vector<Info>,greater<Info>>qu;//这里我采用dijstra+A*算法寻路,因为很明显斜着的路劲和直走的路径的全值是不一样的
     qu.push(Info{0.0f,start.x,start.y});
     mndis[start.x][start.y]=0.0;
     Data targetPoint={start.x,start.y};
@@ -1469,24 +1520,29 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     while(!qu.empty()&&!meetGoal)
     {
         auto p=qu.top();
-        float d=get<0>(p);
+        auto d=get<0>(p);
         int x=get<1>(p),y=get<2>(p);
         qu.pop();
-        if(d>mndis[x][y])continue;
+        //
         for(int i=0;i<8;++i){
             auto&offset=dire[i];
             int xx=x+offset.x,yy=y+offset.y;
             if(xx>=0&&yy>=0&&xx<MAP_L&&yy<MAP_U){
                 Block&block=theMap->cell[xx][yy];
                 bool isLand=block.getMapType()!=MAPTYPE_OCEAN;
-                float dd=d+(i<4?Sqrt2:1.0f);
+                float dd=mndis[x][y]+(i<4?Sqrt2:1.0);
                 //判断格子是否可走、未走过
                 //斜线方向需要多判断马脚操作
                 if(isLand^isShip){
                     if((map_HaveJud[xx][yy]!=mask||mndis[xx][yy]>dd)&&!(findPathMap[xx][yy] && goalMap[xx][yy]!=mask ||i<4 && (findPathMap[xx][y]||findPathMap[x][yy]))){
                         preNode[xx][yy]={x,y};
-                        qu.push(Info{dd,xx,yy});
                         mndis[xx][yy]=dd;
+                        //算出预估最小值
+                        Data start={xx,yy};
+                        double mnPd=1e9;
+                        for(auto&tp:goalPoint)mnPd=min(mnPd,PredictDistance(start,tp));
+                        //
+                        qu.push(Info{dd+mnPd,xx,yy});
                         vis.push_back({xx,yy});
                         map_HaveJud[xx][yy]=mask;
                         if(goalMap[xx][yy]==mask){
@@ -1500,8 +1556,6 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
         }
         if(meetGoal)break;
     }
-
-    double dr0=1e9,ur0=1e9;
     {
         //如果没有能有一条合法的路径到终点
         if(!meetGoal){
@@ -1537,11 +1591,15 @@ pair<stack<Point>,array<double,2>> Core_List::findPath(const int (&findPathMap)[
     return {path,{dr0,ur0}};
 }
 
-Point Core_List::GetCoastInLine(const Point &point0, const Point &point1)
+Point Core_List::GetSameBlockInLine(const Point &point0, const Point &point1)
 {
-    if(checkIsCoast(point0.x,point0.y))return point0;
-    //以下是直线段的绘制
-    int x1 = point0.x, y1 = point0.y, x2 = point1.x, y2 = point1.y;
+    //保证传入的点都在范围之内
+    bool ocean=theMap->cell[point0.x][point0.y].getMapType()==MAPTYPE_OCEAN;
+    bool targetOcean=theMap->cell[point1.x][point1.y].getMapType()==MAPTYPE_OCEAN;
+    //如果起点和终点都是同一种地形类型，直接返回
+    if(ocean==targetOcean)return point1;
+    //寻找从终点出发与目的地最近的合法点
+    int x1 = point1.x, y1 = point1.y, x2 = point0.x, y2 = point0.y;
     int dx = x2 - x1, dy = y2 - y1;
     int s1 = (dx >= 0 ? 1 : -1), s2 = (dy >= 0 ? 1 : -1);
     dx = abs(dx);
@@ -1555,7 +1613,11 @@ Point Core_List::GetCoastInLine(const Point &point0, const Point &point1)
             if (e >= 0)//y方向增量为1
                 xbase += s1, ybase += s2, e += deta2;
             else xbase += s1, e += deta1;
-            if(checkIsCoast(xbase,ybase))return {xbase,ybase};
+            //检查如果和起点类型一致，那么就可以返回了
+            if(!(xbase<0||xbase>=MAP_L||ybase<0||ybase>=MAP_U)){
+                bool flag=theMap->cell[xbase][ybase].getMapType()==MAPTYPE_OCEAN;
+                if(flag==ocean)return {xbase,ybase};
+            }
         }
 
     }
@@ -1567,9 +1629,63 @@ Point Core_List::GetCoastInLine(const Point &point0, const Point &point1)
             if (e >= 0)//x方向增量为1
                 xbase += s1, ybase += s2, e += deta2;
             else ybase += s2, e += deta1;
-            if(checkIsCoast(xbase,ybase))return {xbase,ybase};
+            //检查如果和起点类型一致，那么就可以返回了
+            if(!(xbase<0||xbase>=MAP_L||ybase<0||ybase>=MAP_U)){
+                bool flag=theMap->cell[xbase][ybase].getMapType()==MAPTYPE_OCEAN;
+                if(flag==ocean)return {xbase,ybase};
+            }
         }
     }
+
+    return point0;
+}
+
+Point Core_List::GetSameBlockInLineNearest(const Point &point0, const Point &point1)
+{
+    //保证传入的点都在范围之内,并且Point0和point1他们所属的块不一样
+    bool ocean=theMap->cell[point0.x][point0.y].getMapType()==MAPTYPE_OCEAN;
+    //寻找从终点出发与目的地最近的合法点
+    int x1 = point0.x, y1 = point0.y, x2 = point1.x, y2 = point1.y;
+    int dx = x2 - x1, dy = y2 - y1;
+    int s1 = (dx >= 0 ? 1 : -1), s2 = (dy >= 0 ? 1 : -1);
+    dx = abs(dx);
+    dy = abs(dy);
+    int xbase = x1, ybase = y1;
+    int xpre,ypre;
+    if (dx >= dy)
+    {
+        int e = (dy << 1) - dx, deta1 = dy << 1, deta2 = (dy - dx) << 1;
+        while (xbase != x2)
+        {
+            xpre=xbase,ypre=ybase;
+            if (e >= 0)//y方向增量为1
+                xbase += s1, ybase += s2, e += deta2;
+            else xbase += s1, e += deta1;
+            //检查如果下一个点和起点类型不一致，那么可以返回了
+            if(!(xbase<0||xbase>=MAP_L||ybase<0||ybase>=MAP_U)){
+                bool flag=theMap->cell[xbase][ybase].getMapType()==MAPTYPE_OCEAN;
+                if(flag!=ocean)return {xpre,ypre};
+            }
+        }
+
+    }
+    else
+    {
+        int e = (dx << 1) - dy, deta1 = dx << 1, deta2 = (dx - dy) << 1;
+        while (ybase != y2)
+        {
+            xpre=xbase,ypre=ybase;
+            if (e >= 0)//x方向增量为1
+                xbase += s1, ybase += s2, e += deta2;
+            else ybase += s2, e += deta1;
+            //检查如果下一个点和起点类型不一致，那么可以返回了
+            if(!(xbase<0||xbase>=MAP_L||ybase<0||ybase>=MAP_U)){
+                bool flag=theMap->cell[xbase][ybase].getMapType()==MAPTYPE_OCEAN;
+                if(flag!=ocean)return {xpre,ypre};
+            }
+        }
+    }
+
     return point1;
 }
 

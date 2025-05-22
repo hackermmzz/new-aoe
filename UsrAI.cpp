@@ -600,6 +600,10 @@ void find_near_land(int x, int y, int* x_out, int* y_out) {
 
 void UsrAI::processData(){
 
+
+void UsrAI::processData()
+{
+  //  return;
     cheatAction();
    // return;
     info = getInfo();

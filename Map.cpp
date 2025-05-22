@@ -1111,6 +1111,37 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
         block.setOffsetY(2);
 }
 
+void Map::divideTheMap()
+{
+    vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
+    int idx=0;
+    function<void(int i,int j)>dfs=[&](int i,int j)->void{
+            blockIndex[i][j]=idx;
+            bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
+            static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
+            for(auto*o:off){
+                int ii=o[0]+i,jj=o[1]+j;
+                if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
+                    if(!vis[ii][jj]){
+                        bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
+                        if(flag1==flag){
+                            vis[ii][jj]=1;
+                            dfs(ii,jj);
+                        }
+                    }
+                }
+            }
+    };
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            if(!vis[i][j]){
+                dfs(i,j);
+                ++idx;
+            }
+        }
+    }
+}
+
 void Map::loadBarrierMap(bool absolute)
 {
     clearBarrierMap();
@@ -2269,6 +2300,7 @@ bool Map::CheckIsNearOcean(int x, int y)
 void Map::init(int MapJudge) {
     InitCell(0, MAP_EXPLORE, true);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText(MapJudge);  //载入地图
+    divideTheMap();                 //把地图化分成一个一个连通块
     Player&enemy=(*player[1]);
     enemy.addArmyAROUND(3,1800,30,1,300,10000,1800,800);
     enemy.addArmyAROUND(3,1700,1000,1,300,10000,1500,1800);

@@ -20,7 +20,6 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
 
 void Core::gameUpdate()
 {
-
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
@@ -44,6 +43,7 @@ void Core::gameUpdate()
     manageOrder(1);
 
     interactionList->update();
+
 }
 
 void Core::updateByObject()
@@ -1131,9 +1131,11 @@ void Core::manageOrder(int id)
             qInfo() << id << "号玩家指令：" + cur.id << "执行成功" << endl;
         }
     }
-
+    NowIns->instructions=std::queue<instruction>();
     NowIns->lock.unlock();
 }
+
+
 
 
 int Core::deleteSelf(Coordinate* object) //删除对象，返回错误码
