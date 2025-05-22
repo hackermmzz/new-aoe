@@ -32,7 +32,6 @@
 
 #include <Windows.h>
 #include <time.h>
-#include "Logger.h"
 #include "digitalConfig.h"
 
 
@@ -273,7 +272,7 @@
 #define HUMAN_STATE_JUSTWALKING 14
 #define HUMAN_STATE_TRANSPORTED 15
 
-/********** 人物手持资源种类 **********/
+ /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
 #define HUMAN_STOCKFOOD 2
 #define HUMAN_STONE 3
@@ -305,7 +304,7 @@
 #define ACTION_INVALID_BUILDINGNUM -5
 #define ACTION_INVALID_RESOURCE -6
 
-//控制对象被删除
+ //控制对象被删除
 #define ACTION_INVALID_NULLWORKER -80
 //目标对象已被删除
 #define ACTION_INVALID_NULLGOALOBJECT -81
@@ -360,7 +359,7 @@
 #define RESOURCE_GOLD 99
 #define RESOURCE_FISH 119
 
-/********** 时代编号 **********/
+ /********** 时代编号 **********/
 #define CIVILIZATION_STONEAGE 1
 #define CIVILIZATION_TOOLAGE 2
 #define CIVILIZATION_BRONZEAGE 3
