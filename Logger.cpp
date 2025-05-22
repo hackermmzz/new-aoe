@@ -59,6 +59,7 @@ void Logger::clean() {
 }
 
 void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+    return;
     // Only log messages with the specified log level or higher
     if (static_cast<LogLevel>(type) < currentLogLevel) {
         return;

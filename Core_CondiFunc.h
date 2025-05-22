@@ -130,16 +130,34 @@ struct relation_Object
 
     void set_distance_AllowWork(){
         distance_AllowWork = goalObject->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
-        if(goalObject->getNum()==BUILDING_DOCK)
-            distance_AllowWork=goalObject->getSideLength();
-        else if(goalObject->getNum()==NUM_STATICRES_Fish)
-            distance_AllowWork=goalObject->getSideLength()*1.2;
+        //如果是建造船坞(首先得确定他是建筑)
+        {
+            void*obj=0;goalObject->printer_ToBuilding(&obj);
+            if(obj&&goalObject->getNum()==BUILDING_DOCK)
+            {
+                distance_AllowWork=goalObject->getSideLength();
+                return;
+            }
+        }
+        //如果是捕鱼(首先得确定他是静态资源)
+        {
+            void*obj=0;goalObject->printer_ToStaticRes(&obj);
+            if(obj&&goalObject->getNum()==NUM_STATICRES_Fish){
+                distance_AllowWork=goalObject->getSideLength()*1.2;
+                return;
+            }
+        }
     }
 
     void set_dis_AllowWork_alter(){
         dis_AllowWork_alter = alterOb->getSideLength()/2.0 + 2*CRASHBOX_SINGLEOB;
-        if(alterOb->getNum()==BUILDING_DOCK)
-            dis_AllowWork_alter=goalObject->getSideLength();
+        {
+            void*obj=0;alterOb->printer_ToBuilding(&obj);
+            if(obj&&alterOb->getNum()==BUILDING_DOCK){
+                dis_AllowWork_alter=goalObject->getSideLength();
+                return;
+            }
+        }
     }
 
     //如果goalObject是Resource的子类，则根据资源种类设置对应资源建筑的类型

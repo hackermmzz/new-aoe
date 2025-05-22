@@ -110,11 +110,12 @@ private:
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
     bool JudgeMoveObjIsShip(MoveObject*moveOb);
-    pair<stack<Point>,array<double,2>> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, const Point& destination , Coordinate*object,Coordinate* goalOb);
+    pair<stack<Point>,array<double,2>> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, Point destination , Coordinate*object,Coordinate* goalOb);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
-    Point GetCoastInLine(const Point&point0,const Point&point1);
+    Point GetSameBlockInLine(const Point&point0,const Point&point1);
+    Point GetSameBlockInLineNearest(const Point&point0,const Point&point1);
     bool checkIsCoast(int x,int y);
 };
 

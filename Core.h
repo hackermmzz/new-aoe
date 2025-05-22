@@ -10,7 +10,6 @@ public:
     SelectWidget *sel = nullptr;
     Map* theMap;    //地图信息
 
-
     Core(){}
     Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
 
@@ -59,7 +58,6 @@ public:
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加
-
 private:
     Player** player;    //player信息
     int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问

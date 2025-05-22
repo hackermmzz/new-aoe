@@ -6,6 +6,7 @@
 #include <QWaitCondition>
 #include "assert.h"
 #include "GlobalVariate.h"
+#include<iostream>
 extern bool is_cheatAction;
 
 class AI : public QThread

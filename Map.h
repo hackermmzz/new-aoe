@@ -43,6 +43,8 @@ public:
 
     void JudegCellType(int BlockDR,int BlockUR);
     void CalCellOffset(int BlockDR,int BlockUR);
+    //划分地图
+     void divideTheMap();
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
     using Type=int[MAP_L][MAP_U];
@@ -138,7 +140,8 @@ public:
         delete *iterDele;
         return staticres.erase(iterDele);
     }
-    
+    //每一个block所属的块的编号
+    int blockIndex[MAP_L][MAP_U];
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
     int intmap[72][72]={};
