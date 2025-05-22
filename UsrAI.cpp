@@ -10,6 +10,8 @@ int building_num[20]; // 包括未完工的建筑
 std::vector<int> building_sn[20]; // 只记录已完工的建筑
 std::vector<int> idle_human_sn;
 std::vector<int> human_sn;
+//std::vector<int> army_sn;
+//std::vector<int> battleship_sn;
 std::vector<int> idle_ship_sn;
 std::vector<int> ship_sn;
 std::vector<int> idle_settler_sn;
@@ -287,7 +289,9 @@ void updateInfo() {
     idle_ship_sn.clear();
     idle_settler_sn.clear();
     human_sn.clear();
+//    army_sn.clear();
     ship_sn.clear();
+//    battleship_sn.clear();
     settler.clear();
     for (auto& human : info.farmers) {
         mmap[human.BlockDR][human.BlockUR] = 'i';
@@ -594,14 +598,14 @@ void find_near_land(int x, int y, int* x_out, int* y_out) {
     *y_out = y;
 }
 
+void UsrAI::processData(){
 
-
-void UsrAI::processData()
-{
-
+    cheatAction();
    // return;
     info = getInfo();
     // 获取地图信息
+    if(info.Wood<10000||info.Gold<=10000||info.Meat<=10000||info.Stone<=10000)
+        cheatRes();
     if (info.GameFrame % 5 != 0) {
         return;
     }
@@ -614,6 +618,7 @@ void UsrAI::processData()
     tryBuildBuilding(BUILDING_GRANARY, BUILD_GRANARY_WOOD, 1, -1);
     tryBuildBuilding(BUILDING_MARKET, BUILD_MARKET_WOOD, 1, BUILDING_GRANARY);
     tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 1, -1); //对岸已经有一个仓库了
+//    tryBuildBuilding(BUILDING_ARMYCAMP,BUILD_ARMYCAMP_WOOD,1,-1);
     tryBuildBuilding(BUILDING_DOCK, BUILD_DOCK_WOOD, 2, -1); // 尝试建造码头
 
     //处理殖民行为
@@ -654,37 +659,60 @@ void UsrAI::processData()
                 BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
             }
         }
+//        if(building.Type==BUILDING_ARMYCAMP){
+//            if(building.Project==0&&)
+//        }
         if (building.Type == BUILDING_DOCK) {
-            if (building.Project == 0 && ship_sn.size() < 1 && info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {
-                BuildingAction(building.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
+//            if (building.Project == 0 && ship_sn.size() < 1 && info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {
+////                BuildingAction(building.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
+////                BuildingAction(building.SN,BUILDING_DOCK_CREATE_SAILING);
+//                BuildingAction(building.SN,BUILDING_DOCK_CREATE_SHIP);
+//            }
+            int tmp=0;
+            for(auto&army:info.armies){
+                if(mmap[army.BlockDR][army.BlockUR]=='o')
+                    tmp++;
             }
+            if(tmp<6)
+                BuildingAction(building.SN,BUILDING_DOCK_CREATE_SHIP);
         }
     }
     // cout<<"村民数量"<<info.farmers.size()<<endl;
     // cout<<"村民状态"<<info.farmers[0].NowState<<endl;
 
-    for (auto& ship : info.farmers) {
-        if (ship.FarmerSort == 1 && ship.NowState == HUMAN_STATE_IDLE) {
+//    for (auto& ship : info.farmers) {
+//        if (ship.FarmerSort == 1 && ship.NowState == HUMAN_STATE_IDLE) {
 
-            if (near_land(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0) {
-                // 如果船靠岸，并且载人小于5，则让村民上船
-                HumanAction(idle_human_sn.back(), ship.SN);
-                idle_human_sn.pop_back();
-            }
-            else if (ship.Resource == 5) {
-                // 如果船载满5人，则让船去目的地
-                int x, y;
-                find_opposite_land(ship.BlockDR, ship.BlockUR, &x, &y);  // 找到对岸
-                HumanMove(ship.SN, tran(x), tran(y));
-            }
-            else {
-                // 如果船载人小于5，并且不在岸上，则让船靠岸
-                if (!near_land(ship.BlockDR, ship.BlockUR)) {
-                    int x, y;
-                    find_near_land(center_x, center_y, &x, &y);
-                    HumanMove(ship.SN, tran(x), tran(y));
-                }
+//            if (near_land(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0) {
+//                // 如果船靠岸，并且载人小于5，则让村民上船
+//                HumanAction(idle_human_sn.back(), ship.SN);
+//                idle_human_sn.pop_back();
+//            }
+//            else if (ship.Resource == 5) {
+//                // 如果船载满5人，则让船去目的地
+//                int x, y;
+//                find_opposite_land(ship.BlockDR, ship.BlockUR, &x, &y);  // 找到对岸
+//                HumanMove(ship.SN, tran(x), tran(y));
+//            }
+//            else {
+//                // 如果船载人小于5，并且不在岸上，则让船靠岸
+//                if (!near_land(ship.BlockDR, ship.BlockUR)) {
+//                    int x, y;
+//                    find_near_land(center_x, center_y, &x, &y);
+//                    HumanMove(ship.SN, tran(x), tran(y));
+//                }
+//            }
+//        }
+//    }
+    //海战
+    for(auto& enemy:info.enemy_armies){
+        if(mmap[enemy.BlockDR][enemy.BlockUR]=='o')
+        for(auto &army:info.armies){
+            if(army.status==0){
+                HumanAction(army.SN,enemy.SN);
             }
         }
     }
+
 }
+
