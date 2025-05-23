@@ -725,20 +725,13 @@ void UsrAI::processData(){
 ////            }
 ////        }
 //    }
-    int sum=0,enemyship=0,sort7=0;
     int enemysortnum[100];
     for(int i=0;i<100;i++)
         enemysortnum[i]=0;
     for(auto it=info.enemy_armies.begin();it!=info.enemy_armies.end();it++){
-        sum++;
         enemysortnum[it->Sort]++;
-//        if(mmap[it->BlockDR][it->BlockUR]=='o')
-//            enemyship++;
-//        if(it->Sort==7)
-//            sort7++;
     }
     for(int i=0;i<100;i++){
-
         if(enemysortnum[i]!=0)
             cout<<"SORT:"<<i<<" NUM:"<<enemysortnum[i]<<"   ";
         }
