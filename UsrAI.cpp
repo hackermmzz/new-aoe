@@ -268,6 +268,9 @@ void updateInfo() {
 
     // 更新建筑信息
     for (auto& building : info.buildings) {
+        if (building.Type == BUILDING_MARKET) {
+            cout << "market" << building.SN << endl;
+        }
         building_num[building.Type]++;
         updateMap(building.Type, building.BlockDR, building.BlockUR);
         if (building.Percent == 100) {
@@ -598,15 +601,16 @@ void find_near_land(int x, int y, int* x_out, int* y_out) {
 
 void UsrAI::processData()
 {
-  //  return;
+    //  return;
     info = getInfo();
     // 获取地图信息
     if (info.GameFrame % 5 != 0) {
         return;
     }
-    if(g_frame==15)qDebug()<<"1";
     updateInfo();
     // outputMap();
+
+    cout << "market" << building_num[BUILDING_MARKET] << endl;
 
     // 按优先级尝试建造各种建筑
     tryBuildBuilding(BUILDING_HOME, BUILD_HOUSE_WOOD, 5, -1);
@@ -661,6 +665,7 @@ void UsrAI::processData()
     }
     // cout<<"村民数量"<<info.farmers.size()<<endl;
     // cout<<"村民状态"<<info.farmers[0].NowState<<endl;
+
 
     for (auto& ship : info.farmers) {
         if (ship.FarmerSort == 1 && ship.NowState == HUMAN_STATE_IDLE) {

@@ -11,7 +11,8 @@
     "qwaitcondition": "cpp",
     "qelapsedtimer": "cpp",
     "qthread": "cpp",
-    "qsoundeffect": "cpp"
+    "qsoundeffect": "cpp",
+    "*.tcc": "cpp"
   },
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
