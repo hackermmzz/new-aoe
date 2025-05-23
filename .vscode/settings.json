@@ -6,7 +6,12 @@
     "*.qss": "css",
     "*.pro": "makefile",
     "*.pri": "makefile",
-    "ostream": "cpp"
+    "ostream": "cpp",
+    "qmutex": "cpp",
+    "qwaitcondition": "cpp",
+    "qelapsedtimer": "cpp",
+    "qthread": "cpp",
+    "qsoundeffect": "cpp"
   },
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",

@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QHash>
 #include <QElapsedTimer>
+#include <QStringList>
 
 class Logger {
 public:
@@ -24,12 +25,18 @@ public:
     static void clean();
     static void messageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 
+    // 添加排除文件功能
+    static void addExcludedFile(const QString& filePath);
+    static void clearExcludedFiles();
+    static bool isFileExcluded(const QString& filePath);
+
 private:
     static QFile* logFile;
     static bool isInit;
     static LogLevel currentLogLevel;
     static QElapsedTimer elapsedTimer;  // 记录启动时间
     static QHash<QtMsgType, QString> contextNames;
+    static QStringList excludedFiles;  // 存储排除的文件列表
 };
 
 #endif // LOGGER_H
