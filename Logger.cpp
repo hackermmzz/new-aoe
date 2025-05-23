@@ -24,6 +24,7 @@ QHash<QtMsgType, QString> Logger::contextNames = {
 
 Logger::LogLevel Logger::currentLogLevel = Logger::LogLevel::Debug;
 QElapsedTimer Logger::elapsedTimer;  // 计时器
+QStringList Logger::excludedFiles;  // 初始化排除文件列表
 
 void Logger::init(LogLevel level) {
     if (isInit) {
@@ -48,7 +49,7 @@ void Logger::init(LogLevel level) {
     logFile->resize(0);
 
     Logger::isInit = true;
-    qInfo()<<"日志服务启动！日志级别："+contextNames.value((static_cast<QtMsgType>(level)));
+    qInfo() << "日志服务启动！日志级别：" + contextNames.value((static_cast<QtMsgType>(level)));
 }
 
 void Logger::clean() {
@@ -58,8 +59,35 @@ void Logger::clean() {
     }
 }
 
+// 添加排除文件
+void Logger::addExcludedFile(const QString& filePath) {
+    excludedFiles.append(filePath);
+}
+
+// 清空排除文件列表
+void Logger::clearExcludedFiles() {
+    excludedFiles.clear();
+}
+
+// 检查文件是否在排除列表中
+bool Logger::isFileExcluded(const QString& filePath) {
+    for (const QString& excludedFile : excludedFiles) {
+        if (filePath.endsWith(excludedFile)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-    return;
+    // 检查文件是否在排除列表中
+    QString currentFile = QString(context.file);
+    if (isFileExcluded(currentFile)) {
+        // 该文件在排除列表中，使用默认处理方式
+        fprintf(stdout, "%s\n", msg.toLocal8Bit().constData());
+        return;
+    }
+
     // Only log messages with the specified log level or higher
     if (static_cast<LogLevel>(type) < currentLogLevel) {
         return;
@@ -75,22 +103,22 @@ void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, co
 
     // Format the elapsed time as "minutes:seconds:milliseconds"
     QString timeString = QString("%1:%2:%3")
-                             .arg(minutes, 2, 10, QChar('0'))  // Ensure two digits for minutes
-                             .arg(seconds, 2, 10, QChar('0'))  // Ensure two digits for seconds
-                             .arg(milliseconds, 3, 10, QChar('0'));  // Ensure three digits for milliseconds
+        .arg(minutes, 2, 10, QChar('0'))  // Ensure two digits for minutes
+        .arg(seconds, 2, 10, QChar('0'))  // Ensure two digits for seconds
+        .arg(milliseconds, 3, 10, QChar('0'));  // Ensure three digits for milliseconds
 
     QString log = QObject::tr("%1 | %2 | %3 | %4 | %5 | %6 | %7\n").
-                  arg(timeString).                           // 使用分钟:秒:毫秒格式
-                  arg(g_frame).                             // 当前帧数
-                  arg(Logger::contextNames.value(type)).
-                  arg(context.line).
-                  arg(QString(context.file).
-                      section('\\', -1)).            // File name without file path
-                  arg(QString(context.function).
-                      section('(', -2, -2).        // Function name only
-                      section(' ', -1).
-                      section(':', -1)).
-                  arg(msg);
+        arg(timeString).                           // 使用分钟:秒:毫秒格式
+        arg(g_frame).                             // 当前帧数
+        arg(Logger::contextNames.value(type)).
+        arg(context.line).
+        arg(QString(context.file).
+            section('\\', -1)).            // File name without file path
+        arg(QString(context.function).
+            section('(', -2, -2).        // Function name only
+            section(' ', -1).
+            section(':', -1)).
+        arg(msg);
 
     logFile->write(log.toLocal8Bit());
     logFile->flush();
