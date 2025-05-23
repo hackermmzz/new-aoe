@@ -606,6 +606,12 @@ void UsrAI::processData(){
     cheatAction();
    // return;
     info = getInfo();
+    //
+    map<int,int>enemy;
+    for(tagArmy army:info.enemy_armies)++enemy[army.Sort];
+    for(auto &ele:enemy){
+        cout<<ele.first<<" "<<ele.second<<endl;
+    }
     // 获取地图信息
     if(info.Wood<10000||info.Gold<=10000||info.Meat<=10000||info.Stone<=10000)
         cheatRes();

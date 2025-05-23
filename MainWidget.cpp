@@ -95,7 +95,7 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
 
     // 显示编辑器
     editor->show();
-    editor->hide();
+    if(!openEditor) editor->hide();
 
     // 导出地图
     connect(editor->ui->export_map,QPushButton::clicked,this,[=](){
@@ -804,7 +804,7 @@ void MainWidget::initPlayers() {
     //设置初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置初始资源
-     player[0]->changeResource(2000,2000,2000,2000);
+     player[0]->changeResource(0,0,0,0);
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
 
@@ -1471,7 +1471,7 @@ void MainWidget::paintUpdate()
     statusUpdate();
 
     //判断是否以新编辑模式启动
-    updateEditor();
+    if(openEditor) updateEditor();
 
     ui->Game->update();
     ui->mapView->update();
