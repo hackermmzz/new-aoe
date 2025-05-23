@@ -10,8 +10,8 @@ public:
     SelectWidget* sel = nullptr;
     Map* theMap;    //地图信息
 
-    Core(){}
-    Core(Map* theMap, Player* player[], int** memorymap,MouseEvent *mouseEvent);
+    Core() {}
+    Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent);
 
 
     void gameUpdate();

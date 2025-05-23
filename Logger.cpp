@@ -80,7 +80,14 @@ bool Logger::isFileExcluded(const QString& filePath) {
 }
 
 void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-    return;
+    // 检查文件是否在排除列表中
+    QString currentFile = QString(context.file);
+    if (isFileExcluded(currentFile)) {
+        // 该文件在排除列表中，使用默认处理方式
+        fprintf(stdout, "%s\n", msg.toLocal8Bit().constData());
+        return;
+    }
+
     // Only log messages with the specified log level or higher
     if (static_cast<LogLevel>(type) < currentLogLevel) {
         return;
