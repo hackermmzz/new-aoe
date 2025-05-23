@@ -195,7 +195,7 @@ void Army::setNowRes()
             break;
         }
     }
-    if(templist!= nowlist)
+    if(templist!= nowlist && templist)
     {
         nowlist = templist;
         nowres = nowlist->begin();

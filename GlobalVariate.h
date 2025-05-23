@@ -387,6 +387,17 @@ private:
     tagInfo* Info;
     QMutex Locker;
 public:
+    template<class T>
+    void WLHHunYao(vector<T>&v){
+        vector<T> res=v;
+        static auto randint=[](int a,int b)->int{return rand()%(b-a+1)+a;};
+        for(int i=0;i<v.size();++i){
+            int idx=randint(0,v.size()-1);
+            swap(res.back(),res[idx]);
+            v[i]=res.back();
+            res.pop_back();
+        }
+    }
     void update(tagInfo* newinfo){
         //控制ins_ret的大小小于100，若大于100，则优先删除旧值
         QMutexLocker locker(&Locker);
@@ -398,6 +409,17 @@ public:
         if(this->Info!=NULL)
             newinfo->ins_ret=this->Info->ins_ret;
         Info=newinfo;
+        //对内部打乱
+        static const bool openHunYao=1;
+        if(openHunYao){
+            WLHHunYao(Info->buildings);
+            WLHHunYao(Info->farmers);
+            WLHHunYao(Info->armies);
+            WLHHunYao(Info->enemy_buildings);
+            WLHHunYao(Info->enemy_farmers);
+            WLHHunYao(Info->enemy_armies);
+            WLHHunYao(Info->resources);
+        }
     }
     void insertInsRet(int id,instruction ins){
         QMutexLocker locker(&Locker);

@@ -5,6 +5,7 @@
 
 int main(int argc, char* argv[])
 {
+    //
     QApplication a(argc, argv);
     QResource::registerResource("./res.rcc");
     Logger::init(Logger::LogLevel::Debug);
