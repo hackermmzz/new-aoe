@@ -15,8 +15,8 @@
 /**********玩家初始资源设置************/
 #define INITIAL_WOOD 200
 #define INITIAL_MEAT 200
-#define INITIAL_STONE 200
-#define INITIAL_GOLD 200
+#define INITIAL_STONE 150
+#define INITIAL_GOLD 0
 
 
 /********** 碰撞箱大小 **********/

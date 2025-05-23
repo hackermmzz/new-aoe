@@ -35,6 +35,7 @@ public:
     ActWidget* getActs(int num){return acts[num];}
 
     // 编辑器相关内容
+    bool openEditor = false;
     Editor* editor;
     int currentSelected;  // 用于记录当前的选择的内容
     // 枚举编辑器中的功能键
