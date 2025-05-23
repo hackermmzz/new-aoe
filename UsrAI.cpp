@@ -600,6 +600,12 @@ void UsrAI::processData()
 {
   //  return;
     info = getInfo();
+    //
+    map<int,int>enemy;
+    for(tagArmy army:info.enemy_armies)++enemy[army.Sort];
+    for(auto &ele:enemy){
+        cout<<ele.first<<" "<<ele.second<<endl;
+    }
     // 获取地图信息
     if (info.GameFrame % 5 != 0) {
         return;

@@ -392,7 +392,7 @@ public:
         vector<T> res=v;
         static auto randint=[](int a,int b)->int{return rand()%(b-a+1)+a;};
         for(int i=0;i<v.size();++i){
-            int idx=randint(0,v.size()-1);
+            int idx=randint(0,res.size()-1);
             swap(res.back(),res[idx]);
             v[i]=res.back();
             res.pop_back();

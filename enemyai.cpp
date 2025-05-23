@@ -325,7 +325,6 @@ void EnemyAI::processData() {
             ifDead(Arrowtower,VECTORARROWTOWER);
             ifDead(Building,VECTORBUILDING);
         }
-if(Boat.size()!=0) qDebug()<<g_frame;
 }
 
 //    if(mode==5){

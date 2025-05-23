@@ -19,29 +19,3 @@ int AI::BuildingAction(int SN,int Action){
 }
 
 
-//void AI::printInsRet(int id){
-//    instruction tmp=getInsRet(id);
-//    if(!tmp.isExist()){
-//        qDebug()<<"ins:"<<id<<" Not Found!";
-//        return;
-//    }
-//    if(tmp.type==1){
-//        qDebug()<<"ins:"<<id
-//               <<"\n   HumanMove("<<tmp.SN<<","<<tmp.DR<<","<<tmp.UR
-//              <<")\n   return "<<tmp.ret;
-//    }else if(tmp.type==2){
-//        qDebug()<<"ins:"<<id
-//               <<"\n   HumanAct("<<tmp.SN<<","<<tmp.obSN
-//              <<")\n   return "<<tmp.ret;
-//    }else if(tmp.type==3){
-//        qDebug()<<"ins:"<<id
-//               <<"\n   HumanBuild("<<tmp.SN<<","<<tmp.BlockDR<<","<<tmp.BlockUR<<","<<tmp.option
-//              <<")\n   return "<<tmp.ret;
-//    }else if(tmp.type==4){
-//        qDebug()<<"ins:"<<id
-//               <<"\n   BuildingAct("<<tmp.SN<<","<<tmp.option
-//              <<")\n   return "<<tmp.ret;
-//    }
-//}
-
-

@@ -2,7 +2,7 @@
 #include "ui_GameWidget.h"
 #include "Map.h"
 #include <QDateTime>
-
+#include<QDateTime>
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GameWidget)
@@ -19,7 +19,6 @@ GameWidget::~GameWidget()
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {
-
     QPainter painter(this);
 
     painter.setPen(Qt::black);
@@ -226,6 +225,7 @@ void GameWidget::paintEvent(QPaintEvent *)
         Core::objClickedCaptureState=2;
         Core::objCapture=0;
     }
+
 }
 
 void GameWidget::keyPressEvent(QKeyEvent *event)
