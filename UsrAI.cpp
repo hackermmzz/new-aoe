@@ -519,6 +519,8 @@ bool UsrAI::tryBuildBuilding(int buildingType, int requiredWood, int maxCount, i
             }
         }
     }
+    cout << buildingType << " " << building_num[buildingType] << endl;
+    cout << idle_human_sn.size() << endl;
     return false;
 }
 
@@ -603,12 +605,6 @@ void UsrAI::processData()
 {
     //  return;
     info = getInfo();
-    //
-    map<int,int>enemy;
-    for(tagArmy army:info.enemy_armies)++enemy[army.Sort];
-    for(auto &ele:enemy){
-        cout<<ele.first<<" "<<ele.second<<endl;
-    }
     // 获取地图信息
     if (info.GameFrame % 5 != 0) {
         return;
@@ -616,7 +612,8 @@ void UsrAI::processData()
     updateInfo();
     // outputMap();
 
-    cout << "market" << building_num[BUILDING_MARKET] << endl;
+    // cout << "market" << building_num[BUILDING_MARKET] << endl;
+
 
     // 按优先级尝试建造各种建筑
     tryBuildBuilding(BUILDING_HOME, BUILD_HOUSE_WOOD, 5, -1);
