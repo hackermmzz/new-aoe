@@ -30,6 +30,8 @@ map<int, int> building_size{
     {BUILDING_MARKET,3},
     {BUILDING_STOCK,3},
     {BUILDING_DOCK,2},
+    {BUILDING_ARMYCAMP,3},
+    {BUILDING_ARROWTOWER,2},
 };
 
 inline int tran(int x) {
@@ -38,6 +40,17 @@ inline int tran(int x) {
 
 inline int tran(double x) {
     return (int)(x / BLOCKSIDELENGTH);
+}
+
+//能否攻击
+bool tryAttack(int x,int y,int a,int b,int l){
+    double d=(x-a)*(x-a)+(y-b)*(y-b);
+    return l>d;
+}
+
+//距离
+double distance(double x,double y,double a,double b){
+    return sqrt((x-a)*(x-a)+(y-b)*(y-b));
 }
 
 // 找到离(x,y)最近的陆地，并返回其对岸的坐标
@@ -540,6 +553,21 @@ bool near_land(int x, int y) {
     return false;
 }
 
+//是否靠近中心陆地
+bool nearCenterLand(int x,int y){
+    // 只检查四个方向（上、下、左、右）
+    for (int dir = 0; dir < 4; dir++) {
+        int nx = x + dx[dir];
+        int ny = y + dy[dir];
+
+        // 检查边界和是否是陆地
+        if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && land_mask[nx][ny] == 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // 使用BFS找到最近的符合条件的水域
 void find_near_land(int x, int y, int* x_out, int* y_out) {
     queue<pair<int, int>> q;
@@ -601,12 +629,135 @@ void find_near_land(int x, int y, int* x_out, int* y_out) {
     *y_out = y;
 }
 
+//海战
+void UsrAI::warInSea(int enemynum,int esnum){
+    for(auto it=info.enemy_armies.begin();it!=info.enemy_armies.end();it++){
+        if(it->Sort==7){
+            for(auto &army:info.armies){
+                if(army.NowState==0)
+                    HumanAction(army.SN,it->SN);
+            }
+            break;
+        }
+    }
+    if(esnum==0&&enemynum>12){
+        for(auto ship=info.armies.begin();ship!=info.armies.end();ship++){
+            if(ship->NowState==0||ship->NowState==10){
+                int enemySN,min=999999;
+                for(auto enemy=info.enemy_armies.begin();enemy!=info.enemy_armies.end();enemy++){
+                    int d=distance(ship->DR,ship->UR,enemy->DR,enemy->UR);
+                    if(d<min){
+                        min=d;
+                        enemySN=enemy->SN;
+                    }
+                }
+                HumanAction(ship->SN,enemySN);
+            }
+        }
+    }
+}
+
+//运输村民
+void UsrAI::transportPeople(int esnum){
+    for (auto& ship : info.farmers) {
+        if (ship.FarmerSort == 1 && (ship.NowState == HUMAN_STATE_IDLE)) {
+            if (nearCenterLand(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0) {
+                // 如果船靠岸，并且载人小于5，则让村民上船
+                HumanAction(idle_human_sn.back(), ship.SN);
+                idle_human_sn.pop_back();
+            }
+            else if (ship.Resource == 5&&esnum==0) {
+                // 如果船载满5人，则让船去目的地
+                int x, y;
+                find_opposite_land(ship.BlockDR, ship.BlockUR, &x, &y);  // 找到对岸
+                HumanMove(ship.SN, tran(x), tran(y));
+            }
+            else {
+                // 如果船载人小于5，并且不在岸上，则让船靠岸
+                if (!nearCenterLand(ship.BlockDR, ship.BlockUR)) {
+                    int x, y;
+                    find_near_land(center_x, center_y, &x, &y);
+                    HumanMove(ship.SN, tran(x), tran(y));
+                }
+            }
+        }
+    }
+}
+
+//殖民之采矿测试
+void UsrAI::colonizeOfGold(int enemynum){
+    if (settler.size() > 0) {
+        //建造仓库
+        if(enemynum<=12){
+            tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 2, -1, 1);
+            // 寻找最近的金矿
+            int min_distance = INT_MAX;
+            int target_gold_sn = -1;
+            if (building_sn[BUILDING_STOCK].size() >= 2) {
+                for (auto& res : info.resources) {
+                    if (res.Type == RESOURCE_GOLD) {
+                        // 计算距离
+                        int distance = abs(settler[0].BlockDR - res.BlockDR) +
+                            abs(settler[0].BlockUR - res.BlockUR);
+
+                        if (distance < min_distance) {
+                            min_distance = distance;
+                            target_gold_sn = res.SN;
+                        }
+                    }
+                }
+
+                // 如果找到金矿，派遣殖民者去采集
+                if (target_gold_sn != -1) {
+                    while (idle_settler_sn.size() > 0) {
+                        HumanAction(idle_settler_sn.back(), target_gold_sn);
+                        idle_settler_sn.pop_back();
+                    }
+                }
+            }
+        }
+        //走向船
+        if(enemynum>12){
+            for(auto ship=info.armies.begin();ship!=info.armies.end();ship++){
+                if(ship->Sort==7){
+                    for(auto man=settler.begin();man!=settler.end();man++)
+                        if(man->NowState==0)
+                            HumanMove(man->SN,ship->DR,ship->UR);
+                }
+            }
+        }
+    }
+}
+
+//殖民之战斗测试
+void UsrAI::colonizeOfBattle(int enemynum, int esnum){
+    if (settler.size() > 0) {
+        //建兵营
+        if(enemynum<=12){
+            tryBuildBuilding(BUILDING_ARMYCAMP, BUILD_ARMYCAMP_WOOD, 1, -1, 1);
+        }
+        //走向船
+        if(enemynum>12){
+            for(auto ship=info.armies.begin();ship!=info.armies.end();ship++){
+                if(ship->Sort==7){
+                    for(auto man=settler.begin();man!=settler.end();man++)
+                        if(man->NowState==0)
+                            HumanMove(man->SN,ship->DR,ship->UR);
+                }
+            }
+        }
+    }
+}
+
+//发育调度系统
+void UsrAI::development(){
+
+}
+
 void UsrAI::processData(){
   //  return;
     cheatAction();
-   // return;
     info = getInfo();
-    //
     map<int,int>enemy;
     for(tagArmy army:info.enemy_armies)++enemy[army.Sort];
     for(auto &ele:enemy){
@@ -627,39 +778,7 @@ void UsrAI::processData(){
     tryBuildBuilding(BUILDING_GRANARY, BUILD_GRANARY_WOOD, 1, -1);
     tryBuildBuilding(BUILDING_MARKET, BUILD_MARKET_WOOD, 1, BUILDING_GRANARY);
     tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 1, -1); //对岸已经有一个仓库了
-//    tryBuildBuilding(BUILDING_ARMYCAMP,BUILD_ARMYCAMP_WOOD,1,-1);
     tryBuildBuilding(BUILDING_DOCK, BUILD_DOCK_WOOD, 2, -1); // 尝试建造码头
-
-    //处理殖民行为
-    if (settler.size() > 0) {
-        //建造仓库
-        tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 2, -1, 1);
-        // 寻找最近的金矿
-        int min_distance = INT_MAX;
-        int target_gold_sn = -1;
-        if (building_sn[BUILDING_STOCK].size() >= 2) {
-            for (auto& res : info.resources) {
-                if (res.Type == RESOURCE_GOLD) {
-                    // 计算距离
-                    int distance = abs(settler[0].BlockDR - res.BlockDR) +
-                        abs(settler[0].BlockUR - res.BlockUR);
-
-                    if (distance < min_distance) {
-                        min_distance = distance;
-                        target_gold_sn = res.SN;
-                    }
-                }
-            }
-
-            // 如果找到金矿，派遣殖民者去采集
-            if (target_gold_sn != -1) {
-                while (idle_settler_sn.size() > 0) {
-                    HumanAction(idle_settler_sn.back(), target_gold_sn);
-                    idle_settler_sn.pop_back();
-                }
-            }
-        }
-    }
 
     // 处理建筑行为
     for (auto& building : info.buildings) {
@@ -668,13 +787,12 @@ void UsrAI::processData(){
                 BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
             }
         }
-//        if(building.Type==BUILDING_ARMYCAMP){
-//            if(building.Project==0&&)
-//        }
+        if(building.Type==BUILDING_ARMYCAMP){
+            if(building.Project==0&&info.Meat>=BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD)
+                BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN);
+        }
         if (building.Type == BUILDING_DOCK) {
 //            if (building.Project == 0 && ship_sn.size() < 1 && info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {
-////                BuildingAction(building.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
-////                BuildingAction(building.SN,BUILDING_DOCK_CREATE_SAILING);
 //                BuildingAction(building.SN,BUILDING_DOCK_CREATE_SHIP);
 //            }
             int tmp=0;
@@ -686,80 +804,29 @@ void UsrAI::processData(){
                 BuildingAction(building.SN,BUILDING_DOCK_CREATE_SHIP);
         }
     }
-    // cout<<"村民数量"<<info.farmers.size()<<endl;
-    // cout<<"村民状态"<<info.farmers[0].NowState<<endl;
 
-//    for (auto& ship : info.farmers) {
-//        if (ship.FarmerSort == 1 && ship.NowState == HUMAN_STATE_IDLE) {
-
-//            if (near_land(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0) {
-//                // 如果船靠岸，并且载人小于5，则让村民上船
-//                HumanAction(idle_human_sn.back(), ship.SN);
-//                idle_human_sn.pop_back();
-//            }
-//            else if (ship.Resource == 5) {
-//                // 如果船载满5人，则让船去目的地
-//                int x, y;
-//                find_opposite_land(ship.BlockDR, ship.BlockUR, &x, &y);  // 找到对岸
-//                HumanMove(ship.SN, tran(x), tran(y));
-//            }
-//            else {
-//                // 如果船载人小于5，并且不在岸上，则让船靠岸
-//                if (!near_land(ship.BlockDR, ship.BlockUR)) {
-//                    int x, y;
-//                    find_near_land(center_x, center_y, &x, &y);
-//                    HumanMove(ship.SN, tran(x), tran(y));
-//                }
-//            }
-//        }
-//    }
-    //海战
-//    for(auto& enemy:info.enemy_armies){
-//        if(mmap[enemy.BlockDR][enemy.BlockUR]=='o'){
-//            tagArmy enemyship;
-//            enemyship=enemy;
-//            for(auto &army:info.armies){
-//                if(army.NowState==0)
-//                    HumanAction(army.SN,enemyship.SN);
-//            }
-//            break;
-//        }
-////        for(auto &army:info.armies){
-////            if(army.status==0||army.status==11){
-////                HumanAction(army.SN,enemy.SN);
-////                cout<<"ship:"<<army.SN<<" is "<<army.status<<endl;
-////            }
-////        }
-//    }
-    int sum=0,enemyship=0,sort7=0;
-    int enemysortnum[100];
-    for(int i=0;i<100;i++)
-        enemysortnum[i]=0;
+    //根据各种敌人数量控制行为
+    int enemynum=0,esnum=0;
     for(auto it=info.enemy_armies.begin();it!=info.enemy_armies.end();it++){
-        sum++;
-        enemysortnum[it->Sort]++;
-//        if(mmap[it->BlockDR][it->BlockUR]=='o')
-//            enemyship++;
-//        if(it->Sort==7)
-//            sort7++;
+        enemynum++;
+        if(it->Sort==7)
+            esnum++;
     }
-    for(int i=0;i<100;i++){
+//    //海战
+//    warInSea(enemynum,esnum);
 
-        if(enemysortnum[i]!=0)
-            cout<<"SORT:"<<i<<" NUM:"<<enemysortnum[i]<<"   ";
-        }
-    cout<<endl;
-//    cout<<"sum:"<<sum<<" enemyship: "<<enemyship<<"sort: "<<sort7<<endl;
-//    for(auto it=info.enemy_armies.begin();it!=info.enemy_armies.end();it++){
-//        if(mmap[it->BlockDR][it->BlockUR]=='o'){
+//    //运输村民
+//    transportPeople(esnum);
 
-//            for(auto &army:info.armies){
-//                if(army.NowState==0)
-//                    HumanAction(army.SN,it->SN);
-//            }
-//            break;
-//        }
-//    }
+//    //处理殖民行为
+////    //采矿测试
+////    colonizeOfGold(enemynum);
+//    //战斗测试
+//    colonizeOfBattle(enemynum,esnum);
+    //发育调度测试
+    development();
 
 }
+
+
 

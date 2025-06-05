@@ -11,7 +11,8 @@
     "qwaitcondition": "cpp",
     "qelapsedtimer": "cpp",
     "qthread": "cpp",
-    "qsoundeffect": "cpp"
+    "qsoundeffect": "cpp",
+    "iostream": "cpp"
   },
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
@@ -52,7 +53,11 @@
     "PowerShell": {
       "source": "PowerShell",
       "icon": "terminal-powershell",
-      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass"]
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass"
+      ]
     },
     "Command Prompt": {
       "path": [
