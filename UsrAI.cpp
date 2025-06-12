@@ -16,6 +16,8 @@ std::vector<int> idle_ship_sn;
 std::vector<int> ship_sn;
 std::vector<int> idle_settler_sn;
 std::vector<tagHuman> settler;
+using req=std::pair<int,int>;
+std::queue<req> require;
 char mmap[MAP_L][MAP_U]; //-:空地 h:建筑 w:资源 i:人 o:海洋
 int land_mask[MAP_L][MAP_U]; // 陆地标记：0-未标记/水域，1-中心陆地，2-非中心陆地
 bool center_land_initialized = false; // 标记是否已经初始化过中心陆地
@@ -23,6 +25,7 @@ const int dx[4] = { 0, 0, -1, 1 };
 const int dy[4] = { -1, 1, 0, 0 };
 int center_x, center_y;
 int obj_x, obj_y;
+static bool isReadyBattle=false;
 map<int, int> building_size{
     {BUILDING_HOME,2},
     {BUILDING_CENTER,4},
@@ -506,6 +509,12 @@ bool UsrAI::tryBuildBuilding(int buildingType, int requiredWood, int maxCount, i
     if (reqiredBuilding != -1 && building_sn[reqiredBuilding].empty()) {
         return false;
     }
+    if(info.Wood<requiredWood){
+        req tmp;
+        tmp.first=1;
+        tmp.second=requiredWood-info.Wood;
+        require.push(tmp);
+    }
     if (is_settler) {
         if (building_num[buildingType] < maxCount && info.Wood >= requiredWood && !idle_settler_sn.empty()) {
             // 找出一个空闲村民
@@ -524,13 +533,12 @@ bool UsrAI::tryBuildBuilding(int buildingType, int requiredWood, int maxCount, i
         // 检查建筑数量、木材和空闲村民
         if (building_num[buildingType] < maxCount && info.Wood >= requiredWood && !idle_human_sn.empty()) {
             // 找出一个空闲村民
-            int humanSN = idle_human_sn.back();
+            int humanSN = info.farmers.begin()->SN;
             // 寻找一块适合建造的空地
             int x, y;
             if (getEmptyBlock(center_x, center_y, &x, &y, buildingType) > 0) {
                 // 向村民发出建造指令
                 HumanBuild(humanSN, buildingType, x, y);
-                idle_human_sn.pop_back();
                 updateMap(buildingType, x, y);
                 return true;
             }
@@ -658,10 +666,10 @@ void UsrAI::warInSea(int enemynum,int esnum){
 }
 
 //运输村民
-void UsrAI::transportPeople(int esnum){
+void UsrAI::transportPeople(int esnum,int num){
     for (auto& ship : info.farmers) {
-        if (ship.FarmerSort == 1 && (ship.NowState == HUMAN_STATE_IDLE)) {
-            if (nearCenterLand(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0) {
+        if (ship.FarmerSort == 1 && (ship.NowState == HUMAN_STATE_IDLE||(ship.NowState==HUMAN_STATE_CUTTING && num>=6))) {
+            if (nearCenterLand(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0&&esnum==0) {
                 // 如果船靠岸，并且载人小于5，则让村民上船
                 HumanAction(idle_human_sn.back(), ship.SN);
                 idle_human_sn.pop_back();
@@ -751,11 +759,47 @@ void UsrAI::colonizeOfBattle(int enemynum, int esnum){
 
 //发育调度系统
 void UsrAI::development(){
-
+    if(require.empty())
+        return;
+    req tmp=require.front();
+    require.pop();
+    if(tmp.first==1)
+        //砍树
+        for(auto man=info.farmers.begin();man!=info.farmers.end();man++){
+            if(man->NowState==0){
+                int tree_dis=1e6,res_sn;
+                for(auto tree=info.resources.begin();tree!=info.resources.end();tree++){
+                    if(tree->Type==RESOURCE_TREE&&land_mask[tree->BlockDR][tree->BlockUR]==1){
+                        double tmp_dis=distance(tree->DR,tree->UR,man->DR,man->UR);
+                        if(tmp_dis<tree_dis){
+                            tree_dis=tmp_dis;
+                            res_sn=tree->SN;
+                        }
+                    }
+                }
+                HumanAction(man->SN,res_sn);
+            }
+        }
+    else if(tmp.first==2)
+        //打猎
+        for(auto man=info.farmers.begin();man!=info.farmers.end();man++){
+            if(man->NowState==0){
+                int gazelle_dis=1e6,res_sn;
+                for(auto gazelle=info.resources.begin();gazelle!=info.resources.end();gazelle++){
+                    if(gazelle->Type==RESOURCE_GAZELLE&&land_mask[gazelle->BlockDR][gazelle->BlockUR]==1){
+                        double tmp_dis=distance(gazelle->DR,gazelle->UR,man->DR,man->UR);
+                        if(tmp_dis<gazelle_dis){
+                            gazelle_dis=tmp_dis;
+                            res_sn=gazelle->SN;
+                        }
+                    }
+                }
+                HumanAction(man->SN,res_sn);
+            }
+        }
 }
 
 void UsrAI::processData(){
-  //  return;
     cheatAction();
     info = getInfo();
     map<int,int>enemy;
@@ -764,8 +808,8 @@ void UsrAI::processData(){
         cout<<ele.first<<" "<<ele.second<<endl;
     }
     // 获取地图信息
-    if(info.Wood<10000||info.Gold<=10000||info.Meat<=10000||info.Stone<=10000)
-        cheatRes();
+//    if(info.Wood<10000||info.Gold<=10000||info.Meat<=10000||info.Stone<=10000)
+//        cheatRes();
     if (info.GameFrame % 5 != 0) {
         return;
     }
@@ -778,18 +822,32 @@ void UsrAI::processData(){
     tryBuildBuilding(BUILDING_GRANARY, BUILD_GRANARY_WOOD, 1, -1);
     tryBuildBuilding(BUILDING_MARKET, BUILD_MARKET_WOOD, 1, BUILDING_GRANARY);
     tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 1, -1); //对岸已经有一个仓库了
-    tryBuildBuilding(BUILDING_DOCK, BUILD_DOCK_WOOD, 2, -1); // 尝试建造码头
+    tryBuildBuilding(BUILDING_DOCK, BUILD_DOCK_WOOD, 1, -1); // 尝试建造码头
 
     // 处理建筑行为
     for (auto& building : info.buildings) {
         if (building.Type == BUILDING_CENTER) {
-            if (building.Project == 0 && human_sn.size() < 6 && info.Meat >= BUILDING_CENTER_CREATEFARMER_FOOD) {
-                BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
+            if (building.Project == 0 && human_sn.size()-settler.size() < 8) {
+                if(info.Meat >= BUILDING_CENTER_CREATEFARMER_FOOD)
+                    BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
+                else{
+                    req tmp;
+                    tmp.first=2;
+                    tmp.second=BUILDING_CENTER_CREATEFARMER_FOOD-info.Meat;
+                    require.push(tmp);
+                }
             }
         }
         if(building.Type==BUILDING_ARMYCAMP){
-            if(building.Project==0&&info.Meat>=BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD)
-                BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN);
+            if(building.Project==0)
+                if(info.Meat>=BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD)
+                    BuildingAction(building.SN,BUILDING_ARMYCAMP_CREATE_CLUBMAN);
+                else{
+                    req tmp;
+                    tmp.first=2;
+                    tmp.second=BUILDING_ARMYCAMP_CREATE_CLUBMAN_FOOD-info.Meat;
+                    require.push(tmp);
+                }
         }
         if (building.Type == BUILDING_DOCK) {
 //            if (building.Project == 0 && ship_sn.size() < 1 && info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {
@@ -801,7 +859,14 @@ void UsrAI::processData(){
                     tmp++;
             }
             if(tmp<6)
-                BuildingAction(building.SN,BUILDING_DOCK_CREATE_SHIP);
+                if(info.Wood>=BUILDING_DOCK_CREATE_SAILING_WOOD)
+                    BuildingAction(building.SN,BUILDING_DOCK_CREATE_SHIP);
+                else{
+                    req tmp;
+                    tmp.first=1;
+                    tmp.second=BUILDING_DOCK_CREATE_SAILING_WOOD-info.Wood;
+                    require.push(tmp);
+                }
         }
     }
 
@@ -812,19 +877,29 @@ void UsrAI::processData(){
         if(it->Sort==7)
             esnum++;
     }
-//    //海战
-//    warInSea(enemynum,esnum);
 
-//    //运输村民
-//    transportPeople(esnum);
-
-//    //处理殖民行为
-////    //采矿测试
-////    colonizeOfGold(enemynum);
-//    //战斗测试
-//    colonizeOfBattle(enemynum,esnum);
-    //发育调度测试
+    //发育调度
     development();
+
+    //海战
+    int num=0;
+    for(auto ship=info.armies.begin();ship!=info.armies.end();ship++){
+        if(ship->Sort==7)
+            num++;
+    }
+    if(num>=6)
+        isReadyBattle=true;
+    if(isReadyBattle)
+        warInSea(enemynum,esnum);
+
+    //运输村民
+    transportPeople(esnum,num);
+
+    //处理殖民行为
+//    //采矿测试
+//    colonizeOfGold(enemynum);
+    //战斗测试
+    colonizeOfBattle(enemynum,esnum);
 
 }
 
