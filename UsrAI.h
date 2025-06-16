@@ -31,6 +31,10 @@ private:
     }
     /*##########DO NOT MODIFY THE CODE IN THE CLASS##########*/
     bool tryBuildBuilding(int buildingType, int requiredWood, int maxCount, int reqiredBuilding,int is_settler=0);
+    void warInSea(int enemynum,int esnum);
+    void transportPeople(int esnum);
+    void colonizeOfGold(int enemynum);
+    void development();
 };
 
 /*##########YOUR CODE BEGINS HERE##########*/
