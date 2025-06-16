@@ -34,7 +34,6 @@ private:
     void warInSea(int enemynum,int esnum);
     void transportPeople(int esnum);
     void colonizeOfGold(int enemynum);
-    void colonizeOfBattle(int enemynum,int esnum);
     void development();
 };
 
