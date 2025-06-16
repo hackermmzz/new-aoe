@@ -22,7 +22,6 @@ public:
     std::list<Human *> human;
     //当前所属飞行物
     std::list<Missile*> missile;
-
     //***************************************************************
     //添加对象
     Building* addBuilding(int Num,int BlockDR,int BlockUR , double percent = 0);

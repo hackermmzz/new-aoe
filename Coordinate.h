@@ -147,7 +147,7 @@ public:
     bool isInWidget(){return this->inWindow == 1; }
     void setDRUR( double DR, double UR ){ this->DR = DR; this->UR = UR; }
     void setBlockDRUR( int BlockDR, int BlockUR ){ this->BlockDR = BlockDR; this->BlockUR = BlockUR; }
-protected:
+public:
     int Num;//对象在对应类中的编号
     //比如building类下Num==0为小房子
     //在不同的类有着不同的含义

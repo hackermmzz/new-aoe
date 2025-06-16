@@ -113,7 +113,7 @@ public:
     void reset_Map_Object_Resource();
 
     //更新用户视野状况
-    void reset_CellExplore(Coordinate* eye);
+    void reset_CellExplore(Coordinate* eye,vector<Point>&store);
     void clear_CellVisible();
 
     void reset_ObjectExploreAndVisible();
@@ -167,6 +167,8 @@ public:
 
     tagMap resMap_UserAI[MAP_L][MAP_U];
     tagMap resMap_EnemyAI[MAP_L][MAP_U];
+    //当前已经探索的区域
+    bool explored[MAP_L][MAP_U];
     //更新用于AI的资源状况表
     void reset_resMap_AI();
     //传入player阵营，若是用户，传出已探索地图部分的地图资源信息，若是Enemy，传回完整的资源地图

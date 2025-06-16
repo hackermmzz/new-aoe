@@ -9,7 +9,7 @@ class Core
 public:
     SelectWidget* sel = nullptr;
     Map* theMap;    //地图信息
-
+    vector<Point>explored;
     Core() {}
     Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent);
 

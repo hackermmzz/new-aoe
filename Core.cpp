@@ -20,6 +20,7 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
 
 void Core::gameUpdate()
 {
+    explored.clear();//清空上一帧带来的变化
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
@@ -178,7 +179,7 @@ void Core::updateByObject()
                 if ((*humaniter)->isWalking()) moveOb_judCrush.push_back(*humaniter);
 
                 //更新视野
-                if (playerIndx == 0) theMap->reset_CellExplore(*humaniter);
+                if (playerIndx == 0&&(*humaniter)->getTransported()==0) theMap->reset_CellExplore(*humaniter,explored);
 
                 humaniter++;
             }
@@ -207,7 +208,7 @@ void Core::updateByObject()
             {
                 theMap->add_Map_Object(*builditer);
                 //更新视野 用户控制的对象
-                if (playerIndx == 0)  theMap->reset_CellExplore(*builditer);
+                if (playerIndx == 0)  theMap->reset_CellExplore(*builditer,explored);
 
                 if ((*builditer)->isFinish() && !(*builditer)->isConstructed())
                 {
@@ -349,6 +350,8 @@ void Core::updateByPlayer(int id) {
     taginfo.Wood = self->getWood();
     taginfo.civilizationStage = self->getCiv();
     taginfo.GameFrame = g_frame;
+    //更新已探索的区域
+    if(id==0)taginfo.exploredUpdate=explored;
     //更新人口数据
     for (Human* human : self->human)
     {

@@ -598,7 +598,7 @@ void find_near_land(int x, int y, int* x_out, int* y_out) {
 
 void UsrAI::processData()
 {
-  //  return;
+  // return;
     info = getInfo();
     //
     map<int,int>enemy;
