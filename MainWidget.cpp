@@ -1482,22 +1482,12 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
-    return sel->getSecend()>GAME_LOSE_SEC || player[0]->get_centerNum()<1;
+    return sel->getSecend()>GAME_LOSE_SEC;
 }
 bool MainWidget::isWin()
 {
-    bool enemyClear = true;
-    std::list<Human *>::iterator enemyiter = player[1]->human.begin(), enemyitere = player[1]->human.end();
-    while(enemyiter != enemyitere)
-    {
-        if(!(*enemyiter)->isDie())
-        {
-            enemyClear = false;
-            break;
-        }
-        enemyiter++;
-    }
-    return enemyClear;
+    auto*hero=player[0];
+    return hero->getGold()>=GAME_WIN_GOLD;
 }
 
 void MainWidget::judgeVictory()

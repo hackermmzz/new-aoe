@@ -77,9 +77,19 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(RectInRect(x,y,w,h)){
                 //如果是海洋
                 if(block.getMapType()==MAPTYPE_OCEAN){
-                    static QPixmap*ocean=new QPixmap(resMap["Sea_Deep"].front());
-                    pix=ocean;
-                }else pix=&(targetList->front().pix);
+                    static QPixmap*ocean=nullptr;
+                    static QPixmap*grayOcean=0;
+                    if(!ocean)
+                    {
+                        ocean=new QPixmap(resMap["Sea_Deep"].front());
+                        grayOcean=new QPixmap(applyTransparencyEffect(*ocean,0.5));
+                    }
+                    auto&block=mainwidget->map->cell[x2][y2];
+                    if(block.Visible&&block.Explored)pix=ocean;
+                    else if(block.Explored)pix=grayOcean;
+                    else pix=0;
+                }
+                else pix=&(targetList->front().pix);
                 //绘制
                 if(pix)
                 painter.drawPixmap(x,y,w,h,*pix);

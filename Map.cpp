@@ -1140,6 +1140,40 @@ void Map::divideTheMap()
             }
         }
     }
+    //找到市镇中心所在起始位置
+    Point centerPos;
+    for(auto&build:player[0]->build){
+        if(build->getNum()==BUILDING_CENTER){
+            centerPos={build->getBlockDR(),build->getBlockUR()};
+            break;
+        }
+    }
+    int mask=blockIndex[centerPos.x][centerPos.y];
+    //如果是海洋并且与己方大陆相距两格，那么可见
+    auto checkLand=[&](int x,int y)->bool{
+        if(x>=0&&x<MAP_L&&y>=0&&y<MAP_U){
+            return cell[x][y].getMapType()!=MAPTYPE_OCEAN&&blockIndex[x][y]==mask;
+        }
+        return 0;
+    };
+    //将己方地图可见化
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            auto&block=cell[i][j];
+            if(blockIndex[i][j]==mask){
+                block.Visible=0;
+                block.Explored=1;
+            }
+            else if(block.getMapType()==MAPTYPE_OCEAN&&(checkLand(i,j+2)||checkLand(i,j-2)||checkLand(i+2,j)||checkLand(i-2,j))){
+                    block.Visible=0;
+                    block.Explored=1;
+            }
+            else{
+                block.Visible=0;
+                block.Explored=0;
+            }
+        }
+    }
 }
 
 void Map::loadBarrierMap(bool absolute)
@@ -1728,7 +1762,7 @@ void Map::reset_resMap_ForUserAndEnemy()
 }
 
 //更新用户视野
-void Map::reset_CellExplore(Coordinate* eye)
+void Map::reset_CellExplore(Coordinate* eye,vector<Point>&store)
 {
     /**
     * 输入：用户的控制对象，如Human、Building
@@ -1749,9 +1783,10 @@ void Map::reset_CellExplore(Coordinate* eye)
 
     for(int i = 0 ; i<size; i++)
     {
-        if(!cell[blockLab[i].x][blockLab[i].y].Explored)
+        if(!cell[blockLab[i].x][blockLab[i].y].Explored){
             cell[blockLab[i].x][blockLab[i].y].Explored = true;
-
+            store.push_back({blockLab[i].x,blockLab[i].y});
+        }
         if(!cell[blockLab[i].x][blockLab[i].y].Visible)
         {
             blockLab_Visible.push(blockLab[i]);
@@ -2298,25 +2333,41 @@ bool Map::CheckIsNearOcean(int x, int y)
  * 返回值：空。
  */
 void Map::init(int MapJudge) {
-    InitCell(0, MAP_EXPLORE, true);    // 第二个参数修改为true时可令地图全部可见
+    memset(explored,0,sizeof(explored));
+    InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText(MapJudge);  //载入地图
-    divideTheMap();                 //把地图化分成一个一个连通块
+    divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
     Player&enemy=(*player[1]);
-    enemy.addArmyAROUND(3,1800,30,1,300,10000,1800,800);
-    enemy.addArmyAROUND(3,1700,1000,1,300,10000,1500,1800);
-    enemy.addArmyAROUND(3,1500,2000,1,300,10000,1400,2900);
-    enemy.addArmyAROUND(3,1400,3100,1,300,10000,800,3800);
-    enemy.addArmyAROUND(3,700,3800,1,300,10000,30,3800);
-    enemy.addArmyAROUND(7,2000,350,1,300,10000,2000,20);
-    enemy.addArmyAROUND(7,2000,700,1,300,10000,2000,400);
-    enemy.addArmyAROUND(7,2400,900,1,300,10000,2400,1300);
-    enemy.addArmyAROUND(7,2500,1500,1,300,10000,2500,1900);
-    enemy.addArmyAROUND(7,2000,2200,1,300,10000,2000,2500);
-    enemy.addArmyAROUND(7,2000,2600,1,300,10000,2000,2900);
-    enemy.addArmyAROUND(7,1700,3000,ARMY_STATE_AROUND,300,10000,1700,3400);
-    enemy.addArmyAROUND(7,1200,3600,1,300,10000,1200,3900);
-    enemy.addArmyAROUND(7,800,4300,1,300,10000,500,4300);
-    enemy.addArmyAROUND(7,450,4300,1,300,10000,100,4300);
+//    enemy.addArmyAROUND(3,1800,30,ARMY_STATE_DEFENSE,300,10000,1800,800);
+//    enemy.addArmyAROUND(3,1700,1000,ARMY_STATE_DEFENSE,300,10000,1500,1800);
+//    enemy.addArmyAROUND(3,1500,2000,ARMY_STATE_DEFENSE,300,10000,1400,2900);
+//    enemy.addArmyAROUND(3,1400,3100,ARMY_STATE_DEFENSE,300,10000,800,3800);
+//    enemy.addArmyAROUND(3,700,3800,ARMY_STATE_DEFENSE,300,10000,30,3800);
+//    enemy.addArmyAROUND(7,2000,350,ARMY_STATE_DEFENSE,300,10000,2000,20);
+//    enemy.addArmyAROUND(7,2000,700,ARMY_STATE_DEFENSE,300,10000,2000,400);
+//    enemy.addArmyAROUND(7,2400,900,ARMY_STATE_DEFENSE,300,10000,2400,1300);
+//    enemy.addArmyAROUND(7,2500,1500,ARMY_STATE_DEFENSE,300,10000,2500,1900);
+//    enemy.addArmyAROUND(7,2000,2200,ARMY_STATE_DEFENSE,300,10000,2000,2500);
+//    enemy.addArmyAROUND(7,2000,2600,ARMY_STATE_DEFENSE,300,10000,2000,2900);
+//    enemy.addArmyAROUND(7,1700,3000,ARMY_STATE_DEFENSE,300,10000,1700,3400);
+//    enemy.addArmyAROUND(7,1200,3600,ARMY_STATE_DEFENSE,300,10000,1200,3900);
+//    enemy.addArmyAROUND(7,800,4300,ARMY_STATE_DEFENSE,300,10000,500,4300);
+//    enemy.addArmyAROUND(7,450,4300,ARMY_STATE_DEFENSE,300,10000,100,4300);
+    enemy.addArmyDEFENSE(3,1800,30,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(3,1700,1000,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(3,1500,2000,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(3,1400,3100,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(3,700,3800,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,2000,350,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,2000,700,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,2400,900,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,2500,1500,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,2000,2200,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,2000,2600,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,1700,3000,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,1200,3600,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,800,4300,ARMY_STATE_DEFENSE);
+    enemy.addArmyDEFENSE(7,450,4300,ARMY_STATE_DEFENSE);
     enemy.addArmyATTACK(0,1000,2025,3,3000,37500);
     enemy.addArmyATTACK(0,1000,2050,3,3000,37500);
     enemy.addArmyATTACK(0,1000,2075,3,3000,37500);

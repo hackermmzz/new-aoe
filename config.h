@@ -41,6 +41,7 @@
 #define GAME_VERSION "v2.02g"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define GAME_LOSE_SEC 1500
+#define GAME_WIN_GOLD 2500
 #define GOLD 10                         //金块资源数量
 #define STONE 10                        //石头资源数量
 #define gen5 sqrt(5)

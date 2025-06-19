@@ -318,6 +318,21 @@ struct tagTerrain {
     int height;
     int type;
 };
+// 定义二维点的结构体
+struct Point {
+    int x;
+    int y;
+
+    Point() {}
+    Point(int x, int y) { this->x = x, this->y = y; }
+    Point(const Point& board) { x = board.x, y = board.y; }
+
+    Point operator +(const Point& ps) { return Point(x + ps.x, y + ps.y); }
+    Point operator -(const Point& ps) { return Point(x - ps.x, y - ps.y); }
+    bool operator ==(const Point& ps)const { return ps.x == x && ps.y == y; }
+    bool operator < (const Point& ps)const { return x < ps.x && y < ps.y; }
+};
+
 struct tagInfo
 {
     vector<tagBuilding> buildings; // 我方建筑列表
@@ -329,6 +344,7 @@ struct tagInfo
     vector<tagResource> resources; // 资源列表
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
     tagTerrain theMap[MAP_L][MAP_U]; // 高程图
+    vector<Point>exploredUpdate;//多探索的区域
     int GameFrame; // 游戏帧数
     int civilizationStage; // 文明阶段
     int Wood; // 木材数量
@@ -557,20 +573,7 @@ struct ImageResource
 
     }
 };
-// 定义二维点的结构体
-struct Point {
-    int x;
-    int y;
 
-    Point() {}
-    Point(int x, int y) { this->x = x, this->y = y; }
-    Point(const Point& board) { x = board.x, y = board.y; }
-
-    Point operator +(const Point& ps) { return Point(x + ps.x, y + ps.y); }
-    Point operator -(const Point& ps) { return Point(x - ps.x, y - ps.y); }
-    bool operator ==(const Point& ps)const { return ps.x == x && ps.y == y; }
-    bool operator < (const Point& ps)const { return x < ps.x && y < ps.y; }
-};
 
 struct conditionDevelop
 {
