@@ -4,19 +4,20 @@
 #include <iostream>
 #include <QString>
 
-int g_globalNum= rand()%11;
-int g_frame=0;
+int g_globalNum = rand() % 11;
+int g_frame = 0;
 int mapmoveFrequency = INITIAL_FREQUENCY;
 extern Score usrScore;
 extern Score enemyScore;
-std::map<int,Coordinate*> g_Object;
-ActWidget *acts[ACT_WINDOW_NUM_FREE];
+std::map<int, Coordinate*> g_Object;
+ActWidget* acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
     {ACT_UPGRADE_AGE, ACT_UPGRADE_AGE_NAME},
     {ACT_UPGRADE_TOWERBUILD, ACT_UPGRADE_TOWERBUILD_NAME},
     {ACT_UPGRADE_WOOD, ACT_UPGRADE_WOOD_NAME},
     {ACT_UPGRADE_STONE, ACT_UPGRADE_STONE_NAME},
+    {ACT_UPGRADE_GOLD, ACT_UPGRADE_GOLD_NAME},
     {ACT_UPGRADE_FARM, ACT_UPGRADE_FARM_NAME},
     {ACT_STOP, ACT_STOP_NAME},
     {ACT_BUILD, ACT_BUILD_NAME},
@@ -49,11 +50,11 @@ std::map<int, std::string> actNames = {
 };
 
 
-MainWidget::MainWidget(int MapJudge, QWidget *parent) :
+MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
 {
-    qInfo()<<"主程序启动参数："<<MapJudge<<" 开始初始化...";
+    qInfo() << "主程序启动参数：" << MapJudge << " 开始初始化...";
     ui->setupUi(this);
     // 初始化游戏资源
     initGameResources();
@@ -84,98 +85,98 @@ MainWidget::MainWidget(int MapJudge, QWidget *parent) :
     // 设置背景音乐
     initBGM();
     //开辟音乐播放线程
-    soundPlayThread=(new SoudPlayThread);
+    soundPlayThread = (new SoudPlayThread);
     soundPlayThread->start();
     //
-    debugText("blue"," 游戏开始");
-    qInfo()<<"初始化结束，游戏开始！";
+    debugText("blue", " 游戏开始");
+    qInfo() << "初始化结束，游戏开始！";
 
     // 创建编辑器
-     editor = new Editor(this);
+    editor = new Editor(this);
 
     // 显示编辑器
     editor->show();
-    if(!openEditor) editor->hide();
+    if (!openEditor) editor->hide();
 
     // 导出地图
-    connect(editor->ui->export_map,QPushButton::clicked,this,[=](){
+    connect(editor->ui->export_map, QPushButton::clicked, this, [=]() {
         this->ExportCurrentState("map.txt");
-        call_debugText ("green"," 导出地图",0);
-    });
-    connect(editor->ui->delete_object,QPushButton::clicked,this,[=](){
-        call_debugText("green"," 删除资源/建筑",0);
+        call_debugText("green", " 导出地图", 0);
+        });
+    connect(editor->ui->delete_object, QPushButton::clicked, this, [=]() {
+        call_debugText("green", " 删除资源/建筑", 0);
         this->currentSelected = DELETEOBJECT;
-    });
+        });
     // 连接 QComboBox 的 currentIndexChanged 信号
-    connect(editor->ui->land_type,QOverload<const QString &>::of(&QComboBox::currentIndexChanged), this, [=](const QString &text) {
+    connect(editor->ui->land_type, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         // 获取当前选中的选项索引
         QString selectedText = text;
-        if(text == "草地") this->currentSelected = FLAT;
-        else if(text == "海洋") this->currentSelected = OCEAN;
-        if(text != "地皮类型") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->land_height,QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this,[=](const QString &text){
+        if (text == "草地") this->currentSelected = FLAT;
+        else if (text == "海洋") this->currentSelected = OCEAN;
+        if (text != "地皮类型") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->land_height, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "提升高度") this->currentSelected = HIGHTERLAND;
-        else if( text == "降低高度") this->currentSelected = LOWERLAND;
-        if(text != "地皮高度") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->player_building_and_source,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        if (text == "提升高度") this->currentSelected = HIGHTERLAND;
+        else if (text == "降低高度") this->currentSelected = LOWERLAND;
+        if (text != "地皮高度") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->player_building_and_source, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "玩家市中心") this->currentSelected = PLAYERDOWNTOWN;
-        else if( text == "玩家运输船") this->currentSelected = PLAYERTRANSPORTSHIP;
-        else if( text == "玩家渔船") this->currentSelected = PLAYERFISHINGBOAT;
-        else if( text == "玩家船坞") this->currentSelected = PLAYERDOCK;
-        else if( text == "玩家战船") this->currentSelected = PLAYERWARSHIP;
-        else if( text == "玩家仓库") this->currentSelected = PLAYERREPOSITORY;
-        else if( text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
-        else if( text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
-        else if( text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
-        if(text != "玩家资源/建筑") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->player_human,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        if (text == "玩家市中心") this->currentSelected = PLAYERDOWNTOWN;
+        else if (text == "玩家运输船") this->currentSelected = PLAYERTRANSPORTSHIP;
+        else if (text == "玩家渔船") this->currentSelected = PLAYERFISHINGBOAT;
+        else if (text == "玩家船坞") this->currentSelected = PLAYERDOCK;
+        else if (text == "玩家战船") this->currentSelected = PLAYERWARSHIP;
+        else if (text == "玩家仓库") this->currentSelected = PLAYERREPOSITORY;
+        else if (text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
+        else if (text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
+        else if (text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
+        if (text != "玩家资源/建筑") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->player_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "玩家农民") this->currentSelected = PLAYERFARMER;
-        else if( text == "玩家棍棒兵") this->currentSelected = PLAYERCLUBMAN;
-        else if( text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
-        else if( text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
-        else if( text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
-        if(text != "玩家人物") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->ai_building_and_resource,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        if (text == "玩家农民") this->currentSelected = PLAYERFARMER;
+        else if (text == "玩家棍棒兵") this->currentSelected = PLAYERCLUBMAN;
+        else if (text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
+        else if (text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
+        else if (text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
+        if (text != "玩家人物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->ai_building_and_resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "地方战船") this->currentSelected = AIWARSHIP;
-        else if( text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
-        if(text != "敌方资源/建筑") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->ai_human,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        if (text == "地方战船") this->currentSelected = AIWARSHIP;
+        else if (text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
+        if (text != "敌方资源/建筑") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->ai_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "敌方棍棒兵") this->currentSelected = AICLUBMAN;
-        else if( text == "地方斧头兵") this->currentSelected = AIAXEMAN;
-        else if( text == "地方侦察兵") this->currentSelected = AISCOUT;
-        else if( text == "地方弓箭手") this->currentSelected = AIBOWMAN;
-        if(text != "敌方人物") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->animal,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        if (text == "敌方棍棒兵") this->currentSelected = AICLUBMAN;
+        else if (text == "地方斧头兵") this->currentSelected = AIAXEMAN;
+        else if (text == "地方侦察兵") this->currentSelected = AISCOUT;
+        else if (text == "地方弓箭手") this->currentSelected = AIBOWMAN;
+        if (text != "敌方人物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "瞪羚") this->currentSelected = GAZELLE;
-        else if( text == "狮子") this->currentSelected = LION;
-        else if( text == "大象") this->currentSelected = ELEPHANT;
-        if(text != "动物") call_debugText("green", " "+text,0);
-    });
-    connect(editor->ui->resource,QOverload<const QString&>::of(&QComboBox::currentIndexChanged),this,[=](const QString &text){
+        if (text == "瞪羚") this->currentSelected = GAZELLE;
+        else if (text == "狮子") this->currentSelected = LION;
+        else if (text == "大象") this->currentSelected = ELEPHANT;
+        if (text != "动物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
         QString selectedText = text;
-        if(text == "树木") this->currentSelected = TREE;
-        else if( text == "石头") this->currentSelected = STONM;
-        else if( text == "金矿") this->currentSelected = GOLDORE;
-        if(text != "公立资源") call_debugText("green", " "+text,0);
-    });
+        if (text == "树木") this->currentSelected = TREE;
+        else if (text == "石头") this->currentSelected = STONM;
+        else if (text == "金矿") this->currentSelected = GOLDORE;
+        if (text != "公立资源") call_debugText("green", " " + text, 0);
+        });
 
 
 }
 
 //******************导出地图*******************
-void MainWidget::ExportCurrentState(const char*fileName)
+void MainWidget::ExportCurrentState(const char* fileName)
 {
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -196,83 +197,83 @@ void MainWidget::ExportCurrentState(const char*fileName)
     int Resource;           // 地图块存放的资源类型（默认为无资源，即空地）
     */
     QJsonObject root;
-    for(int i=0,idx=0;i<MAP_L;++i)
-        for(int j=0;j<MAP_U;++j){
-            Block&cell=map->cell[i][j];
+    for (int i = 0, idx = 0;i < MAP_L;++i)
+        for (int j = 0;j < MAP_U;++j) {
+            Block& cell = map->cell[i][j];
             QJsonObject obj;
-            obj.insert("BlockDR",i);
-            obj.insert("BlockUR",j);
-            obj.insert("Num",cell.Num);
-            obj.insert("Visible",cell.Visible);
-            obj.insert("Explored",cell.Explored);
-            obj.insert("Type",cell.getMapType());
-            obj.insert("Pattern",cell.getMapPattern());
-            obj.insert("Height",cell.getMapHeight());
-            obj.insert("OffsetX",cell.getOffsetX());
-            obj.insert("OffsetY",cell.getOffsetY());
-            obj.insert("Resource",cell.getMapResource());
-            root.insert("Cell_"+QString::number(idx++),obj);
-    }
+            obj.insert("BlockDR", i);
+            obj.insert("BlockUR", j);
+            obj.insert("Num", cell.Num);
+            obj.insert("Visible", cell.Visible);
+            obj.insert("Explored", cell.Explored);
+            obj.insert("Type", cell.getMapType());
+            obj.insert("Pattern", cell.getMapPattern());
+            obj.insert("Height", cell.getMapHeight());
+            obj.insert("OffsetX", cell.getOffsetX());
+            obj.insert("OffsetY", cell.getOffsetY());
+            obj.insert("Resource", cell.getMapResource());
+            root.insert("Cell_" + QString::number(idx++), obj);
+        }
     //////////////保存building
-    int building_idx=0;
-    for(Building*build:player[0]->build){
+    int building_idx = 0;
+    for (Building* build : player[0]->build) {
         QJsonObject obj;
-        obj.insert("BlockDR",build->getBlockDR());
-        obj.insert("BlockUR",build->getBlockUR());
-        obj.insert("Num",build->getNum());
-        obj.insert("Own","WLH");
-        root.insert("Building_"+QString::number(building_idx++),obj);
+        obj.insert("BlockDR", build->getBlockDR());
+        obj.insert("BlockUR", build->getBlockUR());
+        obj.insert("Num", build->getNum());
+        obj.insert("Own", "WLH");
+        root.insert("Building_" + QString::number(building_idx++), obj);
     }
-    for(Building*build:player[1]->build){
+    for (Building* build : player[1]->build) {
         QJsonObject obj;
-        obj.insert("BlockDR",build->getBlockDR());
-        obj.insert("BlockUR",build->getBlockUR());
-        obj.insert("Num",build->getNum());
-        obj.insert("Own","LZ");
-        root.insert("Building_"+QString::number(building_idx++),obj);
+        obj.insert("BlockDR", build->getBlockDR());
+        obj.insert("BlockUR", build->getBlockUR());
+        obj.insert("Num", build->getNum());
+        obj.insert("Own", "LZ");
+        root.insert("Building_" + QString::number(building_idx++), obj);
     }
     ////////////////保存人物
-    int Human_idx=0;
-    for(Human*human:player[0]->human){
+    int Human_idx = 0;
+    for (Human* human : player[0]->human) {
         QJsonObject obj;
-        obj.insert("DR",human->getDR());
-        obj.insert("UR",human->getUR());
-        obj.insert("Num",human->getNum());
-        obj.insert("Sort",human->getSort()==SORT_FARMER?"Farmer":"Army");
-        obj.insert("FarmerType",human->getSort()==SORT_FARMER?((Farmer*)human)->get_farmerType():-1);
-        obj.insert("Own","WLH");
-        root.insert("Human_"+QString::number(Human_idx++),obj);
+        obj.insert("DR", human->getDR());
+        obj.insert("UR", human->getUR());
+        obj.insert("Num", human->getNum());
+        obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
+        obj.insert("FarmerType", human->getSort() == SORT_FARMER ? ((Farmer*)human)->get_farmerType() : -1);
+        obj.insert("Own", "WLH");
+        root.insert("Human_" + QString::number(Human_idx++), obj);
     }
-    for(Human*human:player[1]->human){
+    for (Human* human : player[1]->human) {
         QJsonObject obj;
-        obj.insert("DR",human->getDR());
-        obj.insert("UR",human->getUR());
-        obj.insert("Num",human->getNum());
-        obj.insert("Sort",human->getSort()==SORT_FARMER?"Farmer":"Army");
-        obj.insert("Own","LZ");
-        root.insert("Human_"+QString::number(Human_idx++),obj);
+        obj.insert("DR", human->getDR());
+        obj.insert("UR", human->getUR());
+        obj.insert("Num", human->getNum());
+        obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
+        obj.insert("Own", "LZ");
+        root.insert("Human_" + QString::number(Human_idx++), obj);
     }
     /////////////////保存静态资源
-    int res_idx=0;
-    for(StaticRes*res:map->staticres){
+    int res_idx = 0;
+    for (StaticRes* res : map->staticres) {
         QJsonObject obj;
-        obj.insert("BlockDR",res->getBlockDR());
-        obj.insert("BlockUR",res->getBlockUR());
-        obj.insert("Num",res->getNum());
-        root.insert("StaticRes_"+QString::number(res_idx++),obj);
+        obj.insert("BlockDR", res->getBlockDR());
+        obj.insert("BlockUR", res->getBlockUR());
+        obj.insert("Num", res->getNum());
+        root.insert("StaticRes_" + QString::number(res_idx++), obj);
     }
     //////////////////保存动物
-    int animal_idx=0;
-    for(Animal*animal:map->animal){
+    int animal_idx = 0;
+    for (Animal* animal : map->animal) {
         QJsonObject obj;
-        obj.insert("DR",animal->getDR());
-        obj.insert("UR",animal->getUR());
-        obj.insert("Num",animal->getNum());
-        root.insert("Animal_"+QString::number(animal_idx++),obj);
+        obj.insert("DR", animal->getDR());
+        obj.insert("UR", animal->getUR());
+        obj.insert("Num", animal->getNum());
+        root.insert("Animal_" + QString::number(animal_idx++), obj);
     }
     /////////////////////////////
     QJsonDocument doc(root);
-    stream<<doc.toJson();
+    stream << doc.toJson();
     file.close();
 }
 
@@ -280,110 +281,111 @@ void MainWidget::ExportCurrentState(const char*fileName)
 void MainWidget::updateEditor()
 {
     static int preHeight = -1;
-    static int needSave =1;
+    static int needSave = 1;
     // 如果左边一直被摁住
-    if(leftMousePress){
+    if (leftMousePress) {
         QPoint globalPos = QCursor::pos();
         QPoint localPos = mapFromGlobal(globalPos);
-        double DR = ui->Game->tranDR(localPos.x(),localPos.y())+ui->Game->DR;
-        double UR = ui->Game->tranUR(localPos.x(),localPos.y())+ui->Game->UR;
-        int L=DR/BLOCKSIDELENGTH,U=UR/BLOCKSIDELENGTH;
-        if(L<0||L>=MAP_L||U<0||U>=MAP_U)return;
-        if(needSave){
-            needSave=0;
+        double DR = ui->Game->tranDR(localPos.x(), localPos.y()) + ui->Game->DR;
+        double UR = ui->Game->tranUR(localPos.x(), localPos.y()) + ui->Game->UR;
+        int L = DR / BLOCKSIDELENGTH, U = UR / BLOCKSIDELENGTH;
+        if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
+        if (needSave) {
+            needSave = 0;
             SaveCurrentState();
         }
         switch (currentSelected) {
-            case HIGHTERLAND:
-                if(preHeight==-1)preHeight=map->cell[L][U].getMapHeight()+1;
-                HigherLand(L,U,preHeight);
-                break;
-            case OCEAN:
-                MakeOcean(L,U);
-                break;
-           case LOWERLAND:
-                if(preHeight==-1)preHeight=map->cell[L][U].getMapHeight()-1;
-                if(preHeight>=0)LowerLand(L,U,preHeight);
-                break;
-           case DELETEOBJECT:
-                clearArea(L,U);
-                break;
-           case FLAT:
-                DeleteOcean(L,U);
-                break;
-           default:
-                needSave=1;
-                delete ui->Game->RollBackState();
-                break;
+        case HIGHTERLAND:
+            if (preHeight == -1)preHeight = map->cell[L][U].getMapHeight() + 1;
+            HigherLand(L, U, preHeight);
+            break;
+        case OCEAN:
+            MakeOcean(L, U);
+            break;
+        case LOWERLAND:
+            if (preHeight == -1)preHeight = map->cell[L][U].getMapHeight() - 1;
+            if (preHeight >= 0)LowerLand(L, U, preHeight);
+            break;
+        case DELETEOBJECT:
+            clearArea(L, U);
+            break;
+        case FLAT:
+            DeleteOcean(L, U);
+            break;
+        default:
+            needSave = 1;
+            delete ui->Game->RollBackState();
+            break;
         }
     }
     else {
-        needSave=1;
-        preHeight=-1;
+        needSave = 1;
+        preHeight = -1;
     }
     // 单击生成
-    if(mouseEvent->mouseEventType==LEFT_PRESS){
-        int L=mouseEvent->DR/BLOCKSIDELENGTH,U=mouseEvent->UR/BLOCKSIDELENGTH;
-        if(L<0||L>=MAP_L||U<0||U>=MAP_U)return;
+    if (mouseEvent->mouseEventType == LEFT_PRESS) {
+        int L = mouseEvent->DR / BLOCKSIDELENGTH, U = mouseEvent->UR / BLOCKSIDELENGTH;
+        if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
         SaveCurrentState();
         //
         switch (currentSelected) {
         case TREE:
-            MakeTree(mouseEvent->DR,mouseEvent->UR);
+            MakeTree(mouseEvent->DR, mouseEvent->UR);
             break;
         case GOLDORE:
-            MakeStaticRes(L,U,GOLDORE);
+            MakeStaticRes(L, U, GOLDORE);
             break;
         case STONM:
-            MakeStaticRes(L,U,STONM);
+            MakeStaticRes(L, U, STONM);
             break;
         case ELEPHANT:
-            MakeAnimal(mouseEvent->DR,mouseEvent->UR,ELEPHANT);
+            MakeAnimal(mouseEvent->DR, mouseEvent->UR, ELEPHANT);
             break;
         case LION:
-            MakeAnimal(mouseEvent->DR,mouseEvent->UR,LION);
+            MakeAnimal(mouseEvent->DR, mouseEvent->UR, LION);
             break;
         case GAZELLE:
-            MakeAnimal(mouseEvent->DR,mouseEvent->UR,GAZELLE);
+            MakeAnimal(mouseEvent->DR, mouseEvent->UR, GAZELLE);
             break;
         case PLAYERDOWNTOWN:
-            MakeBuilding(L,U,PLAYERDOWNTOWN);
+            MakeBuilding(L, U, PLAYERDOWNTOWN);
             break;
         case AIARROWTOWER:
-            MakeBuilding(L,U,AIARROWTOWER);
+            MakeBuilding(L, U, AIARROWTOWER);
             break;
         case PLAYERFARMER:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,PLAYERFARMER);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, PLAYERFARMER);
             break;
         case AICLUBMAN:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,AICLUBMAN);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, AICLUBMAN);
             break;
         case AIBOWMAN:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,AIBOWMAN);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, AIBOWMAN);
             break;
         case AISCOUT:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,AISCOUT);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, AISCOUT);
             break;
         case PLAYERDOCK:
-            MakeBuilding(L,U,PLAYERDOCK);
+            MakeBuilding(L, U, PLAYERDOCK);
             break;
         case AIWARSHIP:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,AIWARSHIP);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, AIWARSHIP);
             break;
         case PLAYERFISHINGBOAT:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,PLAYERFISHINGBOAT);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, PLAYERFISHINGBOAT);
             break;
         case PLAYERTRANSPORTSHIP:
-            MakeHuman(mouseEvent->DR,mouseEvent->UR,PLAYERTRANSPORTSHIP);
+            MakeHuman(mouseEvent->DR, mouseEvent->UR, PLAYERTRANSPORTSHIP);
             break;
         case PLAYERFISHERY:
-            MakeStaticRes(L,U,PLAYERFISHERY);
+            MakeStaticRes(L, U, PLAYERFISHERY);
             break;
         default:
             delete ui->Game->RollBackState();
             break;
         }
-    }else if(mouseEvent->mouseEventType==RIGHT_PRESS)currentSelected=-1;
+    }
+    else if (mouseEvent->mouseEventType == RIGHT_PRESS)currentSelected = -1;
     // mouseEvent->mouseEventType=NULL_MOUSEEVENT;
 }
 
@@ -398,9 +400,10 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
         int x = (*itStatic)->getBlockDR();
         int y = (*itStatic)->getBlockUR();
         if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-            delete *itStatic;
+            delete* itStatic;
             itStatic = staticResList.erase(itStatic);
-        } else {
+        }
+        else {
             ++itStatic;
         }
     }
@@ -412,9 +415,10 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
         int x = (*itAnimal)->getBlockDR();
         int y = (*itAnimal)->getBlockUR();
         if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-            delete *itAnimal;
+            delete* itAnimal;
             itAnimal = animalList.erase(itAnimal);
-        } else {
+        }
+        else {
             ++itAnimal;
         }
     }
@@ -427,9 +431,10 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
             int x = (*itBuild)->getBlockDR();
             int y = (*itBuild)->getBlockUR();
             if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-                delete *itBuild;
+                delete* itBuild;
                 itBuild = buildList.erase(itBuild);
-            } else {
+            }
+            else {
                 ++itBuild;
             }
         }
@@ -443,50 +448,50 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
 
 void MainWidget::SaveCurrentState()
 {
-    GameState*state=new GameState;
+    GameState* state = new GameState;
     ////////////////////////
     //保存地形
-    for(int i=0;i<MAP_L;++i)for(int j=0;j<MAP_U;++j)state->cell[i][j]=map->cell[i][j];
-    for(int i=0;i<GENERATE_L;++i)for(int j=0;j<GENERATE_U;++j)state->m_heightMap[i][j]=map->m_heightMap[i][j];
+    for (int i = 0;i < MAP_L;++i)for (int j = 0;j < MAP_U;++j)state->cell[i][j] = map->cell[i][j];
+    for (int i = 0;i < GENERATE_L;++i)for (int j = 0;j < GENERATE_U;++j)state->m_heightMap[i][j] = map->m_heightMap[i][j];
     //保存我方人物信息
     {
-        Player*p=player[0];
-        state->myBuilding=p->build;
-        state->myHuman=p->human;
+        Player* p = player[0];
+        state->myBuilding = p->build;
+        state->myHuman = p->human;
     }
     //保存敌方信息
     {
-        Player*p=player[1];
-        state->myBuilding=p->build;
-        state->myHuman=p->human;
+        Player* p = player[1];
+        state->myBuilding = p->build;
+        state->myHuman = p->human;
     }
-    state->myHuman=player[0]->human;
-    state->myBuilding=player[0]->build;
-    state->enemyHuman=player[1]->human;
-    state->enemyBuilding=player[1]->build;
-    state->animal=map->animal;
-    state->resource=map->staticres;
+    state->myHuman = player[0]->human;
+    state->myBuilding = player[0]->build;
+    state->enemyHuman = player[1]->human;
+    state->enemyBuilding = player[1]->build;
+    state->animal = map->animal;
+    state->resource = map->staticres;
     //
     ////////////////////////
     ui->Game->SaveCurrentState(state);
 }
 
 
-void MainWidget::HigherLand(int blockL, int blockU,int height)
+void MainWidget::HigherLand(int blockL, int blockU, int height)
 {
-    static const int width=3;
-    static const int half=width/2;
+    static const int width = 3;
+    static const int half = width / 2;
     /////////////////////////////////////先去检查能不能去拔高(即周围不能有比他高，或者比他矮低于1的方块)
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                for(int i=-2;i<=2;++i){
-                    for(int j=-2;j<=2;++j){
-                        int l=ll+i,u=uu+j;
-                        if(l>=0&&u>=0&&l<MAP_L&&u<MAP_U){
-                            int h1=map->cell[l][u].getMapHeight();
-                            if(height<h1||height-h1>1)return;
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                for (int i = -2;i <= 2;++i) {
+                    for (int j = -2;j <= 2;++j) {
+                        int l = ll + i, u = uu + j;
+                        if (l >= 0 && u >= 0 && l < MAP_L && u < MAP_U) {
+                            int h1 = map->cell[l][u].getMapHeight();
+                            if (height < h1 || height - h1>1)return;
                         }
                     }
                 }
@@ -494,18 +499,18 @@ void MainWidget::HigherLand(int blockL, int blockU,int height)
         }
     }
     /////////////////////////////////////
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                map->m_heightMap[ll+4][uu+4]=height;
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                map->m_heightMap[ll + 4][uu + 4] = height;
                 map->cell[ll][uu].setMapHeight(height);
                 map->cell[ll][uu].reset();
             }
         }
     }
-    for(int i=0;i<MAP_L;++i){
-        for(int j=0;j<MAP_U;++j){
+    for (int i = 0;i < MAP_L;++i) {
+        for (int j = 0;j < MAP_U;++j) {
             map->cell[i][j].resetOffset();
         }
     }
@@ -517,19 +522,19 @@ void MainWidget::HigherLand(int blockL, int blockU,int height)
 
 void MainWidget::LowerLand(int blockL, int blockU, int height)
 {
-    static const int width=3;
-    static const int half=width/2;
+    static const int width = 3;
+    static const int half = width / 2;
     /////////////////////////////////////先去检查能不能去压低
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                for(int i=-2;i<=2;++i){
-                    for(int j=-2;j<=2;++j){
-                        int l=ll+i,u=uu+j;
-                        if(l>=0&&u>=0&&l<MAP_L&&u<MAP_U){
-                            int h1=map->cell[l][u].getMapHeight();
-                            if(height>h1||h1-height>1)return;
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                for (int i = -2;i <= 2;++i) {
+                    for (int j = -2;j <= 2;++j) {
+                        int l = ll + i, u = uu + j;
+                        if (l >= 0 && u >= 0 && l < MAP_L && u < MAP_U) {
+                            int h1 = map->cell[l][u].getMapHeight();
+                            if (height > h1 || h1 - height > 1)return;
                         }
                     }
                 }
@@ -537,18 +542,18 @@ void MainWidget::LowerLand(int blockL, int blockU, int height)
         }
     }
     /////////////////////////////////////
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                map->m_heightMap[ll+4][uu+4]=height;
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                map->m_heightMap[ll + 4][uu + 4] = height;
                 map->cell[ll][uu].setMapHeight(height);
                 map->cell[ll][uu].reset();
             }
         }
     }
-    for(int i=0;i<MAP_L;++i){
-        for(int j=0;j<MAP_U;++j){
+    for (int i = 0;i < MAP_L;++i) {
+        for (int j = 0;j < MAP_U;++j) {
             map->cell[i][j].resetOffset();
         }
     }
@@ -561,13 +566,13 @@ void MainWidget::LowerLand(int blockL, int blockU, int height)
 
 void MainWidget::MakeOcean(int blockL, int blockU)
 {
-    static const int width=3;
-    static const int half=width/2;
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                map->m_heightMap[ll+4][uu+4]=MAPHEIGHT_OCEAN;
+    static const int width = 3;
+    static const int half = width / 2;
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                map->m_heightMap[ll + 4][uu + 4] = MAPHEIGHT_OCEAN;
                 map->cell[ll][uu].setMapHeight(MAPHEIGHT_OCEAN);
                 map->cell[ll][uu].setOffsetX(0);
                 map->cell[ll][uu].setOffsetY(0);
@@ -575,11 +580,11 @@ void MainWidget::MakeOcean(int blockL, int blockU)
         }
     }
     map->GenerateType();
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                map->CalCellOffset(ll,uu);
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                map->CalCellOffset(ll, uu);
             }
         }
     }
@@ -589,27 +594,27 @@ void MainWidget::MakeOcean(int blockL, int blockU)
 
 void MainWidget::DeleteOcean(int blockL, int blockU)
 {
-    static const int width=3;
-    static const int half=width/2;
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                map->m_heightMap[ll+4][uu+4]=MAPHEIGHT_FLAT;
+    static const int width = 3;
+    static const int half = width / 2;
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                map->m_heightMap[ll + 4][uu + 4] = MAPHEIGHT_FLAT;
                 map->cell[ll][uu].setMapHeight(MAPHEIGHT_FLAT);
                 map->cell[ll][uu].setOffsetX(0);
                 map->cell[ll][uu].setOffsetY(0);
-                map->ResetMapType(ll,uu);
+                map->ResetMapType(ll, uu);
             }
         }
     }
 
     map->GenerateType();
-    for(int i=-half;i<=half;++i){
-        for(int j=-half;j<=half;++j){
-            int ll=blockL+i,uu=blockU+j;
-            if(ll>=0&&uu>=0&&ll<MAP_L&&uu<MAP_U){
-                map->CalCellOffset(ll,uu);
+    for (int i = -half;i <= half;++i) {
+        for (int j = -half;j <= half;++j) {
+            int ll = blockL + i, uu = blockU + j;
+            if (ll >= 0 && uu >= 0 && ll < MAP_L && uu < MAP_U) {
+                map->CalCellOffset(ll, uu);
             }
         }
     }
@@ -618,12 +623,12 @@ void MainWidget::DeleteOcean(int blockL, int blockU)
 
 void MainWidget::MakeTree(double DR, double UR)
 {
-    static const float minus=1.0;
-    std::list<Animal*>&list=map->animal;
+    static const float minus = 1.0;
+    std::list<Animal*>& list = map->animal;
     //去判断该位置是不是已经种了树了
-    int L=DR/BLOCKSIDELENGTH,U=UR/BLOCKSIDELENGTH;
-    for(Animal*res:list){
-        if(res->getBlockDR()==L&&res->getBlockUR()==U) return;
+    int L = DR / BLOCKSIDELENGTH, U = UR / BLOCKSIDELENGTH;
+    for (Animal* res : list) {
+        if (res->getBlockDR() == L && res->getBlockUR() == U) return;
     }
     map->addAnimal(0, DR, UR); // 树
 }
@@ -631,72 +636,78 @@ void MainWidget::MakeTree(double DR, double UR)
 void MainWidget::MakeStaticRes(int blockL, int blockU, int type)
 {
     //////////////////////////////去重
-    for(StaticRes*res:map->staticres){
-        if(res->getBlockDR()==blockL&&res->getBlockUR()==blockU) return;
+    for (StaticRes* res : map->staticres) {
+        if (res->getBlockDR() == blockL && res->getBlockUR() == blockU) return;
     }
     //////////////////////////////
-    if(type==GOLDORE)
+    if (type == GOLDORE)
     {
-        map->addStaticRes(2,blockL,blockU);
+        map->addStaticRes(2, blockL, blockU);
     }
-    else if(type==STONM)
+    else if (type == STONM)
     {
-        map->addStaticRes(1,blockL,blockU);
+        map->addStaticRes(1, blockL, blockU);
     }
-    else if(type==PLAYERFISHERY)
+    else if (type == PLAYERFISHERY)
     {
-        map->addStaticRes(3,blockL,blockU);
+        map->addStaticRes(3, blockL, blockU);
     }
 }
 
 void MainWidget::MakeAnimal(double DR, double UR, int type)
 {
 
-    int finalType=-1;
-    if(type==ELEPHANT)finalType=2;
-    else if(type==LION)finalType=3;
-    else if(type==GAZELLE)finalType=1;
+    int finalType = -1;
+    if (type == ELEPHANT)finalType = 2;
+    else if (type == LION)finalType = 3;
+    else if (type == GAZELLE)finalType = 1;
     /////////////////////////////////
-    if(finalType!=-1)
-        map->addAnimal(finalType,DR,UR);
+    if (finalType != -1)
+        map->addAnimal(finalType, DR, UR);
 }
 
 void MainWidget::MakeBuilding(int blockL, int blockU, int type)
 {
-    for(Building*build:player[0]->build){
-        if(build->getBlockDR()==blockL&&build->getBlockUR()==blockU)return;
+    for (Building* build : player[0]->build) {
+        if (build->getBlockDR() == blockL && build->getBlockUR() == blockU)return;
     }
-    for(Building*build:player[1]->build){
-        if(build->getBlockDR()==blockL&&build->getBlockUR()==blockU)return;
+    for (Building* build : player[1]->build) {
+        if (build->getBlockDR() == blockL && build->getBlockUR() == blockU)return;
     }
     //////////////////判断类型
-    if(type==PLAYERDOWNTOWN){
-        player[0]->addBuilding(BUILDING_CENTER,blockL,blockU,100);
+    if (type == PLAYERDOWNTOWN) {
+        player[0]->addBuilding(BUILDING_CENTER, blockL, blockU, 100);
     }
-    else if(type==AIARROWTOWER){
-        player[1]->addBuilding(BUILDING_ARROWTOWER,blockL,blockU,100);
+    else if (type == AIARROWTOWER) {
+        player[1]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);
     }
-    else if(type==PLAYERDOCK){
-        player[0]->addBuilding(BUILDING_DOCK,blockL,blockU,100);
+    else if (type == PLAYERDOCK) {
+        player[0]->addBuilding(BUILDING_DOCK, blockL, blockU, 100);
     }
 }
 
 void MainWidget::MakeHuman(double DR, double UR, int type)
 {
-    if(type==PLAYERFARMER){
-        player[0]->addFarmer(DR,UR);
-    }else if(type==AISCOUT){
-        player[1]->addArmy(AT_SCOUT,DR,UR);
-    }else if(type==AICLUBMAN){
-        player[1]->addArmy(AT_CLUBMAN,DR,UR);
-    }else if(type==AIBOWMAN){
-        player[1]->addArmy(AT_BOWMAN,DR,UR);
-    }else if(type==AIWARSHIP){
-        player[1]->addArmy(AT_SHIP,DR,UR);
-    }else if(type==PLAYERFISHINGBOAT){
-        player[0]->addShip(FARMERTYPE_WOOD_BOAT,DR,UR);
-    }else if(type==PLAYERTRANSPORTSHIP){
-        player[0]->addShip(FARMERTYPE_SAILING,DR,UR);
+    if (type == PLAYERFARMER) {
+        player[0]->addFarmer(DR, UR);
+    }
+    else if (type == AISCOUT) {
+        player[1]->addArmy(AT_SCOUT, DR, UR);
+    }
+    else if (type == AICLUBMAN) {
+        player[1]->addArmy(AT_CLUBMAN, DR, UR);
+    }
+    else if (type == AIBOWMAN) {
+        player[1]->addArmy(AT_BOWMAN, DR, UR);
+    }
+    else if (type == AIWARSHIP) {
+        player[1]->addArmy(AT_SHIP, DR, UR);
+    }
+    else if (type == PLAYERFISHINGBOAT) {
+        player[0]->addShip(FARMERTYPE_WOOD_BOAT, DR, UR);
+    }
+    else if (type == PLAYERTRANSPORTSHIP) {
+        player[0]->addShip(FARMERTYPE_SAILING, DR, UR);
     }
 }
 
@@ -704,13 +715,13 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
 
 //***************InitHelperFunctionBegin**************
 void MainWidget::initGameResources() {
-    qDebug()<<"游戏资源初始化...";
+    qDebug() << "游戏资源初始化...";
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
 }
 
 void MainWidget::initGameElements() {
-    qDebug()<<"游戏元素初始化...";
+    qDebug() << "游戏元素初始化...";
     initBlock();
     initBuilding();
     initAnimal();
@@ -721,14 +732,14 @@ void MainWidget::initGameElements() {
 }
 
 void MainWidget::initWindowProperties() {
-    qDebug()<<"游戏窗口初始化...";
+    qDebug() << "游戏窗口初始化...";
     this->setFixedSize(GAME_WIDTH, GAME_HEIGHT);
     this->setWindowTitle("Age Of Empires");
     this->setWindowIcon(QIcon());
 }
 
 void MainWidget::initOptions() {
-    qDebug()<<"窗口选项初始化...";
+    qDebug() << "窗口选项初始化...";
     //“设置”选项卡
     option = new Option();
     option->setModal(true);
@@ -736,10 +747,10 @@ void MainWidget::initOptions() {
     aboutDialog = new AboutDialog(this);
     //倍速按钮组
     pbuttonGroup = new QButtonGroup(this);
-    pbuttonGroup->addButton(ui->radioButton_1,0);
-    pbuttonGroup->addButton(ui->radioButton_2,1);
-    pbuttonGroup->addButton(ui->radioButton_4,2);
-    pbuttonGroup->addButton(ui->radioButton_8,3);
+    pbuttonGroup->addButton(ui->radioButton_1, 0);
+    pbuttonGroup->addButton(ui->radioButton_2, 1);
+    pbuttonGroup->addButton(ui->radioButton_4, 2);
+    pbuttonGroup->addButton(ui->radioButton_8, 3);
     //绑定倍速按钮
     connect(ui->radioButton_1, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
@@ -762,7 +773,7 @@ void MainWidget::initOptions() {
 }
 
 void MainWidget::initInfoPane() {
-    qDebug()<<"游戏实体属性框初始化...";
+    qDebug() << "游戏实体属性框初始化...";
     sel = new SelectWidget(this);
     sel->move(20, 810);
     sel->show();
@@ -783,17 +794,17 @@ void MainWidget::initInfoPane() {
 }
 
 void MainWidget::initGameTimer() {
-    qDebug()<<"初始化计时器...";
+    qDebug() << "初始化计时器...";
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
     timer->start(40);
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
-    connect(timer,SIGNAL(timeout()),this,SLOT(FrameUpdate()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
 }
 
 void MainWidget::initPlayers() {
-    qDebug()<<"初始化玩家...";
+    qDebug() << "初始化玩家...";
     // 开辟玩家空间
     for (int i = 0; i < MAXPLAYER; i++) {
         player[i] = new Player(i);
@@ -804,19 +815,19 @@ void MainWidget::initPlayers() {
     //设置初始时代
     player[0]->setCiv(CIVILIZATION_TOOLAGE);
     //设置初始资源
-     player[0]->changeResource(0,0,0,0);
+    player[0]->changeResource(0, 0, 0, 0);
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
 
 void MainWidget::initMap(int MapJudge) {
-    qDebug()<<"初始化地图...";
+    qDebug() << "初始化地图...";
     map = new Map;
     map->setPlayer(player);
     map->init(MapJudge);
     map->init_Map_Height();
 
     // 内存图开辟空间
-    memorymap = new int*[MEMORYROW];
+    memorymap = new int* [MEMORYROW];
     for (int i = 0; i < MEMORYROW; i++) {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
@@ -825,7 +836,7 @@ void MainWidget::initMap(int MapJudge) {
 }
 
 void MainWidget::initAI() {
-    qDebug()<<"加载AI...";
+    qDebug() << "加载AI...";
     UsrAi = new UsrAI();
     EnemyAi = new EnemyAI();
     connect(this, &MainWidget::startAI, UsrAi, &AI::startProcessing);
@@ -837,21 +848,21 @@ void MainWidget::initAI() {
 }
 
 void MainWidget::setupCore() {
-    qDebug()<<"加载内核...";
-    core = new Core(map,player,memorymap,mouseEvent);
+    qDebug() << "加载内核...";
+    core = new Core(map, player, memorymap, mouseEvent);
     sel->setCore(core);
     core->sel = sel;
 }
 
 void MainWidget::setupMouseTracking() {
-    qDebug()<<"设置鼠标跟踪...";
+    qDebug() << "设置鼠标跟踪...";
     ui->Game->setMouseTracking(true);
     ui->Game->setAttribute(Qt::WA_MouseTracking, true);
     ui->Game->installEventFilter(this);
 }
 
 void MainWidget::setupTipLabel() {
-    qDebug()<<"设置信息栏文本颜色...";
+    qDebug() << "设置信息栏文本颜色...";
     QPalette pe;
     pe.setColor(QPalette::WindowText, Qt::green);
     ui->tip->setPalette(pe);
@@ -859,7 +870,7 @@ void MainWidget::setupTipLabel() {
 }
 
 void MainWidget::initBGM() {
-    qDebug()<<"加载背景音乐...";
+    qDebug() << "加载背景音乐...";
     bgm = SoundMap["BGM"];
     if (bgm != NULL) {
         bgm->setLoopCount(QSoundEffect::Infinite);
@@ -868,7 +879,7 @@ void MainWidget::initBGM() {
 }
 
 void MainWidget::initViewMap() {
-    qDebug()<<"初始化小地图...";
+    qDebug() << "初始化小地图...";
     ui->mapView->setFriendlyFarmerList(&(player[0]->human));
     ui->mapView->setEnemyFarmerList(&(player[1]->human));
     ui->mapView->setFriendlyBuildList(&(player[0]->build));
@@ -900,14 +911,14 @@ MainWidget::~MainWidget()
     delete core;
 }
 
-void MainWidget::paintEvent(QPaintEvent *)
+void MainWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     QPixmap pix;
-    pix=resMap["Interface"].front();
-    painter.drawPixmap(0,0,1440,45,pix);
-    pix=resMap["Interface"].back();
-    painter.drawPixmap(0,GAME_HEIGHT - 203.5,1440,203.5,pix);
+    pix = resMap["Interface"].front();
+    painter.drawPixmap(0, 0, 1440, 45, pix);
+    pix = resMap["Interface"].back();
+    painter.drawPixmap(0, GAME_HEIGHT - 203.5, 1440, 203.5, pix);
 
 }
 
@@ -915,14 +926,14 @@ void MainWidget::paintEvent(QPaintEvent *)
 // 初始化区块
 void MainWidget::initBlock()
 {
-    for(int num=0;num<BLOCK_COUNT;num++)
+    for (int num = 0;num < BLOCK_COUNT;num++)
     {
         Block::allocateblock(num);
-        loadResource(Block::getBlockname(num),Block::getblock(num));
+        loadResource(Block::getBlockname(num), Block::getblock(num));
         Block::allocategrayblock(num);
         loadGrayRes(Block::getblock(num), Block::getgrayblock(num));
         Block::allocateblackblock(num);
-        loadBlackRes(Block::getblock(num),Block::getblackblock(num));
+        loadBlackRes(Block::getblock(num), Block::getblackblock(num));
     }
 }
 
@@ -932,110 +943,110 @@ void MainWidget::initBuilding()
     for (int i = 0; i < 4; i++)
     {
         Building::allocatebuild(i);
-        loadResource(Building::getBuildingname(i),Building::getBuild(i));
+        loadResource(Building::getBuildingname(i), Building::getBuild(i));
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<11;j++)
+        for (int j = 0;j < 11;j++)
         {
-            Building::allocatebuilt(i,j);
-            loadResource(Building::getBuiltname(i,j),Building::getBuilt(i,j));
+            Building::allocatebuilt(i, j);
+            loadResource(Building::getBuiltname(i, j), Building::getBuilt(i, j));
         }
     }
 
-    for(int type = 0; type < 3; type++)
+    for (int type = 0; type < 3; type++)
     {
         Building::allocatebuildFire(type);
         loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
     }
 
     //市镇中心
-    Building::setActNames(BUILDING_CENTER , 0 , ACT_CREATEFARMER);
-    Building::setActNames(BUILDING_CENTER , 1 , ACT_UPGRADE_AGE);
+    Building::setActNames(BUILDING_CENTER, 0, ACT_CREATEFARMER);
+    Building::setActNames(BUILDING_CENTER, 1, ACT_UPGRADE_AGE);
     //谷仓
-    Building::setActNames(BUILDING_GRANARY , 0 , ACT_RESEARCH_WALL);
-    Building::setActNames(BUILDING_GRANARY , 1 , ACT_UPGRADE_TOWERBUILD);
+    Building::setActNames(BUILDING_GRANARY, 0, ACT_RESEARCH_WALL);
+    Building::setActNames(BUILDING_GRANARY, 1, ACT_UPGRADE_TOWERBUILD);
     //仓库
-    Building::setActNames(BUILDING_STOCK , 0 , ACT_STOCK_UPGRADE_USETOOL);
-    Building::setActNames(BUILDING_STOCK , 1 , ACT_STOCK_UPGRADE_DEFENSE_INFANTRY);
-    Building::setActNames(BUILDING_STOCK , 2 , ACT_STOCK_UPGRADE_DEFENSE_ARCHER);
-    Building::setActNames(BUILDING_STOCK , 3 , ACT_STOCK_UPGRADE_DEFENSE_RIDER);
+    Building::setActNames(BUILDING_STOCK, 0, ACT_STOCK_UPGRADE_USETOOL);
+    Building::setActNames(BUILDING_STOCK, 1, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY);
+    Building::setActNames(BUILDING_STOCK, 2, ACT_STOCK_UPGRADE_DEFENSE_ARCHER);
+    Building::setActNames(BUILDING_STOCK, 3, ACT_STOCK_UPGRADE_DEFENSE_RIDER);
     //市场
-    Building::setActNames(BUILDING_MARKET , 0 , ACT_UPGRADE_WOOD);
-    Building::setActNames(BUILDING_MARKET , 1 , ACT_UPGRADE_STONE);
-    Building::setActNames(BUILDING_MARKET , 2 , ACT_UPGRADE_FARM);
-    Building::setActNames(BUILDING_MARKET , 3 , ACT_UPGRADE_GOLD);
+    Building::setActNames(BUILDING_MARKET, 0, ACT_UPGRADE_WOOD);
+    Building::setActNames(BUILDING_MARKET, 1, ACT_UPGRADE_STONE);
+    Building::setActNames(BUILDING_MARKET, 2, ACT_UPGRADE_FARM);
+    Building::setActNames(BUILDING_MARKET, 3, ACT_UPGRADE_GOLD);
     //军队
-    Building::setActNames(BUILDING_ARMYCAMP , 0 , ACT_ARMYCAMP_CREATE_CLUBMAN);
-    Building::setActNames(BUILDING_ARMYCAMP , 5 , ACT_ARMYCAMP_UPGRADE_CLUBMAN);
-    Building::setActNames(BUILDING_ARMYCAMP , 3 , ACT_ARMYCAMP_CREATE_SLINGER);
-    Building::setActNames(BUILDING_RANGE , 0 , ACT_RANGE_CREATE_BOWMAN);
-    Building::setActNames(BUILDING_STABLE , 0 , ACT_STABLE_CREATE_SCOUT);
+    Building::setActNames(BUILDING_ARMYCAMP, 0, ACT_ARMYCAMP_CREATE_CLUBMAN);
+    Building::setActNames(BUILDING_ARMYCAMP, 5, ACT_ARMYCAMP_UPGRADE_CLUBMAN);
+    Building::setActNames(BUILDING_ARMYCAMP, 3, ACT_ARMYCAMP_CREATE_SLINGER);
+    Building::setActNames(BUILDING_RANGE, 0, ACT_RANGE_CREATE_BOWMAN);
+    Building::setActNames(BUILDING_STABLE, 0, ACT_STABLE_CREATE_SCOUT);
     //船坞
-    Building::setActNames(BUILDING_DOCK , 0 , ACT_DOCK_CREATE_SAILING);
-    Building::setActNames(BUILDING_DOCK , 1 , ACT_DOCK_CREATE_WOOD_BOAT);
-    Building::setActNames(BUILDING_DOCK , 2 , ACT_DOCK_CREATE_SHIP);
+    Building::setActNames(BUILDING_DOCK, 0, ACT_DOCK_CREATE_SAILING);
+    Building::setActNames(BUILDING_DOCK, 1, ACT_DOCK_CREATE_WOOD_BOAT);
+    Building::setActNames(BUILDING_DOCK, 2, ACT_DOCK_CREATE_SHIP);
 }
 
 // 初始化动物
 void MainWidget::initAnimal()
 {
-    for(int num=0;num<5;num++)
+    for (int num = 0;num < 5;num++)
     {
-        if(num==ANIMAL_TREE)
+        if (num == ANIMAL_TREE)
         {
-            Animal::allocateStand(num,0);
-            Animal::allocateDie(num,0);
-            loadResource(Animal::getAnimalName(num),Animal::getStand(num,0));
-            loadResource(Animal::getAnimalcarcassname(num),Animal::getDie(num,0));
+            Animal::allocateStand(num, 0);
+            Animal::allocateDie(num, 0);
+            loadResource(Animal::getAnimalName(num), Animal::getStand(num, 0));
+            loadResource(Animal::getAnimalcarcassname(num), Animal::getDie(num, 0));
             continue;
         }
-        else if(num == ANIMAL_FOREST)
+        else if (num == ANIMAL_FOREST)
         {
-            Animal::allocateStand(num,0);
-            Animal::allocateDie(num,0);
-            loadResource(Animal::getAnimalName(num),Animal::getStand(num,0));
-            loadResource(Animal::getAnimalcarcassname(num),Animal::getDie(num,0));
+            Animal::allocateStand(num, 0);
+            Animal::allocateDie(num, 0);
+            loadResource(Animal::getAnimalName(num), Animal::getStand(num, 0));
+            loadResource(Animal::getAnimalcarcassname(num), Animal::getDie(num, 0));
             continue;
         }
-        if(num==ANIMAL_GAZELLE||num==ANIMAL_LION)
+        if (num == ANIMAL_GAZELLE || num == ANIMAL_LION)
         {
-            for(int i=0;i<=4;i++)
+            for (int i = 0;i <= 4;i++)
             {
-                Animal::allocateRun(num,i);
-                loadResource(Animal::getAnimalName(num)+"_Run_"+direction[i],Animal::getRun(num,i));
+                Animal::allocateRun(num, i);
+                loadResource(Animal::getAnimalName(num) + "_Run_" + direction[i], Animal::getRun(num, i));
             }
-            for(int i=5;i<8;i++)
+            for (int i = 5;i < 8;i++)
             {
-                Animal::allocateRun(num,i);
-                flipResource(Animal::getRun(num,8-i),Animal::getRun(num,i));
+                Animal::allocateRun(num, i);
+                flipResource(Animal::getRun(num, 8 - i), Animal::getRun(num, i));
             }
         }
-        for(int i=0;i<=4;i++)
+        for (int i = 0;i <= 4;i++)
         {
-            Animal::allocateAttack(num,i);
-            Animal::allocateWalk(num,i);
-            Animal::allocateStand(num,i);
-            Animal::allocateDie(num,i);
-            Animal::allocateDisappear(num,i);
-            loadResource(Animal::getAnimalName(num)+"_Stand_"+direction[i],Animal::getStand(num,i));
-            loadResource(Animal::getAnimalName(num)+"_Walk_"+direction[i],Animal::getWalk(num,i));
-            loadResource(Animal::getAnimalName(num)+"_Attack_"+direction[i],Animal::getAttack(num,i));
-            loadResource(Animal::getAnimalName(num)+"_Die_"+direction[i],Animal::getDie(num,i));
-            loadResource(Animal::getAnimalName(num)+"_Disappear_"+direction[i],Animal::getDisappear(num,i));
+            Animal::allocateAttack(num, i);
+            Animal::allocateWalk(num, i);
+            Animal::allocateStand(num, i);
+            Animal::allocateDie(num, i);
+            Animal::allocateDisappear(num, i);
+            loadResource(Animal::getAnimalName(num) + "_Stand_" + direction[i], Animal::getStand(num, i));
+            loadResource(Animal::getAnimalName(num) + "_Walk_" + direction[i], Animal::getWalk(num, i));
+            loadResource(Animal::getAnimalName(num) + "_Attack_" + direction[i], Animal::getAttack(num, i));
+            loadResource(Animal::getAnimalName(num) + "_Die_" + direction[i], Animal::getDie(num, i));
+            loadResource(Animal::getAnimalName(num) + "_Disappear_" + direction[i], Animal::getDisappear(num, i));
         }
-        for(int i=5;i<8;i++)
+        for (int i = 5;i < 8;i++)
         {
-            Animal::allocateAttack(num,i);
-            Animal::allocateWalk(num,i);
-            Animal::allocateStand(num,i);
-            Animal::allocateDie(num,i);
-            Animal::allocateDisappear(num,i);
-            flipResource(Animal::getWalk(num,8-i),Animal::getWalk(num,i));
-            flipResource(Animal::getStand(num,8-i),Animal::getStand(num,i));
-            flipResource(Animal::getAttack(num,8-i),Animal::getAttack(num,i));
-            flipResource(Animal::getDie(num,8-i),Animal::getDie(num,i));
-            flipResource(Animal::getDisappear(num,8-i),Animal::getDisappear(num,i));
+            Animal::allocateAttack(num, i);
+            Animal::allocateWalk(num, i);
+            Animal::allocateStand(num, i);
+            Animal::allocateDie(num, i);
+            Animal::allocateDisappear(num, i);
+            flipResource(Animal::getWalk(num, 8 - i), Animal::getWalk(num, i));
+            flipResource(Animal::getStand(num, 8 - i), Animal::getStand(num, i));
+            flipResource(Animal::getAttack(num, 8 - i), Animal::getAttack(num, i));
+            flipResource(Animal::getDie(num, 8 - i), Animal::getDie(num, i));
+            flipResource(Animal::getDisappear(num, 8 - i), Animal::getDisappear(num, i));
         }
     }
 }
@@ -1043,10 +1054,10 @@ void MainWidget::initAnimal()
 // 初始化不可移动的资源
 void MainWidget::initStaticResource()
 {
-    for(int num = 0; num<4; num++)
+    for (int num = 0; num < 4; num++)
     {
         StaticRes::allocateStaticResource(num);
-        loadResource(StaticRes::getStaticResName(num) , StaticRes::getStaticResource(num));
+        loadResource(StaticRes::getStaticResName(num), StaticRes::getStaticResource(num));
     }
 }
 
@@ -1056,99 +1067,99 @@ void MainWidget::initFarmer()
     //加载素材
     //"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker","Fisher"
 
-    for(int statei=0;statei<8;statei++)
+    for (int statei = 0;statei < 8;statei++)
     {
-        for(int i=0;i<=4;i++)
+        for (int i = 0;i <= 4;i++)
         {
-            Farmer::allocateWalk(statei,i);
-            Farmer::allocateStand(statei,i);
-            Farmer::allocateDie(statei,i);
-            Farmer::allocateDisappear(statei,i);
-            loadResource(Farmer::getFarmerName(statei)+"_Stand_"+direction[i],Farmer::getStand(statei,i));
-            loadResource(Farmer::getFarmerName(statei)+"_Walk_"+direction[i],Farmer::getWalk(statei,i));
-            loadResource(Farmer::getFarmerName(statei)+"_Die_"+direction[i],Farmer::getDie(statei,i));
-            loadResource(Farmer::getFarmerName(statei)+"_Disappear_"+direction[i],Farmer::getDisappear(statei,i));
+            Farmer::allocateWalk(statei, i);
+            Farmer::allocateStand(statei, i);
+            Farmer::allocateDie(statei, i);
+            Farmer::allocateDisappear(statei, i);
+            loadResource(Farmer::getFarmerName(statei) + "_Stand_" + direction[i], Farmer::getStand(statei, i));
+            loadResource(Farmer::getFarmerName(statei) + "_Walk_" + direction[i], Farmer::getWalk(statei, i));
+            loadResource(Farmer::getFarmerName(statei) + "_Die_" + direction[i], Farmer::getDie(statei, i));
+            loadResource(Farmer::getFarmerName(statei) + "_Disappear_" + direction[i], Farmer::getDisappear(statei, i));
         }
-        for(int i=5;i<8;i++)
+        for (int i = 5;i < 8;i++)
         {
-            Farmer::allocateWalk(statei,i);
-            Farmer::allocateStand(statei,i);
-            Farmer::allocateDie(statei,i);
-            Farmer::allocateDisappear(statei,i);
-            flipResource(Farmer::getWalk(statei,8-i),Farmer::getWalk(statei,i));
-            flipResource(Farmer::getStand(statei,8-i),Farmer::getStand(statei,i));
-            flipResource(Farmer::getDie(statei,8-i),Farmer::getDie(statei,i));
-            flipResource(Farmer::getDisappear(statei,8-i),Farmer::getDisappear(statei,i));
+            Farmer::allocateWalk(statei, i);
+            Farmer::allocateStand(statei, i);
+            Farmer::allocateDie(statei, i);
+            Farmer::allocateDisappear(statei, i);
+            flipResource(Farmer::getWalk(statei, 8 - i), Farmer::getWalk(statei, i));
+            flipResource(Farmer::getStand(statei, 8 - i), Farmer::getStand(statei, i));
+            flipResource(Farmer::getDie(statei, 8 - i), Farmer::getDie(statei, i));
+            flipResource(Farmer::getDisappear(statei, 8 - i), Farmer::getDisappear(statei, i));
         }
     }
     // Work
-    for(int statei=0;statei<8;statei++)
+    for (int statei = 0;statei < 8;statei++)
     {
-        if(statei==0)
+        if (statei == 0)
         {
             continue;
         }
-        for(int i=0;i<=4;i++)
+        for (int i = 0;i <= 4;i++)
         {
-            Farmer::allocateWork(statei,i);
-            loadResource(Farmer::getFarmerName(statei)+"_Work_"+direction[i],Farmer::getWork(statei,i));
+            Farmer::allocateWork(statei, i);
+            loadResource(Farmer::getFarmerName(statei) + "_Work_" + direction[i], Farmer::getWork(statei, i));
         }
-        for(int i=5;i<8;i++)
+        for (int i = 5;i < 8;i++)
         {
-            Farmer::allocateWork(statei,i);
-            flipResource(Farmer::getWork(statei,8-i),Farmer::getWork(statei,i));
+            Farmer::allocateWork(statei, i);
+            flipResource(Farmer::getWork(statei, 8 - i), Farmer::getWork(statei, i));
         }
     }
     // Attack
-    for(int statei=0;statei<8;statei++)
+    for (int statei = 0;statei < 8;statei++)
     {
-        if(statei==2||statei==3||statei==5||statei==6)
+        if (statei == 2 || statei == 3 || statei == 5 || statei == 6)
         {
             continue;
         }
-        for(int i=0;i<=4;i++)
+        for (int i = 0;i <= 4;i++)
         {
-            Farmer::allocateAttack(statei,i);
-            loadResource(Farmer::getFarmerName(statei)+"_Attack_"+direction[i],Farmer::getAttack(statei,i));
+            Farmer::allocateAttack(statei, i);
+            loadResource(Farmer::getFarmerName(statei) + "_Attack_" + direction[i], Farmer::getAttack(statei, i));
         }
-        for(int i=5;i<8;i++)
+        for (int i = 5;i < 8;i++)
         {
-            Farmer::allocateAttack(statei,i);
-            flipResource(Farmer::getAttack(statei,8-i),Farmer::getAttack(statei,i));
+            Farmer::allocateAttack(statei, i);
+            flipResource(Farmer::getAttack(statei, 8 - i), Farmer::getAttack(statei, i));
         }
     }
     // Carry 考虑如何对接
-    for(int statei=0;statei<=6;statei++)
+    for (int statei = 0;statei <= 6;statei++)
     {
-        if(statei==0||statei==5)
+        if (statei == 0 || statei == 5)
         {
             continue;
         }
-        for(int i=0;i<=4;i++)
+        for (int i = 0;i <= 4;i++)
         {
-            Farmer::allocateCarry(statei,i);
-            loadResource(Farmer::getFarmerCarry(statei)+"_"+direction[i],Farmer::getCarry(statei,i));
+            Farmer::allocateCarry(statei, i);
+            loadResource(Farmer::getFarmerCarry(statei) + "_" + direction[i], Farmer::getCarry(statei, i));
         }
-        for(int i=5;i<8;i++)
+        for (int i = 5;i < 8;i++)
         {
-            Farmer::allocateCarry(statei,i);
-            flipResource(Farmer::getCarry(statei,8-i),Farmer::getCarry(statei,i));
+            Farmer::allocateCarry(statei, i);
+            flipResource(Farmer::getCarry(statei, 8 - i), Farmer::getCarry(statei, i));
         }
     }
     //船
-    string shipName[]={"","Wood_Boat","Sailing"};
-    for(int type=1;type<=2;type++)
+    string shipName[] = { "","Wood_Boat","Sailing" };
+    for (int type = 1;type <= 2;type++)
     {
-        string&sN=shipName[type];
-        for(int i=0;i<=4;i++)
+        string& sN = shipName[type];
+        for (int i = 0;i <= 4;i++)
         {
-            Farmer::allocateShipStand(type,i);
-            loadResource(sN+"_Stand_"+direction[i],Farmer::getShipStand(type,i));
+            Farmer::allocateShipStand(type, i);
+            loadResource(sN + "_Stand_" + direction[i], Farmer::getShipStand(type, i));
         }
-        for(int i=5;i<8;i++)
+        for (int i = 5;i < 8;i++)
         {
-            Farmer::allocateShipStand(type,i);
-            flipResource(Farmer::getShipStand(type,8-i),Farmer::getShipStand(type,i));
+            Farmer::allocateShipStand(type, i);
+            flipResource(Farmer::getShipStand(type, 8 - i), Farmer::getShipStand(type, i));
         }
     }
 }
@@ -1159,57 +1170,57 @@ void MainWidget::initArmy()
     //"Archer","Axeman","Clubman","Scout"
 
     // Stand Walk Die
-    for(int statei=0;statei<8;statei++)
+    for (int statei = 0;statei < 8;statei++)
     {
-        for(int level = 0 ; level<2;level++)
+        for (int level = 0; level < 2;level++)
         {
-            for(int i=0;i<=4;i++)
+            for (int i = 0;i <= 4;i++)
             {
-                Army::allocateWalk(0,statei,level,i);
-                Army::allocateStand(0,statei,level,i);
-                Army::allocateDie(0,statei,level,i);
-                Army::allocateDisappear(0,statei,level,i);
-                Army::allocateAttack(0,statei,level,i);
-                loadResource(Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(0,statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Disappear_"+direction[i],Army::getDisappear(0,statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(0,statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(0,statei,level,i));
-                loadResource(Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(0,statei,level,i));
+                Army::allocateWalk(0, statei, level, i);
+                Army::allocateStand(0, statei, level, i);
+                Army::allocateDie(0, statei, level, i);
+                Army::allocateDisappear(0, statei, level, i);
+                Army::allocateAttack(0, statei, level, i);
+                loadResource(Army::getArmyName(statei, level) + "_Attack_" + direction[i], Army::getAttack(0, statei, level, i));
+                loadResource(Army::getArmyName(statei, level) + "_Disappear_" + direction[i], Army::getDisappear(0, statei, level, i));
+                loadResource(Army::getArmyName(statei, level) + "_Stand_" + direction[i], Army::getStand(0, statei, level, i));
+                loadResource(Army::getArmyName(statei, level) + "_Walk_" + direction[i], Army::getWalk(0, statei, level, i));
+                loadResource(Army::getArmyName(statei, level) + "_Die_" + direction[i], Army::getDie(0, statei, level, i));
 
-                Army::allocateWalk(1,statei,level,i);
-                Army::allocateStand(1,statei,level,i);
-                Army::allocateDie(1,statei,level,i);
-                Army::allocateDisappear(1,statei,level,i);
-                Army::allocateAttack(1,statei,level,i);
-                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Attack_"+direction[i],Army::getAttack(1,statei,level,i));
-                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Disappear_"+direction[i],Army::getDisappear(1,statei,level,i));
-                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Stand_"+direction[i],Army::getStand(1,statei,level,i));
-                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Walk_"+direction[i],Army::getWalk(1,statei,level,i));
-                loadResource("Enemy_"+Army::getArmyName(statei,level)+"_Die_"+direction[i],Army::getDie(1,statei,level,i));
+                Army::allocateWalk(1, statei, level, i);
+                Army::allocateStand(1, statei, level, i);
+                Army::allocateDie(1, statei, level, i);
+                Army::allocateDisappear(1, statei, level, i);
+                Army::allocateAttack(1, statei, level, i);
+                loadResource("Enemy_" + Army::getArmyName(statei, level) + "_Attack_" + direction[i], Army::getAttack(1, statei, level, i));
+                loadResource("Enemy_" + Army::getArmyName(statei, level) + "_Disappear_" + direction[i], Army::getDisappear(1, statei, level, i));
+                loadResource("Enemy_" + Army::getArmyName(statei, level) + "_Stand_" + direction[i], Army::getStand(1, statei, level, i));
+                loadResource("Enemy_" + Army::getArmyName(statei, level) + "_Walk_" + direction[i], Army::getWalk(1, statei, level, i));
+                loadResource("Enemy_" + Army::getArmyName(statei, level) + "_Die_" + direction[i], Army::getDie(1, statei, level, i));
             }
-            for(int i=5;i<8;i++)
+            for (int i = 5;i < 8;i++)
             {
-                Army::allocateWalk(0,statei,level,i);
-                Army::allocateStand(0,statei,level,i);
-                Army::allocateDie(0,statei,level,i);
-                Army::allocateDisappear(0,statei,level,i);
-                Army::allocateAttack(0,statei,level,i);
-                flipResource(Army::getAttack(0,statei,level,8-i),Army::getAttack(0,statei,level,i));
-                flipResource(Army::getDisappear(0,statei,level,8-i),Army::getDisappear(0,statei,level,i));
-                flipResource(Army::getWalk(0,statei,level,8-i),Army::getWalk(0,statei,level,i));
-                flipResource(Army::getStand(0,statei,level,8-i),Army::getStand(0,statei,level,i));
-                flipResource(Army::getDie(0,statei,level,8-i),Army::getDie(0,statei,level,i));
+                Army::allocateWalk(0, statei, level, i);
+                Army::allocateStand(0, statei, level, i);
+                Army::allocateDie(0, statei, level, i);
+                Army::allocateDisappear(0, statei, level, i);
+                Army::allocateAttack(0, statei, level, i);
+                flipResource(Army::getAttack(0, statei, level, 8 - i), Army::getAttack(0, statei, level, i));
+                flipResource(Army::getDisappear(0, statei, level, 8 - i), Army::getDisappear(0, statei, level, i));
+                flipResource(Army::getWalk(0, statei, level, 8 - i), Army::getWalk(0, statei, level, i));
+                flipResource(Army::getStand(0, statei, level, 8 - i), Army::getStand(0, statei, level, i));
+                flipResource(Army::getDie(0, statei, level, 8 - i), Army::getDie(0, statei, level, i));
 
-                Army::allocateWalk(1,statei,level,i);
-                Army::allocateStand(1,statei,level,i);
-                Army::allocateDie(1,statei,level,i);
-                Army::allocateDisappear(1,statei,level,i);
-                Army::allocateAttack(1,statei,level,i);
-                flipResource(Army::getAttack(1,statei,level,8-i),Army::getAttack(1,statei,level,i));
-                flipResource(Army::getDisappear(1,statei,level,8-i),Army::getDisappear(1,statei,level,i));
-                flipResource(Army::getWalk(1,statei,level,8-i),Army::getWalk(1,statei,level,i));
-                flipResource(Army::getStand(1,statei,level,8-i),Army::getStand(1,statei,level,i));
-                flipResource(Army::getDie(1,statei,level,8-i),Army::getDie(1,statei,level,i));
+                Army::allocateWalk(1, statei, level, i);
+                Army::allocateStand(1, statei, level, i);
+                Army::allocateDie(1, statei, level, i);
+                Army::allocateDisappear(1, statei, level, i);
+                Army::allocateAttack(1, statei, level, i);
+                flipResource(Army::getAttack(1, statei, level, 8 - i), Army::getAttack(1, statei, level, i));
+                flipResource(Army::getDisappear(1, statei, level, 8 - i), Army::getDisappear(1, statei, level, i));
+                flipResource(Army::getWalk(1, statei, level, 8 - i), Army::getWalk(1, statei, level, i));
+                flipResource(Army::getStand(1, statei, level, 8 - i), Army::getStand(1, statei, level, i));
+                flipResource(Army::getDie(1, statei, level, 8 - i), Army::getDie(1, statei, level, i));
             }
         }
     }
@@ -1220,17 +1231,17 @@ void MainWidget::initMissile()
 {
     //加载飞行物素材
 
-    for(int statei = 0; statei<NUMBER_MISSILE; statei++)
+    for (int statei = 0; statei < NUMBER_MISSILE; statei++)
     {
         Missile::allocatemissile(statei);
-        loadResource(Missile::getMissilename(statei),Missile::getmissile(statei));
+        loadResource(Missile::getMissilename(statei), Missile::getmissile(statei));
     }
 }
 
 // 删除区块资源
 void MainWidget::deleteBlock()
 {
-    for(int i=0;i<1;i++)
+    for (int i = 0;i < 1;i++)
     {
         Block::deallocateblock(i);
         Block::deallocateblackblock(i);
@@ -1247,13 +1258,13 @@ void MainWidget::deleteBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for(int j=0;j<10;j++)
+        for (int j = 0;j < 10;j++)
         {
-            Building::deallocatebuilt(i,j);
+            Building::deallocatebuilt(i, j);
         }
     }
 
-    for(int type = 0; type<3; type++)
+    for (int type = 0; type < 3; type++)
     {
         Building::deallocatebuildFire(type);
     }
@@ -1270,7 +1281,7 @@ void MainWidget::deleteAnimal()
             Animal::deallocateDie(num, 0);
             continue;
         }
-        if (num == 1|| num == 3)
+        if (num == 1 || num == 3)
         {
             for (int i = 0; i <= 4; i++)
             {
@@ -1287,7 +1298,7 @@ void MainWidget::deleteAnimal()
             Animal::deallocateWalk(num, i);
             Animal::deallocateStand(num, i);
             Animal::deallocateDie(num, i);
-            Animal::deallocateDisappear(num,i);
+            Animal::deallocateDisappear(num, i);
         }
         for (int i = 5; i < 8; i++)
         {
@@ -1295,7 +1306,7 @@ void MainWidget::deleteAnimal()
             Animal::deallocateWalk(num, i);
             Animal::deallocateStand(num, i);
             Animal::deallocateDie(num, i);
-            Animal::deallocateDisappear(num,i);
+            Animal::deallocateDisappear(num, i);
         }
     }
 }
@@ -1303,7 +1314,7 @@ void MainWidget::deleteAnimal()
 // 删除不可移动的资源
 void MainWidget::deleteStaticResource()
 {
-    for(int num = 0; num<3; num++)
+    for (int num = 0; num < 3; num++)
         StaticRes::deallocateStaticResource(num);
 }
 
@@ -1311,9 +1322,9 @@ void MainWidget::deleteStaticResource()
 void MainWidget::deleteFarmer()
 {
     // 清理素材资源
-    for(int statei = 0; statei < 7; statei++)
+    for (int statei = 0; statei < 7; statei++)
     {
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
             Farmer::deallocateWalk(statei, i);
             Farmer::deallocateStand(statei, i);
@@ -1323,42 +1334,42 @@ void MainWidget::deleteFarmer()
     }
 
     // 清理 Work 资源
-    for(int statei = 0; statei < 7; statei++)
+    for (int statei = 0; statei < 7; statei++)
     {
-        if(statei == 0)
+        if (statei == 0)
         {
             continue;
         }
 
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
             Farmer::deallocateWork(statei, i);
         }
     }
 
     // 清理 Attack 资源
-    for(int statei = 0; statei < 7; statei++)
+    for (int statei = 0; statei < 7; statei++)
     {
-        if(statei == 2 || statei == 3 || statei == 5 || statei == 6)
+        if (statei == 2 || statei == 3 || statei == 5 || statei == 6)
         {
             continue;
         }
 
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
             Farmer::deallocateAttack(statei, i);
         }
     }
 
     // 清理 Carry 资源
-    for(int statei = 0; statei <= 4; statei++)
+    for (int statei = 0; statei <= 4; statei++)
     {
-        if(statei == 0)
+        if (statei == 0)
         {
             continue;
         }
 
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
             Farmer::deallocateCarry(statei, i);
         }
@@ -1369,19 +1380,19 @@ void MainWidget::deleteFarmer()
 void MainWidget::deleteArmy()
 {
     // 清理素材资源
-    for(int statei = 0; statei < 7; statei++)
+    for (int statei = 0; statei < 7; statei++)
     {
-        for(int level = 0 ;level<2;level++)
+        for (int level = 0;level < 2;level++)
         {
-            for(int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
-                for(int re = 0 ; re <NOWPLAYER; re++)
+                for (int re = 0; re < NOWPLAYER; re++)
                 {
-                    Army::deallocateWalk(re, statei,level, i);
-                    Army::deallocateStand(re, statei,level, i);
-                    Army::deallocateDie(re , statei,level, i);
-                    Army::deallocateAttack(re , statei,level, i);
-                    Army::deallocateDisappear(re , statei,level, i);
+                    Army::deallocateWalk(re, statei, level, i);
+                    Army::deallocateStand(re, statei, level, i);
+                    Army::deallocateDie(re, statei, level, i);
+                    Army::deallocateAttack(re, statei, level, i);
+                    Army::deallocateDisappear(re, statei, level, i);
                 }
             }
         }
@@ -1391,41 +1402,41 @@ void MainWidget::deleteArmy()
 // 删除飞行物资源
 void MainWidget::deleteMissile()
 {
-    for(int statei = 0; statei < NUMBER_MISSILE; statei++ ) Missile::deallocatemissile(statei);
+    for (int statei = 0; statei < NUMBER_MISSILE; statei++) Missile::deallocatemissile(statei);
 }
 
-bool MainWidget::eventFilter(QObject *watched, QEvent *event)
+bool MainWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    for(int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++)
     {
-        if(watched == acts[i] && !acts[i]->isHidden()) {
-            if(event->type() == QEvent::HoverEnter) {
+        if (watched == acts[i] && !acts[i]->isHidden()) {
+            if (event->type() == QEvent::HoverEnter) {
                 ui->tip->setText(QString::fromStdString(actNames[sel->actions[i]]));
-                if(acts[i]->getStatus() != 2)
+                if (acts[i]->getStatus() != 2)
                 {
                     acts[i]->setStatus(0);
                     acts[i]->update();
                 }
             }
-            else if(event->type() == QEvent::MouseButtonRelease && acts[i]->getStatus() != 2){
+            else if (event->type() == QEvent::MouseButtonRelease && acts[i]->getStatus() != 2) {
                 acts[i]->setStatus(0);
             }
-            else if(event->type() == QEvent::MouseButtonPress && acts[i]->getStatus() != 2){
+            else if (event->type() == QEvent::MouseButtonPress && acts[i]->getStatus() != 2) {
                 acts[i]->setStatus(1);
             }
-            else if(event->type() == QEvent::HoverLeave && acts[i]->getStatus() != 2)
+            else if (event->type() == QEvent::HoverLeave && acts[i]->getStatus() != 2)
             {
                 ui->tip->setText("");
             }
         }
     }
-    return QWidget::eventFilter(watched,event);
+    return QWidget::eventFilter(watched, event);
 }
 
 void MainWidget::showPlayerResource(int playerRepresent)
 {
-    int wood,food,stone,gold;
-    core->getPlayerNowResource(playerRepresent,wood,food,stone,gold);
+    int wood, food, stone, gold;
+    core->getPlayerNowResource(playerRepresent, wood, food, stone, gold);
     ui->resWood->setText(QString::number(wood));
     ui->resFood->setText(QString::number(food));
     ui->resStone->setText(QString::number(stone));
@@ -1439,11 +1450,11 @@ void MainWidget::statusUpdate()
     QFont currentFont = ui->score0->font();
     ui->score0->setTextFormat(Qt::RichText); // 确保使用富文本格式
     ui->score0->setText("<html><head/><body><p><span style=\" font-size:12pt; color:#00007f;\">"
-                        +QString::number(usrScore.getScore())+"</span></p></body></html>");
+        + QString::number(usrScore.getScore()) + "</span></p></body></html>");
 
     ui->score1->setTextFormat(Qt::RichText); // 确保使用富文本格式
     ui->score1->setText("<html><head/><body><p><span style=\" font-size:12pt; color:#aa0000;\">"
-                        +QString::number(enemyScore.getScore())+"</span></p></body></html>");
+        + QString::number(enemyScore.getScore()) + "</span></p></body></html>");
 
     ui->mapView->screenL = ui->Game->getBlockDR();
     ui->mapView->screenU = ui->Game->getBlockUR();
@@ -1453,7 +1464,7 @@ void MainWidget::statusUpdate()
 
 void MainWidget::gameDataUpdate()
 {
-    if(!pause)
+    if (!pause)
     {
         core->gameUpdate();
         core->infoShare();
@@ -1471,7 +1482,7 @@ void MainWidget::paintUpdate()
     statusUpdate();
 
     //判断是否以新编辑模式启动
-    if(openEditor) updateEditor();
+    if (openEditor) updateEditor();
 
     ui->Game->update();
     ui->mapView->update();
@@ -1482,44 +1493,44 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
-    return sel->getSecend()>GAME_LOSE_SEC;
+    return sel->getSecend() > GAME_LOSE_SEC;
 }
 bool MainWidget::isWin()
 {
-    auto*hero=player[0];
-    return hero->getGold()>=GAME_WIN_GOLD;
+    auto* hero = player[0];
+    return hero->getGold() >= GAME_WIN_GOLD;
 }
 
 void MainWidget::judgeVictory()
 {
-    if(isLoss())
+    if (isLoss())
     {
         //停止当前动作
         timer->stop();
         playSound("Lose");
-        debugText("blue"," 游戏失败，未达成目标。最终得分为:" + QString::number(usrScore.getScore()));
+        debugText("blue", " 游戏失败，未达成目标。最终得分为:" + QString::number(usrScore.getScore()));
 
         //弹出胜利提示
-        if( isExamining || QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
+        if (isExamining || QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
         {
-//            setLose();
+            //            setLose();
             ScoreSave("Lose");
             this->close();
         }
     }
 
-    if(isWin())
+    if (isWin())
     {
         //停止当前动作
         timer->stop();
 
         playSound("Win");
-        debugText("blue"," 游戏胜利。最终得分为:"+ QString::number(usrScore.getScore()) );
+        debugText("blue", " 游戏胜利。最终得分为:" + QString::number(usrScore.getScore()));
 
         //弹出胜利提示
-        if( isExamining || QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
+        if (isExamining || QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
         {
-//            setWinning();
+            //            setWinning();
             ScoreSave("Win");
             this->close();
         }
@@ -1529,20 +1540,20 @@ void MainWidget::judgeVictory()
 
 void MainWidget::playSound()
 {
-    if(isExamining) return;
+    if (isExamining) return;
     soundPlayThread->AddSound(soundQueue);
     return;
 }
-void MainWidget::playSound(string s){
-    if(isExamining||SoundMap[s]==0) return;
+void MainWidget::playSound(string s) {
+    if (isExamining || SoundMap[s] == 0) return;
     SoundMap[s]->play();
     return;
 }
 void MainWidget::makeSound()
 {
-    if(soundQueue.empty()) return;
+    if (soundQueue.empty()) return;
 
-    if(!option->getSound())
+    if (!option->getSound())
     {
         queue<string> empty;
         swap(empty, soundQueue);
@@ -1560,14 +1571,14 @@ void MainWidget::ScoreSave(string gameResult)
     {
         std::string score = QString::number(usrScore.getScore()).toStdString();
         std::string time = QString::number(sel->getSecend()).toStdString();
-        ScoreFile << gameResult <<" "<< score << " " << time;
+        ScoreFile << gameResult << " " << score << " " << time;
         ScoreFile.close();
     }
     else
     {
         qDebug() << "open GameScore fail.";
     }
-    return ;
+    return;
 }
 //**************槽函数***************
 // 游戏帧更新
@@ -1578,23 +1589,23 @@ void MainWidget::FrameUpdate()
     //打印debug栏
     respond_DebugMessage();
 
-    if(!pause) gameframe++;
-    g_frame=gameframe;
+    if (!pause) gameframe++;
+    g_frame = gameframe;
     sel->resetSecond();
 
     ui->lcdNumber->display(gameframe);
 
-    if(mapmoveFrequency==1||mapmoveFrequency==2){
+    if (mapmoveFrequency == 1 || mapmoveFrequency == 2) {
         paintUpdate();
     }
-    else if(mapmoveFrequency==4){
-        if(gameframe%2==0 || pause) paintUpdate();
+    else if (mapmoveFrequency == 4) {
+        if (gameframe % 2 == 0 || pause) paintUpdate();
     }
-    else if(mapmoveFrequency==8){
-        if(gameframe%3==0 || pause) paintUpdate();
+    else if (mapmoveFrequency == 8) {
+        if (gameframe % 3 == 0 || pause) paintUpdate();
     }
-    else{
-        qDebug()<<"Speed setting error";
+    else {
+        qDebug() << "Speed setting error";
     }
 
     gameDataUpdate();
@@ -1603,45 +1614,45 @@ void MainWidget::FrameUpdate()
 }
 void MainWidget::onRadioClickSlot()
 {
-    static int interval=40;
-    switch(pbuttonGroup->checkedId())
+    static int interval = 40;
+    switch (pbuttonGroup->checkedId())
     {
     case 0:
         timer->setInterval(interval);
-        mapmoveFrequency=1;
+        mapmoveFrequency = 1;
         break;
     case 1:
-        mapmoveFrequency=2;
-        timer->setInterval(interval/mapmoveFrequency);
+        mapmoveFrequency = 2;
+        timer->setInterval(interval / mapmoveFrequency);
         break;
     case 2:
-        mapmoveFrequency=4;
-        timer->setInterval(interval/mapmoveFrequency);
+        mapmoveFrequency = 4;
+        timer->setInterval(interval / mapmoveFrequency);
         break;
     case 3:
-        mapmoveFrequency=8;
-        timer->setInterval(interval/mapmoveFrequency);
-        nowobject=NULL;
+        mapmoveFrequency = 8;
+        timer->setInterval(interval / mapmoveFrequency);
+        nowobject = NULL;
         break;
     }
 }
 
 void MainWidget::cheat_Player0Resource()
 {
-    player[0]->changeResource(500,500,500,500);
+    player[0]->changeResource(500, 500, 500, 500);
 }
 
 void MainWidget::on_stopButton_clicked()
 {
     pause = !pause;
 
-    if(pause) ui->stopButton->setText("继续");
+    if (pause) ui->stopButton->setText("继续");
     else ui->stopButton->setText("暂停");
 }
 
 void MainWidget::responseMusicChange()
 {
-    if( !isExamining && option->getMusic())
+    if (!isExamining && option->getMusic())
         bgm->play();
     else
         bgm->stop();
@@ -1650,17 +1661,17 @@ void MainWidget::responseMusicChange()
 //输出提示框
 void MainWidget::respond_DebugMessage()
 {
-    std::map<QString,int>::iterator iter = debugMessageRecord.begin(), itere = debugMessageRecord.end();
+    std::map<QString, int>::iterator iter = debugMessageRecord.begin(), itere = debugMessageRecord.end();
 
-    while(!debugMassagePackage.empty())
+    while (!debugMassagePackage.empty())
     {
-        debugText(debugMassagePackage.front().color,debugMassagePackage.front().content);
+        debugText(debugMassagePackage.front().color, debugMassagePackage.front().content);
         debugMassagePackage.pop();
     }
 
-    while(iter!= itere)
+    while (iter != itere)
     {
-        if(gameframe - iter->second > 200) iter = debugMessageRecord.erase(iter);
+        if (gameframe - iter->second > 200) iter = debugMessageRecord.erase(iter);
         else iter++;
     }
 }
@@ -1673,11 +1684,11 @@ void MainWidget::debugText(const QString& color, const QString& content)
         ui->DebugTexter->insertHtml(COLOR_RED(sel->getShowTime() + content));
     else if (color == "green")
         ui->DebugTexter->insertHtml(COLOR_GREEN(sel->getShowTime() + content));
-    else if(color == "black")
+    else if (color == "black")
         ui->DebugTexter->insertHtml(COLOR_BLACK(sel->getShowTime() + content));
 
     ui->DebugTexter->insertPlainText("\n");
-    QScrollBar *bar = ui->DebugTexter->verticalScrollBar();
+    QScrollBar* bar = ui->DebugTexter->verticalScrollBar();
     bar->setValue(bar->maximum());
 }
 
@@ -1715,7 +1726,8 @@ void MainWidget::exportDebugTextHtml()
         out << debugInfo;
         file.close();
         qDebug() << "Debugging information has been saved to:" << fileName;
-    } else {
+    }
+    else {
         qDebug() << "fail to save Debugging information.";
     }
 }
@@ -1749,7 +1761,8 @@ void MainWidget::exportDebugTextTxt()
         out << debugInfo;
         file.close();
         qDebug() << "Debugging information has been saved to:" << fileName;
-    } else {
+    }
+    else {
         qDebug() << "fail to save Debugging information.";
     }
 }
@@ -1767,10 +1780,11 @@ void MainWidget::clearDebugTextFile()
 
     // 遍历目录并删除文件
     QStringList fileList = outputDir.entryList(QDir::Files);
-    foreach (QString fileName, fileList) {
+    foreach(QString fileName, fileList) {
         if (outputDir.remove(fileName)) {
             qDebug() << "have deleted:" << fileName;
-        } else {
+        }
+        else {
             qDebug() << "fail to delete debugging infomation.";
         }
     }
@@ -1780,51 +1794,51 @@ void MainWidget::clearDebugTextFile()
 //设置初始资源
 void MainWidget::buildInitialStock()
 {
-    int minBDR = MAP_L/2 - 10, minBUR = MAP_U/2 - 10;
-    int maxBDR = MAP_L/2 + 6, maxBUR = MAP_U/2 + 6;
-    int lenth = 0,step;
-    Point StockPoint,judPoint;
+    int minBDR = MAP_L / 2 - 10, minBUR = MAP_U / 2 - 10;
+    int maxBDR = MAP_L / 2 + 6, maxBUR = MAP_U / 2 + 6;
+    int lenth = 0, step;
+    Point StockPoint, judPoint;
     vector<Point> findLab;
     bool tasking = true;
     int labSize, treeNum, maxtreeNum = 0;
-    int lx,ly,mx,my;
+    int lx, ly, mx, my;
 
     map->loadBarrierMap(true);
     map->reset_Map_Object_Resource();
     map->reset_resMap_AI();
-    while(tasking)
+    while (tasking)
     {
         lenth = maxBDR - minBDR;
-        for(int y = minBUR; y<=maxBUR; y++)
+        for (int y = minBUR; y <= maxBUR; y++)
         {
-            if(y==minBUR || y==maxBUR) step = 1;
+            if (y == minBUR || y == maxBUR) step = 1;
             else step = lenth;
 
-            for(int x = minBDR; x<=maxBDR; x+=lenth)
-                if(!map->isBarrier(x,y,5) && map->isFlat(x+1,y+1,3)) findLab.push_back(Point(x+1,y+1));
+            for (int x = minBDR; x <= maxBDR; x += lenth)
+                if (!map->isBarrier(x, y, 5) && map->isFlat(x + 1, y + 1, 3)) findLab.push_back(Point(x + 1, y + 1));
         }
 
         labSize = findLab.size();
 
-        if(labSize>0)
+        if (labSize > 0)
         {
-            for(int i = 0 ; i<labSize; i++)
+            for (int i = 0; i < labSize; i++)
             {
                 judPoint = findLab[i];
-                lx = max(judPoint.x - 5 , 0);
-                ly = max(judPoint.y - 5 , 0);
+                lx = max(judPoint.x - 5, 0);
+                ly = max(judPoint.y - 5, 0);
                 mx = min(judPoint.x + 8, MAP_L);
                 my = min(judPoint.y + 8, MAP_U);
                 treeNum = 0;
 
-                for(int x = lx ; x <mx; x++)
-                    for(int y = ly; y<my; y++)
-                        if(map->resMap_EnemyAI[x][y].type == RESOURCE_TREE) treeNum++;
+                for (int x = lx; x < mx; x++)
+                    for (int y = ly; y < my; y++)
+                        if (map->resMap_EnemyAI[x][y].type == RESOURCE_TREE) treeNum++;
 
-                if(treeNum > 10)
+                if (treeNum > 10)
                 {
                     tasking = false;
-                    if(treeNum > maxtreeNum)
+                    if (treeNum > maxtreeNum)
                     {
                         maxtreeNum = treeNum;
                         StockPoint = judPoint;
@@ -1833,13 +1847,13 @@ void MainWidget::buildInitialStock()
             }
         }
         findLab.clear();
-        minBDR = max(minBDR-1, 0);
-        minBUR = max(minBUR-1, 0);
-        maxBDR = min(maxBDR+1, MAP_L-5);
-        maxBUR = min(maxBUR+1, MAP_U-5);
+        minBDR = max(minBDR - 1, 0);
+        minBUR = max(minBUR - 1, 0);
+        maxBDR = min(maxBDR + 1, MAP_L - 5);
+        maxBUR = min(maxBUR + 1, MAP_U - 5);
     }
 
-//    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
+    //    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
     return;
 }
 

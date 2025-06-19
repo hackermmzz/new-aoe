@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+本博弈系统采取了多线程并行的方式完成代码游戏控制。主线程为博弈系统本体，负责游戏的绘制、规则演绎、手动操作，以及响应用户线程的命令。次线程为用户编程线程，设计了一个类名为UsrAI的接口类，请在成员函数UsrAI::processData()中连续获取游戏信息，再根据自己拟定的策略调用命令函数，控制游戏过程。
+
+●获取游戏信息的接口
+UsrAI::tagInfo getInfo();
+用户需要定义一个tagInfo类型的变量，获得此函数的返回值，如：
+tagInfo info = getInfo();
+建议在建议在processData()的第一句话获得当前帧的游戏状态。
+接口返回结构体结构说明：
+tagInfo是总结构，包含tagBuilding、tagResource、tagFarmer、tagArmy等结构体，各个结构代码如下。其中对于Type、ProductSort等分类参数可通过查询常量表来获得对应关系，相关定义在config.h和digitalConfig.h中。
+●发送命令函数及其参数和返回值：
+UsrAI类提供了4个Action成员函数向主线程发出控制命令。
+1.对建筑SN发出命令：（Action数值见“建筑动作类型常量表”）
+int BuildingAction(int SN, int Action)    
+2.命令单位SN走向指定细节坐标（DR0, UR0）（运输船载人时，靠岸自动放人）： 
+int HumanMove(int SN, double DR0, double UR0)
+3.将编号为obSN的对象设定为单位SN的对象：（村民会自动走向对象并工作，士兵会自动走向对象进攻）（若SN与obSN相同，则该单位自我销毁）（SN为单位，obSN为运输船时，该指令为上船）
+int HumanAction(int SN, int obSN)
+4.命令村民SN在块坐标BlockL,BlockU处建造类型为BuildingNum的新建筑：（建筑占用的所有地块是必须位于同一平面的空地 ）
+int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR) 
+这4个函数的第一个参数都是SN，为执行命令动作的对象编号（所有对象的唯一编号，通过提供获取get函数所返回的结构体中的元素获取），并返回指令的编号。
+●UsrAI::processData()是系统调用AI代码的入口。注意这个调用不是一次性的，而是每帧会尝试调用一次。游戏核心本身是按时间发起的事件处理机制，UsrAI::processData()函数实际上是一个会定时执行的循环体。编程时必须考虑到这个因素，至少有两个后果：a.几乎所有的游戏动作都需要有控制条件，不然就成了每帧都发起，会达不到预期；b.控制动作、记录中间过程用的变量，都必须是静态或者全局的，使用局部变量进入代码会被重新初始化造成错误。请仔细阅读示例代码，学习这种编程方式。
+
