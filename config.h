@@ -219,6 +219,7 @@
 #define BUILDING_CENTER_UPGRADE_NAME "演进到工具时代(花费:500食物)"
 #define BUILDING_MARKET_WOOD_UPGRADE_NAME "研发木材加工:远程攻击距离+1,伐木+2(花费:120食物,75木头)"
 #define BUILDING_MARKET_STONE_UPGRADE_NAME "研发石矿开采:采石+3(花费:100食物,50石头)"
+#define BUILDING_MARKET_GOLD_UPGRADE_NAME "研发金矿开采:采金+3(花费:120食物,100木头)"
 #define BUILDING_MARKET_FARM_UPGRADE_NAME "研发驯养动物:农场食物产量+75(花费:200食物,50木头)"
 #define BUILDING_ACTION_CANCEL_NAME "中止"
 
@@ -239,39 +240,14 @@
 /********** 人物状态 **********/
 /*
  * 0代表为空闲状态
- * 1代表为正在前往当前对象的状态
- * 2代表为正在砍树的状态（收集木头）
- * 3代表为正在挖石头的状态
- * 4代表为正在挖金子的状态
- * 5代表正在采集果子的状态
- * 6代表正在建造建筑的状态
- * 7代表正在修理建筑的状态
- * 8代表为进行攻击的状态
- * 9代表为正在返回资源建筑的状态，即放置资源
- * 10代表正在前往攻击的状态
- * 11代表人物遇到障碍物停止移动的状态
- * 12代表种地
- * 13代表正在采集肉的状态
- * 14代表正在走向目的地的状态
- * 15代表被船运输中
- * 后续补充
+ * 1代表为正在移动状态（无目标对象）
+ * 2代表为正在工作状态
+ * 3代表为正在攻击状态
  */
 #define HUMAN_STATE_IDLE 0
-#define HUMAN_STATE_GOTO_OBJECT 1
-#define HUMAN_STATE_CUTTING 2
-#define HUMAN_STATE_DIGGING_STONE 3
-#define HUMAN_STATE_DIGGING_GOLD 4
-#define HUMAN_STATE_GATHERING 5
-#define HUMAN_STATE_BUILDING 6
-#define HUMAN_STATE_FIXING 7
-#define HUMAN_STATE_ATTACKING 8
-#define HUMAN_STATE_GOTO_RESOURCE 9
-#define HUMAN_STATE_GOTO_ATTACK 10
-#define HUMAN_STATE_STOP 11
-#define HUMAN_STATE_FARMING 12
-#define HUMAN_STATE_BUTCHERING 13
-#define HUMAN_STATE_JUSTWALKING 14
-#define HUMAN_STATE_TRANSPORTED 15
+#define HUMAN_STATE_WALKING 1
+#define HUMAN_STATE_WORKING 2
+#define HUMAN_STATE_ATTACKING 3
 
  /********** 人物手持资源种类 **********/
 #define HUMAN_WOOD 1
@@ -378,6 +354,7 @@
 #define ACT_UPGRADE_TOWERBUILD_NAME "研发:建造箭塔(花费:50食物)"
 #define ACT_UPGRADE_WOOD_NAME "研发木材加工:远程攻击距离+1,伐木+2(花费:120食物,75木头)"
 #define ACT_UPGRADE_STONE_NAME "研发石矿开采:采石+3(花费:100食物,50石头)"
+#define ACT_UPGRADE_GOLD_NAME "研发金矿开采:采金+3(花费:120食物,100木头)"
 #define ACT_UPGRADE_FARM_NAME "研发驯养动物:农场食物产量+75(花费:200食物,50木头)"
 #define ACT_STOP_NAME "中止"
 #define ACT_BUILD_NAME "建造"

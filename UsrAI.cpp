@@ -603,7 +603,7 @@ void find_near_land(int x, int y, int* x_out, int* y_out) {
 
 void UsrAI::processData()
 {
-    //  return;
+    return;
     info = getInfo();
     // 获取地图信息
     if (info.GameFrame % 5 != 0) {
