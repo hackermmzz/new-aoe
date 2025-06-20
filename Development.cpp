@@ -506,8 +506,8 @@ void Development::init_DevelopLab()
 //    developLab[BUILDING_WALL].buildCon->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].headAct);
     //船坞
     {
-        developLab[BUILDING_DOCK].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_DOCK, TIME_BUILD_DOCK, BUILD_DOCK_WOOD);
-        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_DOCK, TIME_BUILDING_DOCK_CREATE_SAILING, BUILDING_DOCK_CREATE_SAILING_WOOD);
+        developLab[BUILDING_DOCK].buildCon = new conditionDevelop(CIVILIZATION_STONEAGE, BUILDING_DOCK, TIME_BUILD_DOCK, BUILD_DOCK_WOOD);
+        newNode = new conditionDevelop(CIVILIZATION_STONEAGE, BUILDING_DOCK, TIME_BUILDING_DOCK_CREATE_SAILING, BUILDING_DOCK_CREATE_SAILING_WOOD);
         newNode->setCreatObjectAfterAction(SORT_FARMER, FARMERTYPE_SAILING);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].setHead(newNode);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SAILING].endNodeAsOver();

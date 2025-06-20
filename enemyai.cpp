@@ -340,7 +340,7 @@ static void ifDead(vector <int> &x,int sort){
 
 }
 void EnemyAI::processData() {
-    //return;
+    return;
     enemyInfo=getInfo();
     int nowState_Army=0;
      //军队数据初始化
