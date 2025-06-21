@@ -958,6 +958,13 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
                 Block& block = GlobalMap->cell[L][U];
                 if (block.getMapType() != MAPTYPE_OCEAN && GlobalMap->map_Object[L][U].empty()) {//如果不为海洋，那就是陆地，并且无障碍物
                     satisfy.push_back({ block.getDR(),block.getUR() });
+                    //加登陆分
+                    if(theMap->enemyLandExplored==0&&theMap->blockIndex[L][U]==theMap->enemyBlockIdx){
+                        theMap->enemyLandExplored=1;
+                        extern Score usrScore;
+                        usrScore.update(_FINDENEMYLAND);
+                    }
+
                 }
             }
         }
@@ -982,12 +989,7 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
         ship->update_resourceClear();
         humans.clear();
     }
-    //加登陆分
-    if(theMap->enemyLandExplored==0){
-        theMap->enemyLandExplored=1;
-        extern Score usrScore;
-        usrScore.update(_FINDENEMYLAND);
-    }
+
 }
 
 void Core_List::object_ResourceChange(Coordinate* object1, relation_Object& relation)
