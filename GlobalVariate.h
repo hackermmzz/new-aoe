@@ -77,7 +77,7 @@ enum ScoreType {
     _DESTORY4,
     _DESTORY5,
     _DESTORY10,
-
+    _FINDENEMYLAND,
     SCORE_TYPE_COUNT
 };
 
@@ -101,6 +101,10 @@ public:
         return score;
     }
     void update(int type, int num = 1) {
+        if(type==_FINDENEMYLAND){
+            addScore(10,"登录地方大陆,分数+10");
+            return;
+        }
         if (type <= _ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
             addScore(5, " 采集到新资源，分数+5");
         }

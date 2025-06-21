@@ -978,6 +978,12 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
         ship->update_resourceClear();
         humans.clear();
     }
+    //加登陆分
+    if(theMap->enemyLandExplored==0){
+        theMap->enemyLandExplored=1;
+        extern Score usrScore;
+        usrScore.update(_FINDENEMYLAND);
+    }
 }
 
 void Core_List::object_ResourceChange(Coordinate* object1, relation_Object& relation)

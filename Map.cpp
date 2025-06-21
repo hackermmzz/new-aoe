@@ -1140,6 +1140,21 @@ void Map::divideTheMap()
             }
         }
     }
+    //找到地方陆地目标所在的大陆
+    {
+        enemyBlockIdx=-1;
+        enemyLandExplored=0;
+        map<int,int>idxCnt;
+        for(auto*human:player[1]->human){
+            ++idxCnt[blockIndex[human->getBlockDR()][human->getBlockUR()]];
+        }
+        for(auto&ele:idxCnt){
+            int idx=ele.first,cnt=ele.second;
+            if(enemyBlockIdx==-1||cnt>idxCnt[enemyBlockIdx]){
+                enemyBlockIdx=idx;
+            }
+        }
+    }
     //找到市镇中心所在起始位置
     Point centerPos;
     for(auto&build:player[0]->build){
@@ -1799,14 +1814,15 @@ void Map::reset_CellExplore(Coordinate* eye,vector<Point>&store)
 
     for(int i = 0 ; i<size; i++)
     {
-        if(!cell[blockLab[i].x][blockLab[i].y].Explored){
-            cell[blockLab[i].x][blockLab[i].y].Explored = true;
-            store.push_back({blockLab[i].x,blockLab[i].y});
+        int x=blockLab[i].x,y=blockLab[i].y;
+        if(!cell[x][y].Explored){
+            cell[x][y].Explored = true;
+            store.push_back({x,y});
         }
-        if(!cell[blockLab[i].x][blockLab[i].y].Visible)
+        if(!cell[x][y].Visible)
         {
             blockLab_Visible.push(blockLab[i]);
-            cell[blockLab[i].x][blockLab[i].y].Visible = true;
+            cell[x][y].Visible = true;
         }
     }
 
