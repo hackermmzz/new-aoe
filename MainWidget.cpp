@@ -1511,7 +1511,7 @@ void MainWidget::judgeVictory()
         debugText("blue", " 游戏失败，未达成目标。最终得分为:" + QString::number(usrScore.getScore()));
 
         //弹出胜利提示
-        if (isExamining || QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。", QMessageBox::Ok))
+        if (isExamining || QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。智慧之神为你惋惜~", QMessageBox::Ok))
         {
             //            setLose();
             ScoreSave("Lose");
@@ -1528,7 +1528,7 @@ void MainWidget::judgeVictory()
         debugText("blue", " 游戏胜利。最终得分为:" + QString::number(usrScore.getScore()));
 
         //弹出胜利提示
-        if (isExamining || QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜你取得了游戏的胜利，成功抵御了敌人的侵略！", QMessageBox::Ok))
+        if (isExamining || QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜获胜，获得了纳西妲的青睐！", QMessageBox::Ok))
         {
             //            setWinning();
             ScoreSave("Win");

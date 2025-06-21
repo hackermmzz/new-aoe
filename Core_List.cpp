@@ -1423,7 +1423,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
         return abs(end[0] - start[0]) + abs(end[1] - start[1]);
         };
     /////////////////////////////////////////////////////////对于农民对渔场寻路，如果渔场靠岸那么我们在岸边找一点使得农民可达
-    if (goalOb && goalOb->getNum() == NUM_STATICRES_Fish && object->getSort() == SORT_FARMER && ((Farmer*)object)->get_farmerType() == FARMERTYPE_FARMER) {
+    if (goalOb && (goalOb->getNum() == NUM_STATICRES_Fish || goalOb->getNum() == BUILDING_DOCK) && object->getSort() == SORT_FARMER && ((Farmer*)object)->get_farmerType() == FARMERTYPE_FARMER) {
         //寻找沿岸(与玩家所在大陆一致)
         auto check = [&](int i, int j)->bool {
             if (i >= 0 && j >= 0 && i < MAP_L && j < MAP_U) {
@@ -1477,6 +1477,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
             }
         }
     }
+
     //预处理能否到达
     Point end = goalOb ? Point(goalOb->getBlockDR(), goalOb->getBlockUR()) : Point(destination.x, destination.y);
     Point res = GetSameBlockInLine(start, end);
@@ -1543,8 +1544,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
         }
     }
 
-    if (isNoPath)
-        return { path,{1e9,1e9} };
+    //if (isNoPath) return { path,{1e9,1e9} };
     goalMap[destination.x][destination.y] = mask;
     if (goalMap[start.x][start.y] == mask)
     {
@@ -1575,6 +1575,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
                 //判断格子是否可走、未走过
                 //斜线方向需要多判断马脚操作
                 if (isLand ^ isShip) {
+                    if (theMap->cell[xx][yy].getMapType() != MAPTYPE_OCEAN)std::cout << "SB" << std::endl;
                     if ((map_HaveJud[xx][yy] != mask || mndis[xx][yy] > dd) && !(findPathMap[xx][yy] && goalMap[xx][yy] != mask || i < 4 && (findPathMap[xx][y] || findPathMap[x][yy]))) {
                         preNode[xx][yy] = { x,y };
                         mndis[xx][yy] = dd;
@@ -1630,6 +1631,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
         if (path.size())
             path.pop();
     }
+
     return { path,{dr0,ur0} };
 }
 
