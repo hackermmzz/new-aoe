@@ -69,7 +69,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(i%2==0)x=-32+64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
             if(i%2==1)x=64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
             w=Block::block[block.Num]->front().pix.width(),h=Block::block[block.Num]->front().pix.height();
-            list<ImageResource>*targetList;
+            list<ImageResource>*targetList=0;
             if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::block[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::grayblock[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)targetList=Block::blackblock[block.Num];
