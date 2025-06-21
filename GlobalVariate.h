@@ -55,13 +55,16 @@ extern std::map<QString, int>debugMessageRecord;
 enum ScoreType {
     _WOOD = 0,
     _STONE,
+    _GOLD,
     _MEAT,
 
     _BERRY,
     _GAZELLE,
     _ELEPHANT,
     _FARM,
+    _FISH,
     _ISWOOD,
+    _ISGOLD,
     _ISSTONE,
 
     _TECH,
@@ -107,6 +110,9 @@ public:
         }
         if (type <= _ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
             addScore(5, " 采集到新资源，分数+5");
+            if (type == _ISGOLD) {
+                addScore(10, " 采集到黄金，分数+10");
+            }
         }
 
         if (type > _MEAT && type <= _ISSTONE) {
@@ -131,10 +137,10 @@ public:
             addScore(2, " 解锁新科技，分数+2");
             break;
         case _HUMAN1:
-            addScore(1, " 生产农民或普通兵种，分数+1");
+            addScore(1, " 生产普通单位，分数+1");
             break;
         case _HUMAN2:
-            addScore(2, " 生产骑兵，分数+2");
+            addScore(2, " 生产特殊单位，分数+2");
             break;
         case _BUILDING1:
             addScore(1, " 建造住房或农田，分数+1");
