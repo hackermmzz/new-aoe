@@ -8,7 +8,7 @@
 
 
 /**********地图可见性设置************/
-#define MAP_EXPLORE true
+#define MAP_EXPLORE false
 #define MAP_VISIABLE false
 
 
