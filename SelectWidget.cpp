@@ -27,7 +27,7 @@ void SelectWidget::initActionResourceMap() {
     actionResourceMap[ACT_UPGRADE_AGE] = "ButtonTech_Center1";
     actionResourceMap[ACT_UPGRADE_FARM] = "ButtonTech_Cow";
     actionResourceMap[ACT_UPGRADE_STONE] = "ButtonTech_Stone";
-    actionResourceMap[ACT_UPGRADE_GOLD] = "ButtonTech_Gold";
+    actionResourceMap[ACT_UPGRADE_GOLD] = "ButtonTech_GoldOre";
     actionResourceMap[ACT_UPGRADE_WOOD] = "ButtonTech_Lumber";
     actionResourceMap[ACT_UPGRADE_TOWERBUILD] = "ButtonTech_ArrowTower";
     actionResourceMap[ACT_STOCK_UPGRADE_USETOOL] = "ButtonTech_Spear";

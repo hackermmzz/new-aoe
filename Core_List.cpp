@@ -921,6 +921,10 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
             {
                 usrScore.update(_ISSTONE);
             }
+            else if (res->get_ResourceSort() == HUMAN_GOLD)
+            {
+                usrScore.update(_ISGOLD);
+            }
 
             gatherer->update_addResource();
         }
@@ -1003,6 +1007,9 @@ void Core_List::object_ResourceChange(Coordinate* object1, relation_Object& rela
             case HUMAN_STONE:
                 usrScore.update(_STONE, worker->getResourceNowHave());
                 break;
+            case HUMAN_GOLD:
+                usrScore.update(_GOLD, worker->getResourceNowHave());
+                break;
             case HUMAN_DOCKFOOD:
             case HUMAN_GRANARYFOOD:
             case HUMAN_STOCKFOOD:
@@ -1079,9 +1086,9 @@ void Core_List::object_FinishAction(Coordinate* object1)
 
         actNum = object1->getActNum();
         if (actNum == BUILDING_CENTER_CREATEFARMER || actNum == BUILDING_ARMYCAMP_CREATE_CLUBMAN
-            || actNum == BUILDING_ARMYCAMP_CREATE_SLINGER || actNum == BUILDING_RANGE_CREATE_BOWMAN)
+            || actNum == BUILDING_ARMYCAMP_CREATE_SLINGER || actNum == BUILDING_RANGE_CREATE_BOWMAN || actNum == BUILDING_DOCK_CREATE_SAILING)
             usrScore.update(_HUMAN1);
-        else if (actNum == BUILDING_STABLE_CREATE_SCOUT)
+        else if (actNum == BUILDING_STABLE_CREATE_SCOUT || actNum == BUILDING_DOCK_CREATE_SHIP || actNum == BUILDING_DOCK_CREATE_WOOD_BOAT)
             usrScore.update(_HUMAN2);
         else
             usrScore.update(_TECH);
@@ -1422,34 +1429,34 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
         return abs(end[0] - start[0]) + abs(end[1] - start[1]);
         };
     /////////////////////////////////////////////////////////对于农民对渔场寻路，如果渔场靠岸那么我们在岸边找一点使得农民可达
-    if(goalOb&&(goalOb->getNum()==NUM_STATICRES_Fish||goalOb->getNum()==BUILDING_DOCK)&&object->getSort()==SORT_FARMER&&((Farmer*)object)->get_farmerType()==FARMERTYPE_FARMER){
+    if (goalOb && (goalOb->getNum() == NUM_STATICRES_Fish || goalOb->getNum() == BUILDING_DOCK) && object->getSort() == SORT_FARMER && ((Farmer*)object)->get_farmerType() == FARMERTYPE_FARMER) {
         //寻找沿岸(与玩家所在大陆一致)
-        auto check=[&](int i,int j)->bool{
-            if(i>=0&&j>=0&&i<MAP_L&&j<MAP_U){
-                return map->blockIndex[i][j]==map->blockIndex[start.x][start.y];
+        auto check = [&](int i, int j)->bool {
+            if (i >= 0 && j >= 0 && i < MAP_L && j < MAP_U) {
+                return map->blockIndex[i][j] == map->blockIndex[start.x][start.y];
             }
             return 0;
-        };
-        int x=goalOb->getBlockDR(),y=goalOb->getBlockUR();
-        int tx=INT_MAX,ty=INT_MAX;
-        bool flag=1;
-        for(int i=0;i<((Building*)goalOb)->get_BlockSizeLen()&&flag;++i){
-            for(int j=0;j<((Building*)goalOb)->get_BlockSizeLen()&&flag;++j){
-                static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
-                for(auto*o:off){
-                    int xx=o[0]+i+x,yy=o[1]+j+y;
-                    if(check(xx,yy)){
-                        tx=xx;ty=yy;
-                        flag=0;
+            };
+        int x = goalOb->getBlockDR(), y = goalOb->getBlockUR();
+        int tx = INT_MAX, ty = INT_MAX;
+        bool flag = 1;
+        for (int i = 0;i < ((Building*)goalOb)->get_BlockSizeLen() && flag;++i) {
+            for (int j = 0;j < ((Building*)goalOb)->get_BlockSizeLen() && flag;++j) {
+                static const int off[][2] = { {0,1},{0,-1},{1,0},{-1,0} };
+                for (auto* o : off) {
+                    int xx = o[0] + i + x, yy = o[1] + j + y;
+                    if (check(xx, yy)) {
+                        tx = xx;ty = yy;
+                        flag = 0;
                     }
                 }
             }
         }
         //
-        if(!flag&&(tx!=start.x||ty!=start.y)){
-            static const double fac=0.001;
-            goalOb=0;
-            destination.x=tx,destination.y=ty;
+        if (!flag && (tx != start.x || ty != start.y)) {
+            static const double fac = 0.001;
+            goalOb = 0;
+            destination.x = tx, destination.y = ty;
         }
     }
     /////////////////////////////////////////////////////////
@@ -1574,7 +1581,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
                 //判断格子是否可走、未走过
                 //斜线方向需要多判断马脚操作
                 if (isLand ^ isShip) {
-                    if(theMap->cell[xx][yy].getMapType()!=MAPTYPE_OCEAN)std::cout<<"SB"<<std::endl;
+                    if (theMap->cell[xx][yy].getMapType() != MAPTYPE_OCEAN)std::cout << "SB" << std::endl;
                     if ((map_HaveJud[xx][yy] != mask || mndis[xx][yy] > dd) && !(findPathMap[xx][yy] && goalMap[xx][yy] != mask || i < 4 && (findPathMap[xx][y] || findPathMap[x][yy]))) {
                         preNode[xx][yy] = { x,y };
                         mndis[xx][yy] = dd;
@@ -1939,6 +1946,7 @@ int Core_List::getNowPhaseNum(Coordinate* object)
         return HUMAN_STATE_ATTACKING;
     case CoreEven_Gather:
     case CoreEven_FixBuilding:
+    case CoreEven_CreatBuilding:
         return HUMAN_STATE_WORKING;
     default:
         return HUMAN_STATE_IDLE;
