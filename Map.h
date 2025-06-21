@@ -142,6 +142,8 @@ public:
     }
     //每一个block所属的块的编号
     int blockIndex[MAP_L][MAP_U];
+    int enemyBlockIdx;//敌人所属的大陆的区块编号
+    bool enemyLandExplored;//标记地方大陆是否被探索
     // 用于存储地图
     Block **cell=new Block*[MAP_L];
     int intmap[72][72]={};
