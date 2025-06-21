@@ -1159,6 +1159,7 @@ void Map::divideTheMap()
     //将己方地图可见化
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
+            //
             auto&block=cell[i][j];
             if(blockIndex[i][j]==mask){
                 block.Visible=0;
@@ -1171,6 +1172,21 @@ void Map::divideTheMap()
             else{
                 block.Visible=0;
                 block.Explored=0;
+            }
+        }
+    }
+    //根据预定义参数进行设置可见
+    if(MAP_EXPLORE){
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                cell[i][j].Explored=1;
+            }
+        }
+    }
+    if(MAP_VISIABLE){
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                cell[i][j].Visible=1;
             }
         }
     }

@@ -1415,6 +1415,37 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
     static auto PredictDistance = [&](const Data& start, const Data& end)->double {
         return abs(end[0] - start[0]) + abs(end[1] - start[1]);
         };
+    /////////////////////////////////////////////////////////对于农民对渔场寻路，如果渔场靠岸那么我们在岸边找一点使得农民可达
+    if(goalOb&&goalOb->getNum()==NUM_STATICRES_Fish&&object->getSort()==SORT_FARMER&&((Farmer*)object)->get_farmerType()==FARMERTYPE_FARMER){
+        //寻找沿岸(与玩家所在大陆一致)
+        auto check=[&](int i,int j)->bool{
+            if(i>=0&&j>=0&&i<MAP_L&&j<MAP_U){
+                return map->blockIndex[i][j]==map->blockIndex[start.x][start.y];
+            }
+            return 0;
+        };
+        int x=goalOb->getBlockDR(),y=goalOb->getBlockUR();
+        int tx=INT_MAX,ty=INT_MAX;
+        bool flag=1;
+        for(int i=0;i<((Building*)goalOb)->get_BlockSizeLen()&&flag;++i){
+            for(int j=0;j<((Building*)goalOb)->get_BlockSizeLen()&&flag;++j){
+                static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
+                for(auto*o:off){
+                    int xx=o[0]+i+x,yy=o[1]+j+y;
+                    if(check(xx,yy)){
+                        tx=xx;ty=yy;
+                        flag=0;
+                    }
+                }
+            }
+        }
+        //
+        if(!flag&&(tx!=start.x||ty!=start.y)){
+            static const double fac=0.001;
+            goalOb=0;
+            destination.x=tx,destination.y=ty;
+        }
+    }
     /////////////////////////////////////////////////////////
     goalPoint.clear();
     stack<Point> path;
