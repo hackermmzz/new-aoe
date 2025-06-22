@@ -8,8 +8,10 @@
 
 
 /**********地图可见性设置************/
-#define MAP_EXPLORE false
-#define MAP_VISIABLE false
+#define MAP_EXPLORE true
+#define MAP_VISIABLE true
+//#define MAP_EXPLORE false
+//#define MAP_VISIABLE false
 
 
 /**********玩家初始资源设置************/

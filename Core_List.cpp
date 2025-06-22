@@ -1583,7 +1583,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
                 //判断格子是否可走、未走过
                 //斜线方向需要多判断马脚操作
                 if (isLand ^ isShip) {
-                    if (theMap->cell[xx][yy].getMapType() != MAPTYPE_OCEAN)std::cout << "SB" << std::endl;
+                    if (theMap->cell[xx][yy].getMapType() != MAPTYPE_OCEAN)std::cout << "1" << std::endl;
                     if ((map_HaveJud[xx][yy] != mask || mndis[xx][yy] > dd) && !(findPathMap[xx][yy] && goalMap[xx][yy] != mask || i < 4 && (findPathMap[xx][y] || findPathMap[x][yy]))) {
                         preNode[xx][yy] = { x,y };
                         mndis[xx][yy] = dd;
