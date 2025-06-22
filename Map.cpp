@@ -1140,6 +1140,21 @@ void Map::divideTheMap()
             }
         }
     }
+    //找到地方陆地目标所在的大陆
+    {
+        enemyBlockIdx=-1;
+        enemyLandExplored=0;
+        map<int,int>idxCnt;
+        for(auto*human:player[1]->human){
+            ++idxCnt[blockIndex[human->getBlockDR()][human->getBlockUR()]];
+        }
+        for(auto&ele:idxCnt){
+            int idx=ele.first,cnt=ele.second;
+            if(enemyBlockIdx==-1||cnt>idxCnt[enemyBlockIdx]){
+                enemyBlockIdx=idx;
+            }
+        }
+    }
     //找到市镇中心所在起始位置
     Point centerPos;
     for(auto&build:player[0]->build){
@@ -1159,6 +1174,7 @@ void Map::divideTheMap()
     //将己方地图可见化
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
+            //
             auto&block=cell[i][j];
             if(blockIndex[i][j]==mask){
                 block.Visible=0;
@@ -1171,6 +1187,21 @@ void Map::divideTheMap()
             else{
                 block.Visible=0;
                 block.Explored=0;
+            }
+        }
+    }
+    //根据预定义参数进行设置可见
+    if(MAP_EXPLORE){
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                cell[i][j].Explored=1;
+            }
+        }
+    }
+    if(MAP_VISIABLE){
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                cell[i][j].Visible=1;
             }
         }
     }
@@ -1281,7 +1312,7 @@ void Map::loadfindPathMapTemperature()
         for(int x=0; x<MAP_L; x++)
             for(int y=0; y<MAP_U; y++)
             {
-                if(barrierMap[x][y] || represent == NOWPLAYERREPRESENT && !cell[x][y].Explored)
+                if(barrierMap[x][y] || (represent == NOWPLAYERREPRESENT && !cell[x][y].Explored))
                     findPathMapTemperature[represent][x][y] = 1;
             }
     return;
@@ -1783,14 +1814,15 @@ void Map::reset_CellExplore(Coordinate* eye,vector<Point>&store)
 
     for(int i = 0 ; i<size; i++)
     {
-        if(!cell[blockLab[i].x][blockLab[i].y].Explored){
-            cell[blockLab[i].x][blockLab[i].y].Explored = true;
-            store.push_back({blockLab[i].x,blockLab[i].y});
+        int x=blockLab[i].x,y=blockLab[i].y;
+        if(!cell[x][y].Explored){
+            cell[x][y].Explored = true;
+            store.push_back({x,y});
         }
-        if(!cell[blockLab[i].x][blockLab[i].y].Visible)
+        if(!cell[x][y].Visible)
         {
             blockLab_Visible.push(blockLab[i]);
-            cell[blockLab[i].x][blockLab[i].y].Visible = true;
+            cell[x][y].Visible = true;
         }
     }
 
@@ -2338,48 +2370,54 @@ void Map::init(int MapJudge) {
     loadGenerateMapText(MapJudge);  //载入地图
     divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
     Player&enemy=(*player[1]);
-//    enemy.addArmyAROUND(3,1800,30,ARMY_STATE_DEFENSE,300,10000,1800,800);
-//    enemy.addArmyAROUND(3,1700,1000,ARMY_STATE_DEFENSE,300,10000,1500,1800);
-//    enemy.addArmyAROUND(3,1500,2000,ARMY_STATE_DEFENSE,300,10000,1400,2900);
-//    enemy.addArmyAROUND(3,1400,3100,ARMY_STATE_DEFENSE,300,10000,800,3800);
-//    enemy.addArmyAROUND(3,700,3800,ARMY_STATE_DEFENSE,300,10000,30,3800);
-//    enemy.addArmyAROUND(7,2000,350,ARMY_STATE_DEFENSE,300,10000,2000,20);
-//    enemy.addArmyAROUND(7,2000,700,ARMY_STATE_DEFENSE,300,10000,2000,400);
-//    enemy.addArmyAROUND(7,2400,900,ARMY_STATE_DEFENSE,300,10000,2400,1300);
-//    enemy.addArmyAROUND(7,2500,1500,ARMY_STATE_DEFENSE,300,10000,2500,1900);
-//    enemy.addArmyAROUND(7,2000,2200,ARMY_STATE_DEFENSE,300,10000,2000,2500);
-//    enemy.addArmyAROUND(7,2000,2600,ARMY_STATE_DEFENSE,300,10000,2000,2900);
-//    enemy.addArmyAROUND(7,1700,3000,ARMY_STATE_DEFENSE,300,10000,1700,3400);
-//    enemy.addArmyAROUND(7,1200,3600,ARMY_STATE_DEFENSE,300,10000,1200,3900);
-//    enemy.addArmyAROUND(7,800,4300,ARMY_STATE_DEFENSE,300,10000,500,4300);
-//    enemy.addArmyAROUND(7,450,4300,ARMY_STATE_DEFENSE,300,10000,100,4300);
-    enemy.addArmyDEFENSE(3,1800,30,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(3,1700,1000,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(3,1500,2000,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(3,1400,3100,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(3,700,3800,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,2000,350,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,2000,700,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,2400,900,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,2500,1500,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,2000,2200,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,2000,2600,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,1700,3000,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,1200,3600,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,800,4300,ARMY_STATE_DEFENSE);
-    enemy.addArmyDEFENSE(7,450,4300,ARMY_STATE_DEFENSE);
-    enemy.addArmyATTACK(0,1000,2025,3,3000,37500);
-    enemy.addArmyATTACK(0,1000,2050,3,3000,37500);
-    enemy.addArmyATTACK(0,1000,2075,3,3000,37500);
-    enemy.addArmyATTACK(0,1000,2100,3,3000,37500);
-    enemy.addArmyATTACK(1,1025,2000,3,3000,37500);
-    enemy.addArmyATTACK(1,1050,2000,3,3000,37500);
-    enemy.addArmyATTACK(1,1075,2000,3,3000,37500);
-    enemy.addArmyATTACK(1,1100,2000,3,3000,37500);
-    enemy.addArmyATTACK(2,1025,2025,3,3000,37500);
-    enemy.addArmyATTACK(2,1025,2050,3,3000,37500);
-    enemy.addArmyATTACK(2,1050,2025,3,3000,37500);
-    enemy.addArmyATTACK(2,1050,2050,3,3000,37500);
+//巡逻船
+    enemy.addArmyAROUND(AT_SHIP,2000,350,ARMY_STATE_AROUND,300,10000,2000,20);
+    enemy.addArmyAROUND(AT_SHIP,2000,700,ARMY_STATE_AROUND,300,10000,2000,400);
+    enemy.addArmyAROUND(AT_SHIP,2400,900,ARMY_STATE_AROUND,300,10000,2400,1300);
+    enemy.addArmyAROUND(AT_SHIP,2500,1500,ARMY_STATE_AROUND,300,10000,2500,1900);
+    enemy.addArmyAROUND(AT_SHIP,2000,2200,ARMY_STATE_AROUND,300,10000,2000,2500);
+    enemy.addArmyAROUND(AT_SHIP,2000,2600,ARMY_STATE_AROUND,300,10000,2000,2900);
+    enemy.addArmyAROUND(AT_SHIP,1700,3000,ARMY_STATE_AROUND,300,10000,1700,3400);
+    enemy.addArmyAROUND(AT_SHIP,1200,3600,ARMY_STATE_AROUND,300,10000,1200,3900);
+    enemy.addArmyAROUND(AT_SHIP,800,4300,ARMY_STATE_AROUND,300,10000,500,4300);
+    enemy.addArmyAROUND(AT_SHIP,450,4300,ARMY_STATE_AROUND,300,10000,100,4300);
+
+    //内陆巡逻骑兵
+    enemy.addArmyAROUND(AT_SCOUT,1400,50,ARMY_STATE_AROUND,300,10000,1400,790);
+    enemy.addArmyAROUND(AT_SCOUT,1400,810,ARMY_STATE_AROUND,300,10000,1400,1350);
+    enemy.addArmyAROUND(AT_SCOUT,1000,2000,ARMY_STATE_AROUND,300,10000,1000,2540);
+    enemy.addArmyAROUND(AT_SCOUT,1000,2560,ARMY_STATE_AROUND,300,10000,1000,3100);
+    enemy.addArmyAROUND(AT_SCOUT,10,4000,ARMY_STATE_AROUND,300,10000,400,4000);
+
+    //登陆测试骑兵
+//    enemy.addArmyAROUND(AT_SCOUT,1120,3500,ARMY_STATE_AROUND,300,10000,1100,3500);
+
+//    enemy.addArmyDEFENSE(AT_SHIP,2000,350,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,2000,700,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,2400,900,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,2500,1500,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,2000,2200,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,2000,2600,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,1700,3000,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,1200,3600,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,800,4300,ARMY_STATE_AROUND);
+//    enemy.addArmyDEFENSE(AT_SHIP,450,4300,ARMY_STATE_AROUND);
+
+    //内陆进攻兵
+    enemy.addArmyATTACK(0,700,2525,3,3000,37500);
+    enemy.addArmyATTACK(0,700,2550,3,3000,37500);
+    enemy.addArmyATTACK(0,700,2575,3,3000,37500);
+    enemy.addArmyATTACK(0,700,2600,3,3000,37500);
+    enemy.addArmyATTACK(1,725,2500,3,3000,37500);
+    enemy.addArmyATTACK(1,750,2500,3,3000,37500);
+    enemy.addArmyATTACK(1,775,2500,3,3000,37500);
+    enemy.addArmyATTACK(1,800,2500,3,3000,37500);
+    enemy.addArmyATTACK(2,725,2525,3,3000,37500);
+    enemy.addArmyATTACK(2,725,2550,3,3000,37500);
+    enemy.addArmyATTACK(2,750,2525,3,3000,37500);
+    enemy.addArmyATTACK(2,750,2550,3,3000,37500);
+
+    //内陆防守兵
     enemy.addArmyDEFENSE(0,500,1600,2);
     enemy.addArmyDEFENSE(0,500,1625,2);
     enemy.addArmyDEFENSE(0,500,1650,2);

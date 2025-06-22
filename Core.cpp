@@ -563,7 +563,32 @@ void Core::infoShare() {
     for (int i = 0;i < NOWPLAYER;i++) {
         updateCommon(&currentBuff[i]);
     }
-
+    ///////修改player当前所有的人类的状态
+    set<int>humans;
+    for(auto*human:player[0]->human)humans.insert(human->getglobalNum());
+    for(auto*human:player[1]->human)humans.insert(human->getglobalNum());
+    auto updateState=[&](tagHuman&human)->void
+    {
+        if(human.WorkObjectSN!=-1){
+            if(humans.count(human.WorkObjectSN)){
+                human.NowState=HUMAN_STATE_ATTACKING;
+            }else{
+                human.NowState=HUMAN_STATE_WORKING;
+            }
+        }
+        else{
+            if(human.DR0!=human.DR||human.UR0!=human.UR){
+                human.NowState=HUMAN_STATE_WALKING;
+            }else{
+                human.NowState=HUMAN_STATE_IDLE;
+            }
+        }
+    };
+    for(auto&human:currentBuff[0].armies)updateState(human);
+    for(auto&human:currentBuff[0].farmers)updateState(human);
+    for(auto&human:currentBuff[1].armies)updateState(human);
+    for(auto&human:currentBuff[1].farmers)updateState(human);
+    ///////
     tagUsrGame.update(&currentBuff[0]);
     tagEnemyGame.update(&currentBuff[1]);
     buff = 1 - buff;    //轮换缓存
