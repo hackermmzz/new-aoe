@@ -340,7 +340,6 @@ static void ifDead(vector <int> &x,int sort){
 
 }
 void EnemyAI::processData() {
-    return;
     enemyInfo=getInfo();
     int nowState_Army=0;
      //军队数据初始化
@@ -351,6 +350,7 @@ void EnemyAI::processData() {
              timer.insert(std::pair<double,long>(enemyInfo.armies[i].SN,false));
             }
      }
+     qDebug()<<g_frame;
         if(g_frame>1000){
 //            check();
             Around();
