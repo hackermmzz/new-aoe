@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
         {"-s", 2},{"-select",2}   // 读取指定地图，"gameMap.txt"
         // 添加更多启动参数...
     };
-    int mapJudge = 0;  // 默认值
+    int mapJudge = 0;  // 设置默认值
 
     //提取选项对应的参数
     for (const QString& arg : args) {
