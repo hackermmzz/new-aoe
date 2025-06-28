@@ -892,10 +892,17 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
             res->updateCnt_byGather(gatherer->get_quantityGather());
 
             //更新首次收集得分
-            if (object2->getSort() == SORT_STATICRES && s_res->getNum() == 0)
+            // 静态资源区分
+            if (object2->getSort() == SORT_STATICRES)
             {
-                usrScore.update(_BERRY);
+                if (s_res->getNum() == NUM_STATICRES_Bush) {
+                    usrScore.update(_BERRY);
+                }
+                else if (s_res->getNum() == NUM_STATICRES_Fish) {
+                    usrScore.update(_FISH);
+                }
             }
+            // 动物区分
             else if (object2->getSort() == SORT_ANIMAL)
             {
                 Animal* animal = NULL;
@@ -913,6 +920,7 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
             {
                 usrScore.update(_FARM);
             }
+            // 
             if (res->get_ResourceSort() == HUMAN_WOOD)
             {
                 usrScore.update(_ISWOOD);
@@ -959,8 +967,8 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
                 if (block.getMapType() != MAPTYPE_OCEAN && GlobalMap->map_Object[L][U].empty()) {//如果不为海洋，那就是陆地，并且无障碍物
                     satisfy.push_back({ block.getDR(),block.getUR() });
                     //加登陆分
-                    if(theMap->enemyLandExplored==0&&theMap->blockIndex[L][U]==theMap->enemyBlockIdx){
-                        theMap->enemyLandExplored=1;
+                    if (theMap->enemyLandExplored == 0 && theMap->blockIndex[L][U] == theMap->enemyBlockIdx) {
+                        theMap->enemyLandExplored = 1;
                         extern Score usrScore;
                         usrScore.update(_FINDENEMYLAND);
                     }

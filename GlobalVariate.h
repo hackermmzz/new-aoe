@@ -105,10 +105,10 @@ public:
     }
     void update(int type, int num = 1) {
         if (type == _FINDENEMYLAND) {
-            addScore(10, "登录地方大陆,分数+10");
+            addScore(10, "登录敌方大陆,分数+10");
             return;
         }
-        if (type <= _ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
+        if (type <= _ISSTONE && scoreTypes[type] == 0 && type != _MEAT) {
             addScore(5, " 采集到新资源，分数+5");
             if (type == _ISGOLD) {
                 addScore(10, " 采集到黄金，分数+10");
@@ -169,14 +169,14 @@ public:
     }
 };
 //
-struct tagObj{
+struct tagObj {
     int SN;// 序列号
     int BlockDR, BlockUR; //区块坐标
-    bool operator <(const tagObj&obj)const{
-        return SN<obj.SN;
+    bool operator <(const tagObj& obj)const {
+        return SN < obj.SN;
     }
 };
-struct tagBuilding:tagObj
+struct tagBuilding :tagObj
 {
     int Type; // 建筑类型
     int Blood; // 当前血量
@@ -193,7 +193,7 @@ struct tagBuilding:tagObj
     }
 };
 
-struct tagResource:tagObj
+struct tagResource :tagObj
 {
     double DR, UR; //细节坐标
     int Type; // 资源类型
@@ -202,7 +202,7 @@ struct tagResource:tagObj
     int Blood; // 当前血量
 };
 
-struct tagHuman:tagObj
+struct tagHuman :tagObj
 {
     double DR, UR; //细节坐标
     double DR0, UR0; // 目的地坐标
@@ -346,7 +346,7 @@ struct Point {
 
 struct tagInfo
 {
-    using TerrainData=const tagTerrain[MAP_L][MAP_U];
+    using TerrainData = const tagTerrain[MAP_L][MAP_U];
     vector<tagBuilding> buildings; // 我方建筑列表
     vector<tagFarmer> farmers; // 我方农民列表
     vector<tagArmy> armies; // 我方军队列表
@@ -355,7 +355,7 @@ struct tagInfo
     vector<tagArmy> enemy_armies; // 敌方军队列表
     vector<tagResource> resources; // 资源列表
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
-    TerrainData*theMap;// 高程图
+    TerrainData* theMap;// 高程图
     //tagTerrain theMap[MAP_L][MAP_U]; //弃用这种形式
     vector<Point>exploredUpdate;//多探索的区域
     int GameFrame; // 游戏帧数
@@ -379,7 +379,7 @@ struct tagInfo
             ins_ret = other.ins_ret;
 
             // Deep copy theMap array
-            theMap=other.theMap;
+            theMap = other.theMap;
             /*
             for (int i = 0; i < MAP_L; ++i) {
                 for (int j = 0; j < MAP_U; ++j) {
