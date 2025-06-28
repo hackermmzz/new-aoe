@@ -434,19 +434,19 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
             if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
                 // 先从map_Object中移除建筑，避免悬空指针
                 Coordinate* buildingToDelete = *itBuild;
-                for(int mapX = buildingToDelete->getBlockDR(); 
-                    mapX < buildingToDelete->getBlockDR() + buildingToDelete->get_BlockSizeLen(); 
+                for (int mapX = buildingToDelete->getBlockDR();
+                    mapX < buildingToDelete->getBlockDR() + buildingToDelete->get_BlockSizeLen();
                     mapX++) {
-                    for(int mapY = buildingToDelete->getBlockUR(); 
-                        mapY < buildingToDelete->getBlockUR() + buildingToDelete->get_BlockSizeLen(); 
+                    for (int mapY = buildingToDelete->getBlockUR();
+                        mapY < buildingToDelete->getBlockUR() + buildingToDelete->get_BlockSizeLen();
                         mapY++) {
-                        if(mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
+                        if (mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
                             auto& objects = map->map_Object[mapX][mapY];
                             objects.erase(remove(objects.begin(), objects.end(), buildingToDelete), objects.end());
                         }
                     }
                 }
-                
+
                 delete* itBuild;
                 itBuild = buildList.erase(itBuild);
             }
@@ -831,7 +831,7 @@ void MainWidget::initPlayers() {
     //设置初始时代
     player[0]->setCiv(CIVILIZATION_STONEAGE);
     //设置初始资源
-    // player[0]->changeResource(10000, 10000, 10000, 500);
+    player[0]->changeResource(10000, 10000, 10000, 500);
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
 

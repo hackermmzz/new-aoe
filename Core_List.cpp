@@ -833,12 +833,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
         //更新得分
         if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 1 && object2->getSort() == SORT_ARMY && object1->getPlayerRepresent() == NOWPLAYERREPRESENT)
         {
-            if (object2->getNum() > 3) {
-                usrScore.update(_KILL10);
-            }
-            else {
-                usrScore.update(_KILL2);
-            }
+            usrScore.update(_KILL2);
         }
 
         if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 0 && object1->getPlayerRepresent() == 1) {
