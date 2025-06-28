@@ -16,6 +16,7 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
     this->memorymap = memorymap;    //内存图
     this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
     this->interactionList = new Core_List(this->theMap, this->player);   //本类中管理的对象交互动态表
+    InitPlayerMap();
 }
 
 void Core::gameUpdate()
@@ -44,7 +45,21 @@ void Core::gameUpdate()
     manageOrder(1);
 
     interactionList->update();
-
+    //判断是否是第一帧,如果是那我需要把所有探索的区域给学生
+    {
+        static bool firstFrame=1;
+        if(firstFrame){
+            firstFrame=0;
+            explored.clear();
+            for(int i=0;i<MAP_L;++i){
+                for(int j=0;j<MAP_U;++j){
+                    if(theMap->cell[i][j].Explored){
+                        explored.push_back({i,j});
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Core::updateByObject()
@@ -351,7 +366,7 @@ void Core::updateByPlayer(int id) {
     taginfo.civilizationStage = self->getCiv();
     taginfo.GameFrame = g_frame;
     //更新已探索的区域
-    if(id==0)taginfo.exploredUpdate=explored;
+    if(id==NOWPLAYERREPRESENT)taginfo.exploredUpdate=explored;
     //更新人口数据
     for (Human* human : self->human)
     {
@@ -541,7 +556,43 @@ void Core::updateByPlayer(int id) {
 /**
  *更新tagGame中的数组大小，资源地图
  */
-void Core::updateCommon(tagInfo* taginfo) {
+void Core::updateCommon(tagInfo* taginfo,int id) {
+    //根据Block获取对应的tagTerrain类型
+    auto GetTerrainType=[&](const Block&block)->tagTerrain{
+        int height = block.getMapHeight();
+        tagTerrain ret;
+        ret.height = height;
+        ret.type = height == MAPHEIGHT_OCEAN ? MAPPATTERN_OCEAN : MAPPATTERN_GRASS;
+        return ret;
+    };
+    //初始化一个全局的给敌人使用
+    struct Data{
+        tagTerrain theMap[MAP_L][MAP_U];
+    };
+    static bool init=0;
+    static Data*data=new Data;
+    if(!init){
+        init=1;
+        for (int i = 0; i < MAP_L; ++i) {
+            for (int j = 0; j < MAP_U; ++j) {
+                (data->theMap)[i][j]=GetTerrainType(theMap->cell[i][j]);
+            }
+        }
+    }
+    //
+    if(id==NOWPLAYERREPRESENT){
+        //根据探索的区域来动态更新
+        for(auto&p:explored){
+            int i=p.x,j=p.y;
+            playerMap[i][j]=GetTerrainType(theMap->cell[i][j]);
+        }
+        taginfo->theMap=&playerMap;
+    }
+    else{
+        //如果是敌人,直接给定固定全局可见的地图
+        taginfo->theMap=&(data->theMap);
+    }
+    /*
     for (int i = 0; i < MAP_L; ++i) {
         for (int j = 0; j < MAP_U; ++j) {
             int height = theMap->cell[i][j].getMapHeight();
@@ -549,6 +600,7 @@ void Core::updateCommon(tagInfo* taginfo) {
             taginfo->theMap[i][j].type = height == MAPHEIGHT_OCEAN ? MAPPATTERN_OCEAN : MAPPATTERN_GRASS;
         }
     }
+    */
 }
 
 
@@ -561,7 +613,7 @@ void Core::infoShare() {
         updateByPlayer(i);
     }
     for (int i = 0;i < NOWPLAYER;i++) {
-        updateCommon(&currentBuff[i]);
+        updateCommon(&currentBuff[i],i);
     }
     ///////修改player当前所有的人类的状态
     set<int>humans;
@@ -592,6 +644,17 @@ void Core::infoShare() {
     tagUsrGame.update(&currentBuff[0]);
     tagEnemyGame.update(&currentBuff[1]);
     buff = 1 - buff;    //轮换缓存
+}
+
+void Core::InitPlayerMap()
+{
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            auto&info=playerMap[i][j];
+            info.height=-1;
+            info.type=MAPPATTERN_UNKNOWN;
+        }
+    }
 }
 
 

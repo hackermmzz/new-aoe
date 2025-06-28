@@ -168,12 +168,17 @@ public:
         }
     }
 };
-
-struct tagBuilding
-{
+//
+struct tagObj{
+    int SN;// 序列号
     int BlockDR, BlockUR; //区块坐标
+    bool operator <(const tagObj&obj)const{
+        return SN<obj.SN;
+    }
+};
+struct tagBuilding:tagObj
+{
     int Type; // 建筑类型
-    int SN; // 序列号
     int Blood; // 当前血量
     int MaxBlood; // 最大血量
     int Percent; // 完成百分比
@@ -188,26 +193,22 @@ struct tagBuilding
     }
 };
 
-struct tagResource
+struct tagResource:tagObj
 {
     double DR, UR; //细节坐标
-    int BlockDR, BlockUR; //区块坐标
     int Type; // 资源类型
-    int SN; // 序列号
     int ProductSort; // 产品种类
     int Cnt; // 剩余资源数量
     int Blood; // 当前血量
 };
 
-struct tagHuman
+struct tagHuman:tagObj
 {
     double DR, UR; //细节坐标
-    int BlockDR, BlockUR; //区块坐标
     double DR0, UR0; // 目的地坐标
     int NowState; // 当前状态
     int WorkObjectSN; // 工作对象序列号
     int Blood; // 当前血量
-    int SN; // 序列号
     int attack; // 攻击力
     int rangedDefense; // 远程防御
     int meleeDefense; // 近战防御
@@ -345,6 +346,7 @@ struct Point {
 
 struct tagInfo
 {
+    using TerrainData=const tagTerrain[MAP_L][MAP_U];
     vector<tagBuilding> buildings; // 我方建筑列表
     vector<tagFarmer> farmers; // 我方农民列表
     vector<tagArmy> armies; // 我方军队列表
@@ -353,7 +355,8 @@ struct tagInfo
     vector<tagArmy> enemy_armies; // 敌方军队列表
     vector<tagResource> resources; // 资源列表
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
-    tagTerrain theMap[MAP_L][MAP_U]; // 高程图
+    TerrainData*theMap;// 高程图
+    //tagTerrain theMap[MAP_L][MAP_U]; //弃用这种形式
     vector<Point>exploredUpdate;//多探索的区域
     int GameFrame; // 游戏帧数
     int civilizationStage; // 文明阶段
@@ -376,12 +379,14 @@ struct tagInfo
             ins_ret = other.ins_ret;
 
             // Deep copy theMap array
+            theMap=other.theMap;
+            /*
             for (int i = 0; i < MAP_L; ++i) {
                 for (int j = 0; j < MAP_U; ++j) {
                     theMap[i][j] = other.theMap[i][j];
                 }
             }
-
+            */
             GameFrame = other.GameFrame;
             civilizationStage = other.civilizationStage;
             Wood = other.Wood;

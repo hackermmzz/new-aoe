@@ -1,697 +1,667 @@
 #include "UsrAI.h"
+#include<set>
 #include <iostream>
+#include<unordered_map>
+using namespace std;
 tagGame tagUsrGame;
 ins UsrIns;
+//
+//
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
-
-// 全局变量定义
 tagInfo info;
-int building_num[20]; // 包括未完工的建筑
-std::vector<int> building_sn[20]; // 只记录已完工的建筑
-std::vector<int> idle_human_sn;
-std::vector<int> human_sn;
-std::vector<int> idle_ship_sn;
-std::vector<int> ship_sn;
-std::vector<int> idle_settler_sn;
-std::vector<tagHuman> settler;
-char mmap[MAP_L][MAP_U]; //-:空地 h:建筑 w:资源 i:人 o:海洋
-int land_mask[MAP_L][MAP_U]; // 陆地标记：0-未标记/水域，1-中心陆地，2-非中心陆地
-bool center_land_initialized = false; // 标记是否已经初始化过中心陆地
-const int dx[4] = { 0, 0, -1, 1 };
-const int dy[4] = { -1, 1, 0, 0 };
-int center_x, center_y;
-int obj_x, obj_y;
-map<int, int> building_size{
+map<int,tagObj*>SnToObj;
+set<int>lock_farmers;
+set<int>idle_farmers;//所有空闲的农民
+set<int>idle_armies;
+tagBuilding Center;
+int mapInfo[MAP_L][MAP_U];
+unordered_map<int,int>buildingSize={
+    {BUILDING_CENTER,3},
     {BUILDING_HOME,2},
-    {BUILDING_CENTER,4},
     {BUILDING_GRANARY,3},
-    {BUILDING_MARKET,3},
     {BUILDING_STOCK,3},
+    {BUILDING_ARMYCAMP,3},
+    {BUILDING_ARROWTOWER,2},
+    {BUILDING_FARM,3},
+    {BUILDING_MARKET,3},
+    {BUILDING_STABLE,3},
+    {BUILDING_RANGE,3},
     {BUILDING_DOCK,2},
 };
+int blockIndex[MAP_L][MAP_U];
+/////////////////////////////
+struct Node{
+    Node*nxt;
+    function<void(void)>action,init;
+    function<bool(void)>condition;
+    Node(
+         const decltype(init)&init_,
+         const decltype(action)&action_,
+         const decltype(condition)&condition_,
+         Node*nxt_=0
+        )
+        :
+          isInit(0),
+          nxt(nxt_),
+          action(action_),
+          init(init_),
+          condition(condition_)
+    {
 
-inline int tran(int x) {
-    return (double)x * BLOCKSIDELENGTH + BLOCKSIDELENGTH / 2;
+    }
+    Node* work(){
+        if(!isInit){
+            isInit=1;
+            init();
+        }
+        //
+        action();
+        //
+        bool cond=1;
+        cond=cond&&condition();
+        return cond?nxt:this;
+    }
+private:
+    bool isInit;
+};
+set<Node*>AllNodes;//当前所有的工作点
+set<int>NodeMsg;
+set<int>TheFrameNodeMsg;
+/////////////////////////////
+void AddMsg(int t){
+    TheFrameNodeMsg.insert(t);
+}
+bool FindMsg(int t){
+    return NodeMsg.count(t);
+}
+int randint(int a,int b){
+    return rand()%(b-a+1)+a;
+}
+void UsrAI::processData()
+{
+    info=getInfo();
+    //初始化所有的工作点
+    InitAll();
+    //更新所有信息
+    UpdateAll();
+    //
+
 }
 
-inline int tran(double x) {
-    return (int)(x / BLOCKSIDELENGTH);
+void UsrAI::InitAll()
+{
+    static bool init=0;
+    if(init)return;
+    init=1;
+    /////////////////建立所有起始工作点
+    InitActionNode();
+
 }
 
-// 找到离(x,y)最近的陆地，并返回其对岸的坐标
-void find_opposite_land(int x, int y, int* x_out, int* y_out) {
-    // 确定起点所在的陆地类型
-    int current_land_type = 0;
-    if (x >= 0 && x < MAP_L && y >= 0 && y < MAP_U) {
-        current_land_type = land_mask[x][y];
+void UsrAI::InitActionNode()
+{
+    map<string,Node*>nodes;
+    decltype(Node::action)emptyAction=[&](){};
+    decltype(Node::condition)emptyCond=[&](){return false;};//形成自循环
+    decltype(Node::init)emptyInit=[&](){};
+    //生成农民
+    {
+        Node*farmerGenerate=new Node(
+                    emptyInit,
+                    [&](){
+            //
+            if(info.farmers.size()>=20)return;
+            //生产农民
+            if(Center.Project==0)BuildingAction(Center.SN,BUILDING_CENTER_CREATEFARMER);
+        },
+        emptyCond
+        );
+        nodes["FarmerGenerate"]=farmerGenerate;
     }
-
-    // 目标陆地类型（寻找对岸）
-    int target_land_type = 0;
-
-    // 如果起点在中心陆地上，寻找非中心陆地
-    if (current_land_type == 1) {
-        target_land_type = 2;
-    }
-    // 如果起点在非中心陆地上或水域中，寻找中心陆地
-    else {
-        target_land_type = (current_land_type == 2) ? 1 : 0;
-
-        // 如果在水域中且不知道要寻找哪种陆地，先找到最近的任何陆地
-        if (current_land_type == 0 && target_land_type == 0) {
-            // 使用BFS找到最近的任何陆地
-            queue<pair<int, int>> q;
-            bool visited[MAP_L][MAP_U];
-            memset(visited, false, sizeof(visited));
-
-            q.push(make_pair(x, y));
-            visited[x][y] = true;
-
-            bool found_land = false;
-            while (!q.empty() && !found_land) {
-                pair<int, int> curr = q.front();
-                q.pop();
-
-                int curr_x = curr.first;
-                int curr_y = curr.second;
-
-                // 如果当前位置是陆地，确定它的类型
-                if (land_mask[curr_x][curr_y] > 0) {
-                    current_land_type = land_mask[curr_x][curr_y];
-                    // 确定目标陆地类型（寻找对岸）
-                    target_land_type = (current_land_type == 1) ? 2 : 1;
-                    found_land = true;
-                    break;
-                }
-
-                // 向四个方向扩展
-                for (int dir = 0; dir < 4; dir++) {
-                    int nx = curr_x + dx[dir];
-                    int ny = curr_y + dy[dir];
-
-                    // 检查边界和是否已访问
-                    if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && !visited[nx][ny]) {
-                        q.push(make_pair(nx, ny));
-                        visited[nx][ny] = true;
-                    }
-                }
-            }
-
-            // 如果没找到任何陆地，返回原位置
-            if (!found_land) {
-                *x_out = x;
-                *y_out = y;
-                return;
-            }
-        }
-    }
-
-    // 使用BFS寻找目标类型的陆地
-    queue<pair<int, int>> q;
-    bool visited[MAP_L][MAP_U];
-    memset(visited, false, sizeof(visited));
-
-    q.push(make_pair(x, y));
-    visited[x][y] = true;
-
-    int target_x = -1, target_y = -1;
-    int min_distance = INT_MAX;
-
-    while (!q.empty()) {
-        pair<int, int> curr = q.front();
-        q.pop();
-
-        int curr_x = curr.first;
-        int curr_y = curr.second;
-
-        // 向四个方向扩展
-        for (int dir = 0; dir < 4; dir++) {
-            int nx = curr_x + dx[dir];
-            int ny = curr_y + dy[dir];
-
-            // 检查边界和是否已访问
-            if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && !visited[nx][ny]) {
-                visited[nx][ny] = true;
-
-                // 如果找到目标类型的陆地
-                if (land_mask[nx][ny] == target_land_type) {
-                    int distance = abs(nx - x) + abs(ny - y);
-                    if (distance < min_distance) {
-                        target_x = nx;
-                        target_y = ny;
-                        min_distance = distance;
-                    }
-                }
-
-                // 继续搜索
-                q.push(make_pair(nx, ny));
-            }
-        }
-    }
-
-    // 如果找到目标陆地，返回其坐标
-    if (target_x != -1) {
-        *x_out = target_x;
-        *y_out = target_y;
-    }
-    else {
-        // 如果没找到，返回原位置
-        *x_out = x;
-        *y_out = y;
-    }
-}
-
-// 判断(x,y)是否在市镇中心所在的陆地上
-bool is_on_center_land(int x, int y) {
-    // 检查边界
-    if (x < 0 || x >= MAP_L || y < 0 || y >= MAP_U) {
-        return false;
-    }
-
-    // 检查是否是中心陆地（值为1）
-    return land_mask[x][y] == 1;
-}
-
-// 判断(x,y)是否在非中心陆地上
-bool is_on_other_land(int x, int y) {
-    // 检查边界
-    if (x < 0 || x >= MAP_L || y < 0 || y >= MAP_U) {
-        return false;
-    }
-
-    // 检查是否是非中心陆地（值为2）
-    return land_mask[x][y] == 2;
-}
-
-void updateMap(int type, int sx, int sy) {
-    int size = building_size[type];
-    for (int i = sx;i < sx + size;i++) {
-        for (int j = sy;j < sy + size;j++) {
-            mmap[i][j] = 'h';
-        }
-    }
-}
-
-// 标记中心陆地和非中心陆地（只执行一次）
-void updateCenterLandMask() {
-    if (center_land_initialized) {
-        return; // 如果已经初始化过，直接返回
-    }
-
-    // 只有当中心坐标有效时才进行初始化
-    if (center_x >= 0 && center_y >= 0) {
-        // 重置陆地标记
-        memset(land_mask, 0, sizeof(land_mask));
-
-        // 第一步：使用洪水填充算法标记所有与市镇中心相连的陆地为1
-        queue<pair<int, int>> q;
-        q.push(make_pair(center_x, center_y));
-        land_mask[center_x][center_y] = 1;
-
-        while (!q.empty()) {
-            pair<int, int> curr = q.front();
-            q.pop();
-
-            int curr_x = curr.first;
-            int curr_y = curr.second;
-
-            // 向四个方向扩展
-            for (int dir = 0; dir < 4; dir++) {
-                int nx = curr_x + dx[dir];
-                int ny = curr_y + dy[dir];
-
-                // 检查边界和是否是陆地且未标记
-                if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && land_mask[nx][ny] == 0) {
-                    // 陆地包括空地、建筑、人和资源
-                    if (mmap[nx][ny] == '-' || mmap[nx][ny] == 'h' || mmap[nx][ny] == 'i' || mmap[nx][ny] == 'w') {
-                        q.push(make_pair(nx, ny));
-                        land_mask[nx][ny] = 1; // 中心陆地标记为1
-                    }
-                }
-            }
-        }
-
-        // 第二步：直接遍历地图，把所有其他陆地标记为2
-        for (int i = 0; i < MAP_L; i++) {
-            for (int j = 0; j < MAP_U; j++) {
-                // 如果是未标记的陆地，直接标记为非中心陆地
-                if (land_mask[i][j] == 0 &&
-                    (mmap[i][j] == '-' || mmap[i][j] == 'h' || mmap[i][j] == 'i' || mmap[i][j] == 'w')) {
-                    land_mask[i][j] = 2; // 非中心陆地标记为2
-                }
-            }
-        }
-
-        center_land_initialized = true; // 标记为已初始化
-
-    }
-}
-
-// 更新游戏信息
-void updateInfo() {
-    // 初始化
-    memset(building_num, 0, sizeof(building_num));
-    for (int i = 0; i < 20; i++) {
-        building_sn[i].clear();
-    }
-    // 更新地图信息
-    for (int i = 0; i < MAP_L; i++) {
-        for (int j = 0; j < MAP_U; j++) {
-            if (info.theMap[i][j].type == MAPPATTERN_OCEAN) {
-                mmap[i][j] = 'o';
-            }
-            else {
-                mmap[i][j] = '-';
-            }
-        }
-    }
-
-    // 更新建筑信息
-    for (auto& building : info.buildings) {
-        if (building.Type == BUILDING_MARKET) {
-            cout << "market" << building.SN << endl;
-        }
-        building_num[building.Type]++;
-        updateMap(building.Type, building.BlockDR, building.BlockUR);
-        if (building.Percent == 100) {
-            building_sn[building.Type].push_back(building.SN);
-        }
-        if (building.Type == BUILDING_CENTER) {
-            center_x = building.BlockDR;
-            center_y = building.BlockUR;
-        }
-    }
-    // 更新中心陆地
-    if (!center_land_initialized) {
-        updateCenterLandMask();
-    }
-    // 更新村民信息
-    idle_human_sn.clear();
-    idle_ship_sn.clear();
-    idle_settler_sn.clear();
-    human_sn.clear();
-    ship_sn.clear();
-    settler.clear();
-    for (auto& human : info.farmers) {
-        mmap[human.BlockDR][human.BlockUR] = 'i';
-        if (human.FarmerSort == 1) { //1表示运输船
-            ship_sn.push_back(human.SN);
-            continue;
-        }
-        human_sn.push_back(human.SN);
-        if (!is_on_center_land(human.BlockDR, human.BlockUR)) {
-            // cout<<"农民"<<human.SN<<"开始殖民"<<endl;
-            settler.push_back(human);
-        }
-        if (human.NowState == HUMAN_STATE_IDLE && human.FarmerSort == 0) { //0表示普通农民
-            if (is_on_center_land(human.BlockDR, human.BlockUR)) {
-                idle_human_sn.push_back(human.SN);
-            }
-            else {
-                idle_settler_sn.push_back(human.SN);
-            }
-        }
-
-    }
-    // 更新资源信息
-    for (auto& resource : info.resources) {
-        mmap[resource.BlockDR][resource.BlockUR] = 'w';
-        if (resource.Type == RESOURCE_GOLD) {
-            obj_x = resource.BlockDR;
-            obj_y = resource.BlockUR;
-        }
-    }
-}
-
-// 以sx，sy为中心向外搜索面积为size*size的空地，x,y返回空地左下角坐标
-int getEmptyBlock(int sx, int sy, int* x, int* y, int type) {
-    // 获取建筑大小
-    if (building_size.find(type) == building_size.end()) {
-        return -1; // 不支持的建筑类型
-    }
-    int size = building_size[type];
-    bool need_ocean = (type == BUILDING_DOCK);
-
-    int buffer = 4; // 缓冲区大小，对所有建筑都适用
-    int searchSize = size + buffer; // 建筑大小加缓冲区
-
-    // 螺旋式向外搜索，最大搜索半径为maxRadius
-    int maxRadius = 40;
-    for (int radius = 0; radius <= maxRadius; radius++) {
-        // 遍历当前半径的正方形圈
-        for (int offsetX = -radius; offsetX <= radius; offsetX++) {
-            for (int offsetY = -radius; offsetY <= radius; offsetY++) {
-                // 仅检查当前圈的边缘
-                if (radius > 0 && abs(offsetX) < radius && abs(offsetY) < radius) {
-                    continue;
-                }
-
-                int startX = sx + offsetX;
-                int startY = sy + offsetY;
-
-                // 检查边界
-                if (startX < 0 || startX + searchSize > MAP_L || startY < 0 || startY + searchSize > MAP_U) {
-                    continue;
-                }
-
-                bool isAvailable = true;
-
-                // 计算建筑本体的起始坐标（加上缓冲区的一半）
-                int buildingStartX = startX + buffer / 2;
-                int buildingStartY = startY + buffer / 2;
-
-                if (need_ocean) {
-                    // 对于码头：首先检查建筑本体是否全部在海洋中
-                    for (int i = 0; i < size; i++) {
-                        for (int j = 0; j < size; j++) {
-                            int checkX = buildingStartX + i;
-                            int checkY = buildingStartY + j;
-                            // 检查是否是海洋
-                            if (mmap[checkX][checkY] != 'o') {
-                                isAvailable = false;
-                                break;
+    //建造房子
+    {
+        static int farmerSN=-1;
+        Node*homeBuild=new Node(
+                    emptyInit,
+                    [&](){
+                        if(farmerSN==-1)
+                        {
+                            auto&&v=AllocateFarmers(1,Center.BlockDR,Center.BlockUR,1);
+                            if(v.size())farmerSN=v.front();
+                            else return;
+                        }
+                        tagFarmer farmer=*(tagFarmer*)SnToObj[farmerSN];
+                        if(farmer.WorkObjectSN==-1&&info.Wood>=BUILD_HOUSE_WOOD){
+                            static array<int,2>pre={Center.BlockDR,Center.BlockUR};
+                            array<int,2>place=FindForBuilding(BUILDING_HOME,BUILDING_CENTER,pre[0],pre[1],1);
+                            if(place[0]!=INT_MAX){
+                                pre=place;
+                                HumanBuild(farmerSN,BUILDING_HOME,place[0],place[1]);
                             }
                         }
-                        if (!isAvailable) break;
+                    },
+        [&](){
+            int cnt=0;
+            for(tagBuilding&obj:info.buildings){
+                if(obj.Type==BUILDING_HOME&&obj.Percent>=100)++cnt;
+            }
+            if(cnt>=5){
+                FreeFarmers({farmerSN});
+                return 1;
+            }
+            return 0;
+        }
+
+        );
+        nodes["homeBuild"]=homeBuild;
+    }
+    //人去捕鱼
+    {
+        static vector<int>farmer;
+        static list<int>fish;
+        nodes["fishing"]=new Node(
+            [&](){
+                //找到所有靠岸渔场
+                for(auto obj:info.resources){
+                    if(obj.Type!=RESOURCE_FISH)continue;
+                    int ele=obj.SN;
+                    tagResource res=*(tagResource*)SnToObj[ele];
+                    //判断是否靠岸
+                    static const int off[][2]={ {0,-1},{1,-1},{0,2},{1,2},{-1,0},{-1,1},{2,0},{2,1} };
+                    bool flag=IsYanAn(res.BlockDR,res.BlockUR);
+                    if(flag){
+                        fish.push_back(ele);
                     }
-
-                    // 如果建筑本体在海洋中，检查是否至少有一格与陆地相邻
-                    if (isAvailable) {
-                        bool adjacent_to_land = false;
-
-                        // 只检查建筑本体的边界格子
-                        for (int i = 0; i < size && !adjacent_to_land; i++) {
-                            for (int j = 0; j < size && !adjacent_to_land; j++) {
-                                // 只检查边界格子
-                                if (i > 0 && i < size - 1 && j > 0 && j < size - 1) {
-                                    continue; // 跳过内部格子
+                }
+            },
+            [&](){
+                AllocateFarmers(farmer,2,Center.BlockDR,Center.BlockUR,1);
+                //更新list
+                for(auto itr=fish.begin();itr!=fish.end();){
+                    if(SnToObj.count(*itr)==0)itr=fish.erase(itr);
+                    else itr=next(itr);
+                }
+                //寻找一个靠我方大陆且可以人采集到的最近渔场
+                int tarsn=-1;
+                for(auto ele:fish){
+                    tagResource res=*(tagResource*)SnToObj[ele];
+                    if(tarsn==-1)tarsn=ele;
+                    else
+                    {
+                        tagResource tar=*(tagResource*)SnToObj[tarsn];
+                        if(abs(tar.BlockDR-Center.BlockDR)+abs(tar.BlockUR-Center.BlockUR)>abs(res.BlockDR-Center.BlockDR)+abs(res.BlockUR-Center.BlockUR))
+                        tarsn=ele;
+                    }
+                }
+                //所有人直接对同一个渔场进行采集
+                if(tarsn!=-1){
+                    for(auto sn:farmer){
+                        tagFarmer f=*(tagFarmer*)SnToObj[sn];
+                        if(f.WorkObjectSN==-1){
+                            HumanAction(sn,tarsn);
+                        }
+                    }
+                }
+            },
+            [&](){
+                return fish.size()==0;
+            }
+        );
+    }
+    //砍树
+    {
+        static vector<int>farmer;
+        nodes["cutTree"]=new Node(
+                    emptyInit,
+                    [&](){
+                        list<int>trees;
+                        //获取所有树的位置
+                        for(tagResource res:info.resources){
+                            if(res.Type!=RESOURCE_TREE||!InMyLand(res.BlockDR,res.BlockUR))continue;
+                            trees.push_back(res.SN);
+                        }
+                        //分配农民
+                        AllocateFarmers(farmer,5,Center.BlockDR,Center.BlockUR);
+                        //去砍树
+                        for(auto sn:farmer){
+                            tagFarmer f=*(tagFarmer*)SnToObj[sn];
+                            //寻找离他最近的树
+                            if(f.WorkObjectSN==-1){
+                                int tar=-1;
+                                for(auto treeSN:trees){
+                                    auto tree=*(tagResource*)SnToObj[treeSN];
+                                    if(tar==-1)tar=treeSN;
+                                    else if(Dis(*SnToObj[tar],f)>Dis(*SnToObj[treeSN],f))
+                                        tar=treeSN;
                                 }
+                                if(~tar){
+                                    HumanAction(sn,tar);
+                                }
+                            }
+                        }
+                    },
+                    [&](){
+                        if(info.Wood>=1000){
+                            FreeFarmers(farmer);
+                            return 1;
+                        }
+                        return 0;
+                    }
+        );
+    }
+    //猎杀羚羊
+    {
+        static vector<int>farmers;
+        static list<int>sheep;
+        static list<int>died;
+        static bool buildSock=0;
+        nodes["killSheep"]=new Node(
+                    [&](){
+                        for(tagResource res:info.resources){
+                            if(res.Type==RESOURCE_GAZELLE){
+                                sheep.push_back(res.SN);
+                            }
+                        }
+                    },
+                    [&](){
+                        AllocateFarmers(farmers,2,Center.BlockDR,Center.BlockUR);
+                        if(farmers.size()!=2)return;
+                        //先杀掉所有🐏
+                        if(sheep.size()){
+                            tagFarmer f0=*(tagFarmer*)SnToObj[farmers[0]],f1=*(tagFarmer*)SnToObj[farmers[1]];
+                            if(f0.WorkObjectSN!=-1){
+                                tagResource res=*(tagResource*)SnToObj[f0.WorkObjectSN];
+                                if(res.Blood>0)return;
+                                died.push_back(f0.WorkObjectSN);
+                                sheep.erase(find(sheep.begin(),sheep.end(),f0.WorkObjectSN));
+                            }
+                            //找到离二者最近的🐏
+                            int tar=-1;
+                            for(auto sn:sheep){
+                                tagResource res=*(tagResource*)SnToObj[sn];
+                                int dis=Dis(f0,res)+Dis(f1,res);
+                                if(tar==-1)tar=sn;
+                                else{
+                                    tagResource tt=*(tagResource*)SnToObj[tar];
+                                    int dis1=Dis(f0,tt)+Dis(f1,tt);
+                                    if(dis1>dis)tar=sn;
+                                }
+                            }
+                            //杀了他
+                            if(~~~~~tar){
+                                HumanAction(farmers[0],tar);
+                                HumanAction(farmers[1],tar);
+                            }
+                        }
+                        //建仓库
+                        else if(!buildSock){
+                            if(info.Wood<BUILDING_STOCK)return;
+                            static bool first=1;
+                            tagFarmer f0=*(tagFarmer*)SnToObj[farmers[0]],f1=*(tagFarmer*)SnToObj[farmers[1]];
+                            if(f0.WorkObjectSN!=-1&&!first){
+                                tagBuilding stock=*(tagBuilding*)SnToObj[f0.WorkObjectSN];
+                                if(stock.Percent>=100){
+                                    buildSock=1;
+                                }
+                                if(f1.WorkObjectSN==-1)HumanAction(f1.SN,f0.WorkObjectSN);
+                                return;
+                            }
+                            first=0;
+                            //计算出一个最佳点，这里我简单的取中点
+                            int x=0,y=0;
+                            for(auto sn:died){
+                                tagResource res=*(tagResource*)SnToObj[sn];
+                                x+=res.BlockDR,y+=res.BlockUR;
+                            }
+                            x/=died.size(),y/=died.size();
+                            auto place=FindForBuilding(BUILDING_STOCK,x,y);
+                            HumanBuild(f0.SN,BUILDING_STOCK,place[0],place[1]);
+                        }
+                        else if(died.size()){
 
-                                int bx = buildingStartX + i;
-                                int by = buildingStartY + j;
-
-                                // 检查当前格子的四个方向
-                                for (int dir = 0; dir < 4; dir++) {
-                                    int ni = bx + dx[dir];
-                                    int nj = by + dy[dir];
-
-                                    if (ni >= 0 && ni < MAP_L && nj >= 0 && nj < MAP_U) {
-                                        // 检查是否是可用的陆地
-                                        if (mmap[ni][nj] == '-') {
-                                            adjacent_to_land = true;
-                                            break;
+                        }
+                    },
+                    [&](){
+                        return 0;
+                    }
+        );
+    }
+    //在沿岸建造船坞
+    {
+        static int farmerSN=-1;
+        static vector<array<int,2>>edge;
+        nodes["buildDock"]=new Node(
+                    [&](){
+                        //找到所有沿我方大陆的岸(可以建造船坞)(dis=2)
+                        auto&theMap=*info.theMap;
+                        for(int i=0;i<MAP_L;++i){
+                            for(int j=0;j<MAP_U;++j){
+                                bool flag=1;
+                                if(theMap[i][j].type==MAPPATTERN_OCEAN){
+                                    for(int l0=0;l0<buildingSize[BUILDING_DOCK]&&flag;++l0){
+                                        for(int l1=0;l1<buildingSize[BUILDING_DOCK]&&flag;++l1){
+                                            int ii=i+l0,jj=j+l1;
+                                            if(!(ii>=0&&i<MAP_L&&jj>=0&&jj<MAP_U&&theMap[ii][jj].type==MAPPATTERN_OCEAN)){
+                                                flag=0;
+                                            }
                                         }
                                     }
                                 }
+                                if(flag&&IsYanAn(i,j))edge.push_back({i,j});
                             }
                         }
-
-                        // 如果没有相邻的陆地，则该位置不可用
-                        if (!adjacent_to_land) {
-                            isAvailable = false;
+                    },
+                    [&](){
+                        if(farmerSN==-1){
+                            auto&&v=AllocateFarmers(1,Center.BlockDR,Center.BlockUR);
+                            if(v.size())farmerSN=v[0];
+                            else return;
                         }
-                    }
-
-                    // 对于码头，最后检查整个区域（包括缓冲区）是否没有被占用
-                    if (isAvailable) {
-                        for (int i = 0; i < searchSize; i++) {
-                            for (int j = 0; j < searchSize; j++) {
-                                int checkX = startX + i;
-                                int checkY = startY + j;
-                                // 检查此位置是否已被占用（除了海洋外）
-                                if (mmap[checkX][checkY] != 'o' && mmap[checkX][checkY] != '-') {
-                                    isAvailable = false;
-                                    break;
-                                }
-                            }
-                            if (!isAvailable) break;
+                        if(info.Wood<BUILD_DOCK_WOOD)return;
+                        //随机选择一个地点进行建筑船坞(2个）
+                        int idx=randint(0,edge.size()-1);
+                        tagFarmer farmer=*(tagFarmer*)SnToObj[farmerSN];
+                        if(farmer.WorkObjectSN==-1){
+                            HumanBuild(farmerSN,BUILDING_DOCK,edge[idx][0],edge[idx][1]);
                         }
-                    }
-                }
-                else {
-                    // 对于普通建筑，检查是否所有格子及缓冲区都是可用的陆地
-                    for (int i = 0; i < searchSize; i++) {
-                        for (int j = 0; j < searchSize; j++) {
-                            int checkX = startX + i;
-                            int checkY = startY + j;
-                            if (info.theMap[checkX][checkY].height == -1 || mmap[checkX][checkY] != '-') {
-                                isAvailable = false;
-                                break;
-                            }
+                    },
+                    [&](){
+                        int cnt=0;
+                        for(tagBuilding obj:info.buildings){
+                            if(obj.Percent>=100&&obj.Type==BUILDING_DOCK)++cnt;
                         }
-                        if (!isAvailable) break;
+                        if(cnt>=2){
+                            FreeFarmers({farmerSN});
+                            return 1;
+                        }
+                        return 0;
                     }
-                }
-
-                if (isAvailable) {
-                    // 返回建筑的实际放置位置（去掉缓冲区的一半）
-                    *x = startX + buffer / 2;
-                    *y = startY + buffer / 2;
-                    return 1; // 返回1表示成功找到空地
-                }
-            }
-        }
+        );
     }
-
-    // 未找到合适的空地
-    return -1;
-}
-
-void outputMap() {
-    //输出高程图到文件test/hmap.txt
-    FILE* f = fopen("test/hmap.txt", "w");
-    if (f) {
-        for (int i = 0;i < MAP_L;i++) {
-            for (int j = 0;j < MAP_U;j++) {
-                fprintf(f, "%d", info.theMap[i][j].height);
-            }
-            fprintf(f, "\n");
-        }
-        fclose(f);
-    }
-
-    //输出mmap到文件test/mmap.txt
-    f = fopen("test/mmap.txt", "w");
-    if (f) {
-        for (int i = 0;i < MAP_L;i++) {
-            for (int j = 0;j < MAP_U;j++) {
-                fprintf(f, "%c", mmap[i][j]);
-            }
-            fprintf(f, "\n");
-        }
-        fclose(f);
-    }
+    //
+    AllNodes.insert(nodes["homeBuild"]);
+    AllNodes.insert(nodes["FarmerGenerate"]);
+    AllNodes.insert(nodes["killSheep"]);
+    AllNodes.insert(nodes["fishing"]);
+    AllNodes.insert(nodes["cutTree"]);
+    AllNodes.insert(nodes["buildDock"]);
+    ////////////////
 
 }
 
-// 尝试建造建筑
-bool UsrAI::tryBuildBuilding(int buildingType, int requiredWood, int maxCount, int reqiredBuilding, int is_settler) {
-    if (reqiredBuilding != -1 && building_sn[reqiredBuilding].empty()) {
-        return false;
-    }
-    if (is_settler) {
-        if (building_num[buildingType] < maxCount && info.Wood >= requiredWood && !idle_settler_sn.empty()) {
-            // 找出一个空闲村民
-            int settlerSN = idle_settler_sn.back();
-            // 寻找一块适合建造的空地
-            int x, y;
-            if (getEmptyBlock(settler[0].BlockDR, settler[0].BlockUR, &x, &y, buildingType) > 0) {
-                HumanBuild(settlerSN, buildingType, x, y);
-                idle_settler_sn.pop_back();
-                updateMap(buildingType, x, y);
-                return true;
-            }
-        }
-    }
-    else {
-        // 检查建筑数量、木材和空闲村民
-        if (building_num[buildingType] < maxCount && info.Wood >= requiredWood && !idle_human_sn.empty()) {
-            // 找出一个空闲村民
-            int humanSN = idle_human_sn.back();
-            // 寻找一块适合建造的空地
-            int x, y;
-            if (getEmptyBlock(center_x, center_y, &x, &y, buildingType) > 0) {
-                // 向村民发出建造指令
-                HumanBuild(humanSN, buildingType, x, y);
-                idle_human_sn.pop_back();
-                updateMap(buildingType, x, y);
-                return true;
-            }
-        }
-    }
-    cout << buildingType << " " << building_num[buildingType] << endl;
-    cout << idle_human_sn.size() << endl;
-    return false;
-}
-
-bool near_land(int x, int y) {
-    // 只检查四个方向（上、下、左、右）
-    for (int dir = 0; dir < 4; dir++) {
-        int nx = x + dx[dir];
-        int ny = y + dy[dir];
-
-        // 检查边界和是否是陆地
-        if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && mmap[nx][ny] == '-') {
-            return true;
-        }
-    }
-    return false;
-}
-
-// 使用BFS找到最近的符合条件的水域
-void find_near_land(int x, int y, int* x_out, int* y_out) {
-    queue<pair<int, int>> q;
-    bool visited[MAP_L][MAP_U];
-    memset(visited, false, sizeof(visited));
-
-    // 从起点开始
-    q.push(make_pair(x, y));
-    visited[x][y] = true;
-
-    while (!q.empty()) {
-        pair<int, int> curr = q.front();
-        q.pop();
-
-        int curr_x = curr.first;
-        int curr_y = curr.second;
-
-        // 如果当前格子是水域，检查周围是否有陆地
-        if (mmap[curr_x][curr_y] == 'o') {
-            bool has_land_nearby = false;
-
-            // 检查四个方向
-            for (int dir = 0; dir < 4; dir++) {
-                int nx = curr_x + dx[dir];
-                int ny = curr_y + dy[dir];
-
-                if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U) {
-                    // 如果旁边有陆地，标记找到了
-                    if (mmap[nx][ny] == '-') {
-                        has_land_nearby = true;
-                        break;
-                    }
-                }
-            }
-
-            // 如果这个水域旁边有陆地，返回该位置
-            if (has_land_nearby) {
-                *x_out = curr_x;
-                *y_out = curr_y;
-                return;
-            }
-        }
-
-        // 向四个方向扩展
-        for (int dir = 0; dir < 4; dir++) {
-            int nx = curr_x + dx[dir];
-            int ny = curr_y + dy[dir];
-
-            // 检查边界和是否已访问
-            if (nx >= 0 && nx < MAP_L && ny >= 0 && ny < MAP_U && !visited[nx][ny]) {
-                q.push(make_pair(nx, ny));
-                visited[nx][ny] = true;
-            }
-        }
-    }
-
-    // 如果没找到，返回原位置
-    *x_out = x;
-    *y_out = y;
-}
-
-
-
-void UsrAI::processData()
+void UsrAI::UpdateAll()
 {
-    return;
-    info = getInfo();
-    // 获取地图信息
-    if (info.GameFrame % 5 != 0) {
-        return;
+    //建立所有的sn对应的对象表
+    {
+        SnToObj.clear();
+        for(auto&obj:info.armies)SnToObj[obj.SN]=&obj;
+        for(auto&obj:info.buildings)SnToObj[obj.SN]=&obj;
+        for(auto&obj:info.enemy_armies)SnToObj[obj.SN]=&obj;
+        for(auto&obj:info.enemy_buildings)SnToObj[obj.SN]=&obj;
+        for(auto&obj:info.enemy_farmers)SnToObj[obj.SN]=&obj;
+        for(auto&obj:info.farmers)SnToObj[obj.SN]=&obj;
+        for(auto&obj:info.resources)SnToObj[obj.SN]=&obj;
     }
-    updateInfo();
-    // outputMap();
+    //获取所有空闲的农民和军队
+    {
+        idle_farmers.clear();
+        idle_armies.clear();
+        for(auto&obj:info.farmers)
+            if(obj.WorkObjectSN==-1&&!lock_farmers.count(obj.SN)&&obj.FarmerSort==FARMERTYPE_FARMER)//不把船算进去
+                idle_farmers.insert(obj.SN);
+        for(auto&obj:info.armies)
+            if(obj.WorkObjectSN==-1)
+                idle_armies.insert(obj.SN);
+    }
+    //找到市镇中心
+    {
+        for(auto&obj:info.buildings)
+            if(obj.Type==BUILDING_CENTER)
+            {
+                Center=obj;
+                break;
+            }
+    }
+    //更新地图
+    {
+        auto&theMap=*info.theMap;
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                tagTerrain terrain=theMap[i][j];
+                if(terrain.type==MAPPATTERN_GRASS){
+                    mapInfo[i][j]=terrain.height;
+                }else{
+                    mapInfo[i][j]=MAPHEIGHT_OCEAN;
+                }
+            }
+        }
+        //将障碍物标记到地图
+        for(auto&ele:SnToObj){
+            tagObj obj=*ele.second;
+            mapInfo[obj.BlockDR][obj.BlockUR]=-1;
+        }
+        //将建筑标记到地图
+        auto help=[&](vector<tagBuilding>&v)->void{
+            for(auto&ele:v){
+                int size=buildingSize[ele.Type];
+                for(int i=0;i<size;++i)
+                    for(int j=0;j<size;++j)
+                        mapInfo[i+ele.BlockDR][j+ele.BlockUR]=-1;
+            }
+        };
+        help(info.buildings);
+        help(info.enemy_buildings);
 
-    // cout << "market" << building_num[BUILDING_MARKET] << endl;
-
-
-    // 按优先级尝试建造各种建筑
-    tryBuildBuilding(BUILDING_HOME, BUILD_HOUSE_WOOD, 5, -1);
-    tryBuildBuilding(BUILDING_GRANARY, BUILD_GRANARY_WOOD, 1, -1);
-    tryBuildBuilding(BUILDING_MARKET, BUILD_MARKET_WOOD, 1, BUILDING_GRANARY);
-    tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 1, -1); //对岸已经有一个仓库了
-    tryBuildBuilding(BUILDING_DOCK, BUILD_DOCK_WOOD, 2, -1); // 尝试建造码头
-
-    //处理殖民行为
-    if (settler.size() > 0) {
-        //建造仓库
-        tryBuildBuilding(BUILDING_STOCK, BUILD_STOCK_WOOD, 2, -1, 1);
-        // 寻找最近的金矿
-        int min_distance = INT_MAX;
-        int target_gold_sn = -1;
-        if (building_sn[BUILDING_STOCK].size() >= 2) {
-            for (auto& res : info.resources) {
-                if (res.Type == RESOURCE_GOLD) {
-                    // 计算距离
-                    int distance = abs(settler[0].BlockDR - res.BlockDR) +
-                        abs(settler[0].BlockUR - res.BlockUR);
-
-                    if (distance < min_distance) {
-                        min_distance = distance;
-                        target_gold_sn = res.SN;
+    }
+    //更新各区块所属的大陆
+    {
+        memset(blockIndex,0,sizeof(blockIndex));
+        int idx=0;
+        auto&theMap=*(info.theMap);
+        //一共两个大陆，先更新我方所在大陆(永远为1)
+        function<void(int,int)>dfs=[&](int i,int j)->void{
+            queue<array<int,2>>q;
+            blockIndex[i][j]=idx;
+            q.push({i,j});
+            while(!q.empty()){
+                int siz=q.size();
+                while(siz--){
+                    auto&e=q.front();
+                    int i=e[0],j=e[1];
+                    q.pop();
+                    const static int off[][2]={{0,-1},{0,1},{-1,0},{1,0}};
+                    for(auto*o:off){
+                        int ii=o[0]+i,jj=o[1]+j;
+                        if(ii>=0&&jj>=0&&ii<MAP_L&&jj<MAP_U&&!blockIndex[ii][jj]){
+                            if(theMap[i][j].type==theMap[ii][jj].type){
+                                blockIndex[ii][jj]=idx;
+                                q.push({ii,jj});
+                            }
+                        }
                     }
                 }
             }
 
-            // 如果找到金矿，派遣殖民者去采集
-            if (target_gold_sn != -1) {
-                while (idle_settler_sn.size() > 0) {
-                    HumanAction(idle_settler_sn.back(), target_gold_sn);
-                    idle_settler_sn.pop_back();
+        };
+        ++idx;
+        dfs(Center.BlockDR,Center.BlockUR);
+        //更新其他区域
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                if(!blockIndex[i][j]){
+                    ++idx;
+                    dfs(i,j);
                 }
             }
         }
     }
-
-    // 处理建筑行为
-    for (auto& building : info.buildings) {
-        if (building.Type == BUILDING_CENTER) {
-            if (building.Project == 0 && human_sn.size() < 6 && info.Meat >= BUILDING_CENTER_CREATEFARMER_FOOD) {
-                BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
-            }
-        }
-        if (building.Type == BUILDING_DOCK) {
-            if (building.Project == 0 && ship_sn.size() < 1 && info.Wood >= BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD) {
-                BuildingAction(building.SN, BUILDING_DOCK_CREATE_WOOD_BOAT);
-            }
-        }
+    //清空所有节点消息
+    {
+        NodeMsg.swap(TheFrameNodeMsg);
+        TheFrameNodeMsg.clear();
     }
-    // cout<<"村民数量"<<info.farmers.size()<<endl;
-    // cout<<"村民状态"<<info.farmers[0].NowState<<endl;
-
-
-    for (auto& ship : info.farmers) {
-        if (ship.FarmerSort == 1 && ship.NowState == HUMAN_STATE_IDLE) {
-
-            if (near_land(ship.BlockDR, ship.BlockUR) && ship.Resource < 5 && idle_human_sn.size()>0) {
-                // 如果船靠岸，并且载人小于5，则让村民上船
-                HumanAction(idle_human_sn.back(), ship.SN);
-                idle_human_sn.pop_back();
-            }
-            else if (ship.Resource == 5) {
-                // 如果船载满5人，则让船去目的地
-                int x, y;
-                find_opposite_land(ship.BlockDR, ship.BlockUR, &x, &y);  // 找到对岸
-                HumanMove(ship.SN, tran(x), tran(y));
-            }
-            else {
-                // 如果船载人小于5，并且不在岸上，则让船靠岸
-                if (!near_land(ship.BlockDR, ship.BlockUR)) {
-                    int x, y;
-                    find_near_land(center_x, center_y, &x, &y);
-                    HumanMove(ship.SN, tran(x), tran(y));
-                }
-            }
+    //更新所有工作点
+    {
+        decltype(AllNodes) updates;
+        for(auto*node:AllNodes){
+            auto*nxt=node->work();
+            updates.insert(nxt);
         }
+        updates.erase(0);
+        AllNodes.swap(updates);
     }
 }
+
+vector<int> UsrAI::AllocateFarmers(int n, int x, int y, bool lock)
+{
+    vector<int>ret;
+    //
+    struct Data{
+        double dis;
+        int sn;
+    };
+    vector<Data>all;
+    for(int sn:idle_farmers){
+        auto&ele=*(tagFarmer*)SnToObj[sn];
+        double dis=abs(ele.BlockDR-x)+abs(ele.BlockUR-y);
+        all.push_back({dis,ele.SN});
+    }
+    sort(all.begin(),all.end(),[&](Data&d0,Data&d1){return d0.dis<d1.dis;});
+    for(int i=0;i<min(int(all.size()),n);++i)ret.push_back(all[i].sn);
+    //
+    if(lock)
+    for(auto sn:ret)
+    {
+        lock_farmers.insert(sn);
+        idle_farmers.erase(sn);
+    }
+    //
+    return ret;
+}
+
+void UsrAI::AllocateFarmers(vector<int> &v, int n, int x, int y, bool lock)
+{
+    //把死去的农民移除
+    if(v.size()){
+        int i=0,j=int(v.size())-1;
+        while(i<j){
+            if(SnToObj.count(v[i])==0){
+                swap(v[i],v[j]);
+                --j;
+            }
+            else ++i;
+        }
+        if(SnToObj.count(v[j])==0)--j;
+        v.resize(j+1);
+    }
+    //
+    if(v.size()>=n)return;
+    auto&&ret=AllocateFarmers(n-v.size(),x,y,lock);
+    for(auto sn:ret)v.push_back(sn);
+}
+
+void UsrAI::FreeFarmers(const vector<int> sn)
+{
+    for(auto sn_:sn)
+    {
+        lock_farmers.erase(sn_);
+    }
+}
+
+array<int, 2> UsrAI::FindSpace(int size, int x, int y,bool land)
+{
+    if(size<=0)return {INT_MAX,INT_MAX};
+    //
+    vector<array<int,2>>fit;
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            bool ava=1;
+            for(int l0=0;l0<size&&ava;++l0){
+                for(int l1=0;l1<size&&ava;++l1){
+                    int h=mapInfo[i+l0][j+l1];
+                    if(land&&h>=0&&h<=MAPHEIGHT_MAX&&h==mapInfo[i][j])continue;
+                    if(!land&&h==MAPHEIGHT_OCEAN&&h==mapInfo[i][j])continue;
+                    ava=0;
+                }
+            }
+            if(ava)fit.push_back({i,j});
+        }
+    }
+    //寻找最合适的
+    array<int,2> ret={INT_MAX,INT_MAX};
+    for(array<int,2>ele:fit){
+        //这里就简答以中心点为目标点
+        long long tx=x+size/2,ty=y+size/2;
+        if(abs(tx-ret[0])+abs(ty-ret[1])>abs(tx-ele[0])+abs(ty-ele[1]))
+            ret=ele;
+    }
+    return ret;
+}
+
+array<int, 2> UsrAI::FindForBuilding(int type, int x, int y)
+{
+    return FindSpace(buildingSize[type],x,y,type!=BUILDING_DOCK);
+}
+
+array<int, 2> UsrAI::FindForBuilding(int tar, int src, int x, int y,int dis)
+{
+    int size=buildingSize[tar];
+    if(size<=0)return {INT_MAX,INT_MAX};
+    //
+    bool land=tar!=BUILDING_DOCK;
+    vector<array<int,2>>fit;
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            bool ava=1;
+            for(int l0=0;l0<size&&ava;++l0){
+                for(int l1=0;l1<size&&ava;++l1){
+                    int h=mapInfo[i+l0][j+l1];
+                    if(land&&h>=0&&h<=MAPHEIGHT_MAX&&h==mapInfo[i][j])continue;
+                    if(!land&&h==MAPHEIGHT_OCEAN)continue;
+                    ava=0;
+                }
+            }
+            if(ava)fit.push_back({i,j});
+        }
+    }
+    //寻找最合适的
+    int size0=buildingSize[src];
+    int xx=size0+x-1,yy=size0+y-1;
+    array<int,2> ret={INT_MAX,INT_MAX};
+    for(array<int,2>ele:fit){
+        //这里就简单以中心点为目标点
+        long long tx=x+size/2,ty=y+size/2;
+        if(abs(tx-ret[0])+abs(ty-ret[1])>abs(tx-ele[0])+abs(ty-ele[1])){
+            //保证距离src建筑距离至少为dis
+            if(abs(ele[0]+size-x)>=dis&&abs(ele[0]-xx-1)>=dis
+                    &&abs(ele[1]+size-y)>=dis&&abs(ele[1]-yy-1)>=dis)
+                ret=ele;
+        }
+    }
+    return ret;
+}
+
+bool UsrAI::InMyLand(int x, int y)
+{
+    return blockIndex[x][y]==blockIndex[Center.BlockDR][Center.BlockUR];
+}
+
+bool UsrAI::IsYanAn(int x, int y)
+{
+    static const int off[][2]={ {0,-1},{1,-1},{0,2},{1,2},{-1,0},{-1,1},{2,0},{2,1} };
+    bool flag=0;
+    for(auto*o:off){
+        int ii=o[0]+x,jj=o[1]+y;
+        if(ii>=0&&jj>=0&&ii<MAP_L&&jj<MAP_U&&InMyLand(ii,jj)){
+            flag=1;
+            break;
+        }
+    }
+    return flag;
+}
+
+int UsrAI::Dis(tagObj &t0, tagObj &t1)
+{
+    return abs(t0.BlockDR-t1.BlockDR)+abs(t0.BlockUR-t1.BlockUR);
+}
+

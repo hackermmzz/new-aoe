@@ -9,6 +9,7 @@ class Core
 public:
     SelectWidget* sel = nullptr;
     Map* theMap;    //地图信息
+    std::remove_const<tagInfo::TerrainData>::type playerMap;//记录tagInfo传给学生的信息
     vector<Point>explored;
     Core() {}
     Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent);
@@ -17,7 +18,7 @@ public:
     void gameUpdate();
     void updateByObject();
     void infoShare();   //将游戏信息同步给AIGame
-
+    void InitPlayerMap();//初始化playerMap
     void getPlayerNowResource(int playerRepresent, int& wood, int& food, int& stone, int& gold);
     bool get_IsBuildAble(int playerRepresent, int buildNum) { return player[playerRepresent]->get_isBuildingAble(buildNum); }
 
@@ -48,7 +49,7 @@ public:
     void requestSound_Click(Coordinate* object);
 
     void updateByPlayer(int id);  //更新tagGame
-    void updateCommon(tagInfo* taginfo);//更新tagGame
+    void updateCommon(tagInfo* taginfo,int id);//更新tagGame
 
     void judge_Crush();
     bool judge_CanTransPort(Coordinate* obj1, Coordinate* obj2);

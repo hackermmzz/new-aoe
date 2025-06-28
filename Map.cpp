@@ -1113,47 +1113,38 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
 
 void Map::divideTheMap()
 {
-    // 使用普通二维数组替代vector<bool>，避免vector<bool>特化的问题
-    bool vis[MAP_L][MAP_U] = {false};
+    vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
     int idx=0;
-    int dfsDepth = 0; // 添加递归深度计数器
-    const int MAX_DFS_DEPTH = 1000; // 最大递归深度
-    
     function<void(int i,int j)>dfs=[&](int i,int j)->void{
-            // 检查递归深度，防止栈溢出
-            if(++dfsDepth > MAX_DFS_DEPTH) {
-                qWarning() << "DFS递归深度过大，可能陷入死循环，位置:" << i << "," << j;
-                return;
-            }
-            
-            // 检查坐标是否有效
-            if(i < 0 || i >= MAP_L || j < 0 || j >= MAP_U) {
-                qWarning() << "DFS访问无效坐标:" << i << "," << j;
-                return;
-            }
-            
+            queue<array<int,2>>q;
+            vis[i][j]=1;
             blockIndex[i][j]=idx;
-            bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
-            static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
-            for(auto*o:off){
-                int ii=o[0]+i,jj=o[1]+j;
-                if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
-                    if(!vis[ii][jj]){
-                        bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
-                        if(flag1==flag){
-                            vis[ii][jj]=true;
-                            dfs(ii,jj);
+            q.push({i,j});
+            while(!q.empty()){
+                auto&e=q.front();
+                int i=e[0],j=e[1];
+                q.pop();
+                bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
+                static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
+                for(auto*o:off){
+                    int ii=o[0]+i,jj=o[1]+j;
+                    if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
+                        if(!vis[ii][jj]){
+                            bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
+                            if(flag1==flag){
+                                vis[ii][jj]=1;
+                                blockIndex[ii][jj]=idx;
+                                q.push({ii,jj});
+                            }
                         }
                     }
                 }
-            }
-            --dfsDepth; // 减少递归深度计数
+           }
     };
     
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
             if(!vis[i][j]){
-                dfsDepth = 0; // 重置递归深度
                 dfs(i,j);
                 ++idx;
             }
