@@ -124,12 +124,11 @@
 
 
 /********** 地图块样式 **********/
-#define MAPPATTERN_EMPTY 0      // 未定义样式
-#define MAPPATTERN_GRASS 0      // 草原
-#define MAPPATTERN_DESERT 1     // 沙漠
-#define MAPPATTERN_OCEAN 2      // 海洋/河流
-#define MAPPATTERN_SHOAL 3      // 浅滩（河流中可行走部分）
-
+#define MAPPATTERN_UNKNOWN 0      // 未定义样式
+#define MAPPATTERN_GRASS 1      // 草原
+#define MAPPATTERN_DESERT 2     // 沙漠
+#define MAPPATTERN_OCEAN 3      // 海洋/河流
+#define MAPPATTERN_SHOAL 4      // 浅滩（河流中可行走部分）
 
 /********** 地图块绘制偏移量 **********/
 #define DRAW_OFFSET -15

@@ -1116,22 +1116,32 @@ void Map::divideTheMap()
     vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
     int idx=0;
     function<void(int i,int j)>dfs=[&](int i,int j)->void{
+            queue<array<int,2>>q;
+            vis[i][j]=1;
             blockIndex[i][j]=idx;
-            bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
-            static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
-            for(auto*o:off){
-                int ii=o[0]+i,jj=o[1]+j;
-                if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
-                    if(!vis[ii][jj]){
-                        bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
-                        if(flag1==flag){
-                            vis[ii][jj]=1;
-                            dfs(ii,jj);
+            q.push({i,j});
+            while(!q.empty()){
+                auto&e=q.front();
+                int i=e[0],j=e[1];
+                q.pop();
+                bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
+                static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
+                for(auto*o:off){
+                    int ii=o[0]+i,jj=o[1]+j;
+                    if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
+                        if(!vis[ii][jj]){
+                            bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
+                            if(flag1==flag){
+                                vis[ii][jj]=1;
+                                blockIndex[ii][jj]=idx;
+                                q.push({ii,jj});
+                            }
                         }
                     }
                 }
-            }
+           }
     };
+    
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
             if(!vis[i][j]){
@@ -1146,7 +1156,12 @@ void Map::divideTheMap()
         enemyLandExplored=0;
         map<int,int>idxCnt;
         for(auto*human:player[1]->human){
-            ++idxCnt[blockIndex[human->getBlockDR()][human->getBlockUR()]];
+            int x = human->getBlockDR();
+            int y = human->getBlockUR();
+            // 添加边界检查
+            if(x >= 0 && x < MAP_L && y >= 0 && y < MAP_U) {
+                ++idxCnt[blockIndex[x][y]];
+            }
         }
         for(auto&ele:idxCnt){
             int idx=ele.first,cnt=ele.second;
@@ -1163,13 +1178,17 @@ void Map::divideTheMap()
             break;
         }
     }
-    int mask=blockIndex[centerPos.x][centerPos.y];
+    // 添加边界检查
+    int mask = -1;
+    if(centerPos.x >= 0 && centerPos.x < MAP_L && centerPos.y >= 0 && centerPos.y < MAP_U) {
+        mask = blockIndex[centerPos.x][centerPos.y];
+    }
     //如果是海洋并且与己方大陆相距两格，那么可见
     auto checkLand=[&](int x,int y)->bool{
         if(x>=0&&x<MAP_L&&y>=0&&y<MAP_U){
             return cell[x][y].getMapType()!=MAPTYPE_OCEAN&&blockIndex[x][y]==mask;
         }
-        return 0;
+        return false;
     };
     //将己方地图可见化
     for(int i=0;i<MAP_L;++i){
@@ -2302,21 +2321,33 @@ void Map::loadGenerateMapText(int MapJudge)
         QJsonObject obj=root[key].toObject();
         if(key.contains("Cell")){
             int blockL=obj["BlockDR"].toInt(),blockU=obj["BlockUR"].toInt();
-            Block&block=cell[blockL][blockU];
-            block.Num=obj["Num"].toInt();
-            block.Visible=obj["Visible"].toBool();
-            block.Explored=obj["Explored"].toBool();
-            block.setMapType(obj["Type"].toInt());
-            block.setMapPattern(obj["Pattern"].toInt());
-            block.setMapHeight(obj["Height"].toInt());
-            block.setOffsetX(obj["OffsetX"].toInt());
-            block.setOffsetY(obj["OffsetY"].toInt());
-            block.setMapResource(obj["Resource"].toInt());
+            // 添加边界检查
+            if(blockL >= 0 && blockL < MAP_L && blockU >= 0 && blockU < MAP_U) {
+                Block&block=cell[blockL][blockU];
+                block.Num=obj["Num"].toInt();
+                block.Visible=obj["Visible"].toBool();
+                block.Explored=obj["Explored"].toBool();
+                block.setMapType(obj["Type"].toInt());
+                block.setMapPattern(obj["Pattern"].toInt());
+                block.setMapHeight(obj["Height"].toInt());
+                block.setOffsetX(obj["OffsetX"].toInt());
+                block.setOffsetY(obj["OffsetY"].toInt());
+                block.setMapResource(obj["Resource"].toInt());
+            } else {
+                qWarning() << "Cell坐标超出范围:" << blockL << "," << blockU;
+            }
         }
         else if(key.contains("Building")){
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
-            cur.addBuilding(obj["Num"].toInt(),obj["BlockDR"].toInt(),obj["BlockUR"].toInt(),100);
+            int blockDR = obj["BlockDR"].toInt();
+            int blockUR = obj["BlockUR"].toInt();
+            // 添加边界检查
+            if(blockDR >= 0 && blockDR < MAP_L && blockUR >= 0 && blockUR < MAP_U) {
+                cur.addBuilding(obj["Num"].toInt(), blockDR, blockUR, 100);
+            } else {
+                qWarning() << "Building坐标超出范围:" << blockDR << "," << blockUR;
+            }
         }else if(key.contains("Human")){
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
@@ -2332,7 +2363,14 @@ void Map::loadGenerateMapText(int MapJudge)
         }else if(key.contains("Animal")){
             addAnimal(obj["Num"].toInt(),obj["DR"].toDouble(),obj["UR"].toDouble());
         }else if(key.contains("StaticRes")){
-            addStaticRes(obj["Num"].toInt(),obj["BlockDR"].toInt(),obj["BlockUR"].toInt());
+            int blockDR = obj["BlockDR"].toInt();
+            int blockUR = obj["BlockUR"].toInt();
+            // 添加边界检查
+            if(blockDR >= 0 && blockDR < MAP_L && blockUR >= 0 && blockUR < MAP_U) {
+                addStaticRes(obj["Num"].toInt(), blockDR, blockUR);
+            } else {
+                qWarning() << "StaticRes坐标超出范围:" << blockDR << "," << blockUR;
+            }
         }
     }
     //赋值m_heightMap
@@ -2342,6 +2380,25 @@ void Map::loadGenerateMapText(int MapJudge)
             m_heightMap[i+4][j+4]=cell[i][j].getMapHeight();
         }
     }
+    
+    // 确保所有cell元素都被正确初始化
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            // 如果cell没有被读取过，设置默认值
+            if(cell[i][j].getMapType() == 0 && cell[i][j].getMapHeight() == 0) {
+                cell[i][j].setMapType(MAPTYPE_FLAT);
+                cell[i][j].setMapHeight(MAPHEIGHT_FLAT);
+                cell[i][j].setMapPattern(MAPPATTERN_GRASS);
+                cell[i][j].setMapResource(RESOURCE_EMPTY);
+                cell[i][j].Explored = false;
+                cell[i][j].Visible = false;
+                cell[i][j].setBlockDRUR(i,j);
+                cell[i][j].setDRUR(i*BLOCKSIDELENGTH,j*BLOCKSIDELENGTH);
+            }
+        }
+    }
+    
+    qDebug() << "地图文件解析完成，共处理" << allKeys.size() << "个对象";
 }
 
 bool Map::CheckIsNearOcean(int x, int y)

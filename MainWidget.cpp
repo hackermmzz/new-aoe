@@ -3,6 +3,7 @@
 #include "ui_Editor.h"
 #include <iostream>
 #include <QString>
+#include <algorithm>
 
 int g_globalNum = rand() % 11;
 int g_frame = 0;
@@ -292,7 +293,7 @@ void MainWidget::updateEditor()
         if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
         if (needSave) {
             needSave = 0;
-            SaveCurrentState();
+            // SaveCurrentState();
         }
         switch (currentSelected) {
         case HIGHTERLAND:
@@ -326,7 +327,7 @@ void MainWidget::updateEditor()
     if (mouseEvent->mouseEventType == LEFT_PRESS) {
         int L = mouseEvent->DR / BLOCKSIDELENGTH, U = mouseEvent->UR / BLOCKSIDELENGTH;
         if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
-        SaveCurrentState();
+        // SaveCurrentState();
         //
         switch (currentSelected) {
         case TREE:
@@ -391,7 +392,7 @@ void MainWidget::updateEditor()
 
 void MainWidget::clearArea(int blockL, int blockU, int radius) {
     // 保存当前状态以支持撤销
-    SaveCurrentState();
+    // SaveCurrentState();
 
     // 清空静态资源（金矿、石堆）
     auto& staticResList = map->staticres;
@@ -423,7 +424,7 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
         }
     }
 
-    // 清空玩家建筑
+    // 清空玩家建筑 - 修复版本
     for (int i = 0; i < MAXPLAYER; ++i) {
         auto& buildList = player[i]->build;
         auto itBuild = buildList.begin();
@@ -431,6 +432,21 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
             int x = (*itBuild)->getBlockDR();
             int y = (*itBuild)->getBlockUR();
             if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
+                // 先从map_Object中移除建筑，避免悬空指针
+                Coordinate* buildingToDelete = *itBuild;
+                for(int mapX = buildingToDelete->getBlockDR(); 
+                    mapX < buildingToDelete->getBlockDR() + buildingToDelete->get_BlockSizeLen(); 
+                    mapX++) {
+                    for(int mapY = buildingToDelete->getBlockUR(); 
+                        mapY < buildingToDelete->getBlockUR() + buildingToDelete->get_BlockSizeLen(); 
+                        mapY++) {
+                        if(mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
+                            auto& objects = map->map_Object[mapX][mapY];
+                            objects.erase(remove(objects.begin(), objects.end(), buildingToDelete), objects.end());
+                        }
+                    }
+                }
+                
                 delete* itBuild;
                 itBuild = buildList.erase(itBuild);
             }
@@ -446,35 +462,35 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
     ui->Game->update();  // 触发界面重绘
 }
 
-void MainWidget::SaveCurrentState()
-{
-    GameState* state = new GameState;
-    ////////////////////////
-    //保存地形
-    for (int i = 0;i < MAP_L;++i)for (int j = 0;j < MAP_U;++j)state->cell[i][j] = map->cell[i][j];
-    for (int i = 0;i < GENERATE_L;++i)for (int j = 0;j < GENERATE_U;++j)state->m_heightMap[i][j] = map->m_heightMap[i][j];
-    //保存我方人物信息
-    {
-        Player* p = player[0];
-        state->myBuilding = p->build;
-        state->myHuman = p->human;
-    }
-    //保存敌方信息
-    {
-        Player* p = player[1];
-        state->myBuilding = p->build;
-        state->myHuman = p->human;
-    }
-    state->myHuman = player[0]->human;
-    state->myBuilding = player[0]->build;
-    state->enemyHuman = player[1]->human;
-    state->enemyBuilding = player[1]->build;
-    state->animal = map->animal;
-    state->resource = map->staticres;
-    //
-    ////////////////////////
-    ui->Game->SaveCurrentState(state);
-}
+// void MainWidget::SaveCurrentState()
+// {
+//     GameState* state = new GameState;
+//     ////////////////////////
+//     //保存地形
+//     for (int i = 0;i < MAP_L;++i)for (int j = 0;j < MAP_U;++j)state->cell[i][j] = map->cell[i][j];
+//     for (int i = 0;i < GENERATE_L;++i)for (int j = 0;j < GENERATE_U;++j)state->m_heightMap[i][j] = map->m_heightMap[i][j];
+//     //保存我方人物信息
+//     {
+//         Player* p = player[0];
+//         state->myBuilding = p->build;
+//         state->myHuman = p->human;
+//     }
+//     //保存敌方信息
+//     {
+//         Player* p = player[1];
+//         state->myBuilding = p->build;
+//         state->myHuman = p->human;
+//     }
+//     state->myHuman = player[0]->human;
+//     state->myBuilding = player[0]->build;
+//     state->enemyHuman = player[1]->human;
+//     state->enemyBuilding = player[1]->build;
+//     state->animal = map->animal;
+//     state->resource = map->staticres;
+//     //
+//     ////////////////////////
+//     ui->Game->SaveCurrentState(state);
+// }
 
 
 void MainWidget::HigherLand(int blockL, int blockU, int height)
@@ -740,10 +756,10 @@ void MainWidget::initWindowProperties() {
 
 void MainWidget::initOptions() {
     qDebug() << "窗口选项初始化...";
-    //“设置”选项卡
+    //"设置"选项卡
     option = new Option();
     option->setModal(true);
-    //“关于我们”选项卡
+    //"关于我们"选项卡
     aboutDialog = new AboutDialog(this);
     //倍速按钮组
     pbuttonGroup = new QButtonGroup(this);
@@ -832,7 +848,7 @@ void MainWidget::initMap(int MapJudge) {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
     map->loadResource();
-    buildInitialStock();
+    // buildInitialStock();
 }
 
 void MainWidget::initAI() {
