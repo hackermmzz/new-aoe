@@ -1113,25 +1113,9 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
 
 void Map::divideTheMap()
 {
-    // 使用普通二维数组替代vector<bool>，避免vector<bool>特化的问题
-    bool vis[MAP_L][MAP_U] = {false};
+    vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
     int idx=0;
-    int dfsDepth = 0; // 添加递归深度计数器
-    const int MAX_DFS_DEPTH = 1000; // 最大递归深度
-    
     function<void(int i,int j)>dfs=[&](int i,int j)->void{
-            // 检查递归深度，防止栈溢出
-            if(++dfsDepth > MAX_DFS_DEPTH) {
-                qWarning() << "DFS递归深度过大，可能陷入死循环，位置:" << i << "," << j;
-                return;
-            }
-            
-            // 检查坐标是否有效
-            if(i < 0 || i >= MAP_L || j < 0 || j >= MAP_U) {
-                qWarning() << "DFS访问无效坐标:" << i << "," << j;
-                return;
-            }
-            
             blockIndex[i][j]=idx;
             bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
             static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
@@ -1141,19 +1125,16 @@ void Map::divideTheMap()
                     if(!vis[ii][jj]){
                         bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
                         if(flag1==flag){
-                            vis[ii][jj]=true;
+                            vis[ii][jj]=1;
                             dfs(ii,jj);
                         }
                     }
                 }
             }
-            --dfsDepth; // 减少递归深度计数
     };
-    
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
             if(!vis[i][j]){
-                dfsDepth = 0; // 重置递归深度
                 dfs(i,j);
                 ++idx;
             }
@@ -1165,12 +1146,7 @@ void Map::divideTheMap()
         enemyLandExplored=0;
         map<int,int>idxCnt;
         for(auto*human:player[1]->human){
-            int x = human->getBlockDR();
-            int y = human->getBlockUR();
-            // 添加边界检查
-            if(x >= 0 && x < MAP_L && y >= 0 && y < MAP_U) {
-                ++idxCnt[blockIndex[x][y]];
-            }
+            ++idxCnt[blockIndex[human->getBlockDR()][human->getBlockUR()]];
         }
         for(auto&ele:idxCnt){
             int idx=ele.first,cnt=ele.second;
@@ -1187,17 +1163,13 @@ void Map::divideTheMap()
             break;
         }
     }
-    // 添加边界检查
-    int mask = -1;
-    if(centerPos.x >= 0 && centerPos.x < MAP_L && centerPos.y >= 0 && centerPos.y < MAP_U) {
-        mask = blockIndex[centerPos.x][centerPos.y];
-    }
+    int mask=blockIndex[centerPos.x][centerPos.y];
     //如果是海洋并且与己方大陆相距两格，那么可见
     auto checkLand=[&](int x,int y)->bool{
         if(x>=0&&x<MAP_L&&y>=0&&y<MAP_U){
             return cell[x][y].getMapType()!=MAPTYPE_OCEAN&&blockIndex[x][y]==mask;
         }
-        return false;
+        return 0;
     };
     //将己方地图可见化
     for(int i=0;i<MAP_L;++i){
