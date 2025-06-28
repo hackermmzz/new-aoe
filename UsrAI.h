@@ -29,11 +29,18 @@ private:
     {
         tagUsrGame.clearInsRet();
     }
+
+    /*********************用户添加函数**********************/
+
+
+
+    /*****************************************************/
+
     /*##########DO NOT MODIFY THE CODE IN THE CLASS##########*/
     bool tryBuildBuilding(int buildingType, int requiredWood, int maxCount, int reqiredBuilding,int is_settler=0);
 };
 
 /*##########YOUR CODE BEGINS HERE##########*/
-    
+
 /*##########YOUR CODE ENDS HERE##########*/
 #endif // USRAI_H
