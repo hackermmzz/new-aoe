@@ -104,8 +104,8 @@ public:
         return score;
     }
     void update(int type, int num = 1) {
-        if(type==_FINDENEMYLAND){
-            addScore(10,"登录地方大陆,分数+10");
+        if (type == _FINDENEMYLAND) {
+            addScore(10, "登录地方大陆,分数+10");
             return;
         }
         if (type <= _ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
@@ -229,7 +229,7 @@ struct tagFarmer : public tagHuman
 {
     int ResourceSort; // 手持资源种类
     int Resource; // 手持资源数量
-    int FarmerSort;//农民的类型
+    int FarmerSort;//村民的类型： 0表示陆地生产单位，1表示运输船，2表示渔船
     tagFarmer toEnemy() {
         Resource = -1;
         DR0 = -1.0;
