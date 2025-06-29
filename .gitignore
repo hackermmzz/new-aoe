@@ -21,6 +21,9 @@ build/
 # 日志文件
 *.log
 
+# CursorAI相关文件
+.cursor
+
 # VS Code相关文件
 .vscode/BROWSE.VC.DB*
 .vscode/ipch/
