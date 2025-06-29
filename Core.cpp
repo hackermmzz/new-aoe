@@ -558,11 +558,17 @@ void Core::updateByPlayer(int id) {
  */
 void Core::updateCommon(tagInfo* taginfo,int id) {
     //根据Block获取对应的tagTerrain类型
-    auto GetTerrainType=[&](const Block&block)->tagTerrain{
-        int height = block.getMapHeight();
+    auto GetTerrainType=[&](int i,int j)->tagTerrain{
+        int height =theMap->cell[i][j].getMapHeight();
         tagTerrain ret;
-        ret.height = height;
-        ret.type = height == MAPHEIGHT_OCEAN ? MAPPATTERN_OCEAN : MAPPATTERN_GRASS;
+        if(height==MAPHEIGHT_OCEAN){
+            ret.height=-1;
+            ret.type=MAPPATTERN_OCEAN;
+        }
+        else{
+            ret.height=height;
+            ret.type=MAPPATTERN_GRASS;
+        }
         return ret;
     };
     //初始化一个全局的给敌人使用
@@ -575,7 +581,7 @@ void Core::updateCommon(tagInfo* taginfo,int id) {
         init=1;
         for (int i = 0; i < MAP_L; ++i) {
             for (int j = 0; j < MAP_U; ++j) {
-                (data->theMap)[i][j]=GetTerrainType(theMap->cell[i][j]);
+                (data->theMap)[i][j]=GetTerrainType(i,j);
             }
         }
     }
@@ -584,7 +590,7 @@ void Core::updateCommon(tagInfo* taginfo,int id) {
         //根据探索的区域来动态更新
         for(auto&p:explored){
             int i=p.x,j=p.y;
-            playerMap[i][j]=GetTerrainType(theMap->cell[i][j]);
+            playerMap[i][j]=GetTerrainType(i,j);
         }
         taginfo->theMap=&playerMap;
     }
@@ -1107,7 +1113,7 @@ void Core::manageOrder(int id)
     deduplicateInstructions(NowIns->instructions);
 
     //获取可以发起指令的所有对象数量(也就是说，就算ai给再多指令，我每一帧只处理ObjCnt这么多指令)
-    int ObjCnt = self->build.size() + self->human.size();//目前貌似只有建筑和人才可以当指令主体
+    int ObjCnt =self->build.size() + self->human.size();//目前貌似只有建筑和人才可以当指令主体
     //
     while (!NowIns->instructions.empty() && ObjCnt--) {
         instruction cur = NowIns->instructions.front();

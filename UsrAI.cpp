@@ -15,6 +15,8 @@ set<int>idle_farmers;//所有空闲的农民
 set<int>idle_armies;
 tagBuilding Center;
 int mapInfo[MAP_L][MAP_U];
+int tmp[MAP_L][MAP_U];
+bool upgrade=0;
 unordered_map<int,int>buildingSize={
     {BUILDING_CENTER,3},
     {BUILDING_HOME,2},
@@ -64,14 +66,14 @@ struct Node{
 private:
     bool isInit;
 };
-set<Node*>AllNodes;//当前所有的工作点
-set<int>NodeMsg;
-set<int>TheFrameNodeMsg;
+vector<Node*>AllNodes;//当前所有的工作点
+set<string>NodeMsg;
+set<string>TheFrameNodeMsg;
 /////////////////////////////
-void AddMsg(int t){
+void AddMsg(string t){
     TheFrameNodeMsg.insert(t);
 }
-bool FindMsg(int t){
+bool FindMsg(string t){
     return NodeMsg.count(t);
 }
 int randint(int a,int b){
@@ -145,7 +147,7 @@ void UsrAI::InitActionNode()
             for(tagBuilding&obj:info.buildings){
                 if(obj.Type==BUILDING_HOME&&obj.Percent>=100)++cnt;
             }
-            if(cnt>=5){
+            if(cnt>=6){
                 FreeFarmers({farmerSN});
                 return 1;
             }
@@ -252,39 +254,35 @@ void UsrAI::InitActionNode()
     //猎杀羚羊
     {
         static vector<int>farmers;
-        static list<int>sheep;
-        static list<int>died;
         static bool buildSock=0;
+        static int stockSN=-1;
         nodes["killSheep"]=new Node(
-                    [&](){
-                        for(tagResource res:info.resources){
-                            if(res.Type==RESOURCE_GAZELLE){
-                                sheep.push_back(res.SN);
-                            }
-                        }
-                    },
+                    emptyCond,
                     [&](){
                         AllocateFarmers(farmers,2,Center.BlockDR,Center.BlockUR);
                         if(farmers.size()!=2)return;
+                        list<tagResource>sheep;
+                        bool alive=0;
+                        for(auto&obj:info.resources)
+                        {
+                            if(obj.Type!=RESOURCE_GAZELLE)continue;
+                            if(obj.Blood>0)alive=1;
+                            sheep.push_back(obj);
+                        }
                         //先杀掉所有🐏
-                        if(sheep.size()){
+                        if(alive){
                             tagFarmer f0=*(tagFarmer*)SnToObj[farmers[0]],f1=*(tagFarmer*)SnToObj[farmers[1]];
-                            if(f0.WorkObjectSN!=-1){
-                                tagResource res=*(tagResource*)SnToObj[f0.WorkObjectSN];
-                                if(res.Blood>0)return;
-                                died.push_back(f0.WorkObjectSN);
-                                sheep.erase(find(sheep.begin(),sheep.end(),f0.WorkObjectSN));
-                            }
+                            if(f0.WorkObjectSN!=-1&&(*(tagResource*)SnToObj[f0.WorkObjectSN]).Blood>0)return;
                             //找到离二者最近的🐏
                             int tar=-1;
-                            for(auto sn:sheep){
-                                tagResource res=*(tagResource*)SnToObj[sn];
+                            for(auto&res:sheep){
+                                if(res.Blood<=0)continue;
                                 int dis=Dis(f0,res)+Dis(f1,res);
-                                if(tar==-1)tar=sn;
+                                if(tar==-1)tar=res.SN;
                                 else{
                                     tagResource tt=*(tagResource*)SnToObj[tar];
                                     int dis1=Dis(f0,tt)+Dis(f1,tt);
-                                    if(dis1>dis)tar=sn;
+                                    if(dis1>dis)tar=res.SN;
                                 }
                             }
                             //杀了他
@@ -295,7 +293,6 @@ void UsrAI::InitActionNode()
                         }
                         //建仓库
                         else if(!buildSock){
-                            if(info.Wood<BUILDING_STOCK)return;
                             static bool first=1;
                             tagFarmer f0=*(tagFarmer*)SnToObj[farmers[0]],f1=*(tagFarmer*)SnToObj[farmers[1]];
                             if(f0.WorkObjectSN!=-1&&!first){
@@ -303,26 +300,48 @@ void UsrAI::InitActionNode()
                                 if(stock.Percent>=100){
                                     buildSock=1;
                                 }
-                                if(f1.WorkObjectSN==-1)HumanAction(f1.SN,f0.WorkObjectSN);
+                                stockSN=f0.WorkObjectSN;
+                                if(f1.WorkObjectSN!=f0.WorkObjectSN)
+                                {
+                                    HumanAction(f1.SN,f0.WorkObjectSN);
+                                }
                                 return;
                             }
+                            if(info.Wood<BUILD_STOCK_WOOD)return;
                             first=0;
                             //计算出一个最佳点，这里我简单的取中点
                             int x=0,y=0;
-                            for(auto sn:died){
-                                tagResource res=*(tagResource*)SnToObj[sn];
+                            for(auto&res:sheep){
                                 x+=res.BlockDR,y+=res.BlockUR;
                             }
-                            x/=died.size(),y/=died.size();
+                            x/=sheep.size(),y/=sheep.size();
                             auto place=FindForBuilding(BUILDING_STOCK,x,y);
                             HumanBuild(f0.SN,BUILDING_STOCK,place[0],place[1]);
                         }
-                        else if(died.size()){
-
+                        else if(sheep.size()){
+                            //发送消息
+                            AddMsg("pickGazalle");
+                            //采集🐏🥩根据距离仓库得距离来算
+                            if(stockSN==-1)return;
+                            tagFarmer f0=*(tagFarmer*)SnToObj[farmers[0]],f1=*(tagFarmer*)SnToObj[farmers[1]];
+                            if(f0.WorkObjectSN!=-1)return;
+                            int tarsn=-1;
+                            tagBuilding stock=*(tagBuilding*)SnToObj[stockSN];
+                            for(auto&res:sheep){
+                                if(tarsn==-1)tarsn=res.SN;
+                                else{
+                                    int dis0=Dis(res,stock),dis1=Dis(*(tagResource*)SnToObj[tarsn],stock);
+                                    if(dis0<dis1)tarsn=res.SN;
+                                }
+                            }
+                            //
+                            if(tarsn!=-1)
+                            for(auto sn:farmers)HumanAction(sn,tarsn);
                         }
                     },
                     [&](){
-                        return 0;
+                        for(auto&obj:info.resources)if(obj.Type==RESOURCE_GAZELLE)return 0;
+                        return 1;
                     }
         );
     }
@@ -378,13 +397,205 @@ void UsrAI::InitActionNode()
                     }
         );
     }
+    //建船
+    {
+        nodes["buildFishBoat"]=new Node(
+                    emptyInit,
+                    [&](){
+                        if(FindMsg("pickGazalle")==0)return;
+                        //找到一个船坞
+                        int tarsn=-1;
+                        for(auto&obj:info.buildings){
+                            if(obj.Type==BUILDING_DOCK&&obj.Percent==100&&obj.Project==0){
+                                tarsn=obj.SN;
+                                break;
+                            }
+                        }
+                        if((~~~~~tarsn)&&info.Wood>=BUILDING_DOCK_CREATE_SAILING_WOOD){
+                            BuildingAction(tarsn,BUILDING_DOCK_CREATE_SAILING);
+                        }
+                    },
+                    [&](){
+                        int cnt=0;
+                        for(auto&b:info.farmers){
+                            if(b.FarmerSort==FARMERTYPE_SAILING)++cnt;
+                        }
+                        return cnt>=3;
+                    }
+                    );
+    }
+    //命令所有的空闲人员立刻去砍树
+    {
+        nodes["idle_curTree"]=new Node(
+                    emptyInit,
+                    [&](){
+                        list<int>trees;
+                        //获取所有树的位置
+                        for(tagResource res:info.resources){
+                            if(res.Type!=RESOURCE_TREE||!InMyLand(res.BlockDR,res.BlockUR))continue;
+                            trees.push_back(res.SN);
+                        }
+                        for(auto sn:idle_farmers){
+                            tagFarmer f=*(tagFarmer*)SnToObj[sn];
+                            if(f.WorkObjectSN==-1){
+                                int tar=-1;
+                                for(auto treeSN:trees){
+                                    auto tree=*(tagResource*)SnToObj[treeSN];
+                                    if(tar==-1)tar=treeSN;
+                                    else if(Dis(*SnToObj[tar],f)>Dis(*SnToObj[treeSN],f))
+                                        tar=treeSN;
+                                }
+                                if(~tar){
+                                    HumanAction(sn,tar);
+                                }
+                            }
+                        }
+                    },
+                    [&](){
+                        return 0;
+                    }
+                    );
+    }
+    //命令所有渔船去打鱼
+    {
+        //
+        static set<int>fish;
+        nodes["catchFish"]=new Node(
+                    emptyInit,
+                    [&](){
+                        fish.clear();
+                        for(auto&obj:info.resources){
+                            if(obj.Type==RESOURCE_FISH){
+                                fish.insert(obj.SN);
+                            }
+                        }
+                        for(auto&obj:info.farmers){
+                            if(obj.FarmerSort==FARMERTYPE_SAILING){
+                                if(fish.count(obj.WorkObjectSN)==0){
+                                    int tarsn=-1;
+                                    for(auto sn:fish){
+                                        if(tarsn==-1)tarsn=sn;
+                                        else if(Dis(obj,*SnToObj[tarsn])>Dis(obj,*SnToObj[sn]))tarsn=sn;
+                                    }
+                                    if(~tarsn)
+                                    HumanAction(obj.SN,tarsn);
+                                }
+                            }
+                        }
+                    },
+                    [&](){
+                        return fish.size()==0;
+                    }
+                  );
+    }
+    //升级时代
+    {
+        nodes["upgradeTime"]=new Node(
+                    emptyInit,
+                    [&](){
+                        if(info.farmers.size()>=15&&info.Meat>=500&&Center.Project==0){
+                            BuildingAction(Center.SN,BUILDING_CENTER_UPGRADE);
+                        }
+                        if(Center.Project==BUILDING_CENTER_UPGRADE&&Center.ProjectPercent>=100){
+                            upgrade=1;
+                        }
+                    },
+                    [&](){
+                        return upgrade;
+                    }
+                    );
+    }
+    //造战船
+    {
+        nodes["buildShip"]=new Node(
+                    emptyInit,
+                    [&](){
+                        if(upgrade==0)return;
+                        if(info.Wood<BUILDING_DOCK_CREATE_SHIP_WOOD)return;
+                        int tarsn=-1;
+                        for(auto&obj:info.buildings){
+                            if(obj.Type==BUILDING_DOCK&&obj.Project==0&&obj.Percent>=100){
+                                tarsn=obj.SN;
+                                break;
+                            }
+                        }
+                        if(~~~~~~~tarsn){
+                            BuildingAction(tarsn,BUILDING_DOCK_CREATE_SHIP);
+                        }
+                    },
+                    [&](){
+                        //造五个战舰
+                        int cnt=0;
+                        for(auto obj:info.armies){
+                            if(obj.Sort==AT_SHIP)++cnt;
+                        }
+                        if(cnt>=4){
+                            AddMsg("shipIsReady");
+                            return 1;
+                        }
+                        return 0;
+                    }
+                    );
+    }
+    //巡逻并且杀掉敌方巡逻舰
+    {
+        static bool ready=0;
+        nodes["killEnemyShip"]=new Node(
+                    emptyInit,
+                    [&](){
+                        ready=ready||FindMsg("shipIsReady");
+                        if(!ready)return;
+                        vector<array<int,2>>unexplored;
+                        //获取地方大陆可能在的几个角落
+                        auto&theMap=*(info.theMap);
+                        if(theMap[0][0].type==MAPPATTERN_UNKNOWN)unexplored.push_back({0,0});
+                        if(theMap[0][MAP_U-1].type==MAPPATTERN_UNKNOWN)unexplored.push_back({0,MAP_U-1});
+                        if(theMap[MAP_L-1][0].type==MAPPATTERN_UNKNOWN)unexplored.push_back({MAP_L-1,0});
+                        if(theMap[MAP_L-1][MAP_U-1].type==MAPPATTERN_UNKNOWN)unexplored.push_back({MAP_L-1,MAP_U-1});
+                        if(unexplored.size()==0)return;
+                        //获取所有的战船
+                        vector<tagArmy>ship;
+                        for(auto&obj:info.armies){
+                            if(obj.Sort==AT_SHIP)ship.push_back(obj);
+                        }
+                        //寻找一个未探索的边角
+                        long long tx=INT_MAX/2,ty=INT_MAX/2;
+                        for(auto p:unexplored){
+                            auto Dis=[&](int tx,int ty)->int{
+                                long long ret=0;
+                                for(auto&obj:ship){
+                                    ret+=abs(obj.BlockDR*1ll-tx)+abs(obj.BlockUR*1ll-ty);
+                                }
+                                return ret;
+                            };
+                            if(Dis(tx,ty)>Dis(p[0],p[1]))tx=p[0],ty=p[1];
+                        }
+                        //巡逻
+                        if(tx!=INT_MAX){
+                            for(auto&obj:ship){
+                                if(obj.status==HUMAN_STATE_IDLE)
+                                HumanMove(obj.SN,tx*BLOCKSIDELENGTH,ty*BLOCKSIDELENGTH);
+                            }
+                        }
+                    },
+                    [&](){
+                        return 0;
+                    }
+                    );
+    }
     //
-    AllNodes.insert(nodes["homeBuild"]);
-    AllNodes.insert(nodes["FarmerGenerate"]);
-    AllNodes.insert(nodes["killSheep"]);
-    AllNodes.insert(nodes["fishing"]);
-    AllNodes.insert(nodes["cutTree"]);
-    AllNodes.insert(nodes["buildDock"]);
+    AllNodes.push_back(nodes["homeBuild"]);
+    AllNodes.push_back(nodes["FarmerGenerate"]);
+    AllNodes.push_back(nodes["killSheep"]);
+    AllNodes.push_back(nodes["fishing"]);
+    AllNodes.push_back(nodes["cutTree"]);
+    AllNodes.push_back(nodes["buildDock"]);
+    AllNodes.push_back(nodes["buildFishBoat"]);
+    AllNodes.push_back(nodes["idle_curTree"]);
+    AllNodes.push_back(nodes["catchFish"]);
+    AllNodes.push_back(nodes["upgradeTime"]);
+    AllNodes.push_back(nodes["buildShip"]);
+    AllNodes.push_back(nodes["killEnemyShip"]);
     ////////////////
 
 }
@@ -431,13 +642,34 @@ void UsrAI::UpdateAll()
                 if(terrain.type==MAPPATTERN_GRASS){
                     mapInfo[i][j]=terrain.height;
                 }else{
-                    mapInfo[i][j]=MAPHEIGHT_OCEAN;
+                    mapInfo[i][j]=-1;
                 }
             }
         }
+        //标记斜坡
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                tmp[i][j]=mapInfo[i][j];
+                const static int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
+                bool flag=1;
+                if(mapInfo[i][j]>=0){
+                    for(auto*o:off){
+                        int ii=i+o[0],jj=j+o[1];
+                        if(ii>=0&&i<MAP_L&&jj>=0&&jj<MAP_U){
+                            if(mapInfo[i][j]!=mapInfo[ii][jj]){
+                                flag=0;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(!flag)tmp[i][j]=-1;
+            }
+        }
+        memcpy(mapInfo,tmp,sizeof(tmp));
         //将障碍物标记到地图
         for(auto&ele:SnToObj){
-            tagObj obj=*ele.second;
+            tagObj&obj=*ele.second;
             mapInfo[obj.BlockDR][obj.BlockUR]=-1;
         }
         //将建筑标记到地图
@@ -481,7 +713,6 @@ void UsrAI::UpdateAll()
                     }
                 }
             }
-
         };
         ++idx;
         dfs(Center.BlockDR,Center.BlockUR);
@@ -505,9 +736,9 @@ void UsrAI::UpdateAll()
         decltype(AllNodes) updates;
         for(auto*node:AllNodes){
             auto*nxt=node->work();
-            updates.insert(nxt);
+            if(nxt)
+            updates.push_back(nxt);
         }
-        updates.erase(0);
         AllNodes.swap(updates);
     }
 }
@@ -578,13 +809,17 @@ array<int, 2> UsrAI::FindSpace(int size, int x, int y,bool land)
             bool ava=1;
             for(int l0=0;l0<size&&ava;++l0){
                 for(int l1=0;l1<size&&ava;++l1){
-                    int h=mapInfo[i+l0][j+l1];
-                    if(land&&h>=0&&h<=MAPHEIGHT_MAX&&h==mapInfo[i][j])continue;
-                    if(!land&&h==MAPHEIGHT_OCEAN&&h==mapInfo[i][j])continue;
+                    int ii=i+l0,jj=j+l1;
+                    if(ii>=0&&jj>=0&&ii<MAP_L&&jj<MAP_U){
+                        int h=mapInfo[ii][jj];
+                        if(land&&h>=0&&h<=MAPHEIGHT_MAX&&h==mapInfo[i][j])continue;
+                        if(!land&&h==mapInfo[i][j])continue;
+                    }
                     ava=0;
                 }
             }
-            if(ava)fit.push_back({i,j});
+            if(ava)
+                fit.push_back({i,j});
         }
     }
     //寻找最合适的
@@ -600,7 +835,8 @@ array<int, 2> UsrAI::FindSpace(int size, int x, int y,bool land)
 
 array<int, 2> UsrAI::FindForBuilding(int type, int x, int y)
 {
-    return FindSpace(buildingSize[type],x,y,type!=BUILDING_DOCK);
+     auto&&ret=FindSpace(buildingSize[type]+1,x,y,type!=BUILDING_DOCK);
+     return ret;
 }
 
 array<int, 2> UsrAI::FindForBuilding(int tar, int src, int x, int y,int dis)
@@ -614,10 +850,13 @@ array<int, 2> UsrAI::FindForBuilding(int tar, int src, int x, int y,int dis)
         for(int j=0;j<MAP_U;++j){
             bool ava=1;
             for(int l0=0;l0<size&&ava;++l0){
-                for(int l1=0;l1<size&&ava;++l1){
-                    int h=mapInfo[i+l0][j+l1];
-                    if(land&&h>=0&&h<=MAPHEIGHT_MAX&&h==mapInfo[i][j])continue;
-                    if(!land&&h==MAPHEIGHT_OCEAN)continue;
+                for(int l1=0;l1<size&&ava;++l1){  
+                    int ii=i+l0,jj=j+l1;
+                    if(ii>=0&&jj>=0&&ii<MAP_L&&jj<MAP_U){
+                        int h=mapInfo[ii][jj];
+                        if(land&&h>=0&&h<=MAPHEIGHT_MAX&&h==mapInfo[i][j])continue;
+                        if(!land&&h==MAPHEIGHT_OCEAN)continue;
+                    }
                     ava=0;
                 }
             }
