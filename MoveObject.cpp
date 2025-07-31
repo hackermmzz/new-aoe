@@ -403,3 +403,17 @@ void MoveObject::init_crashMove_Block( int foundation, int dblockDR, int dblockU
     //待编写以优化碰撞处理
 
 }
+
+void MoveObject::setPosForced(double DR_, double UR_)
+{
+    PredictedDR=DR=DR_;
+    PredictedUR=UR=UR_;
+    setPath(stack<Point>(),DR_,UR_);
+}
+
+void MoveObject::ForceStand(double dr,double ur)
+{
+    setPosForced(dr,ur);
+    setPreStand();
+    setNowState(MOVEOBJECT_STATE_STAND);
+}

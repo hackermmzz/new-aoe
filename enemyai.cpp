@@ -248,14 +248,40 @@ static void ifATTACK(){
             if(enemyInfo.armies[i].status==2&& ifA[enemyInfo.armies[i].SN]==false){
                  ifA[enemyInfo.armies[i].SN]=true;
             }
-        }}
+        }
+        for(int i=0;i<enemyInfo.buildings.size();i++){
+            if(enemyInfo.buildings[i].Type==BUILDING_ARROWTOWER&&ifA[enemyInfo.buildings[i].SN]==false){
+                ifA[enemyInfo.buildings[i].SN]=true;
+            }
+        }
+    }
         else if(Defend.size()==0){
             for(int i=0;i<enemyInfo.armies.size();i++){
                 if(enemyInfo.armies[i].status==2&& ifA[enemyInfo.armies[i].SN]==true){
                      ifA[enemyInfo.armies[i].SN]=false;
                 }
             }
+            for(int i=0;i<enemyInfo.buildings.size();i++){
+                if(enemyInfo.buildings[i].Type==BUILDING_ARROWTOWER&&ifA[enemyInfo.buildings[i].SN]==true){
+                    ifA[enemyInfo.buildings[i].SN]=false;
+                }
+            }
         }
+    //追击检查
+    for(int i=0;i<enemyInfo.armies.size();i++){
+        if(ifA[enemyInfo.armies[i].SN]==true&&enemyInfo.armies[i].status==DEFENSE){
+            if(countdistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR)>600){
+               ifA[enemyInfo.armies[i].SN]=false;
+               timer[enemyInfo.armies[i].SN]=g_frame;
+            }
+        }
+        else if(ifA[enemyInfo.armies[i].SN]==true&&enemyInfo.armies[i].status==AROUND){
+            if(countdistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR)>1500){
+               ifA[enemyInfo.armies[i].SN]=false;
+               timer[enemyInfo.armies[i].SN]=g_frame;
+            }
+        }
+    }
     }
 
 //巡逻
@@ -331,6 +357,14 @@ void EnemyAI::Attack(){
             timer[enemyInfo.armies[i].SN]=g_frame;
         }
     }
+    for(int i=0;i<enemyInfo.buildings.size();i++){
+        if(g_frame-timer[enemyInfo.buildings[i].SN]>125&&enemyInfo.buildings[i].Type==BUILDING_ARROWTOWER&&ifA[enemyInfo.buildings[i].SN]==true){
+            if(Defend.size()!=0){
+                HumanAction(enemyInfo.buildings[i].SN,Defend.back());
+                timer[enemyInfo.buildings[i].SN]=g_frame;
+            }
+        }
+    }
 
 }
 
@@ -403,11 +437,16 @@ void EnemyAI::processData() {
     enemyInfo=getInfo();
      //军队数据初始化
      if(g_frame==50){
-         sum=enemyInfo.armies.size();
          for(int i=0;i<enemyInfo.armies.size();i++){
              ifA.insert(std::pair<int,bool>(enemyInfo.armies[i].SN,false));
              timer.insert(std::pair<int,int>(enemyInfo.armies[i].SN,0));
             }
+         for(int i=0;i<enemyInfo.buildings.size();i++){
+             if(enemyInfo.buildings[i].Type==BUILDING_ARROWTOWER){
+                 ifA.insert(std::pair<int,bool>(enemyInfo.buildings[i].SN,false));
+                 timer.insert(std::pair<int,int>(enemyInfo.buildings[i].SN,0));
+             }
+         }
      }
      if(g_frame>50&&g_frame % 8==0){
            visionChange();
@@ -421,6 +460,7 @@ void EnemyAI::processData() {
               }
         if(g_frame>50&&g_frame % 10==0){
             int s=Farmer.size();
+            int t=enemyInfo.buildings.size();
             ifDead(Farmer,VECTORFARMER);
             if(s!=Farmer.size())
             ifDead(Army,VECTORARMY);

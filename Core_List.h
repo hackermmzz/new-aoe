@@ -33,7 +33,13 @@ public:
     int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止
-    void eraseRelation(Coordinate* object){ object->initAction(); relate_AllObject[object].isExist = false; } //指令因意外原因停止
+    void eraseRelation(Coordinate* object){
+        object->initAction();
+        auto&ele=relate_AllObject[object];
+        ele.isExist = 0;
+        ele.goalObject=0;
+        ele.alterOb=0;
+    } //指令因意外原因停止
     void eraseObject(Coordinate* eraseOb);
     void manageRelationList();
 
@@ -47,7 +53,8 @@ public:
     void conduct_Attacked(Coordinate*);  //受到攻击而诱发
     void manageMontorAct(); //添加监视的object的相应行动
     void resourceBuildHaveChange(){ this->resourceBuildingChange = true; }
-
+    //判断是否为陆地单位
+    static bool JudgeMoveObjIsLandUnit(MoveObject*moveOb);
 
 private:
     Map* theMap;    //地图信息
@@ -109,7 +116,6 @@ private:
     void setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0);
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
-    bool JudgeMoveObjIsShip(MoveObject*moveOb);
     pair<stack<Point>,array<double,2>> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, Point destination , Coordinate*object,Coordinate* goalOb);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
@@ -117,6 +123,8 @@ private:
     Point GetSameBlockInLine(const Point&point0,const Point&point1);
     Point GetSameBlockInLineNearest(const Point&point0,const Point&point1);
     bool checkIsCoast(int x,int y);
+    bool checkIsLandUint(Coordinate*obj);
+    bool checkIsOcean(int x,int y);
 };
 
 #endif // CORE_LIST_H

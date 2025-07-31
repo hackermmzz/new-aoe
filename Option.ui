@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QPushButton" name="exportHtml">
+  <widget class="QPushButton" name="exportTreeBlock">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>导出Debug调试栏信息为HTML</string>
+    <string>导出森林遮掩信息为TXT</string>
    </property>
   </widget>
   <widget class="QPushButton" name="exportTxt">

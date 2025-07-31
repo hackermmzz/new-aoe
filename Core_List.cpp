@@ -294,6 +294,20 @@ int Core_List::addRelation(Coordinate* object1, int evenType, int actNum)
             if (oper == 1) return ACTION_INVALID_BUILDACT_MAXHUMAN;
             else if (oper == 0) return ACTION_INVALID_RESOURCE;
         }
+        //对于时代升级,需要判断是否有不少于2个非房屋得已经完成得建筑
+        if(evenType==CoreEven_BuildingAct&&actNum==BUILDING_CENTER_UPGRADE){
+            int cnt=0;
+            auto*p=player[object1->getPlayerRepresent()];
+            for(Building*obj:p->build){
+                if(obj->isFinish())
+                {
+                    if(obj->getNum()!=BUILDING_HOME&&obj->getNum()!=BUILDING_CENTER){
+                        ++cnt;
+                    }
+                }
+            }
+            if(cnt<2)return ACTION_INVALID_UPGRADE_TIME;
+        }
 
         player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb, actNum);
         buildOb->setAction(actNum);
@@ -981,9 +995,7 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
         for (Human* human : humans) {
             int idx = rand() % satisfy.size();
             double targetDr = satisfy[idx][0], targetUr = satisfy[idx][1];
-            human->setPosForced(targetDr + generateRandomDouble(1.0, BLOCKSIDELENGTH - 1.0), targetUr + generateRandomDouble(1.0, BLOCKSIDELENGTH - 1.0));
-            human->setPreStand();
-            human->setNowState(MOVEOBJECT_STATE_STAND);
+            human->ForceStand(targetDr + generateRandomDouble(1.0, BLOCKSIDELENGTH - 1.0),targetUr + generateRandomDouble(1.0, BLOCKSIDELENGTH - 1.0));
             human->setTransported(0);
         }
         ship->update_resourceClear();
@@ -1239,8 +1251,8 @@ void Core_List::manageMontorAct()
                 do {
                     int L = dr / BLOCKSIDELENGTH, U = ur / BLOCKSIDELENGTH;
                     if (L >= 0 && U >= 0 && L < MAP_L && U < MAP_U && theMap->cell[L][U].getMapType() == MAPTYPE_OCEAN) {
-                        double dir0 = rand() * 1.0 / RAND_MAX;
-                        double dir1 = sqrt(1.0 - dir0 * dir0);
+                        double dir0 = rand() * 1.0 / RAND_MAX*((rand()&1)?-1:1);
+                        double dir1 = sqrt(1.0 - dir0 * dir0)*((rand()&1)?-1:1);
                         dr = ob_m->getDR() + dir0 * dis;
                         ur = ob_m->getUR() + dir1 * dis;
                         flag = 1;
@@ -1259,7 +1271,27 @@ void Core_List::manageMontorAct()
         }
         iter++;
     }
+    //对于视野范围外的动物取消他对人类的行为
+    for(auto itr=relate_AllObject.begin();itr!=relate_AllObject.end();++itr){
+        relation_Object&relation=itr->second;
+        if(!relation.isExist)continue;
+        Coordinate*obj=itr->first;
+        Animal*animal=0;
+        obj->printer_ToAnimal((void**)&animal);
+        //判断是否是动物
+        if(!animal)continue;
+        //判断他的另一个对象是否是人类
 
+        if(!relation.goalObject)continue;
+        Human*tar=0;
+        relation.goalObject->printer_ToHuman((void**)&tar);
+        if(!tar)continue;
+        //判断人类是否还在他的视野范围内
+        int view=animal->getVision();
+        int dis=abs(obj->getBlockDR()-tar->getBlockDR())+abs(obj->getBlockUR()-tar->getBlockUR());
+        if(dis>view)suspendRelation(obj);
+    }
+    //
     return;
 }
 
@@ -1363,9 +1395,9 @@ void Core_List::crashHandle(MoveObject* moveOb)
         if (moveOb->is_MoveFirstStep() || PreviousPoint == nextBlockPoint)
         {
             //判断对象是否是船
-            bool ship = JudgeMoveObjIsShip(moveOb);
+            bool landUnit = JudgeMoveObjIsLandUnit(moveOb);
             //
-            auto& blockLab_canMove = theMap->findBlock_Free(nextBlockPoint, 1, !ship);
+            auto& blockLab_canMove = theMap->findBlock_Free(nextBlockPoint, 1, landUnit);
 
             if (blockLab_canMove.size()) PreviousPoint = blockLab_canMove[rand() % blockLab_canMove.size()];
         }
@@ -1393,7 +1425,7 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
     }
 }
 
-bool Core_List::JudgeMoveObjIsShip(MoveObject* moveOb)
+bool Core_List::JudgeMoveObjIsLandUnit(MoveObject* moveOb)
 {
     bool ship = 0;
     {
@@ -1410,7 +1442,7 @@ bool Core_List::JudgeMoveObjIsShip(MoveObject* moveOb)
             }
         }
     }
-    return ship;
+    return !ship;
 }
 
 pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)[MAP_L][MAP_U], Map* map, const Point& start, Point destination, Coordinate* object, Coordinate* goalOb)
@@ -1428,30 +1460,59 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
     static vector<Data>goalPoint;
     /////////////////////////////////////////////////////////启发函数
     static auto PredictDistance = [&](const Data& start, const Data& end)->double {
-        return abs(end[0] - start[0]) + abs(end[1] - start[1]);
-        };
-    /////////////////////////////////////////////////////////对于农民对渔场寻路，如果渔场靠岸那么我们在岸边找一点使得农民可达
-    if (goalOb && (goalOb->getNum() == NUM_STATICRES_Fish || goalOb->getNum() == BUILDING_DOCK) && object->getSort() == SORT_FARMER && ((Farmer*)object)->get_farmerType() == FARMERTYPE_FARMER) {
+        static vector<double>power((MAP_L+MAP_U+1)*(MAP_L+MAP_U+1));
+        static bool init=1;
+        if(init){
+            init=0;
+            for(int i=1;i<power.size();++i)power[i]=sqrt(i);
+        }
+        //
+        auto d0=start[0]-end[0],d1=start[1]-end[1];
+        return power[d0*d0+d1*d1];
+    };
+    /////////////////////////////////////////////////////////对于陆地单位对海洋单位进行寻路,如果沿岸那么就以附近陆地单位为逻辑,不沿岸则按照对对象寻址的逻辑
+    if (goalOb && !checkIsLandUint(goalOb)&& checkIsLandUint(object)) {
         //寻找沿岸(与玩家所在大陆一致)
         auto check = [&](int i, int j)->bool {
             if (i >= 0 && j >= 0 && i < MAP_L && j < MAP_U) {
                 return map->blockIndex[i][j] == map->blockIndex[start.x][start.y];
             }
             return 0;
-            };
+        };
         int x = goalOb->getBlockDR(), y = goalOb->getBlockUR();
         int tx = INT_MAX, ty = INT_MAX;
         bool flag = 1;
-        for (int i = 0;i < ((Building*)goalOb)->get_BlockSizeLen() && flag;++i) {
-            for (int j = 0;j < ((Building*)goalOb)->get_BlockSizeLen() && flag;++j) {
-                static const int off[][2] = { {0,-1},{1,-1},{0,2},{1,2},{-1,0},{-1,1},{2,0},{2,1} };
-                for (auto* o : off) {
-                    int xx = o[0] + i + x, yy = o[1] + j + y;
-                    if (check(xx, yy)) {
-                        tx = xx;ty = yy;
-                        flag = 0;
-                    }
-                }
+        int siz=goalOb->get_BlockSizeLen();
+        //上
+        for(int i=0;i<siz&&flag;++i){
+            int xx=x+i,yy=y-1;
+            if(check(xx,yy)){
+                tx = xx,ty=yy;
+                flag = 0;
+            }
+        }
+        //下
+        for(int i=0;i<siz&&flag;++i){
+            int xx=x+i,yy=y+siz;
+            if(check(xx,yy)){
+                tx = xx,ty=yy;
+                flag = 0;
+            }
+        }
+        //左
+        for(int i=0;i<siz&&flag;++i){
+            int xx=x-1,yy=y+i;
+            if(check(xx,yy)){
+                tx = xx,ty=yy;
+                flag = 0;
+            }
+        }
+        //右
+        for(int i=0;i<siz&&flag;++i){
+            int xx=x+siz,yy=y+i;
+            if(check(xx,yy)){
+                tx = xx,ty=yy;
+                flag = 0;
             }
         }
         //
@@ -1470,22 +1531,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
     //initMap_HaveJud();
     //memset(goalMap,0,sizeof(goalMap));
     //判断是不是船
-    bool isShip = false;
-    if (object) {
-        Human* ship = 0;
-        object->printer_ToHuman((void**)&ship);
-        if (ship) {
-            int sort = ship->getSort();
-            if (sort == SORT_FARMER) {
-                if (((Farmer*)ship)->get_farmerType() != FARMERTYPE_FARMER)isShip = 1;
-            }
-            else if (sort == SORT_ARMY)
-            {
-                if (((Army*)ship)->getNum() == AT_SHIP)isShip = 1;
-            }
-        }
-    }
-
+    bool isShip = object&&!checkIsLandUint(object);
     //预处理能否到达
     Point end = goalOb ? Point(goalOb->getBlockDR(), goalOb->getBlockUR()) : Point(destination.x, destination.y);
     Point res = GetSameBlockInLine(start, end);
@@ -1579,12 +1625,15 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
             if (xx >= 0 && yy >= 0 && xx < MAP_L && yy < MAP_U) {
                 Block& block = theMap->cell[xx][yy];
                 bool isLand = block.getMapType() != MAPTYPE_OCEAN;
-                float dd = mndis[x][y] + (i < 4 ? Sqrt2 : 1.0);
+                float dd = mndis[x][y] + (i < 4 ? Sqrt2 : 1.0f);
                 //判断格子是否可走、未走过
                 //斜线方向需要多判断马脚操作
                 if (isLand ^ isShip) {
-                    if (theMap->cell[xx][yy].getMapType() != MAPTYPE_OCEAN)/*std::cout << "1" << std::endl*/;
-                    if ((map_HaveJud[xx][yy] != mask || mndis[xx][yy] > dd) && !(findPathMap[xx][yy] && goalMap[xx][yy] != mask || i < 4 && (findPathMap[xx][y] || findPathMap[x][yy]))) {
+                    if ((map_HaveJud[xx][yy] != mask || mndis[xx][yy] > dd) &&
+                        !(findPathMap[xx][yy] && goalMap[xx][yy] != mask)&&
+                        !(i < 4 && ((findPathMap[xx][y] || findPathMap[x][yy])||(!isShip&&(checkIsOcean(xx,y)||checkIsOcean(x,yy)))))
+                        )
+                    {
                         preNode[xx][yy] = { x,y };
                         mndis[xx][yy] = dd;
                         //算出预估最小值
@@ -1639,7 +1688,6 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)
         if (path.size())
             path.pop();
     }
-
     return { path,{dr0,ur0} };
 }
 
@@ -1751,6 +1799,44 @@ bool Core_List::checkIsCoast(int x, int y)
         if (i < 0 || i < 0 || i >= MAP_L || i >= MAP_U)continue;
         if (theMap->cell[i][j].getMapType() == MAPTYPE_OCEAN)return 1;
     }
+    return 0;
+}
+
+bool Core_List::checkIsLandUint(Coordinate *obj)
+{
+    //可能是船类
+    Farmer*human=0;
+    obj->printer_ToHuman((void**)(&human));
+    if(human){
+        if(human->getSort()==SORT_FARMER){
+            Farmer*f=(Farmer*)human;
+            return f->get_farmerType()==FARMERTYPE_FARMER;
+        }
+        else if(human->getSort()==SORT_ARMY){
+            Army*army=(Army*)human;
+            return army->getNum()!=AT_SHIP;
+        }
+    }
+    //可能是建筑类
+    Building*building=0;
+    obj->printer_ToBuilding((void**)(&building));
+    if(building){
+        return building->getNum()!=BUILDING_DOCK;
+    }
+    //可能是资源类
+    StaticRes*res=0;
+    obj->printer_ToStaticRes((void**)(&res));
+    if(res){
+        return res->Num!=NUM_STATICRES_Fish;
+    }
+    //剩下的统统为陆地单元
+    return 1;
+}
+
+bool Core_List::checkIsOcean(int x, int y)
+{
+    if(x>=0&&y>=0&&x<MAP_L&&y<MAP_U)
+        if(theMap->cell[x][y].getMapType()==MAPTYPE_OCEAN)return 1;
     return 0;
 }
 

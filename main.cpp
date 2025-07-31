@@ -2,14 +2,16 @@
 #include <QApplication>
 #include <QMap>
 #include "Logger.h"
-
+#include"EventFilter.h"
 int main(int argc, char* argv[])
 {
     //
     QApplication a(argc, argv);
     QResource::registerResource("./res.rcc");
     Logger::init(Logger::LogLevel::Debug);
-
+    //安装全局事件器
+    eventFilter=new EventFilter();
+    a.installEventFilter(eventFilter);
     // 添加排除文件，这些文件不会被Logger处理
     Logger::addExcludedFile("EnemyAI.cpp");
     Logger::addExcludedFile("UsrAI.cpp");

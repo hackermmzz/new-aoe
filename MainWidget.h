@@ -13,7 +13,7 @@
 #include "soudplaythread.h"
 #include "Editor.h"
 #include "ui_Editor.h"
-
+#include"areaselected.h"
 namespace Ui {
 class MainWidget;
 }
@@ -35,8 +35,9 @@ public:
     ActWidget* getActs(int num){return acts[num];}
 
     // 编辑器相关内容
-    bool openEditor = false;
     Editor* editor;
+    AreaSelected*rectArea;//矩形区域生成监听器
+    AreaSelected*circleArea;//圆形区域生成监听器
     int currentSelected;  // 用于记录当前的选择的内容
     // 枚举编辑器中的功能键
     enum EditorElement{
@@ -70,7 +71,9 @@ public:
         ELEPHANT,
         TREE,
         STONM,
-        GOLDORE
+        GOLDORE,
+        RECT_AREA,
+        CIRCLE_AREA,
     };
 
     bool leftMousePress;
@@ -139,7 +142,7 @@ private:
     void respond_DebugMessage();
     void debugText(const QString& color,const QString& content);
     void clearDebugText();
-    void exportDebugTextHtml();
+    void exportDebugTextTreeBlock();
     void exportDebugTextTxt();
     void clearDebugTextFile();
 //*****************************************
@@ -159,6 +162,7 @@ private:
 //*****************************************
 
 //***************InitHelperFunction**********
+    void initEditor();
     void initGameElements();
     void initGameResources();
     void initWindowProperties();

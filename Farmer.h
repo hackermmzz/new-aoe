@@ -20,7 +20,7 @@ public:
     bool is_missileAttack(){return get_AttackType() == ATTACKTYPE_SHOOT;}
     int get_farmerType(){return FarmerType;}
     string getSound_Click(){return sound_click;}
-
+    void setSpeed();
     /***************指针强制转化****************/
     //若要将Farmer类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){*ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址
@@ -99,7 +99,7 @@ public:
     int getState(){return state;}
 
     double getResourceNowHave(){ return resource; }
-    int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort); }
+    int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort)+farmer_addition_ResourceHold(); }
     int getResourceSort(){ return resourceSort; }
     double get_quantityGather(){ return quantity_GatherOnce * playerScience->get_rate_ResorceGather(resourceSort); }
     bool get_isFullBackpack(){ return resource >= getResourceHave_Max(); }//用于普通情况下判断farmer是否满背包
@@ -120,6 +120,7 @@ public:
     void update_resourceClear(){ resource = 0; }
     void update_transportHuman(Human*human){resource+=1;HumanTransport.push_back(human);}
     void updateState();
+    int farmer_addition_ResourceHold();
     vector<Human *>& getHumanTransport();
     bool isShip(){
         return FarmerType!=0;

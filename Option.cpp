@@ -9,7 +9,7 @@ Option::Option(QWidget *parent) :
     setFixedSize(600,500);
     pix=QPixmap(":/new/prefix1/res/About_Background_001.png");
     setWindowTitle("设置");
-    btnHtml = ui->exportHtml;
+    btnTreeBlock = ui->exportTreeBlock;
     btntxt = ui->exportTxt;
     btnTextClear = ui->textClear;
     btnFileClear = ui->exportClear;
@@ -129,9 +129,9 @@ void Option::on_textClear_clicked()
     emit request_ClearDebugText();
 }
 
-void Option::on_exportHtml_clicked()
+void Option::on_exportTreeBlock_clicked()
 {
-    emit request_exportHtml();
+    emit request_exportTreeBlock();
 }
 
 void Option::on_exportTxt_clicked()

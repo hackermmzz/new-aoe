@@ -54,7 +54,6 @@ public:
     /*****************人口信息*******************/
     void addHumanNum(){ humanNum++; }
     void subHumanNum(){ humanNum--; }
-
     //当前人口数目
     int get_humanNum(){ return humanNum; }
     //获取人口上限

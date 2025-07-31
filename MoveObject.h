@@ -105,7 +105,10 @@ public:
     static void init_crashMove_Block( int foundation, int dblockDR, int dblockUR );
 
   /*******************以上静态函数***********************/
-
+    //强制设置位置
+    void setPosForced(double DR,double UR);
+    //强制设置空闲
+    void ForceStand(double dr,double ur);
     //设置状态（预设）
     void setPreStand(){this->prestate=MOVEOBJECT_STATE_STAND;}
     void setPreWalk(){this->prestate=MOVEOBJECT_STATE_WALK;}

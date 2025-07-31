@@ -32,12 +32,7 @@ int Human::getDEF(int attackType_got)
             playerScience->get_addition_Defence(getSort() , Num , ARMY_INFANTRY , attackType_got);
 }
 
-void Human::setPosForced(double DR_, double UR_)
-{
-    PredictedDR=DR=DR_;
-    PredictedUR=UR=UR_;
-    setPath(stack<Point>(),DR_,UR_);
-}
+
 
 bool Human::getTransported() const
 {

@@ -59,7 +59,11 @@ SOURCES += \
     AboutDialog.cpp \
     Logger.cpp \
     soudplaythread.cpp \
-    Editor.cpp
+    Editor.cpp \
+    digitalconfig.cpp \
+    EventFilter.cpp \
+    RectArea.cpp \
+    CircleArea.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -96,7 +100,11 @@ HEADERS += \
     AboutDialog.h \
     Logger.h \
     soudplaythread.h \
-    Editor.h
+    Editor.h \
+    AreaSelected.h \
+    Rectarea.h \
+    EventFilter.h \
+    CircleArea.h
 
 FORMS += \
         MainWidget.ui \

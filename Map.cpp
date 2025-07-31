@@ -2,6 +2,14 @@
 #include <tuple>
 #include <unordered_map>
 #include <iostream>
+#include <bits/stdc++.h>
+#include <chrono>
+#include<vector>
+#include<array>
+#include <random>
+#include<map>
+#include<rectarea.h>
+#include<circlearea.h>
 ///////////////////////////
 Map*GlobalMap;
 ///////////////////////////
@@ -801,6 +809,84 @@ void Map::drawEdge(int tempMap[MAP_L][MAP_U] ,std::map<int, int> codeToNum,int M
     } //for(int i = 0; i < MAP_L; ++i)
 }
 
+void Map::MergeTrees()
+{
+    using PD=std::array<int,2>;
+    static const int Dis=3;
+    static const int therold=7;
+    static std::vector<PD>offset;
+    static vector<PD>blocked0,blocked1;//用于存储新增的被阻塞的位置
+    //算出所有曼哈顿距离为Dis的偏移
+    if(offset.empty()){
+        for(int i=-Dis;i<=Dis;++i){
+            for(int j=-Dis;j<=Dis;++j){
+                if(abs(i)+abs(j)<=Dis){
+                    offset.push_back(PD{i,j});
+                }
+            }
+        }
+    }
+    //清空
+    blocked0.clear();
+    blocked1.clear();
+    memset(TreeBlock,0,sizeof(TreeBlock));
+    //获取所有的树
+    set<PD>trees;
+    for(auto&tree_:animal){
+        Animal&tree=*tree_;
+        if(tree.getNum()==ANIMAL_TREE&&!tree.isDie()){
+            trees.insert({tree.getBlockDR(),tree.getBlockUR()});
+        }
+    }
+    //查看邻接四个角有几个在trees里面
+    auto GetAroundTreeCount=[&](int x,int y)->int{
+        int cnt=0;
+        for(auto&o:offset){
+            int xx=x+o[0],yy=y+o[1];
+            if(trees.count({xx,yy}))++cnt;
+        }
+        return cnt;
+    };
+    //对单个树进行检测
+    for(auto&ele:trees){
+        int x=ele[0],y=ele[1];
+        //获取
+        int cnt=GetAroundTreeCount(x,y);
+        //默认被四棵树围住的树不能被砍
+        if(cnt>=therold)
+        {
+            blocked0.push_back(PD{x,y});
+            TreeBlock[x][y]=1;
+        }
+    }
+    //对形成的block进一步封闭
+    const static int off[][2]={{0,1},{0,-1},{-1,0},{1,0},{-1,-1},{-1,1},{1,1},{1,-1}};
+    while(blocked0.size()){
+        map<PD,int>counts;
+        for(auto&pos:blocked0){
+            int i=pos[0],j=pos[1];
+            //如果周围有四个那么该点也为不可达
+            for(auto*o:off){
+                int ii=i+o[0],jj=j+o[1];
+                if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U&&!TreeBlock[ii][jj]){
+                    if(++counts[PD{ii,jj}]==6){
+                        blocked1.push_back({ii,jj});
+                    }
+                }
+            }
+        }
+        //对新增的不可达区域进行mask
+        for(auto&ele:blocked1){
+            TreeBlock[ele[0]][ele[1]]=1;
+        }
+        //清空
+        blocked0.clear();
+        //
+        swap(blocked0,blocked1);
+    }
+
+}
+
 void Map::refineShore() {
     // 创建临时地图：海洋标记为1，陆地标记为0
     int tempMap[MAP_L][MAP_U] = {0};    //tempMap[左右][上下]
@@ -811,6 +897,21 @@ void Map::refineShore() {
     }
     drawEdge(tempMap, OceanCodeToNum, 0, 1, 2);  // 绘制海洋边缘，陆地是0，海洋是1，海滩被标记为2
     drawEdge(tempMap, SandCodeToNum, 0, 2, 3);  // 绘制沙地边缘，陆地是0，沙地是2，边界被标记为2
+}
+
+vector<QString> Map::GetAllTargetFiles(QString suffix)
+{
+    //获取当前目录路径
+    QString currentDir = QDir::currentPath();
+    // 创建迭代器（非递归模式）
+    QDirIterator it(currentDir,                   // 当前目录
+                    QStringList() << ("*." + suffix), // 后缀过滤器
+                    QDir::Files);                 // 只遍历文件（不递归）
+    vector<QString>ret;
+    while (it.hasNext()) {
+        ret.push_back(it.next());
+    }
+    return ret;
 }
 
 
@@ -1190,6 +1291,16 @@ void Map::divideTheMap()
         }
         return false;
     };
+    auto checkOceanNeedSetExplored=[&](int i,int j)->bool{
+        //检测2*2的正方形内是否有内陆
+        for(int x=-2;x<=2;++x){
+            for(int y=-2;y<=2;++y){
+                int ii=i+x,jj=j+y;
+                if(checkLand(ii,jj))return 1;
+            }
+        }
+        return 0;
+    };
     //将己方地图可见化
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
@@ -1199,7 +1310,7 @@ void Map::divideTheMap()
                 block.Visible=0;
                 block.Explored=1;
             }
-            else if(block.getMapType()==MAPTYPE_OCEAN&&(checkLand(i,j+2)||checkLand(i,j-2)||checkLand(i+2,j)||checkLand(i-2,j))){
+            else if(block.getMapType()==MAPTYPE_OCEAN&&checkOceanNeedSetExplored(i,j)){
                     block.Visible=0;
                     block.Explored=1;
             }
@@ -1210,14 +1321,14 @@ void Map::divideTheMap()
         }
     }
     //根据预定义参数进行设置可见
-    if(MAP_EXPLORE){
+    if(MAP_EXPLORE||EditorMode){
         for(int i=0;i<MAP_L;++i){
             for(int j=0;j<MAP_U;++j){
                 cell[i][j].Explored=1;
             }
         }
     }
-    if(MAP_VISIABLE){
+    if(MAP_VISIABLE||EditorMode){
         for(int i=0;i<MAP_L;++i){
             for(int j=0;j<MAP_U;++j){
                 cell[i][j].Visible=1;
@@ -1292,7 +1403,8 @@ void Map::loadBarrierMap_ByObjectMap()
             size = map_Object[x][y].size();
             for(int i = 0; i<size; i++)
             {
-                object = map_Object[x][y][i];
+                //
+                object=map_Object[x][y][i];
                 if(CanCrush(object)==0)continue;
                 barrierMap[x][y] = 1;
                 break;
@@ -1305,8 +1417,9 @@ bool Map::CanCrush(Coordinate *object)
 {
     if(object->getSort() == SORT_STATICRES && (object->getNum() == NUM_STATICRES_Bush||object->getNum()==NUM_STATICRES_Fish))
         return 0;
-    if(object->getSort()==SORT_FARMER||object->getSort()==SORT_ARMY||object->getSort()==SORT_HUMAN){
-        Human*human=(Human*)object;
+    Human*human=0;
+    object->printer_ToHuman((void**)&human);
+    if(human){
         if(human->getTransported())
             return 0;
     }
@@ -1331,7 +1444,7 @@ void Map::loadfindPathMapTemperature()
         for(int x=0; x<MAP_L; x++)
             for(int y=0; y<MAP_U; y++)
             {
-                if(barrierMap[x][y] || (represent == NOWPLAYERREPRESENT && !cell[x][y].Explored))
+                if(TreeBlock[x][y] || barrierMap[x][y] || (represent == NOWPLAYERREPRESENT && !cell[x][y].Explored))
                     findPathMapTemperature[represent][x][y] = 1;
             }
     return;
@@ -1527,7 +1640,7 @@ vector<pair<Point,int>> Map::findBlock_Free(Coordinate* object , int disLen, boo
     return ans;
 }
 
-vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool land)
+vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool landUnit)
 {
     int blockDR = blockPoint.x, blockUR = blockPoint.y;
 
@@ -1545,7 +1658,7 @@ vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool land)
         {
             if(x == blockDR && y==blockUR) continue;
             bool ocean=cell[x][y].getMapType()==MAPTYPE_OCEAN;
-            if(map_Object[x][y].empty()&&(ocean^land))
+            if(map_Object[x][y].empty()&&(ocean^landUnit))
             {
                 tempPoint.x = x;
                 tempPoint.y = y;
@@ -1809,6 +1922,11 @@ void Map::reset_resMap_ForUserAndEnemy()
         }
 
     return;
+}
+
+QString Map::GetMapFileName()
+{
+    return MapFileName;
 }
 
 //更新用户视野
@@ -2300,11 +2418,22 @@ void Map::GenerateMapTxt(int MapJudge) {
  * 内容：读取地图txt文件；
  * 返回值：空。
  */
+
 void Map::loadGenerateMapText(int MapJudge)
 {
-    QFile file("map.txt");
+    // 使用高精度时间为种子的真随机数生成器
+    auto&&AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX);
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::mt19937 gen(seed);
+    std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
+    int mapIdx = dis(gen); // 1~4
+    auto mapPath=AllMapFile[mapIdx];
+    QFile file(mapPath);
+    MapFileName=mapPath.split("/").back();
+//    QFile file("map3.txt");
+
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        qWarning()<<"文件打开错误";
+        qWarning() << "文件打开错误\n";
         return;
     }
     QJsonParseError * error = nullptr;
@@ -2352,6 +2481,7 @@ void Map::loadGenerateMapText(int MapJudge)
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
             double UR=obj["UR"].toDouble(),DR=obj["DR"].toDouble();
+            int sn=-1;
             if(obj["Sort"].toString()=="Farmer")
             {
                 int FarmerType=obj["FarmerType"].toInt();
@@ -2359,9 +2489,23 @@ void Map::loadGenerateMapText(int MapJudge)
                 cur.addFarmer(DR,UR);
                 else cur.addShip(FarmerType,DR,UR);
             }
-           // else cur.addArmy(obj["Num"].toInt(),DR,UR);
+            else
+            {
+                sn=cur.addArmy(obj["Num"].toInt(),DR,UR)->getglobalNum();
+            }
+            //读取区域限制
+            if(obj.contains("AreaLimit")&&sn!=-1){
+                QJsonObject area=obj["AreaLimit"].toObject();
+                string tp=area["type"].toString().toStdString();
+                if(tp==RectArea::Name()){
+                    enemyAreaLimit[sn]=pair<string,void*>{tp,new RectAreaData{area["DR"].toDouble(),area["UR"].toDouble(),area["W"].toDouble(),area["H"].toDouble()}};
+                }else if(tp==CircleArea::Name()){
+                    enemyAreaLimit[sn]=pair<string,void*>{tp,new CircleAreaData{area["DR"].toDouble(),area["UR"].toDouble(),area["R"].toDouble()}};
+                }
+            }
         }else if(key.contains("Animal")){
-            addAnimal(obj["Num"].toInt(),obj["DR"].toDouble(),obj["UR"].toDouble());
+            double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble();
+            addAnimal(obj["Num"].toInt(),dr,ur);
         }else if(key.contains("StaticRes")){
             int blockDR = obj["BlockDR"].toInt();
             int blockUR = obj["BlockUR"].toInt();
@@ -2373,6 +2517,85 @@ void Map::loadGenerateMapText(int MapJudge)
             }
         }
     }
+
+    // 读取敌人配置信息
+    if(root.contains("EnemyConfig")) {
+        QJsonObject enemyConfig = root["EnemyConfig"].toObject();
+        Player& enemy = (*player[1]);
+
+        // 读取巡逻船配置
+        if(enemyConfig.contains("patrolShips")) {
+            QJsonArray patrolShips = enemyConfig["patrolShips"].toArray();
+            for(const QJsonValue& shipValue : patrolShips) {
+                QJsonObject ship = shipValue.toObject();
+                QString type = ship["type"].toString();
+                double x = ship["x"].toDouble();
+                double y = ship["y"].toDouble();
+                int status = ship["status"].toString() == "ARMY_STATE_AROUND" ? ARMY_STATE_AROUND : 0;
+                int starttime = ship["starttime"].toInt();
+                int finishtime = ship["finishtime"].toInt();
+                double destX = ship["destX"].toDouble();
+                double destY = ship["destY"].toDouble();
+
+                if(type == "AT_SHIP") {
+                    enemy.addArmyAROUND(AT_SHIP, x, y, status, starttime, finishtime, destX, destY);
+                }
+            }
+        }
+
+        // 读取内陆巡逻骑兵配置
+        if(enemyConfig.contains("patrolScouts")) {
+            QJsonArray patrolScouts = enemyConfig["patrolScouts"].toArray();
+            for(const QJsonValue& scoutValue : patrolScouts) {
+                QJsonObject scout = scoutValue.toObject();
+                QString type = scout["type"].toString();
+                double x = scout["x"].toDouble();
+                double y = scout["y"].toDouble();
+                int status = scout["status"].toString() == "ARMY_STATE_AROUND" ? ARMY_STATE_AROUND : 0;
+                int starttime = scout["starttime"].toInt();
+                int finishtime = scout["finishtime"].toInt();
+                double destX = scout["destX"].toDouble();
+                double destY = scout["destY"].toDouble();
+
+                if(type == "AT_SCOUT") {
+                    enemy.addArmyAROUND(AT_SCOUT, x, y, status, starttime, finishtime, destX, destY);
+                }
+            }
+        }
+
+        // 读取内陆进攻兵配置
+        if(enemyConfig.contains("attackArmies")) {
+            QJsonArray attackArmies = enemyConfig["attackArmies"].toArray();
+            for(const QJsonValue& armyValue : attackArmies) {
+                QJsonObject army = armyValue.toObject();
+                int type = army["type"].toInt();
+                double x = army["x"].toDouble();
+                double y = army["y"].toDouble();
+                int status = army["status"].toInt();
+                int starttime = army["starttime"].toInt();
+                int finishtime = army["finishtime"].toInt();
+
+                enemy.addArmyATTACK(type, x, y, status, starttime, finishtime);
+            }
+        }
+
+        // 读取内陆防守兵配置
+        if(enemyConfig.contains("defenseArmies")) {
+            QJsonArray defenseArmies = enemyConfig["defenseArmies"].toArray();
+            for(const QJsonValue& armyValue : defenseArmies) {
+                QJsonObject army = armyValue.toObject();
+                int type = army["type"].toInt();
+                double x = army["x"].toDouble();
+                double y = army["y"].toDouble();
+                int status = army["status"].toInt();
+
+                enemy.addArmyDEFENSE(type, x, y, status);
+            }
+        }
+
+        qDebug() << "敌人配置读取完成";
+    }
+
     //赋值m_heightMap
     memset(m_heightMap,0,sizeof(m_heightMap));
     for(int i=0;i<MAP_L;++i){
@@ -2380,7 +2603,7 @@ void Map::loadGenerateMapText(int MapJudge)
             m_heightMap[i+4][j+4]=cell[i][j].getMapHeight();
         }
     }
-    
+
     // 确保所有cell元素都被正确初始化
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
@@ -2397,7 +2620,7 @@ void Map::loadGenerateMapText(int MapJudge)
             }
         }
     }
-    
+
     qDebug() << "地图文件解析完成，共处理" << allKeys.size() << "个对象";
 }
 
@@ -2426,67 +2649,61 @@ void Map::init(int MapJudge) {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText(MapJudge);  //载入地图
     divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
-    Player&enemy=(*player[1]);
-//巡逻船
-    enemy.addArmyAROUND(AT_SHIP,2000,350,ARMY_STATE_AROUND,300,10000,2000,20);
-    enemy.addArmyAROUND(AT_SHIP,2000,700,ARMY_STATE_AROUND,300,10000,2000,400);
-    enemy.addArmyAROUND(AT_SHIP,2400,900,ARMY_STATE_AROUND,300,10000,2400,1300);
-    enemy.addArmyAROUND(AT_SHIP,2500,1500,ARMY_STATE_AROUND,300,10000,2500,1900);
-    enemy.addArmyAROUND(AT_SHIP,2000,2200,ARMY_STATE_AROUND,300,10000,2000,2500);
-    enemy.addArmyAROUND(AT_SHIP,2000,2600,ARMY_STATE_AROUND,300,10000,2000,2900);
-    enemy.addArmyAROUND(AT_SHIP,1700,3000,ARMY_STATE_AROUND,300,10000,1700,3400);
-    enemy.addArmyAROUND(AT_SHIP,1200,3600,ARMY_STATE_AROUND,300,10000,1200,3900);
-    enemy.addArmyAROUND(AT_SHIP,800,4300,ARMY_STATE_AROUND,300,10000,500,4300);
-    enemy.addArmyAROUND(AT_SHIP,450,4300,ARMY_STATE_AROUND,300,10000,100,4300);
 
-    //内陆巡逻骑兵
-    enemy.addArmyAROUND(AT_SCOUT,1400,50,ARMY_STATE_AROUND,300,10000,1400,790);
-    enemy.addArmyAROUND(AT_SCOUT,1400,810,ARMY_STATE_AROUND,300,10000,1400,1350);
-    enemy.addArmyAROUND(AT_SCOUT,1000,2000,ARMY_STATE_AROUND,300,10000,1000,2540);
-    enemy.addArmyAROUND(AT_SCOUT,1000,2560,ARMY_STATE_AROUND,300,10000,1000,3100);
-    enemy.addArmyAROUND(AT_SCOUT,10,4000,ARMY_STATE_AROUND,300,10000,400,4000);
+    // 敌人配置现在从map.txt文件中读取，不再硬编码
+    // 如果没有从文件中读取到敌人配置，则使用默认配置
+//    if(player[1]->human.empty()) {
+//        Player& enemy = (*player[1]);
 
-    //登陆测试骑兵
-//    enemy.addArmyAROUND(AT_SCOUT,1120,3500,ARMY_STATE_AROUND,300,10000,1100,3500);
+//        //巡逻船
+//        enemy.addArmyAROUND(AT_SHIP,100,1500,ARMY_STATE_AROUND,300,10000,2000,20);
+//        enemy.addArmyAROUND(AT_SHIP,500,1600,ARMY_STATE_AROUND,300,10000,2000,400);
+//        enemy.addArmyAROUND(AT_SHIP,1200,1350,ARMY_STATE_AROUND,300,10000,2400,1300);
+//        enemy.addArmyAROUND(AT_SHIP,1700,1000,ARMY_STATE_AROUND,300,10000,2500,1900);
+//        enemy.addArmyAROUND(AT_SHIP,2400,1000,ARMY_STATE_AROUND,300,10000,2000,2500);
+//        enemy.addArmyAROUND(AT_SHIP,3100,1000,ARMY_STATE_AROUND,300,10000,2000,2900);
+//        enemy.addArmyAROUND(AT_SHIP,3150,1700,ARMY_STATE_AROUND,300,10000,1700,3400);
+//        enemy.addArmyAROUND(AT_SHIP,3700,1900,ARMY_STATE_AROUND,300,10000,1200,3900);
+//        enemy.addArmyAROUND(AT_SHIP,4100,1000,ARMY_STATE_AROUND,300,10000,500,4300);
+//        enemy.addArmyAROUND(AT_SHIP,4500,1000,ARMY_STATE_AROUND,300,10000,100,4300);
 
-//    enemy.addArmyDEFENSE(AT_SHIP,2000,350,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,2000,700,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,2400,900,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,2500,1500,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,2000,2200,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,2000,2600,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,1700,3000,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,1200,3600,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,800,4300,ARMY_STATE_AROUND);
-//    enemy.addArmyDEFENSE(AT_SHIP,450,4300,ARMY_STATE_AROUND);
 
-    //内陆进攻兵
-    enemy.addArmyATTACK(0,700,2525,3,3000,37500);
-    enemy.addArmyATTACK(0,700,2550,3,3000,37500);
-    enemy.addArmyATTACK(0,700,2575,3,3000,37500);
-    enemy.addArmyATTACK(0,700,2600,3,3000,37500);
-    enemy.addArmyATTACK(1,725,2500,3,3000,37500);
-    enemy.addArmyATTACK(1,750,2500,3,3000,37500);
-    enemy.addArmyATTACK(1,775,2500,3,3000,37500);
-    enemy.addArmyATTACK(1,800,2500,3,3000,37500);
-    enemy.addArmyATTACK(2,725,2525,3,3000,37500);
-    enemy.addArmyATTACK(2,725,2550,3,3000,37500);
-    enemy.addArmyATTACK(2,750,2525,3,3000,37500);
-    enemy.addArmyATTACK(2,750,2550,3,3000,37500);
+//        // 内陆巡逻骑兵
+//        enemy.addArmyAROUND(AT_SCOUT,4000,700,ARMY_STATE_AROUND,300,10000,2100,4550);
+//        enemy.addArmyAROUND(AT_SCOUT,3300,750,ARMY_STATE_AROUND,300,10000,3800,3000);
+//        enemy.addArmyAROUND(AT_SCOUT,1800,50,ARMY_STATE_AROUND,300,10000,4450,3100);
 
-    //内陆防守兵
-    enemy.addArmyDEFENSE(0,500,1600,2);
-    enemy.addArmyDEFENSE(0,500,1625,2);
-    enemy.addArmyDEFENSE(0,500,1650,2);
-    enemy.addArmyDEFENSE(0,500,1675,2);
-    enemy.addArmyDEFENSE(1,525,1600,2);
-    enemy.addArmyDEFENSE(1,550,1600,2);
-    enemy.addArmyDEFENSE(1,575,1600,2);
-    enemy.addArmyDEFENSE(1,600,1600,2);
-    enemy.addArmyDEFENSE(2,525,1625,2);
-    enemy.addArmyDEFENSE(2,525,1650,2);
-    enemy.addArmyDEFENSE(2,550,1625,2);
-    enemy.addArmyDEFENSE(2,550,1650,2);
+//        //  内陆进攻兵(基准点700 2500替换为2000 500)
+//        enemy.addArmyATTACK(0,2000,525,3,3000,37500);
+//        enemy.addArmyATTACK(0,2000,550,3,3000,37500);
+//        enemy.addArmyATTACK(0,2000,575,3,3000,37500);
+//        enemy.addArmyATTACK(0,2000,600,3,3000,37500);
+//        enemy.addArmyATTACK(1,2025,500,3,3000,37500);
+//        enemy.addArmyATTACK(1,2050,500,3,3000,37500);
+//        enemy.addArmyATTACK(1,2075,500,3,3000,37500);
+//        enemy.addArmyATTACK(1,2100,500,3,3000,37500);
+//        enemy.addArmyATTACK(2,2025,525,3,3000,37500);
+//        enemy.addArmyATTACK(2,2025,550,3,3000,37500);
+//        enemy.addArmyATTACK(2,2050,525,3,3000,37500);
+//        enemy.addArmyATTACK(2,2050,550,3,3000,37500);
+
+//        //  内陆防守兵（基准点500,1600替换为3000 400）
+//        enemy.addArmyDEFENSE(0,3000,400,2);
+//        enemy.addArmyDEFENSE(0,3000,425,2);
+//        enemy.addArmyDEFENSE(0,3000,450,2);
+//        enemy.addArmyDEFENSE(0,3000,475,2);
+//        enemy.addArmyDEFENSE(1,3025,400,2);
+//        enemy.addArmyDEFENSE(1,3050,400,2);
+//        enemy.addArmyDEFENSE(1,3075,400,2);
+//        enemy.addArmyDEFENSE(1,3100,400,2);
+//        enemy.addArmyDEFENSE(2,3025,425,2);
+//        enemy.addArmyDEFENSE(2,3025,450,2);
+//        enemy.addArmyDEFENSE(2,3050,425,2);
+//        enemy.addArmyDEFENSE(2,3050,450,2);
+
+//        qDebug() << "使用默认敌人配置";
+//    }
+
     refineShore();
 }
 

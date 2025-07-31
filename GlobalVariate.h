@@ -32,6 +32,8 @@ extern std::queue<string> soundQueue;
 extern std::list<Coordinate*> drawlist;
 
 extern Coordinate* nowobject;
+
+extern bool GenerateHumanLock;//
 //当前选中对象
 //出于gamewidget和core均需要获取当前访问对象
 

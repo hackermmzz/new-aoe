@@ -15,7 +15,7 @@ class Option : public QDialog
 public:
     explicit Option(QWidget *parent = 0);
     ~Option();
-    QPushButton *btnHtml, *btntxt, *btnTextClear, *btnFileClear, *btnMusic, *btnSound, *btnPause, *btnSelect, *btnLine, *btnPos, *btnOverlap;
+    QPushButton *btnTreeBlock, *btntxt, *btnTextClear, *btnFileClear, *btnMusic, *btnSound, *btnPause, *btnSelect, *btnLine, *btnPos, *btnOverlap;
 
     bool getMusic(){ return music; }
     bool getSound(){ return sound; }
@@ -41,11 +41,11 @@ private:
 signals:
     void changeMusic();
     void request_ClearDebugText();
-    void request_exportHtml();
+    void request_exportTreeBlock();
     void request_exportTxt();
     void request_exportClear();
 
-private slots:
+public slots:
 
     void on_music_clicked();
     void on_sound_clicked();
@@ -59,7 +59,7 @@ private slots:
 
     void on_overlap_clicked();
     void on_textClear_clicked();
-    void on_exportHtml_clicked();
+    void on_exportTreeBlock_clicked();
     void on_exportTxt_clicked();
     void on_exportClear_clicked();
 };

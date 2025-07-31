@@ -26,7 +26,7 @@ int Animal::AnimalCnt[5] = { CNT_TREE, CNT_GAZELLE, CNT_ELEPHANT, CNT_LION, CNT_
 int Animal::AnimalNowresStep[5] = { 0, 0, NOWRES_TIMER_ELEPHANT, NOWRES_TIMER_LION, 0 };
 
 int Animal::AnimalVision[5] = { 0, VISION_GAZELLE, VISION_ELEPHANT, VISION_LION, 0};
-double Animal::AnimalCrashLen[5] = { CRASHBOX_SINGLEBLOCK, CRASHBOX_SINGLEOB, CRASHBOX_BIGOB, CRASHBOX_SMALLOB, CRASHBOX_SMALLBLOCK };
+double Animal::AnimalCrashLen[5] = { CRASHBOX_MICRO, CRASHBOX_SINGLEOB, CRASHBOX_BIGOB, CRASHBOX_SMALLOB, CRASHBOX_SMALLBLOCK };
 double Animal::AnimalSpeed[5] = { 0, ANIMAL_SPEED, SPEED_ELEPHANT, ANIMAL_SPEED, 0 };
 
 int Animal::AnimalFriendly[5] = { FRIENDLY_NULL, FRIENDLY_FRI, FRIENDLY_FENCY, FRIENDLY_ENEMY, FRIENDLY_NULL };
@@ -195,7 +195,7 @@ void Animal::setAttribute()
 
     if(Num == ANIMAL_ELEPHANT)
     {
-        dis_Attack = DISTANCE_ATTACK_CLOSE_BIGOB;
+        dis_Attack = DISTANCE_ELEPHANT_ATTACK;
         isRangeAttack = true;
     }
 

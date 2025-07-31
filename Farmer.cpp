@@ -25,7 +25,7 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
 
     this->Blood=1;
     this->MaxBlood=BLOOD_FARMER;
-    speed = HUMAN_SPEED;
+    setSpeed();
     this->atk = 3;
     attackType = ATTACKTYPE_CLOSE;
     phaseFromEnd_MissionAttack = THROWMISSION_FARMER;
@@ -194,6 +194,12 @@ int Farmer::get_add_specialAttack()
     else return 0;
 }
 
+void Farmer::setSpeed()
+{
+    if(FarmerType!=FARMERTYPE_WOOD_BOAT)speed=HUMAN_SPEED;
+    else speed=WOOD_BOAT_SPEED;
+}
+
 void Farmer::updateState()
 {
     if(FarmerType==FARMERTYPE_FARMER){
@@ -223,6 +229,13 @@ void Farmer::updateState()
             break;
         }
     }
+}
+
+int Farmer::farmer_addition_ResourceHold()
+{
+    if(resourceSort==HUMAN_DOCKFOOD&&FarmerType==FARMERTYPE_SAILING)
+        return 5;
+    return 0;
 }
 
 vector<Human *>& Farmer::getHumanTransport()

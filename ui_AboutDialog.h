@@ -130,7 +130,7 @@ public:
         teacherLabel->setText(QApplication::translate("AboutDialog", "\346\214\207\345\257\274\350\200\201\345\270\210\357\274\232  \345\250\204\351\234\207", Q_NULLPTR));
         memberLabel->setText(QApplication::translate("AboutDialog", "\345\274\200\345\217\221\344\272\272\345\221\230\357\274\232", Q_NULLPTR));
         member1->setText(QApplication::translate("AboutDialog", "v0.99-v1.03gbeta\357\274\232  \350\265\265\345\256\207\351\243\236  \345\272\204\346\230\216\345\223\262  \345\274\240\345\256\207\345\270\206", Q_NULLPTR));
-        label->setText(QApplication::translate("AboutDialog", "v2.02g-v3.0            \346\261\252\347\253\213\346\264\252 \346\233\276\346\226\207\350\275\251 \345\255\231\346\235\250", Q_NULLPTR));
+        label->setText(QApplication::translate("AboutDialog", "v2.02g-v2.50            \346\261\252\347\253\213\346\264\252 \346\233\276\346\226\207\350\275\251 \345\255\231\346\211\254", Q_NULLPTR));
     } // retranslateUi
 
 };

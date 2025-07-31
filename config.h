@@ -38,8 +38,9 @@
 /********** 游戏配置数据 **********/
 #define GAME_WIDTH 1920                 //总窗口宽度
 #define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.02g"
+#define GAME_VERSION "v2.51c"
 #define GAME_TITLE "Age of Empires"     //总窗口名称
+#define MAPFILE_SUFFIX "njust"           //地图文件后缀
 #define GAME_LOSE_SEC 1500
 #define GAME_WIN_GOLD 2500
 #define GOLD 10                         //金块资源数量
@@ -64,6 +65,7 @@
 #define GAMEWIDGET_MIDBLOCKL 22
 #define GAMEWIDGET_MIDBLOCKU 0
 #define HUMAN_SPEED sqrt(5)
+#define WOOD_BOAT_SPEED SPEED_SCOUT     //运输船的速度和骑士一样快
 #define ANIMAL_SPEED sqrt(10)
 #define RESPATH ":/new/prefix1/res"
 #define ForestMAX 2
@@ -82,8 +84,8 @@
 #define KEY_RIGHT 68
 #define BLOCK_COUNT 41     // Block种类计数，包括所有种类和样式的地图块数量
 #define FRAMES_PER_SECOND 25    //每秒帧数
-#define OPTION_MUSIC true  // 默认关闭
-#define OPTION_SOUND true  // 默认关闭
+#define OPTION_MUSIC false  // 默认false，关闭
+#define OPTION_SOUND false  // 默认false，关闭
 #define OPTION_SELECT false
 #define OPTION_LINE false
 #define OPTION_POS false
@@ -279,7 +281,7 @@
 #define ACTION_INVALID_OBSN -4
 #define ACTION_INVALID_BUILDINGNUM -5
 #define ACTION_INVALID_RESOURCE -6
-
+#define ACTION_INVALID_UPGRADE_TIME -7
  //控制对象被删除
 #define ACTION_INVALID_NULLWORKER -80
 //目标对象已被删除
@@ -475,7 +477,7 @@
 #define BLOOD_FARMER 25
 #define BLOOD_FOREST 100
 
-#define SPEED_ELEPHANT (0.8 * ANIMAL_SPEED)
+#define SPEED_ELEPHANT (1.0/1.1 * HUMAN_SPEED)
 
 #define CNT_TREE 75
 #define CNT_GAZELLE 150

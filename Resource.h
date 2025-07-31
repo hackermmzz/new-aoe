@@ -22,7 +22,7 @@ public:
 
     void updateCnt_byGather( double gather){  Cnt -= gather ;}
     void updateCnt_byDecay(){ Cnt*=(1-DecayRate); }
-    bool is_Surplus(){ return Cnt>0; }
+    bool is_Surplus(){ return Cnt>=0.5;} //按娄老师和学生要求，对于小于1个得直接判死}
 
 protected:
     double Cnt; //Cnt表示当前剩余的实际资源量

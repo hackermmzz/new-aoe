@@ -1,6 +1,10 @@
 #ifndef DIGITALCONFIG_H
 #define DIGITALCONFIG_H
-
+#include<eventfilter.h>
+/**********常量设置**************(配置统一使用变量减少编译时间)*/
+extern  EventFilter*eventFilter;//全局事件顾虑器
+extern const int EventInterval;//事件触发最小间隔
+extern const bool EditorMode;//是否打开编辑器模式
 /**********debug消息************/
 #define IS_FILTER_DEBUGMESSAGE false
 #define IS_DEBUGTEXT_ONLYNOWPLAYER true
@@ -20,6 +24,7 @@
 
 
 /********** 碰撞箱大小 **********/
+#define CRASHBOX_MICRO      1.0
 #define CRASHBOX_SINGLEBLOCK 16.36
 #define CRASHBOX_SMALLBLOCK 34.21
 #define CRASHBOX_SMALL 32.72
@@ -129,16 +134,16 @@
 /**船坞**/
 #define BLOOD_BUILD_DOCK 350
 #define VISION_DOCK 4
-#define BUILD_DOCK_WOOD 120
+#define BUILD_DOCK_WOOD 100
 #define TIME_BUILD_DOCK 40
 /**生产战船**/
-#define BUILDING_DOCK_CREATE_SHIP_WOOD 60
+#define BUILDING_DOCK_CREATE_SHIP_WOOD 135
 #define TIME_BUILDING_DOCK_CREATE_SHIP 30
 /**生产渔船**/
 #define BUILDING_DOCK_CREATE_SAILING_WOOD 60
 #define TIME_BUILDING_DOCK_CREATE_SAILING 30
 /**生产运输船**/
-#define BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD 60
+#define BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD 150
 #define TIME_BUILDING_DOCK_CREATE_WOOD_BOAT 30
 //升级伐木（1级）
 #define BUILDING_MARKET_WOOD_UPGRADE_FOOD 120
@@ -199,8 +204,8 @@
 #define DISTANCE_Manhattan_Unload (BLOCKSIDELENGTH*1.2)
 #define DISTANCE_Manhattan_Transport (DISTANCE_Manhattan_Unload*1.2)
 #define DISTANCE_ATTACK_CLOSE (8*gen5)
-#define DISTANCE_ATTACK_CLOSE_BIGOB (15*gen5)
 #define DISTANCE_HIT_TARGET 4
+#define DISTANCE_ELEPHANT_ATTACK (BLOCKSIDELENGTH*1.19)
 //箭塔攻击距离
 #define DIS_ARROWTOWER 7
 
@@ -401,7 +406,7 @@
 #define DEFSHOOT_CAVALRY 0
 //战船
 #define BLOOD_SHIP 300
-#define SPEED_SHIP (2/1.1*HUMAN_SPEED)
+#define SPEED_SHIP SPEED_SCOUT  //和骑士一样快
 #define VISION_SHIP 4
 #define ATK_SHIP 20
 #define DIS_SHIP 10

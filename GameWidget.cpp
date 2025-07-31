@@ -177,21 +177,16 @@ void GameWidget::paintEvent(QPaintEvent *)
 
     if(nowobject!=NULL)
     {
-        painter.setPen(Qt::white);
-        int width=nowobject->getCrashLength()*4;
-        int height=nowobject->getCrashLength()*2;
-        int tempBlockDR = nowobject->getDR() / BLOCKSIDELENGTH, tempBlockUR = nowobject->getUR() / BLOCKSIDELENGTH;
-        int X=tranX(nowobject->getDR()-DR,nowobject->getUR()-UR)-nowobject->getCrashLength()*2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
-        int Y=tranY(nowobject->getDR()-DR,nowobject->getUR()-UR) - height / 2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
-        QPolygonF diamond;
-        diamond << QPointF(X+width/2, Y);
-        diamond << QPointF(X+width, Y+height/2);
-        diamond << QPointF(X+width/2, Y+height);
-        diamond << QPointF(X, Y+height/2);
-        painter.drawPolygon(diamond);
+        AddEdge(nowobject->getDR(),nowobject->getUR(),nowobject->getCrashLength(),nowobject->getCrashLength());
     }
+    //绘制矩形线框
+    paintEdge(painter);
+    //绘制直线
+    paintLine(painter);
+    //
     Building* buildOb = NULL;
     //drawlist正常绘制
+    bool CaptureFlag=0;
     if(!drawlist.empty())
     {
         std::list<Coordinate *>::iterator iter=drawlist.begin();
@@ -216,14 +211,19 @@ void GameWidget::paintEvent(QPaintEvent *)
                     buildOb->getFireNowRes()->pix
                 );
             }
-
             if(Core::objClickedCaptureState==1){//如果需要捕捉点击对象
-                int xx=Core::mouseEventStore.memoryMapX,yy=Core::mouseEventStore.memoryMapY;
+                int xx=mainwidget->mouseEvent->memoryMapX,yy=mainwidget->mouseEvent->memoryMapY;
+                xx<<=2,yy<<=2;
                 int x=tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX();
-                int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
-                if(xx>=x/4&&xx<=(x+w)/4&&yy>=y/4&&yy<=(y+h)/4){
-                    Core::objClickedCaptureState=2;
-                    Core::objCapture=*iter;
+                int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR)+mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
+                auto&res=*(*iter)->getNowRes();
+                int w=res.pix.width(),h=res.pix.height();
+                if(xx>=x&&xx<=(x+w)&&yy>=y&&yy<=(y+h)){
+                    //if(res.memorymap.getMemoryMap(xx,yy)!=0)
+                    {
+                        CaptureFlag=1;
+                        Core::objCapture=*iter;
+                    }
                 }
             }
             (*iter)->setInWidget();
@@ -231,11 +231,58 @@ void GameWidget::paintEvent(QPaintEvent *)
         }
     }
 
+    if(CaptureFlag){
+        Core::objClickedCaptureState=2;
+    }
+
     if(Core::objClickedCaptureState==1){
         Core::objClickedCaptureState=2;
         Core::objCapture=0;
     }
 
+}
+
+void GameWidget::paintEdge(QPainter &painter)
+{
+    while(EdgeQueue.size()){
+        auto ele=EdgeQueue.front();
+        EdgeQueue.pop();
+        paintEdge(painter,get<0>(ele),get<1>(ele),get<2>(ele),get<3>(ele));
+    }
+}
+
+void GameWidget::paintEdge(QPainter &painter,double dr,double ur,double w,double h)
+{
+    painter.setPen(Qt::white);
+    int width=w*4;
+    int height=h*2;
+    int tempBlockDR = dr / BLOCKSIDELENGTH, tempBlockUR = ur / BLOCKSIDELENGTH;
+    int X=tranX(dr-DR,ur-UR)-w*2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
+    int Y=tranY(dr-DR,ur-UR) - height / 2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
+    QPolygonF diamond;
+    diamond << QPointF(X+width/2, Y);
+    diamond << QPointF(X+width, Y+height/2);
+    diamond << QPointF(X+width/2, Y+height);
+    diamond << QPointF(X, Y+height/2);
+    painter.drawPolygon(diamond);
+}
+
+void GameWidget::paintLine(QPainter &painter)
+{
+    while(LineQueue.empty()==false){
+        auto ele=LineQueue.front();
+        LineQueue.pop();
+        double dr0=get<0>(ele),ur0=get<1>(ele),dr1=get<2>(ele),ur1=get<3>(ele);
+        int tempBlockDR = dr0 / BLOCKSIDELENGTH, tempBlockUR = ur0 / BLOCKSIDELENGTH;
+        int X0=tranX(dr0-DR,ur0-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
+        int Y0=tranY(dr0-DR,ur0-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
+        int X1=tranX(dr1-DR,ur1-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
+        int Y1=tranY(dr1-DR,ur1-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
+        QPolygonF diamond;
+        diamond<<QPointF(X0,Y0);
+        diamond<<QPointF(X1,Y1);
+        painter.drawPolygon(diamond);
+    }
 }
 
 void GameWidget::keyPressEvent(QKeyEvent *event)
@@ -442,6 +489,16 @@ void GameWidget::emptymemorymap()
             mainwidget->memorymap[i][j]=0;
         }
     }
+}
+
+void GameWidget::AddEdge(double dr, double ur, double w, double h)
+{
+    EdgeQueue.push(tuple<double,double,double,double>{dr,ur,w,h});
+}
+
+void GameWidget::AddLine(double dr0, double ur0, double dr1, double ur1)
+{
+    LineQueue.push(tuple<double,double,double,double>{dr0,ur0,dr1,ur1});
 }
 
 //地图移动

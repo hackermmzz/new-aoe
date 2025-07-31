@@ -4,7 +4,8 @@
 #include <iostream>
 #include <QString>
 #include <algorithm>
-
+#include<rectarea.h>
+#include<circlearea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
 int mapmoveFrequency = INITIAL_FREQUENCY;
@@ -57,6 +58,8 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
 {
     qInfo() << "主程序启动参数：" << MapJudge << " 开始初始化...";
     ui->setupUi(this);
+    //初始化一些编辑器配置
+    initEditor();
     // 初始化游戏资源
     initGameResources();
     // 初始化游戏元素
@@ -97,11 +100,11 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
 
     // 显示编辑器
     editor->show();
-    if (!openEditor) editor->hide();
+    if (!EditorMode) editor->hide();
 
     // 导出地图
     connect(editor->ui->export_map, QPushButton::clicked, this, [=]() {
-        this->ExportCurrentState("map.txt");
+        this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
         call_debugText("green", " 导出地图", 0);
         });
     connect(editor->ui->delete_object, QPushButton::clicked, this, [=]() {
@@ -172,7 +175,12 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         else if (text == "金矿") this->currentSelected = GOLDORE;
         if (text != "公立资源") call_debugText("green", " " + text, 0);
         });
-
+    connect(editor->ui->areaLimit, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "矩形区域") this->currentSelected = RECT_AREA;
+        else if (text == "圆形区域") this->currentSelected = CIRCLE_AREA;
+        if (text != "敌方区域限制") call_debugText("green", " " + text, 0);
+        });
 
 }
 
@@ -252,6 +260,26 @@ void MainWidget::ExportCurrentState(const char* fileName)
         obj.insert("Num", human->getNum());
         obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
         obj.insert("Own", "LZ");
+        //对敌人进行限制区域(先矩形区域,后圆形区域)
+        RectAreaData*rect=((RectArea*)rectArea)->GetPosIn(human->getDR(),human->getUR());
+        CircleAreaData*circle=((CircleArea*)circleArea)->GetPosIn(human->getDR(),human->getUR());
+        if(rect){
+            QJsonObject obj1;
+            obj1.insert("Type",QString(rectArea->GetName().c_str()));
+            obj1.insert("DR",rect->dr);
+            obj1.insert("UR",rect->ur);
+            obj1.insert("W",rect->w);
+            obj1.insert("H",rect->h);
+            obj.insert("AreaLimit",obj1);
+        }else if(circle){
+            QJsonObject obj1;
+            obj1.insert("Type",QString(circleArea->GetName().c_str()));
+            obj1.insert("DR",circle->dr);
+            obj1.insert("UR",circle->ur);
+            obj1.insert("R",circle->rad);
+            obj.insert("AreaLimit",obj1);
+        }
+        //
         root.insert("Human_" + QString::number(Human_idx++), obj);
     }
     /////////////////保存静态资源
@@ -281,6 +309,8 @@ void MainWidget::ExportCurrentState(const char* fileName)
 
 void MainWidget::updateEditor()
 {
+    using PD=array<int,2>;
+    //
     static int preHeight = -1;
     static int needSave = 1;
     // 如果左边一直被摁住
@@ -387,7 +417,11 @@ void MainWidget::updateEditor()
         }
     }
     else if (mouseEvent->mouseEventType == RIGHT_PRESS)currentSelected = -1;
-    // mouseEvent->mouseEventType=NULL_MOUSEEVENT;
+    //更新区域绘制
+    rectArea->SetFilter(currentSelected!=RECT_AREA);
+    rectArea->Draw();
+    circleArea->SetFilter(currentSelected!=CIRCLE_AREA);
+    circleArea->Draw();
 }
 
 void MainWidget::clearArea(int blockL, int blockU, int radius) {
@@ -461,6 +495,7 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
     map->reset_resMap_AI();
     ui->Game->update();  // 触发界面重绘
 }
+
 
 // void MainWidget::SaveCurrentState()
 // {
@@ -776,9 +811,10 @@ void MainWidget::initOptions() {
     connect(ui->option, &QPushButton::clicked, option, &QDialog::show);
     connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
     connect(option, &Option::request_ClearDebugText, this, &MainWidget::clearDebugText);
-    connect(option, &Option::request_exportHtml, this, &MainWidget::exportDebugTextHtml);
+    connect(option, &Option::request_exportTreeBlock, this, &MainWidget::exportDebugTextTreeBlock);
     connect(option, &Option::request_exportTxt, this, &MainWidget::exportDebugTextTxt);
     connect(option, &Option::request_exportClear, this, &MainWidget::clearDebugTextFile);
+    connect(option->btnTreeBlock,&QPushButton::clicked,option,&Option::on_exportTreeBlock_clicked);
     //隐藏组件
     option->hide();
     option->btnSelect->hide();
@@ -1483,8 +1519,11 @@ void MainWidget::gameDataUpdate()
     if (!pause)
     {
         core->gameUpdate();
-        core->infoShare();
-        emit startAI();
+        //如果当前模式不是编辑器功能，那么不运行ai
+        if(!EditorMode){
+            core->infoShare();
+            emit startAI();
+        }
     }
     else
     {
@@ -1498,7 +1537,7 @@ void MainWidget::paintUpdate()
     statusUpdate();
 
     //判断是否以新编辑模式启动
-    if (openEditor) updateEditor();
+    if (EditorMode) updateEditor();
 
     ui->Game->update();
     ui->mapView->update();
@@ -1509,6 +1548,7 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
+    return 0;
     return sel->getSecend() > GAME_LOSE_SEC;
 }
 bool MainWidget::isWin()
@@ -1578,6 +1618,12 @@ void MainWidget::makeSound()
     playSound();
 
     return;
+}
+
+void MainWidget::initEditor()
+{
+    rectArea=new RectArea(ui->Game);
+    circleArea=new CircleArea(ui->Game);
 }
 
 void MainWidget::ScoreSave(string gameResult)
@@ -1713,39 +1759,33 @@ void MainWidget::clearDebugText()
     ui->DebugTexter->clear();
 }
 
-void MainWidget::exportDebugTextHtml()
+void MainWidget::exportDebugTextTreeBlock()
 {
-    QString debugInfo = ui->DebugTexter->toHtml();
-
-    // 获取当前系统时间，用于命名文件
-    QString currentTime = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
-
-    // 获取项目文件夹路径
-    QString projectPath = QDir::currentPath();
-
-    // 构建输出文件夹路径
-    QString outputPath = QDir::cleanPath(projectPath + QDir::separator() + "output");
-
-    // 创建输出文件夹（如果不存在）
-    QDir outputDir(outputPath);
-    if (!outputDir.exists()) {
-        outputDir.mkpath(".");
+    QFile file("TreeBlock.txt");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+       qDebug() << "无法打开文件：" << file.errorString();
+       return;
+    }
+    //导出我方人的位置
+    using PD=std::array<int,2>;
+    set<PD>pos;
+    for(Human*human:player[0]->human){
+        pos.insert({human->getBlockDR(),human->getBlockUR()});
+    }
+    //
+    QTextStream out(&file);
+    for(int i=0;i<MAP_L;++i){
+       for(int j=0;j<MAP_U;++j){
+           int tar=int(map->TreeBlock[i][j]);
+           if(tar==0&&pos.count({i,j}))tar=3;
+           out<<tar;
+       }
+       out<<endl;
     }
 
-    // 构建文件名
-    QString fileName = QString("%1/debug_info_%2.html").arg(outputPath).arg(currentTime);
-
-    // 打开文件以写入文本
-    QFile file(fileName);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
-        out << debugInfo;
-        file.close();
-        qDebug() << "Debugging information has been saved to:" << fileName;
-    }
-    else {
-        qDebug() << "fail to save Debugging information.";
-    }
+    //
+    file.close();
+    debugText("red","树林遮掩图导出成功!");
 }
 
 void MainWidget::exportDebugTextTxt()

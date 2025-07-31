@@ -22,7 +22,7 @@ QT_BEGIN_NAMESPACE
 class Ui_Option
 {
 public:
-    QPushButton *exportHtml;
+    QPushButton *exportTreeBlock;
     QPushButton *exportTxt;
     QPushButton *textClear;
     QPushButton *exportClear;
@@ -38,9 +38,9 @@ public:
         if (Option->objectName().isEmpty())
             Option->setObjectName(QStringLiteral("Option"));
         Option->resize(600, 500);
-        exportHtml = new QPushButton(Option);
-        exportHtml->setObjectName(QStringLiteral("exportHtml"));
-        exportHtml->setGeometry(QRect(20, 60, 271, 81));
+        exportTreeBlock = new QPushButton(Option);
+        exportTreeBlock->setObjectName(QStringLiteral("exportTreeBlock"));
+        exportTreeBlock->setGeometry(QRect(20, 60, 271, 81));
         exportTxt = new QPushButton(Option);
         exportTxt->setObjectName(QStringLiteral("exportTxt"));
         exportTxt->setGeometry(QRect(300, 60, 271, 81));
@@ -77,7 +77,7 @@ public:
     void retranslateUi(QDialog *Option)
     {
         Option->setWindowTitle(QApplication::translate("Option", "Dialog", Q_NULLPTR));
-        exportHtml->setText(QApplication::translate("Option", "\345\257\274\345\207\272Debug\350\260\203\350\257\225\346\240\217\344\277\241\346\201\257\344\270\272HTML", Q_NULLPTR));
+        exportTreeBlock->setText(QApplication::translate("Option", "\345\257\274\345\207\272\346\243\256\346\236\227\351\201\256\346\216\251\344\277\241\346\201\257\344\270\272TXT", Q_NULLPTR));
         exportTxt->setText(QApplication::translate("Option", "\345\257\274\345\207\272Debug\350\260\203\350\257\225\346\240\217\344\277\241\346\201\257\344\270\272TXT", Q_NULLPTR));
         textClear->setText(QApplication::translate("Option", "\346\270\205\351\231\244\345\275\223\345\211\215\350\260\203\350\257\225\346\240\217\344\277\241\346\201\257", Q_NULLPTR));
         exportClear->setText(QApplication::translate("Option", "\346\270\205\351\231\244\345\257\274\345\207\272\347\233\256\345\275\225\344\270\213\346\211\200\346\234\211\350\260\203\350\257\225\346\226\207\344\273\266", Q_NULLPTR));

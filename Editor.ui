@@ -220,6 +220,9 @@
      <height>51</height>
     </rect>
    </property>
+   <property name="currentText">
+    <string>公立资源</string>
+   </property>
    <item>
     <property name="text">
      <string>公立资源</string>
@@ -306,6 +309,37 @@
    <item>
     <property name="text">
      <string>海洋</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="areaLimit">
+   <property name="geometry">
+    <rect>
+     <x>1100</x>
+     <y>40</y>
+     <width>111</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="editable">
+    <bool>false</bool>
+   </property>
+   <property name="currentText">
+    <string>敌方区域限制</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>敌方区域限制</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>圆形区域</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>矩形区域</string>
     </property>
    </item>
   </widget>

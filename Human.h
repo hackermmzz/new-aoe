@@ -43,7 +43,6 @@ public:
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
 //    int getType(){ return type; }
 
-    void setPosForced(double DR,double UR);
     bool getTransported() const;
     void setTransported(bool value);
 

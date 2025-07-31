@@ -270,10 +270,12 @@ void Player::enforcementAction( Building* actBuild, vector<pair<Point,int>>Block
         Point block=satisfy[rand()%satisfy.size()];
         //创建相应对象
         if(creatObjectSort == SORT_FARMER) {
-            if(creatObjectNum==FARMERTYPE_FARMER)
+            if(creatObjectNum==FARMERTYPE_FARMER){
                 addFarmer(trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
-            else
+            }
+            else{
                 addShip(creatObjectNum,trans_BlockPointToDetailCenter(block.x) , trans_BlockPointToDetailCenter(block.y));
+            }
         }
         else if(creatObjectSort == SORT_ARMY)
         {

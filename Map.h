@@ -37,7 +37,8 @@ public:
     void generateLandforms();
     // 重绘海岸
     void refineShore();
-
+    //
+    vector<QString> GetAllTargetFiles(QString suffix);
     // 判断地图块是否为斜坡
     bool isSlope(int BlockDR, int BlockUR);
 
@@ -64,7 +65,7 @@ public:
     bool isFlat(Coordinate* judOb);
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
     vector<pair<Point,int>> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
-    vector<Point>& findBlock_Free(Point blockPoint, int lenth,bool land);
+    vector<Point>& findBlock_Free(Point blockPoint, int lenth,bool landUnit);
     vector<Point> findBlock_Flat(int disLen = 1);
 
     bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }
@@ -152,7 +153,9 @@ public:
     std::list<Animal *> animal={};
 //    std::list<Ruin *> ruin={};
 
-
+    //打开的地图文件
+    QString MapFileName;
+    //
     int findPathMap[MAP_L][MAP_U] = {};
 
     //用于记录需要监视视野的Ob的视野格子和各Ob所在位置的地图
@@ -178,6 +181,8 @@ public:
     /************************************/
 
 public:
+    int mapIdx = rand()%4 + 1;
+    QString GetMapFileName();
     int CheckNeighborHigher(int x, int y, int currentCalHeight);
     int CheckNeighborType(int x, int y, int selectType);
     int CheckNeighborForest(int x, int y, int forestCell[][FOREST_GENERATE_U]);
@@ -201,15 +206,17 @@ public:
     void setBarrier(int blockDR,int blockUR , int blockSideLen = 1 );
 
     void drawEdge(int tempMap[MAP_L][MAP_U],std::map<int, int> codeToNum,int MapType1,int MapType2,int MapType3);  // 绘制地形交界
-
+    //合并森林
+    void MergeTrees();
 
     Player** player;
     short m_heightMap[GENERATE_L][GENERATE_L] = {{}};
     int Gamemap[MAP_L][MAP_U] = {};  // 地图资源二维数组
     bool mapFlag[MAP_L][MAP_U] = {{false}}; // 地图标识二维数组，0为可放置，1为不可放置
-
+    bool TreeBlock[MAP_L][MAP_U] ={{0}};//将森林按所处位置合并成森林
     int barrierMap[MAP_L][MAP_U];   //障碍物地图
     tagMap resMap_AI[MAP_L][MAP_U]; //为AI准备的资源地图
+    map<int,pair<string,void*>>enemyAreaLimit;//记录敌人能活动的区域限制
     int EL;
     int EU;
 

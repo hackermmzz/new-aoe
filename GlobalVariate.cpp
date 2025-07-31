@@ -27,6 +27,7 @@ bool filterRepetitionMessage = IS_FILTER_DEBUGMESSAGE;
 
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 
+bool GenerateHumanLock=0;//每一帧保证只有一个人可以诞生
 int InitImageResMap(QString path)
 {
     //判断路径是否存在

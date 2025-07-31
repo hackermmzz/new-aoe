@@ -571,15 +571,17 @@ void SelectWidget::refreshActs()
             else if (objFarmer->getResourceSort() == HUMAN_STONE) ui->objIconSmall->setPixmap(resMap["Icon_Stone"].front());
             //运输船显示运载人口
             else if (objFarmer->get_farmerType() == 1) ui->objIconSmall->setPixmap(resMap["SmallIcon_People"].front());
-
             //如果当前村民没有资源
             if (objFarmer->getResourceNowHave() == 0)
             {
                 ui->objIconSmall->setPixmap(QPixmap());
                 ui->objText->setText("");
             }
-            else if (objFarmer->get_farmerType() != 0) {
+            else if (objFarmer->get_farmerType() == FARMERTYPE_WOOD_BOAT) {
                 ui->objText->setText(QString::number((int)(objFarmer->getResourceNowHave())) + "/5 ");
+            }
+            else if(objFarmer->get_farmerType() == FARMERTYPE_SAILING) {
+                ui->objText->setText(QString::number((int)(objFarmer->getResourceNowHave())) + "/15 ");
             }
             else {
                 ui->objText->setText(QString::number((int)(objFarmer->getResourceNowHave())));

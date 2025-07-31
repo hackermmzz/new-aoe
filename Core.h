@@ -2,7 +2,6 @@
 #define CORE_H
 
 #include "Core_List.h"
-
 class SelectWidget;
 class Core
 {
@@ -17,6 +16,7 @@ public:
 
     void gameUpdate();
     void updateByObject();
+    void ResetHumanPos();
     void infoShare();   //将游戏信息同步给AIGame
     void InitPlayerMap();//初始化playerMap
     void getPlayerNowResource(int playerRepresent, int& wood, int& food, int& stone, int& gold);
@@ -71,6 +71,7 @@ private:
     int handleMilitaryAction(Coordinate* self, Coordinate* obj, int id);
     int handleBuildingAction(Coordinate* self, int option, int id);
     void deduplicateInstructions(std::queue<instruction>& instructions); // 去重指令队列
+    void FirstFrameProcess();//游戏开始的第一帧需要干的事情
 public:
     //延迟获取到点击的对象
     static  Coordinate* objCapture;

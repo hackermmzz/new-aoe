@@ -1,5 +1,4 @@
 #include "Core_CondiFunc.h"
-#include"iostream"
 //****************************************************************************************
 //寻路用结构体
 Point pathNode::goalPoint = Point(0,0);
@@ -416,8 +415,11 @@ bool condition_UniObjectPercent(  Coordinate* object1, relation_Object& relation
             int creatSort = -1, creatNum = -1;
             bool needCreatOb = buildOb->isActionNeedCreatObject(creatSort, creatNum);
 
-            if(needCreatOb && (creatSort == SORT_ARMY || creatSort == SORT_FARMER))
-                return isNegation^(buildOb->is_ActionFinish() && buildOb->isRepresentHumanHaveSpace());
+            if(needCreatOb && (creatSort == SORT_ARMY || creatSort == SORT_FARMER)){
+               bool flag=(buildOb->is_ActionFinish() && buildOb->isRepresentHumanHaveSpace())&&!GenerateHumanLock;
+               if(flag)GenerateHumanLock=1;
+               return isNegation^flag;
+            }
             else
                 return isNegation^(buildOb->is_ActionFinish());
         }

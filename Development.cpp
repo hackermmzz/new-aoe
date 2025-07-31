@@ -216,6 +216,7 @@ int Development::get_addition_ResourceSort(int resourceSort)
         }
     }
 
+
     return addition;
 }
 

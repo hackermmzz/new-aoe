@@ -26,6 +26,8 @@ void Core::gameUpdate()
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
 
     updateByObject();
+    //重置人物的位置
+    ResetHumanPos();
     loadRelationMap();
 
     //更新AI用的资源表，该资源表是User/Enemy的通用模板
@@ -43,25 +45,46 @@ void Core::gameUpdate()
     }
     manageOrder(0);
     manageOrder(1);
-
+    //
+    extern bool GenerateHumanLock;
+    GenerateHumanLock=0;//每一帧都保证只能生产出一个人
     interactionList->update();
-    //判断是否是第一帧,如果是那我需要把所有探索的区域给学生
+
+    //判断是否是第一帧,第一帧需要初始化一些数据
     {
         static bool firstFrame=1;
         if(firstFrame){
             firstFrame=0;
-            explored.clear();
-            for(int i=0;i<MAP_L;++i){
-                for(int j=0;j<MAP_U;++j){
-                    if(theMap->cell[i][j].Explored){
-                        explored.push_back({i,j});
-                    }
-                }
-            }
+            FirstFrameProcess();
         }
     }
 }
-
+void Core::ResetHumanPos(){
+    //
+    auto ResetLandUnit=[&](MoveObject&obj)->void{
+        if(theMap->cell[obj.BlockDR][obj.BlockUR].getMapType()==MAPTYPE_OCEAN){
+            Point&&p=obj.get_PreviousBlock();
+            obj.ForceStand((p.x+0.5)*BLOCKSIDELENGTH,(p.y+0.5)*BLOCKSIDELENGTH);
+        }
+    };
+    auto ResetOceanUnit=[&](MoveObject&obj)->void{
+        if(theMap->cell[obj.BlockDR][obj.BlockUR].getMapType()!=MAPTYPE_OCEAN){
+            Point&&p=obj.get_PreviousBlock();
+            obj.ForceStand((p.x+0.5)*BLOCKSIDELENGTH,(p.y+0.5)*BLOCKSIDELENGTH);
+        }
+    };
+    auto ResetPos=[&](MoveObject&obj)->void{
+        bool landUnit=Core_List::JudgeMoveObjIsLandUnit(&obj);
+        landUnit?ResetLandUnit(obj):ResetOceanUnit(obj);
+    };
+    //
+    auto solve=[&](Player&player)->void{
+        for(auto*human:player.human)ResetPos(*human);
+    };
+    //
+    solve(*(player[0]));
+    solve(*(player[1]));
+}
 void Core::updateByObject()
 {
     //player管理的各个ob更新状态
@@ -180,11 +203,14 @@ void Core::updateByObject()
                     humaniter++;
                 }
             }
+            else if((*humaniter)->getTransported()){
+                //人若被运输则啥也不干
+                humaniter++;
+            }
             else
             {
                 //                if((*humaniter)->getSort() == SORT_ARMY && (*humaniter)->getNum()!=AT_SCOUT && get_IsObjectFree(*humaniter))
                 //                    theMap->add_Map_Vision(*humaniter);
-
                 interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->updateLU();
                 (*humaniter)->nextframe();
@@ -194,8 +220,7 @@ void Core::updateByObject()
                 if ((*humaniter)->isWalking()) moveOb_judCrush.push_back(*humaniter);
 
                 //更新视野
-                if (playerIndx == 0&&(*humaniter)->getTransported()==0) theMap->reset_CellExplore(*humaniter,explored);
-
+                if(playerIndx==0)theMap->reset_CellExplore(*humaniter,explored);
                 humaniter++;
             }
 
@@ -642,10 +667,14 @@ void Core::infoShare() {
             }
         }
     };
-    for(auto&human:currentBuff[0].armies)updateState(human);
-    for(auto&human:currentBuff[0].farmers)updateState(human);
-    for(auto&human:currentBuff[1].armies)updateState(human);
-    for(auto&human:currentBuff[1].farmers)updateState(human);
+    for(auto&human:currentBuff[0].armies)
+        updateState(human);
+    for(auto&human:currentBuff[0].farmers)
+        updateState(human);
+    for(auto&human:currentBuff[1].armies)
+        updateState(human);
+    for(auto&human:currentBuff[1].farmers)
+        updateState(human);
     ///////
     tagUsrGame.update(&currentBuff[0]);
     tagEnemyGame.update(&currentBuff[1]);
@@ -677,6 +706,7 @@ void Core::getPlayerNowResource(int playerRepresent, int& wood, int& food, int& 
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
+    //如果已经死亡,则重新设置点击对象
     Coordinate* object_click = 0;
     //状态0表示当前可以去捕获新的点击对象
     if (objClickedCaptureState == 0) {
@@ -699,8 +729,9 @@ void Core::manageMouseEvent()
         if (object_click == NULL)
         {
             if ((nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY)\
-                && nowobject->getPlayerRepresent() == NOWPLAYERREPRESENT)
+                    && nowobject->getPlayerRepresent() == NOWPLAYERREPRESENT){
                 interactionList->addRelation(nowobject, mouseEvent->DR, mouseEvent->UR, CoreEven_JustMoveTo);
+            }
             mouseEvent->mouseEventType = NULL_MOUSEEVENT;
         }
         else
@@ -1094,6 +1125,21 @@ void Core::deduplicateInstructions(std::queue<instruction>& instructions) {
     }
 }
 
+void Core::FirstFrameProcess()
+{
+    //如我需要把所有探索的区域给学生
+    explored.clear();
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            if(theMap->cell[i][j].Explored){
+                explored.push_back({i,j});
+            }
+        }
+    }
+    //给出debug提示打开了哪副地图
+    call_debugText("red",QString("打开的地图是:")+theMap->GetMapFileName(),0);;
+}
+
 //后续编写，用于处理AI指令
 void Core::manageOrder(int id)
 {
@@ -1235,6 +1281,7 @@ void Core::manageOrder(int id)
 
 
 
+
 int Core::deleteSelf(Coordinate* object) //删除对象，返回错误码
 {
     BloodHaver* bloodOb = NULL;
@@ -1258,14 +1305,13 @@ void Core::judge_Crush()
     *   调用此函数前务必保证以上两个数组已完成本帧的更新
     */
 
-    vector<Point> judBlock;
     int labSize_jud = moveOb_judCrush.size(), labSize, obSize;
     MoveObject* judOb;
     Coordinate* barrierOb;
     for (int i = 0; i < labSize_jud; i++)
     {
         judOb = moveOb_judCrush[i];
-        judBlock = judOb->get_JudCrush_Block();
+        auto&&judBlock = judOb->get_JudCrush_Block();
         labSize = judBlock.size();
         for (int j = 0; j < labSize; j++)
         {
@@ -1280,12 +1326,13 @@ void Core::judge_Crush()
                 if (judOb == barrierOb) continue;
 
                 /****当前取消移动物体之间的碰撞******/
-//                if(barrierOb->getSort() == SORT_FARMER || barrierOb->getSort() == SORT_ARMY) continue;
-//                if(barrierOb->getSort() == SORT_ANIMAL && !((Animal*)barrierOb)->isTree()) continue;
                 if (!theMap->CanCrush(barrierOb))continue;
                 /****当前取消移动物体之间的碰撞******/
                 //判断碰撞，碰撞箱有重合
-                if (judOb->isCrash(barrierOb))break;
+                if (judOb->isCrash(barrierOb))
+                {
+                    break;
+                }
             }
         }
     }
@@ -1309,6 +1356,8 @@ void Core::loadRelationMap()
 {
     //更新寻路用障碍表
     theMap->loadBarrierMap_ByObjectMap();
+    //对成片的树进行合并成一个大block
+    theMap->MergeTrees();
     //更新寻路地图模板
     theMap->loadfindPathMapTemperature();
 }
@@ -1325,13 +1374,21 @@ void Core::resetNowObject_Click(bool isStop)
         }
 
         nowobject = objCapture;
-        if (nowobject != NULL) {
+        //去看看这个对象是否还在
+        bool flag=0;
+        for(auto&ele:g_Object){
+            if(ele.second==nowobject){
+                flag=1;
+                break;
+            }
+        }
+        if (flag&&nowobject) {
             call_debugText("blue", " 点击对象为：" + nowobject->getChineseName() + ", SN:" + QString::number(nowobject->getglobalNum()), REPRESENT_BOARDCAST_MESSAGE);
             if (nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY) {
                 call_debugText("blue", " nowState: " + QString::number(this->interactionList->getNowPhaseNum(nowobject)), REPRESENT_BOARDCAST_MESSAGE);
             }
         }
-
+        else nowobject=objCapture=0;
         requestSound_Click(nowobject);
         sel->initActs();
         mouseEvent->mouseEventType = NULL_MOUSEEVENT;
