@@ -3,11 +3,16 @@
 
 #include <QMutex>
 #include <QSoundEffect>
-
+#include<eventfilter.h>
 #include "config.h"
 
 using namespace std;
 class Coordinate;
+//
+extern const bool EditorMode;
+extern EventFilter *eventFilter;
+extern bool tryCaptured;
+//
 extern bool isExamining;
 
 extern bool AIfinished;
@@ -15,7 +20,7 @@ extern bool INSfinshed;
 extern int g_globalNum;
 extern int mapmoveFrequency;
 extern std::map<int, Coordinate*> g_Object;
-
+extern int** memorymap;
 extern int MidX;
 extern int MidY;
 extern int MAP_LSide[2];
@@ -32,7 +37,8 @@ extern std::queue<string> soundQueue;
 extern std::list<Coordinate*> drawlist;
 
 extern Coordinate* nowobject;
-
+extern Coordinate* LeftMouseObjCapture;
+extern Coordinate*RightMouseObjCaptrue;
 extern bool GenerateHumanLock;//
 //当前选中对象
 //出于gamewidget和core均需要获取当前访问对象
@@ -476,13 +482,27 @@ public:
 
 struct MouseEvent
 {
+private:
     int memoryMapX;
     int memoryMapY;
     double DR;
     double UR;
     int mouseEventType;
+public:
     //鼠标点击类型 自定义对应关系 左键点击 左键拉框 右键点击等
-
+    MouseEvent();
+    int GetMouseEventType();
+    void SetMouseEventType(int tp);
+    bool HaveEvent();
+    int GetMemoryMapX();
+    int GetMemoryMapY();
+    void SetMemoeyMapX(int v);
+    void SetMemoryMapY(int v);
+    double GetDR();
+    double GetUR();
+    void SetDR(double v);
+    void SetUR(double v);
+    void Reset();
 };
 
 

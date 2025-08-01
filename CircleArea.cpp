@@ -6,10 +6,7 @@ CircleArea::CircleArea(GameWidget *widget_)
 {
     widget=widget_;
 }
-void CircleArea::onClick()
-{
 
-}
 
 void CircleArea::onLeftMouseDown()
 {
@@ -22,7 +19,14 @@ void CircleArea::onLeftMouseDown()
 void CircleArea::onLeftMouseUp()
 {
     triger=0;
-    area.push_back(current);
+    if(current.rad!=0){
+        area.push_back(current);
+        //将关联对象与当前区域进行关联
+        for(auto*coor:coordinate){
+            relation[coor]=current;
+        }
+        coordinate.clear();
+    }
 }
 
 void CircleArea::onMouseMove(int delta_x, int delta_y)
@@ -37,10 +41,28 @@ void CircleArea::Draw()
 {
     for(auto&ele:area)
         for(auto&line:GetCircle(ele))
-            widget->AddLine(line[0],line[1],line[2],line[3]);
+            widget->AddLine(line[0],line[1],line[2],line[3],Qt::gray);
     if(triger)
         for(auto&line:GetCircle(current))
-            widget->AddLine(line[0],line[1],line[2],line[3]);
+            widget->AddLine(line[0],line[1],line[2],line[3],Qt::green);
+    //绘制所有待关联的对象
+    for(auto*obj:coordinate){
+        widget->AddEdge(obj->getDR(),obj->getUR(),obj->getCrashLength(),obj->getCrashLength(),Qt::red);
+    }
+    //
+    for(auto&ele:relation){
+        auto*obj=ele.first;
+        if(coordinate.count(obj)==0){
+            widget->AddEdge(obj->getDR(),obj->getUR(),obj->getCrashLength(),obj->getCrashLength(),Qt::darkRed);
+        }
+    }
+}
+
+void CircleArea::onRightMouseClick()
+{
+    // 选择对象
+    Coordinate*obj=Core::getObject(MouseX()/4,MouseY()/4);
+    if(obj!=0)coordinate.insert(obj);
 }
 
 vector<array<double, 4> > CircleArea::GetCircle(CircleAreaData &data)
@@ -74,10 +96,6 @@ CircleAreaData *CircleArea::GetPosIn(double dr, double ur)
     return NULL;
 }
 
-string CircleArea::GetName()
-{
-    return Name();
-}
 
 string CircleArea::Name()
 {

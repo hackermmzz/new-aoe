@@ -55,13 +55,12 @@ public:
     bool judge_CanTransPort(Coordinate* obj1, Coordinate* obj2);
 
     void loadRelationMap();
-
+    static Coordinate* getObject(int mx,int my);//当编辑器功能打开才可以使用,否则只返回0
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加
 private:
     Player** player;    //player信息
-    int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
     MouseEvent* mouseEvent; //记录当前鼠标事件
     Core_List* interactionList;
     vector<MoveObject*> moveOb_judCrush;
@@ -73,10 +72,6 @@ private:
     void deduplicateInstructions(std::queue<instruction>& instructions); // 去重指令队列
     void FirstFrameProcess();//游戏开始的第一帧需要干的事情
 public:
-    //延迟获取到点击的对象
-    static  Coordinate* objCapture;
-    static int objClickedCaptureState;
-    static MouseEvent mouseEventStore;
 };
 
 #endif // CORE_H

@@ -38,6 +38,7 @@ public:
     Editor* editor;
     AreaSelected*rectArea;//矩形区域生成监听器
     AreaSelected*circleArea;//圆形区域生成监听器
+    AreaSelected*lineArea;//曲线路径生成
     int currentSelected;  // 用于记录当前的选择的内容
     // 枚举编辑器中的功能键
     enum EditorElement{
@@ -74,9 +75,9 @@ public:
         GOLDORE,
         RECT_AREA,
         CIRCLE_AREA,
+        LINE_AREA,
     };
 
-    bool leftMousePress;
 
 public slots:
     void cheat_Player0Resource();

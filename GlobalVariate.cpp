@@ -9,7 +9,10 @@
 using namespace std;
 
 bool isExamining = EXAMINE_MODE;
-
+//
+const bool EditorMode=false;
+EventFilter *eventFilter;
+//
 map<std::string, std::list<QPixmap>> resMap;
 map<string, QSoundEffect*> SoundMap;
 std::queue<string> soundQueue;
@@ -19,9 +22,12 @@ std::list<Coordinate*> drawlist;
 Score usrScore=Score(0);
 Score enemyScore=Score(1);
 Coordinate *nowobject=NULL;
+bool tryCaptured=0;//尝试捕获点击对象后置1
+Coordinate* LeftMouseObjCapture=0;
+Coordinate* RightMouseObjCaptrue=0;
 std::queue<st_DebugMassage>debugMassagePackage;
 std::map<QString , int>debugMessageRecord;
-
+int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
 bool only_debug_Player0 = IS_DEBUGTEXT_ONLYNOWPLAYER;
 bool filterRepetitionMessage = IS_FILTER_DEBUGMESSAGE;
 
@@ -574,3 +580,72 @@ int sgn(double __x)
     else if(__x < 0) return -1;
     else return 0;
 }
+
+MouseEvent::MouseEvent()
+{
+    Reset();
+}
+
+int MouseEvent::GetMouseEventType()
+{
+    return mouseEventType;
+}
+
+void MouseEvent::SetMouseEventType(int tp)
+{
+    mouseEventType=tp;
+}
+
+bool MouseEvent::HaveEvent()
+{
+    return mouseEventType!=NULL_MOUSEEVENT;
+}
+
+int MouseEvent::GetMemoryMapX()
+{
+    return memoryMapX;
+}
+
+int MouseEvent::GetMemoryMapY()
+{
+    return memoryMapY;
+}
+
+void MouseEvent::SetMemoeyMapX(int v)
+{
+    memoryMapX=v;
+}
+
+void MouseEvent::SetMemoryMapY(int v)
+{
+    memoryMapY=v;
+}
+
+double MouseEvent::GetDR()
+{
+    return DR;
+}
+
+double MouseEvent::GetUR()
+{
+    return UR;
+}
+
+void MouseEvent::SetDR(double v)
+{
+    DR=v;
+}
+
+void MouseEvent::SetUR(double v)
+{
+    UR=v;
+}
+
+void MouseEvent::Reset()
+{
+    memoryMapX=0;
+    memoryMapY=0;
+    DR=UR=0;
+    mouseEventType=NULL_MOUSEEVENT;
+}
+

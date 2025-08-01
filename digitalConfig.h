@@ -1,10 +1,5 @@
 #ifndef DIGITALCONFIG_H
 #define DIGITALCONFIG_H
-#include<eventfilter.h>
-/**********常量设置**************(配置统一使用变量减少编译时间)*/
-extern  EventFilter*eventFilter;//全局事件顾虑器
-extern const int EventInterval;//事件触发最小间隔
-extern const bool EditorMode;//是否打开编辑器模式
 /**********debug消息************/
 #define IS_FILTER_DEBUGMESSAGE false
 #define IS_DEBUGTEXT_ONLYNOWPLAYER true

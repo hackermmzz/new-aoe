@@ -6,6 +6,7 @@
 #include <algorithm>
 #include<rectarea.h>
 #include<circlearea.h>
+#include<LineArea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
 int mapmoveFrequency = INITIAL_FREQUENCY;
@@ -179,6 +180,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         QString selectedText = text;
         if (text == "矩形区域") this->currentSelected = RECT_AREA;
         else if (text == "圆形区域") this->currentSelected = CIRCLE_AREA;
+        else if(text=="曲线区域")this->currentSelected=LINE_AREA;
         if (text != "敌方区域限制") call_debugText("green", " " + text, 0);
         });
 
@@ -194,17 +196,64 @@ void MainWidget::ExportCurrentState(const char* fileName)
 
     }
     QTextStream stream(&file);
+    //获取对象的区域限制
+    auto GetAreaLimit=[&](Coordinate*obj)->pair<string,void*>{
+          auto&lineR=((LineArea*)(lineArea))->relation;
+          auto&circleR=((CircleArea*)(circleArea))->relation;
+          auto&rectR=((RectArea*)(rectArea))->relation;
+          //
+          if(lineR.count(obj)){
+            auto&d=lineR[obj];
+            return pair<string,void*>{LineArea::Name(),&d};
+          }else if(circleR.count(obj)){
+              auto&d=circleR[obj];
+              return pair<string,void*>{CircleArea::Name(),&d};
+          }else if(rectR.count(obj)){
+              auto&d=rectR[obj];
+              return pair<string,void*>{RectArea::Name(),&d};
+          }
+          return pair<string,void*>{"",0};
+    };
+    //
+    auto JsonAreaLimit=[&](string type,void*data)->QJsonObject{
+        QJsonObject json;
+        //
+        if(data==0)return json;
+        json.insert("Type",QString(type.c_str()));
+        //
+        if(type==LineArea::Name()){
+            LineAreaData&d=*(LineAreaData*)data;
+            QJsonArray array;
+            for(auto&p:d.data){
+                QJsonArray arr;
+                arr.append(p[0]);
+                arr.append(p[1]);
+                array.append(arr);
+            }
+            json.insert("Point",array);
+
+        }else if(type==CircleArea::Name()){
+            CircleAreaData&d=*(CircleAreaData*)data;
+            json.insert("DR",d.dr);
+            json.insert("UR",d.ur);
+            json.insert("R",d.rad);
+        }else if(type==RectArea::Name()){
+            RectAreaData&d=*(RectAreaData*)data;
+            json.insert("DR",d.dr);
+            json.insert("UR",d.ur);
+            json.insert("W",d.w);
+            json.insert("H",d.h);
+        }
+        return json;
+    };
+    auto GetAreaJson=[&](Coordinate*obj)->pair<bool,QJsonObject>{
+        auto&&ret0=GetAreaLimit(obj);
+        auto&&ret1=JsonAreaLimit(ret0.first,ret0.second);
+        if(ret0.first=="")return pair<bool,QJsonObject>{0,ret1};
+        return pair<bool,QJsonObject>{1,ret1};
+    };
+    //
     //////////////保存cell图
-    /*
-    int Num;
-    bool Visible=false;//是否可见
-    bool Explored=false;//是否被探索
-    int Type;               // 地图块种类（地形凹凸）
-    int Pattern;            // 地图块样式（草地、沙漠等）
-    int Height;             // 地图块高度
-    int OffsetX, OffsetY;   // 地图块偏移量
-    int Resource;           // 地图块存放的资源类型（默认为无资源，即空地）
-    */
     QJsonObject root;
     for (int i = 0, idx = 0;i < MAP_L;++i)
         for (int j = 0;j < MAP_U;++j) {
@@ -251,7 +300,14 @@ void MainWidget::ExportCurrentState(const char* fileName)
         obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
         obj.insert("FarmerType", human->getSort() == SORT_FARMER ? ((Farmer*)human)->get_farmerType() : -1);
         obj.insert("Own", "WLH");
+        //获取区域限制
+        auto&&ret=GetAreaJson(human);
+        if(ret.first){
+            obj.insert("AreaLimit",ret.second);
+        }
+        //
         root.insert("Human_" + QString::number(Human_idx++), obj);
+
     }
     for (Human* human : player[1]->human) {
         QJsonObject obj;
@@ -260,27 +316,14 @@ void MainWidget::ExportCurrentState(const char* fileName)
         obj.insert("Num", human->getNum());
         obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
         obj.insert("Own", "LZ");
-        //对敌人进行限制区域(先矩形区域,后圆形区域)
-        RectAreaData*rect=((RectArea*)rectArea)->GetPosIn(human->getDR(),human->getUR());
-        CircleAreaData*circle=((CircleArea*)circleArea)->GetPosIn(human->getDR(),human->getUR());
-        if(rect){
-            QJsonObject obj1;
-            obj1.insert("Type",QString(rectArea->GetName().c_str()));
-            obj1.insert("DR",rect->dr);
-            obj1.insert("UR",rect->ur);
-            obj1.insert("W",rect->w);
-            obj1.insert("H",rect->h);
-            obj.insert("AreaLimit",obj1);
-        }else if(circle){
-            QJsonObject obj1;
-            obj1.insert("Type",QString(circleArea->GetName().c_str()));
-            obj1.insert("DR",circle->dr);
-            obj1.insert("UR",circle->ur);
-            obj1.insert("R",circle->rad);
-            obj.insert("AreaLimit",obj1);
+        //获取区域限制
+        auto&&ret=GetAreaJson(human);
+        if(ret.first){
+            obj.insert("AreaLimit",ret.second);
         }
         //
         root.insert("Human_" + QString::number(Human_idx++), obj);
+
     }
     /////////////////保存静态资源
     int res_idx = 0;
@@ -309,18 +352,20 @@ void MainWidget::ExportCurrentState(const char* fileName)
 
 void MainWidget::updateEditor()
 {
+    //
+    extern EventFilter *eventFilter;
+    //
     using PD=array<int,2>;
     //
     static int preHeight = -1;
     static int needSave = 1;
+    //
+    double DR = ui->Game->TranGlobalPosToDR(eventFilter->MouseX(),eventFilter->MouseY());
+    double UR = ui->Game->TranGlobalPosToUR(eventFilter->MouseX(),eventFilter->MouseY());
+    int L = DR / BLOCKSIDELENGTH, U = UR / BLOCKSIDELENGTH;
+    if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
     // 如果左边一直被摁住
-    if (leftMousePress) {
-        QPoint globalPos = QCursor::pos();
-        QPoint localPos = mapFromGlobal(globalPos);
-        double DR = ui->Game->tranDR(localPos.x(), localPos.y()) + ui->Game->DR;
-        double UR = ui->Game->tranUR(localPos.x(), localPos.y()) + ui->Game->UR;
-        int L = DR / BLOCKSIDELENGTH, U = UR / BLOCKSIDELENGTH;
-        if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
+    if (eventFilter->LeftMousePress()) {
         if (needSave) {
             needSave = 0;
             // SaveCurrentState();
@@ -354,14 +399,12 @@ void MainWidget::updateEditor()
         preHeight = -1;
     }
     // 单击生成
-    if (mouseEvent->mouseEventType == LEFT_PRESS) {
-        int L = mouseEvent->DR / BLOCKSIDELENGTH, U = mouseEvent->UR / BLOCKSIDELENGTH;
-        if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
+    if (eventFilter->LeftMouseClicked()) {
         // SaveCurrentState();
         //
         switch (currentSelected) {
         case TREE:
-            MakeTree(mouseEvent->DR, mouseEvent->UR);
+            MakeTree(mouseEvent->GetDR(), mouseEvent->GetUR());
             break;
         case GOLDORE:
             MakeStaticRes(L, U, GOLDORE);
@@ -370,13 +413,13 @@ void MainWidget::updateEditor()
             MakeStaticRes(L, U, STONM);
             break;
         case ELEPHANT:
-            MakeAnimal(mouseEvent->DR, mouseEvent->UR, ELEPHANT);
+            MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), ELEPHANT);
             break;
         case LION:
-            MakeAnimal(mouseEvent->DR, mouseEvent->UR, LION);
+            MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), LION);
             break;
         case GAZELLE:
-            MakeAnimal(mouseEvent->DR, mouseEvent->UR, GAZELLE);
+            MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), GAZELLE);
             break;
         case PLAYERDOWNTOWN:
             MakeBuilding(L, U, PLAYERDOWNTOWN);
@@ -385,28 +428,28 @@ void MainWidget::updateEditor()
             MakeBuilding(L, U, AIARROWTOWER);
             break;
         case PLAYERFARMER:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, PLAYERFARMER);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERFARMER);
             break;
         case AICLUBMAN:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, AICLUBMAN);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICLUBMAN);
             break;
         case AIBOWMAN:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, AIBOWMAN);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIBOWMAN);
             break;
         case AISCOUT:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, AISCOUT);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AISCOUT);
             break;
         case PLAYERDOCK:
             MakeBuilding(L, U, PLAYERDOCK);
             break;
         case AIWARSHIP:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, AIWARSHIP);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIWARSHIP);
             break;
         case PLAYERFISHINGBOAT:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, PLAYERFISHINGBOAT);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERFISHINGBOAT);
             break;
         case PLAYERTRANSPORTSHIP:
-            MakeHuman(mouseEvent->DR, mouseEvent->UR, PLAYERTRANSPORTSHIP);
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERTRANSPORTSHIP);
             break;
         case PLAYERFISHERY:
             MakeStaticRes(L, U, PLAYERFISHERY);
@@ -416,12 +459,13 @@ void MainWidget::updateEditor()
             break;
         }
     }
-    else if (mouseEvent->mouseEventType == RIGHT_PRESS)currentSelected = -1;
     //更新区域绘制
     rectArea->SetFilter(currentSelected!=RECT_AREA);
     rectArea->Draw();
     circleArea->SetFilter(currentSelected!=CIRCLE_AREA);
     circleArea->Draw();
+    lineArea->SetFilter(currentSelected!=LINE_AREA);
+    lineArea->Draw();
 }
 
 void MainWidget::clearArea(int blockL, int blockU, int radius) {
@@ -1516,6 +1560,7 @@ void MainWidget::statusUpdate()
 
 void MainWidget::gameDataUpdate()
 {
+    //
     if (!pause)
     {
         core->gameUpdate();
@@ -1529,15 +1574,13 @@ void MainWidget::gameDataUpdate()
     {
         core->resetNowObject_Click(pause);
     }
-
     makeSound();
 }
+
 void MainWidget::paintUpdate()
 {
     statusUpdate();
 
-    //判断是否以新编辑模式启动
-    if (EditorMode) updateEditor();
 
     ui->Game->update();
     ui->mapView->update();
@@ -1622,8 +1665,36 @@ void MainWidget::makeSound()
 
 void MainWidget::initEditor()
 {
-    rectArea=new RectArea(ui->Game);
-    circleArea=new CircleArea(ui->Game);
+    //注册全局事件监听
+    auto&e=::eventFilter;
+    e->RegistReciver([&](){
+        if(e->LeftMouseClicked()){
+           int x=e->MouseX(),y=e->MouseY();
+           mouseEvent->SetMemoeyMapX(x/4);
+           mouseEvent->SetMemoryMapY(y/4);
+           mouseEvent->SetMouseEventType(LEFT_PRESS);
+           mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
+           mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
+        }
+        else if(e->RightMouseClicked()){
+            int x=e->MouseX(),y=e->MouseY();
+            mouseEvent->SetMemoeyMapX(x/4);
+            mouseEvent->SetMemoryMapY(y/4);
+            mouseEvent->SetMouseEventType(RIGHT_PRESS);
+            mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
+            mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
+        }
+        //轮询编辑器
+        if(EditorMode){
+            updateEditor();
+        }
+    });
+    //
+    if(EditorMode){
+        rectArea=new RectArea(ui->Game);
+        circleArea=new CircleArea(ui->Game);
+        lineArea=new LineArea(ui->Game);
+    }
 }
 
 void MainWidget::ScoreSave(string gameResult)

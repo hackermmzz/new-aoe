@@ -185,8 +185,10 @@ void GameWidget::paintEvent(QPaintEvent *)
     paintLine(painter);
     //
     Building* buildOb = NULL;
+    //重置捕获
+    if(mainwidget->mouseEvent->HaveEvent())
+        LeftMouseObjCapture=RightMouseObjCaptrue=0;
     //drawlist正常绘制
-    bool CaptureFlag=0;
     if(!drawlist.empty())
     {
         std::list<Coordinate *>::iterator iter=drawlist.begin();
@@ -211,34 +213,37 @@ void GameWidget::paintEvent(QPaintEvent *)
                     buildOb->getFireNowRes()->pix
                 );
             }
-            if(Core::objClickedCaptureState==1){//如果需要捕捉点击对象
-                int xx=mainwidget->mouseEvent->memoryMapX,yy=mainwidget->mouseEvent->memoryMapY;
-                xx<<=2,yy<<=2;
+            if(mainwidget->mouseEvent->HaveEvent()){//如果需要捕捉点击对象
+                tryCaptured=true;
+                int xx=mainwidget->mouseEvent->GetMemoryMapX()*4,yy=mainwidget->mouseEvent->GetMemoryMapY()*4;
                 int x=tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX();
                 int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR)+mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
                 auto&res=*(*iter)->getNowRes();
                 int w=res.pix.width(),h=res.pix.height();
                 if(xx>=x&&xx<=(x+w)&&yy>=y&&yy<=(y+h)){
-                    //if(res.memorymap.getMemoryMap(xx,yy)!=0)
                     {
-                        CaptureFlag=1;
-                        Core::objCapture=*iter;
+                        int tp=mainwidget->mouseEvent->GetMouseEventType();
+                        if(tp==LEFT_PRESS){
+                            LeftMouseObjCapture=*iter;
+                        }
+                        else if(tp==RIGHT_PRESS){
+                            RightMouseObjCaptrue=*iter;
+                        }
                     }
                 }
             }
+            //如果开启了编辑器,绘制内存图
+            if(EditorMode){
+                drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
+                                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
+                                       (*(*iter)->getNowRes()),(*iter)->getglobalNum());
+            }
+            //
             (*iter)->setInWidget();
             iter++;
         }
     }
 
-    if(CaptureFlag){
-        Core::objClickedCaptureState=2;
-    }
-
-    if(Core::objClickedCaptureState==1){
-        Core::objClickedCaptureState=2;
-        Core::objCapture=0;
-    }
 
 }
 
@@ -247,18 +252,18 @@ void GameWidget::paintEdge(QPainter &painter)
     while(EdgeQueue.size()){
         auto ele=EdgeQueue.front();
         EdgeQueue.pop();
-        paintEdge(painter,get<0>(ele),get<1>(ele),get<2>(ele),get<3>(ele));
+        paintEdge(painter,get<0>(ele),get<1>(ele),get<2>(ele),get<3>(ele),get<4>(ele));
     }
 }
 
-void GameWidget::paintEdge(QPainter &painter,double dr,double ur,double w,double h)
+void GameWidget::paintEdge(QPainter &painter,double dr,double ur,double w,double h,QColor color)
 {
-    painter.setPen(Qt::white);
+    painter.setPen(color);
     int width=w*4;
     int height=h*2;
     int tempBlockDR = dr / BLOCKSIDELENGTH, tempBlockUR = ur / BLOCKSIDELENGTH;
-    int X=tranX(dr-DR,ur-UR)-w*2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
-    int Y=tranY(dr-DR,ur-UR) - height / 2 + mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
+    int X=tranX(dr-DR,ur-UR)-w*2 + mainwidget->map->getCellOffsetX(tempBlockDR,tempBlockUR);
+    int Y=tranY(dr-DR,ur-UR) - height / 2 + mainwidget->map->getCellOffsetY(tempBlockDR,tempBlockUR);
     QPolygonF diamond;
     diamond << QPointF(X+width/2, Y);
     diamond << QPointF(X+width, Y+height/2);
@@ -273,11 +278,14 @@ void GameWidget::paintLine(QPainter &painter)
         auto ele=LineQueue.front();
         LineQueue.pop();
         double dr0=get<0>(ele),ur0=get<1>(ele),dr1=get<2>(ele),ur1=get<3>(ele);
-        int tempBlockDR = dr0 / BLOCKSIDELENGTH, tempBlockUR = ur0 / BLOCKSIDELENGTH;
-        int X0=tranX(dr0-DR,ur0-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
-        int Y0=tranY(dr0-DR,ur0-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
-        int X1=tranX(dr1-DR,ur1-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetX();
-        int Y1=tranY(dr1-DR,ur1-UR)+ mainwidget->map->cell[tempBlockDR][tempBlockUR].getOffsetY();
+        QColor color=get<4>(ele);
+        painter.setPen(color);
+        int tempBlockDR0 = dr0 / BLOCKSIDELENGTH, tempBlockUR0 = ur0 / BLOCKSIDELENGTH;
+        int tempBlockDR1 = dr1 / BLOCKSIDELENGTH, tempBlockUR1 = ur1 / BLOCKSIDELENGTH;
+        int X0=tranX(dr0-DR,ur0-UR)+ mainwidget->map->getCellOffsetX(tempBlockDR0,tempBlockUR0);
+        int Y0=tranY(dr0-DR,ur0-UR)+ mainwidget->map->getCellOffsetY(tempBlockDR0,tempBlockUR0);
+        int X1=tranX(dr1-DR,ur1-UR)+ mainwidget->map->getCellOffsetX(tempBlockDR1,tempBlockUR1);
+        int Y1=tranY(dr1-DR,ur1-UR)+ mainwidget->map->getCellOffsetY(tempBlockDR1,tempBlockUR1);
         QPolygonF diamond;
         diamond<<QPointF(X0,Y0);
         diamond<<QPointF(X1,Y1);
@@ -338,16 +346,20 @@ void GameWidget::ResumePreState()
     delete state;
 }
 
+double GameWidget::TranGlobalPosToDR(int x, int y)
+{
+    return (tranDR(x, y) + DR) ;
+}
+
+double GameWidget::TranGlobalPosToUR(int x, int y)
+{
+     return (tranUR(x, y) + UR) ;
+}
+
 void GameWidget::mousePressEvent(QMouseEvent *event)
 {
     if(event->button()==Qt::LeftButton)
     {
-        mainwidget->leftMousePress=1;
-        mainwidget->mouseEvent->memoryMapX=event->x()/4;
-        mainwidget->mouseEvent->memoryMapY=event->y()/4;
-        mainwidget->mouseEvent->mouseEventType=LEFT_PRESS;
-        mainwidget->mouseEvent->DR=tranDR(event->x(),event->y())+DR;
-        mainwidget->mouseEvent->UR=tranUR(event->x(),event->y())+UR;
         if(buildMode >= 0){
             int hoverDR = (tranDR(event->x(), event->y()) + DR) / BLOCKSIDELENGTH;
             int hoverUR = (tranUR(event->x(), event->y()) + UR) / BLOCKSIDELENGTH;
@@ -368,14 +380,6 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
     }
     else if(event->button()==Qt::RightButton)
     {
-        mainwidget->mouseEvent->memoryMapX=event->x()/4;
-        mainwidget->mouseEvent->memoryMapY=event->y()/4;
-        mainwidget->mouseEvent->mouseEventType=RIGHT_PRESS;
-        double tDR = tranDR(event->x(),event->y());
-        double tUR = tranUR(event->x(),event->y());
-        mainwidget->mouseEvent->DR = tDR + DR;
-        mainwidget->mouseEvent->UR = tUR + UR;
-
         if(buildMode >= 0)
         {
             buildMode = -1;
@@ -393,11 +397,6 @@ bool GameWidget::judgeinWindow(double x, double y)
     return 0;
 }
 
-void GameWidget::mouseReleaseEvent(QMouseEvent* event)
-{
-    mainwidget->mouseEvent->mouseEventType=NULL_MOUSEEVENT;
-    mainwidget->leftMousePress=0;
-}
 
 //坐标间的相互转化
 int GameWidget::tranX(int DR, int UR)
@@ -491,14 +490,14 @@ void GameWidget::emptymemorymap()
     }
 }
 
-void GameWidget::AddEdge(double dr, double ur, double w, double h)
+void GameWidget::AddEdge(double dr, double ur, double w, double h,QColor color)
 {
-    EdgeQueue.push(tuple<double,double,double,double>{dr,ur,w,h});
+    EdgeQueue.push(tuple<double,double,double,double,QColor>{dr,ur,w,h,color});
 }
 
-void GameWidget::AddLine(double dr0, double ur0, double dr1, double ur1)
+void GameWidget::AddLine(double dr0, double ur0, double dr1, double ur1,QColor color)
 {
-    LineQueue.push(tuple<double,double,double,double>{dr0,ur0,dr1,ur1});
+    LineQueue.push(tuple<double,double,double,double,QColor>{dr0,ur0,dr1,ur1,color});
 }
 
 //地图移动

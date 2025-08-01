@@ -46,6 +46,9 @@ public:
     void CalCellOffset(int BlockDR,int BlockUR);
     //划分地图
      void divideTheMap();
+    //获取指定cell的偏移
+    int getCellOffsetX(int l,int u);
+    int getCellOffsetY(int l,int u);
     /*********************寻路相关*******************/
     //加载寻路用地图 视野+障碍物
     using Type=int[MAP_L][MAP_U];

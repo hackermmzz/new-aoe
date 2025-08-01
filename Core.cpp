@@ -6,14 +6,11 @@ tagInfo Buffer0[2];
 tagInfo Buffer1[2];
 int buff = 0;
 tagInfo* currentBuff;
-Coordinate* Core::objCapture;
-int Core::objClickedCaptureState;
-MouseEvent Core::mouseEventStore;
 Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent)
 {
+    ::memorymap=memorymap;
     this->theMap = theMap;  //mainWidget的map对象
     this->player = player;  //所有player的数组
-    this->memorymap = memorymap;    //内存图
     this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
     this->interactionList = new Core_List(this->theMap, this->player);   //本类中管理的对象交互动态表
     InitPlayerMap();
@@ -38,7 +35,7 @@ void Core::gameUpdate()
 
     judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
 
-    if (mouseEvent->mouseEventType != NULL_MOUSEEVENT)
+    if (mouseEvent->HaveEvent())
     {
         if (mapmoveFrequency == 8) resetNowObject_Click();
         else manageMouseEvent();
@@ -706,33 +703,32 @@ void Core::getPlayerNowResource(int playerRepresent, int& wood, int& food, int& 
 //处理鼠标事件
 void Core::manageMouseEvent()
 {
+    if(!tryCaptured)return;
     //如果已经死亡,则重新设置点击对象
     Coordinate* object_click = 0;
-    //状态0表示当前可以去捕获新的点击对象
-    if (objClickedCaptureState == 0) {
-        mouseEventStore = *mouseEvent;
-        objClickedCaptureState = 1;
-        return;
+    //
+    if(mouseEvent->GetMouseEventType()==LEFT_PRESS)
+    {
+        nowobject=LeftMouseObjCapture;
     }
-    //当前正在捕获对象
-    else if (objClickedCaptureState == 1) {
-        return;
+    //
+    if(mouseEvent->GetMouseEventType() == RIGHT_PRESS)
+    {
+        object_click=RightMouseObjCaptrue;
     }
-    //捕捉到对象
-    else if (objClickedCaptureState == 2) {
-        objClickedCaptureState = 0;
-        object_click = objCapture;
-    }
+    //
     resetNowObject_Click();
-    if (mouseEvent->mouseEventType == RIGHT_PRESS && nowobject != NULL)
+    //
+    tryCaptured=false;
+    //
+    if (mouseEvent->GetMouseEventType() == RIGHT_PRESS && nowobject != NULL)
     {
         if (object_click == NULL)
         {
             if ((nowobject->getSort() == SORT_FARMER || nowobject->getSort() == SORT_ARMY)\
                     && nowobject->getPlayerRepresent() == NOWPLAYERREPRESENT){
-                interactionList->addRelation(nowobject, mouseEvent->DR, mouseEvent->UR, CoreEven_JustMoveTo);
+                interactionList->addRelation(nowobject, mouseEvent->GetDR(), mouseEvent->GetUR(), CoreEven_JustMoveTo);
             }
-            mouseEvent->mouseEventType = NULL_MOUSEEVENT;
         }
         else
         {
@@ -856,10 +852,9 @@ void Core::manageMouseEvent()
             default:
                 break;
             }
-
-            mouseEvent->mouseEventType = NULL_MOUSEEVENT;
         }
     }
+      mouseEvent->SetMouseEventType(NULL_MOUSEEVENT);
 }
 
 //处理动作执行结果和输出日志
@@ -1362,18 +1357,26 @@ void Core::loadRelationMap()
     theMap->loadfindPathMapTemperature();
 }
 
+Coordinate *Core::getObject(int mx, int my)
+{
+    if(EditorMode)
+    return g_Object[memorymap[mx][my]];
+    //
+    return 0;
+}
+
 
 void Core::resetNowObject_Click(bool isStop)
 {
-    if (mouseEvent->mouseEventType == LEFT_PRESS)
+    if (mouseEvent->GetMouseEventType() == LEFT_PRESS)
     {
         if (isStop)
         {
-            call_debugText("blue", " 细节坐标 (" + QString::number(mouseEvent->DR) + "," + QString::number(mouseEvent->UR)\
-                + "), 块坐标 (" + QString::number((int)(mouseEvent->DR / BLOCKSIDELENGTH)) + "," + QString::number((int)(mouseEvent->UR / BLOCKSIDELENGTH)) + ")", REPRESENT_BOARDCAST_MESSAGE);
+            call_debugText("blue", " 细节坐标 (" + QString::number(mouseEvent->GetDR()) + "," + QString::number(mouseEvent->GetUR())\
+                + "), 块坐标 (" + QString::number((int)(mouseEvent->GetDR() / BLOCKSIDELENGTH)) + "," + QString::number((int)(mouseEvent->GetUR() / BLOCKSIDELENGTH)) + ")", REPRESENT_BOARDCAST_MESSAGE);
         }
 
-        nowobject = objCapture;
+        nowobject = LeftMouseObjCapture;
         //去看看这个对象是否还在
         bool flag=0;
         for(auto&ele:g_Object){
@@ -1388,10 +1391,9 @@ void Core::resetNowObject_Click(bool isStop)
                 call_debugText("blue", " nowState: " + QString::number(this->interactionList->getNowPhaseNum(nowobject)), REPRESENT_BOARDCAST_MESSAGE);
             }
         }
-        else nowobject=objCapture=0;
+        else nowobject=0;
         requestSound_Click(nowobject);
         sel->initActs();
-        mouseEvent->mouseEventType = NULL_MOUSEEVENT;
     }
 }
 

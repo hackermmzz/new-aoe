@@ -16,15 +16,16 @@ private:
     RectAreaData current;
     GameWidget*widget;
     vector<RectAreaData>area;
+    set<Coordinate*>coordinate;
 public:
+    map<Coordinate*,RectAreaData>relation;
     RectArea(GameWidget*widget);
-    virtual void onClick();
     virtual void onLeftMouseDown();
     virtual void onLeftMouseUp();
     virtual void onMouseMove(int delta_x,int delta_y);
     virtual void Draw();
+    virtual void onRightMouseClick();
     RectAreaData* GetPosIn(double dr,double ur);
-    virtual  string GetName();
     static string Name();
 };
 

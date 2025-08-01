@@ -60,10 +60,10 @@ SOURCES += \
     Logger.cpp \
     soudplaythread.cpp \
     Editor.cpp \
-    digitalconfig.cpp \
     EventFilter.cpp \
     RectArea.cpp \
-    CircleArea.cpp
+    CircleArea.cpp \
+    LineArea.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -104,7 +104,8 @@ HEADERS += \
     AreaSelected.h \
     Rectarea.h \
     EventFilter.h \
-    CircleArea.h
+    CircleArea.h \
+    LineArea.h
 
 FORMS += \
         MainWidget.ui \

@@ -334,6 +334,11 @@
    </item>
    <item>
     <property name="text">
+     <string>曲线区域</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>圆形区域</string>
     </property>
    </item>

@@ -35,25 +35,24 @@ public:
 
     void paintEvent(QPaintEvent *);
     void paintEdge(QPainter&painter);
-    void paintEdge(QPainter&painter,double dr,double ur,double w,double h);
+    void paintEdge(QPainter&painter,double dr,double ur,double w,double h,QColor color=Qt::white);
     void paintLine(QPainter&painter);
     void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void SaveCurrentState(void*state);
     void *RollBackState();
     void ResumePreState();
-
+    double TranGlobalPosToDR(int x,int y);
+    double TranGlobalPosToUR(int x,int y);
     int tranX(int DR, int UR);
     int tranY(int DR,int UR);
     int tranDR(int X,int Y);
     int tranUR(int X, int Y);
-
     void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
     void drawmemory(int X, int Y,  ImageResource&res, int globalNum);
     void emptymemorymap();
-    void AddEdge(double dr,double ur,double w,double h);
-    void AddLine(double dr0,double ur0,double dr1,double ur1);
+    void AddEdge(double dr,double ur,double w,double h,QColor color=Qt::white);
+    void AddLine(double dr0,double ur0,double dr1,double ur1,QColor color=Qt::white);
     bool judgeinWindow(double x, double y);
 
     int getBlockDR(){
@@ -86,9 +85,9 @@ public:
 //    bool pos = false;
     deque<void*>AllState;
     //需要矩形画线框的队列
-    queue<tuple<double,double,double,double>>EdgeQueue;
+    queue<tuple<double,double,double,double,QColor>>EdgeQueue;
     //需要画单条直线的队列
-    queue<tuple<double,double,double,double>>LineQueue;
+    queue<tuple<double,double,double,double,QColor>>LineQueue;
 private slots:
     void movemap();
     void UpdateData();

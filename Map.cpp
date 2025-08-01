@@ -9,6 +9,7 @@
 #include <random>
 #include<map>
 #include<rectarea.h>
+#include<linearea.h>
 #include<circlearea.h>
 ///////////////////////////
 Map*GlobalMap;
@@ -1337,6 +1338,22 @@ void Map::divideTheMap()
     }
 }
 
+int Map::getCellOffsetX(int l, int u)
+{
+    if(l>=0&&u>=0&&l<MAP_L&&u<MAP_U){
+        return cell[l][u].getOffsetX();
+    }
+    return 0;
+}
+
+int Map::getCellOffsetY(int l, int u)
+{
+    if(l>=0&&u>=0&&l<MAP_L&&u<MAP_U){
+        return cell[l][u].getOffsetY();
+    }
+    return 0;
+}
+
 void Map::loadBarrierMap(bool absolute)
 {
     clearBarrierMap();
@@ -2443,6 +2460,29 @@ void Map::loadGenerateMapText(int MapJudge)
         return;
     }
     file.close();
+    /////////////////////////////////解析区域的函数
+    auto ParseArea=[&](int sn,const string&type,QJsonObject&obj)->void{
+        void*data=0;
+        if(type==LineArea::Name()){
+            auto*block=new vector<array<double,2>>();
+            QJsonArray points=obj["Point"].toArray();
+            for(auto ele:points){
+                QJsonArray point=ele.toArray();
+                block->push_back({point[0].toDouble(),point[1].toDouble()});
+            }
+            data=block;
+        }else if(type==CircleArea::Name()){
+            double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble(),r=obj["R"].toDouble();
+            auto*dat=new array<double,3>{dr,ur,r};
+            data=dat;
+        }else if(type==RectArea::Name()){
+            double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble(),w=obj["W"].toDouble(),h=obj["H"].toDouble();
+            auto*dat=new array<double,4>{dr,ur,w,h};
+            data=dat;
+        }
+        //
+        enemyAreaLimit[sn]=pair<string,void*>{type,data};
+    };
     /////////////////////////////////开始解析
     QJsonObject root=doc.object();
     QStringList allKeys=root.keys();
@@ -2481,7 +2521,6 @@ void Map::loadGenerateMapText(int MapJudge)
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
             double UR=obj["UR"].toDouble(),DR=obj["DR"].toDouble();
-            int sn=-1;
             if(obj["Sort"].toString()=="Farmer")
             {
                 int FarmerType=obj["FarmerType"].toInt();
@@ -2491,16 +2530,13 @@ void Map::loadGenerateMapText(int MapJudge)
             }
             else
             {
-                sn=cur.addArmy(obj["Num"].toInt(),DR,UR)->getglobalNum();
-            }
-            //读取区域限制
-            if(obj.contains("AreaLimit")&&sn!=-1){
-                QJsonObject area=obj["AreaLimit"].toObject();
-                string tp=area["type"].toString().toStdString();
-                if(tp==RectArea::Name()){
-                    enemyAreaLimit[sn]=pair<string,void*>{tp,new RectAreaData{area["DR"].toDouble(),area["UR"].toDouble(),area["W"].toDouble(),area["H"].toDouble()}};
-                }else if(tp==CircleArea::Name()){
-                    enemyAreaLimit[sn]=pair<string,void*>{tp,new CircleAreaData{area["DR"].toDouble(),area["UR"].toDouble(),area["R"].toDouble()}};
+                //默认敌方只有军队需要须臾限制
+                int sn=cur.addArmy(obj["Num"].toInt(),DR,UR)->getglobalNum();
+                //读取区域限制
+                if(obj.contains("AreaLimit")){
+                    QJsonObject area=obj["AreaLimit"].toObject();
+                    string type=area["Type"].toString().toStdString();
+                    ParseArea(sn,type,area);
                 }
             }
         }else if(key.contains("Animal")){
@@ -2517,7 +2553,8 @@ void Map::loadGenerateMapText(int MapJudge)
             }
         }
     }
-
+    //
+    //
     // 读取敌人配置信息
     if(root.contains("EnemyConfig")) {
         QJsonObject enemyConfig = root["EnemyConfig"].toObject();
