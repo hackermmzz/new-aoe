@@ -10,7 +10,7 @@ using namespace std;
 
 bool isExamining = EXAMINE_MODE;
 //
-const bool EditorMode=false;
+const bool EditorMode=1;
 EventFilter *eventFilter;
 //
 map<std::string, std::list<QPixmap>> resMap;

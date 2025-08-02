@@ -44,10 +44,27 @@ void RectArea::onMouseMove(int delta_x, int delta_y)
 
 void RectArea::Draw()
 {
+    //
+    using Point=array<double,2>;
+    auto AddLine=[&](RectAreaData&current,QColor color)->void{
+        using Data=array<double,2>;
+        Data point[4];
+        point[0]={current.dr,current.ur};
+        point[1]={current.dr+current.w,current.ur};
+        point[2]={current.dr+current.w,current.ur+current.h};
+        point[3]={current.dr,current.ur+current.h};
+        for(int i=0;i<4;++i){
+            auto&p0=point[i],&p1=point[(i+1)%4];
+            widget->AddLine(p0[0],p0[1],p1[0],p1[1],color);
+        }
+    };
+    //
     for(auto&ele:area)
-    widget->AddEdge(ele.dr,ele.ur,ele.w,ele.h,Qt::gray);
+    {
+        AddLine(ele,Qt::gray);
+    }
     if(triger){
-        widget->AddEdge(current.dr,current.ur,current.w,current.h,Qt::green);
+        AddLine(current,Qt::green);
     }
     //绘制所有待关联的对象
     for(auto*obj:coordinate){
