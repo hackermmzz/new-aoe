@@ -1,0 +1,84 @@
+{
+  "files.associations": {
+    "*.dbclient-js": "javascript",
+    "*.qrc": "xml",
+    "*.ui": "xml",
+    "*.qss": "css",
+    "*.pro": "makefile",
+    "*.pri": "makefile",
+    "ostream": "cpp",
+    "qmutex": "cpp",
+    "qwaitcondition": "cpp",
+    "qelapsedtimer": "cpp",
+    "qthread": "cpp",
+    "qsoundeffect": "cpp",
+    "*.tcc": "cpp"
+  },
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/**",
+    "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/**",
+    "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtCore",
+    "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtGui",
+    "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtWidgets",
+    "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/QtMultimedia"
+  ],
+  "C_Cpp.default.compilerPath": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/g++.exe",
+  "C_Cpp.default.cStandard": "c11",
+  "C_Cpp.default.cppStandard": "c++11",
+  "C_Cpp.default.intelliSenseMode": "gcc-x86",
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "C_Cpp.autocomplete": "Default",
+  "C_Cpp.suggestSnippets": true,
+  "C_Cpp.intelliSenseEngine": "Default",
+  "C_Cpp.enhancedColorization": "Enabled",
+  "C_Cpp.vcpkg.enabled": false,
+  "C_Cpp.default.defines": [
+    "QT_CORE_LIB",
+    "QT_GUI_LIB",
+    "QT_WIDGETS_LIB",
+    "QT_MULTIMEDIA_LIB"
+  ],
+  "C_Cpp.default.browse.path": [
+    "${workspaceFolder}/**",
+    "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/include/**",
+    "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include/**",
+    "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include/c++/**"
+  ],
+  "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
+  "terminal.integrated.env.windows": {
+    "PATH": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin;C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin;${env:PATH}"
+  },
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass"]
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "problems.showCurrentInStatus": true,
+  "problems.autoReveal": true,
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.dimInactiveRegions": true,
+  "C_Cpp.codeAnalysis.runAutomatically": true,
+  "C_Cpp.loggingLevel": "Information",
+  "C_Cpp.formatting": "vcFormat",
+  "C_Cpp.default.enableConfigurationSquiggles": true,
+  "C_Cpp.workspaceSymbols": "All",
+  "C_Cpp.debugShortcut": true,
+  "debug.internalConsoleOptions": "openOnSessionStart",
+  "debug.openDebug": "openOnDebugBreak",
+  "debug.showBreakpointsInOverviewRuler": true,
+  "debug.inlineValues": true,
+  "editor.codeLens": true,
+  "task.problemMatchers.neverPrompt": false
+}

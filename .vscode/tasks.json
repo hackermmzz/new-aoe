@@ -1,0 +1,169 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "qmake",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/qmake.exe",
+      "args": ["-spec", "win32-g++", "CONFIG+=debug", "CONFIG+=qml_debug"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "make",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/mingw32-make.exe",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "dependsOn": ["qmake"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "make release",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/mingw32-make.exe",
+      "args": ["release"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "dependsOn": ["qmake"]
+    },
+    {
+      "label": "qmake & make",
+      "dependsOrder": "sequence",
+      "dependsOn": ["qmake", "make"],
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "qmake & make release",
+      "dependsOrder": "sequence",
+      "dependsOn": ["qmake", "make release"],
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    },
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/Tools/mingw530_32/bin/mingw32-make.exe",
+      "args": ["clean"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Qt Designer",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/designer.exe",
+      "args": [],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Qt Assistant",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/assistant.exe",
+      "args": [],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate UI Headers",
+      "type": "shell",
+      "command": "C:/ProgramData/Qt5.9.2/5.9.2/mingw53_32/bin/uic.exe",
+      "args": [
+        "-o",
+        "${fileDirname}/ui_${fileBasenameNoExtension}.h",
+        "${file}"
+      ],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Capture Link Errors",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Capturing linking errors"],
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": [
+          {
+            "regexp": "^(.*)\\(\\.(\\w+)\\+0x[0-9a-f]+\\):\\s+In\\s+function\\s+`(.*)':$",
+            "file": 1,
+            "message": 3
+          },
+          {
+            "regexp": "^(.*):([0-9]+):\\s+multiple\\s+definition\\s+of\\s+`(.*)'$",
+            "file": 1,
+            "line": 2,
+            "message": 3,
+            "severity": "error"
+          }
+        ]
+      }
+    }
+  ]
+}
