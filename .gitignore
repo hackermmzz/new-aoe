@@ -10,9 +10,7 @@ ui_*.h
 qrc_*.cpp
 object_script.*
 *.qmake.stash
-*.rcc
 *.pro.user*
-
 # 构建目录
 debug/
 release/

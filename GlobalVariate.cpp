@@ -9,7 +9,7 @@
 
 using namespace std;
 
-bool IsExamining = true;
+bool IsExamining = false;
 int TimePerFrame=40;//一帧要耗的时间
 NetworkPlugin*NetworkManager;
 QString GameServerAddr="http://localhost:8080/api/admin/CodeRunStatusPost";

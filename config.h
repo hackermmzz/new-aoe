@@ -50,7 +50,6 @@
 #define NOWPLAYER 2
 #define NOWPLAYERREPRESENT 0
 #define INITIAL_FREQUENCY 1
-#define EXAMINE_MODE false
 
 #define MEMORYROW 400                  //列 行长度
 #define MEMORYCOLUMN 200               //行 列长度

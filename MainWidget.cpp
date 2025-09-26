@@ -1978,7 +1978,6 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
-    return g_frame>=200;
     return sel->getSecend() > GAME_LOSE_SEC;
 }
 bool MainWidget::isWin()
