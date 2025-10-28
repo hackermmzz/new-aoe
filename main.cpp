@@ -4,9 +4,11 @@
 #include "Logger.h"
 #include"EventFilter.h"
 void ParseArguments(const QApplication&app);
+extern void configInit();
 int main(int argc, char* argv[])
 {
-cout<<"hello world"<<endl;
+    //初始化配置
+    configInit();
     //
     QApplication app(argc, argv);
     QResource::registerResource("./res.rcc");

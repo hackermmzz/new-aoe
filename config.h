@@ -33,12 +33,18 @@
 #include <Windows.h>
 #include <time.h>
 #include "digitalConfig.h"
-
-
+#include "string.h"
+using namespace std;
 /********** 游戏配置数据 **********/
-#define GAME_WIDTH 1920                 //总窗口宽度
-#define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.51c"
+extern int GAME_WIDTH; //总窗口宽度
+extern int GAME_HEIGHT; //总窗口高度
+extern std::string GAME_VERSION; //版本
+/**********地图可见性设置************/
+extern bool MAP_VISIABLE;
+extern bool MAP_EXPLORE;
+
+extern  vector<string> sound_work;
+///////////////////////////////////////////////
 #define GAME_TITLE "Age of Empires"     //总窗口名称
 #define MAPFILE_SUFFIX "njust"           //地图文件后缀
 #define GAME_LOSE_SEC 30*60

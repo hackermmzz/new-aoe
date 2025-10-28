@@ -2,7 +2,7 @@
 #define FARMER_H
 
 #include "Human.h"
-
+#include"config.h"
 class Farmer:public Human
 {
 public:
@@ -196,7 +196,6 @@ private:
     //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
 
     static string sound_click;
-    static std::string sound_work[7];
 
 
     void requestSound_Work();

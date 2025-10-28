@@ -13,9 +13,6 @@ std::string Farmer::FarmerCarry[7]={"","CarryWood","CarryMeat","CarryStone","Car
 
 string Farmer::sound_click = "Click_Villager";
 
-std::string Farmer::sound_work[7] = {\
-    "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
-};
 
 Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent,int farmerType_)
 {

@@ -1,0 +1,14 @@
+{
+    "GAME_WIDTH":1920,
+    "GAME_HEIGHT":1000,
+    "GAME_VERSION":"v3.0",
+    "MAP_VISIABLE":false,
+    "MAP_EXPLORE":false,
+    "sound_work":["", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"],
+    "farmer_type":{
+        "farmer":{
+            "blood":20,
+            "speed":10.0
+        }
+    }
+}
