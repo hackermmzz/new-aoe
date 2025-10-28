@@ -6,7 +6,7 @@
 void ParseArguments(const QApplication&app);
 int main(int argc, char* argv[])
 {
-
+cout<<"hello world"<<endl;
     //
     QApplication app(argc, argv);
     QResource::registerResource("./res.rcc");
