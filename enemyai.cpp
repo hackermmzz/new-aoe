@@ -823,13 +823,21 @@ void EnemyAI::processData() {
         ifDead(Building,VECTORBUILDING);
     }
 }
-     /*###########YOUR CODE ENDS HERE###########*/
+
+// 用于处理攻击波次函数
+// 传入参数：第 x 波进攻
 void EnemyAI::onWaveAttack(int wave) {
-    // TODO: 发起第wave波进攻
-    if (wave < 1 || wave > 3) {
-        // std::string debugStr = "非法波次：" + std::to_string(wave);
-        // call_debugText("black", " AI" + QString::number(0) + "打印：" + QString::fromStdString(debugStr), 0);
-       // return;
+    // 判断进攻波次，并且分别实现每波进攻的策略
+
+    if(wave == 1){
+        // 第一波进攻逻辑
     }
-    mode = wave;
+    else if(wave == 2){
+        // 第二波进攻逻辑
+    }
+    else if(wave == 3){
+        // 第三波进攻逻辑
+    }
+
+    
 }
