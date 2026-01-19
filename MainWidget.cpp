@@ -5,12 +5,14 @@
 #include <QString>
 #include <algorithm>
 #include <QApplication>
-#include<rectarea.h>
-#include<circlearea.h>
-#include<LineArea.h>
+#include <rectarea.h>
+#include <circlearea.h>
+#include <LineArea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
-int mapmoveFrequency = INITIAL_FREQUENCY;
+// mapmoveFrequency 将在 initGameTimer() 中根据 INITIAL_FREQUENCY 初始化
+// 不能在这里初始化，因为此时 configInit() 可能还未被调用
+int mapmoveFrequency;
 
 // 全局区域对象定义
 RectArea* g_rectArea = nullptr;
@@ -1229,6 +1231,19 @@ void MainWidget::initOptions() {
     connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+     //根据INITIAL_FREQUENCY默认选中对应的倍速按钮
+     if (INITIAL_FREQUENCY == 1) {
+         ui->radioButton_1->setChecked(true);
+     } else if (INITIAL_FREQUENCY == 2) {
+         ui->radioButton_2->setChecked(true);
+     } else if (INITIAL_FREQUENCY == 4) {
+         ui->radioButton_4->setChecked(true);
+     } else if (INITIAL_FREQUENCY == 8) {
+         ui->radioButton_8->setChecked(true);
+     } else {
+         // 如果INITIAL_FREQUENCY不是标准值，默认选中1×
+         ui->radioButton_1->setChecked(true);
+     }
     //绑定设置按钮
     connect(ui->option, &QPushButton::clicked, option, &QDialog::show);
     connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
@@ -1271,7 +1286,23 @@ void MainWidget::initGameTimer() {
     qDebug() << "初始化计时器...";
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
-    timer->start(TimePerFrame);
+    //方案2：根据INITIAL_FREQUENCY设置初始计时器间隔和mapmoveFrequency
+    static int interval = 40;
+    mapmoveFrequency = INITIAL_FREQUENCY;  // 确保mapmoveFrequency被正确初始化
+    if (INITIAL_FREQUENCY == 1) {
+        timer->setInterval(interval);
+    } else if (INITIAL_FREQUENCY == 2) {
+        timer->setInterval(interval / 2);
+    } else if (INITIAL_FREQUENCY == 4) {
+        timer->setInterval(interval / 4);
+    } else if (INITIAL_FREQUENCY == 8) {
+        timer->setInterval(interval / 8);
+    } else {
+        // 如果INITIAL_FREQUENCY不是标准值，使用默认值
+        timer->setInterval(interval);
+        mapmoveFrequency = 1;
+    }
+    timer->start();
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
