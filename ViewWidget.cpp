@@ -139,8 +139,9 @@ void ViewWidget::paintEvent(QPaintEvent *)
             painter.fillRect((QRect(ret[0],ret[1],d.w,d.h)),d.color);
         }
     }
+
     //绘制当前区域边框
-    const static int EdgeW=160,EdgeH=60;
+    const static int EdgeW=87,EdgeH=35;
     auto&&ret=MapTo(screenL,screenU);
     QPen pen;
     pen.setColor(QColor(Qt::white));
