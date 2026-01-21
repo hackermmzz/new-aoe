@@ -1,8 +1,10 @@
-﻿#include "MainWidget.h"
+#include "MainWidget.h"
 #include <QApplication>
 #include <QMap>
+#include <QCommandLineParser>
 #include "Logger.h"
-#include"EventFilter.h"
+#include "EventFilter.h"
+#include "GlobalVariate.h"
 void ParseArguments(const QApplication&app);
 extern void configInit();
 int main(int argc, char* argv[])

@@ -14,12 +14,12 @@ int TimePerFrame=40;//一帧要耗的时间
 NetworkPlugin*NetworkManager;
 QString GameServerAddr="http://localhost:8080/api/admin/CodeRunStatusPost";
 int Indices=-1;
-int DataPostIntervalFrame=100;//每隔100帧上传一次数据
+int DataPostIntervalFrame=100;            //每隔100帧上传一次数据
 QString Id;
 QString API_Value;
 //
 const bool EditorMode=false;
-const bool GlobalVision=false;//是否开启全局视野
+const bool GlobalVision=true;             //是否开启全局视野
 EventFilter *eventFilter;
 //
 map<std::string, std::list<QPixmap>> resMap;
