@@ -1,4 +1,6 @@
 {
+    "EDITORMODE": true,
+    "GLOBALVISION": true,
     "GAME_WIDTH": 1920,
     "GAME_HEIGHT": 1000,
     "GAME_VERSION": "v3.0",
