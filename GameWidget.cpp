@@ -1,4 +1,4 @@
-﻿#include "GameWidget.h"
+#include "GameWidget.h"
 #include "ui_GameWidget.h"
 #include "Map.h"
 #include <QDateTime>
@@ -471,7 +471,13 @@ void GameWidget::drawmemory(int X, int Y,  ImageResource&res, int globalNum)
             {
                 if(res.memorymap.getMemoryMap(i,j)!=0)
                 {
-                    mainwidget->memorymap[mx/4][my/4]=globalNum;
+                    int memoryX = mx/4;
+                    int memoryY = my/4;
+                    // 添加边界检查，防止数组越界
+                    if(memoryX >= 0 && memoryX < MEMORYROW && memoryY >= 0 && memoryY < MEMORYCOLUMN)
+                    {
+                        mainwidget->memorymap[memoryX][memoryY]=globalNum;
+                    }
                 }
             }
         }
