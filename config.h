@@ -359,6 +359,8 @@ extern string ACT_BUILD_MARKET_NAME;
 extern string ACT_BUILD_ARROWTOWER_NAME;
 extern string ACT_BUILD_DOCK_NAME;
 extern string ACT_SHIP_LAY_NAME;
+extern string ACT_BUILD_COLLAGE_NAME;
+extern string ACT_BUILD_SIEGE_NAME;
 
 extern string ACT_ARMYCAMP_CREATE_CLUBMAN_NAME;
 extern string ACT_ARMYCAMP_CREATE_SLINGER_NAME;
@@ -614,7 +616,7 @@ extern string ACT_NULL_NAME;
 //#define GAME_TITLE "Age of Empires"     //总窗口名称
 #define MAPFILE_SUFFIX "njust"           //地图文件后缀？？改了函数报错
 #define GAME_LOSE_SEC 30*60
-#define GAME_WIN_GOLD 2500               //?？改成常量直接胜利
+#define GAME_WIN_GOLD 250000               //?？改成常量直接胜利
 //#define GOLD 10                         //金块资源数量
 //#define STONE 10                        //石头资源数量
 #define gen5 sqrt(5)                    //???改了地图直接消失，出现刀斧手弓箭手的提示
@@ -725,7 +727,7 @@ extern string ACT_NULL_NAME;
 
 
 /********** 建筑种类 **********/
-#define BUILDING_TYPE_MAXNUM 12
+#define BUILDING_TYPE_MAXNUM 13  // 【修改】扩展建筑类型最大数量，添加学院
 #define BUILDING_HOME 0
 #define BUILDING_GRANARY 1
 #define BUILDING_CENTER 2
@@ -739,7 +741,9 @@ extern string ACT_NULL_NAME;
 #define BUILDING_STABLE 8
 #define BUILDING_RANGE 9
 #define BUILDING_DOCK 10
-#define BUILDING_WALL 11
+#define BUILDING_WALL 13
+#define BUILDING_COLLAGE 11
+#define BUILDING_SIEGE 12
 
 //Building_Resource类（产资源建筑）
 #define BUILDING_FARM 4
@@ -994,6 +998,8 @@ extern string ACT_NULL_NAME;
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
 #define ACT_BUILD_DOCK 61
+#define ACT_BUILD_COLLAGE 63
+#define ACT_BUILD_SIEGE 64
 
 #define ACT_SHIP_LAY 62
 

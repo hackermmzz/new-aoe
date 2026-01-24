@@ -54,7 +54,8 @@ void SelectWidget::initActionResourceMap() {
     actionResourceMap[ACT_BUILD_STABLE] = "Button_Stable";
     actionResourceMap[ACT_BUILD_DOCK] = "Button_Dock";
     actionResourceMap[ACT_SHIP_LAY] = "Button_Lay";
-}
+    actionResourceMap[ACT_BUILD_COLLAGE] = "Button_Collage";
+    actionResourceMap[ACT_BUILD_SIEGE] = "Button_Siege";}
 
 SelectWidget::~SelectWidget()
 {
@@ -734,6 +735,12 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
     case ACT_BUILD_DOCK:
         setCursorAndBuildMode("Dock", BUILDING_DOCK);
         break;
+    case ACT_BUILD_COLLAGE:
+        setCursorAndBuildMode("Collage_Egypt", BUILDING_COLLAGE);
+        break;
+    case ACT_BUILD_SIEGE:
+        setCursorAndBuildMode("Siege_Egypt", BUILDING_SIEGE);
+        break;
     case ACT_BUILD_CANCEL:
         QApplication::restoreOverrideCursor();
         emit sendBuildMode(-1);
@@ -835,7 +842,9 @@ void SelectWidget::showBuildActLab()
     manageBuildBottom(6, ACT_BUILD_RANGE, BUILDING_RANGE);
     manageBuildBottom(7, ACT_BUILD_STABLE, BUILDING_STABLE);
     manageBuildBottom(8, ACT_BUILD_FARM, BUILDING_FARM);
-    manageBuildBottom(9, ACT_BUILD_DOCK, BUILDING_DOCK);
+    // manageBuildBottom(9, ACT_BUILD_DOCK, BUILDING_DOCK);
+    manageBuildBottom(10, ACT_BUILD_COLLAGE, BUILDING_COLLAGE);
+    manageBuildBottom(9, ACT_BUILD_SIEGE, BUILDING_SIEGE);
 
     actions[11] = ACT_BUILD_CANCEL;
     actionStatus[11] = ACT_STATUS_ENABLED;
