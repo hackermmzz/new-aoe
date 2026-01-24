@@ -18,8 +18,8 @@ int DataPostIntervalFrame=100;            //每隔100帧上传一次数据
 QString Id;
 QString API_Value;
 //
-const bool EditorMode=true;
-const bool GlobalVision=true;             //是否开启全局视野
+const bool EditorMode=false;
+const bool GlobalVision=false;             //是否开启全局视野
 EventFilter *eventFilter;
 //
 map<std::string, std::list<QPixmap>> resMap;
