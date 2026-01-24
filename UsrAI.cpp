@@ -10,6 +10,6 @@ ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 void UsrAI::processData()
 {
-   cheatRes();
-   cheatAction();
+   // cheatRes();
+   // cheatAction();
 }

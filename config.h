@@ -727,7 +727,7 @@ extern string ACT_NULL_NAME;
 
 
 /********** 建筑种类 **********/
-#define BUILDING_TYPE_MAXNUM 13  // 【修改】扩展建筑类型最大数量，添加学院
+#define BUILDING_TYPE_MAXNUM 13
 #define BUILDING_HOME 0
 #define BUILDING_GRANARY 1
 #define BUILDING_CENTER 2
