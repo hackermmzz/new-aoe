@@ -1461,7 +1461,7 @@ void MainWidget::initBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for (int j = 0;j < 11;j++)
+        for (int j = 0;j < 13;j++)
         {
             Building::allocatebuilt(i, j);
             loadResource(Building::getBuiltname(i, j), Building::getBuilt(i, j));
@@ -2014,7 +2014,8 @@ bool MainWidget::isLoss()
 bool MainWidget::isWin()
 {
     auto* hero = player[0];
-    return hero->getGold() >= GAME_WIN_GOLD;
+//    return hero->getGold() >= GAME_WIN_GOLD;
+    return false;
 }
 
 void MainWidget::judgeVictory()

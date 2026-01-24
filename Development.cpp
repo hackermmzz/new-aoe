@@ -523,5 +523,20 @@ void Development::init_DevelopLab()
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].setHead(newNode);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].endNodeAsOver();
     }
+
+    //学院
+    {
+        developLab[BUILDING_COLLAGE].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_COLLAGE, TIME_BUILD_COLLAGE, BUILD_COLLAGE_WOOD, 0, BUILD_COLLAGE_STONE);
+        // 设置学院的前置条件：需要先建造谷仓
+        developLab[BUILDING_COLLAGE].buildCon->addPreCondition(developLab[BUILDING_GRANARY].buildCon);
+    }
+
+    //攻城武器厂
+    {
+        developLab[BUILDING_SIEGE].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_SIEGE, TIME_BUILD_SIEGE, BUILD_SIEGE_WOOD, 0, BUILD_SIEGE_STONE);
+        // 设置攻城武器厂的前置条件：需要先建造谷仓
+        developLab[BUILDING_SIEGE].buildCon->addPreCondition(developLab[BUILDING_GRANARY].buildCon);
+    }
+
     //wlh友情提示：存在内存泄漏
 }
