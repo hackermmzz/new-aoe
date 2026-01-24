@@ -785,7 +785,7 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
 
     // 更新障碍物地图和资源地图
     map->loadBarrierMap(true);
-    map->reset_resMap_AI();
+    // map->reset_resMap_AI();
     ui->Game->update();  // 触发界面重绘
 }
 
