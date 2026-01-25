@@ -44,7 +44,7 @@ double Development::get_rate_Attack(int sort, int type, int armyClass, int attac
 
     if (interSort != -1 && interNum != -1)
     {
-        if (interSort == SORT_BUILDING && sort == SORT_ARMY && (type == AT_SWORDSMAN || type == AT_CAVALRY || type == AT_IMPROVED))
+        if (interSort == SORT_BUILDING && sort == SORT_ARMY && (type == AT_SWORDSMAN || type == AT_IMPROVED))
             rate = 2;
     }
 
@@ -529,6 +529,18 @@ void Development::init_DevelopLab()
         developLab[BUILDING_COLLAGE].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_COLLAGE, TIME_BUILD_COLLAGE, BUILD_COLLAGE_WOOD, 0, BUILD_COLLAGE_STONE);
         // 设置学院的前置条件：需要先建造谷仓
         developLab[BUILDING_COLLAGE].buildCon->addPreCondition(developLab[BUILDING_GRANARY].buildCon);
+
+        //造祭司
+        newNode = new conditionDevelop(
+            CIVILIZATION_STONEAGE, 
+            BUILDING_COLLAGE, 
+            TIME_BUILDING_COLLAGE_CREATE_PRIEST, 
+            0, 
+            BUILDING_COLLAGE_CREATE_PRIEST_FOOD
+        );
+        newNode->setCreatObjectAfterAction(SORT_ARMY, AT_PRIEST);
+        developLab[BUILDING_COLLAGE].actCon[BUILDING_COLLAGE_CREATE_PRIEST].setHead(newNode);
+        developLab[BUILDING_COLLAGE].actCon[BUILDING_COLLAGE_CREATE_PRIEST].endNodeAsOver();
     }
 
     //攻城武器厂
@@ -536,6 +548,17 @@ void Development::init_DevelopLab()
         developLab[BUILDING_SIEGE].buildCon = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_SIEGE, TIME_BUILD_SIEGE, BUILD_SIEGE_WOOD, 0, BUILD_SIEGE_STONE);
         // 设置攻城武器厂的前置条件：需要先建造谷仓
         developLab[BUILDING_SIEGE].buildCon->addPreCondition(developLab[BUILDING_GRANARY].buildCon);
+        //造投石车
+        newNode = new conditionDevelop(
+            CIVILIZATION_STONEAGE, 
+            BUILDING_SIEGE, 
+            TIME_BUILDING_SIEGE_CREATE_STONETHROWER, 
+            0, 
+            BUILDING_SIEGE_CREATE_STONETHROWER_FOOD
+        );
+        newNode->setCreatObjectAfterAction(SORT_ARMY, AT_STONETHROWER);
+        developLab[BUILDING_SIEGE].actCon[BUILDING_SIEGE_CREATE_STONETHROWER].setHead(newNode);
+        developLab[BUILDING_SIEGE].actCon[BUILDING_SIEGE_CREATE_STONETHROWER].endNodeAsOver();
     }
 
     //wlh友情提示：存在内存泄漏

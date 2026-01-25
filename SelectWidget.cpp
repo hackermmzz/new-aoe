@@ -36,6 +36,8 @@ void SelectWidget::initActionResourceMap() {
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_RIDER] = "ButtonTech_Horse";
     actionResourceMap[ACT_ARMYCAMP_UPGRADE_CLUBMAN] = "ButtonTech_Axeman";
     actionResourceMap[ACT_ARMYCAMP_CREATE_SLINGER] = "Button_Slinger";
+    actionResourceMap[ACT_COLLAGE_CREATE_PRIEST] = "Button_Priest";
+    actionResourceMap[ACT_SIEGE_CREATE_STONETHROWER] = "Button_StoneThrower";
     actionResourceMap[ACT_RANGE_CREATE_BOWMAN] = "Button_Archer";
     actionResourceMap[ACT_STABLE_CREATE_SCOUT] = "Button_Scout";
     actionResourceMap[ACT_DOCK_CREATE_SAILING] = "Button_Sailing";
@@ -54,8 +56,8 @@ void SelectWidget::initActionResourceMap() {
     actionResourceMap[ACT_BUILD_STABLE] = "Button_Stable";
     actionResourceMap[ACT_BUILD_DOCK] = "Button_Dock";
     actionResourceMap[ACT_SHIP_LAY] = "Button_Lay";
-    actionResourceMap[ACT_BUILD_COLLAGE] = "Button_Collage";
-    actionResourceMap[ACT_BUILD_SIEGE] = "Button_Siege";}
+    actionResourceMap[ACT_BUILD_COLLAGE] = "Button_Collage_Egypt";
+    actionResourceMap[ACT_BUILD_SIEGE] = "Button_Siege_Egypt";}
 
 SelectWidget::~SelectWidget()
 {
@@ -807,6 +809,12 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         break;
     case ACT_DOCK_CREATE_SHIP:
         core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_DOCK_CREATE_SHIP);
+        break;
+    case ACT_COLLAGE_CREATE_PRIEST:
+        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_COLLAGE_CREATE_PRIEST);
+        break;
+    case ACT_SIEGE_CREATE_STONETHROWER:
+        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_SIEGE_CREATE_STONETHROWER);
         break;
     case ACT_STOP:
         if (nowobject != nullptr) {

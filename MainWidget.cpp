@@ -2,6 +2,7 @@
 #include "ui_MainWidget.h"
 #include "ui_Editor.h"
 #include <iostream>
+#include <cstdio>
 #include <QString>
 #include <algorithm>
 #include <QApplication>
@@ -60,9 +61,12 @@ std::map<int, std::string> actNames = {
     {ACT_BUILD_ARMYCAMP, ACT_BUILD_ARMYCAMP_NAME},
     {ACT_BUILD_RANGE, ACT_BUILD_RANGE_NAME},
     {ACT_BUILD_STABLE, ACT_BUILD_STABLE_NAME},
+    {ACT_BUILD_COLLAGE, ACT_BUILD_COLLAGE_NAME},
+    {ACT_BUILD_SIEGE, ACT_BUILD_SIEGE_NAME},
     {ACT_RANGE_CREATE_BOWMAN, ACT_RANGE_CREATE_BOWMAN_NAME},
     {ACT_RESEARCH_WALL, ACT_RESEARCH_WALL_NAME},
     {ACT_STABLE_CREATE_SCOUT, ACT_STABLE_CREATE_SCOUT_NAME},
+    {ACT_SIEGE_CREATE_STONETHROWER, ACT_SIEGE_CREATE_STONETHROWER_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_ARCHER, ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_RIDER, ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME},
@@ -1500,6 +1504,10 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_DOCK, 0, ACT_DOCK_CREATE_SAILING);
     Building::setActNames(BUILDING_DOCK, 1, ACT_DOCK_CREATE_WOOD_BOAT);
     Building::setActNames(BUILDING_DOCK, 2, ACT_DOCK_CREATE_SHIP);
+    //学院
+    Building::setActNames(BUILDING_COLLAGE, 1, ACT_COLLAGE_CREATE_PRIEST);
+    //攻城武器厂
+    Building::setActNames(BUILDING_SIEGE, 1, ACT_SIEGE_CREATE_STONETHROWER);
 }
 
 // 初始化动物
@@ -1681,7 +1689,7 @@ void MainWidget::initFarmer()
 void MainWidget::initArmy()
 {
     //加载素材
-    //"Archer","Axeman","Clubman","Scout"
+    //"Archer","Axeman","Clubman","Scout","Priest","StoneThrrower"
 
     // Stand Walk Die
     for (int statei = 0;statei < 8;statei++)
@@ -1697,7 +1705,7 @@ void MainWidget::initArmy()
                 Army::allocateAttack(0, statei, level, i);
                 loadResource(Army::getArmyName(statei, level) + "_Attack_" + direction[i], Army::getAttack(0, statei, level, i));
                 loadResource(Army::getArmyName(statei, level) + "_Disappear_" + direction[i], Army::getDisappear(0, statei, level, i));
-                loadResource(Army::getArmyName(statei, level) + "_Stand_" + direction[i], Army::getStand(0, statei, level, i));
+                loadResource(Army::getArmyName(statei, level) + "_Stand_" + direction[i], Army::getDisappear(0, statei, level, i));
                 loadResource(Army::getArmyName(statei, level) + "_Walk_" + direction[i], Army::getWalk(0, statei, level, i));
                 loadResource(Army::getArmyName(statei, level) + "_Die_" + direction[i], Army::getDie(0, statei, level, i));
 
