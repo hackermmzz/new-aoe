@@ -19,7 +19,7 @@ QString Id;
 QString API_Value;
 //
 const bool EditorMode=false;
-const bool GlobalVision=false;             //是否开启全局视野
+const bool GlobalVision=true;             //是否开启全局视野
 EventFilter *eventFilter;
 //
 map<std::string, std::list<QPixmap>> resMap;
