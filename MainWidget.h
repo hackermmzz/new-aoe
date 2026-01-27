@@ -1,4 +1,4 @@
-﻿#ifndef MAINWIDGET_H
+#ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
 #include "config.h"
@@ -99,6 +99,7 @@ public:
         TREE,
         STONM,
         GOLDORE,
+        BERRY,
         RECT_AREA,
         CIRCLE_AREA,
         LINE_AREA,

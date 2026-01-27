@@ -243,6 +243,11 @@
      <string>金矿</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>浆果</string>
+    </property>
+   </item>
   </widget>
   <widget class="QComboBox" name="animal">
    <property name="geometry">
