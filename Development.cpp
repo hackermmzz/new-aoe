@@ -367,10 +367,12 @@ void Development::init_DevelopLab()
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].setHead(newNode);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
 
-        //升级时代
+        //升级至工具时代
         newNode = new conditionDevelop(CIVILIZATION_STONEAGE, BUILDING_CENTER, TIME_BUILDING_CENTER_UPGRADE, \
             0, BUILDING_CENTER_UPGRADE_FOOD);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].setHead(newNode);
+        //升级至铜器时代
+        //newNode =new conditionDevelop()
         /** 缺少石器时代两个建筑的前置条件*/
     }
 
