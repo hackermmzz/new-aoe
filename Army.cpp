@@ -34,7 +34,8 @@ std::string Army::ArmyName[20][2]={{"Clubman","Axeman"},
                                   {"Scout","Scout"},
                                   {"Sworder","Sworder"},
                                   {"ImprovedArcher","ImprovedArcher"},
-                                  {"Cavalry","Cavalry"},
+                                  {"Priest","Priest"},
+                                  {"StoneThrower","StoneThrower"},
                                   {"Ship","Ship"}
                                  };
 
@@ -226,7 +227,7 @@ void Army::setNowRes()
             break;
         }
     }
-    if(templist!= nowlist && templist)
+    if(templist!= nowlist && templist && !templist->empty())
     {
         nowlist = templist;
         nowres = nowlist->begin();
@@ -585,24 +586,41 @@ void Army::setAttribute()
         nowres_step = NOWRES_TIMER_SCOUT;
         break;
 
-    case AT_CAVALRY:      //侦察骑兵
+    case AT_PRIEST:         //祭司
         upgradable = false;
-        dependBuildNum = BUILDING_STABLE;
-        armyClass = ARMY_RIDER;
+        dependBuildNum = BUILDING_COLLAGE;
+        armyClass = ARMY_INFANTRY;
         attackType = ATTACKTYPE_CLOSE;
 
-        MaxBlood = BLOOD_CAVALRY;
-        speed = SPEED_CAVALRY;
-        vision = VISION_CAVALRY;
-        atk = ATK_CAVALRY;
-        dis_Attack = DIS_CAVALRY;
-        inter_Attack = INTERVAL_CAVALRY;
-        defence_close = DEFCLOSE_CAVALRY;
-        defence_shoot = DEFSHOOT_CAVALRY;
+        MaxBlood = BLOOD_PRIEST;
+        speed = SPEED_PRIEST;
+        vision = VISION_PRIEST;
+        atk = ATK_PRIEST;
+        dis_Attack = DIS_PRIEST;
+        inter_Attack = INTERVAL_PRIEST;
+        defence_close = DEFCLOSE_PRIEST;
+        defence_shoot = DEFSHOOT_PRIEST;
 
-        crashLength = CRASHBOX_SMALLOB;
+        crashLength = CRASHBOX_SINGLEOB;
+        nowres_step = NOWRES_TIMER_CLUBMAN;
+        break;
+    case AT_STONETHROWER:         //投石车
+        upgradable = false;
+        dependBuildNum = BUILDING_SIEGE;
+        armyClass = ARMY_INFANTRY;
+        attackType = ATTACKTYPE_CLOSE;
 
-        nowres_step = NOWRES_TIMER_CAVALRY;
+        MaxBlood = BLOOD_STONETHROWER;
+        speed = SPEED_STONETHROWER;
+        vision = VISION_STONETHROWER;
+        atk = ATK_STONETHROWER;
+        dis_Attack = DIS_STONETHROWER;
+        inter_Attack = INTERVAL_STONETHROWER;
+        defence_close = DEFCLOSE_STONETHROWER;
+        defence_shoot = DEFSHOOT_STONETHROWER;
+
+        crashLength = CRASHBOX_SINGLEOB;
+        nowres_step = NOWRES_TIMER_CLUBMAN;
         break;
     case AT_SHIP:           //战船
         upgradable = false;

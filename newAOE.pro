@@ -64,7 +64,8 @@ SOURCES += \
     RectArea.cpp \
     CircleArea.cpp \
     LineArea.cpp \
-    networkplugin.cpp
+    networkplugin.cpp \
+    config.cpp
 
 HEADERS += \
         MainWidget.h \

@@ -7,27 +7,27 @@ std::list<ImageResource>* Building::buildFire[3];
 
 std::string Building::Buildingname[4]={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
 std::string Building::Builtname[3][20]={{},
-                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock"},
-                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock"}
+                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Collage_Egypt","Siege_Egypt",""},
+                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Collage_Egypt","Siege_Egypt",""}
                                       };
-std::string Building::BuildDisplayName[20]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场","船坞"};
+std::string Building::BuildDisplayName[20]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场","船坞","学院","攻城武器厂",""};
 
 std::string Building::BuildFireName[3] = { "S_Fire", "M_Fire", "B_Fire"};
 
 std::string Building::sound_click[20] = {\
-    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market","Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range","Click_Range"
+    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market","Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range","Click_Dock","Click_Collage","Click_Siege",""\
 };
 
 int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
 
 int Building::BuildingMaxBlood[20] = { BLOOD_BUILD_HOUSE,  BLOOD_BUILD_GRANARY, BLOOD_BUILD_CENTER, BLOOD_BUILD_STOCK, BLOOD_BUILD_FARM,\
-                                     BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE, BLOOD_BUILD_RANGE,BLOOD_BUILD_DOCK};
+                                     BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE, BLOOD_BUILD_RANGE,BLOOD_BUILD_DOCK,BLOOD_BUILD_COLLAGE,BLOOD_BUILD_SIEGE,0};
 
 int Building::BuildingFundation[20] = { FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,\
-                                      FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,FOUNDATION_SMALL};
+                                      FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,FOUNDATION_SMALL,FOUNDATION_MIDDLE,FOUNDATION_MIDDLE,0};
 
 int Building::BuildingVision[20] = { VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,\
-                                     VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE,VISION_DOCK};
+                                     VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE, VISION_RANGE,VISION_DOCK,VISION_COLLAGE,VISION_SIEGE,0};
 
 /********************静态资源**************************/
 bool is_cheatAction = false;
@@ -131,6 +131,8 @@ void Building::setAttribute()
     case BUILDING_STABLE:
     case BUILDING_WALL:
     case BUILDING_DOCK:
+    case BUILDING_COLLAGE:
+    case BUILDING_SIEGE:
         break;
     case BUILDING_ARROWTOWER:
         atk = ATK_BUILD_ARROWTOWER;
@@ -253,6 +255,12 @@ void Building::ActNumToActName()
         else if(actNum == BUILDING_DOCK_CREATE_WOOD_BOAT) actName = ACT_DOCK_CREATE_WOOD_BOAT;
         else if(actNum == BUILDING_DOCK_CREATE_SHIP) actName = ACT_DOCK_CREATE_SHIP;
     }
+    else if(Num == BUILDING_COLLAGE){
+        if(actNum == BUILDING_COLLAGE_CREATE_PRIEST) actName = ACT_COLLAGE_CREATE_PRIEST;
+    }
+    else if(Num == BUILDING_SIEGE){
+        if(actNum == BUILDING_SIEGE_CREATE_STONETHROWER) actName = ACT_SIEGE_CREATE_STONETHROWER;
+    }
 }
 
 
@@ -354,6 +362,12 @@ bool Building::isMatchResourceType(int resourceType)
 
     if(Num == BUILDING_GRANARY &&  resourceType == HUMAN_GRANARYFOOD )
         return true;
+
+    if(Num == BUILDING_COLLAGE)
+        return false;
+
+    if(Num == BUILDING_SIEGE)
+        return false;
 
     return false;
 }

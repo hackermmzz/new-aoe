@@ -2673,6 +2673,18 @@ void Map::loadGenerateMapText(int MapJudge)
 {
     // 使用高精度时间为种子的真随机数生成器
     auto&&AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX);
+    
+    // 检查是否有地图文件
+    if(AllMapFile.empty()){
+        qWarning() << "没有找到地图文件，开始生成新地图\n";
+        // 生成新地图
+        generateResources();
+        generateResource();
+        generateCenterAround();
+        generateEnemy();
+        return;
+    }
+    
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
@@ -2684,6 +2696,11 @@ void Map::loadGenerateMapText(int MapJudge)
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         qWarning() << "文件打开错误\n";
+        // 文件打开失败，生成新地图
+        generateResources();
+        generateResource();
+        generateCenterAround();
+        generateEnemy();
         return;
     }
     QJsonParseError * error = nullptr;

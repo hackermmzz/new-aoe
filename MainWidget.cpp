@@ -2,15 +2,18 @@
 #include "ui_MainWidget.h"
 #include "ui_Editor.h"
 #include <iostream>
+#include <cstdio>
 #include <QString>
 #include <algorithm>
 #include <QApplication>
-#include<rectarea.h>
-#include<circlearea.h>
-#include<LineArea.h>
+#include <rectarea.h>
+#include <circlearea.h>
+#include <LineArea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
-int mapmoveFrequency = INITIAL_FREQUENCY;
+// mapmoveFrequency 将在 initGameTimer() 中根据 INITIAL_FREQUENCY 初始化
+// 不能在这里初始化，因为此时 configInit() 可能还未被调用
+int mapmoveFrequency;
 
 // 全局区域对象定义
 RectArea* g_rectArea = nullptr;
@@ -58,9 +61,12 @@ std::map<int, std::string> actNames = {
     {ACT_BUILD_ARMYCAMP, ACT_BUILD_ARMYCAMP_NAME},
     {ACT_BUILD_RANGE, ACT_BUILD_RANGE_NAME},
     {ACT_BUILD_STABLE, ACT_BUILD_STABLE_NAME},
+    {ACT_BUILD_COLLAGE, ACT_BUILD_COLLAGE_NAME},
+    {ACT_BUILD_SIEGE, ACT_BUILD_SIEGE_NAME},
     {ACT_RANGE_CREATE_BOWMAN, ACT_RANGE_CREATE_BOWMAN_NAME},
     {ACT_RESEARCH_WALL, ACT_RESEARCH_WALL_NAME},
     {ACT_STABLE_CREATE_SCOUT, ACT_STABLE_CREATE_SCOUT_NAME},
+    {ACT_SIEGE_CREATE_STONETHROWER, ACT_SIEGE_CREATE_STONETHROWER_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_ARCHER, ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_RIDER, ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME},
@@ -783,7 +789,7 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
 
     // 更新障碍物地图和资源地图
     map->loadBarrierMap(true);
-    map->reset_resMap_AI();
+    // map->reset_resMap_AI();
     ui->Game->update();  // 触发界面重绘
 }
 
@@ -1229,6 +1235,19 @@ void MainWidget::initOptions() {
     connect(ui->radioButton_2, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_4, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
     connect(ui->radioButton_8, SIGNAL(clicked()), this, SLOT(onRadioClickSlot()));
+     //根据INITIAL_FREQUENCY默认选中对应的倍速按钮
+     if (INITIAL_FREQUENCY == 1) {
+         ui->radioButton_1->setChecked(true);
+     } else if (INITIAL_FREQUENCY == 2) {
+         ui->radioButton_2->setChecked(true);
+     } else if (INITIAL_FREQUENCY == 4) {
+         ui->radioButton_4->setChecked(true);
+     } else if (INITIAL_FREQUENCY == 8) {
+         ui->radioButton_8->setChecked(true);
+     } else {
+         // 如果INITIAL_FREQUENCY不是标准值，默认选中1×
+         ui->radioButton_1->setChecked(true);
+     }
     //绑定设置按钮
     connect(ui->option, &QPushButton::clicked, option, &QDialog::show);
     connect(option, &Option::changeMusic, this, &MainWidget::responseMusicChange);
@@ -1271,7 +1290,23 @@ void MainWidget::initGameTimer() {
     qDebug() << "初始化计时器...";
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
-    timer->start(TimePerFrame);
+    //方案2：根据INITIAL_FREQUENCY设置初始计时器间隔和mapmoveFrequency
+    static int interval = 40;
+    mapmoveFrequency = INITIAL_FREQUENCY;  // 确保mapmoveFrequency被正确初始化
+    if (INITIAL_FREQUENCY == 1) {
+        timer->setInterval(interval);
+    } else if (INITIAL_FREQUENCY == 2) {
+        timer->setInterval(interval / 2);
+    } else if (INITIAL_FREQUENCY == 4) {
+        timer->setInterval(interval / 4);
+    } else if (INITIAL_FREQUENCY == 8) {
+        timer->setInterval(interval / 8);
+    } else {
+        // 如果INITIAL_FREQUENCY不是标准值，使用默认值
+        timer->setInterval(interval);
+        mapmoveFrequency = 1;
+    }
+    timer->start();
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
@@ -1430,7 +1465,7 @@ void MainWidget::initBuilding()
     }
     for (int i = 1; i < 3; i++)
     {
-        for (int j = 0;j < 11;j++)
+        for (int j = 0;j < 13;j++)
         {
             Building::allocatebuilt(i, j);
             loadResource(Building::getBuiltname(i, j), Building::getBuilt(i, j));
@@ -1469,6 +1504,10 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_DOCK, 0, ACT_DOCK_CREATE_SAILING);
     Building::setActNames(BUILDING_DOCK, 1, ACT_DOCK_CREATE_WOOD_BOAT);
     Building::setActNames(BUILDING_DOCK, 2, ACT_DOCK_CREATE_SHIP);
+    //学院
+    Building::setActNames(BUILDING_COLLAGE, 1, ACT_COLLAGE_CREATE_PRIEST);
+    //攻城武器厂
+    Building::setActNames(BUILDING_SIEGE, 1, ACT_SIEGE_CREATE_STONETHROWER);
 }
 
 // 初始化动物
@@ -1650,7 +1689,7 @@ void MainWidget::initFarmer()
 void MainWidget::initArmy()
 {
     //加载素材
-    //"Archer","Axeman","Clubman","Scout"
+    //"Archer","Axeman","Clubman","Scout","Priest","StoneThrrower"
 
     // Stand Walk Die
     for (int statei = 0;statei < 8;statei++)
@@ -1666,7 +1705,7 @@ void MainWidget::initArmy()
                 Army::allocateAttack(0, statei, level, i);
                 loadResource(Army::getArmyName(statei, level) + "_Attack_" + direction[i], Army::getAttack(0, statei, level, i));
                 loadResource(Army::getArmyName(statei, level) + "_Disappear_" + direction[i], Army::getDisappear(0, statei, level, i));
-                loadResource(Army::getArmyName(statei, level) + "_Stand_" + direction[i], Army::getStand(0, statei, level, i));
+                loadResource(Army::getArmyName(statei, level) + "_Stand_" + direction[i], Army::getDisappear(0, statei, level, i));
                 loadResource(Army::getArmyName(statei, level) + "_Walk_" + direction[i], Army::getWalk(0, statei, level, i));
                 loadResource(Army::getArmyName(statei, level) + "_Die_" + direction[i], Army::getDie(0, statei, level, i));
 
@@ -1983,7 +2022,8 @@ bool MainWidget::isLoss()
 bool MainWidget::isWin()
 {
     auto* hero = player[0];
-    return hero->getGold() >= GAME_WIN_GOLD;
+//    return hero->getGold() >= GAME_WIN_GOLD;
+    return false;
 }
 
 void MainWidget::judgeVictory()

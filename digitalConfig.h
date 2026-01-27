@@ -6,9 +6,7 @@
 #define REPRESENT_BOARDCAST_MESSAGE -1
 
 
-/**********地图可见性设置************/
-#define MAP_EXPLORE false
-#define MAP_VISIABLE false
+
 
 
 /**********玩家初始资源设置************/
@@ -140,6 +138,24 @@
 /**生产运输船**/
 #define BUILDING_DOCK_CREATE_WOOD_BOAT_WOOD 150
 #define TIME_BUILDING_DOCK_CREATE_WOOD_BOAT 30
+/**学院**/
+#define BLOOD_BUILD_COLLAGE 400
+#define VISION_COLLAGE 4
+#define BUILD_COLLAGE_WOOD 200
+#define BUILD_COLLAGE_STONE 100
+#define TIME_BUILD_COLLAGE 50
+/**生产祭祀 */
+#define BUILDING_COLLAGE_CREATE_PRIEST_FOOD 50
+#define TIME_BUILDING_COLLAGE_CREATE_PRIEST 26
+/**攻城武器厂**/
+#define BLOOD_BUILD_SIEGE 400
+#define VISION_SIEGE 4
+#define BUILD_SIEGE_WOOD 200
+#define BUILD_SIEGE_STONE 100
+#define TIME_BUILD_SIEGE 50
+/**生产投石车 */
+#define BUILDING_SIEGE_CREATE_STONETHROWER_FOOD 50
+#define TIME_BUILDING_SIEGE_CREATE_STONETHROWER 26
 //升级伐木（1级）
 #define BUILDING_MARKET_WOOD_UPGRADE_FOOD 120
 #define BUILDING_MARKET_WOOD_UPGRADE_WOOD 75
@@ -248,14 +264,16 @@
 //#define AT_ELEPHENTARCHER 8
 
 #define AT_SCOUT 3
-#define AT_CAVALRY 6
+//#define AT_CAVALRY 6
 //#define AT_CAMEL 11
 //#define AT_CHARIOT 12
 //#define AT_ELEPHENT 13
 
 #define AT_SHIP 7
 /********** 祭祀 **********/
-#define AT_PRIEST 51
+#define AT_PRIEST 8
+/********** 投石车 **********/
+#define AT_STONETHROWER 9
 
 
 /********** 攻城工具 **********/
@@ -408,6 +426,26 @@
 #define INTERVAL_SHIP 1.4
 #define DEFCLOSE_SHIP 0
 #define DEFSHOOT_SHIP 0
+
+//祭司
+#define BLOOD_PRIEST 35
+#define SPEED_PRIEST (0.8*HUMAN_SPEED)
+#define VISION_PRIEST 5
+#define DIS_PRIEST 0
+#define INTERVAL_PRIEST 2.0
+#define ATK_PRIEST 1
+#define DEFCLOSE_PRIEST 1
+#define DEFSHOOT_PRIEST 0
+
+//投石车
+#define BLOOD_STONETHROWER 35
+#define SPEED_STONETHROWER (0.8*HUMAN_SPEED)
+#define VISION_STONETHROWER 5
+#define DIS_STONETHROWER 0
+#define INTERVAL_STONETHROWER 2.0
+#define ATK_STONETHROWER 1
+#define DEFCLOSE_STONETHROWER 1
+#define DEFSHOOT_STONETHROWER 0
 /********** 飞行物投掷判断 **********/
 #define THROWMISSION_FARMER 25
 #define THROWMISSION_ARCHER 4
