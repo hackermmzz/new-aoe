@@ -207,6 +207,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         if (text == "树木") this->currentSelected = TREE;
         else if (text == "石头") this->currentSelected = STONM;
         else if (text == "金矿") this->currentSelected = GOLDORE;
+        else if (text == "浆果") this->currentSelected = BERRY;
         if (text != "公立资源") call_debugText("green", " " + text, 0);
         });
     // 巡逻区域控制
@@ -589,6 +590,9 @@ void MainWidget::updateEditor()
             break;
         case STONM:
             MakeStaticRes(L, U, STONM);
+            break;
+        case BERRY:
+            MakeStaticRes(L, U, BERRY);
             break;
         case ELEPHANT:
             MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), ELEPHANT);
@@ -1084,6 +1088,11 @@ void MainWidget::MakeStaticRes(int blockL, int blockU, int type)
     {
         map->addStaticRes(3, blockL, blockU);
     }
+        else if (type == BERRY)
+    {
+        map->addStaticRes(0, blockL, blockU);
+    }
+
 }
 
 void MainWidget::MakeAnimal(double DR, double UR, int type)
