@@ -635,8 +635,8 @@ extern string ACT_NULL_NAME;
 //#define GAMEWIDGET_HEIGHT 751
 #define BLOCKSIDELENGTH (16*gen5)
 //#define UNLOAD_RADIAN  2                //卸货时候寻找合适的陆地的半径
-#define MAP_L 128
-#define MAP_U 128
+#define MAP_L 100
+#define MAP_U 100
 #define GENERATE_L (MAP_L+8)
 #define GENERATE_U (MAP_U+8)
 //#define GAMEWIDGET_MIDBLOCKL 22
