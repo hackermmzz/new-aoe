@@ -43,6 +43,8 @@ private:
      void assignTargetsBasedOnVision();
      int getVisionRange(int unitSort);
      int findBestTargetInVision(int centerX, int centerY, int range, int attackerSort);
+     void FirstAttack();
+     void SecondAttack();
      
      // 敌人状态相关方法
      string getEnemyStatus(int unitSN);

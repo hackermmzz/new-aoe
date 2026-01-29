@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cfloat>
+#include <QDebug>
 
 using std::string;
 using std::vector;
@@ -51,6 +52,11 @@ static vector <int> Defend;
 static map<int, bool> ifA;
 static int sum;
 static int mode = -3;
+
+static vector<tagFarmer>deadFirst;
+static vector<tagArmy>attackEnemy;
+static vector<int> farmerSNs;
+static map<int,pair<int,int>> Army_location;
 
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
@@ -783,6 +789,29 @@ void EnemyAI::processData() {
         }
     }
 
+    for(const auto& farmer : enemyInfo.enemy_farmers) {
+        farmerSNs.push_back(farmer.SN);
+    }
+    if(Army_location.empty())
+    {
+        for(tagArmy&army:enemyInfo.armies)
+            Army_location[army.SN]=make_pair(army.BlockDR,army.BlockUR);
+    }
+    /*
+    for(tagArmy& army : enemyInfo.armies) {
+        if(army.WorkObjectSN!=-1) continue;
+        if (!farmerSNs.empty()) {
+            int targetSN = findNearestTarget(army.BlockDR, army.BlockUR, farmerSNs);
+            // 仅在目标有效时发起攻击
+            if (targetSN != -1) {
+                HumanAction(army.SN, targetSN);
+            }
+        }
+    }
+    return;
+    */
+       onWaveAttack(1);
+return;
     // 新的基于视野的攻击系统
     assignTargetsBasedOnVision();
     return;
@@ -829,8 +858,8 @@ void EnemyAI::processData() {
 void EnemyAI::onWaveAttack(int wave) {
     // 判断进攻波次，并且分别实现每波进攻的策略
 
-    if(wave == 1){
-        // 第一波进攻逻辑
+    if(wave == 1 &&g_frame>=250){
+        FirstAttack();
     }
     else if(wave == 2){
         // 第二波进攻逻辑
@@ -840,4 +869,103 @@ void EnemyAI::onWaveAttack(int wave) {
     }
 
     
+}
+
+void EnemyAI::FirstAttack()
+{
+    // 1. 初始化目标农民 (只在为空时执行一次)
+    if(deadFirst.empty() && !enemyInfo.enemy_farmers.empty())
+    {
+        for(int i = 0; i < 3 && i < enemyInfo.enemy_farmers.size(); i++)
+            deadFirst.push_back(enemyInfo.enemy_farmers[i]);
+    }
+
+    // 2. 初始化进攻部队 (只在为空时执行一次)
+    if(attackEnemy.empty() && !deadFirst.empty())
+    {
+        double sumBlockdr = 0, sumBlockur = 0;
+        for (tagFarmer& c : deadFirst) {
+            sumBlockdr += c.BlockDR;
+            sumBlockur += c.BlockUR;
+        }
+        int avgDr = sumBlockdr / deadFirst.size();
+        int avgUr = sumBlockur / deadFirst.size();
+
+        vector<pair<tagArmy, int>> cmp_Distance;
+        for(tagArmy& army : enemyInfo.armies) {
+            cmp_Distance.emplace_back(army, pow(army.BlockDR - avgDr, 2) + pow(army.BlockUR - avgUr, 2));
+        }
+        sort(cmp_Distance.begin(), cmp_Distance.end(), [](const pair<tagArmy, int>& a, const pair<tagArmy, int>& b){
+            return a.second < b.second;
+        });
+
+        // 取前5个距离最近的士兵进入骚扰小组
+        for(int i = 0; i < 5 && i < cmp_Distance.size(); i++)
+            attackEnemy.push_back(cmp_Distance[i].first);
+    }
+
+    // 3. 任务分配与状态监控
+    auto it = attackEnemy.begin();
+    while (it != attackEnemy.end())
+    {
+        tagArmy& a_backup = *it;
+        tagArmy* realArmy = nullptr;
+
+        // 在当前帧寻找该士兵的实时状态
+        for(auto& real : enemyInfo.armies) {
+            if(real.SN == a_backup.SN) {
+                realArmy = &real;
+                break;
+            }
+        }
+
+        // A. 士兵已阵亡，直接从任务列表移除
+        if(!realArmy) {
+            it = attackEnemy.erase(it);
+            continue;
+        }
+
+        // B. 检查任务目标（农民）是否还活着
+   /*     bool targetAlive = false;
+        for(auto& f : enemyInfo.enemy_farmers) {
+            if(f.SN == a_backup.WorkObjectSN&&f.Blood>0) {
+                targetAlive = true;
+                break;
+            }
+        }
+*/
+        if (a_backup.WorkObjectSN == -1) {
+            // 还没有任务：分配一个目标农民
+            int targetIdx = std::distance(attackEnemy.begin(), it) % deadFirst.size();
+            int targetSN = deadFirst[targetIdx].SN;
+
+            HumanAction(realArmy->SN, targetSN);
+            a_backup.WorkObjectSN = targetSN; // 更新备份里的任务状态
+            ++it;
+        }
+
+        bool targetAlive = false;
+        for(auto& f : enemyInfo.enemy_farmers) {
+            if(f.SN == a_backup.WorkObjectSN&&f.Blood>0) {
+                targetAlive = true;
+                break;
+            }
+        }
+       /* else if (targetAlive) {
+            // 目标还活着：如果士兵闲置了（比如被卡住或目标跑远了），重新下达攻击指令
+            if (realArmy->status == ARMY_STATE_DEFAULT) {
+                HumanAction(realArmy->SN, a_backup.WorkObjectSN);
+            }
+            ++it;
+        }*/
+       if(a_backup.WorkObjectSN != -1&&!targetAlive){
+            cout<<targetAlive;
+                auto posIt = Army_location.find(realArmy->SN);
+                if(posIt != Army_location.end()&&realArmy->WorkObjectSN!=-1) {
+                    HumanMove(realArmy->SN, Army_location[realArmy->SN].first, Army_location[realArmy->SN].second);
+                }
+                it = attackEnemy.erase(it);
+
+        }
+    }
 }
