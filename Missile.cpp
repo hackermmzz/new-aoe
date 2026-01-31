@@ -1,6 +1,6 @@
 #include "Missile.h"
 
-std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" , "Cobblestone"};
+std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" , "Cobblestone","Boulders"};
 std::list<ImageResource>* Missile::missile[NUMBER_MISSILE];
 
 Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight , Development* playerScience, int playerRepresent)
@@ -14,6 +14,8 @@ Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int begin
     this->UR = attacker->getUR();
     this->DR0 = attackee->getDR();
     this->UR0 = attackee->getUR();
+    this->initDR=this->DR;
+    this->initUR=this->UR;
     BlockDR = transBlock(DR);
     BlockUR = transBlock(UR);
     Height_begin = beginHeight; //设置初始出发高度
@@ -42,7 +44,10 @@ void Missile::setAttribute()
         isAOE = false;
         isMandatoryArrive = false;
         speed = Missile_Speed_Cobblestone;
-
+    case Missile_Boulders:
+        isAOE = true;
+        isMandatoryArrive=false;
+        speed=Missile_Speed_Boulders;
     default:
         break;
     }
@@ -53,9 +58,9 @@ void Missile::setAttribute()
 void Missile::nextframe()
 {
     updateMove();
+    updateViewPosition();
+    setNowRes();
     updateLU();
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/8.0;
 }
 
 void Missile::setNowRes()
@@ -84,7 +89,7 @@ void Missile::calculateDMove()
 int Missile::calculateAngle(double nextDR, double nextUR)
 {
     int tempAngle = 0 , partNum = 32;
-    double dDR =nextDR - DR , dUR = nextUR - UR , sita = atan2(dUR,dDR) , gama , neta;
+    double dDR =nextDR - viewDR , dUR = nextUR - viewUR , sita = atan2(dUR,dDR) , gama , neta;
     const double pi = 3.1415926 ;
     double halfPi = pi/2, quarterPi = pi/4 , circle = 2*pi;
 
@@ -194,4 +199,46 @@ void Missile::deleteAttackerSponsor(Coordinate* attacker)
         set_attackerDie();
         AttackSponsor = NULL;
     }
+}
+
+void Missile::updateViewPosition()
+{
+    //获取当前初始位置initDR,initUR和目标点DR0,UR0,根据起始点和目标点更新投掷物绘制坐标
+    //增量到视图坐标
+    auto&&ret=calculateViewPosition(DR,UR);
+    viewDR=ret[0],viewUR=ret[1];
+    //更新角度
+    auto&&ret1=calculateViewPosition(PredictedDR,PredictedUR);
+    Angle=calculateAngle(ret1[0],ret1[1]);
+    //更新imageXY
+   this->updateImageXYByNowRes();
+}
+
+std::array<double, 2> Missile::calculateViewPosition(double curDR, double curUR)
+{
+    //////////////////////////////////////////////////这里作者汪，只提供最简单的变换，更加逼真的仿射变换交给你
+    //这边有bug，除以0的bug
+    static double factor=1.732050807568877;
+    static double sqrt2=sqrt(2);
+    double x0=abs(initDR-DR0)/2.0;
+    if(x0==0)return std::array<double,2>{curDR,curUR};
+    double x=abs(x0-abs(curDR-initDR));
+    double y=-factor*(x-x0)*(x+x0)/x0;
+    //计算向量
+    double dx=initDR-DR0,dy=initUR-UR0;
+    double div=2*(dx*dx+dy*dy);
+    if(div==0)return std::array<double,2>{curDR,curUR};
+    double cosP=(dx+dy)*(dx+dy)/div;
+    y*=cosP;
+    return std::array<double,2>{curDR-y/sqrt2,curUR+y/sqrt2};
+}
+
+double Missile::getViewDR()
+{
+    return viewDR;
+}
+
+double Missile::getViewUR()
+{
+    return viewUR;
 }

@@ -2672,7 +2672,7 @@ void Map::GenerateMapTxt(int MapJudge) {
 void Map::loadGenerateMapText(int MapJudge)
 {
     // 使用高精度时间为种子的真随机数生成器
-    auto&&AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX);
+    auto AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX);
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
@@ -3013,61 +3013,6 @@ void Map::init(int MapJudge) {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText(MapJudge);  //载入地图
     divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
-
-    // 敌人配置现在从map.txt文件中读取，不再硬编码
-    // 如果没有从文件中读取到敌人配置，则使用默认配置
-//    if(player[1]->human.empty()) {
-//        Player& enemy = (*player[1]);
-
-//        //巡逻船
-//        enemy.addArmyAROUND(AT_SHIP,100,1500,ARMY_STATE_AROUND,300,10000,2000,20);
-//        enemy.addArmyAROUND(AT_SHIP,500,1600,ARMY_STATE_AROUND,300,10000,2000,400);
-//        enemy.addArmyAROUND(AT_SHIP,1200,1350,ARMY_STATE_AROUND,300,10000,2400,1300);
-//        enemy.addArmyAROUND(AT_SHIP,1700,1000,ARMY_STATE_AROUND,300,10000,2500,1900);
-//        enemy.addArmyAROUND(AT_SHIP,2400,1000,ARMY_STATE_AROUND,300,10000,2000,2500);
-//        enemy.addArmyAROUND(AT_SHIP,3100,1000,ARMY_STATE_AROUND,300,10000,2000,2900);
-//        enemy.addArmyAROUND(AT_SHIP,3150,1700,ARMY_STATE_AROUND,300,10000,1700,3400);
-//        enemy.addArmyAROUND(AT_SHIP,3700,1900,ARMY_STATE_AROUND,300,10000,1200,3900);
-//        enemy.addArmyAROUND(AT_SHIP,4100,1000,ARMY_STATE_AROUND,300,10000,500,4300);
-//        enemy.addArmyAROUND(AT_SHIP,4500,1000,ARMY_STATE_AROUND,300,10000,100,4300);
-
-
-//        // 内陆巡逻骑兵
-//        enemy.addArmyAROUND(AT_SCOUT,4000,700,ARMY_STATE_AROUND,300,10000,2100,4550);
-//        enemy.addArmyAROUND(AT_SCOUT,3300,750,ARMY_STATE_AROUND,300,10000,3800,3000);
-//        enemy.addArmyAROUND(AT_SCOUT,1800,50,ARMY_STATE_AROUND,300,10000,4450,3100);
-
-//        //  内陆进攻兵(基准点700 2500替换为2000 500)
-//        enemy.addArmyATTACK(0,2000,525,3,3000,37500);
-//        enemy.addArmyATTACK(0,2000,550,3,3000,37500);
-//        enemy.addArmyATTACK(0,2000,575,3,3000,37500);
-//        enemy.addArmyATTACK(0,2000,600,3,3000,37500);
-//        enemy.addArmyATTACK(1,2025,500,3,3000,37500);
-//        enemy.addArmyATTACK(1,2050,500,3,3000,37500);
-//        enemy.addArmyATTACK(1,2075,500,3,3000,37500);
-//        enemy.addArmyATTACK(1,2100,500,3,3000,37500);
-//        enemy.addArmyATTACK(2,2025,525,3,3000,37500);
-//        enemy.addArmyATTACK(2,2025,550,3,3000,37500);
-//        enemy.addArmyATTACK(2,2050,525,3,3000,37500);
-//        enemy.addArmyATTACK(2,2050,550,3,3000,37500);
-
-//        //  内陆防守兵（基准点500,1600替换为3000 400）
-//        enemy.addArmyDEFENSE(0,3000,400,2);
-//        enemy.addArmyDEFENSE(0,3000,425,2);
-//        enemy.addArmyDEFENSE(0,3000,450,2);
-//        enemy.addArmyDEFENSE(0,3000,475,2);
-//        enemy.addArmyDEFENSE(1,3025,400,2);
-//        enemy.addArmyDEFENSE(1,3050,400,2);
-//        enemy.addArmyDEFENSE(1,3075,400,2);
-//        enemy.addArmyDEFENSE(1,3100,400,2);
-//        enemy.addArmyDEFENSE(2,3025,425,2);
-//        enemy.addArmyDEFENSE(2,3025,450,2);
-//        enemy.addArmyDEFENSE(2,3050,425,2);
-//        enemy.addArmyDEFENSE(2,3050,450,2);
-
-//        qDebug() << "使用默认敌人配置";
-//    }
-
     refineShore();
 }
 

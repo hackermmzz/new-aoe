@@ -747,7 +747,7 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_CENTER_CREATEFARMER);
         break;
     case ACT_UPGRADE_AGE:
-        if (mainPtr->player[0]->get_civiBuild_Times(mainPtr->player[0]->getCiv()) >= 2)
+        //if (mainPtr->player[0]->get_civiBuild_Times(mainPtr->player[0]->getCiv()) >= 2) 这个条件在内核满足就行，这里不需要给
             core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_CENTER_UPGRADE);
         break;
     case ACT_UPGRADE_TOWERBUILD:

@@ -87,13 +87,12 @@ private:
     Missile* creatMissile(Coordinate* , Coordinate*);
 
     void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
-
+    vector<BloodHaver*> deal_RangeAttack(Coordinate* missile,const array<double,2>&center);
     void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
     void init_resetResBuild(){ needReset_resBuild = false; }
 
     void requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject = NULL);
-
-
+    void change_HumanRepresent(Human*human,int represent);
     /************控制行动************/
     void object_Move(Coordinate * object , double DR , double UR);  //控制移动
     void object_Attack(Coordinate* , Coordinate* ); //控制因object1影响object2血量

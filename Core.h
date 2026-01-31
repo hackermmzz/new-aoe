@@ -54,7 +54,7 @@ public:
     void judge_Crush();
     bool judge_CanTransPort(Coordinate *obj);
     bool judge_CanTransPort(Coordinate* obj1, Coordinate* obj2);
-
+    bool judge_IsHuman(Coordinate*obj);
     void loadRelationMap();
     static Coordinate* getObject(int mx,int my);//当编辑器功能打开才可以使用,否则只返回0
     /************管理添加表************/

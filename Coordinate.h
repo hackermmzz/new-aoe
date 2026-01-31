@@ -80,7 +80,9 @@ public:
     double getUR(){return this->UR;}
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
-
+    //获取游戏绘制得经过处理的DR,
+    virtual double getViewDR(){return getDR();}
+    virtual double getViewUR(){return getUR();}
     //块、细节坐标转换
     double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
     int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }

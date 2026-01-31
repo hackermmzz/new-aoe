@@ -746,7 +746,6 @@ void Core::manageMouseEvent()
         {
             Farmer* farmer = NULL;
             Building* buildOb = NULL;
-
             switch (nowobject->getSort())
             {
             case SORT_FARMER:
@@ -824,6 +823,8 @@ void Core::manageMouseEvent()
                         interactionList->addRelation(nowobject, object_click, CoreEven_Attacking);
                     else if (object_click->getSort() == SORT_FARMER && ((Farmer*)object_click)->get_farmerType() == FARMERTYPE_WOOD_BOAT) {
                         interactionList->addRelation(nowobject, object_click, CoreEven_Transport);
+                    }else if(nowobject->getNum()==AT_PRIEST&&judge_IsHuman(object_click)){//祭司军队
+                        interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
                     }
                     break;
                 default:
@@ -1063,6 +1064,16 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
         if (self->getPlayerRepresent() != obj->getPlayerRepresent()) {
             ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
             logActionResult(ret, self, obj, 2, 0, "攻击", id);
+        }
+        else if(self->getNum()==AT_PRIEST){
+            //判断目标是否为人类
+            if(judge_IsHuman(obj))ret=ACTION_INVALID_PRIEST_TARGET_ERROR;
+            //祭司可以选中所有阵营的人类单位
+            else{
+                bool samRep=self->getPlayerRepresent()==obj->getPlayerRepresent();
+                ret=interactionList->addRelation(self,obj,CoreEven_Attacking);
+                logActionResult(ret,self,obj,2,0,samRep?"治疗":"转换",id);
+            }
         }
         else {
             ret = ACTION_INVALID_ACTION; // 不能攻击友方单位
@@ -1368,6 +1379,13 @@ bool Core::judge_CanTransPort(Coordinate* obj1, Coordinate* obj2)
         return judge_CanTransPort(obj2);
     }
     return false;
+}
+
+bool Core::judge_IsHuman(Coordinate *obj)
+{
+    Human*hm=0;
+    obj->printer_ToHuman((void**)&hm);
+    return hm!=0;
 }
 
 void Core::loadRelationMap()

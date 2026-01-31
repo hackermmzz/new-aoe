@@ -195,9 +195,10 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(iter!=drawlist.end())
         {
             // x、y坐标偏移量
-            int tx = tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR), ty = tranY((*iter)->getDR()-DR, (*iter)->getUR()-UR);
+            double dr=(*iter)->getViewDR(),ur=(*iter)->getViewUR();
+            int tx = tranX(dr-DR, ur-UR), ty = tranY(dr-DR, ur-UR);
             // BlockDR、BlockUR
-            int tmpBlockDR = (*iter)->getDR() / BLOCKSIDELENGTH, tmpBlockUR = (*iter)->getUR() / BLOCKSIDELENGTH;
+            int tmpBlockDR = dr/ BLOCKSIDELENGTH, tmpBlockUR = ur / BLOCKSIDELENGTH;
             int x=tx - (*iter)->getimageX() + mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX();
             int y=(*iter)->getimageY() - (*iter)->getNowRes()->pix.height() + ty +  mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
             int w=(*iter)->getNowRes()->pix.width(),h=(*iter)->getNowRes()->pix.height();
@@ -216,8 +217,8 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(mainwidget->mouseEvent->HaveEvent()){//如果需要捕捉点击对象
                 tryCaptured=true;
                 int xx=mainwidget->mouseEvent->GetMemoryMapX()*4,yy=mainwidget->mouseEvent->GetMemoryMapY()*4;
-                int x=tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX();
-                int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR)+mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
+                int x=tranX(dr-DR, ur-UR)-(*iter)->getimageX();
+                int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY(dr-DR,ur-UR)+mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
                 auto&res=*(*iter)->getNowRes();
                 int w=res.pix.width(),h=res.pix.height();
                 if(xx>=x&&xx<=(x+w)&&yy>=y&&yy<=(y+h)){
@@ -234,8 +235,8 @@ void GameWidget::paintEvent(QPaintEvent *)
             }
             //如果开启了编辑器,绘制内存图
             if(EditorMode){
-                drawmemory(tranX((*iter)->getDR()-DR, (*iter)->getUR()-UR)-(*iter)->getimageX(),
-                                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY((*iter)->getDR()-DR,(*iter)->getUR()-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
+                drawmemory(tranX(dr-DR, ur-UR)-(*iter)->getimageX(),
+                                       (*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY(dr-DR,ur-UR) + /*(*iter)->getMapHeightOffsetY()*/ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY(),
                                        (*(*iter)->getNowRes()),(*iter)->getglobalNum());
             }
             //

@@ -66,7 +66,7 @@ public:
     //获取“复仇”目标位置
     void get_AvangeObject_Position( double& DR, double& UR ){ DR = DR_avange; UR = UR_avange; }
 
-    void updateBlood(int damage){ Blood -= (double)damage/(double)getMaxBlood(); if(Blood<0) Blood = 0; }
+    void updateBlood(int damage);
     //更新“复仇”目标的当前位置
     void updateAvangeObjectPosition(){ if(avangeObject!=NULL)
                                         { DR_avange = avangeObject->getDR(); UR_avange = avangeObject->getUR(); } }

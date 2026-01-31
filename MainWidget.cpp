@@ -1428,16 +1428,16 @@ void MainWidget::initBuilding()
         Building::allocatebuild(i);
         loadResource(Building::getBuildingname(i), Building::getBuild(i));
     }
-    for (int i = 1; i < 3; i++)
+    for (int i = 1; i < 4; i++)
     {
-        for (int j = 0;j < 11;j++)
+        for (int j = 0;j < BUILDING_TYPE_MAXNUM;j++)
         {
             Building::allocatebuilt(i, j);
             loadResource(Building::getBuiltname(i, j), Building::getBuilt(i, j));
         }
     }
 
-    for (int type = 0; type < 3; type++)
+    for (int type = 0; type < 4; type++)
     {
         Building::allocatebuildFire(type);
         loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
@@ -1469,6 +1469,8 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_DOCK, 0, ACT_DOCK_CREATE_SAILING);
     Building::setActNames(BUILDING_DOCK, 1, ACT_DOCK_CREATE_WOOD_BOAT);
     Building::setActNames(BUILDING_DOCK, 2, ACT_DOCK_CREATE_SHIP);
+    //攻城武器厂
+    Building::setActNames(BUILDING_SIEGE, 0, ACT_SIEGE_CREATE_STONE_THROWER);
 }
 
 // 初始化动物
@@ -1653,7 +1655,7 @@ void MainWidget::initArmy()
     //"Archer","Axeman","Clubman","Scout"
 
     // Stand Walk Die
-    for (int statei = 0;statei < 8;statei++)
+    for (int statei = 0;statei < AT_ARMY_MAX_NUM;statei++)
     {
         for (int level = 0; level < 2;level++)
         {
@@ -1982,6 +1984,9 @@ bool MainWidget::isLoss()
 }
 bool MainWidget::isWin()
 {
+    //开发者状态默认永远不会赢
+    return false;
+    //
     auto* hero = player[0];
     return hero->getGold() >= GAME_WIN_GOLD;
 }
@@ -2177,7 +2182,7 @@ void MainWidget::onRadioClickSlot()
 void MainWidget::cheat_Player0Resource()
 {
     if(!IsExamining)
-        player[0]->changeResource(1000, 500, 500, 500);
+        player[0]->changeResource(1000, 5000, 5000, 5000);
 }
 
 void MainWidget::on_stopButton_clicked()

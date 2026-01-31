@@ -33,8 +33,11 @@ public:
     int addFarmer(double DR,double UR);
     int addShip(int Num,double DR,double UR);
     Missile* addMissile( Coordinate* attacker , Coordinate* attackee  , int beginHeight);
-
-    //删除实例对象
+    //移除实例对象
+    void removeHuman(Human*target);
+    //插入实例对象
+    void insertHuman(Human*target);
+    //删除实例对象(会清理内存)
     list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele );
     list<Building*>::iterator deleteBuilding( list<Building*>::iterator iterDele );
     list<Missile*>::iterator deleteMissile( list<Missile*>::iterator iterDele );

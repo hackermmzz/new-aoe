@@ -138,6 +138,22 @@ Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee , int b
     return newMissile;
 }
 
+void Player::removeHuman(Human *target)
+{
+    for(auto itr=human.begin();itr!=human.end();++itr){
+        auto*x=*itr;
+        if(x==target){
+            human.erase(itr);
+            break;
+        }
+    }
+}
+
+void Player::insertHuman(Human *target)
+{
+    human.push_back(target);
+}
+
 //删除实例对象
 list<Human*>::iterator Player::deleteHuman( list<Human*>::iterator iterDele )
 {

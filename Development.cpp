@@ -60,8 +60,10 @@ int Development::get_addition_Attack(int sort, int type, int armyClass, int atta
     {
         level = getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_USETOOL);
         switch (level) {
+        case 2:
+            addition +=BUILDING_STOCK_UPGRADE_CLOSER_ATTACK_2_ADDITION_ATTACK;
         case 1:
-            addition += BUILDING_STOCK_UPGRADE_USETOOL_ADDITION_ATKCLOSE;
+            addition += BUILDING_STOCK_UPGRADE_CLOSER_ATTACK_ADDITION_ATTACK;
         default:
             break;
         }
@@ -77,7 +79,15 @@ int Development::get_addition_Attack(int sort, int type, int armyClass, int atta
         }
 
     }
-
+    if(sort==SORT_BUILDING&&type==BUILDING_ARMYCAMP){
+        level=getActLevel(BUILDING_GRANARY,BUILDING_GRANARY_ARROWTOWE_UPGRADE);
+        switch (level) {
+        case 1:
+            addition+=BUILDING_GRANARY_UPGRADE_ARROWTOWER_ADDITION_ATK;
+        default:
+            break;
+        }
+    }
     return addition;
 }
 
@@ -141,6 +151,8 @@ int Development::get_addition_Defence(int sort, int type, int armyClass, int att
             {
                 level = getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY);
                 switch (level) {
+                case 2:
+                    addition+=BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_2_ADDITION_DEFENSE_INFANTRY;
                 case 1:
                     addition += BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_ADDITION_DEFENSE_INFANTRY;
                 default:
@@ -152,6 +164,8 @@ int Development::get_addition_Defence(int sort, int type, int armyClass, int att
             {
                 level = getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER);
                 switch (level) {
+                case 2:
+                    addition += BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_2_ADDITION_DEFENSE_ARCHER;
                 case 1:
                     addition += BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_ADDITION_DEFENSE_ARCHER;
                 default:
@@ -163,6 +177,8 @@ int Development::get_addition_Defence(int sort, int type, int armyClass, int att
             {
                 level = getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_RIDER);
                 switch (level) {
+                case 2:
+                     addition += BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_2_ADDITION_DEFENSE_RIDER;
                 case 1:
                     addition += BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_ADDITION_DEFENSE_RIDER;
                 default:
@@ -368,11 +384,13 @@ void Development::init_DevelopLab()
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_CREATEFARMER].endNodeAsOver();
 
         //升级至工具时代
-        newNode = new conditionDevelop(CIVILIZATION_STONEAGE, BUILDING_CENTER, TIME_BUILDING_CENTER_UPGRADE, \
-            0, BUILDING_CENTER_UPGRADE_FOOD);
+        newNode = new conditionDevelop(CIVILIZATION_STONEAGE, BUILDING_CENTER, TIME_BUILDING_CENTER_UPGRADE,
+            0, BUILDING_CENTER_UPGRADE_TOOLAGE_FOOD);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].setHead(newNode);
         //升级至铜器时代
-        //newNode =new conditionDevelop()
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE,BUILDING_CENTER,TIME_BUILDING_CENTER_UPGRADE,
+                                       0,BUILDING_CENTER_UPGRADE_BRONZEAGE_FOOD,0,BUILDING_CENTER_UPGRADE_BRONZEAGE_GOLD);
+        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].push_back(newNode);
         /** 缺少石器时代两个建筑的前置条件*/
     }
 
@@ -384,9 +402,9 @@ void Development::init_DevelopLab()
     {
         developLab[BUILDING_STOCK].buildCon = new conditionDevelop(CIVILIZATION_STONEAGE, BUILDING_STOCK, TIME_BUILD_STOCK, BUILD_STOCK_WOOD);
 
-        //升级工具利用
-        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_STOCK, TIME_BUILDING_STOCK_UPGRADE_USETOOL, \
-            0, BUILDING_STOCK_UPGRADE_USETOOL_FOOD);
+        //升级/近战部队攻击力
+        newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_STOCK, TIME_BUILDING_STOCK_UPGRADE_CLOSER_ATTACK, \
+            0, BUILDING_STOCK_UPGRADE_CLOSER_ATTACK_FOOD);
         developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_USETOOL].setHead(newNode);
         //升级步兵护甲
         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_STOCK, TIME_BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY, \
@@ -400,6 +418,22 @@ void Development::init_DevelopLab()
         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_STOCK, TIME_BUILDING_STOCK_UPGRADE_DEFENSE_RIDER, \
             0, BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_FOOD);
         developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_RIDER].setHead(newNode);
+        //铜器时代
+        //近战部队攻击力+2
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_STOCK,TIME_BUILDING_STOCK_UPGRADE_CLOSER_ATTACK_2,0,BUILDING_STOCK_UPGRADE_CLOSER_ATTACK_2_FOOD,0,BUILDING_STOCK_UPGRADE_CLOSER_ATTACK_2_GOLD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_USETOOL].push_back(newNode);
+        //步兵护甲+2
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_STOCK,TIME_BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_2,0,BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_2_FOOD,0,BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY_2_GOLD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY].push_back(newNode);
+        //弓兵护甲+2
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_STOCK,TIME_BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_2,0,BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_2_FOOD,0,BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER_2_GOLD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER].push_back(newNode);
+        //骑兵护甲+2
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_STOCK,TIME_BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_2,0,BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_2_FOOD,0,BUILDING_STOCK_UPGRADE_DEFENSE_RIDER_2_GOLD);
+        developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_DEFENSE_RIDER].push_back(newNode);
+        //步兵对投射武器防御力+1
+        //newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_STOCK,TIME_BUILDING_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY,0,BUILDING_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY_FOOD,0,BUILDING_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY_GOLD);
+        //developLab[BUILDING_STOCK].actCon[BUILDING_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY].setHead(newNode);
     }
 
 
@@ -410,6 +444,8 @@ void Development::init_DevelopLab()
         //研发、升级箭塔
         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_GRANARY, TIME_BUILDING_GRANARY_RESEARCH_ARROWTOWER, 0, BUILDING_GRANARY_ARROWTOWER_FOOD);
         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].setHead(newNode);
+        //铜器时代可以升级箭塔
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_GRANARY,TIME_BUILDING_GRANARY_UPGRADE_ARROWTOWER,0,BUILDING_GRANARY_UPGRADE_ARROWTOWER_FOOD,BUILDING_GRANARY_UPGRADE_ARROWTOWER_STONE,0);
         //研发城墙
 //         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_WALL , 0 , BUILDING_GRANARY_RESEARCH_WALL_FOOD);
 //         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].setHead(newNode);
@@ -524,6 +560,19 @@ void Development::init_DevelopLab()
         newNode->setCreatObjectAfterAction(SORT_ARMY, AT_SHIP);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].setHead(newNode);
         developLab[BUILDING_DOCK].actCon[BUILDING_DOCK_CREATE_SHIP].endNodeAsOver();
+    }
+    //攻城武器厂
+    {
+        developLab[BUILDING_SIEGE].buildCon=new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_SIEGE,TIME_BUILD_SIEGE,BUILD_SIEGE_WOOD,0,0,0);
+        newNode=new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_SIEGE,TIME_BUILDING_SIEGE_CREATE_STONE_THROWER,BUILDING_SIEGE_CREATE_STONE_THROWER_WOOD,0,0,BUILDING_SIEGE_CREATE_STONE_THROWER_GOLD);
+        //newNode->setCreatObjectAfterAction(SORT_ARMY,AT_STONE_THROWER);
+        developLab[BUILDING_SIEGE].actCon[BUILDING_SIEGE_CREATE_STONE_THROWER].setHead(newNode);
+        developLab[BUILDING_SIEGE].actCon[BUILDING_SIEGE_CREATE_STONE_THROWER].endNodeAsOver();
+    }
+    //学院
+    {
+        developLab[BUILDING_COLLAGE].buildCon=new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_COLLAGE,TIME_BUILD_COLLAGE,BUILD_COLLAGE_WOOD,0,0,0);
+
     }
     //wlh友情提示：存在内存泄漏
 }

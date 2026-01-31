@@ -21,31 +21,36 @@ using std::uniform_real_distribution;
 using std::uniform_int_distribution;
 
 //[playerrepresent][num][leve][angel]
-std::list<ImageResource>* Army::Walk[2][20][2][8];
-std::list<ImageResource>* Army::Disappear[2][20][2][8];
-std::list<ImageResource>* Army::Stand[2][20][2][8];
-std::list<ImageResource>* Army::Attack[2][20][2][8];
-std::list<ImageResource>* Army::Die[2][20][2][8];
+std::list<ImageResource>* Army::Walk[2][AT_ARMY_MAX_NUM][2][8];
+std::list<ImageResource>* Army::Disappear[2][AT_ARMY_MAX_NUM][2][8];
+std::list<ImageResource>* Army::Stand[2][AT_ARMY_MAX_NUM][2][8];
+std::list<ImageResource>* Army::Attack[2][AT_ARMY_MAX_NUM][2][8];
+std::list<ImageResource>* Army::Die[2][AT_ARMY_MAX_NUM][2][8];
 
 //[num][level]
-std::string Army::ArmyName[20][2]={{"Clubman","Axeman"},
+std::string Army::ArmyName[AT_ARMY_MAX_NUM][2]={{"Clubman","Axeman"},
                                   {"Slinger","Slinger"},
                                   {"Archer","Archer"},
                                   {"Scout","Scout"},
                                   {"Sworder","Sworder"},
                                   {"ImprovedArcher","ImprovedArcher"},
                                   {"Cavalry","Cavalry"},
-                                  {"Ship","Ship"}
+                                  {"Ship","Ship"},
+                                  {"StoneThrower","StoneThrower"},
+                                  {"Priest","Priest"}
                                  };
 
-std::string Army::ArmyDisplayName[20][2]={{"棍棒兵","刀斧兵"},
-                                         {"投石兵","投石兵"},
-                                         {"弓箭手","弓箭手"},
-                                         {"侦察骑兵","侦察骑兵"},
-                                         {"Prof.Yan","Prof.Yan"},
-                                         {"Prof.Lou","Prof.Lou"},
-                                         {"Prof.Lu","Prof.Lu"},
-                                         {"Prof.Wang","Prof.Wang"},
+std::string Army::ArmyDisplayName[AT_ARMY_MAX_NUM][2]={
+                                        {"棍棒兵","刀斧兵"},
+                                        {"投石兵","投石兵"},
+                                        {"弓箭手","弓箭手"},
+                                        {"侦察骑兵","侦察骑兵"},
+                                        {"Prof.Yan","Prof.Yan"},
+                                        {"Prof.Lou","Prof.Lou"},
+                                        {"Prof.Lu","Prof.Lu"},
+                                        {"Prof.Wang","Prof.Wang"},
+                                        {"投石车","投石车"},
+                                        {"祭司","祭司"}
                                         };
 
 string Army::click_sound = "Click_Army";
@@ -82,8 +87,6 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     this->ifAttack=false;
     this->timelock=15;
 
-    // 初始化巡逻系统
-    initPatrolSystem();
 
     setNowRes();
     updateImageXYByNowRes();
@@ -127,8 +130,6 @@ Army::Army(double DR,double UR,int Num ,int status, Development* playerScience, 
     this->timelock=15;
     isAttackable = true;
 
-    // 初始化巡逻系统
-    initPatrolSystem();
 
     setNowRes();
     updateImageXYByNowRes();
@@ -189,10 +190,6 @@ void Army::nextframe()
 
     updateImageXYByNowRes();
     
-    // 更新巡逻系统（仅对敌方单位）
-    if(playerRepresent == 1) {
-        updatePatrol();
-    }
 }
 
 void Army::setNowRes()
@@ -619,12 +616,53 @@ void Army::setAttribute()
         defence_close = DEFCLOSE_SHIP;
         defence_shoot = DEFSHOOT_SHIP;
 
-        crashLength = CRASHBOX_SINGLEOB;
+        crashLength = CRASHBOX_BIGOB;
 
         type_Missile = Missile_Arrow;
-        phaseFromEnd_MissionAttack = THROWMISSION_ARCHER;
+        phaseFromEnd_MissionAttack = THROWMISSION_SHIP;
 
-        nowres_step = NOWRES_TIMER_IMPROVEDBOWMAN1;
+        nowres_step = NOWRES_TIMER_SHIP;
+        break;
+    case AT_STONE_THROWER://投石车
+        upgradable = false;
+        dependBuildNum = BUILDING_SIEGE;
+        armyClass = ARMY_INFANTRY;
+        attackType = ATTACKTYPE_SHOOT;
+
+        MaxBlood = BLOOD_STONE_THROWER;
+        speed = SPEED_STONE_THROWER;
+        vision = VISION_STONE_THROWER;
+        atk = ATK_STONE_THROWER;
+        dis_Attack = DIS_STONE_THROWER;
+        inter_Attack = INTERVAL_STONE_THROWER;
+        defence_close = DEFCLOSE_STONE_THROWER;
+        defence_shoot = DEFSHOOT_STONE_THROWER;
+
+        crashLength = CRASHBOX_SMALL;
+
+        type_Missile = Missile_Boulders;
+        phaseFromEnd_MissionAttack = THROWMISSION_STONE_THROWER;
+
+        nowres_step = NOWRES_TIMER_STONE_THROWER;
+        break;
+    case AT_PRIEST://祭司
+        upgradable = false;
+        dependBuildNum = BUILDING_TEMPLE;
+        armyClass = ARMY_FLAMEN;
+        attackType = ATTACKTYPE_CHANGE;
+
+        MaxBlood = BLOOD_PRIEST;
+        speed = SPEED_PRIEST;
+        vision = VISION_PRIEST;
+        atk=ATK_PRIEST;//祭司的攻击力就是它对相同阵营恢复的血量
+        dis_Attack = DIS_PRIEST;
+        inter_Attack = INTERVAL_PRIEST;
+        defence_close = DEFCLOSE_PRIEST;
+        defence_shoot = DEFSHOOT_PRIEST;
+
+        crashLength = CRASHBOX_BIGOB;
+
+        nowres_step = NOWRES_TIMER_PRIEST;
         break;
     default:
         incorrectNum = true;
@@ -698,325 +736,3 @@ Army::~Army()
 
 }
 
-// 巡逻系统实现
-
-void Army::initPatrolSystem()
-{
-    patrolState = PATROL_STATE_IDLE;
-    patrolCenterDR = 0;
-    patrolCenterUR = 0;
-    currentPatrolTargetDR = 0;
-    currentPatrolTargetUR = 0;
-    chaseTarget = nullptr;
-    patrolTimer = 0;
-    patrolDirection = 1;  // 1顺时针, -1逆时针
-    lastPatrolAngle = 0;
-    patrolInitialized = false;
-}
-
-bool Army::hasPatrolArea()
-{
-    // 检查这个单位是否有巡逻区域 (通过globalNum查找enemyAreaLimit)
-    extern Map* GlobalMap;
-    if(!GlobalMap) return false;
-    
-    return GlobalMap->enemyAreaLimit.find(this->globalNum) != GlobalMap->enemyAreaLimit.end();
-}
-
-void Army::startPatrol()
-{
-    if(!hasPatrolArea()) return;
-    
-    extern Map* GlobalMap;
-    auto& areaData = GlobalMap->enemyAreaLimit[this->globalNum];
-    
-    // 根据区域类型设置巡逻中心点
-    if(areaData.first == "Circle") {
-        auto* circleData = (array<double,3>*)areaData.second;
-        patrolCenterDR = (*circleData)[0];
-        patrolCenterUR = (*circleData)[1];
-        // 半径信息在(*circleData)[2]中
-    }
-    else if(areaData.first == "Rect") {
-        auto* rectData = (array<double,4>*)areaData.second;
-        patrolCenterDR = (*rectData)[0];
-        patrolCenterUR = (*rectData)[1];
-    }
-    else if(areaData.first == "Line") {
-        auto* lineData = (vector<array<double,2>>*)areaData.second;
-        if(!lineData->empty()) {
-            // 使用第一个点作为中心点
-            patrolCenterDR = (*lineData)[0][0];
-            patrolCenterUR = (*lineData)[0][1];
-        }
-    }
-    
-    patrolState = PATROL_STATE_PATROLLING;
-    patrolInitialized = true;
-    generatePatrolPath();
-}
-
-void Army::generatePatrolPath()
-{
-    if(!hasPatrolArea()) return;
-    
-    extern Map* GlobalMap;
-    auto& areaData = GlobalMap->enemyAreaLimit[this->globalNum];
-    
-    static random_device rd;
-    static mt19937 gen(rd());
-    
-    if(areaData.first == "Circle") {
-        auto* circleData = (array<double,3>*)areaData.second;
-        double centerDR = (*circleData)[0];
-        double centerUR = (*circleData)[1];
-        double radius = (*circleData)[2];
-        
-        // 在圆形区域内生成随机巡逻点
-        uniform_real_distribution<> angleDist(0.0, 2 * M_PI);
-        uniform_real_distribution<> radiusDist(0.0, radius * 0.8);  // 避免太靠近边缘
-        
-        double angle = angleDist(gen);
-        double r = radiusDist(gen);
-        
-        currentPatrolTargetDR = centerDR + r * cos(angle);
-        currentPatrolTargetUR = centerUR + r * sin(angle);
-        lastPatrolAngle = angle;
-    }
-    else if(areaData.first == "Rect") {
-        auto* rectData = (array<double,4>*)areaData.second;
-        double centerDR = (*rectData)[0];
-        double centerUR = (*rectData)[1];
-        double width = (*rectData)[2];
-        double height = (*rectData)[3];
-        
-        // 在矩形区域内生成随机巡逻点
-        uniform_real_distribution<> drDist(centerDR - width/2 * 0.8, centerDR + width/2 * 0.8);
-        uniform_real_distribution<> urDist(centerUR - height/2 * 0.8, centerUR + height/2 * 0.8);
-        
-        currentPatrolTargetDR = drDist(gen);
-        currentPatrolTargetUR = urDist(gen);
-    }
-    else if(areaData.first == "Line") {
-        auto* lineData = (vector<array<double,2>>*)areaData.second;
-        if(!lineData->empty()) {
-            // 在线性区域中随机选择一个点
-            uniform_int_distribution<> pointDist(0, lineData->size() - 1);
-            int pointIndex = pointDist(gen);
-            
-            currentPatrolTargetDR = (*lineData)[pointIndex][0];
-            currentPatrolTargetUR = (*lineData)[pointIndex][1];
-        }
-    }
-}
-
-bool Army::isInPatrolArea()
-{
-    if(!hasPatrolArea()) return false;
-    
-    extern Map* GlobalMap;
-    auto& areaData = GlobalMap->enemyAreaLimit[this->globalNum];
-    
-    double currentDR = getDR();
-    double currentUR = getUR();
-    
-    if(areaData.first == "Circle") {
-        auto* circleData = (array<double,3>*)areaData.second;
-        double centerDR = (*circleData)[0];
-        double centerUR = (*circleData)[1];
-        double radius = (*circleData)[2];
-        
-        double dx = currentDR - centerDR;
-        double dy = currentUR - centerUR;
-        double distance = sqrt(dx*dx + dy*dy);
-        
-        return distance <= radius;
-    }
-    else if(areaData.first == "Rect") {
-        auto* rectData = (array<double,4>*)areaData.second;
-        double centerDR = (*rectData)[0];
-        double centerUR = (*rectData)[1];
-        double width = (*rectData)[2];
-        double height = (*rectData)[3];
-        
-        double halfWidth = width / 2;
-        double halfHeight = height / 2;
-        
-        return (currentDR >= centerDR - halfWidth && currentDR <= centerDR + halfWidth) &&
-               (currentUR >= centerUR - halfHeight && currentUR <= centerUR + halfHeight);
-    }
-    else if(areaData.first == "Line") {
-        // 对于线性区域，检查是否在任何线段附近
-        auto* lineData = (vector<array<double,2>>*)areaData.second;
-        const double tolerance = 50.0;  // 容忍距离
-        
-        for(size_t i = 0; i < lineData->size(); i++) {
-            double dx = currentDR - (*lineData)[i][0];
-            double dy = currentUR - (*lineData)[i][1];
-            double distance = sqrt(dx*dx + dy*dy);
-            
-            if(distance <= tolerance) return true;
-        }
-        return false;
-    }
-    
-    return false;
-}
-
-Coordinate* Army::detectEnemyInRange()
-{
-    // 检测视野范围内的敌方单位（玩家单位）
-    double visionRange = getVision();
-    double currentDR = getDR();
-    double currentUR = getUR();
-    
-    extern Map* GlobalMap;
-    if(!GlobalMap) return nullptr;
-    
-    // 检查玩家0的所有单位
-    for(Human* human : GlobalMap->player[0]->human) {
-        if(!human) continue;
-        
-        BloodHaver* bloodHaver = nullptr;
-        human->printer_ToBloodHaver((void**)&bloodHaver);
-        if(!bloodHaver || bloodHaver->isDie()) continue;
-        
-        double dx = human->getDR() - currentDR;
-        double dy = human->getUR() - currentUR;
-        double distance = sqrt(dx*dx + dy*dy);
-        
-        if(distance <= visionRange) {
-            return human;  // 发现敌人
-        }
-    }
-    
-    return nullptr;
-}
-
-void Army::updatePatrol()
-{
-    // 只有敌方单位(player[1])才进行巡逻
-    if(getPlayerRepresent() != 1) return;
-    
-    // 如果单位已死亡或正在死亡，停止巡逻
-    if(isDie() || isDying()) {
-        patrolState = PATROL_STATE_IDLE;
-        return;
-    }
-    
-    // 首次初始化巡逻
-    if(!patrolInitialized && hasPatrolArea()) {
-        startPatrol();
-        return;
-    }
-    
-    patrolTimer++;
-    
-    switch(patrolState) {
-        case PATROL_STATE_IDLE:
-            // 检查是否应该开始巡逻
-            if(hasPatrolArea() && !isAttacking()) {
-                startPatrol();
-            }
-            break;
-            
-        case PATROL_STATE_PATROLLING:
-        {
-            // 检测敌人
-            Coordinate* enemy = detectEnemyInRange();
-            if(enemy) {
-                chaseTarget = enemy;
-                patrolState = PATROL_STATE_CHASING;
-                // 开始攻击敌人
-                extern MainWidget* g_mainWidget;
-                if(g_mainWidget && g_mainWidget->getCore() && g_mainWidget->getCore()->interactionList) {
-                    g_mainWidget->getCore()->interactionList->addRelation(this, enemy, CoreEven_Attacking);
-                }
-                break;
-            }
-            
-            // 检查是否到达巡逻目标点
-            double dx = currentPatrolTargetDR - getDR();
-            double dy = currentPatrolTargetUR - getUR();
-            double distance = sqrt(dx*dx + dy*dy);
-            
-            if(distance < 30.0) {  // 到达目标点
-                generatePatrolPath();  // 生成新的巡逻点
-                patrolTimer = 0;
-            } else if(!isWalking() && patrolTimer > 60) {  // 如果停止移动且超时
-                // 移动到巡逻目标点
-                extern MainWidget* g_mainWidget;
-                if(g_mainWidget && g_mainWidget->getCore() && g_mainWidget->getCore()->interactionList) {
-                    g_mainWidget->getCore()->interactionList->addRelation(this, currentPatrolTargetDR, currentPatrolTargetUR, CoreEven_JustMoveTo);
-                }
-                patrolTimer = 0;
-            }
-            break;
-        }
-        
-        case PATROL_STATE_CHASING:
-        {
-            // 检查追击目标是否有效
-            if(!chaseTarget) {
-                patrolState = PATROL_STATE_RETURNING;
-                break;
-            }
-            
-            BloodHaver* targetBloodHaver = nullptr;
-            chaseTarget->printer_ToBloodHaver((void**)&targetBloodHaver);
-            if(!targetBloodHaver || targetBloodHaver->isDie()) {
-                chaseTarget = nullptr;
-                patrolState = PATROL_STATE_RETURNING;
-                break;
-            }
-            
-            // 检查是否失去目标（超出视野）
-            double dx = chaseTarget->getDR() - getDR();
-            double dy = chaseTarget->getUR() - getUR();
-            double distance = sqrt(dx*dx + dy*dy);
-            
-            if(distance > getVision() * 1.5) {  // 失去目标
-                chaseTarget = nullptr;
-                patrolState = PATROL_STATE_RETURNING;
-            }
-            // 继续攻击逻辑由AI系统处理
-            break;
-        }
-        
-        case PATROL_STATE_RETURNING:
-        {
-            // 检查是否已回到巡逻区域
-            if(isInPatrolArea()) {
-                patrolState = PATROL_STATE_PATROLLING;
-                generatePatrolPath();
-                patrolTimer = 0;
-            } else {
-                // 移动回巡逻区域中心
-                if(!isWalking() && patrolTimer > 60) {
-                    extern MainWidget* g_mainWidget;
-                    if(g_mainWidget && g_mainWidget->getCore() && g_mainWidget->getCore()->interactionList) {
-                        g_mainWidget->getCore()->interactionList->addRelation(this, patrolCenterDR, patrolCenterUR, CoreEven_JustMoveTo);
-                    }
-                    patrolTimer = 0;
-                }
-            }
-            break;
-        }
-    }
-}
-
-void Army::returnToPatrolArea()
-{
-    if(hasPatrolArea()) {
-        patrolState = PATROL_STATE_RETURNING;
-        chaseTarget = nullptr;
-        patrolTimer = 0;
-    }
-}
-
-void Army::stopPatrol()
-{
-    patrolState = PATROL_STATE_IDLE;
-    chaseTarget = nullptr;
-    patrolTimer = 0;
-}

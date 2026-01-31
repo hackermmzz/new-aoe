@@ -698,6 +698,14 @@ void Core_List::requestSound_Action(Coordinate* object, int actionType, Coordina
     }
 }
 
+void Core_List::change_HumanRepresent(Human *human, int represent)
+{
+    int origin_rep=human->getPlayerRepresent();
+    human->setPlayerRepresent(represent);
+    theMap->player[represent]->insertHuman(human);
+    theMap->player[origin_rep]->removeHuman(human);
+}
+
 
 //****************************************************************************************
 //通用的控制对象行动函数
@@ -706,6 +714,7 @@ void Core_List::object_Move(Coordinate* object, double DR, double UR)
     MoveObject* moveObject = NULL;
     Coordinate* goalOb;
     object->printer_ToMoveObject((void**)&moveObject);
+    int sort=object->getSort();
     //如果有目标点，设置目标点
     if (moveObject) moveObject->stateCrash = false;//重置碰撞状态（tagGame）
 
@@ -774,7 +783,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
     if (object2) object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
     object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
-
+    set<BloodHaver*>attackees;
     if (attackee != NULL && attacker != NULL && attacker->canAttack())  //若指针均非空
     {
         if (!attacker->isAttacking())
@@ -804,12 +813,15 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             else if (attacker->is_attackHit())
             {
                 calculateDamage = true;
+                attackees.insert(attackee);
                 attacker->haveAttack();
                 if (attacker->get_isRangeAttack()) deal_RangeAttack(object1, object2);
                 if (!attackee->isGotAttack())
                 {
-                    attackee->setAvangeObject(object1);
-                    if (object1->getPlayerRepresent() != 0) object1->visibleSomeTimes();
+                    //如果阵营不相同，才做出复仇
+                    if(object1->getPlayerRepresent()!=object2->getPlayerRepresent())attackee->setAvangeObject(object1);
+                    //使得被攻击者可见
+                    if (object1->getPlayerRepresent() != NOWPLAYERREPRESENT) object1->visibleSomeTimes();
                 }
             }
         }
@@ -817,6 +829,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     else if (missile != NULL && missile->is_HitTarget() && attackee != NULL)
     {
         calculateDamage = true;
+        attackees.insert(attackee);
         attacker = missile->getAttackAponsor();
 
         extra_damage += missile->get_AttackAddition_Height(theMap->get_MapHeight(object2->getBlockDR(), object2->getBlockUR()));
@@ -835,48 +848,77 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
                 if (missile->getAttacker()->getPlayerRepresent() != 0) missile->getAttacker()->visibleSomeTimes();
             }
         }
+        //判断是否为溅射伤害
+        if(missile->IsRangeAttack()){
+            auto&&ret=deal_RangeAttack(missile,array<double,2>{missile->getDR0(),missile->getUR0()});
+            for(auto*x:ret)attackees.insert(x);
+        }
     }
 
     if (calculateDamage)
     {
-        bool isDead = attackee->isDie();
-        damage = attacker->getATK() - attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
-        if (damage < 0) damage = 0;
-        attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
-
-        //更新得分
-        if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 1 && object2->getSort() == SORT_ARMY && object1->getPlayerRepresent() == NOWPLAYERREPRESENT)
-        {
-            if (object2->getNum() > 3) {
-                usrScore.update(_KILL10);
-            }
-            else {
-                usrScore.update(_KILL2);
-            }
-        }
-
-        if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 0 && object1->getPlayerRepresent() == 1) {
-            if (object2->getSort() == SORT_BUILDING) {
-                switch (object2->getNum()) {
-                case BUILDING_HOME:
-                case BUILDING_FARM:
-                    enemyScore.update(_DESTORY2);
-                    break;
-                case BUILDING_ARROWTOWER:
-                    enemyScore.update(_DESTORY5);
-                    break;
-                case BUILDING_CENTER:
-                    enemyScore.update(_DESTORY10);
-                    break;
-                default:
-                    enemyScore.update(_DESTORY4);
+        int sort=object1->getSort();
+        int num=object1->getNum();
+        for(auto*attackee:attackees){
+            bool isDead = attackee->isDie();
+            //祭司伤害攻击
+            if(sort==SORT_ARMY&&num==AT_PRIEST){
+                //如果对象死亡，不可能起死回生的
+                if(isDead)continue;
+                //判断阵营
+                bool samRep=object1->getPlayerRepresent()==object2->getPlayerRepresent();
+                if(samRep){
+                    //相同阵营回复血量
+                    attackee->updateBlood(-attacker->getATK());
+                }else{
+                    //不同阵营转换敌人为己方阵营
+                    Human*human=0;
+                    object2->printer_ToHuman((void**)&human);
+                    if(human==0)return; //这里按道理不可能出现这种情况
+                    //设置阵营以及相关一些操作
+                    change_HumanRepresent(human,object1->getPlayerRepresent());
                 }
             }
-            else {
-                enemyScore.update(_KILL2);
+            //普通伤害攻击
+            else{
+                damage = attacker->getATK() - attackee->getDEF(attacker->get_AttackType()) + extra_damage;   //统一伤害计算公式
+                if (damage < 0) damage = 0;
+                attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
+
+                //更新得分
+                if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 1 && object2->getSort() == SORT_ARMY && object1->getPlayerRepresent() == NOWPLAYERREPRESENT)
+                {
+                    if (object2->getNum() > 3) {
+                        usrScore.update(_KILL10);
+                    }
+                    else {
+                        usrScore.update(_KILL2);
+                    }
+                }
+
+                if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 0 && object1->getPlayerRepresent() == 1) {
+                    if (object2->getSort() == SORT_BUILDING) {
+                        switch (object2->getNum()) {
+                        case BUILDING_HOME:
+                        case BUILDING_FARM:
+                            enemyScore.update(_DESTORY2);
+                            break;
+                        case BUILDING_ARROWTOWER:
+                            enemyScore.update(_DESTORY5);
+                            break;
+                        case BUILDING_CENTER:
+                            enemyScore.update(_DESTORY10);
+                            break;
+                        default:
+                            enemyScore.update(_DESTORY4);
+                        }
+                    }
+                    else {
+                        enemyScore.update(_KILL2);
+                    }
+                }
             }
         }
-
     }
 }
 
@@ -1331,6 +1373,44 @@ void Core_List::deal_RangeAttack(Coordinate* attacker, Coordinate* attackee)
 
 }
 
+vector<BloodHaver*> Core_List::deal_RangeAttack(Coordinate *missile, const array<double, 2> &center)
+{
+    int rad=0;
+    //
+    if(missile->getSort()==SORT_MISSILE){
+        auto type=missile->getNum();
+        switch (type) {
+        case Missile_Boulders:
+            rad=Missile_Boulders_Range;
+            break;
+        default:
+            break;
+        }
+    }
+    //
+    set<BloodHaver*>ret;
+    if(rad>0){
+        int dr=center[0]/BLOCKSIDELENGTH,ur=center[1]/BLOCKSIDELENGTH;
+        for(int i=-rad;i<=rad;++i){
+            int t=rad-abs(i);
+            for(int j=-t;j<=t;++j){
+                int dr0=dr+i,ur0=ur+j;
+                if(dr0>=0&&dr0<MAP_L&&ur0>=0&&ur0<MAP_U){
+                    auto&objects=theMap->map_Object[dr0][ur0];
+                    for(auto*obj:objects){
+                        BloodHaver*attackee=0;
+                        obj->printer_ToBloodHaver((void**)&attackee);
+                        if(attackee){
+                            ret.insert(attackee);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return vector<BloodHaver*>{ret.begin(),ret.end()};
+}
+
 
 //**************************************************************
 //寻路相关
@@ -1354,7 +1434,9 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
         *pre = 1;
     }
 
-    if (moveOb->getSort() == SORT_MISSILE) path.push(destination);
+    if (moveOb->getSort() == SORT_MISSILE) {
+        path.push(destination);
+    }
     else {
         auto&& ret = findPath(findPathMap, theMap, start, destination, moveOb, goalOb);
         path = ret.first;

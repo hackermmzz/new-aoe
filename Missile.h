@@ -5,7 +5,7 @@
 #include "Building.h"
 #include "Army.h"
 #include "Farmer.h"
-
+using std::pair;
 class Missile : public MoveObject
 {
 public:
@@ -80,7 +80,13 @@ public:
     //攻击者死亡，设置missile的攻击发起者为NULL
     void deleteAttackerSponsor(Coordinate* attacker);
     int get_AttackAddition_Height(int goalHeigh){ return goalHeigh<Height_begin ? Height_begin - goalHeigh : 0; }
-
+    //对于投掷物，为了实现类似天上飞的效果，我们对ImageX、ImageY成员特殊更新
+    void updateViewPosition();
+    std::array<double,2> calculateViewPosition(double curDR,double curUR);
+    double getViewDR();
+    double getViewUR();
+    //判断是否为溅射伤害
+    bool IsRangeAttack(){return isAOE;}
 private:
     bool isAttackerDie = false;
     Coordinate* AttackSponsor = NULL;
@@ -101,7 +107,11 @@ private:
     std::map<int ,int > lab_SpecialAttack;
     int Height_begin = 0;   //记录起始高度,只能在初始化时设置
 
-
+    //飞行物绘制按照这个坐标来
+    double viewDR;
+    double viewUR;
+    double initDR;
+    double initUR;
     //图像资源相关
     static std::string missilename[NUMBER_MISSILE];
     static std::list<ImageResource> *missile[NUMBER_MISSILE];

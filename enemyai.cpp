@@ -762,6 +762,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
 }
 
 void EnemyAI::processData() {
+    return;
     enemyInfo=getInfo();
 
     for(tagBuilding&b:enemyInfo.buildings)

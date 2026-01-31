@@ -66,14 +66,14 @@ public:
 
   /********************静态函数**************************/
     static std::string getArmyName(int num , int level) {
-        if (num >= 0 && num < 8 && level>=0&& level<2) {
+        if (num >= 0 && num < AT_ARMY_MAX_NUM && level>=0&& level<2) {
             return ArmyName[num][level];
         }
         return "";
     }
 
     static std::string getArmyDisplayNum(int num , int level) {
-        if (num >= 0 && num <8&& level>=0&& level<2) {
+        if (num >= 0 && num <AT_ARMY_MAX_NUM&& level>=0&& level<2) {
             return ArmyDisplayName[num][level];
         }
         return "";
@@ -133,26 +133,6 @@ public:
     //获取士兵等级
     int getLevel();
 
-    // 巡逻系统相关方法
-    void initPatrolSystem();
-    void updatePatrol();
-    bool hasPatrolArea();
-    void startPatrol();
-    void stopPatrol();
-    void returnToPatrolArea();
-    bool isInPatrolArea();
-    void generatePatrolPath();
-    Coordinate* detectEnemyInRange();
-    
-    // 巡逻状态相关
-    int getPatrolState() { return patrolState; }
-    void setPatrolState(int state) { patrolState = state; }
-    
-    // 巡逻区域相关
-    void setPatrolCenter(double dr, double ur) { patrolCenterDR = dr; patrolCenterUR = ur; }
-    double getPatrolCenterDR() { return patrolCenterDR; }
-    double getPatrolCenterUR() { return patrolCenterUR; }
-
 private:
     int armyClass;
     bool upgradable = false;
@@ -194,13 +174,13 @@ private:
 
 
     /*************静态成员************/
-    static std::list<ImageResource> *Walk[2][20][2][8];
-    static std::list<ImageResource> *Stand[2][20][2][8];
-    static std::list<ImageResource> *Attack[2][20][2][8];
-    static std::list<ImageResource> *Die[2][20][2][8];
-    static std::list<ImageResource> *Disappear[2][20][2][8];
-    static std::string ArmyName[20][2];
-    static std::string ArmyDisplayName[20][2];
+    static std::list<ImageResource> *Walk[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Stand[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Attack[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Die[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Disappear[2][AT_ARMY_MAX_NUM][2][8];
+    static std::string ArmyName[AT_ARMY_MAX_NUM][2];
+    static std::string ArmyDisplayName[AT_ARMY_MAX_NUM][2];
 
     static string click_sound;
     /*************静态成员************/
