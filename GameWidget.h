@@ -11,14 +11,18 @@
 #include "Core.h"
 
 struct GameState{
-    short m_heightMap[GENERATE_L][GENERATE_U];
-    Block cell[MAP_L][MAP_U];
+    vector<vector<short>> m_heightMap;
+    vector<vector<Block>> cell;
     std::list<Building*>myBuilding;
     std::list<Human*>myHuman;
     std::list<Building*>enemyBuilding;
     std::list<Human*>enemyHuman;
     std::list<Animal*>animal;
     std::list<StaticRes*>resource;
+    GameState(){
+        m_heightMap=decltype(m_heightMap)(GENERATE_L,vector<short>(GENERATE_U));
+        cell=decltype(cell)(MAP_L,vector<Block>(MAP_U));
+    }
 };
 
 namespace Ui {

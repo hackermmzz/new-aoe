@@ -6,6 +6,12 @@
 class Farmer:public Human
 {
 public:
+    static array<std::string,8> FarmerName;
+    static array<std::string,8> FarmerCarry;
+    static array<std::string,8> FarmerDisplayName;
+    static string sound_click;
+    static array<std::string,8> sound_work;
+public:
     Farmer(){}
     Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER,int FarmerType=FARMERTYPE_FARMER);
 
@@ -185,18 +191,9 @@ private:
     static std::list<ImageResource> *Carry[7][8];
 
     static std::list<ImageResource> *Disappear[8][8];
-
-    static std::string FarmerName[8];
-    static std::string FarmerCarry[7];
-
-    std::string FarmerDisplayName[8]={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人","渔民"};
     /////////////船
     static std::list<ImageResource>* ShipStand[10][8];
-    //    std::string actName[1]={};
-    //窗口按钮资源的字符串名称 用来查找对应的qpixmap资源
 
-    static string sound_click;
-    static std::string sound_work[7];
 
 
     void requestSound_Work();

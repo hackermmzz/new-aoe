@@ -2,7 +2,7 @@
 #define OPTION_H
 
 #include <QDialog>
-
+#include "GlobalVariate.h"
 #include "config.h"
 namespace Ui {
 class Option;

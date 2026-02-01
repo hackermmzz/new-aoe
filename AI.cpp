@@ -1,6 +1,6 @@
 #include "AI.h"
 
-QString AI::AIName[NOWPLAYER] = { "UsrAI", "EnemyAI" };
+std::vector<QString> AI::AIName= { "UsrAI", "EnemyAI" };
 
 AI::~AI() {
     stopThread = true;

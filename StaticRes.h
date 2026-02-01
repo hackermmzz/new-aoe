@@ -7,6 +7,9 @@
 class StaticRes:public Coordinate,public Resource
 {
 public:
+    static array<std::string,10> StaticResDisplayName;
+    static array<std::string,10> StaticResname;
+public:
     /** **********************
     *   Num 0：浆果丛
     *   Num 1: 石头
@@ -50,8 +53,6 @@ public:
   /**********************以上静态函数**************************/
 
 private:
-    static std::string StaticResDisplayName[10];
-    static std::string StaticResname[10];
     static std::list<ImageResource> *staticResource[10]; //存储image资源的链表
 };
 

@@ -8,6 +8,32 @@
 
 class Animal:public MoveObject, public Resource, public BloodHaver
 {
+public:
+    //以下为图片资源
+    static std::list<ImageResource> *Walk[5][8];
+    static std::list<ImageResource> *Stand[5][8];
+    static std::list<ImageResource> *Attack[5][8];
+    static std::list<ImageResource> *Die[5][8];
+    static std::list<ImageResource> *Run[5][8];
+    static std::list<ImageResource> *Disappear[5][8];
+
+    static array<std::string,5> Animalname;
+    static array<std::string,5> Animalcarcassname;
+    static array<std::string,5> AnimalDisplayName;
+
+    static array<std::string,5> sound_click;
+
+    static array<int,5> AnimalMaxBlood;
+    static array<int,5> AnimalResouceSort;
+    static array<int,5> AnimalCnt;
+    static array<int,5>AnimalVision;
+    static array<double,5> AnimalSpeed;
+    static array<double,5> AnimalCrashLen;
+    static array<int,5> AnimalNowresStep;
+
+    static array<int,5>AnimalAtk;
+    static array<int,5> AnimalFriendly;
+    static array<bool,5> AnimalAttackable;
 private:
     int Friendly=FRIENDLY_NULL;
     //友好度 1为友好 2为敌对 3为中立 0为无
@@ -25,31 +51,6 @@ private:
     bool moveAble = true;
     int treeState = 0;
 
-    //以下为图片资源
-    static std::list<ImageResource> *Walk[5][8];
-    static std::list<ImageResource> *Stand[5][8];
-    static std::list<ImageResource> *Attack[5][8];
-    static std::list<ImageResource> *Die[5][8];
-    static std::list<ImageResource> *Run[5][8];
-    static std::list<ImageResource> *Disappear[5][8];
-
-    static std::string Animalname[5];
-    static std::string Animalcarcassname[5];
-    static std::string AnimalDisplayName[5];
-
-    static std::string sound_click[5];
-
-    static int AnimalMaxBlood[5];
-    static int AnimalResouceSort[5];
-    static int AnimalCnt[5];
-    static int AnimalVision[5];
-    static double AnimalSpeed[5];
-    static double AnimalCrashLen[5];
-    static int AnimalNowresStep[5];
-
-    static int AnimalAtk[5];
-    static int AnimalFriendly[5];
-    static bool AnimalAttackable[5];
 
     /*******音乐与音效*******/
     void requestSound_Die();

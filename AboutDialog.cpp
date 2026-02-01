@@ -1,13 +1,13 @@
 #include "AboutDialog.h"
 #include "ui_AboutDialog.h"
-
+#include "GlobalVariate.h"
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AboutDialog)
 {
     ui->setupUi(this);
     setFixedSize(600,500);
-    pix = QPixmap(":/new/prefix1/res/About_Background_001.png");
+    pix = QPixmap(RESPATH+"/About_Background_001.png");
 
     setWindowTitle("关于我们");
     ui->nameLabel->setText("项目名称： newAOE");
@@ -17,7 +17,6 @@ AboutDialog::AboutDialog(QWidget *parent) :
 AboutDialog::~AboutDialog()
 {
     delete ui;
-//    delete pix;
 }
 
 void AboutDialog::paintEvent(QPaintEvent *event)

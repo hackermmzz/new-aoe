@@ -1,8 +1,8 @@
 ﻿#include "StaticRes.h"
 
 std::list<ImageResource>* StaticRes::staticResource[10];
-std::string StaticRes::StaticResname[10]={"Bush","Stone","GoldOre","Fish"};
-std::string StaticRes::StaticResDisplayName[10] = {"浆果丛","石头","金矿","渔场"};
+array<std::string,10> StaticRes::StaticResname;
+array<std::string,10> StaticRes::StaticResDisplayName;
 
 
 StaticRes::StaticRes(int Num, double DR, double UR)

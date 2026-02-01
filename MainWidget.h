@@ -31,7 +31,7 @@ public:
     explicit MainWidget(int MapJudge, QWidget *parent = 0);
     ~MainWidget();
 
-    Player* player[MAXPLAYER];
+    Player** player;
     Map *map;
     MouseEvent *mouseEvent=new MouseEvent();
     int **memorymap=new int*[MEMORYROW];    //动态
@@ -211,6 +211,7 @@ private:
 //*****************************************
 
 //***************InitHelperFunction**********
+    void initVar();
     void initEditor();
     void initGameElements();
     void initGameResources();
@@ -234,6 +235,7 @@ private:
     void initArmy();
     void initMissile();
     void buildInitialStock();
+
 //*****************************************
 
 //***************DeleteFunction************

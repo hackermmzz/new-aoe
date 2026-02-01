@@ -13,11 +13,11 @@ extern Score enemyScore;
 class Core_List
 {
 public:
-    Core_List(){}
+    Core_List(){initMember();}
     Core_List(Map* theMap, Player* player[]);
     ~Core_List(){}
 
-
+    void initMember();
     void update();
     bool isObject_Free( Coordinate* object ){ return !relate_AllObject[object].isExist;}
     /** ******************************************
@@ -63,8 +63,8 @@ private:
     map<Coordinate* , relation_Object> relate_AllObject;    //动态表,描述对象之间关系(行动)的表
 
     //寻路相关
-    int map_HaveJud[MAP_L][MAP_U];
-    int goalMap[MAP_L][MAP_U];
+    vector<vector<int>> map_HaveJud;
+    vector<vector<int>> goalMap;
 
     bool resourceBuildingChange = false;
     bool needReset_resBuild = false;
@@ -106,7 +106,7 @@ private:
 
 
     /************寻路相关************/
-    void initMap_HaveJud(){ memset(map_HaveJud , 0 ,sizeof(map_HaveJud)); }
+    void initMap_HaveJud();
     void haveJud_Map_Move( int blockDR , int blockUR ){ map_HaveJud[blockDR][blockUR] = true; }
     void haveJud_Map_Move(Point movePoi){ map_HaveJud[movePoi.x][movePoi.y] = true; }
     bool isHaveJud( int blockDR , int blockUR ){ return map_HaveJud[blockDR][blockUR]; }
@@ -115,7 +115,7 @@ private:
     void setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0);
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
-    pair<stack<Point>,array<double,2>> findPath(const int (&findPathMap)[MAP_L][MAP_U],Map *map, const Point& start, Point destination , Coordinate*object,Coordinate* goalOb);
+    pair<stack<Point>,array<double,2>> findPath(Map::TypeRef&findpathMap,Map *map, const Point& start, Point destination , Coordinate*object,Coordinate* goalOb);
 
     int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
     int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
