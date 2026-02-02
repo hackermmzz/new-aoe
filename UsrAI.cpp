@@ -15,7 +15,7 @@ void UsrAI::processData()
     static bool res=0;
     if(!res)
     res=1,cheatRes();
-    //return;
+    return;
     auto info=getInfo();
     static bool xx=0;
     static tagFarmer f;
@@ -29,6 +29,6 @@ void UsrAI::processData()
             }
         }
     }
-    if(f.WorkObjectSN==-1)
-    HumanBuild(f.SN,BUILDING_COLLAGE,112,106);
+    // if(f.WorkObjectSN==-1)
+    // HumanBuild(f.SN,BUILDING_COLLAGE,112,106);
 }

@@ -372,6 +372,8 @@ enum BUILDING_TYPE{
 #define ACT_BUILD_MARKET_NAME "建造市场(花费:150木头)(需要先建造谷仓)"
 #define ACT_BUILD_ARROWTOWER_NAME "建造箭塔(花费:150石头)(需要先在谷仓内升级科技)"
 #define ACT_BUILD_DOCK_NAME "建造船坞(花费:120木头)"
+#define ACT_BUILD_COLLAGE_NAME "建造学院"
+#define ACT_BUILD_SIEGE_NAME "建造攻城武器厂"
 #define ACT_SHIP_LAY_NAME "卸货"
 
 #define ACT_ARMYCAMP_CREATE_CLUBMAN_NAME "训练棍棒兵(花费:50食物)"
@@ -390,6 +392,8 @@ enum BUILDING_TYPE{
 #define ACT_DOCK_CREATE_SAILING_NAME "建造渔船"
 #define ACT_DOCK_CREATE_WOOD_BOAT_NAME "建造运输船"
 #define ACT_DOCK_CREATE_SHIP_NAME "建造战船"
+#define ACT_COLLAGE_CREATE_HOPLITE_NAME "训练方阵兵"
+#define ACT_SIEGE_CREATE_STONE_THROWER_NAME "建造投石车"
 #define ACT_NULL_NAME ""
 
 #define ACT_WINDOW_NUM_FREE 12
@@ -429,6 +433,8 @@ enum BUILDING_TYPE{
 #define ACT_BUILD_RANGE 59
 #define ACT_BUILD_STABLE 60
 #define ACT_BUILD_DOCK 61
+#define ACT_BUILD_SIEGE 64
+#define ACT_BUILD_COLLAGE 63
 
 #define ACT_SHIP_LAY 62
 

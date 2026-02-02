@@ -267,6 +267,10 @@ void Building::ActNumToActName()
         else if(actNum == BUILDING_DOCK_CREATE_WOOD_BOAT) actName = ACT_DOCK_CREATE_WOOD_BOAT;
         else if(actNum == BUILDING_DOCK_CREATE_SHIP) actName = ACT_DOCK_CREATE_SHIP;
     }
+    else if(Num == BUILDING_SIEGE)
+    {
+        if(actNum == BUILDING_SIEGE_CREATE_STONE_THROWER) actName =ACT_SIEGE_CREATE_STONE_THROWER;
+    }
 }
 
 
