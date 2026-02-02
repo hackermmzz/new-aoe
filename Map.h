@@ -31,6 +31,7 @@ public:
     bool isSlope(int BlockDR, int BlockUR);
 
     void JudegCellType(int BlockDR,int BlockUR);
+    array<int,2> GetCellOffset(int BlockDR, int BlockUR);
     void CalCellOffset(int BlockDR,int BlockUR);
     //划分地图
      void divideTheMap();
