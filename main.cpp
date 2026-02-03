@@ -1,4 +1,5 @@
-﻿#include "MainWidget.h"
+﻿#include "GlobalVariate.h"
+#include "MainWidget.h"
 #include <QApplication>
 #include <QMap>
 #include "Logger.h"
@@ -6,10 +7,10 @@
 void ParseArguments(const QApplication&app);
 int main(int argc, char* argv[])
 {
+    //第一步先读取配置
 
     //
     QApplication app(argc, argv);
-    QResource::registerResource("./res.rcc");
     Logger::init(Logger::LogLevel::Debug);
     //创建网络插件
     NetworkManager=new NetworkPlugin(&app);

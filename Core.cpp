@@ -8,6 +8,7 @@ int buff = 0;
 tagInfo* currentBuff;
 Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent)
 {
+    this->playerMap=vector<vector<tagTerrain>>(MAP_L,vector<tagTerrain>(MAP_U));
     ::memorymap=memorymap;
     this->theMap = theMap;  //mainWidget的map对象
     this->player = player;  //所有player的数组
@@ -606,12 +607,13 @@ void Core::updateCommon(tagInfo* taginfo,int id){
     };
     //初始化一个全局的给敌人使用
     struct Data{
-        tagTerrain theMap[MAP_L][MAP_U];
+        vector<vector<tagTerrain>> theMap;
     };
     static bool init=0;
     static Data*data=new Data;
     if(!init){
         init=1;
+        data->theMap=vector<vector<tagTerrain>>(MAP_L,vector<tagTerrain>(MAP_U));
         for (int i = 0; i < MAP_L; ++i) {
             for (int j = 0; j < MAP_U; ++j) {
                 (data->theMap)[i][j]=GetTerrainType(i,j);

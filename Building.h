@@ -8,6 +8,25 @@
 class Building:public Coordinate,public BloodHaver
 {
 public:
+/********************静态资源**************************/
+  static std::list<ImageResource> *build[4];//建设list
+  static std::list<ImageResource> *built[4][BUILDING_TYPE_MAXNUM]; //建设完成的list
+  static std::list<ImageResource> *buildFire[3];
+
+  static array<std::string,4> Buildingname;
+  static array<array<std::string,BUILDING_TYPE_MAXNUM>,4> Builtname;
+  static array<std::string,BUILDING_TYPE_MAXNUM> BuildDisplayName;
+  static array<std::string,3> BuildFireName;
+
+  static array<array<int,ACT_WINDOW_NUM_FREE>,BUILDING_TYPE_MAXNUM> actNames;
+
+  static array<string,BUILDING_TYPE_MAXNUM> sound_click;
+
+  static array<int,BUILDING_TYPE_MAXNUM> BuildingMaxBlood;
+  static array<int,BUILDING_TYPE_MAXNUM> BuildingFundation;
+  static array<int,BUILDING_TYPE_MAXNUM> BuildingVision;
+/********************静态资源**************************/
+public:
     Building(){}
     Building(int Num, int BlockDR, int BlockUR, int civ = CIVILIZATION_STONEAGE, Development* playerScience = NULL, int playerRepresent = MAXPLAYER, int Percent=100);
 
@@ -145,24 +164,7 @@ public:
 
 
 protected:
-  /********************静态资源**************************/
-    static std::list<ImageResource> *build[4];//建设list
-    static std::list<ImageResource> *built[4][BUILDING_TYPE_MAXNUM]; //建设完成的list
-    static std::list<ImageResource> *buildFire[3];
 
-    static std::string Buildingname[4];
-    static std::string Builtname[4][BUILDING_TYPE_MAXNUM];
-    static std::string BuildDisplayName[BUILDING_TYPE_MAXNUM];
-    static std::string BuildFireName[3];
-
-    static int actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE];
-
-    static string sound_click[BUILDING_TYPE_MAXNUM];
-
-    static int BuildingMaxBlood[BUILDING_TYPE_MAXNUM];
-    static int BuildingFundation[BUILDING_TYPE_MAXNUM];
-    static int BuildingVision[BUILDING_TYPE_MAXNUM];
-  /********************静态资源**************************/
 
 
     bool defencing = false;

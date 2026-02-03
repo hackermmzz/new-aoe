@@ -9,6 +9,8 @@ using std::pair;
 class Missile : public MoveObject
 {
 public:
+    static array<std::string,NUMBER_MISSILE> missilename;
+public:
     Missile(){}
     Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
     ~Missile(){ if(AttackerRecord) delete AttackerRecord; }
@@ -113,7 +115,6 @@ private:
     double initDR;
     double initUR;
     //图像资源相关
-    static std::string missilename[NUMBER_MISSILE];
     static std::list<ImageResource> *missile[NUMBER_MISSILE];
 };
 

@@ -28,33 +28,11 @@ std::list<ImageResource>* Army::Attack[2][AT_ARMY_MAX_NUM][2][8];
 std::list<ImageResource>* Army::Die[2][AT_ARMY_MAX_NUM][2][8];
 
 //[num][level]
-std::string Army::ArmyName[AT_ARMY_MAX_NUM][2]={{"Clubman","Axeman"},
-                                  {"Slinger","Slinger"},
-                                  {"Archer","Archer"},
-                                  {"Scout","Scout"},
-                                  {"Sworder","Sworder"},
-                                  {"ImprovedArcher","ImprovedArcher"},
-                                  {"Cavalry","Cavalry"},
-                                  {"Ship","Ship"},
-                                  {"StoneThrower","StoneThrower"},
-                                  {"Priest","Priest"}
-                                 };
+array<array<std::string,2>,AT_ARMY_MAX_NUM> Army::ArmyName;
 
-std::string Army::ArmyDisplayName[AT_ARMY_MAX_NUM][2]={
-                                        {"棍棒兵","刀斧兵"},
-                                        {"投石兵","投石兵"},
-                                        {"弓箭手","弓箭手"},
-                                        {"侦察骑兵","侦察骑兵"},
-                                        {"Prof.Yan","Prof.Yan"},
-                                        {"Prof.Lou","Prof.Lou"},
-                                        {"Prof.Lu","Prof.Lu"},
-                                        {"Prof.Wang","Prof.Wang"},
-                                        {"投石车","投石车"},
-                                        {"祭司","祭司"}
-                                        };
+array<array<std::string,2>,AT_ARMY_MAX_NUM> Army::ArmyDisplayName;
 
-string Army::click_sound = "Click_Army";
-
+string Army::click_sound;
 Army::Army()
 {
 

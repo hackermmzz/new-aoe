@@ -1,7 +1,7 @@
 #ifndef AREASELECTED_H
 #define AREASELECTED_H
 #include"config.h"
-#include"digitalConfig.h"
+#include"GlobalVariate.h"
 #include<qevent.h>
 #include<QWidget>
 #include<vector>

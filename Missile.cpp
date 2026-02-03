@@ -1,6 +1,6 @@
 #include "Missile.h"
 
-std::string Missile::missilename[NUMBER_MISSILE] = { "Spear" , "Arrow" , "Cobblestone","Boulders"};
+array<std::string,NUMBER_MISSILE> Missile::missilename;
 std::list<ImageResource>* Missile::missile[NUMBER_MISSILE];
 
 Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight , Development* playerScience, int playerRepresent)

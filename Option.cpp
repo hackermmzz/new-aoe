@@ -7,7 +7,7 @@ Option::Option(QWidget *parent) :
 {
     ui->setupUi(this);
     setFixedSize(600,500);
-    pix=QPixmap(":/new/prefix1/res/About_Background_001.png");
+    pix=QPixmap(RESPATH+"/About_Background_001.png");
     setWindowTitle("设置");
     btnTreeBlock = ui->exportTreeBlock;
     btntxt = ui->exportTxt;

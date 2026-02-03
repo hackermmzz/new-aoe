@@ -97,7 +97,6 @@ HEADERS += \
     EnemyAI.h \
     ViewWidget.h \
     Option.h \
-    digitalConfig.h \
     AboutDialog.h \
     Logger.h \
     soudplaythread.h \

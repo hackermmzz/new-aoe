@@ -2,9 +2,16 @@
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
+    initMember();
     this->theMap = theMap;
     this->player = player;
     initDetailList();
+}
+
+void Core_List::initMember()
+{
+    map_HaveJud=decltype(map_HaveJud)(MAP_L,vector<int>(MAP_U));
+    goalMap=decltype(goalMap)(MAP_L,vector<int>(MAP_U));
 }
 
 
@@ -1162,6 +1169,10 @@ void Core_List::object_FinishAction(Coordinate* object1)
     object_FinishAction_Absolute(object1);
 }
 
+void Core_List::initMap_HaveJud(){
+    for(auto&v:map_HaveJud)fill(v.begin(),v.end(),0);
+}
+
 
 //****************************************************************************************
 //处理受到攻击的诱发行动
@@ -1527,7 +1538,7 @@ bool Core_List::JudgeMoveObjIsLandUnit(MoveObject* moveOb)
     return !ship;
 }
 
-pair<stack<Point>, array<double, 2>> Core_List::findPath(const int(&findPathMap)[MAP_L][MAP_U], Map* map, const Point& start, Point destination, Coordinate* object, Coordinate* goalOb)
+pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMap, Map* map, const Point& start, Point destination, Coordinate* object, Coordinate* goalOb)
 {
     /////////////////////////////////////////////////////////
     static unsigned long long mask = 0;

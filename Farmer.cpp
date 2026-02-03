@@ -8,14 +8,12 @@ std::list<ImageResource>* Farmer::Attack[8][8];
 std::list<ImageResource>* Farmer::Die[8][8];
 std::list<ImageResource>* Farmer::Disappear[8][8];
 std::list<ImageResource>* Farmer::ShipStand[10][8];
-std::string Farmer::FarmerName[8]={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker","Fisher"};
-std::string Farmer::FarmerCarry[7]={"","CarryWood","CarryMeat","CarryStone","CarryGold","","CarryFish"};
 
-string Farmer::sound_click = "Click_Villager";
-
-std::string Farmer::sound_work[7] = {\
-    "", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build"\
-};
+array<std::string,8> Farmer::FarmerName;
+array<std::string,8> Farmer::FarmerCarry;
+array<std::string,8> Farmer::FarmerDisplayName;
+string Farmer::sound_click;
+array<std::string,8> Farmer::sound_work ;
 
 Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent,int farmerType_)
 {

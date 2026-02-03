@@ -10,8 +10,6 @@
 #include<LineArea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
-int mapmoveFrequency = INITIAL_FREQUENCY;
-
 // 全局区域对象定义
 RectArea* g_rectArea = nullptr;
 CircleArea* g_circleArea = nullptr;
@@ -81,6 +79,8 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
 {
     qInfo() << "主程序启动参数：" << MapJudge << " 开始初始化...";
     ui->setupUi(this);
+    //初始化一些变量
+    initVar();
     //初始化编辑器默认状态
     currentSelected = NORMAL_MOUSE;
     //初始化一些编辑器配置
@@ -1283,6 +1283,7 @@ void MainWidget::initGameTimer() {
 void MainWidget::initPlayers() {
     qDebug() << "初始化玩家...";
     // 开辟玩家空间
+    player=new Player*[MAXPLAYER];
     for (int i = 0; i < MAXPLAYER; i++) {
         player[i] = new Player(i);
     }
@@ -1440,12 +1441,11 @@ void MainWidget::initBuilding()
         }
     }
 
-    for (int type = 0; type < 4; type++)
+    for (int type = 0; type < 3; type++)
     {
         Building::allocatebuildFire(type);
         loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
     }
-
     //市镇中心
     Building::setActNames(BUILDING_CENTER, 0, ACT_CREATEFARMER);
     Building::setActNames(BUILDING_CENTER, 1, ACT_UPGRADE_AGE);
@@ -1989,9 +1989,6 @@ bool MainWidget::isWin()
 {
     //开发者状态默认永远不会赢
     return false;
-    //
-    auto* hero = player[0];
-    return hero->getGold() >= GAME_WIN_GOLD;
 }
 
 void MainWidget::judgeVictory()
@@ -2053,6 +2050,104 @@ void MainWidget::makeSound()
     playSound();
 
     return;
+}
+
+template<class U,class V>
+void HelpInit(U&src,const V&tar){
+
+}
+
+void MainWidget::initVar()
+{
+    /************************地图移动速度**********************/
+    mapmoveFrequency = INITIAL_FREQUENCY;
+    /************************Animal文件配置********************/
+    //
+    Animal::Animalname={"Tree","Gazelle","Elephant","Lion","Forest"};
+    Animal::Animalcarcassname={"Fallen_Tree","Gazelle","Elephant","Lion","Forest_Stool"};
+    Animal::AnimalDisplayName={"树","瞪羚","大象","狮子","树林"};
+    //音效
+    Animal::sound_click= {"", "", "Elephant_Stand", "Lion_Stand", ""};
+    //对象属性
+    //树， 瞪羚， 大象， 狮子， 森林
+    Animal::AnimalMaxBlood = { BLOOD_TREE, BLOOD_GAZELLE, BLOOD_ELEPHANT, BLOOD_LION, BLOOD_FARMER };
+    Animal::AnimalResouceSort = { HUMAN_WOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_WOOD };
+    Animal::AnimalCnt = { CNT_TREE, CNT_GAZELLE, CNT_ELEPHANT, CNT_LION, CNT_TREE };
+    Animal::AnimalNowresStep = { 0, 0, NOWRES_TIMER_ELEPHANT, NOWRES_TIMER_LION, 0 };
+    Animal::AnimalVision = { 0, VISION_GAZELLE, VISION_ELEPHANT, VISION_LION, 0};
+    Animal::AnimalCrashLen = { CRASHBOX_MICRO, CRASHBOX_SINGLEOB, CRASHBOX_BIGOB, CRASHBOX_SMALLOB, CRASHBOX_SMALLBLOCK };
+    Animal::AnimalSpeed = { 0, ANIMAL_SPEED, SPEED_ELEPHANT, ANIMAL_SPEED, 0 };
+    Animal::AnimalFriendly = { FRIENDLY_NULL, FRIENDLY_FRI, FRIENDLY_FENCY, FRIENDLY_ENEMY, FRIENDLY_NULL };
+    Animal::AnimalAttackable = { false, false, true, true, false };
+    Animal::AnimalAtk = { 0, 0, 10, 2, 0 };
+    /*****************************Army*******************************/
+    Army::ArmyName=decltype(Army::ArmyName){{
+      {string("Clubman"),string("Axeman")},
+      {string("Slinger"),string("Slinger")},
+      {string("Archer"),string("Archer")},
+      {string("Scout"),string("Scout")},
+      {string("Sworder"),string("Sworder")},
+      {string("ImprovedArcher"),string("ImprovedArcher")},
+      {string("Cavalry"),string("Cavalry")},
+      {string("Ship"),string("Ship")},
+      {string("StoneThrower"),string("StoneThrower")},
+      {string("Priest"),string("Priest")}
+     }};
+    Army::ArmyDisplayName=decltype(Army::ArmyDisplayName){{
+                        {string("棍棒兵"),string("刀斧兵")},
+                        {string("投石兵"),string("投石兵")},
+                        {string("弓箭手"),string("弓箭手")},
+                        {string("侦察骑兵"),string("侦察骑兵")},
+                        {string("Prof.Yan"),string("Prof.Yan")},
+                        {string("Prof.Lou"),string("Prof.Lou")},
+                        {string("Prof.Lu"),string("Prof.Lu")},
+                        {string("Prof.Wang"),string("Prof.Wang")},
+                        {string("投石车"),string("投石车")},
+                        {string("祭司"),string("祭司")}
+                        }};
+    Army::click_sound = "Click_Army";
+    /******************************************Buildings****************************/
+    Building::Buildingname={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
+    Building::Builtname=decltype(Building::Builtname){{
+    {},
+    {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"},
+    {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"},
+    {"House_Egypt","Granary","Center_Egypt","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"}
+    }};
+    Building::BuildDisplayName={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场","船坞","攻城武器厂","学院"};
+    Building::BuildFireName = { "S_Fire", "M_Fire", "B_Fire"};
+
+    Building::sound_click= {
+    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market",
+    "Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range","Click_Range","Click_Range",
+    "Click_Range"
+    };
+    Building::BuildingMaxBlood= {
+    BLOOD_BUILD_HOUSE,  BLOOD_BUILD_GRANARY, BLOOD_BUILD_CENTER, BLOOD_BUILD_STOCK, BLOOD_BUILD_FARM,
+    BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE,
+    BLOOD_BUILD_RANGE,BLOOD_BUILD_DOCK,BLOOD_BUILD_SIEGE,BLOOD_BUILD_COLLAGE
+    };
+    Building::BuildingFundation= {
+    FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,
+    FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,
+    FOUNDATION_SMALL,FOUNDATION_MIDDLE,FOUNDATION_MIDDLE
+    };
+    Building::BuildingVision= {
+    VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,
+    VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE,
+    VISION_RANGE,VISION_DOCK,VISION_SIEGE,VISION_COLLAGE
+    };
+    /**********************************************Farmer*********************************/
+    Farmer::FarmerName={"Villager","Lumber","Gatherer","Miner","Hunter","Farmer","Worker","Fisher"};
+    Farmer::FarmerCarry={"","CarryWood","CarryMeat","CarryStone","CarryGold","","CarryFish"};
+    Farmer::FarmerDisplayName={"村民","樵夫","浆果采集者","矿工","猎人","农民","工人","渔民"};
+    Farmer::sound_click = "Click_Villager";
+    Farmer::sound_work = {"", "Cut", "Gather", "Mine", "Archer_Attack", "Plow", "Build" };
+    /**********************************************Missile********************************/
+    Missile::missilename= { "Spear" , "Arrow" , "Cobblestone","Boulders"};
+    /**********************************************StaticRes****************************/
+    StaticRes::StaticResname={"Bush","Stone","GoldOre","Fish"};
+    StaticRes::StaticResDisplayName = {"浆果丛","石头","金矿","渔场"};
 }
 
 void MainWidget::initEditor()

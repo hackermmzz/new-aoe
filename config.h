@@ -20,7 +20,6 @@
 #include <QObject>
 #include <QKeyEvent>
 #include <qtimer.h>
-
 #include <stack>
 #include <queue>
 #include <list>
@@ -29,68 +28,25 @@
 #include <sstream>
 #include <vector>
 #include <unordered_set>
-
 #include <Windows.h>
 #include <time.h>
-#include "digitalConfig.h"
-
-
+/**********debug消息************/
+#define REPRESENT_BOARDCAST_MESSAGE -1
 /********** 游戏配置数据 **********/
-#define GAME_WIDTH 1920                 //总窗口宽度
-#define GAME_HEIGHT 1000              //总窗口高度
-#define GAME_VERSION "v2.51c"
-#define GAME_TITLE "Age of Empires"     //总窗口名称
-#define MAPFILE_SUFFIX "njust"           //地图文件后缀
-#define GAME_LOSE_SEC 30*60
-#define GAME_WIN_GOLD 2500
-#define GOLD 10                         //金块资源数量
-#define STONE 10                        //石头资源数量
 #define gen5 sqrt(5)
-#define MAXPLAYER 8
-#define NOWPLAYER 2
-#define NOWPLAYERREPRESENT 0
-#define INITIAL_FREQUENCY 1
-
-#define MEMORYROW 400                  //列 行长度
-#define MEMORYCOLUMN 200               //行 列长度
-#define GAMEWIDGET_WIDTH 1440
-#define GAMEWIDGET_HEIGHT 751
-#define BLOCKSIDELENGTH (16*gen5)
-#define UNLOAD_RADIAN  2                //卸货时候寻找合适的陆地的半径
-#define MAP_L 128
-#define MAP_U 128
 #define GENERATE_L (MAP_L+8)
 #define GENERATE_U (MAP_U+8)
 #define GAMEWIDGET_MIDBLOCKL 22
 #define GAMEWIDGET_MIDBLOCKU 0
-#define HUMAN_SPEED sqrt(5)
-#define WOOD_BOAT_SPEED SPEED_SCOUT     //运输船的速度和骑士一样快
-#define ANIMAL_SPEED sqrt(10)
-#define RESPATH "res"
-#define ForestMAX 2
-#define FOREST_GENERATE_L 15
-#define FOREST_GENERATE_U 30
-#define FOREST_GENERATE_PERCENT 45  // 生成森林时出现空地的概率
-#define FOREST_GENERATE_OPTCOUNTER 5
-#define FOREST_COUNT_MIN 150
-#define TREEMAX 40
-#define BLOCKPIXEL_X (65 - showLine)
-#define BLOCKPIXEL_Y (33 - showLine)
-#define GENERATELANDFORMS_NUM 4
-#define KEY_UP 87
-#define KEY_LEFT 65
-#define KEY_DOWN 83
-#define KEY_RIGHT 68
 #define BLOCK_COUNT 41     // Block种类计数，包括所有种类和样式的地图块数量
-#define FRAMES_PER_SECOND 25    //每秒帧数
-#define OPTION_MUSIC false  // 默认false，关闭
-#define OPTION_SOUND false  // 默认false，关闭
-#define OPTION_SELECT false
-#define OPTION_LINE false
-#define OPTION_POS false
-#define OPTION_OVERLAP false
-
-
+/********** 飞行物投掷判断 **********/
+#define THROWMISSION_FARMER 25
+#define THROWMISSION_ARCHER 4
+#define THROWMISSION_IMPROVEDBOWMAN1 6
+#define THROWMISSION_SHIP 4
+#define THROWMISSION_SLINGER 5
+#define THROWMISSION_STONE_THROWER 5
+#define THROWMISSION_ARROWTOWN_TIMER 25
 /********** 地图块种类 **********/
 /* L0边为右上角，L0到L3顺时针排列 */
 /* A0边为上方角，A0到A3顺时针排列 */
@@ -125,15 +81,16 @@
 
 
 /********** 地图块样式 **********/
-#define MAPPATTERN_UNKNOWN 0      // 未定义样式
-#define MAPPATTERN_GRASS 1      // 草原
-#define MAPPATTERN_DESERT 2     // 沙漠
-#define MAPPATTERN_OCEAN 3      // 海洋/河流
-#define MAPPATTERN_SHOAL 4      // 浅滩（河流中可行走部分）
+enum MAPPATTERN {
+    MAPPATTERN_UNKNOWN = 0, // 未定义样式
+    MAPPATTERN_GRASS = 1,// 草原
+    MAPPATTERN_DESERT = 2,// 沙漠
+    MAPPATTERN_OCEAN = 3,// 海洋/河流
+    MAPPATTERN_SHOAL = 4// 浅滩（河流中可行走部分）
+};
 
 /********** 地图块绘制偏移量 **********/
 #define DRAW_OFFSET -15
-
 
 /********** DebugText栏颜色 **********/
 #define COLOR_RED(STRING) QString("<font color=red>%1</font><font color=black> </font>").arg(STRING)
@@ -147,14 +104,9 @@
 #define BUILDING_FIRE_MIDDLE 1
 #define BUILDING_FIRE_BIG 2
 
-#define BUILDING_BLOOD_FIRE_SMALL 0.75
-#define BUILDING_BLOOD_FIRE_MIDDLE 0.5
-#define BUILDING_BLOOD_FIRE_BIG 0.25
-
-
 /********** 建筑种类 **********/
-enum BUILDING_TYPE{
-    BUILDING_HOME=0,
+enum BUILDING_TYPE {
+    BUILDING_HOME = 0,
     BUILDING_GRANARY,
     BUILDING_CENTER,
     BUILDING_STOCK,
@@ -168,15 +120,9 @@ enum BUILDING_TYPE{
     BUILDING_SIEGE,
     BUILDING_COLLAGE,
     BUILDING_TEMPLE,//这个还未增加，本次也不用增加
+    BUILDING_WALL,//这个还未增加，本次也不用增加
     BUILDING_TYPE_MAXNUM,
 };
-#define BUILDING_ARROWTOWERPOSITION -1
-
-#define BUILDING_WALL 100
-
-
-/********** 建筑状态 **********/
-#define BUILDING_FREE 0 // 建筑状态为空闲（无工作）时用0表示
 
 
 /********** 建筑动作 **********/
@@ -215,7 +161,7 @@ enum BUILDING_TYPE{
 #define BUILDING_DOCK_CREATE_SAILING 119
 #define BUILDING_DOCK_CREATE_WOOD_BOAT 120
 #define BUILDING_DOCK_CREATE_SHIP 515
-//投石车
+//攻城武器厂
 #define BUILDING_SIEGE_CREATE_STONE_THROWER 50
 
 /********** 建筑动作命名 **********/
@@ -231,17 +177,20 @@ enum BUILDING_TYPE{
 
 /********** Coordinate子类中 Num值实际指代种类 **********/
 //资源
-#define NUM_STATICRES_Bush 0
-#define NUM_STATICRES_Stone 1
-#define NUM_STATICRES_GoldOre 2
-#define NUM_STATICRES_Fish 3
+enum STATICRES {
+    NUM_STATICRES_Bush = 0,
+    NUM_STATICRES_Stone,
+    NUM_STATICRES_GoldOre,
+    NUM_STATICRES_Fish
+};
 //动物
-#define ANIMAL_TREE 0
-#define ANIMAL_GAZELLE 1
-#define ANIMAL_ELEPHANT 2
-#define ANIMAL_LION 3
-#define ANIMAL_FOREST 4
-
+enum ANIMAL {
+    ANIMAL_TREE = 0,
+    ANIMAL_GAZELLE,
+    ANIMAL_ELEPHANT,
+    ANIMAL_LION,
+    ANIMAL_FOREST
+};
 /********** 人物状态 **********/
 /*
  * 0代表为空闲状态
@@ -249,104 +198,82 @@ enum BUILDING_TYPE{
  * 2代表为正在工作状态
  * 3代表为正在攻击状态
  */
-#define HUMAN_STATE_IDLE 0
-#define HUMAN_STATE_WALKING 1
-#define HUMAN_STATE_WORKING 2
-#define HUMAN_STATE_ATTACKING 3
+enum HUMAN_STATE {
+    HUMAN_STATE_IDLE = 0,
+    HUMAN_STATE_WALKING,
+    HUMAN_STATE_WORKING,
+    HUMAN_STATE_ATTACKING
+};
 
- /********** 人物手持资源种类 **********/
-#define HUMAN_WOOD 1
-#define HUMAN_STOCKFOOD 2
-#define HUMAN_STONE 3
-#define HUMAN_GOLD 4
-#define HUMAN_GRANARYFOOD 5
-#define HUMAN_DOCKFOOD 6 //也就是鱼肉
+/********** 人物手持资源种类 **********/
+enum HUMAN_RESOURCE {
+    HUMAN_UNKNOWN = 0,
+    HUMAN_WOOD,
+    HUMAN_STOCKFOOD,
+    HUMAN_STONE,
+    HUMAN_GOLD,
+    HUMAN_GRANARYFOOD,
+    HUMAN_DOCKFOOD //也就是鱼肉
+};
 /********** AI函数 **********/
-//函数编号
-#define FUC_BUILDINGACTION 1
-#define FUC_HUMANMOVE 2
-#define FUC_HUMANACTION 3
-#define FUC_HUMANBUILD 4
-
 /********** 动作返回编号及action错误码 **********/
 /*
  * 0是成功
- * -1是SN不存在
- * -2是Action不存在
- * -3是指定位置超界
- * -4是obSN不存在
- * -5是BuildingNum不存在
- * -6是资源不足
  */
-#define ACTION_SUCCESS 0
-#define ACTION_INVALID_SN -1
-#define ACTION_INVALID_ACTION -2
-#define ACTION_INVALID_LOCATION -3
-#define ACTION_INVALID_OBSN -4
-#define ACTION_INVALID_BUILDINGNUM -5
-#define ACTION_INVALID_RESOURCE -6
-#define ACTION_INVALID_UPGRADE_TIME -7
-#define ACTION_INVALID_PRIEST_TARGET_ERROR -8
- //控制对象被删除
-#define ACTION_INVALID_NULLWORKER -80
-//目标对象已被删除
-#define ACTION_INVALID_NULLGOALOBJECT -81
+enum ACTION_STATUS_CODE {
+    ACTION_SUCCESS = 0,
+    ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH,//建筑位置有高度差
+    ACTION_INVALID_HUMANBUILD_OVERBORDER,//建筑位置加上建筑宽度，超出边界
+    ACTION_INVALID_HUMANBUILD_UNEXPLORE,//建筑位置未被探索
+    ACTION_INVALID_HUMANBUILD_OVERLAP,//建筑位置与其他物体有重叠冲突
+    ACTION_INVALID_HUMANBUILD_LOCK,//建筑未解锁，未达成建筑条件
+    ACTION_INVALID_DISTANCE_FAR,//距离相距太远
+    ACTION_INVALID_FULLY_LOAD,//携带人物满了
+    ACTION_INVALID_POSITION_NOT_FIT,//建筑放置的位置不合适
+    /*********修理建筑，建筑不需要修理********/
+    ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH,
+    ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX,
+    ///////////////////////
+    ACTION_INVALID_BUILDACT_MAXHUMAN,//造人行动，已达人口上限
+    ACTION_INVALID_BUILDACT_LOCK,//建筑行动未解锁，或该行动只能进行有限次且已达上限
+    ACTION_INVALID_BUILDACT_NEEDBUILT,//建筑还在建造过程中
+    ACTION_INVALID_ISNTFREE,//对象已有必须手动取消的任务，不空闲
+    ACTION_INVALID_NULLGOALOBJECT,//目标对象已被删除
+    ACTION_INVALID_NULLWORKER,//控制对象被删除
+    ACTION_INVALID_PRIEST_TARGET_ERROR,
+    ACTION_INVALID_UPGRADE_TIME,
+    ACTION_INVALID_RESOURCE,
+    ACTION_INVALID_BUILDINGNUM,
+    ACTION_INVALID_OBSN,
+    ACTION_INVALID_LOCATION,
+    ACTION_INVALID_ACTION,
+    ACTION_INVALID_SN
 
-//对象已有必须手动取消的任务，不空闲
-#define ACTION_INVALID_ISNTFREE -82
-
-//BuildingAction
-//建筑还在建造过程中
-#define ACTION_INVALID_BUILDACT_NEEDBUILT -11
-
-//建筑行动未解锁，或该行动只能进行有限次且已达上限
-#define ACTION_INVALID_BUILDACT_LOCK -13
-//造人行动，已达人口上限
-#define ACTION_INVALID_BUILDACT_MAXHUMAN -14
-
-//HumanMove
-
-//HumanAction
-//修理建筑，建筑不需要修理
-#define ACTION_INVALID_HUMANACTION_BUILDNOTNEEDFIX -21
-#define ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH -22
-
-//HumanBuild
-//建筑位置有高度差
-#define ACTION_INVALID_HUMANBUILD_DIFFERENTHIGH -41
-//建筑位置加上建筑宽度，超出边界
-#define ACTION_INVALID_HUMANBUILD_OVERBORDER -42
-//建筑位置未被探索
-#define ACTION_INVALID_HUMANBUILD_UNEXPLORE -43
-//建筑位置与其他物体有重叠冲突
-#define ACTION_INVALID_HUMANBUILD_OVERLAP -44
-//建筑未解锁，未达成建筑条件
-#define ACTION_INVALID_HUMANBUILD_LOCK -45
-//距离相距太远
-#define ACTION_INVALID_DISTANCE_FAR -99
-//携带人物满了
-#define ACTION_INVALID_FULLY_LOAD -119
-//建筑放置的位置不合适
-#define ACTION_INVALID_POSITION_NOT_FIT -520
+};
 /********** 资源种类 **********/
 /*
  * 如表 十进制位代表大的分类 个位代表他在大类中的具体编号
  */
-#define RESOURCE_EMPTY 0
-#define RESOURCE_BUSH 20
-#define RESOURCE_TREE 60
-#define RESOURCE_STONE 21
-#define RESOURCE_GAZELLE 71
-#define RESOURCE_ELEPHANT 72
-#define RESOURCE_LION 73
-#define RESOURCE_GOLD 99
-#define RESOURCE_FISH 119
+enum RESOURCE_TYPE {
+    RESOURCE_EMPTY = 0,
+    RESOURCE_BUSH,
+    RESOURCE_TREE,
+    RESOURCE_STONE,
+    RESOURCE_GAZELLE,
+    RESOURCE_ELEPHANT,
+    RESOURCE_LION,
+    RESOURCE_GOLD,
+    RESOURCE_FISH
+};
 
- /********** 时代编号 **********/
-#define CIVILIZATION_STONEAGE 1
-#define CIVILIZATION_TOOLAGE 2
-#define CIVILIZATION_BRONZEAGE 3
-#define CIVILIZATION_IRONAGE 4
+/********** 时代编号 **********/
+enum CIVILIZATION {
+    CIVILIZATION_UNKNOWN = 0,
+    CIVILIZATION_STONEAGE,
+    CIVILIZATION_TOOLAGE,
+    CIVILIZATION_BRONZEAGE,
+    CIVILIZATION_IRONAGE
+};
 
 
 #define ACT_STATUS_ENABLED 0
@@ -398,190 +325,147 @@ enum BUILDING_TYPE{
 
 #define ACT_WINDOW_NUM_FREE 12
 
-#define ACT_NULL 0
-#define ACT_CREATEFARMER 1
-#define ACT_UPGRADE_AGE 2
-#define ACT_UPGRADE_TOWERBUILD 3
-#define ACT_UPGRADE_WOOD 4
-#define ACT_UPGRADE_STONE 5
-#define ACT_UPGRADE_FARM 6
-#define ACT_UPGRADE_GOLD 7
-#define ACT_STOCK_UPGRADE_USETOOL 8
-#define ACT_STOCK_UPGRADE_DEFENSE_INFANTRY 9
-#define ACT_STOCK_UPGRADE_DEFENSE_ARCHER 10
-#define ACT_STOCK_UPGRADE_DEFENSE_RIDER 11
-#define ACT_ARMYCAMP_CREATE_CLUBMAN 13
-#define ACT_ARMYCAMP_CREATE_SLINGER 14
-#define ACT_ARMYCAMP_UPGRADE_CLUBMAN 15
-#define ACT_RANGE_CREATE_BOWMAN 16
-#define ACT_STABLE_CREATE_SCOUT 17
-#define ACT_RESEARCH_WALL 18
-#define ACT_DOCK_CREATE_SAILING 19
-#define ACT_DOCK_CREATE_WOOD_BOAT 20
-#define ACT_DOCK_CREATE_SHIP 21
-#define ACT_SIEGE_CREATE_STONE_THROWER 22
 
-#define ACT_BUILD 50
-#define ACT_BUILD_HOUSE 51
-#define ACT_BUILD_GRANARY 52
-#define ACT_BUILD_STOCK 53
-#define ACT_BUILD_CANCEL 54
-#define ACT_BUILD_FARM 55
-#define ACT_BUILD_MARKET 56
-#define ACT_BUILD_ARROWTOWER 57
-#define ACT_BUILD_ARMYCAMP 58
-#define ACT_BUILD_RANGE 59
-#define ACT_BUILD_STABLE 60
-#define ACT_BUILD_DOCK 61
-#define ACT_BUILD_SIEGE 64
-#define ACT_BUILD_COLLAGE 63
-
-#define ACT_SHIP_LAY 62
-
-#define ACT_STOP 100
-
-
-/********** 对象视野 **********/
-//建筑的视野搬至建筑属性相关
-#define VISION_FARMER 4
-#define VISION_GAZELLE 2
-#define VISION_LION 3
-#define VISION_ELEPHANT 4
-
-
+enum ACTION {
+    ACT_NULL = 0,
+    ACT_CREATEFARMER,
+    ACT_UPGRADE_AGE,
+    ACT_UPGRADE_TOWERBUILD,
+    ACT_UPGRADE_WOOD,
+    ACT_UPGRADE_STONE,
+    ACT_UPGRADE_FARM,
+    ACT_UPGRADE_GOLD,
+    ACT_STOCK_UPGRADE_USETOOL,
+    ACT_STOCK_UPGRADE_DEFENSE_INFANTRY,
+    ACT_STOCK_UPGRADE_DEFENSE_ARCHER,
+    ACT_STOCK_UPGRADE_DEFENSE_RIDER,
+    ACT_ARMYCAMP_CREATE_CLUBMAN,
+    ACT_ARMYCAMP_CREATE_SLINGER,
+    ACT_ARMYCAMP_UPGRADE_CLUBMAN,
+    ACT_RANGE_CREATE_BOWMAN,
+    ACT_STABLE_CREATE_SCOUT,
+    ACT_RESEARCH_WALL,
+    ACT_DOCK_CREATE_SAILING,
+    ACT_DOCK_CREATE_WOOD_BOAT,
+    ACT_DOCK_CREATE_SHIP,
+    ACT_SIEGE_CREATE_STONE_THROWER,
+    ACT_BUILD,
+    ACT_BUILD_HOUSE,
+    ACT_BUILD_GRANARY,
+    ACT_BUILD_STOCK,
+    ACT_BUILD_CANCEL,
+    ACT_BUILD_FARM,
+    ACT_BUILD_MARKET,
+    ACT_BUILD_ARROWTOWER,
+    ACT_BUILD_ARMYCAMP,
+    ACT_BUILD_RANGE,
+    ACT_BUILD_STABLE,
+    ACT_BUILD_DOCK,
+    ACT_BUILD_COLLAGE,
+    ACT_BUILD_SIEGE,
+    ACT_SHIP_LAY,
+    ACT_STOP
+};
 /********** 地基编号 **********/
-#define FOUNDATION_SMALL 0
-#define FOUNDATION_MIDDLE 1
-#define FOUNDATION_BIG 2
-#define FOUNDATION_HOUSE 3
-#define FOUNDATION_BLOCK 4
+enum FOUNDATION {
+    FOUNDATION_SMALL = 0,
+    FOUNDATION_MIDDLE,
+    FOUNDATION_BIG,
+    FOUNDATION_HOUSE,
+    FOUNDATION_BLOCK
+};
 
-#define SORT_COORDINATE 0
-#define SORT_BUILDING 1
-#define SORT_STATICRES 2
-#define SORT_HUMAN 4
-#define SORT_FARMER 5
-#define SORT_ANIMAL 7
-#define SORT_TREEFOREST 6
-#define SORT_MISSILE 8
-#define SORT_Building_Resource 9
-#define SORT_ARMY 10
+enum ElementSort {
+    SORT_COORDINATE = 0,
+    SORT_BUILDING,
+    SORT_STATICRES,
+    SORT_HUMAN,
+    SORT_FARMER,
+    SORT_ANIMAL,
+    SORT_TREEFOREST,
+    SORT_MISSILE,
+    SORT_Building_Resource,
+    SORT_ARMY
+};
 
-#define PRODUCTSORT_WOOD 1
-#define PRODUCTSORT_GRANARYFOOD 2
-#define PRODUCTSORT_STONE 3
-#define PRODUCTSORT_GOLD 4
-#define PRODUCTSORT_STOCKFOOD 5
+enum ProductSort {
+    PRODUCTSORT_UNKNOWN = 0,
+    PRODUCTSORT_WOOD,
+    PRODUCTSORT_GRANARYFOOD,
+    PRODUCTSORT_STONE,
+    PRODUCTSORT_GOLD,
+    PRODUCTSORT_STOCKFOOD
+};
 
 #define OBJECTTYPE_BLOCK 0
 #define OBJECTTYPE_COORDINATE 1
 
-#define ANIMAL_STATE_IDLE 0
-#define ANIMAL_STATE_ROAMING 1
-#define ANIMAL_STATE_FLEEING 2
-#define ANIMAL_STATE_CHASING 3
-#define ANIMAL_STATE_ATTACKING 4
+enum AnimalState {
+    ANIMAL_STATE_IDLE = 0,
+    ANIMAL_STATE_ROAMING,
+    ANIMAL_STATE_FLEEING,
+    ANIMAL_STATE_CHASING,
+    ANIMAL_STATE_ATTACKING
+};
 
-#define BLOOD_TREE 25
-#define BLOOD_GAZELLE 8
-#define BLOOD_ELEPHANT 45
-#define BLOOD_LION 20
-#define BLOOD_FARMER 25
-#define BLOOD_FOREST 100
+enum FarmerRole {
+    FARMER_VILLAGER = 0,
+    FARMER_LUMBER,
+    FARMER_GATHERER,
+    FARMER_MINER,
+    FARMER_HUNTER,
+    FARMER_FARMER,
+    FARMER_WORKER,
+    FARMER_FISHER
+};
 
-#define SPEED_ELEPHANT (1.0/1.1 * HUMAN_SPEED)
 
-#define CNT_TREE 75
-#define CNT_GAZELLE 150
-#define CNT_ELEPHANT 300
-#define CNT_LION 100
-//#define CNT_FARM 250
-#define CNT_UPGRADEFARM 325
-#define CNT_BUSH 150
-#define CNT_STONE 250
-#define CNT_GOLDORE 200
-#define CNT_FOREST 300
-#define CNT_FISH 200
+enum MoveObjectState {
+    MOVEOBJECT_STATE_STAND = 0,
+    MOVEOBJECT_STATE_WALK,
+    MOVEOBJECT_STATE_ATTACK,
+    MOVEOBJECT_STATE_DIE,
+    MOVEOBJECT_STATE_WORK,
+    MOVEOBJECT_STATE_RUN
+};
 
-#define ANIMAL_ATTACKRANGE_LION 10
-#define ANIMAL_ATTACKRANGE_ELEPHANT 10
 
-#define FARMER_VILLAGER 0
-#define FARMER_LUMBER 1
-#define FARMER_GATHERER 3
-#define FARMER_MINER 2
-#define FARMER_HUNTER 4
-#define FARMER_FARMER 5
-#define FARMER_WORKER 6
-#define FARMER_FISHER 7
-
-#define FARMER_CARRYLIMIT_WOOD 10
-#define FARMER_CARRYLIMIT_FOOD 10
-#define FARMER_CARRYLIMIT_STONE 10
-#define FARMER_CARRYLIMIT_GOLD 10
-#define FARMER_CARRYLIMIT_UPGRADEWOOD 12
-#define FARMER_CARRYLIMIT_UPGRADEFOOD 13
-#define FARMER_CARRYLIMIT_UPGRADESTONE 13
-#define FARMER_CARRYLIMIT_UPGRADEGOLD 10
-
-#define FARMER_HUNTRANGE 3
-#define FARMER_UPGRADEHUNTRANGE 4
-
-#define FARMER_GATHERSPEED_WOOD 0.02
-#define FARMER_GATHERSPEED_FOOD 0.02
-#define FARMER_GATHERSPEED_STONE 0.02
-#define FARMER_GATHERSPEED_GOLD 0.02
-#define FARMER_CONSTRUCTSPEED 0.02
-
-#define MOVEOBJECT_STATE_STAND 0
-#define MOVEOBJECT_STATE_WALK 1
-#define MOVEOBJECT_STATE_ATTACK 2
-#define MOVEOBJECT_STATE_DIE 3
-
-#define MOVEOBJECT_STATE_WORK 5
-#define MOVEOBJECT_STATE_RUN 6
-#define ATTACKVALUE_FARMER 3
-
-#define HOUSE_HUMAN_NUM 4
-#define MAX_HUMAN_NUM 50
 
 //鼠标结构体中对应鼠标点击事件
 #define NULL_MOUSEEVENT 0
 #define LEFT_PRESS 1
 #define RIGHT_PRESS 2
-
-
-
-
 /********** Core静态表 **********/
 //####关系事件名称
-#define CoreEven_JustMoveTo 0
-#define CoreEven_CreatBuilding 1
-#define CoreEven_Gather 2
-#define CoreEven_Attacking 4
-#define CoreEven_FixBuilding 5
-#define CoreEven_BuildingAct 6
-#define CoreEven_MissileAttack 7
-#define CoreEven_Transport 8
-#define CoreEven_UnLoad 9
+enum CoreEvenType {
+    CoreEven_JustMoveTo = 0,
+    CoreEven_CreatBuilding,
+    CoreEven_Gather,
+    CoreEven_Attacking,
+    CoreEven_FixBuilding,
+    CoreEven_BuildingAct,
+    CoreEven_MissileAttack,
+    CoreEven_Transport,
+    CoreEven_UnLoad
+};
 //####对一个关系事件，细节关系的最大数量
+enum CoreDetailType {
+    CoreDetail_JumpPhase = -3,
+    CoreDetail_AbsoluteEnd,
+    CoreDetail_NormalEnd,
+    CoreDetail_Move,
+    CoreDetail_Attack,
+    CoreDetail_Gather,
+    CoreDetail_ResourceIn,
+    CoreDetail_Transport,
+    CoreDetail_UpdateRatio,
+    CoreDetail_Unload,
+    // CoreDetailLinkMaxNum
+};
 #define CoreDetailLinkMaxNum 15
-//####细节环节名称
-#define CoreDetail_NormalEnd -1
-#define CoreDetail_AbsoluteEnd -2
-#define CoreDetail_JumpPhase -3
-#define CoreDetail_Move 0
-#define CoreDetail_Attack 1
-#define CoreDetail_Gather 2
-#define CoreDetail_ResourceIn 3
-#define CoreDetail_Transport 4
-#define CoreDetail_UpdateRatio 5
-#define CoreDetail_Unload 6
-
 /********** Core关系函数的可变操作指令 **********/
 #define OPERATECON_DEFAULT 11111
 #define OPERATECHANGE 100
-
 //####距离判定
 #define OPERATECON_NEAR_ABSOLUTE OPERATECON_DEFAULT
 #define OPERATECON_MOVEALTER 200
@@ -591,43 +475,89 @@ enum BUILDING_TYPE{
 #define OPERATECON_NEAR_ATTACK_MOVE 10004
 #define OPERATECON_NEAR_UNLOAD 10005
 #define OPERATECON_NEAR_TRANSPORT 10006
-
 #define OPERATECON_NEARALTER_ABSOLUTE 20000
 #define OPERATECON_NEARALTER_WORK 20002
-
 //####指定对象
 #define OPERATECON_OBJECT1 10011
 #define OPERATECON_OBJECT2 10012
-
 #define OPERATECON_TIMES 00001
 #define OPERATE_TIMEMAX 10
-
 #define OPERATECON_TIMES_USELESSACT_MOVE 250
-
-
 /********** 占地边长-块坐标常量 **********/
-#define SIZELEN_SINGEL 1
-#define SIZELEN_SMALL 2
-#define SIZELEN_MIDDLE 3
-#define SIZELEN_BIG 4
-
-
+enum SizeLenType {
+    SIZELEN_SINGEL = 1,
+    SIZELEN_SMALL,
+    SIZELEN_MIDDLE,
+    SIZELEN_BIG
+};
 /********** animal友好度 **********/
-#define FRIENDLY_NULL 0
-#define FRIENDLY_FRI 1
-#define FRIENDLY_ENEMY 2
-#define FRIENDLY_FENCY 3
+enum FriendlyType {
+    FRIENDLY_NULL = 0,
+    FRIENDLY_FRI,
+    FRIENDLY_ENEMY,
+    FRIENDLY_FENCY
+};
+/********** 兵种类别 **********/
+enum AT_ARMY {
+    AT_CLUBMAN = 0,
+    AT_SLINGER,
+    AT_BOWMAN,
+    AT_SCOUT,
+    AT_SWORDSMAN,
+    AT_IMPROVED,
+    AT_CAVALRY,
+    AT_SHIP,
+    AT_STONE_THROWER,
+    AT_PRIEST,
+    AT_ARMY_MAX_NUM
+};
 
+/********** 军队类别 **********/
+enum ARMY_TYPE {
+    ARMY_UNKNOWN = 0,
+    ARMY_INFANTRY,//步兵
+    ARMY_ARCHER,//弓兵
+    ARMY_RIDER,//骑兵
+    ARMY_FLAMEN,//祭
+    ARMY_SIEGE,//攻城兵器
+    ARMY_SHIP//船
+};
+/********** 攻击方式 **********/
+enum AttackType {
+    ATTACKTYPE_CANTATTACK = -1,
+    ATTACKTYPE_ANIMAL,
+    ATTACKTYPE_CLOSE,
+    ATTACKTYPE_CLOSE_TOTREE,
+    ATTACKTYPE_SHOOT,
+    ATTACKTYPE_CHANGE,
+};
+/***********农民类型**********/
+enum FarmerType {
+    FARMERTYPE_FARMER = 0,
+    FARMERTYPE_WOOD_BOAT,
+    FARMERTYPE_SAILING
+};
+/********** 飞行物类别 **********/
+enum MissileType {
+    Missile_Spear = 0,
+    Missile_Arrow,
+    Missile_Cobblestone,
+    Missile_Boulders,
+    NUMBER_MISSILE
+};
 /********** 兵种状态 **********/
-#define ARMY_STATE_DEFAULT 0
-#define ARMY_STATE_AROUND 1
-#define ARMY_STATE_DEFENSE 2
-#define ARMY_STATE_ATTACK 3
-
+enum ArmyState {
+    ARMY_STATE_DEFAULT = 0,
+    ARMY_STATE_AROUND,
+    ARMY_STATE_DEFENSE,
+    ARMY_STATE_ATTACK
+};
 /********** 巡逻状态 **********/
-#define PATROL_STATE_IDLE 0
-#define PATROL_STATE_PATROLLING 1
-#define PATROL_STATE_CHASING 2
-#define PATROL_STATE_RETURNING 3
+enum PatrolState {
+    PATROL_STATE_IDLE = 0,
+    PATROL_STATE_PATROLLING,
+    PATROL_STATE_CHASING,
+    PATROL_STATE_RETURNING
+};
 
 #endif // CONFIG_H

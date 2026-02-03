@@ -1,42 +1,36 @@
 ﻿#include "Animal.h"
 
  //图片资源
-std::string Animal::Animalname[5]={"Tree","Gazelle","Elephant","Lion","Forest"};
-std::string Animal::Animalcarcassname[5]={"Fallen_Tree","Gazelle","Elephant","Lion","Forest_Stool"};
-std::string Animal::AnimalDisplayName[5]={"树","瞪羚","大象","狮子","树林"};
+array<std::string,5> Animal::Animalname;
+array<std::string,5> Animal::Animalcarcassname;
+array<std::string,5> Animal::AnimalDisplayName;
 std::list<ImageResource>* Animal::Walk[5][8];
 std::list<ImageResource>* Animal::Stand[5][8];
 std::list<ImageResource>* Animal::Attack[5][8];
 std::list<ImageResource>* Animal::Die[5][8];
 std::list<ImageResource>* Animal::Run[5][8];
 std::list<ImageResource>* Animal::Disappear[5][8];
-
-
 //音效
-std::string Animal::sound_click[5] = {\
-    "", "", "Elephant_Stand", "Lion_Stand", ""\
-};
-
-
+array<std::string,5> Animal::sound_click;
 //对象属性
 //树， 瞪羚， 大象， 狮子， 森林
-int Animal::AnimalMaxBlood[5] = { BLOOD_TREE, BLOOD_GAZELLE, BLOOD_ELEPHANT, BLOOD_LION, BLOOD_FARMER };
-int Animal::AnimalResouceSort[5] = { HUMAN_WOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_STOCKFOOD, HUMAN_WOOD };
-int Animal::AnimalCnt[5] = { CNT_TREE, CNT_GAZELLE, CNT_ELEPHANT, CNT_LION, CNT_FOREST };
-int Animal::AnimalNowresStep[5] = { 0, 0, NOWRES_TIMER_ELEPHANT, NOWRES_TIMER_LION, 0 };
+array<int,5> Animal::AnimalMaxBlood;
+array<int,5>  Animal::AnimalResouceSort;
+array<int,5> Animal::AnimalCnt;
+array<int,5>  Animal::AnimalNowresStep;
 
-int Animal::AnimalVision[5] = { 0, VISION_GAZELLE, VISION_ELEPHANT, VISION_LION, 0};
-double Animal::AnimalCrashLen[5] = { CRASHBOX_MICRO, CRASHBOX_SINGLEOB, CRASHBOX_BIGOB, CRASHBOX_SMALLOB, CRASHBOX_SMALLBLOCK };
-double Animal::AnimalSpeed[5] = { 0, ANIMAL_SPEED, SPEED_ELEPHANT, ANIMAL_SPEED, 0 };
-
-int Animal::AnimalFriendly[5] = { FRIENDLY_NULL, FRIENDLY_FRI, FRIENDLY_FENCY, FRIENDLY_ENEMY, FRIENDLY_NULL };
-bool Animal::AnimalAttackable[5] = { false, false, true, true, false };
-int Animal::AnimalAtk[5] = { 0, 0, 10, 2, 0 };
+array<int,5> Animal::AnimalVision;
+array<double,5> Animal::AnimalCrashLen;
+array<double,5> Animal::AnimalSpeed;
+array<int,5>  Animal::AnimalFriendly;
+array<bool,5> Animal::AnimalAttackable;
+array<int,5> Animal::AnimalAtk;
 
 
 /************构造与析构*************/
 Animal::Animal(int Num, double DR, double UR)
 {
+
     this->Num=Num;
 
     setDRUR(DR, UR);
@@ -162,7 +156,7 @@ void Animal::setAttribute()
         incorrectNum = true;
         return;
     }
-
+    int x=CNT_TREE;
     MaxBlood = AnimalMaxBlood[Num];
     resourceSort = AnimalResouceSort[Num];
     MaxCnt = AnimalCnt[Num];

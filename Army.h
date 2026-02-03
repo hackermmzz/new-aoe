@@ -6,6 +6,18 @@
 class Army : public Human
 {
 public:
+    /*************静态成员************/
+    static std::list<ImageResource> *Walk[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Stand[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Attack[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Die[2][AT_ARMY_MAX_NUM][2][8];
+    static std::list<ImageResource> *Disappear[2][AT_ARMY_MAX_NUM][2][8];
+    static array<array<std::string,2>,AT_ARMY_MAX_NUM> ArmyName;
+    static array<array<std::string,2>,AT_ARMY_MAX_NUM> ArmyDisplayName;
+
+    static string click_sound;
+    /*************静态成员************/
+public:
     Army();
     Army(double DR,double UR,int type , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
     Army(double DR,double UR,int type ,int status, Development* playerScience=NULL, int playerRepresent=MAXPLAYER,int starttime=15,int finishtime=37500,double dDR=0,double dUR=0);
@@ -173,17 +185,7 @@ private:
     /*****************/
 
 
-    /*************静态成员************/
-    static std::list<ImageResource> *Walk[2][AT_ARMY_MAX_NUM][2][8];
-    static std::list<ImageResource> *Stand[2][AT_ARMY_MAX_NUM][2][8];
-    static std::list<ImageResource> *Attack[2][AT_ARMY_MAX_NUM][2][8];
-    static std::list<ImageResource> *Die[2][AT_ARMY_MAX_NUM][2][8];
-    static std::list<ImageResource> *Disappear[2][AT_ARMY_MAX_NUM][2][8];
-    static std::string ArmyName[AT_ARMY_MAX_NUM][2];
-    static std::string ArmyDisplayName[AT_ARMY_MAX_NUM][2];
 
-    static string click_sound;
-    /*************静态成员************/
 
 
     void requestSound_Attack();

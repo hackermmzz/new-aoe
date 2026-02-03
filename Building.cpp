@@ -1,50 +1,22 @@
 ﻿#include "Building.h"
-
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
 std::list<ImageResource>* Building::built[4][BUILDING_TYPE_MAXNUM];
 std::list<ImageResource>* Building::buildFire[3];
 
-std::string Building::Buildingname[4]={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
-std::string Building::Builtname[4][BUILDING_TYPE_MAXNUM]={{},
-                                       {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"},
-                                       {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"},
-                                       {"House_Egypt","Granary","Center_Egypt","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"}
-                                      };
-std::string Building::BuildDisplayName[BUILDING_TYPE_MAXNUM]={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场","船坞","攻城武器厂","学院"};
+array<std::string,4> Building::Buildingname;
+array<array<std::string,BUILDING_TYPE_MAXNUM>,4> Building::Builtname;
+array<std::string,BUILDING_TYPE_MAXNUM>  Building::BuildDisplayName;
+array<std::string,3> Building::BuildFireName;
 
-std::string Building::BuildFireName[3] = { "S_Fire", "M_Fire", "B_Fire"};
+array<string,BUILDING_TYPE_MAXNUM> Building::sound_click;
 
-std::string Building::sound_click[BUILDING_TYPE_MAXNUM] = {
-    "Click_House","Click_Granary","Click_Center","Click_Stock","Click_Farm","Click_Market",
-    "Villager_ArrowTower","Click_ArmyCamp","Click_Stable","Click_Range","Click_Range","Click_Range",
-    "Click_Range"
-};
+array<array<int,ACT_WINDOW_NUM_FREE>,BUILDING_TYPE_MAXNUM> Building::actNames;
+array<int,BUILDING_TYPE_MAXNUM> Building::BuildingMaxBlood;
 
-int Building::actNames[BUILDING_TYPE_MAXNUM][ACT_WINDOW_NUM_FREE] = {ACT_NULL};
+array<int,BUILDING_TYPE_MAXNUM>Building::BuildingFundation;
 
-int Building::BuildingMaxBlood[BUILDING_TYPE_MAXNUM] = {
-   BLOOD_BUILD_HOUSE,  BLOOD_BUILD_GRANARY, BLOOD_BUILD_CENTER, BLOOD_BUILD_STOCK, BLOOD_BUILD_FARM,
-    BLOOD_BUILD_MARKET, BLOOD_BUILD_ARROWTOWER, BLOOD_BUILD_ARMYCAMP, BLOOD_BUILD_STABLE,
-    BLOOD_BUILD_RANGE,BLOOD_BUILD_DOCK,BLOOD_BUILD_SIEGE,BLOOD_BUILD_COLLAGE
-};
-
-int Building::BuildingFundation[BUILDING_TYPE_MAXNUM] = {
-    FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,
-    FOUNDATION_MIDDLE, FOUNDATION_SMALL, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE, FOUNDATION_MIDDLE,
-    FOUNDATION_SMALL,FOUNDATION_MIDDLE,FOUNDATION_MIDDLE
-};
-
-int Building::BuildingVision[BUILDING_TYPE_MAXNUM] = {
-    VISION_HOME, VISION_GRANARY, VISION_CENTER, VISION_STOCK, VISION_FARM,
-    VISION_MARKET, VISION_ARROWTOWER, VISION_ARMYCAMP, VISION_STABLE,
-    VISION_RANGE,VISION_DOCK,VISION_SIEGE,VISION_COLLAGE
-};
-
-/********************静态资源**************************/
-bool is_cheatAction = false;
-extern Score usrScore;
-
+array<int,BUILDING_TYPE_MAXNUM> Building::BuildingVision;
 
 /********************构造与析构**************************/
 Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* playerScience, int playerRepresent, int Percent)

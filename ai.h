@@ -48,7 +48,7 @@ private:
     QMutex mutex;
     QWaitCondition condition;
     bool stopThread = false;
-    static QString AIName[NOWPLAYER];
+    static std::vector<QString> AIName;
 
     bool isHuman(int SN);
 

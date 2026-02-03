@@ -11,6 +11,7 @@ ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 void UsrAI::processData()
 {
+//    return;
     cheatAction();
     static bool res=0;
     if(!res)
