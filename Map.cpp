@@ -1488,9 +1488,9 @@ bool Map::addAnimal(int Num, double DR, double UR) {
  * 返回值：生成成功返回true。
  */
 bool Map::loadResource() {
-    for(int i = 0; i < MAP_U; i++)
+    for(int i = 0; i < MAP_L; i++)
     {
-        for(int j = 0; j < MAP_L; j++)
+        for(int j = 0; j < MAP_U; j++)
         {
             if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapType() != MAPTYPE_FLAT) continue;
             int tOffsetX = 0, tOffsetY = 0;

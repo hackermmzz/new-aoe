@@ -11,25 +11,25 @@ ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 void UsrAI::processData()
 {
-//    return;
+    //    return;
     cheatAction();
-    static bool res=0;
-    if(!res)
-    res=1,cheatRes();
+    static bool res = 0;
+    if (!res)
+        res = 1, cheatRes();
     return;
-    auto info=getInfo();
-    static bool xx=0;
-    static tagFarmer f;
-    for(auto x :info.farmers){
-        if(x.FarmerSort==FARMERTYPE_FARMER){
-            if(xx&&f.SN==x.SN){
-                f=x;
-            }else if(!xx){
-                f=x;
-                xx=1;
+    auto info = getInfo();
+    static bool xx = 0;
+    static tagArmy f;
+    for (auto x : info.armies) {
+        if (x.Sort == AT_STONE_THROWER) {
+            if (xx && f.SN == x.SN) {
+                f = x;
+            }
+            else if (!xx) {
+                f = x;
+                xx = 1;
+                PinPointStrike(f.SN, f.DR, f.UR + 32.0 * 5);
             }
         }
     }
-    // if(f.WorkObjectSN==-1)
-    // HumanBuild(f.SN,BUILDING_COLLAGE,112,106);
 }

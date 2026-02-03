@@ -71,6 +71,7 @@ private:
     int handleFarmerAction(Coordinate* self, Coordinate* obj, int id);
     int handleMilitaryAction(Coordinate* self, Coordinate* obj, int id);
     int handleBuildingAction(Coordinate* self, int option, int id);
+    int handlePinPointStrike(Coordinate* self, double dr0,double ur0, int id);
     void deduplicateInstructions(std::queue<instruction>& instructions); // 去重指令队列
     void FirstFrameProcess();//游戏开始的第一帧需要干的事情
 public:

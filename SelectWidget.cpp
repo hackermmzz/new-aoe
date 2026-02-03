@@ -1,6 +1,5 @@
 #include "SelectWidget.h"
 #include "ui_SelectWidget.h"
-#include "ai.h"
 
 SelectWidget::SelectWidget(QWidget* parent) : QWidget(parent),
 ui(new Ui::SelectWidget)
@@ -807,66 +806,65 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         core->addRelation(nowobject, nowobject, CoreEven_UnLoad);
         break;
     case ACT_CREATEFARMER:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_CENTER_CREATEFARMER);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_CENTER_CREATEFARMER);
         break;
     case ACT_UPGRADE_AGE:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_CENTER_UPGRADE);
         // if (mainPtr->player[0]->get_civiBuild_Times(mainPtr->player[0]->getCiv()) >= 2) 这个条件在内核满足就行，这里不需要给
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_CENTER_UPGRADE);
         break;
     case ACT_UPGRADE_TOWERBUILD:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_GRANARY_ARROWTOWER);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_GRANARY_ARROWTOWER);
         break;
     case ACT_UPGRADE_WOOD:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_MARKET_WOOD_UPGRADE);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_WOOD_UPGRADE);
         break;
     case ACT_UPGRADE_STONE:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_MARKET_STONE_UPGRADE);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_STONE_UPGRADE);
         break;
     case ACT_UPGRADE_GOLD:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_MARKET_GOLD_UPGRADE);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_GOLD_UPGRADE);
         break;
     case ACT_UPGRADE_FARM:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_MARKET_FARM_UPGRADE);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_FARM_UPGRADE);
         break;
     case ACT_STOCK_UPGRADE_USETOOL:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_STOCK_UPGRADE_USETOOL);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_USETOOL);
         break;
     case ACT_STOCK_UPGRADE_DEFENSE_INFANTRY:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY);
         break;
     case ACT_STOCK_UPGRADE_DEFENSE_ARCHER:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER);
         break;
     case ACT_STOCK_UPGRADE_DEFENSE_RIDER:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_STOCK_UPGRADE_DEFENSE_RIDER);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_RIDER);
         break;
     case ACT_ARMYCAMP_CREATE_CLUBMAN:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_ARMYCAMP_CREATE_CLUBMAN);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_ARMYCAMP_CREATE_CLUBMAN);
         break;
     case ACT_ARMYCAMP_UPGRADE_CLUBMAN:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_ARMYCAMP_UPGRADE_CLUBMAN);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_ARMYCAMP_UPGRADE_CLUBMAN);
         break;
     case ACT_ARMYCAMP_CREATE_SLINGER:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_ARMYCAMP_CREATE_SLINGER);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_ARMYCAMP_CREATE_SLINGER);
         break;
     case ACT_RANGE_CREATE_BOWMAN:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_RANGE_CREATE_BOWMAN);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_RANGE_CREATE_BOWMAN);
         break;
     case ACT_STABLE_CREATE_SCOUT:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_STABLE_CREATE_SCOUT);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STABLE_CREATE_SCOUT);
         break;
     case ACT_DOCK_CREATE_SAILING:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_DOCK_CREATE_SAILING);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_DOCK_CREATE_SAILING);
         break;
     case ACT_DOCK_CREATE_WOOD_BOAT:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_DOCK_CREATE_WOOD_BOAT);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_DOCK_CREATE_WOOD_BOAT);
         break;
     case ACT_DOCK_CREATE_SHIP:
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_DOCK_CREATE_SHIP);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_DOCK_CREATE_SHIP);
         break;
     case ACT_SIEGE_CREATE_STONE_THROWER:
-        // BuildingAction(nowobject->getglobalNum(), BUILDING_SIEGE_CREATE_STONE_THROWER);
-        core->addRelation(nowobject, CoreEven_BuildingAct, BUILDING_SIEGE_CREATE_STONE_THROWER);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_SIEGE_CREATE_STONE_THROWER);
         break;
     case ACT_STOP:
         if (nowobject != nullptr)

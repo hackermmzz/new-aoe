@@ -880,14 +880,14 @@ void Core::logActionResult(int ret, Coordinate* self, Coordinate* obj, int actio
     QString logMsg;
 
     switch (actionType) {
-    case 0: // 停止动作
+    case INS_CANCEL: // 停止动作
         logMsg = " ActionStop:" + self->getChineseName() + " " + QString::number(self->getglobalNum());
         break;
-    case 1: // 移动
+    case INS_HUMANMOVE: // 移动
         logMsg = " HumanMove:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
             " 移动至 (" + desc + ")";
         break;
-    case 2: // 设置工作目标
+    case INS_HUMANACTION: // 设置工作目标
         if (obj) {
             if (desc.contains("攻击"))
                 logMsg = " HumanAction:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
@@ -902,13 +902,17 @@ void Core::logActionResult(int ret, Coordinate* self, Coordinate* obj, int actio
                 " 设置工作目标为 " + obj->getChineseName() + " " + QString::number(obj->getglobalNum());
         }
         break;
-    case 3: // 建造
+    case INS_HUMANBUILD: // 建造
         logMsg = " HumanBuild:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
             " 开始在块坐标 " + desc + " 处建造 Building_" + QString::number(option);
         break;
-    case 4: // 建筑行动
+    case INS_BUILDINGACTION: // 建筑行动
         logMsg = " BuildAction:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
             " 执行行动 ACTION_" + QString::number(option);
+        break;
+    case INS_PINPOINT_STRIKE:
+        logMsg = " PinPoint_Strike:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
+            " 定点投掷至区域:" + desc;
         break;
     }
 
@@ -930,7 +934,7 @@ int Core::handleFarmerAction(Coordinate* self, Coordinate* obj, int id)
         ret = deleteSelf(self);
         if (ret == ACTION_SUCCESS) {
             actionDesc = "被删除";
-            logActionResult(ret, self, NULL, 2, 0, actionDesc, id);
+            logActionResult(ret, self, NULL, INS_HUMANACTION, 0, actionDesc, id);
         }
         return ret;
     }
@@ -941,7 +945,7 @@ int Core::handleFarmerAction(Coordinate* self, Coordinate* obj, int id)
         case SORT_STATICRES:
         case SORT_ANIMAL:
             ret = interactionList->addRelation(self, obj, CoreEven_Gather);
-            logActionResult(ret, self, obj, 2, 0, "", id);
+            logActionResult(ret, self, obj, INS_HUMANACTION, 0, "", id);
             break;
 
         case SORT_BUILDING:
@@ -954,11 +958,11 @@ int Core::handleFarmerAction(Coordinate* self, Coordinate* obj, int id)
                 else
                     ret = interactionList->addRelation(self, obj, CoreEven_FixBuilding);
 
-                logActionResult(ret, self, obj, 2, 0, "", id);
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "", id);
             }
             else {
                 ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-                logActionResult(ret, self, obj, 2, 0, "攻击", id);
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "攻击", id);
             }
             break;
 
@@ -969,18 +973,18 @@ int Core::handleFarmerAction(Coordinate* self, Coordinate* obj, int id)
                 else
                     ret = interactionList->addRelation(self, obj, CoreEven_FixBuilding);
 
-                logActionResult(ret, self, obj, 2, 0, "", id);
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "", id);
             }
             else {
                 ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-                logActionResult(ret, self, obj, 2, 0, "攻击", id);
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "攻击", id);
             }
             break;
 
         case SORT_ARMY:
             if (self->getPlayerRepresent() != obj->getPlayerRepresent()) {
                 ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-                logActionResult(ret, self, obj, 2, 0, "攻击", id);
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "攻击", id);
             }
             else {
                 ret = ACTION_INVALID_ACTION; // 无法对友方军队执行动作
@@ -990,11 +994,11 @@ int Core::handleFarmerAction(Coordinate* self, Coordinate* obj, int id)
         case SORT_FARMER:
             if (judge_CanTransPort(obj,self)) {
                 ret = interactionList->addRelation(self, obj, CoreEven_Transport);
-                logActionResult(ret, self, obj, 2, 0, "走向运输船", id);
+                logActionResult(ret, self, obj,INS_HUMANACTION, 0, "走向运输船", id);
             }
             else if (self->getPlayerRepresent() != obj->getPlayerRepresent()) {
                 ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-                logActionResult(ret, self, obj, 2, 0, "攻击", id);
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "攻击", id);
             }
             else {
                 ret = ACTION_INVALID_ACTION; // 无法对非船的友方农民执行动作
@@ -1018,7 +1022,7 @@ int Core::handleFarmerAction(Coordinate* self, Coordinate* obj, int id)
     else if (FarmerType == FARMERTYPE_SAILING) {
         if (obj->getSort() == SORT_STATICRES && obj->getNum() == NUM_STATICRES_Fish) {
             ret = interactionList->addRelation(self, obj, CoreEven_Gather);
-            logActionResult(ret, self, obj, 2, 0, "捕鱼", id);
+            logActionResult(ret, self, obj, INS_HUMANACTION, 0, "捕鱼", id);
         }
         else {
             ret = ACTION_INVALID_ACTION; // 渔船只能捕鱼
@@ -1042,7 +1046,7 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
         ret = deleteSelf(self);
         if (ret == ACTION_SUCCESS) {
             actionDesc = "被删除";
-            logActionResult(ret, self, NULL, 2, 0, actionDesc, id);
+            logActionResult(ret, self, NULL,INS_HUMANACTION, 0, actionDesc, id);
         }
         return ret;
     }
@@ -1065,7 +1069,7 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
     case SORT_ARMY:
         if (self->getPlayerRepresent() != obj->getPlayerRepresent()) {
             ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-            logActionResult(ret, self, obj, 2, 0, "攻击", id);
+            logActionResult(ret, self, obj,INS_HUMANACTION, 0, "攻击", id);
         }
         else if(self->getNum()==AT_PRIEST){
             //判断目标是否为人类
@@ -1074,7 +1078,7 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
             else{
                 bool samRep=self->getPlayerRepresent()==obj->getPlayerRepresent();
                 ret=interactionList->addRelation(self,obj,CoreEven_Attacking);
-                logActionResult(ret,self,obj,2,0,samRep?"治疗":"转换",id);
+                logActionResult(ret,self,obj,INS_HUMANACTION,0,samRep?"治疗":"转换",id);
             }
         }
         else {
@@ -1121,7 +1125,27 @@ int Core::handleBuildingAction(Coordinate* self, int option, int id)
         }
     }
 
-    logActionResult(ret, self, NULL, 4, option, "", id);
+    logActionResult(ret, self, NULL, INS_BUILDINGACTION, option, "", id);
+    return ret;
+}
+
+int Core::handlePinPointStrike(Coordinate *self, double dr0,double ur0, int id)
+{
+    int ret = ACTION_INVALID_SN;
+    QString desc="";
+    //
+    int sort=self->getSort(),num=self->getNum();
+    switch(sort){
+        case SORT_ARMY:
+        if(num==AT_STONE_THROWER){
+            ret=interactionList->addRelation(self,dr0,ur0,CoreEven_Attacking);
+            desc=QString("(")+QString::number(dr0)+","+QString::number(ur0)+")";
+        }
+        default:
+            ret=ACTION_INVALID_SN;
+    }
+    //
+    logActionResult(ret, self, NULL, INS_PINPOINT_STRIKE, 0,desc, id);
     return ret;
 }
 
@@ -1196,24 +1220,24 @@ void Core::manageOrder(int id)
         }
 
         switch (cur.type) {
-        case 0:    // 终止对象self的动作
+        case INS_CANCEL:    // 终止对象self的动作
             interactionList->suspendRelation(self);
             ret = ACTION_SUCCESS;
-            logActionResult(ret, self, NULL, 0, 0, "", id);
+            logActionResult(ret, self, NULL, INS_CANCEL, 0, "", id);
             break;
 
-        case 1:    // 命令单位self走向指定坐标L，U
+        case INS_HUMANMOVE:    // 命令单位self走向指定坐标L，U
             // 检查坐标是否有效
             if (cur.DR < 0 || cur.UR < 0 || cur.DR >= BLOCKSIDELENGTH * MAP_L || cur.UR >= BLOCKSIDELENGTH * MAP_L) {
                 ret = ACTION_INVALID_LOCATION;
             }
             else {
                 ret = interactionList->addRelation(self, cur.DR, cur.UR, CoreEven_JustMoveTo);
-                logActionResult(ret, self, NULL, 1, 0, QString::number(cur.DR) + "," + QString::number(cur.UR), id);
+                logActionResult(ret, self, NULL, INS_HUMANMOVE, 0, QString::number(cur.DR) + "," + QString::number(cur.UR), id);
             }
             break;
 
-        case 2:    // 命令单位self将工作目标设为obj
+        case INS_HUMANACTION:    // 命令单位self将工作目标设为obj
         {
             Coordinate* obj = cur.obj;
             if (obj == NULL || g_Object[cur.obSN] == NULL) {
@@ -1245,7 +1269,7 @@ void Core::manageOrder(int id)
         }
         break;
 
-        case 3:    // 命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
+        case INS_HUMANBUILD:    // 命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
         {
             // 检查是否为村民
             if (self->getSort() != SORT_FARMER) {
@@ -1274,14 +1298,17 @@ void Core::manageOrder(int id)
 
             ret = interactionList->addRelation(self, cur.BlockDR, cur.BlockUR, CoreEven_CreatBuilding, true, cur.option);
             QString desc = "(" + QString::number(cur.BlockDR) + "," + QString::number(cur.BlockUR) + ")";
-            logActionResult(ret, self, NULL, 3, cur.option, desc, id);
+            logActionResult(ret, self, NULL, INS_HUMANBUILD, cur.option, desc, id);
         }
         break;
 
-        case 4:    // 命令建筑self进行option工作
+        case INS_BUILDINGACTION:    // 命令建筑self进行option工作
             ret = handleBuildingAction(self, cur.option, id);
             break;
 
+        case INS_PINPOINT_STRIKE:
+            ret= handlePinPointStrike(self,cur.DR,cur.UR,id);
+            break;
         default:
             ret = ACTION_INVALID_ACTION;
         }

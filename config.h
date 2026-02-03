@@ -240,6 +240,7 @@ enum ACTION_STATUS_CODE {
     ACTION_INVALID_ISNTFREE,//对象已有必须手动取消的任务，不空闲
     ACTION_INVALID_NULLGOALOBJECT,//目标对象已被删除
     ACTION_INVALID_NULLWORKER,//控制对象被删除
+    ACTION_INVALID_PINPOINT_NOT_FIT,//定点打击地点不合适
     ACTION_INVALID_PRIEST_TARGET_ERROR,
     ACTION_INVALID_UPGRADE_TIME,
     ACTION_INVALID_RESOURCE,
@@ -559,5 +560,13 @@ enum PatrolState {
     PATROL_STATE_CHASING,
     PATROL_STATE_RETURNING
 };
-
+/************ AI指令枚举************/
+enum AiInstructionType{
+    INS_CANCEL=0,    //取消当前的行动
+    INS_HUMANMOVE,   //人类移动
+    INS_HUMANACTION, //人类进行一定动作
+    INS_HUMANBUILD, //人类建筑
+    INS_BUILDINGACTION, //建筑动作
+    INS_PINPOINT_STRIKE//定点打击
+};
 #endif // CONFIG_H
