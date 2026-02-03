@@ -22,6 +22,7 @@ public:
     int HumanAction(int SN, int obSN);
     int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR);
     int BuildingAction(int SN, int Action);
+    int PinPointStrike(int SN,double DR0,double UR0);
     //    void printInsRet(int id);
     void cheatAction();
 

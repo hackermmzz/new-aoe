@@ -368,6 +368,7 @@ bool condition_UniObjectDie( Coordinate* object1, relation_Object& relation , in
     if(operate == OPERATECON_OBJECT1&& object1!=NULL) object1->printer_ToBloodHaver((void**)&object_judget);
     else if(operate == OPERATECON_OBJECT2 && relation.goalObject!=NULL) relation.goalObject->printer_ToBloodHaver((void**)&object_judget);
 
+   // return false;
     if(object_judget == NULL) return isNegation ^ true;
     else return isNegation ^ object_judget->isDie();
 }
@@ -452,8 +453,6 @@ bool condition_Object1_FullBackpack( Coordinate* object1 , relation_Object& rela
 bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int& operate , bool isNegation )
 {
     double dr1 = object1->getDR() , ur1 = object1->getUR() ,dr2 , ur2;
-//    double predr = relation.DR_Predicted,preur = relation.UR_Predicted;
-//    double dis_r = object1->getCrashLength();
     double dis = 1e6;
     BloodHaver* attacker = NULL;
     int heightAdd = 0;
@@ -486,7 +485,6 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
 
         dr2 = relation.DR_alter;
         ur2 = relation.UR_alter;
-//      dis_r+=relation.crashLength_alter;
     }
     else
     {

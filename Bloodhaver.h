@@ -47,7 +47,6 @@ public:
     //判断是否受到了攻击
     bool isGotAttack(){ return gotAttack; }
     bool canAttack(){ return isAttackable; }
-
     //设置攻击目标
     void setAttackObject(Coordinate* attackObject){ this->attackObject = attackObject; }
     //受到攻击，设置“复仇”目标，用于做受到攻击时的反应

@@ -1367,6 +1367,7 @@ void MainWidget::initViewMap() {
     ui->mapView->setEnemyBuildList(&(player[1]->build));
     ui->mapView->setAnimalList(&(map->animal));
     ui->mapView->setResList(&(map->staticres));
+
 }
 //**************InitHelperFunctionEnd**************
 

@@ -248,6 +248,43 @@ void GameWidget::paintEvent(QPaintEvent *)
     }
 
 
+    //
+    static bool x=0;
+    static QImage img;
+      static QPixmap pm;
+    if(!x){
+        x=1;
+        int w,h;w=h=100;
+        img=QImage(w, h, QImage::Format_ARGB32);
+        uchar *bits = img.bits();
+        int bytesPerPixel = img.depth() / 8;
+        w=img.width(),h=img.height();
+        int hw=w/2,hh=h/2;
+        double p=0.99;
+        auto fade=[&](double t)->double{
+          return pow(t,3)*(t*(6*t-15)+10);
+        };
+        for (int y = 0; y < h; ++y) {
+            for (int x = 0; x < w; ++x) {
+                // 计算当前像素的起始地址
+                uchar *pixel = bits + y * img.bytesPerLine() + x * bytesPerPixel;
+                // 读取RGB值（Qt中RGB32格式为BGR顺序）
+                uchar &b = pixel[0];
+                uchar &g = pixel[1];
+                uchar &r = pixel[2];
+                uchar &a= pixel[3];
+                double dx=abs(hw-x)*1.0/hw,dy=abs(hh-y)*1.0/hh;
+                double fac=dx*dx+dy*dy;
+                fac=1.0-sqrt(fac/2.0);
+                fac=fade(fac)*p;
+                uchar c=0;
+                if(fac*100>rand()%100)c=201;
+                b=g=r=a=c;
+            }
+        }
+        pm=QPixmap::fromImage(img);
+    }
+    painter.drawPixmap(100,100,img.width(),img.height(),pm);
 }
 
 void GameWidget::paintEdge(QPainter &painter)

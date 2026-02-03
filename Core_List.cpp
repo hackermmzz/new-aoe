@@ -87,14 +87,6 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
             Human* f1 = (Human*)object1;
             //如果满载,返回错误码
             if (f0->getResourceNowHave() >= 5)return ACTION_INVALID_FULLY_LOAD;
-            //如果两个相距太远，返回错误码
-            /*
-            double dr0=f0->getDR(),ur0=f0->getUR(),dr1=f1->getDR(),ur1=f1->getUR();
-            double dr=dr1-dr0,ur=ur1-ur0;
-            if(dr*dr+ur*ur>=SHIP_ACT_MAX_DISTANCE){
-                return ACTION_INVALID_DISTANCE_FAR;
-            }
-            */
         }
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
@@ -167,10 +159,9 @@ int Core_List::addRelation(Coordinate* object1, double DR, double UR, int eventT
 
         if (eventType == CoreEven_JustMoveTo)
         {
-            if (DR < 0) DR = 0;
-            if (UR < 0) UR = 0;
-            if (DR > MAP_L * BLOCKSIDELENGTH) DR = MAP_L * BLOCKSIDELENGTH;
-            if (UR > MAP_U * BLOCKSIDELENGTH) UR = MAP_U * BLOCKSIDELENGTH;
+            //锁定目的地
+            DR=max(min(MAP_L * BLOCKSIDELENGTH,DR),0.0);
+            UR=max(min(MAP_U * BLOCKSIDELENGTH,UR),0.0);
             //如果是运输船,并且指定的位置是岸边,那么执行卸货动作(就算木有人也执行卸货,反正就多一个细节罢了)
             if (object1->getSort() == SORT_FARMER && ((Farmer*)object1)->get_farmerType() == FARMERTYPE_WOOD_BOAT) {
                 Farmer* obj = (Farmer*)object1;
@@ -196,6 +187,20 @@ int Core_List::addRelation(Coordinate* object1, double DR, double UR, int eventT
             relate_AllObject[object1].sort = SORT_COORDINATE;
 
             requestSound_Action(object1, CoreEven_JustMoveTo);
+            return ACTION_SUCCESS;
+        }
+        else if(eventType==CoreEven_Attacking){//定点攻击
+            //必须保证目的地在地图上
+            if(DR<0||UR<0||DR>=MAP_L*BLOCKSIDELENGTH||UR>=MAP_U*BLOCKSIDELENGTH){
+                 return ACTION_INVALID_PINPOINT_NOT_FIT;
+            }
+            relate_AllObject[object1] =relation_Object(DR,UR,eventType);
+            relate_AllObject[object1].respondConduct = respond;
+            relate_AllObject[object1].sort = SORT_COORDINATE;
+            relate_AllObject[object1].init_AttackAb(object1);
+            MoveObject*moveOb;
+            object1->printer_ToMoveObject((void**)&moveOb);
+            moveOb->beginRun();
             return ACTION_SUCCESS;
         }
     }
@@ -833,6 +838,12 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             }
         }
     }
+    else if(missile!=NULL && missile->IsRangeAttack()){ //判断是否为溅射伤害
+        calculateDamage=true;
+        attacker = missile->getAttackAponsor();
+        auto&&ret=deal_RangeAttack(missile,array<double,2>{missile->getDR0(),missile->getUR0()});
+        for(auto*x:ret)attackees.insert(x);
+    }
     else if (missile != NULL && missile->is_HitTarget() && attackee != NULL)
     {
         calculateDamage = true;
@@ -854,11 +865,6 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
 
                 if (missile->getAttacker()->getPlayerRepresent() != 0) missile->getAttacker()->visibleSomeTimes();
             }
-        }
-        //判断是否为溅射伤害
-        if(missile->IsRangeAttack()){
-            auto&&ret=deal_RangeAttack(missile,array<double,2>{missile->getDR0(),missile->getUR0()});
-            for(auto*x:ret)attackees.insert(x);
         }
     }
 
