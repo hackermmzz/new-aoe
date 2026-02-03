@@ -614,39 +614,46 @@ void Map::JudegCellType(int BlockDR, int BlockUR)
     }
 }
 
-void Map::CalCellOffset(int BlockDR, int BlockUR)
+array<int, 2> Map::GetCellOffset(int BlockDR, int BlockUR)
 {
     int i=BlockDR,j=BlockUR;
     Block&block=cell[i][j];
+    int ox=0,oy=0;
     // 偏移
     if(block.getMapHeight()>0)
     {
-        this->cell[i][j].setOffsetY(DRAW_OFFSET * this->cell[i][j].getMapHeight());
+        oy=DRAW_OFFSET * this->cell[i][j].getMapHeight();
     }
     if(block.getMapType() == 2 || block.getMapType() == 3 || block.getMapType() == 4 || block.getMapType() == 5 || block.getMapType() == 8 || block.getMapType() == 9)
     {
-        this->cell[i][j].setOffsetY(this->cell[i][j].getOffsetY() + DRAW_OFFSET);
+        oy=this->cell[i][j].getOffsetY() + DRAW_OFFSET;
     }
 
     // 修整边界
     if(this->cell[i][j].getMapType() == 10)
     {
-        int t = this->cell[i][j].getOffsetX();
-        this->cell[i][j].setOffsetX(t - 1);
+        ox = this->cell[i][j].getOffsetX()-1;
     }
-    if(this->cell[i][j].getMapType() == 11)
+    else if(this->cell[i][j].getMapType() == 11)
     {
-        int t = this->cell[i][j].getOffsetX();
-        this->cell[i][j].setOffsetX(t + 1);
+        ox= this->cell[i][j].getOffsetX()+1;
     }
-    if(this->cell[i][j].getMapType() == 13)
+    else if(this->cell[i][j].getMapType() == 13)
     {
-        int t = this->cell[i][j].getOffsetY();
-        this->cell[i][j].setOffsetY(t + 1);
+       oy = this->cell[i][j].getOffsetY()+1;
     }
     //如果是海洋，按照wlh的方式来偏移
     if(block.getMapType()==MAPTYPE_OCEAN)
-        block.setOffsetY(2);
+        oy=2;
+    return {ox,oy};
+}
+
+void Map::CalCellOffset(int BlockDR, int BlockUR)
+{
+    auto&&ret=GetCellOffset(BlockDR,BlockUR);
+    auto&cell=this->cell[BlockDR][BlockUR];
+    cell.setOffsetX(ret[0]);
+    cell.setOffsetY(ret[1]);
 }
 
 void Map::divideTheMap()
@@ -1774,13 +1781,16 @@ void Map::loadGenerateMapText(int MapJudge)
         return;
     }
     file.close();
+    /////////////////////////////////判断位置是否合法
+    auto checkBlockLegal=[&](int dr,int ur)->bool{return dr>=0&&dr<MAP_L&&ur>=0&&ur<MAP_U;};
+    auto checkDetailBlockLegal=[&](double dr,double ur)->bool{return checkBlockLegal(floor(dr/BLOCKSIDELENGTH),floor(ur/BLOCKSIDELENGTH));};
     /////////////////////////////////解析区域到relation映射的函数
     auto ParseAreaToRelation=[&](Coordinate* unit, const string& type, QJsonObject& obj, int areaType) -> void {
         // 只有在编辑器模式下才建立relation映射
         if (!g_rectArea || !g_circleArea || !g_lineArea) {
             return;  // 非编辑器模式，跳过
         }
-        
+
         if(type == LineArea::Name()){
             LineAreaData areaData;
             areaData.areaType = areaType;
@@ -1809,7 +1819,7 @@ void Map::loadGenerateMapText(int MapJudge)
             g_rectArea->relation.insert({unit, areaData});
         }
     };
-    
+
     /////////////////////////////////解析区域的函数
     auto ParseArea=[&](int sn,const string&type,QJsonObject&obj)->void{
         void*data=0;
@@ -1855,7 +1865,7 @@ void Map::loadGenerateMapText(int MapJudge)
         if(key.contains("Cell")){
             int blockL=obj["BlockDR"].toInt(),blockU=obj["BlockUR"].toInt();
             // 添加边界检查
-            if(blockL >= 0 && blockL < MAP_L && blockU >= 0 && blockU < MAP_U) {
+            if(checkBlockLegal(blockL,blockU)) {
                 Block&block=cell[blockL][blockU];
                 block.Num=obj["Num"].toInt();
                 block.Visible=obj["Visible"].toBool();
@@ -1876,7 +1886,7 @@ void Map::loadGenerateMapText(int MapJudge)
             int blockDR = obj["BlockDR"].toInt();
             int blockUR = obj["BlockUR"].toInt();
             // 添加边界检查
-            if(blockDR >= 0 && blockDR < MAP_L && blockUR >= 0 && blockUR < MAP_U) {
+            if(checkBlockLegal(blockDR,blockUR)){
                 cur.addBuilding(obj["Num"].toInt(), blockDR, blockUR, 100);
             } else {
                 qWarning() << "Building坐标超出范围:" << blockDR << "," << blockUR;
@@ -1885,6 +1895,7 @@ void Map::loadGenerateMapText(int MapJudge)
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
             double UR=obj["UR"].toDouble(),DR=obj["DR"].toDouble();
+            if(!checkDetailBlockLegal(DR,UR))continue;
             if(obj["Sort"].toString()=="Farmer")
             {
                 int FarmerType=obj["FarmerType"].toInt();
@@ -1931,7 +1942,7 @@ void Map::loadGenerateMapText(int MapJudge)
                         ParseAreaToRelation(army, type, area, 1);  // 1=巡逻区域
                     }
                 }
-                
+
                 // 读取敌人状态属性
                 if(obj.contains("statu") && cur.getRepresent() == 1){  // 只对敌方单位处理状态
                     string status = obj["statu"].toString().toStdString();
@@ -1939,7 +1950,7 @@ void Map::loadGenerateMapText(int MapJudge)
                         // 将敌人状态存储到Map的内部存储中，稍后应用到MainWidget
                         int globalNum = army->getglobalNum();
                         enemyStatusMap[globalNum] = status;
-                        
+
                         // 调试信息
                         QString debugInfo = QString("读取敌人状态: GlobalNum=%1, Status=%2")
                             .arg(globalNum).arg(QString::fromStdString(status));
@@ -1949,12 +1960,13 @@ void Map::loadGenerateMapText(int MapJudge)
             }
         }else if(key.contains("Animal")){
             double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble();
+            if(!checkDetailBlockLegal(ur,dr))continue;
             addAnimal(obj["Num"].toInt(),dr,ur);
         }else if(key.contains("StaticRes")){
             int blockDR = obj["BlockDR"].toInt();
             int blockUR = obj["BlockUR"].toInt();
             // 添加边界检查
-            if(blockDR >= 0 && blockDR < MAP_L && blockUR >= 0 && blockUR < MAP_U) {
+            if(checkBlockLegal(blockDR,blockUR)) {
                 addStaticRes(obj["Num"].toInt(), blockDR, blockUR);
             } else {
                 qWarning() << "StaticRes坐标超出范围:" << blockDR << "," << blockUR;
@@ -1982,7 +1994,7 @@ void Map::loadGenerateMapText(int MapJudge)
                 double destX = ship["destX"].toDouble();
                 double destY = ship["destY"].toDouble();
 
-                if(type == "AT_SHIP") {
+                if(type == "AT_SHIP"&&checkDetailBlockLegal(x,y)&&checkDetailBlockLegal(destX,destY)) {
                     enemy.addArmyAROUND(AT_SHIP, x, y, status, starttime, finishtime, destX, destY);
                 }
             }
@@ -2002,7 +2014,7 @@ void Map::loadGenerateMapText(int MapJudge)
                 double destX = scout["destX"].toDouble();
                 double destY = scout["destY"].toDouble();
 
-                if(type == "AT_SCOUT") {
+                if(type == "AT_SCOUT"&&checkDetailBlockLegal(x,y)&&checkDetailBlockLegal(destX,destY)) {
                     enemy.addArmyAROUND(AT_SCOUT, x, y, status, starttime, finishtime, destX, destY);
                 }
             }
@@ -2019,7 +2031,7 @@ void Map::loadGenerateMapText(int MapJudge)
                 int status = army["status"].toInt();
                 int starttime = army["starttime"].toInt();
                 int finishtime = army["finishtime"].toInt();
-
+                if(checkDetailBlockLegal(x,y))
                 enemy.addArmyATTACK(type, x, y, status, starttime, finishtime);
             }
         }
@@ -2033,7 +2045,7 @@ void Map::loadGenerateMapText(int MapJudge)
                 double x = army["x"].toDouble();
                 double y = army["y"].toDouble();
                 int status = army["status"].toInt();
-
+                if(checkDetailBlockLegal(x,y))
                 enemy.addArmyDEFENSE(type, x, y, status);
             }
         }
