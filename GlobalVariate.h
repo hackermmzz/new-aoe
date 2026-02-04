@@ -418,6 +418,7 @@ extern int DIS_SCOUT;
 extern double INTERVAL_SCOUT;
 extern int ATK_SCOUT;
 extern int DEFCLOSE_SCOUT;
+extern int Boulder_Trail_Effect_Duration;
 extern int DEFSHOOT_SCOUT;
 // 战车属性
 extern int BLOOD_CHARIOT;

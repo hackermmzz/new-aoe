@@ -106,7 +106,8 @@ HEADERS += \
     EventFilter.h \
     CircleArea.h \
     LineArea.h \
-    networkplugin.h
+    networkplugin.h \
+    PerlinNoise.hpp
 
 FORMS += \
         MainWidget.ui \

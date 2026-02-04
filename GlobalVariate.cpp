@@ -27,6 +27,7 @@ int GAME_LOSE_SEC;//游戏失败的终止时间
 int MAXPLAYER;//最大玩家数量
 int NOWPLAYER;//当前游戏实现的玩家的数量
 int NOWPLAYERREPRESENT;//当前游戏操控的玩家ID
+int Boulder_Trail_Effect_Duration;//巨石拖尾特效存在时间
 int INITIAL_FREQUENCY;//地图移动的速度
 int MEMORYROW;//内存图的行数
 int MEMORYCOLUMN;//内存图的列数
@@ -1725,6 +1726,7 @@ void ReadConfig()
     jsonInt(DEFCLOSE_HOPLITE);
     jsonInt(DEFSHOOT_HOPLITE);
     jsonInt(NOWRES_TIMER_HOPLITE);
+    jsonInt(Boulder_Trail_Effect_Duration);
     ////////////////////////////////////////////////
 
 }
