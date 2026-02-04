@@ -1,0 +1,62 @@
+#ifndef ENEMYAI_H
+#define ENEMYAI_H
+
+#include "AI.h"
+#include <string>
+
+using std::string;
+
+extern tagGame tagEnemyGame;
+extern ins EnemyIns;
+
+// 前向声明
+class MainWidget;
+class Human;
+
+class EnemyAI:public AI
+{
+
+public:
+    EnemyAI(){this->id=1;}
+    ~EnemyAI(){
+        ;
+    }
+private:
+    void processData() override;
+
+    tagInfo getInfo(){
+        return tagEnemyGame.getInfo();
+    }
+    int AddToIns(instruction ins) override{
+        EnemyIns.lock.lock();
+        ins.id=EnemyIns.g_id;
+        EnemyIns.g_id++;
+        EnemyIns.instructions.push(ins);
+        EnemyIns.lock.unlock();
+        return ins.id;
+    }
+    void clearInsRet() override{
+        tagEnemyGame.clearInsRet();
+    }
+     void Around();
+     void Attack();
+     void assignTargetsBasedOnVision();
+     int getVisionRange(int unitSort);
+     int findBestTargetInVision(int centerX, int centerY, int range, int attackerSort);
+     
+     // 敌人状态相关方法
+     string getEnemyStatus(int unitSN);
+     bool isLandUnit(int unitSort);
+     bool shouldCooperateAttack(int unitSN);
+     
+     // 距离计算和目标优化
+     double calculateDistance(int x1, int y1, int x2, int y2);
+     int findNearestTarget(int attackerX, int attackerY, const vector<int>& targets);
+public slots:
+    void onWaveAttack(int wave);
+};
+/*##########DO NOT EDIT ABOVE##########*/
+
+
+
+#endif // ENEMYAI_H

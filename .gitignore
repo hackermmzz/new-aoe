@@ -1,0 +1,43 @@
+*.orig
+*.user*
+
+# Qt相关临时文件
+Makefile*
+*.o
+*.obj
+moc_*
+ui_*.h
+qrc_*.cpp
+object_script.*
+*.qmake.stash
+*.pro.user*
+# 构建目录
+debug/
+release/
+build/
+
+# 日志文件
+*.log
+
+# CursorAI相关文件
+.cursor
+
+# VS Code相关文件
+.vscode/
+
+# JetBrains IDE相关文件
+.idea/
+
+# 系统相关文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.bak
+*.tmp
+*.temp
+*~
+output/
+
+# 静态图片文件
+res/
