@@ -14,7 +14,7 @@ bool IsExamining;
 int TimePerFrame;//一帧要耗的时间
 QString GameServerAddr;
 int DataPostIntervalFrame;//每隔100帧上传一次数据
-bool EditorMode;
+bool EditorMode;//是否开启编辑器模式
 bool GlobalVision;//是否开启全局视野
 bool only_debug_Player0;
 bool filterRepetitionMessage;

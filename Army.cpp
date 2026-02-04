@@ -698,7 +698,7 @@ void Army::setAttribute()
         defence_close = DEFCLOSE_STONE_THROWER;
         defence_shoot = DEFSHOOT_STONE_THROWER;
 
-        crashLength = CRASHBOX_SMALL;
+        crashLength = CRASHBOX_BIGOB;
 
         type_Missile = Missile_Boulders;
         phaseFromEnd_MissionAttack = THROWMISSION_STONE_THROWER;
@@ -720,7 +720,7 @@ void Army::setAttribute()
         defence_close = DEFCLOSE_PRIEST;
         defence_shoot = DEFSHOOT_PRIEST;
 
-        crashLength = CRASHBOX_BIGOB;
+        crashLength = CRASHBOX_SINGLEOB;
 
         nowres_step = NOWRES_TIMER_PRIEST;
         break;
