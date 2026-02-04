@@ -41,6 +41,7 @@ public:
     void paintEdge(QPainter&painter);
     void paintEdge(QPainter&painter,double dr,double ur,double w,double h,QColor color=Qt::white);
     void paintLine(QPainter&painter);
+    void paintEffect(QPainter&painter);
     void mousePressEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void SaveCurrentState(void*state);
@@ -52,13 +53,13 @@ public:
     int tranY(int DR,int UR);
     int tranDR(int X,int Y);
     int tranUR(int X, int Y);
-    void insert(Coordinate *p,std::list<Coordinate*> *drawlist);
+    void insert(Coordinate *p,std::vector<Coordinate*> *drawlist);
     void drawmemory(int X, int Y,  ImageResource&res, int globalNum);
     void emptymemorymap();
     void AddEdge(double dr,double ur,double w,double h,QColor color=Qt::white);
     void AddLine(double dr0,double ur0,double dr1,double ur1,QColor color=Qt::white);
     bool judgeinWindow(double x, double y);
-
+    QImage GenBoulderTrailEffect();
     int getBlockDR(){
         return BlockDR;
     }
@@ -78,7 +79,8 @@ public:
     //边长为16倍根号5
 
     MainWidget *mainwidget;
-
+    //绘制到buffer上
+    QPixmap gameBuffer;
     //框选用，起点和终点
     QPoint selectionStartPos;
     QPoint selectionEndPos;

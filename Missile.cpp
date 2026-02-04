@@ -49,10 +49,12 @@ void Missile::setAttribute()
         isAOE = false;
         isMandatoryArrive = false;
         speed = Missile_Speed_Cobblestone;
+        break;
     case Missile_Boulders:
         isAOE = true;
         isMandatoryArrive=false;
         speed=Missile_Speed_Boulders;
+        break;
     default:
         break;
     }
