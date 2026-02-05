@@ -610,6 +610,8 @@ void MainWidget::updateEditor()
         case PLAYERDOWNTOWN:
             MakeBuilding(L, U, PLAYERDOWNTOWN);
             break;
+        case PLAYERARROWTOWER:
+            MakeBuilding(L, U, PLAYERARROWTOWER);
         case AIARROWTOWER:
             MakeBuilding(L, U, AIARROWTOWER);
             break;
@@ -1117,6 +1119,9 @@ void MainWidget::MakeBuilding(int blockL, int blockU, int type)
     //////////////////判断类型
     if (type == PLAYERDOWNTOWN) {
         player[0]->addBuilding(BUILDING_CENTER, blockL, blockU, 100);
+    }
+    else if(type == PLAYERARROWTOWER){
+        player[0]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);
     }
     else if (type == AIARROWTOWER) {
         player[1]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);

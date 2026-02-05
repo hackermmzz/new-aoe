@@ -54,6 +54,7 @@ private:
      int findNearestTarget(int attackerX, int attackerY, const vector<int>& targets);
 public slots:
     void onWaveAttack(int wave);
+    void FirstAttack();
 };
 /*##########DO NOT EDIT ABOVE##########*/
 

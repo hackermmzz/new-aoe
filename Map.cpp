@@ -656,7 +656,7 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
     cell.setOffsetY(ret[1]);
 }
 
-void Map::divideTheMap()
+/*void Map::divideTheMap()
 {
     vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
     int idx=0;
@@ -765,6 +765,47 @@ void Map::divideTheMap()
         }
     }
     //根据预定义参数进行设置可见
+    if(MAP_EXPLORE||EditorMode||GlobalVision){
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                cell[i][j].Explored=1;
+            }
+        }
+    }
+    if(MAP_VISIABLE||EditorMode||GlobalVision){
+        for(int i=0;i<MAP_L;++i){
+            for(int j=0;j<MAP_U;++j){
+                cell[i][j].Visible=1;
+            }
+        }
+    }
+}
+*/
+void Map::divideTheMap()
+{
+    Point centerPos;
+    for(auto&build:player[0]->build){
+        if(build->getNum()==BUILDING_CENTER){
+            centerPos={build->getBlockDR(),build->getBlockUR()};
+            break;
+        }
+    }
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            auto&block=cell[i][j];
+            block.Visible=0;
+            block.Explored=0;
+        }
+    }
+    for(int i=-8;i<=8;++i){
+        for(int j=-8;j<=8;++j){
+            int ii=centerPos.x+i,jj=centerPos.y+j;
+            if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
+                cell[ii][jj].Visible=1;
+                cell[ii][jj].Explored=1;
+            }
+        }
+    }
     if(MAP_EXPLORE||EditorMode||GlobalVision){
         for(int i=0;i<MAP_L;++i){
             for(int j=0;j<MAP_U;++j){
