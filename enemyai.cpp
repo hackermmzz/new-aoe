@@ -55,7 +55,14 @@ static int mode = -3;
 static vector<tagFarmer>deadFirst;
 static vector<tagArmy>attackEnemy;
 static vector<int> farmerSNs;
-static map<int,pair<int,int>> Army_location;
+// 第一波总目标（击杀 3 农民）是否已完成；完成后不再往 attackEnemy 里加人，避免反复加人/撤退
+static bool wave1Completed = false;
+// 撤退目标为细节坐标 (DR, UR)，HumanMove 需要 double 而非区块坐标
+static map<int, pair<double, double>> Army_location;
+// 每单位上次分配攻击目标的帧号，避免每帧重复下令导致部分兵种抽搐
+static map<int, int> lastAssignFrame;
+// 每单位上次补发攻击指令的帧号（目标仍活着但引擎清空指令时），用较短间隔快速补发避免卡住
+static map<int, int> lastReissueFrame;
 
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
@@ -851,8 +858,8 @@ void EnemyAI::FirstAttack()
                 deadFirst.push_back(enemyInfo.enemy_farmers[i]);
         }
 
-        // 2. 初始化进攻部队 (只在为空时执行一次)
-        if(attackEnemy.empty() && !deadFirst.empty())
+        // 2. 初始化进攻部队 (只在为空且第一波未完成时执行一次；完成后不再补人)
+        if(attackEnemy.empty() && !deadFirst.empty() && !wave1Completed)
         {
             double sumBlockdr = 0, sumBlockur = 0;
             for (tagFarmer& c : deadFirst) {
@@ -870,73 +877,77 @@ void EnemyAI::FirstAttack()
                 return a.second < b.second;
             });
 
-            // 取前5个距离最近的士兵进入骚扰小组
-            for(int i = 0; i < 5 && i < cmp_Distance.size(); i++)
-                attackEnemy.push_back(cmp_Distance[i].first);
+            // 取前5个距离最近的士兵进入骚扰小组，并记录其初始位置用于撤退
+            for(int i = 0; i < 5 && i < cmp_Distance.size(); i++) {
+                const tagArmy& a = cmp_Distance[i].first;
+                attackEnemy.push_back(a);
+                Army_location[a.SN] = std::make_pair(a.DR, a.UR);
+            }
         }
 
-        // 3. 任务分配与状态监控
+        // 3. 当前集火目标：按顺序取 deadFirst 中第一个仍存活的农民，全队集火同一目标；全部击杀后才集体撤退
+        int currentTargetSN = -1;
+        for (size_t i = 0; i < deadFirst.size(); i++) {
+            bool alive = false;
+            for (const auto& f : enemyInfo.enemy_farmers) {
+                if (f.SN == deadFirst[i].SN && f.Blood > 0) { alive = true; break; }
+            }
+            if (alive) {
+                currentTargetSN = deadFirst[i].SN;
+                break;
+            }
+        }
+        bool waveComplete = (currentTargetSN == -1);  // 3 个目标均已阵亡，集体撤退
+        if (waveComplete) wave1Completed = true;      // 标记第一波已完成，之后不再往 attackEnemy 加人
+
+        // 4. 任务分配与状态监控
         auto it = attackEnemy.begin();
         while (it != attackEnemy.end())
         {
             tagArmy& a_backup = *it;
             tagArmy* realArmy = nullptr;
 
-            // 在当前帧寻找该士兵的实时状态
-            for(auto& real : enemyInfo.armies) {
-                if(real.SN == a_backup.SN) {
+            for (auto& real : enemyInfo.armies) {
+                if (real.SN == a_backup.SN) {
                     realArmy = &real;
                     break;
                 }
             }
 
-            // A. 士兵已阵亡，直接从任务列表移除
-            if(!realArmy) {
+            // A. 士兵已阵亡，从列表移除并清理状态
+            if (!realArmy) {
+                lastAssignFrame.erase(a_backup.SN);
+                lastReissueFrame.erase(a_backup.SN);
+                Army_location.erase(a_backup.SN);
                 it = attackEnemy.erase(it);
                 continue;
             }
 
-            // B. 检查任务目标（农民）是否还活着
-       /*     bool targetAlive = false;
-            for(auto& f : enemyInfo.enemy_farmers) {
-                if(f.SN == a_backup.WorkObjectSN&&f.Blood>0) {
-                    targetAlive = true;
-                    break;
+            // B. 总目标已完成：集体撤退
+            if (waveComplete) {
+                auto posIt = Army_location.find(realArmy->SN);
+                if (posIt != Army_location.end()) {
+                    HumanMove(realArmy->SN, posIt->second.first, posIt->second.second);
                 }
-            }
-    */
-            if (a_backup.WorkObjectSN == -1) {
-                // 还没有任务：分配一个目标农民
-                int targetIdx = std::distance(attackEnemy.begin(), it) % deadFirst.size();
-                int targetSN = deadFirst[targetIdx].SN;
-
-                HumanAction(realArmy->SN, targetSN);
-                a_backup.WorkObjectSN = targetSN; // 更新备份里的任务状态
-                ++it;
+                lastAssignFrame.erase(realArmy->SN);
+                lastReissueFrame.erase(realArmy->SN);
+                Army_location.erase(realArmy->SN);
+                it = attackEnemy.erase(it);
+                continue;
             }
 
-            bool targetAlive = false;
-            for(auto& f : enemyInfo.enemy_farmers) {
-                if(f.SN == a_backup.WorkObjectSN&&f.Blood>0) {
-                    targetAlive = true;
-                    break;
+            // C. 未完成总目标：所有人集火 currentTargetSN；需要时补发指令（目标切换或引擎清空）
+            int unitSN = realArmy->SN;
+            if (realArmy->WorkObjectSN != currentTargetSN) {
+                bool targetChanged = (a_backup.WorkObjectSN != currentTargetSN);
+                int now = g_frame;
+                bool throttleOk = (lastReissueFrame[unitSN] == 0 || now - lastReissueFrame[unitSN] >= 12);
+                if (targetChanged || throttleOk) {
+                    HumanAction(unitSN, currentTargetSN);
+                    a_backup.WorkObjectSN = currentTargetSN;
+                    lastReissueFrame[unitSN] = now;
                 }
             }
-           /* else if (targetAlive) {
-                // 目标还活着：如果士兵闲置了（比如被卡住或目标跑远了），重新下达攻击指令
-                if (realArmy->status == ARMY_STATE_DEFAULT) {
-                    HumanAction(realArmy->SN, a_backup.WorkObjectSN);
-                }
-                ++it;
-            }*/
-           if(a_backup.WorkObjectSN != -1&&!targetAlive){
-                cout<<targetAlive;
-                    auto posIt = Army_location.find(realArmy->SN);
-                    if(posIt != Army_location.end()&&realArmy->WorkObjectSN!=-1) {
-                        HumanMove(realArmy->SN, Army_location[realArmy->SN].first, Army_location[realArmy->SN].second);
-                    }
-                    it = attackEnemy.erase(it);
-
-            }
+            ++it;
         }
 }
