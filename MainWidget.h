@@ -108,6 +108,7 @@ public:
         ENEMY_STATUS_ATTACK,
         ENEMY_STATUS_DEFEND,
         NORMAL_MOUSE,
+        PLAYERHOME,
     };
 
 

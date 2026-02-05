@@ -178,6 +178,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         else if (text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
         else if (text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
         else if (text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
+        else if (text == "玩家房子") this->currentSelected = PLAYERHOME;
         if (text != "玩家资源/建筑") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->player_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -612,6 +613,13 @@ void MainWidget::updateEditor()
             break;
         case PLAYERARROWTOWER:
             MakeBuilding(L, U, PLAYERARROWTOWER);
+            break;
+        case PLAYERREPOSITORY:
+            MakeBuilding(L, U, PLAYERREPOSITORY);
+            break;
+        case PLAYERHOME:
+            MakeBuilding(L, U, PLAYERHOME);
+            break;
         case AIARROWTOWER:
             MakeBuilding(L, U, AIARROWTOWER);
             break;
@@ -1122,6 +1130,12 @@ void MainWidget::MakeBuilding(int blockL, int blockU, int type)
     }
     else if(type == PLAYERARROWTOWER){
         player[0]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);
+    }
+    else if(type == PLAYERREPOSITORY){
+        player[0]->addBuilding(BUILDING_STOCK, blockL, blockU, 100);
+    }
+    else if(type == PLAYERHOME){
+        player[0]->addBuilding(BUILDING_HOME, blockL, blockU, 100);
     }
     else if (type == AIARROWTOWER) {
         player[1]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);

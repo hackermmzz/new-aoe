@@ -31,7 +31,7 @@
     <rect>
      <x>330</x>
      <y>40</y>
-     <width>111</width>
+     <width>91</width>
      <height>51</height>
     </rect>
    </property>
@@ -54,15 +54,20 @@
   <widget class="QComboBox" name="player_building_and_source">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>420</x>
      <y>40</y>
-     <width>111</width>
+     <width>131</width>
      <height>51</height>
     </rect>
    </property>
    <item>
     <property name="text">
      <string>玩家资源/建筑</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>玩家房子</string>
     </property>
    </item>
    <item>
@@ -313,6 +318,9 @@
    </item>
   </widget>
   <widget class="QComboBox" name="patrolArea">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>1211</x>
@@ -322,9 +330,6 @@
     </rect>
    </property>
    <property name="editable">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="currentText">
@@ -365,6 +370,9 @@
    </property>
   </widget>
   <widget class="QComboBox" name="enemyStatus">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>1321</x>
@@ -374,9 +382,6 @@
     </rect>
    </property>
    <property name="editable">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="currentText">
