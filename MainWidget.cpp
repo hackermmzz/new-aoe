@@ -202,6 +202,12 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         else if (text == "敌方斧头兵") this->currentSelected = AIAXEMAN;
         else if (text == "敌方侦察兵") this->currentSelected = AISCOUT;
         else if (text == "敌方弓箭手") this->currentSelected = AIBOWMAN;
+        else if (text == "敌方祭司")   this->currentSelected = AIPRIEST;
+        else if (text == "敌方方阵兵") this->currentSelected = AIHOPLITE;
+        else if (text == "敌方阔剑兵") this->currentSelected = AIBROADSWORDSMAN;
+        else if (text == "敌方驷马战车") this->currentSelected = AICHARIOT;
+        else if (text == "敌方战车射手") this->currentSelected = AICHARIOTARCHER;
+        else if (text == "敌方十字弓手") this->currentSelected = AICOMPARCHER;
         if (text != "敌方人物") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -649,6 +655,24 @@ void MainWidget::updateEditor()
             break;
         case AISCOUT:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AISCOUT);
+            break;
+        case AIPRIEST:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIPRIEST);
+            break;
+        case AIHOPLITE:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIHOPLITE);
+            break;
+        case AICOMPARCHER:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICOMPARCHER);
+            break;
+        case AICHARIOT:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICHARIOT);
+            break;
+        case AICHARIOTARCHER:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICHARIOTARCHER);
+            break;
+        case AIBROADSWORDSMAN:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIBROADSWORDSMAN);
             break;
         case PLAYERDOCK:
             MakeBuilding(L, U, PLAYERDOCK);
@@ -1205,6 +1229,24 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
     }
     else if (type == AIBOWMAN) {
         player[1]->addArmy(AT_BOWMAN, DR, UR);
+    }
+    else if (type == AIPRIEST){
+        player[1]->addArmy(AT_PRIEST, DR, UR);
+    }
+    else if (type == AICOMPARCHER){
+
+    }
+    else if (type == AIHOPLITE){
+        player[1]->addArmy(AT_HOPLITE, DR, UR);
+    }
+    else if (type == AIBROADSWORDSMAN){
+        player[1]->addArmy(AT_BROADSWORDSMAN, DR, UR);
+    }
+    else if (type == AICHARIOT){
+        player[1]->addArmy(AT_CHARIOT, DR, UR);
+    }
+    else if (type == AICHARIOTARCHER){
+        player[1]->addArmy(AT_CHARIOT_ARCHER, DR, UR);
     }
     else if (type == AIWARSHIP) {
         player[1]->addArmy(AT_SHIP, DR, UR);
