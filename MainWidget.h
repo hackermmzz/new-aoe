@@ -100,6 +100,7 @@ public:
         AIBROADSWORDSMAN,
         AICHARIOT,
         AICHARIOTARCHER,
+        AISTONETHROWER,
         GAZELLE,
         LION,
         ELEPHANT,

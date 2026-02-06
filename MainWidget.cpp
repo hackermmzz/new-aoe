@@ -207,7 +207,8 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         else if (text == "敌方阔剑兵") this->currentSelected = AIBROADSWORDSMAN;
         else if (text == "敌方驷马战车") this->currentSelected = AICHARIOT;
         else if (text == "敌方战车射手") this->currentSelected = AICHARIOTARCHER;
-        else if (text == "敌方十字弓手") this->currentSelected = AICOMPARCHER;
+        else if (text == "敌方复合弓手") this->currentSelected = AICOMPARCHER;
+        else if (text == "敌方投石车") this->currentSelected = AISTONETHROWER;
         if (text != "敌方人物") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -673,6 +674,9 @@ void MainWidget::updateEditor()
             break;
         case AIBROADSWORDSMAN:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIBROADSWORDSMAN);
+            break;
+        case AISTONETHROWER:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AISTONETHROWER);
             break;
         case PLAYERDOCK:
             MakeBuilding(L, U, PLAYERDOCK);
@@ -1234,7 +1238,7 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
         player[1]->addArmy(AT_PRIEST, DR, UR);
     }
     else if (type == AICOMPARCHER){
-
+        player[1]->addArmy(AT_COMPOSITE_BOWMAN, DR, UR);
     }
     else if (type == AIHOPLITE){
         player[1]->addArmy(AT_HOPLITE, DR, UR);
@@ -1247,6 +1251,9 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
     }
     else if (type == AICHARIOTARCHER){
         player[1]->addArmy(AT_CHARIOT_ARCHER, DR, UR);
+    }
+    else if (type == AISTONETHROWER){
+        player[1]->addArmy(AT_STONE_THROWER, DR, UR);
     }
     else if (type == AIWARSHIP) {
         player[1]->addArmy(AT_SHIP, DR, UR);
