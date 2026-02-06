@@ -4,7 +4,7 @@
     "TimePerFrame": 40,
     "GameServerAddr": "http://localhost:8080/api/admin/CodeRunStatusPost",
     "DataPostIntervalFrame": 100,
-    "EditorMode": true,
+    "EditorMode": false,
     "GlobalVision": false,
     "only_debug_Player0": true,
     "filterRepetitionMessage": false,
