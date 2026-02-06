@@ -10,6 +10,7 @@
 using namespace std;
 
 /*************************配置读取量***********************/
+int DefaultCivilization;//初始文明
 bool IsExamining;
 int TimePerFrame;//一帧要耗的时间
 QString GameServerAddr;
@@ -1727,6 +1728,7 @@ void ReadConfig()
     jsonInt(DEFSHOOT_HOPLITE);
     jsonInt(NOWRES_TIMER_HOPLITE);
     jsonInt(Boulder_Trail_Effect_Duration);
+    jsonInt(DefaultCivilization);
     ////////////////////////////////////////////////
 
 }

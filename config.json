@@ -1,4 +1,5 @@
 {
+    "DefaultCivilization":2,
     "IsExamining": false,
     "TimePerFrame": 40,
     "GameServerAddr": "http://localhost:8080/api/admin/CodeRunStatusPost",

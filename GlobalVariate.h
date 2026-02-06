@@ -11,6 +11,7 @@
 using namespace std;
 class Coordinate;
 //
+extern int DefaultCivilization;
 extern bool MAP_EXPLORE;
 extern bool MAP_VISIABLE;
 extern int INITIAL_WOOD;

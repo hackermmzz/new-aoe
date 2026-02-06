@@ -1321,7 +1321,7 @@ void MainWidget::initPlayers() {
     // player[0]->set_AllTechnology();
     player[1]->set_AllTechnology();
     //设置初始时代
-    player[0]->setCiv(CIVILIZATION_STONEAGE);
+    player[0]->setCiv(DefaultCivilization);
     //设置初始资源
     // player[0]->changeResource(10000, 10000, 10000, 500);
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
