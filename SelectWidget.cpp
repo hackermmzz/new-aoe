@@ -37,6 +37,10 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_ARCHER] = "ButtonTech_Arrow";
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_RIDER] = "ButtonTech_Horse";
     actionResourceMap[ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY] = "ButtonTech_BronzeShield";
+    actionResourceMap[ACT_STOCK_UPGRADE_METALWORKING] = "ButtonTech_Spear";
+    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE] = "ButtonTech_Sword";
+    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE] = "ButtonTech_Arrow";
+    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE] = "ButtonTech_Horse";
     actionResourceMap[ACT_ARMYCAMP_UPGRADE_CLUBMAN] = "ButtonTech_Axeman";
     actionResourceMap[ACT_ARMYCAMP_CREATE_SLINGER] = "Button_Slinger";
     actionResourceMap[ACT_ARMYCAMP_CREATE_BROADSWORD] = "Button_BroadSwordsman";
@@ -47,11 +51,14 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_RANGE_UPGRADE_COMPOSITE_BOW] = "ButtonTech_CompositeBow";
     actionResourceMap[ACT_RANGE_CREATE_CHARIOT_ARCHER] = "Button_ChariotArcher";
     actionResourceMap[ACT_STABLE_CREATE_SCOUT] = "Button_Scout";
+    actionResourceMap[ACT_STABLE_CREATE_CAVALRY] = "Button_Cavalry";
     actionResourceMap[ACT_STABLE_CREATE_CHARIOT] = "Button_Chariot";
     actionResourceMap[ACT_DOCK_CREATE_SAILING] = "Button_Sailing";
     actionResourceMap[ACT_DOCK_CREATE_WOOD_BOAT] = "Button_Wood_Boat";
     actionResourceMap[ACT_DOCK_CREATE_SHIP] = "Button_Ship";
     actionResourceMap[ACT_SIEGE_CREATE_STONE_THROWER] = "Button_StoneThrower";
+    actionResourceMap[ACT_STONE_THROWER_PINPOINT_STRIKE] = "Button_PinPointStrike";
+    actionResourceMap[ACT_STONE_THROWER_CANCEL_PINPOINT_STRIKE] = "Exit";
     actionResourceMap[ACT_BUILD] = "Button_Build";
     actionResourceMap[ACT_BUILD_ARROWTOWER] = "Button_ArrowTower";
     actionResourceMap[ACT_BUILD_CANCEL] = "Exit";
@@ -206,14 +213,42 @@ void SelectWidget::initActs()
             actionStatus[i] = ACT_STATUS_DISABLED;
         }
     }
-    else
+    else if (type == SORT_ARMY) // 军队单位
     {
-        for (int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
+        Army* objArmy = (Army*)nowobject;
+        // 如果是投石车
+        if (objArmy->getNum() == AT_STONE_THROWER)
         {
-            actions[i] = ACT_NULL;
-            actionStatus[i] = ACT_STATUS_DISABLED;
+            // 检查是否正在等待顶点投射
+            if (g_mainWidget && g_mainWidget->isWaitingForPinPointStrike() &&
+                g_mainWidget->getPinPointStrikeUnit() == nowobject)
+            {
+                // 如果正在等待，显示取消按钮
+                actions[0] = ACT_STONE_THROWER_CANCEL_PINPOINT_STRIKE;
+                actionStatus[0] = ACT_STATUS_ENABLED;
+            }
+            else
+            {
+                // 否则显示顶点投射按钮
+                actions[0] = ACT_STONE_THROWER_PINPOINT_STRIKE;
+                actionStatus[0] = ACT_STATUS_ENABLED;
+            }
+            for (int i = 1; i < ACT_WINDOW_NUM_FREE; i++)
+            {
+                actions[i] = ACT_NULL;
+                actionStatus[i] = ACT_STATUS_DISABLED;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
+            {
+                actions[i] = ACT_NULL;
+                actionStatus[i] = ACT_STATUS_DISABLED;
+            }
         }
     }
+
     //    if(nowobject->getActSpeed() > 0)//如果行动中则只出现停止按钮
     //    {
     //        actions[0] = ACT_STOP;
@@ -367,12 +402,12 @@ void SelectWidget::refreshActs()
         case ACT_UPGRADE_CRAFT:
             isBuildingAct = true;
             buildType = BUILDING_MARKET;
-            buildingActType = BUILDING_MARKET_CRAFT_UPGRADE;
+            buildingActType = BUILDING_MARKET_WOOD_UPGRADE;  // 使用同一个建筑动作ID
             break;
         case ACT_UPGRADE_PLOW:
             isBuildingAct = true;
             buildType = BUILDING_MARKET;
-            buildingActType = BUILDING_MARKET_PLOW_UPGRADE;
+            buildingActType = BUILDING_MARKET_FARM_UPGRADE;  // 使用同一个建筑动作ID
             break;
         case ACT_DOCK_CREATE_SAILING:
             isBuildingAct = true;
@@ -440,6 +475,34 @@ void SelectWidget::refreshActs()
             buildType = BUILDING_STOCK;
             buildingActType = BUILDING_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY;
             break;
+
+        case ACT_STABLE_CREATE_CAVALRY:
+            isBuildingAct = true;
+            buildType = BUILDING_STABLE;
+            buildingActType = BUILDING_STABLE_CREATE_CAVALRY;
+            break;
+
+        case ACT_STOCK_UPGRADE_METALWORKING:
+            isBuildingAct = true;
+            buildType = BUILDING_STOCK;
+            buildingActType = BUILDING_STOCK_UPGRADE_USETOOL;  // 使用同一个建筑动作ID
+            break;
+        case ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE:
+            isBuildingAct = true;
+            buildType = BUILDING_STOCK;
+            buildingActType = BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY;  // 使用同一个建筑动作ID
+            break;
+        case ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE:
+            isBuildingAct = true;
+            buildType = BUILDING_STOCK;
+            buildingActType = BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER;  // 使用同一个建筑动作ID
+            break;
+        case ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE:
+            isBuildingAct = true;
+            buildType = BUILDING_STOCK;
+            buildingActType = BUILDING_STOCK_UPGRADE_DEFENSE_RIDER;  // 使用同一个建筑动作ID
+            break;
+
 
         case ACT_NULL:
             actionStatus[i] = ACT_STATUS_DISABLED;
@@ -898,10 +961,10 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_WHEEL_UPGRADE);
         break;
     case ACT_UPGRADE_CRAFT:
-        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_CRAFT_UPGRADE);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_WOOD_UPGRADE);
         break;
     case ACT_UPGRADE_PLOW:
-        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_PLOW_UPGRADE);
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_FARM_UPGRADE);
         break;
     case ACT_STOCK_UPGRADE_USETOOL:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_USETOOL);
@@ -913,6 +976,18 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER);
         break;
     case ACT_STOCK_UPGRADE_DEFENSE_RIDER:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_RIDER);
+        break;
+    case ACT_STOCK_UPGRADE_METALWORKING:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_USETOOL);
+        break;
+    case ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY);
+        break;
+    case ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER);
+        break;
+    case ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STOCK_UPGRADE_DEFENSE_RIDER);
         break;
     case ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY:
@@ -951,6 +1026,9 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
     case ACT_STABLE_CREATE_SCOUT:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STABLE_CREATE_SCOUT);
         break;
+    case ACT_STABLE_CREATE_CAVALRY:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STABLE_CREATE_CAVALRY);
+        break;
     case ACT_STABLE_CREATE_CHARIOT:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_STABLE_CREATE_CHARIOT);
         break;
@@ -966,6 +1044,54 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
     case ACT_SIEGE_CREATE_STONE_THROWER:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_SIEGE_CREATE_STONE_THROWER);
         break;
+
+    case ACT_STONE_THROWER_PINPOINT_STRIKE:
+        // 顶点投射：点击按钮后，等待用户点击地图上的目标位置
+        // 设置一个状态，表示正在等待地图点击
+        if (nowobject != nullptr && nowobject->getSort() == SORT_ARMY)
+        {
+            Army* objArmy = (Army*)nowobject;
+            if (objArmy->getNum() == AT_STONE_THROWER)
+            {
+                // 设置等待地图点击的状态，坐标将在manageMouseEvent中获取
+                // 这里先设置一个标志，实际坐标获取在Core::manageMouseEvent中处理
+                g_mainWidget->setWaitingForPinPointStrike(true);
+                g_mainWidget->setPinPointStrikeUnit(nowobject);
+                // 刷新按钮显示
+                initActs();
+            }
+        }
+        break;
+
+    case ACT_STONE_THROWER_CANCEL_PINPOINT_STRIKE:
+        // 取消定点投射：重置等待状态并停止正在进行的投射动作
+        if (g_mainWidget && g_mainWidget->isWaitingForPinPointStrike())
+        {
+            Coordinate* strikeUnit = g_mainWidget->getPinPointStrikeUnit();
+            // 如果投石车正在执行投射动作，停止它
+            if (strikeUnit != nullptr && nowobject == strikeUnit)
+            {
+                core->suspendRelation(strikeUnit);
+            }
+            // 重置等待状态
+            g_mainWidget->setWaitingForPinPointStrike(false);
+            g_mainWidget->setPinPointStrikeUnit(nullptr);
+            // 刷新按钮显示
+            initActs();
+        }
+        // 即使不在等待状态，如果当前选中的投石车正在执行动作，也停止它
+        else if (nowobject != nullptr && nowobject->getSort() == SORT_ARMY)
+        {
+            Army* objArmy = (Army*)nowobject;
+            if (objArmy->getNum() == AT_STONE_THROWER)
+            {
+                core->suspendRelation(nowobject);
+                // 刷新按钮显示
+                initActs();
+            }
+        }
+        break;
+
     case ACT_STOP:
         if (nowobject != nullptr)
         {

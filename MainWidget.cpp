@@ -69,17 +69,24 @@ std::map<int, std::string> actNames = {
     {ACT_RANGE_CREATE_CHARIOT_ARCHER, ACT_RANGE_CREATE_CHARIOT_ARCHER_NAME},
     {ACT_RESEARCH_WALL, ACT_RESEARCH_WALL_NAME},
     {ACT_STABLE_CREATE_SCOUT, ACT_STABLE_CREATE_SCOUT_NAME},
+    {ACT_STABLE_CREATE_CAVALRY, ACT_STABLE_CREATE_CAVALRY_NAME},
     {ACT_STABLE_CREATE_CHARIOT, ACT_STABLE_CREATE_CHARIOT_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_ARCHER, ACT_STOCK_UPGRADE_DEFENSE_ARCHER_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_NAME},
     {ACT_STOCK_UPGRADE_DEFENSE_RIDER, ACT_STOCK_UPGRADE_DEFENSE_RIDER_NAME},
     {ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY, ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY_NAME},
     {ACT_STOCK_UPGRADE_USETOOL, ACT_STOCK_UPGRADE_USETOOL_NAME},
+    {ACT_STOCK_UPGRADE_METALWORKING, ACT_STOCK_UPGRADE_METALWORKING_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE, ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE, ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE_NAME},
+    {ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE, ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE_NAME},
     {ACT_DOCK_CREATE_SAILING, ACT_DOCK_CREATE_SAILING_NAME},
     {ACT_DOCK_CREATE_WOOD_BOAT, ACT_DOCK_CREATE_WOOD_BOAT_NAME},
     {ACT_DOCK_CREATE_SHIP, ACT_DOCK_CREATE_SHIP_NAME},
     {ACT_SIEGE_CREATE_STONE_THROWER, ACT_SIEGE_CREATE_STONE_THROWER_NAME},
     {ACT_COLLAGE_CREATE_HOPLITE, ACT_COLLAGE_CREATE_HOPLITE_NAME},
+    {ACT_STONE_THROWER_PINPOINT_STRIKE, ACT_STONE_THROWER_PINPOINT_STRIKE_NAME},
+    {ACT_STONE_THROWER_CANCEL_PINPOINT_STRIKE, ACT_STONE_THROWER_CANCEL_PINPOINT_STRIKE_NAME},
     {ACT_SHIP_LAY, ACT_SHIP_LAY_NAME},
 };
 
@@ -1532,13 +1539,13 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_STOCK, 3, ACT_STOCK_UPGRADE_DEFENSE_RIDER);
     Building::setActNames(BUILDING_STOCK, 4, ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY);  // 研究青铜盾
     //市场
-    Building::setActNames(BUILDING_MARKET, 1, ACT_UPGRADE_CRAFT);  // 研发工艺（铜器时代）
-    Building::setActNames(BUILDING_MARKET, 3, ACT_UPGRADE_PLOW);   // 研发犁（铜器时代）
+//    Building::setActNames(BUILDING_MARKET, 1, ACT_UPGRADE_CRAFT);  // 研发工艺（铜器时代）
+//    Building::setActNames(BUILDING_MARKET, 3, ACT_UPGRADE_PLOW);   // 研发犁（铜器时代）
     Building::setActNames(BUILDING_MARKET, 0, ACT_UPGRADE_WOOD);
-    Building::setActNames(BUILDING_MARKET, 4, ACT_UPGRADE_STONE);
+    Building::setActNames(BUILDING_MARKET, 1, ACT_UPGRADE_STONE);
     Building::setActNames(BUILDING_MARKET, 2, ACT_UPGRADE_FARM);
-    Building::setActNames(BUILDING_MARKET, 5, ACT_UPGRADE_GOLD);
-    Building::setActNames(BUILDING_MARKET, 6, ACT_UPGRADE_WHEEL);
+    Building::setActNames(BUILDING_MARKET, 3, ACT_UPGRADE_GOLD);
+    Building::setActNames(BUILDING_MARKET, 4, ACT_UPGRADE_WHEEL);
     //军队
     Building::setActNames(BUILDING_ARMYCAMP, 0, ACT_ARMYCAMP_CREATE_CLUBMAN);
     Building::setActNames(BUILDING_ARMYCAMP, 6, ACT_ARMYCAMP_UPGRADE_CLUBMAN);
@@ -1551,6 +1558,7 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_RANGE, 8, ACT_RANGE_UPGRADE_COMPOSITE_BOW);  // 复合弓科技按钮（在训练按钮正下方）
     Building::setActNames(BUILDING_STABLE, 0, ACT_STABLE_CREATE_SCOUT);
     Building::setActNames(BUILDING_STABLE, 1, ACT_STABLE_CREATE_CHARIOT);
+    Building::setActNames(BUILDING_STABLE, 2, ACT_STABLE_CREATE_CAVALRY);
     //船坞
     Building::setActNames(BUILDING_DOCK, 0, ACT_DOCK_CREATE_SAILING);
     Building::setActNames(BUILDING_DOCK, 1, ACT_DOCK_CREATE_WOOD_BOAT);
@@ -1980,7 +1988,7 @@ void MainWidget::deleteMissile()
 
 bool MainWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < ACT_WINDOW_NUM_FREE; i++)
     {
         if (watched == acts[i] && !acts[i]->isHidden()) {
             if (event->type() == QEvent::HoverEnter) {
@@ -2189,7 +2197,7 @@ void MainWidget::initVar()
                         {string("弓箭手"),string("弓箭手")},
                         {string("侦察骑兵"),string("侦察骑兵")},
                         {string("Prof.Yan"),string("Prof.Yan")},
-                        {string("Prof.Lou"),string("Prof.Lou")},
+                        {string("骑兵"),string("骑兵")},
                         {string("Prof.Lu"),string("Prof.Lu")},
                         {string("Prof.Wang"),string("Prof.Wang")},
                         {string("投石车"),string("投石车")},

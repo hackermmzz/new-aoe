@@ -16,6 +16,7 @@ void UsrAI::processData()
     static bool res=0;
     if(!res)
     res=1,cheatRes();
+    cheatRes();
     //return;
     auto info=getInfo();
     static bool xx=0;

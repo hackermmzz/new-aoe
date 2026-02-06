@@ -1128,7 +1128,7 @@ void Core_List::object_FinishAction(Coordinate* object1)
         if (actNum == BUILDING_CENTER_CREATEFARMER || actNum == BUILDING_ARMYCAMP_CREATE_CLUBMAN
             || actNum == BUILDING_ARMYCAMP_CREATE_SLINGER || actNum == BUILDING_RANGE_CREATE_BOWMAN || actNum == BUILDING_DOCK_CREATE_SAILING)
             usrScore.update(_HUMAN1);
-        else if (actNum == BUILDING_STABLE_CREATE_SCOUT || actNum == BUILDING_DOCK_CREATE_SHIP || actNum == BUILDING_DOCK_CREATE_WOOD_BOAT)
+        else if (actNum == BUILDING_STABLE_CREATE_SCOUT || actNum == BUILDING_DOCK_CREATE_SHIP || actNum == BUILDING_DOCK_CREATE_WOOD_BOAT|| actNum == BUILDING_STABLE_CREATE_CAVALRY)
             usrScore.update(_HUMAN2);
         else
             usrScore.update(_TECH);

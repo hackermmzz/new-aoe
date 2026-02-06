@@ -117,7 +117,7 @@ int Development::get_addition_DisAttack(int sort, int type, int armyClass, int a
             addition += BUILDING_MARKET_WOOD_UPGRADE_ADDITION_DISSHOOT;
         }
         // 检查工艺科技（铜器时代，在木材加工基础上再增加）
-        if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_CRAFT_UPGRADE) >= 1)
+        if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 2)
         {
             addition += BUILDING_MARKET_CRAFT_UPGRADE_ADDITION_DISSHOOT;
         }
@@ -257,7 +257,7 @@ double Development::get_rate_ResorceGather(int resourceSort)
             rate += BUILDING_MARKET_WOOD_UPGRADE_ADDITION_GATHERRATE;
         }
         // 检查工艺科技（铜器时代，在木材加工基础上再增加）
-        if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_CRAFT_UPGRADE) >= 1)
+        if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 2)
         {
             rate += BUILDING_MARKET_CRAFT_UPGRADE_ADDITION_GATHERRATE;
         }
@@ -300,7 +300,7 @@ int Development::get_addition_MaxCnt(int sort, int type)
                 addition += BUILDING_MARKET_FARM_UPGRADE_ADDITION_FOOD;
             }
             // 检查犁科技（铜器时代，在驯养动物基础上再增加）
-            if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_PLOW_UPGRADE) >= 1)
+            if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_FARM_UPGRADE) >= 2)
             {
                 addition += BUILDING_MARKET_PLOW_UPGRADE_ADDITION_FOOD;
             }
@@ -550,25 +550,24 @@ void Development::init_DevelopLab()
              developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_WHEEL_UPGRADE].setHead(newNode);
              //developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_WHEEL_UPGRADE].endNodeAsOver();
          }
-        //铜器时代
+        //铜器时代（前置条件：工具时代的对应升级）
         //研发工艺（木材加工升级版）- 需要木材加工作为前置条件
         {
+
+            //研发工艺 - 木材加工升级版（前置：研发木材加工）
             newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_MARKET, TIME_BUILDING_MARKET_CRAFT_UPGRADE,
                                           BUILDING_MARKET_CRAFT_UPGRADE_WOOD, BUILDING_MARKET_CRAFT_UPGRADE_FOOD);
-            // 添加木材加工作为前置条件
             newNode->addPreCondition(developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_WOOD_UPGRADE].headAct);
-            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_CRAFT_UPGRADE].setHead(newNode);  // ✅ 改为独立的条目
-            //developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_CRAFT_UPGRADE].endNodeAsOver();
+            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_WOOD_UPGRADE].push_back(newNode);
         }
 
-        //研发犁（驯养动物升级版）- 需要驯养动物作为前置条件
+
         {
+            //研发犁 - 驯养动物升级版（前置：研发驯养动物）
             newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_MARKET, TIME_BUILDING_MARKET_PLOW_UPGRADE,
                                           BUILDING_MARKET_PLOW_UPGRADE_WOOD, BUILDING_MARKET_PLOW_UPGRADE_FOOD);
-            // 添加驯养动物作为前置条件
             newNode->addPreCondition(developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_FARM_UPGRADE].headAct);
-           developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_PLOW_UPGRADE].setHead(newNode); // ✅ 改为独立的条目
-           // developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_PLOW_UPGRADE].endNodeAsOver();
+            developLab[BUILDING_MARKET].actCon[BUILDING_MARKET_FARM_UPGRADE].push_back(newNode);
         }
 
     }
@@ -592,6 +591,14 @@ void Development::init_DevelopLab()
         newNode->setCreatObjectAfterAction(SORT_ARMY, AT_CHARIOT);
         developLab[BUILDING_STABLE].actCon[BUILDING_STABLE_CREATE_CHARIOT].setHead(newNode);
         developLab[BUILDING_STABLE].actCon[BUILDING_STABLE_CREATE_CHARIOT].endNodeAsOver();
+
+        //训练骑兵
+          newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_STABLE, TIME_BUILDING_STABLE_CREATE_CAVALRY,
+                                        0, BUILDING_STABLE_CREATE_CAVALRY_FOOD, 0, BUILDING_STABLE_CREATE_CAVALRY_GOLD);
+          newNode->setCreatObjectAfterAction(SORT_ARMY, AT_CAVALRY);
+          developLab[BUILDING_STABLE].actCon[BUILDING_STABLE_CREATE_CAVALRY].setHead(newNode);
+          developLab[BUILDING_STABLE].actCon[BUILDING_STABLE_CREATE_CAVALRY].endNodeAsOver();
+
     }
 
 
