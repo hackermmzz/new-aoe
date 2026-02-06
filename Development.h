@@ -67,7 +67,6 @@ public:
     /***************当前建筑信息*******************/
     //获取当前房屋数目
     int get_homeNum(){ return (int)(centerNum>0) + homeNum; }
-
     void addHome(){ homeNum++; }
     void subHome(){ homeNum--; }
     void subCenter(){ centerNum--; }

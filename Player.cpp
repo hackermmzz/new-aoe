@@ -36,6 +36,12 @@ Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent
     else newbuilding=new Building(Num,BlockDR,BlockUR, getCiv(), playerScience , represent , percent);
 
     build.push_back(newbuilding);
+    
+    // 如果是房屋类型，增加房屋数量计数
+    if(Num == BUILDING_HOME) {
+        playerScience->addHome();
+    }
+    
     return newbuilding;
 }
 
