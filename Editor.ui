@@ -132,6 +132,11 @@
    </item>
    <item>
     <property name="text">
+     <string>敌方投石车</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>敌方箭塔</string>
     </property>
    </item>
@@ -193,6 +198,11 @@
    <item>
     <property name="text">
      <string>敌方人物</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方投石车</string>
     </property>
    </item>
    <item>
