@@ -37,9 +37,12 @@ Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent
 
     build.push_back(newbuilding);
     
-    // 如果是房屋类型，增加房屋数量计数
-    if(Num == BUILDING_HOME) {
-        playerScience->addHome();
+    // 只在建筑100%完成时（编辑器模式）才更新计数，避免与finishBuild中的调用重复
+    if(percent >= 100) {
+        // 如果是房屋类型，增加房屋数量计数
+        if(Num == BUILDING_HOME) {
+            playerScience->addHome();
+        }
     }
     
     return newbuilding;
