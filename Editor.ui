@@ -186,13 +186,43 @@
     <rect>
      <x>770</x>
      <y>40</y>
-     <width>111</width>
+     <width>141</width>
      <height>51</height>
     </rect>
    </property>
    <item>
     <property name="text">
      <string>敌方人物</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方方阵兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方驷马战车</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方阔剑兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方复合弓手</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方战车射手</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>敌方祭司</string>
     </property>
    </item>
    <item>
@@ -252,9 +282,9 @@
   <widget class="QComboBox" name="animal">
    <property name="geometry">
     <rect>
-     <x>880</x>
+     <x>910</x>
      <y>40</y>
-     <width>111</width>
+     <width>81</width>
      <height>51</height>
     </rect>
    </property>

@@ -78,6 +78,7 @@ public:
         PLAYERFISHERY,
         PLAYERWARSHIP,
         PLAYERDOCK,
+        PLAYERHOME,
         PLAYERFISHINGBOAT,
         PLAYERREPOSITORY,
         PLAYERARROWTOWER,
@@ -93,6 +94,12 @@ public:
         AIAXEMAN,
         AISCOUT,
         AIBOWMAN,
+        AIPRIEST,
+        AIHOPLITE,
+        AICOMPARCHER,
+        AIBROADSWORDSMAN,
+        AICHARIOT,
+        AICHARIOTARCHER,
         GAZELLE,
         LION,
         ELEPHANT,
@@ -108,7 +115,6 @@ public:
         ENEMY_STATUS_ATTACK,
         ENEMY_STATUS_DEFEND,
         NORMAL_MOUSE,
-        PLAYERHOME,
     };
 
 
