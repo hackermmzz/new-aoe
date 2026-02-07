@@ -49,6 +49,16 @@ public:
     void setEnemyStatus(Coordinate* unit, const string& status);  // 设置敌人状态
     string getEnemyStatus(Coordinate* unit);  // 获取敌人状态
 
+    // 投石车定点投射相关函数
+    void setWaitingForPinPointStrike(bool waiting) { waitingForPinPointStrike = waiting; }
+    void setPinPointStrikeUnit(Coordinate* unit) { pinPointStrikeUnit = unit; }
+    bool isWaitingForPinPointStrike() const { return waitingForPinPointStrike; }
+    Coordinate* getPinPointStrikeUnit() const { return pinPointStrikeUnit; }
+
+    // 顶点投射相关变量
+    bool waitingForPinPointStrike = false;  // 是否正在等待地图点击以执行顶点投射
+    Coordinate* pinPointStrikeUnit = nullptr;  // 等待执行顶点投射的单位
+
     // 编辑器相关内容
     Editor* editor;
     AreaSelected*rectArea;//矩形区域生成监听器

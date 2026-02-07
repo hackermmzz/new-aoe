@@ -101,26 +101,88 @@ public:
     /*****************act相关***************/
     int getActNames(int num)
     {
-//        // 对于市场建筑，位置0和位置2需要根据科技树状态动态返回
-//        if (this->Num == BUILDING_MARKET && playerScience != NULL)
-//        {
-//            // 位置0：如果wood已完成，返回craft；否则返回wood
-//            if (num == 0)
-//            {
-//                if (playerScience->getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 1)
-//                    return ACT_UPGRADE_CRAFT;
-//                else
-//                    return actNames[this->Num][num];
-//            }
-//            // 位置2：如果farm已完成，返回plow；否则返回farm
-//            else if (num == 2)
-//            {
-//                if (playerScience->getActLevel(BUILDING_MARKET, BUILDING_MARKET_FARM_UPGRADE) >= 1)
-//                    return ACT_UPGRADE_PLOW;
-//                else
-//                    return actNames[this->Num][num];
-//            }
-//        }
+        int actNum = actNames[this->Num][num];
+        int civ = playerScience->get_civilization();
+        // 检查当前节点的时代，如果是铜器时代且工具时代升级已完成，返回对应的铜器时代动作ID
+        if (actNum == ACT_STOCK_UPGRADE_USETOOL)
+        {
+            // 检查当前节点是否可以显示（如果可以显示且是铜器时代，说明当前节点是铜器时代节点）
+            if (civ >= CIVILIZATION_BRONZEAGE &&
+                playerScience->get_isBuildActionShowAble(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_USETOOL, civ))
+            {
+                // 检查当前节点是否是铜器时代节点（通过检查资源消耗是否包含黄金）
+                int wood, food, stone, gold;
+                playerScience->get_Resource_Consume(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_USETOOL, wood, food, stone, gold);
+                if (gold > 0)  // 如果资源消耗包含黄金，说明是铜器时代节点
+                    return ACT_STOCK_UPGRADE_METALWORKING;
+            }
+        }
+        else if (actNum == ACT_STOCK_UPGRADE_DEFENSE_INFANTRY)
+        {
+            if (civ >= CIVILIZATION_BRONZEAGE &&
+                playerScience->get_isBuildActionShowAble(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY, civ))
+            {
+                int wood, food, stone, gold;
+                playerScience->get_Resource_Consume(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY, wood, food, stone, gold);
+                if (gold > 0)
+                    return ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE;
+            }
+        }
+        else if (actNum == ACT_STOCK_UPGRADE_DEFENSE_ARCHER)
+        {
+            if (civ >= CIVILIZATION_BRONZEAGE &&
+                playerScience->get_isBuildActionShowAble(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER, civ))
+            {
+                int wood, food, stone, gold;
+                playerScience->get_Resource_Consume(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER, wood, food, stone, gold);
+                if (gold > 0)
+                    return ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE;
+            }
+        }
+        else if (actNum == ACT_STOCK_UPGRADE_DEFENSE_RIDER)
+        {
+            if (civ >= CIVILIZATION_BRONZEAGE &&
+                playerScience->get_isBuildActionShowAble(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_RIDER, civ))
+            {
+                int wood, food, stone, gold;
+                playerScience->get_Resource_Consume(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_RIDER, wood, food, stone, gold);
+                if (gold > 0)
+                    return ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE;
+            }
+        }
+        // 对于市场建筑，根据当前节点的时代返回不同的动作ID
+        else if (this->Num == BUILDING_MARKET && playerScience != NULL)
+        {
+            int actNum = actNames[this->Num][num];
+            int civ = playerScience->get_civilization();
+            // 检查当前节点的时代，如果是铜器时代且工具时代升级已完成，返回对应的铜器时代动作ID
+            if (actNum == ACT_UPGRADE_WOOD)
+            {
+                // 检查当前节点是否可以显示（如果可以显示且是铜器时代，说明当前节点是铜器时代节点）
+                if (civ >= CIVILIZATION_BRONZEAGE &&
+                    playerScience->get_isBuildActionShowAble(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE, civ))
+                {
+                    // 检查当前节点是否是铜器时代节点（通过检查资源消耗）
+                    // 工艺需要150木材和170食物，而木材加工只需要75木材和120食物
+                    int wood, food, stone, gold;
+                    playerScience->get_Resource_Consume(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE, wood, food, stone, gold);
+                    if (wood >= 150)  // 如果资源消耗包含150木材，说明是铜器时代节点（工艺）
+                        return ACT_UPGRADE_CRAFT;
+                }
+            }
+            else if (actNum == ACT_UPGRADE_FARM)
+            {
+                if (civ >= CIVILIZATION_BRONZEAGE &&
+                    playerScience->get_isBuildActionShowAble(BUILDING_MARKET, BUILDING_MARKET_FARM_UPGRADE, civ))
+                {
+                    int wood, food, stone, gold;
+                    playerScience->get_Resource_Consume(BUILDING_MARKET, BUILDING_MARKET_FARM_UPGRADE, wood, food, stone, gold);
+                    // 犁需要250食物和75木材，而驯养动物需要200食物和50木材
+                    if (food >= 250)  // 如果资源消耗包含250食物，说明是铜器时代节点（犁）
+                        return ACT_UPGRADE_PLOW;
+                }
+            }
+        }
         return actNames[this->Num][num];
     }
 

@@ -1,5 +1,6 @@
 #include "SelectWidget.h"
 #include "Core.h"
+#include "MainWidget.h"
 #include <QDateTime>
 #include <iostream>
 tagInfo Buffer0[2];
@@ -734,6 +735,24 @@ void Core::manageMouseEvent()
     resetNowObject_Click();
     //
     tryCaptured=false;
+    //
+    // 检查是否正在等待定点投射
+    if (g_mainWidget && g_mainWidget->isWaitingForPinPointStrike())
+    {
+        Coordinate* strikeUnit = g_mainWidget->getPinPointStrikeUnit();
+        if (strikeUnit != nullptr && mouseEvent->GetMouseEventType() == RIGHT_PRESS)
+        {
+            // 执行定点投射
+            double dr = mouseEvent->GetDR();
+            double ur = mouseEvent->GetUR();
+            g_mainWidget->getUsrAI()->PinPointStrike(strikeUnit->getglobalNum(), dr, ur);
+            // 重置状态
+            g_mainWidget->setWaitingForPinPointStrike(false);
+            g_mainWidget->setPinPointStrikeUnit(nullptr);
+            mouseEvent->SetMouseEventType(NULL_MOUSEEVENT);
+            return;
+        }
+    }
     //
     if (mouseEvent->GetMouseEventType() == RIGHT_PRESS && nowobject != NULL)
     {

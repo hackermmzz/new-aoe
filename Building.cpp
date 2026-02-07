@@ -207,10 +207,31 @@ void Building::ActNumToActName()
     }
     else if(Num == BUILDING_STOCK)
     {
-        if(actNum == BUILDING_STOCK_UPGRADE_USETOOL) actName = ACT_STOCK_UPGRADE_USETOOL;
-        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY) actName = ACT_STOCK_UPGRADE_DEFENSE_INFANTRY;
-        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER) actName = ACT_STOCK_UPGRADE_DEFENSE_ARCHER;
-        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_RIDER) actName = ACT_STOCK_UPGRADE_DEFENSE_RIDER;
+        if(actNum == BUILDING_STOCK_UPGRADE_USETOOL) {
+            // 根据当前节点的时代返回不同的动作ID
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_USETOOL) >= 1)
+                actName = ACT_STOCK_UPGRADE_METALWORKING;
+            else
+                actName = ACT_STOCK_UPGRADE_USETOOL;
+        }
+        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY) {
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_INFANTRY) >= 1)
+                actName = ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE;
+            else
+                actName = ACT_STOCK_UPGRADE_DEFENSE_INFANTRY;
+        }
+        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER) {
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_ARCHER) >= 1)
+                actName = ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE;
+            else
+                actName = ACT_STOCK_UPGRADE_DEFENSE_ARCHER;
+        }
+        else if(actNum == BUILDING_STOCK_UPGRADE_DEFENSE_RIDER) {
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_DEFENSE_RIDER) >= 1)
+                actName = ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE;
+            else
+                actName = ACT_STOCK_UPGRADE_DEFENSE_RIDER;
+        }
         else if(actNum == BUILDING_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY) actName = ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY;
     }
     else if(Num == BUILDING_ARMYCAMP)
@@ -222,13 +243,23 @@ void Building::ActNumToActName()
         else if(actNum == BUILDING_ARMYCAMP_UPGRADE_BROADSWORD) actName = ACT_ARMYCAMP_UPGRADE_BROADSWORD;
     }
     else if(Num == BUILDING_MARKET)
-       {
-        if(actNum == BUILDING_MARKET_WOOD_UPGRADE) actName = ACT_UPGRADE_WOOD;
+    {
+        if(actNum == BUILDING_MARKET_WOOD_UPGRADE) {
+            // 根据当前节点的时代返回不同的动作ID
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 1)
+                actName = ACT_UPGRADE_CRAFT;
+            else
+                actName = ACT_UPGRADE_WOOD;
+        }
         else if(actNum == BUILDING_MARKET_STONE_UPGRADE) actName = ACT_UPGRADE_STONE;
-        else if(actNum == BUILDING_MARKET_FARM_UPGRADE) actName = ACT_UPGRADE_FARM;
+        else if(actNum == BUILDING_MARKET_FARM_UPGRADE) {
+            // 根据当前节点的时代返回不同的动作ID
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_MARKET, BUILDING_MARKET_FARM_UPGRADE) >= 1)
+                actName = ACT_UPGRADE_PLOW;
+            else
+                actName = ACT_UPGRADE_FARM;
+        }
         else if(actNum == BUILDING_MARKET_GOLD_UPGRADE) actName = ACT_UPGRADE_GOLD;
-        else if(actNum == BUILDING_MARKET_CRAFT_UPGRADE) actName = ACT_UPGRADE_CRAFT;
-        else if(actNum == BUILDING_MARKET_PLOW_UPGRADE) actName = ACT_UPGRADE_PLOW;
         else if(actNum == BUILDING_MARKET_WHEEL_UPGRADE) actName = ACT_UPGRADE_WHEEL;
        }
     else if( Num == BUILDING_RANGE)
@@ -242,6 +273,7 @@ void Building::ActNumToActName()
     {
         if(actNum == BUILDING_STABLE_CREATE_SCOUT) actName =ACT_STABLE_CREATE_SCOUT;
         else if(actNum == BUILDING_STABLE_CREATE_CHARIOT) actName = ACT_STABLE_CREATE_CHARIOT;
+        else if(actNum == BUILDING_STABLE_CREATE_CAVALRY) actName = ACT_STABLE_CREATE_CAVALRY;
     }
     else if(Num == BUILDING_DOCK)
     {
