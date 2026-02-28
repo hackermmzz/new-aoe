@@ -1346,15 +1346,28 @@ void MainWidget::initInfoPane() {
         acts[i] = acts_[i];
         acts[i]->setStatus(0);
         acts[i]->setNum(i);
+        // 设置按钮的固定大小，确保隐藏时仍占据空间
+        acts[i]->setFixedSize(70, 70);
+        acts[i]->setMinimumSize(70, 70);
         acts[i]->hide();
         acts[i]->setAttribute(Qt::WA_Hover, true);
         acts[i]->installEventFilter(this);
         connect(acts[i], SIGNAL(actPress(int)), sel, SLOT(widgetAct(int)));
     }
 
+    // 设置布局的最小列宽和行高，确保隐藏按钮仍占据空间
+    // 按钮大小是70x70，加上间距6，所以最小尺寸设为76
+    const int buttonSize = 76;
+    for (int col = 0; col < 6; col++) {
+        ui->gridLayout->setColumnMinimumWidth(col, buttonSize);
+    }
+    for (int row = 0; row < 2; row++) {
+        ui->gridLayout->setRowMinimumHeight(row, buttonSize);
+    }
+
     connect(ui->Game, SIGNAL(sendView(int, int, int)), sel, SLOT(getBuild(int, int, int)));
     connect(sel, SIGNAL(sendBuildMode(int)), ui->Game, SLOT(setBuildMode(int)));
-}
+    }
 
 void MainWidget::initGameTimer() {
     qDebug() << "初始化计时器...";
@@ -1519,12 +1532,17 @@ void MainWidget::initBuilding()
         Building::allocatebuild(i);
         loadResource(Building::getBuildingname(i), Building::getBuild(i));
     }
-    for (int i = 1; i < 4; i++)
+    // 为每个时代、敌我双方加载建筑资源
+    for (int age = 1; age < 4; age++)  // 时代: 1=石器, 2=工具, 3=铜器
     {
-        for (int j = 0;j < BUILDING_TYPE_MAXNUM;j++)
+        for (int isEnemy = 0; isEnemy < 2; isEnemy++)  // 0=我方, 1=敌方
         {
-            Building::allocatebuilt(i, j);
-            loadResource(Building::getBuiltname(i, j), Building::getBuilt(i, j));
+            for (int buildType = 0; buildType < BUILDING_TYPE_MAXNUM; buildType++)
+            {
+                Building::allocatebuilt(age, isEnemy, buildType);
+                loadResource(Building::getBuiltname(age, isEnemy, buildType),
+                           Building::getBuilt(age, isEnemy, buildType));
+            }
         }
     }
 
@@ -1552,7 +1570,7 @@ void MainWidget::initBuilding()
     Building::setActNames(BUILDING_MARKET, 1, ACT_UPGRADE_STONE);
     Building::setActNames(BUILDING_MARKET, 2, ACT_UPGRADE_FARM);
     Building::setActNames(BUILDING_MARKET, 3, ACT_UPGRADE_GOLD);
-    Building::setActNames(BUILDING_MARKET, 4, ACT_UPGRADE_WHEEL);
+    Building::setActNames(BUILDING_MARKET, 6, ACT_UPGRADE_WHEEL);
     //军队
     Building::setActNames(BUILDING_ARMYCAMP, 0, ACT_ARMYCAMP_CREATE_CLUBMAN);
     Building::setActNames(BUILDING_ARMYCAMP, 6, ACT_ARMYCAMP_UPGRADE_CLUBMAN);
@@ -1844,11 +1862,14 @@ void MainWidget::deleteBuilding()
     {
         Building::deallocatebuild(i);
     }
-    for (int i = 1; i < 3; i++)
+    for (int age = 1; age < 4; age++)  // 时代: 1=石器, 2=工具, 3=铜器
     {
-        for (int j = 0;j < 10;j++)
+        for (int isEnemy = 0; isEnemy < 2; isEnemy++)  // 0=我方, 1=敌方
         {
-            Building::deallocatebuilt(i, j);
+            for (int buildType = 0; buildType < BUILDING_TYPE_MAXNUM; buildType++)
+            {
+                Building::deallocatebuilt(age, isEnemy, buildType);
+            }
         }
     }
 
@@ -2219,11 +2240,34 @@ void MainWidget::initVar()
     Army::click_sound = "Click_Army";
     /******************************************Buildings****************************/
     Building::Buildingname={"Small_Foundation","Foundation","Big_Foundation","Building_House1"};
-    Building::Builtname=decltype(Building::Builtname){{
-    {},
-    {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"},
-    {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"},
-    {"House_Egypt","Granary","Center_Egypt","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt"}
+    Building::Builtname = {{
+        // 索引0 (CIVILIZATION_UNKNOWN，通常不使用) - 需要15个空字符串
+        {{
+            {"","","","","","","","","","","","","","",""},
+            {"","","","","","","","","","","","","","",""}
+        }},
+        // 索引1 - 石器时代 (CIVILIZATION_STONEAGE)
+        {{
+            // 我方建筑 [0]
+            {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""},
+            // 敌方建筑 [1]
+            {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""}
+        }},
+        // 索引2 - 工具时代 (CIVILIZATION_TOOLAGE)
+        {{
+            // 我方建筑 [0]
+            {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""},
+            // 敌方建筑 [1]
+            {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""}
+        }},
+        // 索引3 - 铜器时代 (CIVILIZATION_BRONZEAGE)
+        {{
+            // 我方建筑 [0]
+            {"House_Egypt","Granary_Egypt","Center_Egypt","Stock_Egypt","Farm","Market_Egypt","ArrowTower","ArmyCamp_Egypt","Stable_Egypt","Range_Egypt","Dock_Egypt","Siege_Egypt","Collage_Egypt","",""},
+            // 敌方建筑 [1]
+            {"House_Daiwa","Granary_Daiwa","Center_Daiwa","Stock_Daiwa","Farm","Market_Daiwa","ArrowTower","ArmyCamp_Daiwa","Stable_Daiwa","Range_Daiwa","Dock_Daiwa","Siege_Daiwa","Collage_Daiwa","",""}
+        }}
+        // 注意：索引4 (CIVILIZATION_IRONAGE 铁器时代) 尚未实现，暂不添加
     }};
     Building::BuildDisplayName={"房屋","谷仓","市镇中心","仓库","农场","市场","箭塔","兵营","马厩","靶场","船坞","攻城武器厂","学院"};
     Building::BuildFireName = { "S_Fire", "M_Fire", "B_Fire"};

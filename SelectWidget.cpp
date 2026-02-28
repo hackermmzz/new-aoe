@@ -62,18 +62,18 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_BUILD] = "Button_Build";
     actionResourceMap[ACT_BUILD_ARROWTOWER] = "Button_ArrowTower";
     actionResourceMap[ACT_BUILD_CANCEL] = "Exit";
-    actionResourceMap[ACT_BUILD_FARM] = "Button_Farm";
-    actionResourceMap[ACT_BUILD_GRANARY] = "Button_Granary";
-    actionResourceMap[ACT_BUILD_HOUSE] = "Button_House1";
-    actionResourceMap[ACT_BUILD_MARKET] = "Button_Market";
-    actionResourceMap[ACT_BUILD_STOCK] = "Button_Stock";
-    actionResourceMap[ACT_BUILD_ARMYCAMP] = "Button_ArmyCamp";
-    actionResourceMap[ACT_BUILD_RANGE] = "Button_Range";
-    actionResourceMap[ACT_BUILD_STABLE] = "Button_Stable";
-    actionResourceMap[ACT_BUILD_DOCK] = "Button_Dock";
-    actionResourceMap[ACT_SHIP_LAY] = "Button_Lay";
-    actionResourceMap[ACT_BUILD_COLLAGE] = "Button_Collage_Egypt";
-    actionResourceMap[ACT_BUILD_SIEGE] = "Button_Siege_Egypt";
+//    actionResourceMap[ACT_BUILD_FARM] = "Button_Farm";
+//    actionResourceMap[ACT_BUILD_GRANARY] = "Button_Granary";
+//    actionResourceMap[ACT_BUILD_HOUSE] = "Button_House1";
+//    actionResourceMap[ACT_BUILD_MARKET] = "Button_Market";
+//    actionResourceMap[ACT_BUILD_STOCK] = "Button_Stock";
+//    actionResourceMap[ACT_BUILD_ARMYCAMP] = "Button_ArmyCamp";
+//    actionResourceMap[ACT_BUILD_RANGE] = "Button_Range";
+//    actionResourceMap[ACT_BUILD_STABLE] = "Button_Stable";
+//    actionResourceMap[ACT_BUILD_DOCK] = "Button_Dock";
+//    actionResourceMap[ACT_SHIP_LAY] = "Button_Lay";
+//    actionResourceMap[ACT_BUILD_COLLAGE] = "Button_Collage_Egypt";
+//    actionResourceMap[ACT_BUILD_SIEGE] = "Button_Siege_Egypt";
 }
 
 SelectWidget::~SelectWidget()
@@ -576,7 +576,9 @@ void SelectWidget::refreshActs()
             ui->objName->setText(QString::fromStdString(objBuilding->getDisplayName(buildType))); // 设置显示名称
 
             // 根据不同时代设置不同的图标
-            string name = "Button_" + objBuilding->getBuiltname(mainPtr->player[0]->getCiv(), buildType);
+            // 判断是否为敌方建筑
+            int isEnemy = (objBuilding->getPlayerRepresent() != NOWPLAYERREPRESENT) ? 1 : 0;
+            string name = "Button_" + Building::getBuiltname(mainPtr->player[0]->getCiv(), isEnemy, buildType);
             if (resMap.find(name) != resMap.end() && !resMap[name].empty())
             {
                 // 如果找到了对应的图片，设置该图片
@@ -650,6 +652,40 @@ void SelectWidget::refreshActs()
                         ui->objText->setText(QString::number((int)(farm->get_Cnt())));
                         ui->objIconSmall->setPixmap(resMap["Icon_Food"].front());
                     }
+                }
+                else if (objBuilding->getNum() == BUILDING_ARROWTOWER)
+                {
+                    // 箭塔：在"血量上方"显示【攻击力】和【射程】
+                    // 说明：
+                    // - 第一行（y=10）：显示攻击力，复用兵种的攻击栏位（objIconSmall_ATK + objText_ATK）
+                    // - 第二行（y=40）：显示射程，复用兵种的近战防御栏位（objIconSmall_DEF_melee + objText_DEF_melee）
+                    // - 第三行（y=70）：清空，不显示防御力
+
+                    // 1) 攻击力（第一行，y=10）：复用兵种的攻击栏位
+                    if (resMap.find("SmallIcon_Attack") != resMap.end() && !resMap["SmallIcon_Attack"].empty())
+                        ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30));
+                    ui->objText_ATK->setText(QString::number(objBuilding->showATK_Basic()));
+
+                    // 2) 射程（第二行，y=40）：复用兵种的近战防御栏位显示射程
+                    // Building::getDis_attack() 返回的是距离 * BLOCKSIDELENGTH（像素单位），这里转回"格子"显示
+                    int rangeInBlock = 0;
+                    if (BLOCKSIDELENGTH > 0)
+                        rangeInBlock = (int)(objBuilding->getDis_attack() / BLOCKSIDELENGTH);
+                    ui->objText_DEF_melee->setText(QString::number(rangeInBlock));
+
+                    // 射程图标：优先 SmallIcon_Range（如果你准备了这个资源），否则用 SmallIcon_Defense_Range / SmallIcon_Attack 兜底
+                    if (resMap.find("SmallIcon_Range") != resMap.end() && !resMap["SmallIcon_Range"].empty())
+                        ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Range"].front().scaled(40, 30));
+                    else if (resMap.find("SmallIcon_Defense_Range") != resMap.end() && !resMap["SmallIcon_Defense_Range"].empty())
+                        ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
+                    else if (resMap.find("SmallIcon_Attack") != resMap.end() && !resMap["SmallIcon_Attack"].empty())
+                        ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30));
+
+                    // 3) 其他栏位清空，避免和"房屋人口/农场产量"等信息混在一起
+                    ui->objText->setText("");
+                    ui->objIconSmall->setPixmap(QPixmap());
+                    ui->objText_DEF_range->setText("");
+                    ui->objIconSmall_DEF_range->setPixmap(QPixmap());
                 }
             }
             else // 如果建筑建造未完成
@@ -773,7 +809,10 @@ void SelectWidget::refreshActs()
             ui->objIcon->setPixmap(resMap[buttonName].front().scaled(110, 110));
             ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); // 攻击图标
             ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
-            ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
+
+            // 判断是否是弓兵类型（远程攻击类型）
+            bool isRangedUnit = (objArmy->get_AttackType() == ATTACKTYPE_SHOOT);
+
             if (objArmy->showATK_Addition() == 0)
                 ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()));
             else
@@ -782,14 +821,34 @@ void SelectWidget::refreshActs()
                 ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()));
             else
                 ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()) + "+" + QString::number(objArmy->showDEF_Close_Addition())); // 显示近战防御（基础+额外）
-            if (objArmy->showDEF_Shoot_Addition() == 0)
-                ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot()));
+
+            // 第三行：弓兵类型显示射程，其他兵种显示远程防御
+            if (isRangedUnit)
+            {
+                // 弓兵类型：显示射程
+                // Army::getDis_attack() 返回的是距离 * BLOCKSIDELENGTH（像素单位），这里转回"格子"显示
+                int rangeInBlock = 0;
+                if (BLOCKSIDELENGTH > 0)
+                    rangeInBlock = (int)(objArmy->getDis_attack() / BLOCKSIDELENGTH);
+                ui->objText_DEF_range->setText(QString::number(rangeInBlock));
+
+                // 射程图标：使用 SmallIcon_Range
+                if (resMap.find("SmallIcon_Range") != resMap.end() && !resMap["SmallIcon_Range"].empty())
+                    ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Range"].front().scaled(40, 30));
+            }
             else
-                ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot()) + "+" + QString::number(objArmy->showDEF_Shoot_Addition())); // 显示远程防御（基础+额外）
+            {
+                // 非弓兵类型：显示远程防御
+                if (objArmy->showDEF_Shoot_Addition() == 0)
+                    ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot()));
+                else
+                    ui->objText_DEF_range->setText(QString::number(objArmy->showDEF_Shoot()) + "+" + QString::number(objArmy->showDEF_Shoot_Addition())); // 显示远程防御（基础+额外）
+                ui->objIconSmall_DEF_range->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
+            }
+
             // 设置血量
             ui->objHp->setText(QString::number(objArmy->getBlood()) + "/" + QString::number(objArmy->getMaxBlood()));
             this->update();
-            this->show();
         }
         else if (type == SORT_ANIMAL) // 动物
         {
@@ -883,6 +942,21 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
             QApplication::setOverrideCursor(cursor);
             emit sendBuildMode(buildMode);
         };
+    // 根据当前时代(civ)为"建造建筑"动作选择光标资源（使用我方风格）
+    auto setCursorAndBuildModeByBuilding = [&](int buildingNum, const QString& fallbackKey)
+        {
+            int civ = mainPtr->player[0]->getCiv();
+            if (civ < 1 || civ > 3) civ = CIVILIZATION_STONEAGE;
+            std::string base = Building::getBuiltname(civ, 0, buildingNum);
+            QString key = base.empty() ? fallbackKey : QString::fromStdString(base);
+
+            // 资源不存在则回退到 fallbackKey，避免空资源导致崩溃
+            auto it = resMap.find(key.toStdString());
+            if (it == resMap.end() || it->second.empty())
+                key = fallbackKey;
+
+            setCursorAndBuildMode(key, buildingNum);
+        };
     // Handle building actions
     switch (actName)
     {
@@ -891,40 +965,40 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         showBuildActLab();
         break;
     case ACT_BUILD_HOUSE:
-        setCursorAndBuildMode("House1", BUILDING_HOME);
+        setCursorAndBuildModeByBuilding(BUILDING_HOME, "House1");
         break;
     case ACT_BUILD_GRANARY:
-        setCursorAndBuildMode("Granary", BUILDING_GRANARY);
+        setCursorAndBuildModeByBuilding(BUILDING_GRANARY, "Granary");
         break;
     case ACT_BUILD_STOCK:
-        setCursorAndBuildMode("Stock", BUILDING_STOCK);
+        setCursorAndBuildModeByBuilding(BUILDING_STOCK, "Stock");
         break;
     case ACT_BUILD_FARM:
-        setCursorAndBuildMode("Farm", BUILDING_FARM);
+        setCursorAndBuildModeByBuilding(BUILDING_FARM, "Farm");
         break;
     case ACT_BUILD_MARKET:
-        setCursorAndBuildMode("Market", BUILDING_MARKET);
+        setCursorAndBuildModeByBuilding(BUILDING_MARKET, "Market");
         break;
     case ACT_BUILD_ARROWTOWER:
-        setCursorAndBuildMode("ArrowTower", BUILDING_ARROWTOWER);
+        setCursorAndBuildModeByBuilding(BUILDING_ARROWTOWER, "ArrowTower");
         break;
     case ACT_BUILD_ARMYCAMP:
-        setCursorAndBuildMode("ArmyCamp", BUILDING_ARMYCAMP);
+        setCursorAndBuildModeByBuilding(BUILDING_ARMYCAMP, "ArmyCamp");
         break;
     case ACT_BUILD_RANGE:
-        setCursorAndBuildMode("Range", BUILDING_RANGE);
+        setCursorAndBuildModeByBuilding(BUILDING_RANGE, "Range");
         break;
     case ACT_BUILD_STABLE:
-        setCursorAndBuildMode("Stable", BUILDING_STABLE);
+        setCursorAndBuildModeByBuilding(BUILDING_STABLE, "Stable");
         break;
     case ACT_BUILD_DOCK:
-        setCursorAndBuildMode("Dock", BUILDING_DOCK);
+        setCursorAndBuildModeByBuilding(BUILDING_DOCK, "Dock");
         break;
     case ACT_BUILD_COLLAGE:
-        setCursorAndBuildMode("Collage_Egypt", BUILDING_COLLAGE);
+        setCursorAndBuildModeByBuilding(BUILDING_COLLAGE, "Collage_Egypt");
         break;
     case ACT_BUILD_SIEGE:
-        setCursorAndBuildMode("Siege_Egypt", BUILDING_SIEGE);
+        setCursorAndBuildModeByBuilding(BUILDING_SIEGE, "Siege_Egypt");
         break;
     case ACT_BUILD_CANCEL:
         QApplication::restoreOverrideCursor();
@@ -1165,7 +1239,42 @@ void SelectWidget::drawActs()
     {
         QPixmap pix;
 
-        if (actionResourceMap.contains(actions[i]))
+        // 建造类动作：根据当前时代(civ)自动选择按钮图标 Button_ + Builtname[civ][我方][建筑类型]
+        auto setBuildActionKeyIfExists = [&](int buildingNum) -> bool
+            {
+                int civ = mainPtr->player[0]->getCiv();
+                if (civ < 1 || civ > 3) civ = CIVILIZATION_STONEAGE;
+                std::string base = Building::getBuiltname(civ, 0, buildingNum); // 建造按钮永远显示我方风格
+                if (base.empty()) return false;
+                std::string key = "Button_" + base;
+                auto it = resMap.find(key);
+                if (it != resMap.end() && !it->second.empty())
+                {
+                    actionKey = QString::fromStdString(key);
+                    return true;
+                }
+                return false;
+            };
+
+        bool handled = false;
+        switch (actions[i])
+        {
+        case ACT_BUILD_HOUSE:      handled = setBuildActionKeyIfExists(BUILDING_HOME); break;
+        case ACT_BUILD_GRANARY:    handled = setBuildActionKeyIfExists(BUILDING_GRANARY); break;
+        case ACT_BUILD_STOCK:      handled = setBuildActionKeyIfExists(BUILDING_STOCK); break;
+        case ACT_BUILD_MARKET:     handled = setBuildActionKeyIfExists(BUILDING_MARKET); break;
+        case ACT_BUILD_ARROWTOWER: handled = setBuildActionKeyIfExists(BUILDING_ARROWTOWER); break;
+        case ACT_BUILD_ARMYCAMP:   handled = setBuildActionKeyIfExists(BUILDING_ARMYCAMP); break;
+        case ACT_BUILD_RANGE:      handled = setBuildActionKeyIfExists(BUILDING_RANGE); break;
+        case ACT_BUILD_STABLE:     handled = setBuildActionKeyIfExists(BUILDING_STABLE); break;
+        case ACT_BUILD_DOCK:       handled = setBuildActionKeyIfExists(BUILDING_DOCK); break;
+        case ACT_BUILD_FARM:       handled = setBuildActionKeyIfExists(BUILDING_FARM); break;
+        case ACT_BUILD_COLLAGE:    handled = setBuildActionKeyIfExists(BUILDING_COLLAGE); break;
+        case ACT_BUILD_SIEGE:      handled = setBuildActionKeyIfExists(BUILDING_SIEGE); break;
+        default: break;
+        }
+
+        if (!handled && actionResourceMap.contains(actions[i]))
         {
             actionKey = actionResourceMap[actions[i]];
         }
@@ -1185,7 +1294,7 @@ void SelectWidget::drawActs()
                 break;
             }
         }
-        else
+        else if (!handled)
         {
             actionKey = "Button"; // 默认值
         }
@@ -1200,11 +1309,9 @@ void SelectWidget::drawActs()
         else
         {
             pix = resMap["Button"].front().scaled(size, size);
-            qWarning() << "Resource for action" << actions[i] << "not found. Using default Button.";
         }
 
         mainPtr->getActs(i)->setPix(pix);
-
         // 设置 actions[i] 为 NULL 时隐藏
         if (actions[i] != ACT_NULL)
         {
@@ -1214,7 +1321,6 @@ void SelectWidget::drawActs()
         {
             mainPtr->getActs(i)->hide();
         }
-
         mainPtr->getActs(i)->update();
     }
 }
