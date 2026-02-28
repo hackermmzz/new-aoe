@@ -1,11 +1,11 @@
 ﻿#include "Building.h"
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
-std::list<ImageResource>* Building::built[4][BUILDING_TYPE_MAXNUM];
+std::list<ImageResource>* Building::built[4][2][BUILDING_TYPE_MAXNUM];
 std::list<ImageResource>* Building::buildFire[3];
 
 array<std::string,4> Building::Buildingname;
-array<array<std::string,BUILDING_TYPE_MAXNUM>,4> Building::Builtname;
+array<array<array<std::string,BUILDING_TYPE_MAXNUM>,2>,4> Building::Builtname;
 array<std::string,BUILDING_TYPE_MAXNUM>  Building::BuildDisplayName;
 array<std::string,3> Building::BuildFireName;
 
@@ -88,7 +88,10 @@ void Building::setNowRes()
     if(Percent<100) tempNowlist = Building::build[Foundation];
     else
     {
-        tempNowlist = Building::built[get_civilization()][Num];
+        // 判断敌我: 如果 playerRepresent != NOWPLAYERREPRESENT，则为敌方
+        int isEnemy = (playerRepresent != NOWPLAYERREPRESENT) ? 1 : 0;
+        int civ = get_civilization();
+        tempNowlist = Building::built[civ][isEnemy][Num];
         setFireNowRes();
     }
 
@@ -310,10 +313,10 @@ void Building::deallocatebuild(int i)
     build[i] = nullptr;
 }
 
-void Building::deallocatebuilt(int i,int j)
+void Building::deallocatebuilt(int age, int isEnemy, int buildType)
 {
-    delete built[i][j];
-    built[i][j] = nullptr;
+    delete built[age][isEnemy][buildType];
+    built[age][isEnemy][buildType] = nullptr;
 }
 
 void Building::deallocatebuildFire(int type)

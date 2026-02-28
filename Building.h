@@ -10,11 +10,12 @@ class Building:public Coordinate,public BloodHaver
 public:
 /********************静态资源**************************/
   static std::list<ImageResource> *build[4];//建设list
-  static std::list<ImageResource> *built[4][BUILDING_TYPE_MAXNUM]; //建设完成的list
+  static std::list<ImageResource> *built[4][2][BUILDING_TYPE_MAXNUM]; //建设完成的list [时代][敌我][建筑类型]
+  // 敌我标识: 0=我方, 1=敌方
   static std::list<ImageResource> *buildFire[3];
 
   static array<std::string,4> Buildingname;
-  static array<array<std::string,BUILDING_TYPE_MAXNUM>,4> Builtname;
+  static array<array<array<std::string,BUILDING_TYPE_MAXNUM>,2>,4> Builtname; // [时代][敌我][建筑类型]
   static array<std::string,BUILDING_TYPE_MAXNUM> BuildDisplayName;
   static array<std::string,3> BuildFireName;
 
@@ -78,20 +79,20 @@ public:
 
   /********************静态函数**************************/
     static std::string getBuildingname(int index){return Buildingname[index];}
-    static std::string getBuiltname(int index1,int index2){return Builtname[index1][index2];}
+    static std::string getBuiltname(int age, int isEnemy, int buildType){return Builtname[age][isEnemy][buildType];}
     static std::string getDisplayName(int num){return BuildDisplayName[num];}
     static std::string getBuildingFireName(int index){ return BuildFireName[index]; }
 
     static void allocatebuild(int i){ build[i]=new std::list<ImageResource>;}
-    static void allocatebuilt(int i,int j){built[i][j]=new std::list<ImageResource>;}
+    static void allocatebuilt(int age, int isEnemy, int buildType){built[age][isEnemy][buildType]=new std::list<ImageResource>;}
     static void allocatebuildFire( int type ){ buildFire[type] = new std::list<ImageResource>; }
 
     static std::list<ImageResource>* getBuild(int i) {return build[i];}
-    static std::list<ImageResource>* getBuilt(int i,int j) { return built[i][j]; }
+    static std::list<ImageResource>* getBuilt(int age, int isEnemy, int buildType) { return built[age][isEnemy][buildType]; }
     static std::list<ImageResource>* getBuildFire(int type){ return buildFire[type]; }
 
     static void deallocatebuild(int i);
-    static void deallocatebuilt(int i,int j);
+    static void deallocatebuilt(int age, int isEnemy, int buildType);
     static void deallocatebuildFire(int type);
 
     static void setActNames(int buildNum , int num, int name){ actNames[buildNum][num] = name; }
