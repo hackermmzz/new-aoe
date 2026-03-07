@@ -37,10 +37,10 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_ARCHER] = "ButtonTech_Arrow";
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_RIDER] = "ButtonTech_Horse";
     actionResourceMap[ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY] = "ButtonTech_BronzeShield";
-    actionResourceMap[ACT_STOCK_UPGRADE_METALWORKING] = "ButtonTech_Spear";
-    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE] = "ButtonTech_Sword";
-    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE] = "ButtonTech_Arrow";
-    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE] = "ButtonTech_Horse";
+    actionResourceMap[ACT_STOCK_UPGRADE_METALWORKING] = "ButtonTech_Spear2";
+    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_INFANTRY_SCALE] = "ButtonTech_Sword2";
+    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_ARCHER_SCALE] = "ButtonTech_Arrow2";
+    actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_RIDER_SCALE] = "ButtonTech_Horse2";
     actionResourceMap[ACT_ARMYCAMP_UPGRADE_CLUBMAN] = "ButtonTech_Axeman";
     actionResourceMap[ACT_ARMYCAMP_CREATE_SLINGER] = "Button_Slinger";
     actionResourceMap[ACT_ARMYCAMP_CREATE_BROADSWORD] = "Button_BroadSwordsman";

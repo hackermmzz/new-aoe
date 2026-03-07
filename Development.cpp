@@ -56,7 +56,7 @@ int Development::get_addition_Attack(int sort, int type, int armyClass, int atta
 {
     int level = 0;
     int addition = 0;
-    if (attackType == ATTACKTYPE_CLOSE)
+    if (attackType == ATTACKTYPE_CLOSE && sort != SORT_FARMER)
     {
         level = getActLevel(BUILDING_STOCK, BUILDING_STOCK_UPGRADE_USETOOL);
         switch (level) {
