@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-dw-locale="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>游戏核心引擎 | hackermmzz/new-aoe | DeepWiki Export</title>
+    <meta name="description" content="游戏核心引擎 相关源文件 以下文件被用作生成本维基页面的上下文： GlobalVariate.h MainWidget.cpp README.md 游戏核心引擎是 new-aoe 的中央逻辑系统，负责驱动实际玩法。它管理逐帧更新、处理玩家输入和 AI 指令、维护实体关系与动作、处理对象生命周期，并协调几乎所有游戏机制。" />
+    <link rel="canonical" href="https://deepwiki.com/hackermmzz/new-aoe/2.2-game-core-engine" />
+    <link rel="preload" href="../../../_next/static/media/4cf2300e9c8272f7-s.p.woff2" as="font" crossorigin type="font/woff2" />
+<link rel="preload" href="../../../_next/static/media/93f479601ee12b01-s.p.woff2" as="font" crossorigin type="font/woff2" />
+    <link rel="stylesheet" href="../../../_next/static/css/de70bee13400563f.css" />
+<link rel="stylesheet" href="../../../_next/static/css/776f0ebb1639b0c7.css" />
+    <link rel="icon" href="../../../favicon.ico" />
+<link rel="icon" href="../../../icon.png" />
+<link rel="icon" href="../../../apple-icon.png" />
+    <link rel="stylesheet" href="../../../assets/site.css" />
+    <script>((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=["light","dark"];function k(b){var c;(Array.isArray(a)?a:[a]).forEach(a=>{let c="class"===a,d=c&&f?e.map(a=>f[a]||a):e;c?(i.classList.remove(...d),i.classList.add(f&&f[b]?f[b]:b)):i.setAttribute(a,b)}),c=b,h&&j.includes(c)&&(i.style.colorScheme=c)}if(d)k(d);else try{let a=localStorage.getItem(b)||c,d=g&&"system"===a?window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light":a;k(d)}catch(a){}})("class","theme","light",null,["light","dark"],null,true,true)</script>
+    <script>(function(defaultLocale,available){var root=document.documentElement;var locale=defaultLocale;try{var saved=localStorage.getItem('dw-locale');if(available.indexOf(saved)!==-1){locale=saved;}}catch(e){}root.setAttribute('data-dw-locale',locale);root.setAttribute('lang',locale==='zh'?'zh-CN':'en');})("zh",["zh", "en"])</script>
+  </head>
+  <body class="__variable_188709 font-geist-sans relative min-h-screen bg-background antialiased">
+    <div class="flex min-h-screen w-full flex-col text-white" id="deepwiki-export-page">
+      <div class="bg-background border-b-border sticky top-0 z-30 border-b border-dashed">
+        <div class="container-wrapper">
+          <div class="container mx-auto flex w-full flex-row items-center gap-2 py-4 md:py-6">
+            <a class="flex items-center gap-3" href="..">
+              <span class="text-base font-medium leading-none md:text-lg hidden sm:block">DeepWiki</span>
+            </a>
+            <div class="flex-1">
+              <div class="flex flex-row items-center gap-2">
+                <a class="block text-xs font-medium leading-none text-white sm:hidden md:text-lg" href="..">DeepWiki</a>
+                <p class="text-sm font-normal leading-none md:text-lg">
+                  <a href="https://github.com/hackermmzz/new-aoe" target="_blank" rel="noopener noreferrer" title="Open repository" class="text-muted-foreground hover:text-muted-foreground/80 group inline-flex items-center gap-1 transition-colors">
+                    hackermmzz/new-aoe
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="dw-locale-switch" data-locale-switch="true"><button type="button" class="dw-locale-button" data-set-locale="zh" aria-label="Switch language to ZH">中</button><button type="button" class="dw-locale-button" data-set-locale="en" aria-label="Switch language to EN">EN</button></div>
+              <div class="hidden items-center gap-3 md:flex">
+              <button type="button" class="flex items-center rounded-md !text-white cursor-pointer transition-all border bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600 gap-1.5 px-3 py-1.5 text-sm" aria-label="Share" data-share-page="true">
+                <span data-locale-text="zh">分享</span>
+                <span data-locale-text="en">Share</span>
+              </button>
+              <button type="button" class="flex size-9 items-center justify-center rounded-md border border-border bg-surface hover:border-border-hover hover:bg-component" aria-label="Toggle theme" data-theme-toggle="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M120,40V24a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66a8,8,0,0,0,11.32-11.32l-12-12A8,8,0,0,0,46.34,57.66Zm0,116.68-12,12a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM232,120H216a8,8,0,0,0,0,16h16a8,8,0,0,0,0-16ZM69.66,186.34a8,8,0,0,0-11.32,11.32l12,12a8,8,0,0,0,11.32-11.32Zm128,11.32a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM216,120h16a8,8,0,0,0,0-16H216a8,8,0,0,0,0,16ZM186.34,58.34a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM128,216a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V224A8,8,0,0,0,128,216Z"></path></svg>
+              </button>
+              </div>
+            </div>
+            <button type="button" class="dw-mobile-sidebar-toggle flex items-center rounded-md cursor-pointer transition-all border border-border bg-surface hover:border-border-hover hover:bg-component gap-2 px-3 py-1.5 text-sm md:hidden" data-sidebar-toggle="true">
+              <span data-locale-text="zh">目录</span>
+              <span data-locale-text="en">Contents</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="w-full flex-1">
+        <div class="container-wrapper relative mx-auto h-full px-0">
+          <div class="container relative mx-auto flex h-full w-full flex-col gap-0 max-md:!px-0 md:flex-row md:gap-6 lg:gap-10">
+            <aside class="dw-sidebar-panel border-r-border hidden max-h-screen border-r border-dashed py-6 pr-4 transition-[border-radius] md:sticky md:left-0 md:top-20 md:block md:h-[calc(100vh-82px)] md:w-64 md:flex-shrink-0 md:overflow-y-auto lg:py-9 xl:w-72">
+              <div class="flex h-full w-full max-w-full flex-shrink-0 flex-col overflow-hidden" style="scrollbar-color:var(--color-border) transparent">
+                <div class="flex-shrink-0 px-2">
+                  <div class="text-secondary pb-1 text-xs">
+                    <span data-locale-text="zh">最近索引：13 March 2026</span>
+                    <span data-locale-text="en">Last indexed: 13 March 2026</span>
+                    (<a href="https://github.com/hackermmzz/new-aoe/commits/882596c8" target="_blank" rel="noopener noreferrer" class="underline-offset-2 hover:underline">882596c</a>)
+                  </div>
+                </div>
+                <ul class="flex-1 flex-shrink-0 space-y-1 overflow-y-auto py-1" style="scrollbar-width:none">
+                  <li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1-overview"><span data-locale-text="zh">概述</span><span data-locale-text="en">Overview</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1.1-system-architecture"><span data-locale-text="zh">系统架构</span><span data-locale-text="en">System Architecture</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1.2-getting-started"><span data-locale-text="zh">快速开始</span><span data-locale-text="en">Getting Started</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2-core-systems"><span data-locale-text="zh">核心系统</span><span data-locale-text="en">Core Systems</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.1-mainwidget-and-game-loop"><span data-locale-text="zh">MainWidget 与游戏循环</span><span data-locale-text="en">MainWidget and Game Loop</span></a></li>
+<li style="padding-left:12px"><a data-selected="true" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="."><span data-locale-text="zh">游戏核心引擎</span><span data-locale-text="en">Game Core Engine</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.3-configuration-system"><span data-locale-text="zh">配置系统</span><span data-locale-text="en">Configuration System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3-game-mechanics"><span data-locale-text="zh">游戏机制</span><span data-locale-text="en">Game Mechanics</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.1-resource-and-economy-system"><span data-locale-text="zh">资源与经济系统</span><span data-locale-text="en">Resource and Economy System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.2-technology-tree"><span data-locale-text="zh">科技树</span><span data-locale-text="en">Technology Tree</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.3-units-and-buildings"><span data-locale-text="zh">单位与建筑</span><span data-locale-text="en">Units and Buildings</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.4-combat-system"><span data-locale-text="zh">战斗系统</span><span data-locale-text="en">Combat System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4-user-interface"><span data-locale-text="zh">用户界面</span><span data-locale-text="en">User Interface</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.1-selectwidget-and-command-panel"><span data-locale-text="zh">SelectWidget 与命令面板</span><span data-locale-text="en">SelectWidget and Command Panel</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.2-map-editor"><span data-locale-text="zh">地图编辑器</span><span data-locale-text="en">Map Editor</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.3-rendering-and-display"><span data-locale-text="zh">渲染与显示</span><span data-locale-text="en">Rendering and Display</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.4-event-handling"><span data-locale-text="zh">事件处理</span><span data-locale-text="en">Event Handling</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5-ai-system"><span data-locale-text="zh">AI 系统</span><span data-locale-text="en">AI System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5.1-ai-architecture"><span data-locale-text="zh">AI 架构</span><span data-locale-text="en">AI Architecture</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5.2-instruction-and-command-system"><span data-locale-text="zh">指令与命令系统</span><span data-locale-text="en">Instruction and Command System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6-map-and-world"><span data-locale-text="zh">地图与世界</span><span data-locale-text="en">Map and World</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.1-map-structure"><span data-locale-text="zh">地图结构</span><span data-locale-text="en">Map Structure</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.2-terrain-and-objects"><span data-locale-text="zh">地形与对象</span><span data-locale-text="en">Terrain and Objects</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.3-collision-and-pathfinding"><span data-locale-text="zh">碰撞与寻路</span><span data-locale-text="en">Collision and Pathfinding</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7-advanced-topics"><span data-locale-text="zh">高级主题</span><span data-locale-text="en">Advanced Topics</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.1-area-management-system"><span data-locale-text="zh">区域管理系统</span><span data-locale-text="en">Area Management System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.2-enemy-status-and-ai-behavior"><span data-locale-text="zh">敌人状态与 AI 行为</span><span data-locale-text="en">Enemy Status and AI Behavior</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.3-network-and-exam-mode"><span data-locale-text="zh">网络与考试模式</span><span data-locale-text="en">Network and Exam Mode</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.4-debug-and-logging-system"><span data-locale-text="zh">调试与日志系统</span><span data-locale-text="en">Debug and Logging System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.5-score-system"><span data-locale-text="zh">评分系统</span><span data-locale-text="en">Score System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8-data-structures-reference"><span data-locale-text="zh">数据结构参考</span><span data-locale-text="en">Data Structures Reference</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.1-game-state-structures"><span data-locale-text="zh">游戏状态结构</span><span data-locale-text="en">Game State Structures</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.2-development-structures"><span data-locale-text="zh">开发结构</span><span data-locale-text="en">Development Structures</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.3-constants-and-enumerations"><span data-locale-text="zh">常量与枚举</span><span data-locale-text="en">Constants and Enumerations</span></a></li>
+                </ul>
+              </div>
+            </aside>
+            <main class="min-w-0 flex-1">
+              <div class="border-b-border max-md:border-b max-md:border-dashed md:py-9">
+                <div class="mx-auto max-w-2xl px-4 pb-8 pt-6 md:px-0 md:pb-0">
+                  <div class="prose prose-invert dark:prose-invert prose-headings:text-inherit prose-p:text-inherit max-w-none">
+                    <div class="prose-custom prose-custom-md prose-custom-gray !max-w-none text-neutral-300 [overflow-wrap:anywhere]">
+                      <section class="dw-locale-article" data-locale-article="zh"><h1 class="group" data-header="true" id="zh-游戏核心引擎">游戏核心引擎<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h1>
+<details><summary>相关源文件</summary><p>以下文件被用作生成本维基页面的上下文：</p>
+<ul>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/README.md" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>README.md</span></a></li>
+</ul></details>
+<p>游戏核心引擎是 new-aoe 的中央逻辑系统，负责驱动实际玩法。它管理逐帧更新、处理玩家输入和 AI 指令、维护实体关系与动作、处理对象生命周期，并协调几乎所有游戏机制。本文重点介绍 <code>Core</code> 类、其关联的 <code>Core_List</code> 关系管理器，以及 <code>gameUpdate()</code> 的执行流水线。</p>
+<p>关于 Core 如何由主循环初始化并调用，请参阅 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../2.1-mainwidget-and-game-loop">MainWidget 与游戏循环</a>。关于控制 Core 行为的参数，请参阅 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../2.3-configuration-system">配置系统</a>。</p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-总览与职责">总览与职责<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p><code>Core</code> 是游戏状态与逻辑的单一真实来源。它由 <code>MainWidget</code> 创建，持有 <code>Map</code>、<code>Player</code> 数组、内存地图以及 <code>MouseEvent</code> 处理器的引用。</p>
+<p><strong>Core 的主要职责：</strong></p>
+<table>
+<thead>
+<tr>
+<th>职责</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>帧更新</strong></td>
+<td>每帧执行 <code>gameUpdate()</code> 推进游戏状态</td>
+</tr>
+<tr>
+<td><strong>对象更新</strong></td>
+<td>通过 <code>updateByObject()</code> 调用所有实体的 <code>nextframe()</code></td>
+</tr>
+<tr>
+<td><strong>输入处理</strong></td>
+<td>通过 <code>manageMouseEvent()</code> 处理玩家点击</td>
+</tr>
+<tr>
+<td><strong>AI 指令处理</strong></td>
+<td>通过 <code>manageOrder()</code> 读取并校验 AI 指令</td>
+</tr>
+<tr>
+<td><strong>关系管理</strong></td>
+<td>通过 <code>Core_List</code> 执行动作链，如移动、攻击、建造</td>
+</tr>
+<tr>
+<td><strong>碰撞检测</strong></td>
+<td>处理单位与单位、单位与地形之间的碰撞</td>
+</tr>
+<tr>
+<td><strong>状态同步</strong></td>
+<td>通过 <code>infoShare()</code> 生成 AI 可读快照</td>
+</tr>
+<tr>
+<td><strong>网络上报</strong></td>
+<td>通过 <code>PostDataToServer()</code> 向评测服务器上报状态</td>
+</tr>
+</tbody>
+</table>
+<p>Core 不直接负责图形渲染或声音播放，它只管理逻辑与状态变化。</p>
+<p><strong>来源：</strong> 图示与 <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L1433-L1438" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1433-1438</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-core-类结构">Core 类结构<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">classDiagram
+    class Core {
+        -Map* map
+        -Player** player
+        -Core_List* relate_AllObject
+        -MouseEvent* mouseEvent
+        -int** memorymap
+        -SelectWidget* sel
+        +Core(Map*, Player**, int**, MouseEvent*)
+        +gameUpdate()
+        +manageMouseEvent()
+        +manageOrder()
+        +updateByObject()
+        +addRelation(Coordinate*, int, Coordinate*)
+        +suspendRelation(Coordinate*)
+        +deleteSelf(Coordinate*)
+        +infoShare()
+        +PostDataToServer()
+        +get_IsObjectFree(Coordinate*) bool
+        +getPlayerNowResource(int) tagInfo
+    }
+    
+    class Core_List {
+        -map~Coordinate*, st_nowRelation~ relate_AllObject
+        -static map~int, st_relationNode*~ relation_Event_static
+        +addRelation(Coordinate*, int, Coordinate*)
+        +eraseRelation(Coordinate*)
+        +suspendRelation(Coordinate*)
+        +manageRelationList()
+        +get_IsObjectFree(Coordinate*) bool
+        +get_nowStage(Coordinate*) int
+        +get_TargetSN(Coordinate*) int
+    }</code></pre></div>
+<p><strong>关键指针说明：</strong></p>
+<ul>
+<li><code>map</code>：地形网格、静态资源、动物以及空间索引</li>
+<li><code>player[]</code>：<code>MAXPLAYER</code> 个玩家的数组</li>
+<li><code>relate_AllObject</code>：负责所有活动动作链的 <code>Core_List</code></li>
+<li><code>mouseEvent</code>：事件过滤器写入的鼠标状态对象</li>
+<li><code>memorymap</code>：视野 / 迷雾 / 碰撞辅助网格</li>
+<li><code>sel</code>：供 UI 更新使用的 <code>SelectWidget</code></li>
+</ul>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L1433-L1438" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1433-1438</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L514-L527" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">514-527</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-gameupdate-执行流水线">gameUpdate() 执行流水线<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>每一帧，<code>MainWidget::FrameUpdate()</code> 都会调用 <code>Core::gameUpdate()</code>，后者按固定顺序执行以下阶段：</p>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">sequenceDiagram
+    participant MW as MainWidget
+    participant Core as Core::gameUpdate()
+    participant List as Core_List
+    participant Obj as Coordinate objects
+    participant AI as AI Threads
+    participant Net as NetworkPlugin
+    
+    MW-&gt;&gt;Core: gameUpdate()
+    Core-&gt;&gt;Obj: updateByObject()
+    Core-&gt;&gt;Core: manageMouseEvent()
+    Core-&gt;&gt;AI: manageOrder()
+    Core-&gt;&gt;List: manageRelationList()
+    Core-&gt;&gt;Core: Collision checks
+    Core-&gt;&gt;AI: infoShare()
+    Core-&gt;&gt;Net: PostDataToServer()
+    Core-&gt;&gt;MW: Update complete</code></pre></div>
+<h3 class="group" data-header="true" id="zh-阶段拆解">阶段拆解<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<h4 class="group" data-header="true" id="zh-1-updatebyobject">1. <code>updateByObject()</code><button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>遍历以下对象集合并调用 <code>nextframe()</code>：</p>
+<ul>
+<li><code>player[i]-&gt;build</code></li>
+<li><code>player[i]-&gt;human</code></li>
+<li><code>player[i]-&gt;missile</code></li>
+<li><code>map-&gt;staticres</code></li>
+<li><code>map-&gt;animal</code></li>
+</ul>
+<p>这让实体得以推进自己的内部状态机，例如：</p>
+<ul>
+<li>单位前进动画</li>
+<li>农民采集进度</li>
+<li>建筑施工百分比</li>
+<li>投射物轨迹推进</li>
+</ul>
+<h4 class="group" data-header="true" id="zh-2-managemouseevent">2. <code>manageMouseEvent()</code><button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>若 <code>mouseEvent-&gt;HaveEvent()</code> 为真，则处理本帧点击：</p>
+<ul>
+<li>左键：选中单位 / 建筑，更新 <code>nowobject</code></li>
+<li>右键空地：创建移动关系</li>
+<li>右键敌人：创建攻击关系</li>
+<li>右键资源：创建采集关系</li>
+</ul>
+<p>在建立关系前，Core 会校验地形、对象归属与动作前提。</p>
+<h4 class="group" data-header="true" id="zh-3-manageorder">3. <code>manageOrder()</code><button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>从 <code>UsrIns.instructions</code> 与 <code>EnemyIns.instructions</code> 队列中取出 AI 指令：</p>
+<ul>
+<li>Type 0：取消动作</li>
+<li>Type 1：移动</li>
+<li>Type 2：执行动作（采集 / 攻击等）</li>
+<li>Type 3：建造</li>
+<li>Type 4：建筑动作（研究 / 训练）</li>
+<li>Type 5：定点打击</li>
+</ul>
+<p>每条指令都会校验：</p>
+<ul>
+<li>SN 是否存在</li>
+<li>资源是否足够</li>
+<li>坐标是否越界</li>
+<li>目标对象是否存在</li>
+<li>当前对象是否允许执行该动作</li>
+</ul>
+<p>并将返回码写入 <code>ins.ret</code>：</p>
+<table>
+<thead>
+<tr>
+<th>返回码</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>成功</td>
+</tr>
+<tr>
+<td><code>-1</code></td>
+<td>SN 不存在</td>
+</tr>
+<tr>
+<td><code>-2</code></td>
+<td>动作不存在</td>
+</tr>
+<tr>
+<td><code>-3</code></td>
+<td>越界</td>
+</tr>
+<tr>
+<td><code>-4</code></td>
+<td>目标对象不存在</td>
+</tr>
+<tr>
+<td><code>-5</code></td>
+<td>建筑非法</td>
+</tr>
+<tr>
+<td><code>-6</code></td>
+<td>资源不足</td>
+</tr>
+</tbody>
+</table>
+<h4 class="group" data-header="true" id="zh-4-managerelationlist">4. <code>manageRelationList()</code><button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p><code>Core_List</code> 负责推进所有活动中的关系：</p>
+<ul>
+<li>把当前关系推进到下一阶段</li>
+<li>调用阶段对应的执行函数</li>
+<li>清理已完成关系，保留未完成关系</li>
+<li>为移动类关系执行路径逻辑</li>
+<li>处理攻击伤害、建筑进度等多帧动作</li>
+</ul>
+<p><code>addRelation()</code> 只是把动作挂入系统，真正跨多帧执行的是 <code>manageRelationList()</code>。</p>
+<h4 class="group" data-header="true" id="zh-5-碰撞运输与视野">5. 碰撞、运输与视野<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>Core 还会额外处理：</p>
+<ul>
+<li>单位与地形碰撞</li>
+<li>重型单位碾压</li>
+<li>船只装载 / 卸载逻辑</li>
+<li>基于单位视野更新战争迷雾</li>
+</ul>
+<h4 class="group" data-header="true" id="zh-6-infoshare">6. <code>infoShare()</code><button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>该阶段把当前游戏状态转换为 AI 可读取的快照：</p>
+<ul>
+<li>遍历建筑、农民、军队、资源</li>
+<li>转换为 <code>tagBuilding</code>、<code>tagFarmer</code>、<code>tagArmy</code>、<code>tagResource</code></li>
+<li>对敌方数据应用战争迷雾遮蔽（如隐藏 <code>DR0</code> / <code>UR0</code>）</li>
+<li>携带地形、资源数量和 <code>ins_ret</code></li>
+</ul>
+<p>AI 线程下一轮通过 <code>getInfo()</code> 读取这些数据。</p>
+<h4 class="group" data-header="true" id="zh-7-postdatatoserver">7. <code>PostDataToServer()</code><button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>若 <code>IsExamining</code> 开启，并且 <code>g_frame % DataPostIntervalFrame == 0</code>，则会将状态序列化并发送给评测服务器。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L765-L791" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">765-791</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L847-L910" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">847-910</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-关系管理系统">关系管理系统<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p><code>Core_List</code> 实现了一套用于多帧动作的有限状态机。每个关系可以理解为：“对象 A 正在对对象 B 执行动作 X”，并在预定义阶段之间逐步推进。</p>
+<h3 class="group" data-header="true" id="zh-关系结构">关系结构<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TD
+    subgraph "st_nowRelation (per object)"
+        A["st_relationNode* nowNode"]
+        B["Coordinate* targetObject"]
+        C["int nowStage"]
+        D["double DR0, UR0"]
+        E["vector~Point~ pathWay"]
+    end
+    
+    subgraph "st_relationNode (static chain)"
+        F["int relation_Event_Type"]
+        G["int nowStage"]
+        H["bool (*isFinished)(...)"]
+        I["void (*executeFunc)(...)"]
+        J["st_relationNode* nextRelation"]
+    end
+    
+    A --&gt; F
+    J --&gt; F</code></pre></div>
+<p><strong>关键数据结构：</strong></p>
+<table>
+<thead>
+<tr>
+<th>结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>st_nowRelation</code></td>
+<td>某对象当前动作实例，记录目标、路径、阶段等</td>
+</tr>
+<tr>
+<td><code>st_relationNode</code></td>
+<td>某关系阶段的静态定义，包含结束判断和执行函数</td>
+</tr>
+<tr>
+<td><code>relation_Event_static</code></td>
+<td>关系类型到阶段链的映射</td>
+</tr>
+<tr>
+<td><code>relate_AllObject</code></td>
+<td><code>Coordinate*</code> 到当前 <code>st_nowRelation</code> 的映射</td>
+</tr>
+</tbody>
+</table>
+<h3 class="group" data-header="true" id="zh-常见关系链">常见关系链<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><strong>移动关系：</strong></p>
+<ol>
+<li>计算路径</li>
+<li>沿路径移动</li>
+<li>到达目标并清理关系</li>
+</ol>
+<p><strong>资源采集关系：</strong></p>
+<ol>
+<li>前往资源点</li>
+<li>到达资源点</li>
+<li>执行采集</li>
+<li>返回存储建筑</li>
+<li>卸载资源</li>
+</ol>
+<p><strong>攻击关系：</strong></p>
+<ol>
+<li>寻路到目标</li>
+<li>接近目标</li>
+<li>进入射程并执行攻击 / 生成 <code>Missile</code></li>
+<li>等待攻击间隔</li>
+<li>若目标仍有效则继续循环</li>
+</ol>
+<p><strong>建造关系：</strong></p>
+<ol>
+<li>扣除资源</li>
+<li>创建未完成建筑</li>
+<li>农民走向工地</li>
+<li>按 <code>FARMER_CONSTRUCTSPEED</code> 增加完成度</li>
+<li>完成后清理关系</li>
+</ol>
+<hr/>
+<h2 class="group" data-header="true" id="zh-对象生命周期">对象生命周期<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-创建">创建<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>对象主要由 <code>Player</code> 和 <code>Map</code> 创建：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>创建对象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addBuilding(...)</code></td>
+<td>建筑</td>
+</tr>
+<tr>
+<td><code>addFarmer(...)</code></td>
+<td>农民</td>
+</tr>
+<tr>
+<td><code>addArmy(...)</code></td>
+<td>军事单位</td>
+</tr>
+<tr>
+<td><code>addMissile(...)</code></td>
+<td>投射物</td>
+</tr>
+<tr>
+<td><code>Map::addAnimal(...)</code></td>
+<td>动物 / 树</td>
+</tr>
+<tr>
+<td><code>Map::addStaticRes(...)</code></td>
+<td>矿点、石头、黄金等</td>
+</tr>
+</tbody>
+</table>
+<p>对象创建后通常会：</p>
+<ol>
+<li>通过 <code>new</code> 分配</li>
+<li>加入所属列表</li>
+<li>写入 <code>map-&gt;map_Object</code> 空间索引</li>
+<li>分配唯一 <code>SN</code></li>
+<li>视情况注册到 <code>g_Object</code></li>
+</ol>
+<h3 class="group" data-header="true" id="zh-更新">更新<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>每帧 <code>Core::updateByObject()</code> 调用 <code>obj-&gt;nextframe()</code>，不同对象类型在其中推进各自行为：</p>
+<ul>
+<li><code>Building</code>：施工、生产队列</li>
+<li><code>Farmer</code>：工作状态切换</li>
+<li><code>Army</code>：攻击冷却与发射逻辑</li>
+<li><code>Missile</code>：轨迹与命中检测</li>
+</ul>
+<h3 class="group" data-header="true" id="zh-删除">删除<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>对象在以下情形被移除：</p>
+<ul>
+<li>生命值归零</li>
+<li>玩家 / AI 主动删除</li>
+<li>资源耗尽</li>
+<li>投射物命中</li>
+<li>建筑施工取消</li>
+</ul>
+<p>典型删除流程：</p>
+<ol>
+<li>调用 <code>Core::deleteSelf(Coordinate* obj)</code></li>
+<li>从所属列表删除</li>
+<li>从 <code>map-&gt;map_Object</code> 中移除</li>
+<li>调用 <code>suspendRelation(obj)</code> 清掉动作关系</li>
+<li>释放内存</li>
+<li>更新其他对象对它的引用</li>
+</ol>
+<p>为避免悬空指针，还需要从区域关系和选择状态中移除该对象，<code>MainWidget::cleanupUnitReferences()</code> 就承担这一职责。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L742-L847" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">742-847</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L512-L527" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">512-527</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-交互处理">交互处理<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-玩家输入流">玩家输入流<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph LR
+    A["EventFilter&lt;br/&gt;Mouse Click"] --&gt; B["MainWidget&lt;br/&gt;updateEditor()"]
+    B --&gt; C["Core&lt;br/&gt;manageMouseEvent()"]
+    C --&gt; D{"Click Type?"}
+    D --&gt;|"Left"| E["Select Unit&lt;br/&gt;Update nowobject"]
+    D --&gt;|"Right on empty"| F["addRelation&lt;br/&gt;MOVE"]
+    D --&gt;|"Right on enemy"| G["addRelation&lt;br/&gt;ATTACK"]
+    D --&gt;|"Right on resource"| H["addRelation&lt;br/&gt;GATHER"]
+    E --&gt; I["SelectWidget&lt;br/&gt;Update UI"]
+    F --&gt; J["Core_List&lt;br/&gt;Queue action"]
+    G --&gt; J
+    H --&gt; J</code></pre></div>
+<h3 class="group" data-header="true" id="zh-ai-指令流">AI 指令流<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph LR
+    A["AI Thread&lt;br/&gt;processData()"] --&gt; B["HumanMove()&lt;br/&gt;HumanAction()&lt;br/&gt;etc."]
+    B --&gt; C["Serialize to&lt;br/&gt;instruction"]
+    C --&gt; D["Push to&lt;br/&gt;UsrIns/EnemyIns"]
+    D --&gt; E["Core&lt;br/&gt;manageOrder()"]
+    E --&gt; F{"Validate"}
+    F --&gt;|"Valid"| G["addRelation&lt;br/&gt;Create action"]
+    F --&gt;|"Invalid"| H["Set ins.ret&lt;br/&gt;Error code"]
+    G --&gt; I["manageRelationList&lt;br/&gt;Execute over frames"]
+    H --&gt; J["infoShare&lt;br/&gt;Return to AI"]
+    I --&gt; J</code></pre></div>
+<p><code>manageOrder()</code> 的校验步骤通常包括：</p>
+<ol>
+<li><code>g_Object[SN]</code> 是否存在</li>
+<li>动作是否和对象类型匹配</li>
+<li>资源是否足够</li>
+<li>坐标是否位于地图范围内</li>
+<li>目标对象是否存在且合法</li>
+</ol>
+<hr/>
+<h2 class="group" data-header="true" id="zh-与其他系统的集成">与其他系统的集成<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-与-map-的集成">与 Map 的集成<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Core 通过 <code>Map</code> 获取：</p>
+<ul>
+<li>地形是否可通行</li>
+<li>路径规划辅助</li>
+<li>资源位置</li>
+<li>某个 block 中的对象列表</li>
+</ul>
+<p>同时，建筑放置 / 销毁、资源耗尽等行为也会反向更新地图状态。</p>
+<h3 class="group" data-header="true" id="zh-与-player-的集成">与 Player 的集成<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Core 会：</p>
+<ul>
+<li>遍历 <code>player[i]-&gt;build</code>、<code>human</code>、<code>missile</code></li>
+<li>调用 <code>changeResource(...)</code> 进行资源扣除 / 增加</li>
+<li>调用 <code>addBuilding()</code>、<code>addArmy()</code> 进行实体创建</li>
+<li>查询 <code>develop-&gt;conditionDevelop()</code> 判断科技前提</li>
+</ul>
+<h3 class="group" data-header="true" id="zh-与-selectwidget-的集成">与 SelectWidget 的集成<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Core 持有 <code>SelectWidget* sel</code>。当玩家选择对象时：</p>
+<ol>
+<li><code>manageMouseEvent()</code> 更新 <code>nowobject</code></li>
+<li><code>SelectWidget</code> 读取对象属性并刷新面板</li>
+<li>用户点击动作按钮</li>
+<li><code>SelectWidget::doActs(...)</code> 调用 Core</li>
+<li>Core 创建对应关系</li>
+</ol>
+<h3 class="group" data-header="true" id="zh-与-ai-线程的集成">与 AI 线程的集成<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>AI 通过以下模式与 Core 协作：</p>
+<ol>
+<li><strong>读</strong>：<code>getInfo()</code> 获取快照</li>
+<li><strong>写</strong>：<code>HumanMove()</code> 等函数把指令推入队列</li>
+<li><strong>反馈</strong>：下一帧 <code>manageOrder()</code> 处理后写入 <code>ins.ret</code></li>
+<li><strong>再次读取</strong>：AI 在下一轮快照中看到返回结果</li>
+</ol>
+<p>这种设计避免了 AI 直接修改 Core 状态，从而降低竞态风险。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L914-L972" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">914-972</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-性能考量">性能考量<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>updateByObject()</code></td>
+<td>O(n)</td>
+<td>遍历所有实体并调用 <code>nextframe()</code></td>
+</tr>
+<tr>
+<td><code>manageRelationList()</code></td>
+<td>O(r)</td>
+<td>只处理活跃关系，通常 <code>r &lt;&lt; n</code></td>
+</tr>
+<tr>
+<td><code>manageMouseEvent()</code></td>
+<td>O(1)</td>
+<td>每帧至多一个鼠标事件</td>
+</tr>
+<tr>
+<td><code>manageOrder()</code></td>
+<td>O(q)</td>
+<td>AI 指令队列通常较小</td>
+</tr>
+<tr>
+<td>碰撞检测</td>
+<td>局部 O(k²)</td>
+<td>借助空间网格避免全局 O(n²)</td>
+</tr>
+</tbody>
+</table>
+<p>主要优化手段：</p>
+<ul>
+<li><strong>空间分区</strong>：借助 <code>map-&gt;map_Object[][]</code> 缩小碰撞检测范围</li>
+<li><strong>延迟寻路</strong>：路径只在需要时重新计算</li>
+<li><strong>静态关系图</strong>：<code>relation_Event_static</code> 是静态结构，避免频繁分配</li>
+<li><strong>迷雾缓存</strong>：视野只在需要时更新</li>
+</ul>
+<hr/>
+<h2 class="group" data-header="true" id="zh-错误处理与校验">错误处理与校验<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-常见错误场景">常见错误场景<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>错误码</th>
+<th>场景</th>
+<th>Core 响应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-1</code></td>
+<td>AI 引用了已删除单位</td>
+<td>忽略指令并返回错误</td>
+</tr>
+<tr>
+<td><code>-2</code></td>
+<td>动作无效</td>
+<td>拒绝执行</td>
+</tr>
+<tr>
+<td><code>-3</code></td>
+<td>目标越界</td>
+<td>创建关系前拒绝</td>
+</tr>
+<tr>
+<td><code>-4</code></td>
+<td>目标中途消失</td>
+<td>中止关系并让单位空闲</td>
+</tr>
+<tr>
+<td><code>-6</code></td>
+<td>资源不足</td>
+<td>拒绝并且不扣资源</td>
+</tr>
+</tbody>
+</table>
+<p>Core 会在多个阶段进行防御性校验：</p>
+<ul>
+<li>收到指令时校验 SN、资源和坐标</li>
+<li>创建关系时校验目标与路径</li>
+<li>执行关系时持续检查目标是否仍有效</li>
+<li>删除对象时先清理关系再释放</li>
+</ul>
+<p>为避免野指针：</p>
+<ol>
+<li>先通过 <code>g_Object[SN]</code> 查找对象</li>
+<li>关系在逻辑上围绕 SN 和阶段推进</li>
+<li>删除前先 <code>suspendRelation()</code></li>
+</ol>
+<hr/>
+<h2 class="group" data-header="true" id="zh-总结">总结<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>游戏核心引擎是 new-aoe 的确定性逻辑内核。它以固定流水线处理每一帧，接收玩家与 AI 输入，基于关系系统推进动作，并协调对象的创建、更新与销毁。移动、战斗、采集、建造等所有玩法，本质上都通过 <code>Core::gameUpdate()</code> 及其下属子系统执行。</p>
+<p><strong>关键要点：</strong></p>
+<ul>
+<li><code>Core::gameUpdate()</code> 是每帧逻辑的唯一入口</li>
+<li><code>Core_List</code> 用多阶段关系图实现跨帧动作</li>
+<li>玩家输入和 AI 指令最终都会转换为关系</li>
+<li>AI 只能通过快照与指令队列间接影响系统</li>
+<li><code>infoShare()</code> 保证 AI 读取到一致状态</li>
+<li><code>ins_ret</code> 为 AI 提供执行反馈</li>
+</ul>
+<p>关于它如何接入主循环，请参阅 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../2.1-mainwidget-and-game-loop">MainWidget 与游戏循环</a>。关于单位行为细节，请参阅 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../3.3-units-and-buildings">单位与建筑</a>。</p></section><section class="dw-locale-article" data-locale-article="en"><h1 class="group" data-header="true" id="en-game-core-engine">Game Core Engine<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h1>
+<details><summary>Relevant source files</summary><p>The following files were used as context for generating this wiki page:</p>
+<ul>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/README.md" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>README.md</span></a></li>
+</ul></details>
+<p>The Game Core Engine is the central logic system that drives gameplay in new-aoe. It manages the per-frame update cycle, processes player input and AI commands, maintains entity relationships and actions, handles object lifecycle, and coordinates all gameplay mechanics. This page documents the <code>Core</code> class, its associated <code>Core_List</code> relation manager, and the <code>gameUpdate()</code> execution pipeline.</p>
+<p>For information about how the Core is initialized and invoked from the main game loop, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../2.1-mainwidget-and-game-loop">MainWidget and Game Loop</a>. For configuration parameters that control Core behavior, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../2.3-configuration-system">Configuration System</a>.</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-overview-and-responsibilities">Overview and Responsibilities<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The <code>Core</code> class serves as the single source of truth for game state and logic. It is instantiated once by <code>MainWidget</code> and owns references to the <code>Map</code>, <code>Player</code> array, memory map, and <code>MouseEvent</code> handler.</p>
+<p><strong>Core Responsibilities:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Responsibility</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Frame Update</strong></td>
+<td>Executes <code>gameUpdate()</code> each frame to advance game state</td>
+</tr>
+<tr>
+<td><strong>Object Updates</strong></td>
+<td>Calls <code>nextframe()</code> on all entities via <code>updateByObject()</code></td>
+</tr>
+<tr>
+<td><strong>Input Processing</strong></td>
+<td>Handles mouse clicks via <code>manageMouseEvent()</code></td>
+</tr>
+<tr>
+<td><strong>AI Command Processing</strong></td>
+<td>Dequeues and validates AI instructions via <code>manageOrder()</code></td>
+</tr>
+<tr>
+<td><strong>Relation Management</strong></td>
+<td>Maintains action chains (move, attack, build, etc.) via <code>Core_List</code></td>
+</tr>
+<tr>
+<td><strong>Collision Detection</strong></td>
+<td>Checks unit-unit and unit-terrain collisions</td>
+</tr>
+<tr>
+<td><strong>State Synchronization</strong></td>
+<td>Provides <code>infoShare()</code> to update AI thread snapshots</td>
+</tr>
+<tr>
+<td><strong>Network Reporting</strong></td>
+<td>Sends game state to evaluation server via <code>PostDataToServer()</code></td>
+</tr>
+</tbody>
+</table>
+<p>The Core does not directly render graphics or play sounds—it purely manages game logic and state transitions.</p>
+<p>Sources: Diagrams 1-2, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L1433-L1438" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1433-1438</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-core-class-architecture">Core Class Architecture<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">classDiagram
+    class Core {
+        -Map* map
+        -Player** player
+        -Core_List* relate_AllObject
+        -MouseEvent* mouseEvent
+        -int** memorymap
+        -SelectWidget* sel
+        +Core(Map*, Player**, int**, MouseEvent*)
+        +gameUpdate()
+        +manageMouseEvent()
+        +manageOrder()
+        +updateByObject()
+        +addRelation(Coordinate*, int, Coordinate*)
+        +suspendRelation(Coordinate*)
+        +deleteSelf(Coordinate*)
+        +infoShare()
+        +PostDataToServer()
+        +get_IsObjectFree(Coordinate*) bool
+        +getPlayerNowResource(int) tagInfo
+    }
+    
+    class Core_List {
+        -map~Coordinate*, st_nowRelation~ relate_AllObject
+        -static map~int, st_relationNode*~ relation_Event_static
+        +addRelation(Coordinate*, int, Coordinate*)
+        +eraseRelation(Coordinate*)
+        +suspendRelation(Coordinate*)
+        +manageRelationList()
+        +get_IsObjectFree(Coordinate*) bool
+        +get_nowStage(Coordinate*) int
+        +get_TargetSN(Coordinate*) int
+    }
+    
+    class Map {
+        +Block cell[][]
+        +list~StaticRes*~ staticres
+        +list~Animal*~ animal
+        +vector~vector~Coordinate*~~ map_Object
+        +loadBarrierMap(bool)
+        +reset_resMap_AI()
+    }
+    
+    class Player {
+        +list~Building*~ build
+        +list~Human*~ human
+        +list~Missile*~ missile
+        +Development* develop
+        +changeResource(int,int,int,int) bool
+        +addBuilding(int, int, int, int)
+        +addFarmer(double, double)
+        +addArmy(int, double, double)
+    }
+    
+    class MouseEvent {
+        -double DR
+        -double UR
+        -int mouseEventType
+        +GetMouseEventType() int
+        +SetMouseEventType(int)
+        +GetDR() double
+        +GetUR() double
+        +Reset()
+    }
+    
+    Core --&gt; Map
+    Core --&gt; Player
+    Core --&gt; Core_List
+    Core --&gt; MouseEvent
+    Core_List --&gt; Coordinate : manages
+    Map --&gt; Coordinate : contains
+    Player --&gt; Coordinate : owns</code></pre></div>
+<p><strong>Key Pointers:</strong></p>
+<ul>
+<li><code>map</code>: Terrain grid, static resources, animals, and <code>map_Object</code> spatial index</li>
+<li><code>player[]</code>: Array of <code>MAXPLAYER</code> players (typically 2), each owning buildings and units</li>
+<li><code>relate_AllObject</code>: Instance of <code>Core_List</code> managing all active action chains</li>
+<li><code>mouseEvent</code>: Shared instance for capturing clicks from <code>EventFilter</code></li>
+<li><code>memorymap</code>: Vision/fog-of-war grid (<code>MEMORYROW × MEMORYCOLUMN</code>)</li>
+<li><code>sel</code>: Reference to <code>SelectWidget</code> for UI updates</li>
+</ul>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L1433-L1438" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1433-1438</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L514-L527" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">514-527</span></a>, Diagram 1</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-the-gameupdate-execution-pipeline">The gameUpdate() Execution Pipeline<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>Each frame (every <code>TimePerFrame</code> milliseconds, default ~16-33ms), <code>MainWidget::FrameUpdate()</code> invokes <code>Core::gameUpdate()</code>, which executes the following stages in strict order:</p>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">sequenceDiagram
+    participant MW as MainWidget
+    participant Core as Core::gameUpdate()
+    participant List as Core_List
+    participant Obj as Coordinate objects
+    participant AI as AI Threads
+    participant Net as NetworkPlugin
+    
+    rect rgb(250, 250, 250)
+    Note over MW,Net: Every Frame (TimePerFrame ms)
+    MW-&gt;&gt;Core: gameUpdate()
+    
+    Core-&gt;&gt;Obj: updateByObject()
+    Note over Obj: Call nextframe() on all entities
+    
+    Core-&gt;&gt;Core: manageMouseEvent()
+    Note over Core: Process player clicks&lt;br/&gt;Create new relations if valid
+    
+    Core-&gt;&gt;AI: manageOrder()
+    Note over AI: Dequeue AI instructions&lt;br/&gt;Validate &amp; convert to relations
+    
+    Core-&gt;&gt;List: manageRelationList()
+    Note over List: Execute action chains&lt;br/&gt;Advance stages, check completion
+    
+    Core-&gt;&gt;Core: Collision checks
+    Note over Core: Transport, crush, vision
+    
+    Core-&gt;&gt;AI: infoShare()
+    Note over AI: Update tagUsrGame/tagEnemyGame
+    
+    Core-&gt;&gt;Net: PostDataToServer()
+    Note over Net: Send state to evaluation server
+    
+    Core-&gt;&gt;MW: Update complete
+    end</code></pre></div>
+<h3 class="group" data-header="true" id="en-stage-breakdown">Stage Breakdown<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<h4 class="group" data-header="true" id="en-1-updatebyobject">1. updateByObject()<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>Iterates all objects across <code>player[i]-&gt;build</code>, <code>player[i]-&gt;human</code>, <code>player[i]-&gt;missile</code>, <code>map-&gt;staticres</code>, <code>map-&gt;animal</code> and calls <code>nextframe()</code> on each. This allows:</p>
+<ul>
+<li>Units to advance animation frames</li>
+<li>Farmers to increment work progress</li>
+<li>Buildings under construction to update completion percentage</li>
+<li>Missiles to move along trajectories</li>
+</ul>
+<h4 class="group" data-header="true" id="en-2-managemouseevent">2. manageMouseEvent()<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>If <code>mouseEvent-&gt;HaveEvent()</code> returns true, processes the click:</p>
+<ul>
+<li>Left click: Selects unit/building (updates <code>nowobject</code>, sends to <code>SelectWidget</code>)</li>
+<li>Right click with selection: Calls <code>addRelation()</code> to create Move, Attack, or Gather relations</li>
+<li>Validates terrain, ownership, and prerequisites before creating relations</li>
+</ul>
+<p>Sources: Diagram 2, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L1433-L1438" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1433-1438</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L974-L997" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">974-997</span></a></p>
+<h4 class="group" data-header="true" id="en-3-manageorder">3. manageOrder()<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>Dequeues instructions from <code>UsrIns.instructions</code> and <code>EnemyIns.instructions</code> queues:</p>
+<ul>
+<li>Type 0 (INS_CANCEL): Calls <code>suspendRelation(self)</code></li>
+<li>Type 1 (INS_HUMANMOVE): Creates movement relation via <code>addRelation()</code></li>
+<li>Type 2 (INS_HUMANACTION): Creates gather/attack relation</li>
+<li>Type 3 (INS_HUMANBUILD): Validates resources, creates build relation</li>
+<li>Type 4 (INS_BUILDINGACTION): Triggers research/training</li>
+<li>Type 5 (INS_PINPOINT_STRIKE): Sets artillery target coordinates</li>
+</ul>
+<p>Each instruction is validated (SN exists, resources sufficient, action allowed) and a return code is written to <code>ins.ret</code>:</p>
+<ul>
+<li><code>0</code>: Success</li>
+<li><code>-1</code>: SN not found</li>
+<li><code>-2</code>: Action not found</li>
+<li><code>-3</code>: Out of bounds</li>
+<li><code>-4</code>: Target object not found</li>
+<li><code>-5</code>: Invalid building</li>
+<li><code>-6</code>: Insufficient resources</li>
+</ul>
+<p>Return codes are stored in <code>tagGame.Info-&gt;ins_ret</code> and returned to AI via <code>getInfo().ins_ret</code>.</p>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L765-L791" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">765-791</span></a>, Diagram 5</p>
+<h4 class="group" data-header="true" id="en-4-managerelationlist">4. manageRelationList()<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>The <code>Core_List</code> processes all active relations in <code>relate_AllObject</code>:</p>
+<ul>
+<li>Advances each relation to its next stage (e.g., "moving to target" → "arrived, start gathering")</li>
+<li>Calls stage-specific functions from <code>relation_Event_static</code> chains</li>
+<li>Removes completed relations, keeps ongoing ones</li>
+<li>Handles pathfinding for movement relations</li>
+<li>Executes attack damage calculations</li>
+<li>Processes building construction progress</li>
+</ul>
+<p>This is where most gameplay actions actually happen—<code>addRelation()</code> only queues the action, <code>manageRelationList()</code> executes it over multiple frames.</p>
+<p>Sources: Diagram 2</p>
+<h4 class="group" data-header="true" id="en-5-collision-transport">5. Collision &amp; Transport<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<ul>
+<li><strong>Collision</strong>: Checks <code>memorymap</code> and <code>Map::isBarrier()</code> to prevent units from walking through each other or terrain</li>
+<li><strong>Crush Detection</strong>: Heavy units (elephants, chariots) can trample light units</li>
+<li><strong>Transport</strong>: Handles ships loading/unloading land units</li>
+<li><strong>Vision</strong>: Updates fog-of-war based on unit vision ranges</li>
+</ul>
+<h4 class="group" data-header="true" id="en-6-infoshare">6. infoShare()<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>Populates <code>tagUsrGame</code> and <code>tagEnemyGame</code> structures by:</p>
+<ul>
+<li>Iterating all buildings, farmers, armies, resources</li>
+<li>Converting to <code>tagBuilding</code>, <code>tagFarmer</code>, <code>tagArmy</code>, <code>tagResource</code> structs</li>
+<li>Applying fog-of-war (enemy data has DR0/UR0 hidden via <code>toEnemy()</code>)</li>
+<li>Copying terrain data and resource counts</li>
+<li>Including <code>ins_ret</code> map for AI feedback</li>
+</ul>
+<p>AI threads read this data via <code>getInfo()</code> in their next cycle.</p>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L847-L910" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">847-910</span></a>, Diagram 5</p>
+<h4 class="group" data-header="true" id="en-7-postdatatoserver">7. PostDataToServer()<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>If <code>IsExamining</code> is enabled and <code>g_frame % DataPostIntervalFrame == 0</code>, serializes game state to JSON and posts to <code>GameServerAddr</code> via <code>NetworkPlugin</code>. Used for online evaluation/grading.</p>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L501-L508" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">501-508</span></a>, Diagram 6</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-relation-management-system">Relation Management System<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The <code>Core_List</code> class implements a finite state machine for multi-frame actions. Each relation represents "Object A is doing Action X to Object B" and progresses through predefined stages.</p>
+<h3 class="group" data-header="true" id="en-relation-structure">Relation Structure<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TD
+    subgraph "st_nowRelation (per object)"
+        A["st_relationNode* nowNode"]
+        B["Coordinate* targetObject"]
+        C["int nowStage"]
+        D["double DR0, UR0"]
+        E["vector~Point~ pathWay"]
+    end
+    
+    subgraph "st_relationNode (static chain)"
+        F["int relation_Event_Type"]
+        G["int nowStage"]
+        H["bool (*isFinished)(...)"]
+        I["void (*executeFunc)(...)"]
+        J["st_relationNode* nextRelation"]
+    end
+    
+    A --&gt; F
+    J --&gt; F</code></pre></div>
+<p><strong>Key Data Structures:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Structure</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>st_nowRelation</code></td>
+<td>Per-object instance tracking current action, target, path, stage</td>
+</tr>
+<tr>
+<td><code>st_relationNode</code></td>
+<td>Static stage definition with condition check and execute function</td>
+</tr>
+<tr>
+<td><code>relation_Event_static</code></td>
+<td>Map of relation type → linked list of stages</td>
+</tr>
+<tr>
+<td><code>relate_AllObject</code></td>
+<td>Map of <code>Coordinate*</code> → current <code>st_nowRelation</code></td>
+</tr>
+</tbody>
+</table>
+<h3 class="group" data-header="true" id="en-common-relation-chains">Common Relation Chains<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><strong>Movement Relation:</strong></p>
+<ol>
+<li>Stage 0: Calculate path to (DR0, UR0)</li>
+<li>Stage 1: Follow path, move toward next waypoint</li>
+<li>Stage 2: Arrival—clear relation or trigger next action</li>
+</ol>
+<p><strong>Gather Resource Relation:</strong></p>
+<ol>
+<li>Stage 0: Path to resource</li>
+<li>Stage 1: Walk to resource</li>
+<li>Stage 2: Perform gathering animation, increment resource count</li>
+<li>Stage 3: Path back to storage building</li>
+<li>Stage 4: Walk to storage</li>
+<li>Stage 5: Deposit resources, update player totals</li>
+</ol>
+<p><strong>Attack Relation:</strong></p>
+<ol>
+<li>Stage 0: Path to target</li>
+<li>Stage 1: Walk toward target</li>
+<li>Stage 2: In range—play attack animation, create <code>Missile</code></li>
+<li>Stage 3: Wait for attack cooldown (based on <code>INTERVAL_*</code> config)</li>
+<li>Loop back to stage 2 if target still alive and in range</li>
+</ol>
+<p><strong>Building Construction Relation:</strong></p>
+<ol>
+<li>Stage 0: Deduct resources from player</li>
+<li>Stage 1: Create incomplete <code>Building</code> object (Percent = 0)</li>
+<li>Stage 2: Farmer walks to building</li>
+<li>Stage 3: Increment Percent each frame based on <code>FARMER_CONSTRUCTSPEED</code></li>
+<li>Stage 4: Percent == 100 → mark building complete, clear relation</li>
+</ol>
+<p>Sources: Diagrams 2-3, description based on relation management pattern</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-object-lifecycle">Object Lifecycle<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-creation">Creation<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Objects are created by <code>Player</code> methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Creates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addBuilding(type, blockDR, blockUR, percent)</code></td>
+<td>Building (construction or instant)</td>
+</tr>
+<tr>
+<td><code>addFarmer(DR, UR)</code></td>
+<td>Farmer at coordinates</td>
+</tr>
+<tr>
+<td><code>addArmy(armyType, DR, UR)</code></td>
+<td>Military unit</td>
+</tr>
+<tr>
+<td><code>addMissile(...)</code></td>
+<td>Projectile (arrow, stone, spear)</td>
+</tr>
+<tr>
+<td><code>Map::addAnimal(type, DR, UR)</code></td>
+<td>Animal or tree</td>
+</tr>
+<tr>
+<td><code>Map::addStaticRes(type, blockDR, blockUR)</code></td>
+<td>Mine, gold, stone</td>
+</tr>
+</tbody>
+</table>
+<p>Created objects are:</p>
+<ol>
+<li>Allocated via <code>new</code></li>
+<li>Added to appropriate list (<code>player-&gt;build</code>, <code>player-&gt;human</code>, etc.)</li>
+<li>Inserted into <code>map-&gt;map_Object[blockDR][blockUR]</code> spatial grid</li>
+<li>Assigned unique <code>SN</code> (serial number) for AI referencing</li>
+<li>Registered in <code>g_Object</code> global map if needed</li>
+</ol>
+<h3 class="group" data-header="true" id="en-updates">Updates<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Each frame, <code>Core::updateByObject()</code> calls <code>obj-&gt;nextframe()</code>:</p>
+<ul>
+<li><strong>Coordinate</strong>: Base update (position, animation frame)</li>
+<li><strong>MoveObject</strong>: Movement along path, collision checks</li>
+<li><strong>BloodHaver</strong>: Regeneration, death checks</li>
+<li><strong>Building</strong>: Construction progress, production queues</li>
+<li><strong>Farmer</strong>: Work state transitions</li>
+<li><strong>Army</strong>: Combat cooldowns, missile launch</li>
+<li><strong>Missile</strong>: Trajectory movement, hit detection</li>
+</ul>
+<h3 class="group" data-header="true" id="en-deletion">Deletion<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Entities are removed when:</p>
+<ul>
+<li>Health reaches 0 (<code>BloodHaver::get_isDestroy()</code>)</li>
+<li>Manually destroyed by player/AI</li>
+<li>Resource depleted (<code>StaticRes::Cnt &lt;= 0</code>)</li>
+<li>Missile hits target</li>
+<li>Building construction cancelled</li>
+</ul>
+<p><strong>Deletion Process:</strong></p>
+<ol>
+<li><code>Core::deleteSelf(Coordinate* obj)</code> called</li>
+<li>Removed from owner's list (<code>player-&gt;deleteHuman()</code>, etc.)</li>
+<li>Removed from <code>map-&gt;map_Object</code> spatial grid</li>
+<li><code>suspendRelation(obj)</code> clears any active actions</li>
+<li>Object memory freed via <code>delete</code></li>
+<li>Any units targeting this object have their relation updated</li>
+</ol>
+<p><strong>Critical:</strong> Units must be removed from area relations (RectArea, CircleArea, LineArea) and selection lists before deletion to avoid dangling pointers. <code>MainWidget::cleanupUnitReferences()</code> handles this.</p>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/MainWidget.cpp#L742-L847" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>MainWidget.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">742-847</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L512-L527" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">512-527</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-interaction-processing">Interaction Processing<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-player-input-flow">Player Input Flow<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph LR
+    A["EventFilter&lt;br/&gt;Mouse Click"] --&gt; B["MainWidget&lt;br/&gt;updateEditor()"]
+    B --&gt; C["Core&lt;br/&gt;manageMouseEvent()"]
+    C --&gt; D{"Click Type?"}
+    D --&gt;|"Left"| E["Select Unit&lt;br/&gt;Update nowobject"]
+    D --&gt;|"Right on empty"| F["addRelation&lt;br/&gt;MOVE"]
+    D --&gt;|"Right on enemy"| G["addRelation&lt;br/&gt;ATTACK"]
+    D --&gt;|"Right on resource"| H["addRelation&lt;br/&gt;GATHER"]
+    E --&gt; I["SelectWidget&lt;br/&gt;Update UI"]
+    F --&gt; J["Core_List&lt;br/&gt;Queue action"]
+    G --&gt; J
+    H --&gt; J</code></pre></div>
+<h3 class="group" data-header="true" id="en-ai-command-flow">AI Command Flow<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph LR
+    A["AI Thread&lt;br/&gt;processData()"] --&gt; B["HumanMove()&lt;br/&gt;HumanAction()&lt;br/&gt;etc."]
+    B --&gt; C["Serialize to&lt;br/&gt;instruction"]
+    C --&gt; D["Push to&lt;br/&gt;UsrIns/EnemyIns"]
+    D --&gt; E["Core&lt;br/&gt;manageOrder()"]
+    E --&gt; F{"Validate"}
+    F --&gt;|"Valid"| G["addRelation&lt;br/&gt;Create action"]
+    F --&gt;|"Invalid"| H["Set ins.ret&lt;br/&gt;Error code"]
+    G --&gt; I["manageRelationList&lt;br/&gt;Execute over frames"]
+    H --&gt; J["infoShare&lt;br/&gt;Return to AI"]
+    I --&gt; J</code></pre></div>
+<p><strong>Validation Steps in manageOrder():</strong></p>
+<ol>
+<li>Check <code>g_Object[SN]</code> exists</li>
+<li>Verify action type matches object type (e.g., only Buildings can do BuildingAction)</li>
+<li>Check resources sufficient for builds/training</li>
+<li>Validate coordinates within map bounds</li>
+<li>For actions on objects, verify <code>g_Object[obSN]</code> exists and is valid target</li>
+</ol>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L765-L791" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">765-791</span></a>, Diagrams 2 and 5</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-integration-with-other-systems">Integration with Other Systems<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-map-integration">Map Integration<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The Core queries the Map for:</p>
+<ul>
+<li><strong>Terrain passability</strong>: <code>map-&gt;isBarrier(blockDR, blockUR)</code></li>
+<li><strong>Pathfinding</strong>: <code>map-&gt;findBlock_Free(startDR, startUR, endDR, endUR)</code></li>
+<li><strong>Resource locations</strong>: <code>map-&gt;staticres</code> list</li>
+<li><strong>Spatial lookups</strong>: <code>map-&gt;map_Object[blockDR][blockUR]</code> contains all objects at that tile</li>
+</ul>
+<p>The Core updates the Map after:</p>
+<ul>
+<li>Buildings placed/destroyed: <code>map-&gt;loadBarrierMap(true)</code></li>
+<li>Resources depleted: <code>map-&gt;reset_resMap_AI()</code></li>
+</ul>
+<h3 class="group" data-header="true" id="en-player-integration">Player Integration<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Each <code>Player</code> owns entity lists and resources. The Core:</p>
+<ul>
+<li>Reads <code>player[i]-&gt;build</code>, <code>player[i]-&gt;human</code>, <code>player[i]-&gt;missile</code> for iteration</li>
+<li>Calls <code>player[i]-&gt;changeResource(wood, food, stone, gold)</code> when spending/gaining</li>
+<li>Invokes <code>player[i]-&gt;addBuilding()</code>, <code>player[i]-&gt;addArmy()</code> when creating units</li>
+<li>Queries <code>player[i]-&gt;develop-&gt;conditionDevelop()</code> for tech prerequisites</li>
+</ul>
+<h3 class="group" data-header="true" id="en-selectwidget-integration">SelectWidget Integration<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>Core</code> holds a <code>SelectWidget* sel</code> reference. When the player selects an object:</p>
+<ol>
+<li><code>Core::manageMouseEvent()</code> sets <code>nowobject = clickedObject</code></li>
+<li>Calls <code>sel-&gt;getBuild(blockDR, blockUR, buildingType)</code> or similar</li>
+<li><code>SelectWidget</code> reads <code>nowobject</code> properties to display UI</li>
+<li>Player clicks action button → <code>SelectWidget::doActs(actName, nowobject)</code> → Core processes</li>
+</ol>
+<h3 class="group" data-header="true" id="en-ai-thread-integration">AI Thread Integration<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>AI threads run asynchronously but synchronize via:</p>
+<ol>
+<li><strong>Read</strong>: AI calls <code>getInfo()</code> which locks <code>tagGame</code> and returns snapshot</li>
+<li><strong>Write</strong>: AI calls <code>HumanMove()</code> etc. which push to <code>ins.instructions</code> queue (thread-safe via <code>QMutex</code>)</li>
+<li><strong>Feedback</strong>: Next frame, <code>Core::manageOrder()</code> processes queue, writes <code>ins.ret</code></li>
+<li><strong>Next Read</strong>: AI sees <code>ins_ret</code> map in next <code>getInfo()</code> call</li>
+</ol>
+<p>This prevents race conditions—AI never directly mutates Core state.</p>
+<p>Sources: Diagram 5, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L914-L972" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">914-972</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-performance-considerations">Performance Considerations<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-per-frame-costs">Per-Frame Costs<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Complexity</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>updateByObject()</code></td>
+<td>O(n) where n = total entities</td>
+<td>Calls <code>nextframe()</code> on every object</td>
+</tr>
+<tr>
+<td><code>manageRelationList()</code></td>
+<td>O(r) where r = active relations</td>
+<td>Typically r &lt;&lt; n (most units idle)</td>
+</tr>
+<tr>
+<td><code>manageMouseEvent()</code></td>
+<td>O(1)</td>
+<td>Single click per frame max</td>
+</tr>
+<tr>
+<td><code>manageOrder()</code></td>
+<td>O(q) where q = queued AI instructions</td>
+<td>Usually small (1-10 per frame)</td>
+</tr>
+<tr>
+<td>Collision checks</td>
+<td>O(k²) where k = units in same tile</td>
+<td>Uses spatial grid to reduce checks</td>
+</tr>
+</tbody>
+</table>
+<h3 class="group" data-header="true" id="en-optimization-strategies">Optimization Strategies<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<ul>
+<li><strong>Spatial Partitioning</strong>: <code>map-&gt;map_Object[][]</code> grid prevents O(n²) collision checks—only units in same/adjacent tiles checked</li>
+<li><strong>Lazy Pathfinding</strong>: Paths calculated once, reused until target changes</li>
+<li><strong>Relation Pooling</strong>: <code>relation_Event_static</code> chains are static—only per-instance state allocated</li>
+<li><strong>Fog-of-War Caching</strong>: Vision updates only when units move</li>
+</ul>
+<h3 class="group" data-header="true" id="en-frame-budget">Frame Budget<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>With <code>TimePerFrame = 33ms</code> (30 FPS) and typical game with 100 units, 20 buildings, 10 active relations:</p>
+<ul>
+<li><code>updateByObject()</code>: ~5-10ms</li>
+<li><code>manageRelationList()</code>: ~2-5ms</li>
+<li>AI processing: ~1-3ms</li>
+<li>Rendering (GameWidget): ~10-15ms</li>
+<li>Remaining: ~5-10ms buffer</li>
+</ul>
+<p>The Core is designed to complete within 10-15ms even with hundreds of entities.</p>
+<p>Sources: Diagram 2, performance characteristics inferred from architecture</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-error-handling-and-validation">Error Handling and Validation<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-common-error-scenarios">Common Error Scenarios<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>Error Code</th>
+<th>Scenario</th>
+<th>Core Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-1</code> (SN not found)</td>
+<td>AI references deleted unit</td>
+<td>Ignore instruction, set <code>ins.ret[-1]</code></td>
+</tr>
+<tr>
+<td><code>-2</code> (Action invalid)</td>
+<td>Building can't perform requested action</td>
+<td>Ignore, return error code</td>
+</tr>
+<tr>
+<td><code>-3</code> (Out of bounds)</td>
+<td>Build/move target outside map</td>
+<td>Reject before creating relation</td>
+</tr>
+<tr>
+<td><code>-4</code> (Target not found)</td>
+<td>Gather/attack target deleted mid-action</td>
+<td>Suspend relation, unit becomes idle</td>
+</tr>
+<tr>
+<td><code>-6</code> (Insufficient resources)</td>
+<td>Not enough wood/food for building</td>
+<td>Reject, don't deduct resources</td>
+</tr>
+</tbody>
+</table>
+<h3 class="group" data-header="true" id="en-defensive-checks">Defensive Checks<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The Core validates at multiple points:</p>
+<ul>
+<li><strong>On instruction</strong>: <code>manageOrder()</code> checks SN, resources, bounds</li>
+<li><strong>On relation creation</strong>: <code>addRelation()</code> verifies target exists, path possible</li>
+<li><strong>On relation execution</strong>: Each stage's <code>isFinished()</code> checks target still alive</li>
+<li><strong>On deletion</strong>: <code>deleteSelf()</code> clears relations, removes from spatial grid</li>
+</ul>
+<p>Invalid pointers are prevented by:</p>
+<ol>
+<li>All entity access via <code>g_Object[SN]</code> map lookup (returns nullptr if deleted)</li>
+<li>Relations store target SN, not raw pointer—re-lookup each frame</li>
+<li><code>suspendRelation()</code> called before <code>delete</code> to clear all references</li>
+</ol>
+<p>Sources: <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1292-L1299" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1292-1299</span></a>, error code documentation</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-summary">Summary<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The Game Core Engine is the deterministic logic kernel of new-aoe. It executes a fixed update pipeline each frame, processes inputs from players and AI, manages a relation-based action system, and coordinates entity lifecycle. All gameplay—movement, combat, resource gathering, building—flows through <code>Core::gameUpdate()</code> and its subsystems.</p>
+<p><strong>Key Takeaways:</strong></p>
+<ul>
+<li><code>Core::gameUpdate()</code> is the single entry point for per-frame logic</li>
+<li><code>Core_List</code> implements multi-stage action chains using static relation graphs</li>
+<li>Player input and AI commands both convert to relations via <code>addRelation()</code></li>
+<li>Objects are owned by <code>Player</code> or <code>Map</code>, referenced by Core, never directly modified by AI</li>
+<li>State synchronization via <code>infoShare()</code> ensures AI sees consistent snapshots</li>
+<li>Return codes in <code>ins_ret</code> provide feedback to AI scripts</li>
+</ul>
+<p>For details on how this integrates with the main loop, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../2.1-mainwidget-and-game-loop">MainWidget and Game Loop</a>. For unit behavior specifics, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../3.3-units-and-buildings">Units and Buildings</a>.</p>
+<p>Sources: All diagrams and files cited throughout this document</p></section>
+                    </div>
+                    <div class="dw-prev-next mt-12 grid gap-3 md:grid-cols-2"><a href="../2.1-mainwidget-and-game-loop" class="rounded-xl border border-dashed border-border bg-surface/30 px-4 py-3 transition-colors hover:bg-surface/60"><div class="text-xs uppercase tracking-wide text-secondary"><span data-locale-text="zh">上一页</span><span data-locale-text="en">Previous</span></div><div class="mt-1 text-sm text-primary"><span data-locale-text="zh">MainWidget 与游戏循环</span><span data-locale-text="en">MainWidget and Game Loop</span></div></a><a href="../2.3-configuration-system" class="rounded-xl border border-dashed border-border bg-surface/30 px-4 py-3 transition-colors hover:bg-surface/60"><div class="text-xs uppercase tracking-wide text-secondary"><span data-locale-text="zh">下一页</span><span data-locale-text="en">Next</span></div><div class="mt-1 text-sm text-primary"><span data-locale-text="zh">配置系统</span><span data-locale-text="en">Configuration System</span></div></a></div>
+                  </div>
+                </div>
+              </div>
+            </main>
+            <aside class="dw-toc-panel hidden xl:sticky xl:top-20 xl:block xl:h-[calc(100vh-82px)] xl:w-72 xl:flex-shrink-0 xl:py-9">
+              <div class="dw-toc-card rounded-xl border border-dashed border-border bg-surface/30">
+                <h3 class="px-4 pb-5 pt-4 text-lg font-medium leading-none">
+                  <span data-locale-text="zh">本页内容</span>
+                  <span data-locale-text="en">On this page</span>
+                </h3>
+                <ul style="scrollbar-width:none" class="dw-toc-list min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pt-0" data-locale-panel="zh"><li><a href="#zh-游戏核心引擎" class="hover:text-primary pr-1 transition-all text-primary font-medium">游戏核心引擎</a></li>
+<li class="ml-3"><a href="#zh-总览与职责" class="hover:text-primary pr-1 transition-all text-secondary">总览与职责</a></li>
+<li class="ml-3"><a href="#zh-core-类结构" class="hover:text-primary pr-1 transition-all text-secondary">Core 类结构</a></li>
+<li class="ml-3"><a href="#zh-gameupdate-执行流水线" class="hover:text-primary pr-1 transition-all text-secondary">gameUpdate() 执行流水线</a></li>
+<li class="ml-3"><a href="#zh-阶段拆解" class="hover:text-primary pr-1 transition-all text-secondary">阶段拆解</a></li>
+<li class="ml-3"><a href="#zh-1-updatebyobject" class="hover:text-primary pr-1 transition-all text-secondary">1. updateByObject()</a></li>
+<li class="ml-3"><a href="#zh-2-managemouseevent" class="hover:text-primary pr-1 transition-all text-secondary">2. manageMouseEvent()</a></li>
+<li class="ml-3"><a href="#zh-3-manageorder" class="hover:text-primary pr-1 transition-all text-secondary">3. manageOrder()</a></li>
+<li class="ml-3"><a href="#zh-4-managerelationlist" class="hover:text-primary pr-1 transition-all text-secondary">4. manageRelationList()</a></li>
+<li class="ml-3"><a href="#zh-5-碰撞运输与视野" class="hover:text-primary pr-1 transition-all text-secondary">5. 碰撞、运输与视野</a></li>
+<li class="ml-3"><a href="#zh-6-infoshare" class="hover:text-primary pr-1 transition-all text-secondary">6. infoShare()</a></li>
+<li class="ml-3"><a href="#zh-7-postdatatoserver" class="hover:text-primary pr-1 transition-all text-secondary">7. PostDataToServer()</a></li>
+<li class="ml-3"><a href="#zh-关系管理系统" class="hover:text-primary pr-1 transition-all text-secondary">关系管理系统</a></li>
+<li class="ml-3"><a href="#zh-关系结构" class="hover:text-primary pr-1 transition-all text-secondary">关系结构</a></li>
+<li class="ml-3"><a href="#zh-常见关系链" class="hover:text-primary pr-1 transition-all text-secondary">常见关系链</a></li>
+<li class="ml-3"><a href="#zh-对象生命周期" class="hover:text-primary pr-1 transition-all text-secondary">对象生命周期</a></li>
+<li class="ml-3"><a href="#zh-创建" class="hover:text-primary pr-1 transition-all text-secondary">创建</a></li>
+<li class="ml-3"><a href="#zh-更新" class="hover:text-primary pr-1 transition-all text-secondary">更新</a></li>
+<li class="ml-3"><a href="#zh-删除" class="hover:text-primary pr-1 transition-all text-secondary">删除</a></li>
+<li class="ml-3"><a href="#zh-交互处理" class="hover:text-primary pr-1 transition-all text-secondary">交互处理</a></li>
+<li class="ml-3"><a href="#zh-玩家输入流" class="hover:text-primary pr-1 transition-all text-secondary">玩家输入流</a></li>
+<li class="ml-3"><a href="#zh-ai-指令流" class="hover:text-primary pr-1 transition-all text-secondary">AI 指令流</a></li>
+<li class="ml-3"><a href="#zh-与其他系统的集成" class="hover:text-primary pr-1 transition-all text-secondary">与其他系统的集成</a></li>
+<li class="ml-3"><a href="#zh-与-map-的集成" class="hover:text-primary pr-1 transition-all text-secondary">与 Map 的集成</a></li>
+<li class="ml-3"><a href="#zh-与-player-的集成" class="hover:text-primary pr-1 transition-all text-secondary">与 Player 的集成</a></li>
+<li class="ml-3"><a href="#zh-与-selectwidget-的集成" class="hover:text-primary pr-1 transition-all text-secondary">与 SelectWidget 的集成</a></li>
+<li class="ml-3"><a href="#zh-与-ai-线程的集成" class="hover:text-primary pr-1 transition-all text-secondary">与 AI 线程的集成</a></li>
+<li class="ml-3"><a href="#zh-性能考量" class="hover:text-primary pr-1 transition-all text-secondary">性能考量</a></li>
+<li class="ml-3"><a href="#zh-错误处理与校验" class="hover:text-primary pr-1 transition-all text-secondary">错误处理与校验</a></li>
+<li class="ml-3"><a href="#zh-常见错误场景" class="hover:text-primary pr-1 transition-all text-secondary">常见错误场景</a></li>
+<li class="ml-3"><a href="#zh-总结" class="hover:text-primary pr-1 transition-all text-secondary">总结</a></li></ul><ul style="scrollbar-width:none" class="dw-toc-list min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pt-0" data-locale-panel="en"><li><a href="#en-game-core-engine" class="hover:text-primary pr-1 transition-all text-primary font-medium">Game Core Engine</a></li>
+<li class="ml-3"><a href="#en-overview-and-responsibilities" class="hover:text-primary pr-1 transition-all text-secondary">Overview and Responsibilities</a></li>
+<li class="ml-3"><a href="#en-core-class-architecture" class="hover:text-primary pr-1 transition-all text-secondary">Core Class Architecture</a></li>
+<li class="ml-3"><a href="#en-the-gameupdate-execution-pipeline" class="hover:text-primary pr-1 transition-all text-secondary">The gameUpdate() Execution Pipeline</a></li>
+<li class="ml-3"><a href="#en-stage-breakdown" class="hover:text-primary pr-1 transition-all text-secondary">Stage Breakdown</a></li>
+<li class="ml-3"><a href="#en-1-updatebyobject" class="hover:text-primary pr-1 transition-all text-secondary">1. updateByObject()</a></li>
+<li class="ml-3"><a href="#en-2-managemouseevent" class="hover:text-primary pr-1 transition-all text-secondary">2. manageMouseEvent()</a></li>
+<li class="ml-3"><a href="#en-3-manageorder" class="hover:text-primary pr-1 transition-all text-secondary">3. manageOrder()</a></li>
+<li class="ml-3"><a href="#en-4-managerelationlist" class="hover:text-primary pr-1 transition-all text-secondary">4. manageRelationList()</a></li>
+<li class="ml-3"><a href="#en-5-collision-transport" class="hover:text-primary pr-1 transition-all text-secondary">5. Collision &amp; Transport</a></li>
+<li class="ml-3"><a href="#en-6-infoshare" class="hover:text-primary pr-1 transition-all text-secondary">6. infoShare()</a></li>
+<li class="ml-3"><a href="#en-7-postdatatoserver" class="hover:text-primary pr-1 transition-all text-secondary">7. PostDataToServer()</a></li>
+<li class="ml-3"><a href="#en-relation-management-system" class="hover:text-primary pr-1 transition-all text-secondary">Relation Management System</a></li>
+<li class="ml-3"><a href="#en-relation-structure" class="hover:text-primary pr-1 transition-all text-secondary">Relation Structure</a></li>
+<li class="ml-3"><a href="#en-common-relation-chains" class="hover:text-primary pr-1 transition-all text-secondary">Common Relation Chains</a></li>
+<li class="ml-3"><a href="#en-object-lifecycle" class="hover:text-primary pr-1 transition-all text-secondary">Object Lifecycle</a></li>
+<li class="ml-3"><a href="#en-creation" class="hover:text-primary pr-1 transition-all text-secondary">Creation</a></li>
+<li class="ml-3"><a href="#en-updates" class="hover:text-primary pr-1 transition-all text-secondary">Updates</a></li>
+<li class="ml-3"><a href="#en-deletion" class="hover:text-primary pr-1 transition-all text-secondary">Deletion</a></li>
+<li class="ml-3"><a href="#en-interaction-processing" class="hover:text-primary pr-1 transition-all text-secondary">Interaction Processing</a></li>
+<li class="ml-3"><a href="#en-player-input-flow" class="hover:text-primary pr-1 transition-all text-secondary">Player Input Flow</a></li>
+<li class="ml-3"><a href="#en-ai-command-flow" class="hover:text-primary pr-1 transition-all text-secondary">AI Command Flow</a></li>
+<li class="ml-3"><a href="#en-integration-with-other-systems" class="hover:text-primary pr-1 transition-all text-secondary">Integration with Other Systems</a></li>
+<li class="ml-3"><a href="#en-map-integration" class="hover:text-primary pr-1 transition-all text-secondary">Map Integration</a></li>
+<li class="ml-3"><a href="#en-player-integration" class="hover:text-primary pr-1 transition-all text-secondary">Player Integration</a></li>
+<li class="ml-3"><a href="#en-selectwidget-integration" class="hover:text-primary pr-1 transition-all text-secondary">SelectWidget Integration</a></li>
+<li class="ml-3"><a href="#en-ai-thread-integration" class="hover:text-primary pr-1 transition-all text-secondary">AI Thread Integration</a></li>
+<li class="ml-3"><a href="#en-performance-considerations" class="hover:text-primary pr-1 transition-all text-secondary">Performance Considerations</a></li>
+<li class="ml-3"><a href="#en-per-frame-costs" class="hover:text-primary pr-1 transition-all text-secondary">Per-Frame Costs</a></li>
+<li class="ml-3"><a href="#en-optimization-strategies" class="hover:text-primary pr-1 transition-all text-secondary">Optimization Strategies</a></li>
+<li class="ml-3"><a href="#en-frame-budget" class="hover:text-primary pr-1 transition-all text-secondary">Frame Budget</a></li>
+<li class="ml-3"><a href="#en-error-handling-and-validation" class="hover:text-primary pr-1 transition-all text-secondary">Error Handling and Validation</a></li>
+<li class="ml-3"><a href="#en-common-error-scenarios" class="hover:text-primary pr-1 transition-all text-secondary">Common Error Scenarios</a></li>
+<li class="ml-3"><a href="#en-defensive-checks" class="hover:text-primary pr-1 transition-all text-secondary">Defensive Checks</a></li>
+<li class="ml-3"><a href="#en-summary" class="hover:text-primary pr-1 transition-all text-secondary">Summary</a></li></ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.__DW_PAGE = {"routePath": "hackermmzz/new-aoe/2.2-game-core-engine", "titles": {"zh": "游戏核心引擎", "en": "Game Core Engine"}, "descriptions": {"zh": "游戏核心引擎 相关源文件 以下文件被用作生成本维基页面的上下文： GlobalVariate.h MainWidget.cpp README.md 游戏核心引擎是 new-aoe 的中央逻辑系统，负责驱动实际玩法。它管理逐帧更新、处理玩家输入和 AI 指令、维护实体关系与动作、处理对象生命周期，并协调几乎所有游戏机制。", "en": "Game Core Engine Relevant source files The following files were used as context for generating this wiki page: GlobalVariate.h MainWidget.cpp README.md The Game"}, "defaultLocale": "zh", "availableLocales": ["zh", "en"], "repoName": "hackermmzz/new-aoe"};
+      window.__DW_ASSET_PREFIX = "../../../assets/";
+    </script>
+    <script src="../../../assets/site.js"></script>
+  </body>
+</html>
