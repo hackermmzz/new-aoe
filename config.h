@@ -29,6 +29,7 @@
 #include <vector>
 #include <unordered_set>
 #include <time.h>
+#include<array>
 /**********debug消息************/
 #define REPRESENT_BOARDCAST_MESSAGE -1
 /********** 游戏配置数据 **********/
