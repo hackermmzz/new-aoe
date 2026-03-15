@@ -12,25 +12,8 @@ ins UsrIns;
 void UsrAI::processData()
 {
     //    return;
-    cheatAction();
-    static bool res=0;
-    if(!res)
-    res=1,cheatRes();
     cheatRes();
-    //return;
-    auto info=getInfo();
-    static bool xx=0;
-    static tagArmy f;
-    for (auto x : info.armies) {
-        if (x.Sort == AT_STONE_THROWER) {
-            if (xx && f.SN == x.SN) {
-                f = x;
-            }
-            else if (!xx) {
-                f = x;
-                xx = 1;
-                PinPointStrike(f.SN, f.DR- 32.0 * 8, f.UR );
-            }
-        }
-    }
+    tagInfo info=getInfo();
+    cout<<info.Meat<<" "<<info.Wood<<" "<<info.Gold<<" "<<info.Stone<<endl;
+
 }
