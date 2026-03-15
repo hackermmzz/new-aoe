@@ -152,11 +152,11 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     if (!EditorMode) editor->hide();
 
     // 导出地图
-    connect(editor->ui->export_map, QPushButton::clicked, this, [=]() {
+    connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
         this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
         call_debugText("green", " 导出地图", 0);
         });
-    connect(editor->ui->delete_object, QPushButton::clicked, this, [=]() {
+    connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {
         call_debugText("green", " 删除资源/建筑", 0);
         this->currentSelected = DELETEOBJECT;
         });
