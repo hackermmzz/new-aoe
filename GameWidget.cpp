@@ -62,19 +62,18 @@ void GameWidget::paintEvent(QPaintEvent *)
             x1++;
         }
         //此处改动不采用nowres来显示图片
+        cout<<"wlh"<<endl;
         int x=mainwidget->map->cell[0][0].block[0]->front().pix.width();
         int y=GAMEWIDGET_WIDTH;
+        cout<<"wlh"<<endl;
         for(int j = 0; j < GAMEWIDGET_WIDTH / mainwidget->map->cell[0][0].block[0]->front().pix.width() + 1; j++) // 行绘制
         {
-            cout<<"1"<<endl;
             if(x2>=MAP_L||y2>=MAP_U||x2<0||y2<0)
             {
-                cout<<"2"<<endl;
                 x2++;
                 y2++;
                 continue;
             }
-
             Block&block=mainwidget->map->cell[x2][y2];
             int x,y,w,h;
             QPixmap*pix=0;
@@ -83,7 +82,6 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(i%2==1)x=64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
             w=Block::block[block.Num]->front().pix.width(),h=Block::block[block.Num]->front().pix.height();
             list<ImageResource>*targetList=0;
-                            cout<<"wlh"<<endl;
             if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::block[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::grayblock[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)targetList=Block::blackblock[block.Num];
@@ -111,7 +109,6 @@ void GameWidget::paintEvent(QPaintEvent *)
             x2++;
             y2++;
         }
-
     }
     //清除内存图内容
     emptymemorymap();
