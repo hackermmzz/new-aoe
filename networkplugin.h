@@ -7,6 +7,7 @@
 #include<queue>
 #include<mutex>
 #include<QEventLoop>
+#include <QDebug>
 using namespace std;
 //不支持多线程
 class NetworkPlugin : public QThread
