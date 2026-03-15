@@ -6,7 +6,7 @@
 #include "Option.h"
 #include "Core.h"
 #include "UsrAI.h"
-#include "EnemyAI.h"
+#include "enemyai.h"
 #include "ActWidget.h"
 #include "AboutDialog.h"
 #include "GlobalVariate.h"

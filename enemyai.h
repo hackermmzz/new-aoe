@@ -1,7 +1,7 @@
 #ifndef ENEMYAI_H
 #define ENEMYAI_H
 
-#include "AI.h"
+#include "ai.h"
 #include <string>
 
 using std::string;
