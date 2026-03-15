@@ -64,8 +64,6 @@ void GameWidget::paintEvent(QPaintEvent *)
         //此处改动不采用nowres来显示图片
         int x=mainwidget->map->cell[0][0].block[0]->front().pix.width();
         int y=GAMEWIDGET_WIDTH;
-        int abc=mainwidget->map->cell[0][0].block[0]->front().pix.width() + 1;
-        cout<<abc<<endl;
         for(int j = 0; j < GAMEWIDGET_WIDTH / mainwidget->map->cell[0][0].block[0]->front().pix.width() + 1; j++) // 行绘制
         {
             if(x2>=MAP_L||y2>=MAP_U||x2<0||y2<0)
