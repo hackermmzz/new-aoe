@@ -9,9 +9,9 @@
 #include <random>
 #include<map>
 #include<algorithm>
-#include<rectarea.h>
-#include<linearea.h>
-#include<circlearea.h>
+#include<Rectarea.h>
+#include<LineArea.h>
+#include<CircleArea.h>
 
 // 前向声明
 class RectArea;

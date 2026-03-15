@@ -1,7 +1,7 @@
 #ifndef USRAI_H
 #define USRAI_H
 
-#include "AI.h"
+#include "ai.h"
 
 extern tagGame tagUsrGame;
 extern ins UsrIns;
