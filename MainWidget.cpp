@@ -268,7 +268,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     
     
     // 鼠标按钮连接
-    connect(editor->ui->mouse_button, QPushButton::clicked, this, [=]() {
+    connect(editor->ui->mouse_button, &QPushButton::clicked, this, [=]() {
         this->currentSelected = NORMAL_MOUSE;
         call_debugText("green", " 普通鼠标模式", 0);
         });
