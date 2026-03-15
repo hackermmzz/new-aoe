@@ -21,7 +21,8 @@ GameWidget::~GameWidget()
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {
-    return;
+    //判断是否关闭了渲染模式
+    if(OffScreen)return;
     //重置buffer的大小
     if(gameBuffer.width()!=this->width()||gameBuffer.height()!=this->height()){
         gameBuffer=QPixmap(this->width(),this->height());

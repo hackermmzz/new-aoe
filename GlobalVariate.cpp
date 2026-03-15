@@ -10,6 +10,7 @@
 using namespace std;
 
 /*************************配置读取量***********************/
+bool OffScreen;//是否关闭渲染游戏渲染
 int DefaultCivilization;//初始文明
 bool IsExamining;
 int TimePerFrame;//一帧要耗的时间
@@ -1730,6 +1731,7 @@ void ReadConfig()
     jsonInt(NOWRES_TIMER_HOPLITE);
     jsonInt(Boulder_Trail_Effect_Duration);
     jsonInt(DefaultCivilization);
+    jsonBool(OffScreen);
     ////////////////////////////////////////////////
 
 }

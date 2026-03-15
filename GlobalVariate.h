@@ -11,6 +11,7 @@
 using namespace std;
 class Coordinate;
 //
+extern bool OffScreen;
 extern int DefaultCivilization;
 extern bool MAP_EXPLORE;
 extern bool MAP_VISIABLE;
