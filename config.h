@@ -28,7 +28,6 @@
 #include <sstream>
 #include <vector>
 #include <unordered_set>
-#include <Windows.h>
 #include <time.h>
 /**********debug消息************/
 #define REPRESENT_BOARDCAST_MESSAGE -1
