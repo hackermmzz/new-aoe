@@ -22,9 +22,11 @@ GameWidget::~GameWidget()
 void GameWidget::paintEvent(QPaintEvent *)
 {
     //重置buffer的大小
+    cout<<"NMZL"<<endl;
     if(gameBuffer.width()!=this->width()||gameBuffer.height()!=this->height()){
         gameBuffer=QPixmap(this->width(),this->height());
     }
+    cout<<"NMZL"<<endl;
     //
     QPainter painter(&gameBuffer);
 
