@@ -5,7 +5,7 @@
 #include <QString>
 #include <algorithm>
 #include <QApplication>
-#include<rectarea.h>
+#include<Rectarea.h>
 #include<circlearea.h>
 #include<LineArea.h>
 int g_globalNum = rand() % 11;
