@@ -72,6 +72,7 @@ void GameWidget::paintEvent(QPaintEvent *)
                 y2++;
                 continue;
             }
+                 cout<<"wlh"<<endl;
             Block&block=mainwidget->map->cell[x2][y2];
             int x,y,w,h;
             QPixmap*pix=0;
