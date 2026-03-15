@@ -21,6 +21,7 @@ GameWidget::~GameWidget()
 }
 void GameWidget::paintEvent(QPaintEvent *)
 {
+    return;
     //重置buffer的大小
     if(gameBuffer.width()!=this->width()||gameBuffer.height()!=this->height()){
         gameBuffer=QPixmap(this->width(),this->height());
