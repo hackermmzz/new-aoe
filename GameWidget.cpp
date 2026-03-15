@@ -66,13 +66,15 @@ void GameWidget::paintEvent(QPaintEvent *)
         int y=GAMEWIDGET_WIDTH;
         for(int j = 0; j < GAMEWIDGET_WIDTH / mainwidget->map->cell[0][0].block[0]->front().pix.width() + 1; j++) // 行绘制
         {
+            cout<<"1"<<endl;
             if(x2>=MAP_L||y2>=MAP_U||x2<0||y2<0)
             {
+                cout<<"2"<<endl;
                 x2++;
                 y2++;
                 continue;
             }
-                 cout<<"wlh"<<endl;
+
             Block&block=mainwidget->map->cell[x2][y2];
             int x,y,w,h;
             QPixmap*pix=0;
