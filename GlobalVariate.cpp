@@ -682,7 +682,6 @@ int InitImageResMap(QString path)
         }
     }
     ////////////////////////////////
-    cout<<resMap.size()<<endl;
     return -1;
 }
 int InitSoundResMap(QString path)
