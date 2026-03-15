@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <QApplication>
 #include<Rectarea.h>
-#include<circlearea.h>
+#include<CircleArea.h>
 #include<LineArea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
