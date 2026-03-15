@@ -80,6 +80,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(i%2==1)x=64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
             w=Block::block[block.Num]->front().pix.width(),h=Block::block[block.Num]->front().pix.height();
             list<ImageResource>*targetList=0;
+                            cout<<"wlh"<<endl;
             if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::block[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::grayblock[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)targetList=Block::blackblock[block.Num];
@@ -107,7 +108,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             x2++;
             y2++;
         }
-                cout<<"wlh"<<endl;
+
     }
     //清除内存图内容
     emptymemorymap();
