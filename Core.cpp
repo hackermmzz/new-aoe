@@ -20,6 +20,7 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
 
 void Core::gameUpdate()
 {
+    cout<<g_frame<<endl;
     //如果是考试状态,禁止cheat
     if(IsExamining){
         is_cheatAction=false;
