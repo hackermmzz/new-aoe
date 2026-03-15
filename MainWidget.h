@@ -13,7 +13,7 @@
 #include "soudplaythread.h"
 #include "Editor.h"
 #include "ui_Editor.h"
-#include"areaselected.h"
+#include"AreaSelected.h"
 
 // 前向声明，避免循环包含
 struct RectAreaData;
