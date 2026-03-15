@@ -47,10 +47,11 @@ void GameWidget::paintEvent(QPaintEvent *)
     int y1=BlockUR;//x2，y2则是引导绘制，用来实际判断cell中的内容
     int x2;
     int y2;
-    cout<<"NMZL"<<endl;
 
     for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 6; i++)
     {
+        cout<<"NMZL"<<endl;
+
         x2=x1;
         y2=y1;
         if(i%2==1)
@@ -107,7 +108,6 @@ void GameWidget::paintEvent(QPaintEvent *)
             y2++;
         }
     }
-    cout<<"NMZL"<<endl;
     //清除内存图内容
     emptymemorymap();
 
