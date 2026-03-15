@@ -22,11 +22,9 @@ GameWidget::~GameWidget()
 void GameWidget::paintEvent(QPaintEvent *)
 {
     //重置buffer的大小
-    cout<<"NMZL"<<endl;
     if(gameBuffer.width()!=this->width()||gameBuffer.height()!=this->height()){
         gameBuffer=QPixmap(this->width(),this->height());
     }
-    cout<<"NMZL"<<endl;
     //
     QPainter painter(&gameBuffer);
 
@@ -49,7 +47,7 @@ void GameWidget::paintEvent(QPaintEvent *)
     int y1=BlockUR;//x2，y2则是引导绘制，用来实际判断cell中的内容
     int x2;
     int y2;
-
+    cout<<"NMZL"<<endl;
 
     for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 6; i++)
     {
@@ -109,7 +107,7 @@ void GameWidget::paintEvent(QPaintEvent *)
             y2++;
         }
     }
-
+    cout<<"NMZL"<<endl;
     //清除内存图内容
     emptymemorymap();
 
