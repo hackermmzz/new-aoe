@@ -50,7 +50,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 
     for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 6; i++)
     {
-        cout<<"NMZL"<<endl;
+        cout<<"wlh"<<endl;
 
         x2=x1;
         y2=y1;
