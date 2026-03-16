@@ -201,6 +201,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         QString selectedText = text;
         if (text == "敌方战船") this->currentSelected = AIWARSHIP;
         else if (text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
+        else if (text == "敌方武器攻城厂") this->currentSelected = AISIEGE;
         if (text != "敌方资源/建筑") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->ai_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -637,6 +638,8 @@ void MainWidget::updateEditor()
         case AIARROWTOWER:
             MakeBuilding(L, U, AIARROWTOWER);
             break;
+        case AISIEGE:
+            MakeBuilding(L, U, AISIEGE);
         case PLAYERFARMER:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERFARMER);
             break;
@@ -1174,6 +1177,9 @@ void MainWidget::MakeBuilding(int blockL, int blockU, int type)
     }
     else if (type == AIARROWTOWER) {
         player[1]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);
+    }
+    else if (type == AISIEGE) {
+        player[1]->addBuilding(BUILDING_SIEGE, blockL,blockU, 100);
     }
     else if (type == PLAYERDOCK) {
         player[0]->addBuilding(BUILDING_DOCK, blockL, blockU, 100);

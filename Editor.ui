@@ -132,6 +132,11 @@
    </item>
    <item>
     <property name="text">
+     <string>敌方武器攻城厂</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>敌方投石车</string>
     </property>
    </item>

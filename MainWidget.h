@@ -100,6 +100,7 @@ public:
         PLAYERBOWMAN,
         AIWARSHIP,
         AIARROWTOWER,
+        AISIEGE,
         AICLUBMAN,
         AIAXEMAN,
         AISCOUT,
