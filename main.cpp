@@ -4,7 +4,7 @@
 #include <QMap>
 #include "Logger.h"
 #include"EventFilter.h"
-void ParseArguments(const QApplication&app);
+
 int main(int argc, char* argv[])
 {
     //开启GPU加速
@@ -43,53 +43,4 @@ int main(int argc, char* argv[])
     w.show();
     return app.exec();
 }
-void ParseArguments(const QApplication&app){
-    ////////////////////////////////解析参数
-    QCommandLineParser parser;
-    // 添加帮助选项（自动处理--help/-h）
-    parser.addHelpOption();
-    QCommandLineOption option0(
-        QStringList()<<"exam",
-         "开启考试模式",
-                "true|false"
-       );
-    QCommandLineOption option1(
-        QStringList()<<"indices",
-         "本次在数据库得编号",
-         "1"
-       );
-    QCommandLineOption option2(
-        QStringList()<<"id",
-         "学号",
-         "923106840429"
-       );
-    QCommandLineOption option3(
-        QStringList()<<"api",
-         "请求的key",
-         "api_dadawvavawfgaga"
-       );
-    QList<QCommandLineOption>options={option0,option1,option2,option3};
-    parser.addOptions(options);
-    parser.process(app);
-    //
-    if(parser.isSet("exam")){
-        auto value=parser.value("exam");
-        if(value=="true")IsExamining=true;
-        else IsExamining=false;
-    }
-    //
-    if(parser.isSet("indices")){
-        auto value=parser.value("indices");
-        Indices=value.toInt();
-    }
-    //
-    if(parser.isSet("id")){
-        auto value=parser.value("id");
-        Id=value;
-    }
-    //
-    if(parser.isSet("api")){
-        auto value=parser.value("api");
-        API_Value=value;
-    }
-}
+

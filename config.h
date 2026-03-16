@@ -629,4 +629,33 @@ enum AiInstructionType{
     INS_BUILDINGACTION, //建筑动作
     INS_PINPOINT_STRIKE//定点打击
 };
+
+/******************得分的类型********************/
+enum ScoreType {
+    _WOOD = 0,
+    _STONE,
+    _GOLD,
+    _MEAT,
+    _BERRY,
+    _GAZELLE,
+    _ELEPHANT,
+    _FARM,
+    _FISH,
+    _ISWOOD,
+    _ISGOLD,
+    _ISSTONE,
+    _TECH,
+    _BUILDING1,
+    _BUILDING2,
+    _HUMAN1,
+    _HUMAN2,
+    _KILL2,
+    _KILL10,
+    _DESTORY2,
+    _DESTORY4,
+    _DESTORY5,
+    _DESTORY10,
+    _FINDENEMYLAND,
+    SCORE_TYPE_COUNT
+};
 #endif // CONFIG_H

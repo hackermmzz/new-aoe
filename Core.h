@@ -13,7 +13,7 @@ public:
     Core() {}
     Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent);
 
-
+    void ModifyDuringExam();
     void gameUpdate();
     void updateByObject();
     void ResetHumanPos();
@@ -60,8 +60,6 @@ public:
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加
-    void PostDataToServer();
-    QJsonObject GetCurrentStatus();
 private:
     Player** player;    //player信息
     MouseEvent* mouseEvent; //记录当前鼠标事件

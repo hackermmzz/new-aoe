@@ -10,12 +10,12 @@
 using namespace std;
 
 /*************************配置读取量***********************/
+QString ResultLogFile;//实时信息输出日志
 bool OffScreen;//是否关闭渲染游戏渲染
 int DefaultCivilization;//初始文明
 bool IsExamining;
 int TimePerFrame;//一帧要耗的时间
 QString GameServerAddr;
-int DataPostIntervalFrame;//每隔100帧上传一次数据
 bool EditorMode;//是否开启编辑器模式
 bool GlobalVision;//是否开启全局视野
 bool only_debug_Player0;
@@ -570,9 +570,6 @@ double BUILDING_BLOOD_FIRE_BIG;
 int mapmoveFrequency;//地图移动速度
 bool is_cheatAction = false;
 EventFilter *eventFilter;
-QString Id;
-QString API_Value;
-int Indices=-1;
 NetworkPlugin*NetworkManager;
 map<std::string, std::list<QPixmap>> resMap;
 map<string, QSoundEffect*> SoundMap;
@@ -588,6 +585,7 @@ std::map<QString , int>debugMessageRecord;
 int** memorymap;    //记录出现在当前画面上的object,用于g_Object[]中访问
 std::string direction[5]={"Down","LeftDown","Left","LeftUp","Up"};
 bool GenerateHumanLock=0;//每一帧保证只有一个人可以诞生
+///////////////////////////////////////////////////////////////////////////////
 int InitImageResMap(QString path)
 {
     //判断路径是否存在
@@ -1094,6 +1092,10 @@ void call_debugText(QString color, QString content,int playerID)
 }
 //*************************************************************
 
+bool instruction::isExist() {
+    return type != -1;
+}
+
 instruction::instruction(int type,int SN, int obSN , bool twoCoredinate){
     this->SN = SN;
     this->obSN = obSN;
@@ -1198,7 +1200,58 @@ void MouseEvent::Reset()
     mouseEventType=NULL_MOUSEEVENT;
 }
 /**********************************工具函数**********************************************/
-
+//配置参数
+void ParseArguments(const QApplication&app){
+    ////////////////////////////////解析参数
+    QCommandLineParser parser;
+    // 添加帮助选项（自动处理--help/-h）
+    parser.addHelpOption();
+    QCommandLineOption option0(
+        QStringList()<<"exam",
+         "开启考试模式",
+                "true|false"
+       );
+    QCommandLineOption option1(
+        QStringList()<<"offscreen",
+        "关闭图像渲染",
+         "true|false"
+       );
+    QCommandLineOption option2(
+        QStringList()<<"ResultLogFile",
+         "实时数据输出存储日志",
+         "a.txt"
+       );
+    QCommandLineOption option3(
+        QStringList()<<"freq",
+         "开启几倍速",
+         "1|2|4|8"
+       );
+    QList<QCommandLineOption>options={option0,option1,option2,option3};
+    parser.addOptions(options);
+    parser.process(app);
+    //
+    if(parser.isSet("exam")){
+        auto value=parser.value("exam");
+        if(value=="true")IsExamining=true;
+        else IsExamining=false;
+    }
+    //
+    if(parser.isSet("offscreen")){
+        auto value=parser.value("offscreen");
+        if(value=="true")OffScreen=true;
+        else OffScreen=false;
+    }
+    //
+    if(parser.isSet("ResultLogFile")){
+        auto value=parser.value("ResultLogFile");
+        ResultLogFile=value;
+    }
+    //
+    if(parser.isSet("freq")){
+        auto value=parser.value("freq");
+        INITIAL_FREQUENCY=value.toInt();
+    }
+}
 //Json化一个Map
 QString JsonMap(const QMap<QString, QVariant>&data){
     QJsonObject obj;
@@ -1209,6 +1262,490 @@ QString JsonMap(const QMap<QString, QVariant>&data){
     QString ret= jsonDoc.toJson(QJsonDocument::Indented);
     return ret;
 }
+
+
+
+ResultLogInfo::ResultLogInfo(bool win_, int score_,int wood_, int food_, int gold_, int stone_, string msg_){
+    win=win_;
+    wood=wood_;
+    food=food_;
+    gold=gold_;
+    stone=stone_;
+    msg=msg_;
+    score=score_;
+}
+
+
+
+
+void ResultLogInfo::LogOut()
+{
+
+}
+
+st_DebugMassage::st_DebugMassage(QString color, QString content)
+{
+    this->color = color;
+    this->content = content;
+}
+
+void Score::addScore(int points, const QString &message) {
+    score += points;
+    if (id == 0)
+        call_debugText("blue", " 玩家" + message, REPRESENT_BOARDCAST_MESSAGE);
+    else
+        call_debugText("red", " 敌方" + message, REPRESENT_BOARDCAST_MESSAGE);
+}
+
+Score::Score(int id) : id(id), score(0) {}
+
+int Score::getScore() {
+    return score;
+}
+
+void Score::update(int type, int num) {
+    if(type==_FINDENEMYLAND){
+        addScore(10,"登录地方大陆,分数+10");
+        return;
+    }
+    if (type <= _ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
+        addScore(5, " 采集到新资源，分数+5");
+        if (type == _ISGOLD) {
+            addScore(10, " 采集到黄金，分数+10");
+        }
+    }
+
+    if (type > _MEAT && type <= _ISSTONE) {
+        scoreTypes[type] = scoreTypes[type] | 1;
+        return;
+    }
+
+    int before = scoreTypes[type] / 100;
+    scoreTypes[type] += num;
+
+    if (type <= _MEAT) {
+        int after = scoreTypes[type] / 100;
+        int change = after - before;
+        while (change > 0) {
+            addScore(1, " 单种资源收集满100个，分数+1");
+            change--;
+        }
+    }
+
+    switch (type) {
+    case _TECH:
+        addScore(2, " 解锁新科技，分数+2");
+        break;
+    case _HUMAN1:
+        addScore(1, " 生产普通单位，分数+1");
+        break;
+    case _HUMAN2:
+        addScore(2, " 生产特殊单位，分数+2");
+        break;
+    case _BUILDING1:
+        addScore(1, " 建造住房或农田，分数+1");
+        break;
+    case _BUILDING2:
+        addScore(2, " 建造一般建筑，分数+2");
+        break;
+    case _KILL2:
+        addScore(2, " 击杀一般敌人，分数+2");
+        break;
+    case _DESTORY2:
+        addScore(2, " 摧毁房屋或农田，分数+2");
+        break;
+    case _DESTORY4:
+        addScore(4, " 摧毁一般建筑，分数+4");
+        break;
+    case _DESTORY5:
+        addScore(5, " 摧毁箭塔，分数+5");
+        break;
+    case _DESTORY10:
+        addScore(10, " 摧毁主营，分数+10");
+        break;
+    default:
+        break;
+    }
+}
+
+bool tagObj::operator <(const tagObj &obj) const{
+    return SN<obj.SN;
+}
+
+tagBuilding tagBuilding::toEnemy() {
+    this->Cnt = -1;
+    this->Project = -1;
+    this->ProjectPercent = -1;
+    return *this;
+}
+
+void tagHuman::cast_from(tagHuman taghuman) {
+    this->DR = taghuman.DR;
+    this->UR = taghuman.UR;
+    this->BlockDR = taghuman.BlockDR;
+    this->BlockUR = taghuman.BlockUR;
+    this->DR0 = taghuman.DR0;
+    this->UR0 = taghuman.UR0;
+    this->NowState = taghuman.NowState;
+    this->WorkObjectSN = taghuman.WorkObjectSN;
+    this->Blood = taghuman.Blood;
+    this->SN = taghuman.SN;
+}
+
+tagFarmer tagFarmer::toEnemy() {
+    Resource = -1;
+    DR0 = -1.0;
+    UR0 = -1.0;
+    return *this;
+}
+
+tagArmy tagArmy::toEnemy() {
+    DR0 = -1.0;
+    UR0 = -1.0;
+    return *this;
+}
+
+tagMap::tagMap() { clear(); }
+
+void tagMap::clear()
+{
+    explore = false;
+    high = -1;
+    clear_r();
+}
+
+void tagMap::clear_r()
+{
+    type = -1;
+    ResType = -1;
+    fundation = -1;
+    SN = -1;
+    remain = -1;
+}
+
+Point::Point() {}
+
+Point::Point(int x, int y) { this->x = x, this->y = y; }
+
+Point::Point(const Point &board) { x = board.x, y = board.y; }
+
+Point Point::operator +(const Point &ps) { return Point(x + ps.x, y + ps.y); }
+
+Point Point::operator -(const Point &ps) { return Point(x - ps.x, y - ps.y); }
+
+bool Point::operator ==(const Point &ps) const { return ps.x == x && ps.y == y; }
+
+bool Point::operator <(const Point &ps) const { return x < ps.x && y < ps.y; }
+
+tagInfo &tagInfo::operator=(const tagInfo &other) {
+    if (this != &other) { // Check for self-assignment
+        buildings = other.buildings;
+        farmers = other.farmers;
+        armies = other.armies;
+        enemy_buildings = other.enemy_buildings;
+        enemy_farmers = other.enemy_farmers;
+        enemy_armies = other.enemy_armies;
+        resources = other.resources;
+        ins_ret = other.ins_ret;
+
+        // Deep copy theMap array
+        theMap=other.theMap;
+        /*
+            for (int i = 0; i < MAP_L; ++i) {
+                for (int j = 0; j < MAP_U; ++j) {
+                    theMap[i][j] = other.theMap[i][j];
+                }
+            }
+            */
+        GameFrame = other.GameFrame;
+        civilizationStage = other.civilizationStage;
+        Wood = other.Wood;
+        Meat = other.Meat;
+        Stone = other.Stone;
+        Gold = other.Gold;
+        Human_MaxNum = other.Human_MaxNum;
+    }
+    return *this;
+}
+
+void tagInfo::clear() {
+    buildings.clear();
+    farmers.clear();
+    armies.clear();
+    enemy_buildings.clear();
+    enemy_farmers.clear();
+    enemy_armies.clear();
+    resources.clear();
+    ins_ret.clear();
+}
+
+void tagGame::update(tagInfo *newinfo) {
+    //控制ins_ret的大小小于100，若大于100，则优先删除旧值
+    QMutexLocker locker(&Locker);
+    if (this->Info != NULL) {
+        while (Info->ins_ret.size() > 100) {
+            Info->ins_ret.erase(Info->ins_ret.begin());
+        }
+    }
+    if (this->Info != NULL)
+        newinfo->ins_ret = this->Info->ins_ret;
+    Info = newinfo;
+    //对内部打乱
+    static const bool openHunYao = 1;
+    // for (auto& building : Info->buildings) {
+    //     qDebug() << "before" << building.SN;
+    // }
+    if (openHunYao) {
+        WLHHunYao(Info->buildings);
+        WLHHunYao(Info->farmers);
+        WLHHunYao(Info->armies);
+        WLHHunYao(Info->enemy_buildings);
+        WLHHunYao(Info->enemy_farmers);
+        WLHHunYao(Info->enemy_armies);
+        WLHHunYao(Info->resources);
+    }
+    // for (auto& building : Info->buildings) {
+    //     qDebug() << "after" << building.SN;
+    // }
+}
+
+void tagGame::insertInsRet(int id, instruction ins) {
+    QMutexLocker locker(&Locker);
+    this->Info->ins_ret.insert(make_pair(id, ins.ret));
+}
+
+tagInfo tagGame::getInfo() {
+    QMutexLocker locker(&Locker);
+    return *Info;
+}
+
+void tagGame::clearInsRet() {
+    QMutexLocker locker(&Locker);
+    Info->ins_ret.clear();
+}
+
+pixMemoryMap::pixMemoryMap(int w, int h) : width(w), height(h) {
+    // 分配内存图空间
+    MemoryMap.resize(width * height);
+}
+
+pixMemoryMap::pixMemoryMap() : width(0), height(0) {}
+
+pixMemoryMap::pixMemoryMap(const pixMemoryMap &other) : width(other.width), height(other.height)
+{
+
+    MemoryMap = other.MemoryMap;
+}
+
+pixMemoryMap &pixMemoryMap::operator=(const pixMemoryMap &other)
+{
+    width = other.width;
+    height = other.height;
+
+    MemoryMap = other.MemoryMap;
+
+    return *this;
+}
+
+void pixMemoryMap::setMemoryMap(int i, int j) {
+    int index = i * height + j;
+    MemoryMap[index] = 1;
+}
+
+char pixMemoryMap::getMemoryMap(int i, int j) {
+    int index = i * height + j;
+    return MemoryMap[index];
+}
+
+void pixMemoryMap::fillBlockMemoryMap()
+{
+    for (int i = 0;i < width / 2;i++)
+    {
+        for (int j = 0;j < height / 2;j++)
+        {
+            if (j * width >= height * (width / 2 - i))
+            {
+                setMemoryMap(i, j);
+            }
+        }
+    }
+    for (int i = width / 2;i < width;i++)
+    {
+        for (int j = 0;j < height / 2;j++)
+        {
+            if (j * width >= height * (i - width / 2))
+            {
+                setMemoryMap(i, j);
+            }
+        }
+    }
+    for (int i = 0;i < width / 2;i++)
+    {
+        for (int j = height / 2;j < height;j++)
+        {
+            if (j * width <= height * (i + width / 2))
+            {
+                setMemoryMap(i, j);
+            }
+        }
+    }
+    for (int i = width / 2;i < width;i++)
+    {
+        for (int j = height / 2;j < height;j++)
+        {
+            if (j * width <= -height * i + 3 * width * height / 2)
+            {
+                setMemoryMap(i, j);
+            }
+        }
+    }
+}
+
+ImageResource::ImageResource(QPixmap pix) :pix(pix)
+{
+    if (pix.isNull()) {
+        // 图片未成功加载，执行错误处理操作
+        qDebug() << "fault";
+    }
+}
+
+ImageResource::ImageResource()
+{
+
+}
+
+conditionDevelop::conditionDevelop() {}
+
+conditionDevelop::conditionDevelop(int civilization, int sort_building, double needTimes, int need_Wood, int need_Food, int need_Stone, int need_Gold)
+{
+    this->civilization = civilization;
+    this->sort_building = sort_building;
+    this->need_Wood = need_Wood;
+    this->need_Food = need_Food;
+    this->need_Stone = need_Stone;
+    this->need_Gold = need_Gold;
+    this->times_second = needTimes;
+}
+
+void conditionDevelop::addPreCondition(conditionDevelop *con_need) { preCondition.push_back(con_need); }
+
+void conditionDevelop::setCreatObjectAfterAction(int creatSort)
+{
+    isCreatObjectAction = true;
+    creatObjectSort = creatSort;
+}
+
+void conditionDevelop::setCreatObjectAfterAction(int creatSort, int creatNum)
+{
+    setCreatObjectAfterAction(creatSort);
+    creatObjectNum = creatNum;
+}
+
+bool conditionDevelop::executable(int wood, int food, int stone, int gold) { return wood >= need_Wood && food >= need_Food && stone >= need_Stone && gold >= need_Gold; }
+
+void conditionDevelop::get_needResource(int &wood, int &food, int &stone, int &gold) { wood = need_Wood, food = need_Food, stone = need_Stone, gold = need_Gold; }
+
+bool conditionDevelop::isShowable(int nowcivilization)
+{
+    if (civilization > nowcivilization) return false;
+
+    for (list<conditionDevelop*>::iterator iter = preCondition.begin(); iter != preCondition.end(); iter++)
+        if (!(*iter)->acttimes) return false;
+
+    return true;
+}
+
+void conditionDevelop::finishAct() { acttimes++; }
+
+bool conditionDevelop::isNeedCreatObject(int &creatSort, int &creatNum)
+{
+    creatSort = creatObjectSort;
+    creatNum = creatObjectNum;
+    return isCreatObjectAction;
+}
+
+bool conditionDevelop::isNeedCreatObject() { return isCreatObjectAction; }
+
+int conditionDevelop::getActTimes() { return acttimes; }
+
+st_upgradeLab::st_upgradeLab() {}
+
+st_upgradeLab::~st_upgradeLab()
+{
+    while (headAct != endNode)
+    {
+        nowExecuteNode = headAct;
+        headAct = headAct->nextDevAction;
+        delete nowExecuteNode;
+    }
+    delete endNode;
+}
+
+void st_upgradeLab::setHead(conditionDevelop *head) { endNode = nowExecuteNode = headAct = head; }
+
+void st_upgradeLab::push_back(conditionDevelop *node)
+{
+    endNode->nextDevAction = node;
+    endNode = node;
+}
+
+void st_upgradeLab::endNodeAsOver() { endNode->nextDevAction = endNode; }
+
+void st_upgradeLab::shift()
+{
+    if (nowExecuteNode != NULL)
+    {
+        overExecute();
+        haveFinishedPhaseNum++;
+        nowExecuteNode = nowExecuteNode->nextDevAction;
+    }
+}
+
+bool st_upgradeLab::isShowAble(int nowcivilization)
+{
+    if (nowExecuteNode == NULL) return false;
+    else return nowExecuteNode->isShowable(nowcivilization) && (!nowExecuting || nowExecuteNode == nowExecuteNode->nextDevAction);
+}
+
+bool st_upgradeLab::executable(int nowcivilization, int wood, int food, int stone, int gold) { return isShowAble(nowcivilization) && nowExecuteNode->executable(wood, food, stone, gold); }
+
+void st_upgradeLab::beginExecute() { this->nowExecuting = true; }
+
+void st_upgradeLab::overExecute() { this->nowExecuting = false; }
+
+int st_upgradeLab::getPhaseTimes() { return this->haveFinishedPhaseNum; }
+
+void st_upgradeLab::get_needResource(int &wood, int &food, int &stone, int &gold)
+{
+    if (nowExecuteNode != NULL)
+        nowExecuteNode->get_needResource(wood, food, stone, gold);
+    else wood = 0, food = 0, stone = 0, gold = 0;
+}
+
+bool st_upgradeLab::isNeedCreatObject() {
+    if (nowExecuteNode != NULL) return nowExecuteNode->isNeedCreatObject();
+    else return false;
+}
+
+st_buildAction::st_buildAction() {}
+
+st_buildAction::~st_buildAction()
+{
+    if (buildCon != NULL)
+    {
+        delete buildCon;
+        buildCon = NULL;
+    }
+}
+
+void st_buildAction::finishBuild() { buildCon->finishAct(); }
+
+void st_buildAction::finishAction(int actNum)
+{
+    actCon[actNum].nowExecuteNode->finishAct();
+    actCon[actNum].shift();
+}
+
 
 
 Q_COREAPP_STARTUP_FUNCTION(ReadConfig)
@@ -1244,7 +1781,6 @@ void ReadConfig()
     jsonBool(IsExamining);
     jsonInt(TimePerFrame);
     jsonQString(GameServerAddr);
-    jsonInt(DataPostIntervalFrame);
     jsonBool(EditorMode);
     jsonBool(GlobalVision);
     jsonBool(only_debug_Player0);

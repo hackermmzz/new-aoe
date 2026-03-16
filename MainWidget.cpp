@@ -2372,14 +2372,8 @@ void MainWidget::HandleGameOver()
     //
     bool win=isWin();
     //
-    QJsonObject obj;
-    obj.insert("id",Id);
-    obj.insert("indices",Indices);
-    obj.insert("status",win?4:11);
-    if(win)obj.insert("data","游戏胜利");
-    else obj.insert("data",core->GetCurrentStatus());
-    NetworkManager->postJson(GameServerAddr,{{"api",API_Value}},obj);
-    NetworkManager->waitDone();
+    auto*p=player[NOWPLAYERREPRESENT];
+    ResultLogInfo(win,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
 }
 //**************槽函数***************
 // 游戏帧更新

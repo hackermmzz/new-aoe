@@ -3,8 +3,6 @@
     "DefaultCivilization":2,
     "IsExamining": false,
     "TimePerFrame": 40,
-    "GameServerAddr": "http://localhost:8080/api/admin/CodeRunStatusPost",
-    "DataPostIntervalFrame": 100,
     "EditorMode": false,
     "GlobalVision": true,
     "only_debug_Player0": true,

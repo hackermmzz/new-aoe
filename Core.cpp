@@ -18,12 +18,12 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
     InitPlayerMap();
 }
 
+
+
 void Core::gameUpdate()
 {
-    //如果是考试状态,禁止cheat
-    if(IsExamining){
-        is_cheatAction=false;
-    }
+    //如果是考试状态,做出一些调整
+    if(IsExamining)ModifyDuringExam();
     //
     explored.clear();//清空上一帧带来的变化
     theMap->clear_CellVisible();     //清空上一帧的视野
@@ -61,11 +61,6 @@ void Core::gameUpdate()
             firstFrame=0;
             FirstFrameProcess();
         }
-    }
-    //进度记录(考试模式下开启)
-    if(IsExamining)
-    {
-        PostDataToServer();
     }
 }
 void Core::ResetHumanPos(){
@@ -1502,34 +1497,13 @@ void Core::requestSound_Click(Coordinate* object)
     return;
 }
 
-void Core::PostDataToServer()
-{
-    //记录下次一发送的帧率
-    static int recordLastFrame=0;
-    //第一帧或者间隔达到指定帧就发送
-    if(recordLastFrame==0 || g_frame-recordLastFrame>=DataPostIntervalFrame){
-        recordLastFrame=g_frame;
-    }else{
-        return;
-    }
-    //获取状态
-    QJsonObject obj;
-    obj.insert("indices",Indices);
-    obj.insert("id",Id);
-    obj.insert("status",2);
-    obj.insert("data",GetCurrentStatus());
-    //上传数据
-    NetworkManager->postJson(GameServerAddr,{{"api",API_Value}},obj);
-}
 
-QJsonObject Core::GetCurrentStatus()
+
+void Core::ModifyDuringExam()
 {
-    QJsonObject ret;
-    Player*p=player[0];
-    ret.insert("score",usrScore.getScore());
-    ret.insert("meat",p->getFood());
-    ret.insert("gold",p->getGold());
-    ret.insert("stone",p->getStone());
-    ret.insert("wood",p->getWood());
-    return ret;
+    //关闭作弊模式
+    is_cheatAction=false;
+    //输出每帧的实时状态信息
+    Player*p=player[NOWPLAYERREPRESENT];
+    ResultLogInfo(0,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
 }
