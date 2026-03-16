@@ -55,6 +55,8 @@ private:
 public slots:
     void onWaveAttack(int wave);
     void FirstAttack();
+    void SecondAttack();
+    tagArmy Threated(tagArmy* army);
 };
 /*##########DO NOT EDIT ABOVE##########*/
 
