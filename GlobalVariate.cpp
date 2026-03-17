@@ -1288,7 +1288,8 @@ void ResultLogInfo::LogOut()
        out=new QTextStream(file);
    }
    //////////////////////////////////////写入信息
-    (*out)<<ToString()<<"\n";
+   (*out)<<ToString()<<"\n";
+   out->flush();
 }
 
 QString ResultLogInfo::ToString()
