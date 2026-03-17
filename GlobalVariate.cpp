@@ -1208,13 +1208,11 @@ void ParseArguments(const QApplication&app){
     parser.addHelpOption();
     QCommandLineOption option0(
         QStringList()<<"exam",
-         "开启考试模式",
-                "true|false"
+         "开启考试模式"
        );
     QCommandLineOption option1(
         QStringList()<<"offscreen",
-        "关闭图像渲染",
-         "true|false"
+        "关闭图像渲染"
        );
     QCommandLineOption option2(
         QStringList()<<"ResultLogFile",
@@ -1231,15 +1229,11 @@ void ParseArguments(const QApplication&app){
     parser.process(app);
     //
     if(parser.isSet("exam")){
-        auto value=parser.value("exam");
-        if(value=="true")IsExamining=true;
-        else IsExamining=false;
+        IsExamining=true;
     }
     //
     if(parser.isSet("offscreen")){
-        auto value=parser.value("offscreen");
-        if(value=="true")OffScreen=true;
-        else OffScreen=false;
+        OffScreen=true;
     }
     //
     if(parser.isSet("ResultLogFile")){
