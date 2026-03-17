@@ -1296,6 +1296,8 @@ QString ResultLogInfo::ToString()
 {
     QJsonObject obj;
     obj["win"]=win;
+    obj["time"]=g_frame/FRAMES_PER_SECOND;
+    obj["frame"]=g_frame;
     obj["score"]=score;
     obj["wood"]=wood;
     obj["food"]=food;
