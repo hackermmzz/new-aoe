@@ -8,6 +8,7 @@
 #include<QNetworkAccessManager>
 #include"networkplugin.h"
 #include<QNetworkReply>
+
 using namespace std;
 class Coordinate;
 //
@@ -541,6 +542,7 @@ struct ResultLogInfo{
     string msg;
     ResultLogInfo(bool win_,int score_,int wood_,int food_,int gold_,int stone_,string msg_="");
     void LogOut();
+    QString ToString();
 };
 //当前选中对象
 //出于gamewidget和core均需要获取当前访问对象

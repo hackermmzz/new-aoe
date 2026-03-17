@@ -6,8 +6,8 @@
 
 QT       += \
         core gui \
-        multimedia
-
+        multimedia\
+ gui-private
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = newAOE

@@ -1281,6 +1281,35 @@ ResultLogInfo::ResultLogInfo(bool win_, int score_,int wood_, int food_, int gol
 void ResultLogInfo::LogOut()
 {
 
+   static QTextStream*out=0;
+   if(!out){
+       //打开文件：WriteOnly 只写模式
+       QFile*file=new QFile(ResultLogFile);
+       if(!file->open(QIODevice::WriteOnly | QIODevice::Text))
+       {
+           qDebug() << "文件打开失败：" << file->errorString();
+           return;
+       }
+       //创建文本流
+       out=new QTextStream(file);
+   }
+   //////////////////////////////////////写入信息
+    (*out)<<ToString()<<"\n";
+}
+
+QString ResultLogInfo::ToString()
+{
+    QJsonObject obj;
+    obj["win"]=win;
+    obj["score"]=score;
+    obj["wood"]=wood;
+    obj["food"]=food;
+    obj["gold"]=gold;
+    obj["stone"]=stone;
+    if(msg!="")obj["msg"]=QString::fromStdString(msg);
+    QJsonDocument doc(obj);
+    QString txt=doc.toJson(QJsonDocument::Compact);
+    return txt;
 }
 
 st_DebugMassage::st_DebugMassage(QString color, QString content)

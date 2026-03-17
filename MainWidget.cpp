@@ -8,6 +8,7 @@
 #include<Rectarea.h>
 #include<CircleArea.h>
 #include<LineArea.h>
+#include <QtGui/private/qzipreader_p.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
 // 全局区域对象定义
@@ -1287,7 +1288,24 @@ void MainWidget::initGameResources() {
     InitImageResMap(RESPATH);   // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
 }
+void zip_decompress(const QString &fileName, const QString &outputPath) {
+    if (fileName.isEmpty()) return;
 
+    QZipReader reader(fileName);
+    foreach (const QZipReader::FileInfo &info, reader.fileInfoList()) {
+    QString filePath = QDir::cleanPath(outputPath + QDir::separator() + info.filePath);
+    if (info.isDir) {
+    QDir().mkpath(filePath);
+    } else {
+    QFile file(filePath);
+    if (file.open(QIODevice::WriteOnly)) {
+    file.write(reader.fileData(info.filePath));
+    file.close();
+    }
+    }
+    }
+    reader.close();
+}
 void MainWidget::initGameElements() {
     qDebug() << "游戏元素初始化...";
     initBlock();
