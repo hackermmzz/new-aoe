@@ -17,6 +17,7 @@ extern bool OffScreen;
 extern int DefaultCivilization;
 extern bool MAP_EXPLORE;
 extern bool MAP_VISIABLE;
+extern double MUSIC_VOLUME;
 extern int INITIAL_WOOD;
 extern int INITIAL_MEAT;
 extern int INITIAL_GOLD;
@@ -504,7 +505,6 @@ extern int NOWRES_TIMER_PRIEST;
 extern bool IsExamining;
 extern int TimePerFrame;
 extern NetworkPlugin*NetworkManager;
-extern QString GameServerAddr;
 //
 extern bool AIfinished;
 extern bool INSfinshed;

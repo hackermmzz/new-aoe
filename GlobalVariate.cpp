@@ -15,11 +15,11 @@ bool OffScreen;//是否关闭渲染游戏渲染
 int DefaultCivilization;//初始文明
 bool IsExamining;
 int TimePerFrame;//一帧要耗的时间
-QString GameServerAddr;
 bool EditorMode;//是否开启编辑器模式
 bool GlobalVision;//是否开启全局视野
 bool only_debug_Player0;
 bool filterRepetitionMessage;
+double MUSIC_VOLUME;//音乐响度
 int GAME_WIDTH;//总窗口宽度
 int GAME_HEIGHT;//总窗口高度
 string GAME_VERSION;//当前版本名称
@@ -725,24 +725,17 @@ int InitSoundResMap(QString path)
     {
         //文件名称
         QString fileName = dir[i];
-        //文件全路径
-        QString filePath = path + "/" + fileName;
-
         //获取文件后缀
-        QFileInfo testInfo(filePath);
         int index = fileName.lastIndexOf(".");
         QString SoundMapName;
         SoundMapName = fileName.left(index);
-
         std::string tmpMapName = SoundMapName.toStdString();
-
-        int volume = 50;
+        //
         QSoundEffect* qSoundEffect = new QSoundEffect();
-
-        filePath ="qrc"+filePath;
-
+        QString filePath ="qrc:///"+fileName;
+        //
         qSoundEffect->setSource(QUrl(filePath));
-        qSoundEffect->setVolume(volume);
+        qSoundEffect->setVolume(MUSIC_VOLUME*100);
         SoundMap.insert(map<string, QSoundEffect*>::value_type(tmpMapName, qSoundEffect));
     }
 
@@ -1796,7 +1789,6 @@ void ReadConfig()
     ////////////////////////////////////////////
     jsonBool(IsExamining);
     jsonInt(TimePerFrame);
-    jsonQString(GameServerAddr);
     jsonBool(EditorMode);
     jsonBool(GlobalVision);
     jsonBool(only_debug_Player0);
@@ -2284,6 +2276,7 @@ void ReadConfig()
     jsonInt(Boulder_Trail_Effect_Duration);
     jsonInt(DefaultCivilization);
     jsonBool(OffScreen);
+    jsonDouble(MUSIC_VOLUME);
     ////////////////////////////////////////////////
 
 }

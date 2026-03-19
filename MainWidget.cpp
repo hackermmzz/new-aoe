@@ -102,8 +102,6 @@ MainWidget::MainWidget(QWidget* parent) :
     QResource::registerResource("./res.rcc");
     //初始化一些变量
     initVar();
-    //初始化编辑器默认状态
-    currentSelected = NORMAL_MOUSE;
     //初始化一些编辑器配置
     initEditor();
     // 初始化游戏资源
@@ -1125,6 +1123,7 @@ void MainWidget::initGameResources() {
     InitImageResMap(RESPATH); // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
     //
+
 }
 void MainWidget::initGameElements() {
     qDebug() << "游戏元素初始化...";
@@ -2159,6 +2158,8 @@ void MainWidget::initEditor()
     editor = new Editor(this);
     // 初始化单位选择和区域管理相关变量
     selectedUnits.clear();
+    //初始化编辑器默认状态
+    currentSelected = NORMAL_MOUSE;
     //
     rectArea=new RectArea(ui->Game);
     circleArea=new CircleArea(ui->Game);
