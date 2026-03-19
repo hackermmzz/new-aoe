@@ -34,8 +34,6 @@ void Core::gameUpdate()
     ResetHumanPos();
     loadRelationMap();
 
-    //更新AI用的资源表，该资源表是User/Enemy的通用模板
-    theMap->reset_resMap_AI();
 
     //刷新视野并处理区域探索结果
     theMap->reset_ObjectExploreAndVisible();
@@ -629,15 +627,7 @@ void Core::updateCommon(tagInfo* taginfo,int id){
         //如果是敌人,直接给定固定全局可见的地图
         taginfo->theMap=&(data->theMap);
     }
-    /*
-    for (int i = 0; i < MAP_L; ++i) {
-        for (int j = 0; j < MAP_U; ++j) {
-            int height = theMap->cell[i][j].getMapHeight();
-            taginfo->theMap[i][j].height = theMap->map_Height[i][j];
-            taginfo->theMap[i][j].type = height == MAPHEIGHT_OCEAN ? MAPPATTERN_OCEAN : MAPPATTERN_GRASS;
-        }
-    }
-    */
+
 }
 
 

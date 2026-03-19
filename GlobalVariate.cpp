@@ -598,13 +598,12 @@ int InitImageResMap(QString path)
 
     QStringList filters;
     filters<<QString("*.png")<<QString("*.gif");
-
     //文件类型过滤器（去除符号链接symlink）
     dir.setFilter(QDir::Files | QDir::NoSymLinks);
     //文件名称过滤器（去除其他后缀的文件）
     dir.setNameFilters(filters);
     int dirCount = dir.count();
-    //    qDebug()<<"路径中一共存在"<<dirCount<<"张图片";
+    //
     if(dirCount <= 0)
     {
         qDebug()<<"路径内无png和gif文件";
@@ -618,29 +617,21 @@ int InitImageResMap(QString path)
         QString fileName = dir[i];
         //文件全路径
         QString filePath = path + "/" + fileName;
-
-        //debug用，可删
-        QStringList ImageList;
-        ImageList.append(filePath);
-
-
         //获取文件后缀
-        QFileInfo testInfo(filePath);
-        QString testSuffix = testInfo.suffix();
         int index = fileName.lastIndexOf("_");
         QString imageMapName;
         imageMapName = fileName.left(index);
         //
         std::string tmpListName = imageMapName.toStdString();
         //获取图片
-        QPixmap img(filePath);
+        QPixmap img;
         /*
          * 鉴于项目耦合度太高了，汪立洪根本不可能去花时间去专门解耦，
          * 特此为了满足oj的低内存运行，必须把图片整体给砍掉,
          * 特此提醒，建议别动这行代码
          *
         */
-        if(OffScreen)img=img.scaled(0,0);
+        if(!OffScreen)img=QPixmap(filePath);
         /*
          * 正所谓，
          * 项目越大，代码越屎。
@@ -650,7 +641,6 @@ int InitImageResMap(QString path)
 
         //存储全局资源
         resMap[tmpListName].push_back(img);
-
     }
     ////////////////////////////////对资源进行额外操作
     //对船的帧数进行调整
@@ -680,6 +670,7 @@ int InitImageResMap(QString path)
             boulders.push_back(scaledPix);
         }
     }
+
     ////////////////////////////////
     return -1;
 }
@@ -738,7 +729,6 @@ int InitSoundResMap(QString path)
         qSoundEffect->setVolume(MUSIC_VOLUME*100);
         SoundMap.insert(map<string, QSoundEffect*>::value_type(tmpMapName, qSoundEffect));
     }
-
 
     return -1;
 }
@@ -1414,23 +1404,7 @@ tagArmy tagArmy::toEnemy() {
     return *this;
 }
 
-tagMap::tagMap() { clear(); }
 
-void tagMap::clear()
-{
-    explore = false;
-    high = -1;
-    clear_r();
-}
-
-void tagMap::clear_r()
-{
-    type = -1;
-    ResType = -1;
-    fundation = -1;
-    SN = -1;
-    remain = -1;
-}
 
 Point::Point() {}
 

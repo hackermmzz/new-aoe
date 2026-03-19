@@ -671,24 +671,7 @@ struct ins {
     std::queue<instruction> instructions;
     QMutex lock;
 };
-struct tagMap
-{
-    bool explore;
-    int high;
 
-    //该位置资源信息
-    int type;       //资源种类（浆果、树等）
-    int ResType;    //采集获得的资源种类（食物、木头等） human_WOOD...
-    int fundation;  //该资源占地图大小
-    int SN;
-    int remain;     //剩余资源量
-
-    //*********************************
-    tagMap();
-    void clear();
-
-    void clear_r();
-};
 struct tagTerrain {
     int height;
     int type;

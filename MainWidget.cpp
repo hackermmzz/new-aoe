@@ -710,7 +710,6 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
 
     // 更新障碍物地图和资源地图
     map->loadBarrierMap(true);
-    map->reset_resMap_AI();
     ui->Game->update();  // 触发界面重绘
 }
 
@@ -1121,7 +1120,7 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
 void MainWidget::initGameResources() {
     qDebug() << "游戏资源初始化...";
     InitImageResMap(RESPATH); // 图像资源
-    InitSoundResMap(RESPATH);   // 音频资源
+    if(!OffScreen) InitSoundResMap(RESPATH);   // 音频资源
     //
 
 }
@@ -1251,14 +1250,12 @@ void MainWidget::initMap() {
     for (int i = 0; i < MEMORYROW; i++) {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
-    map->loadResource();
     
     // 应用从地图文件中读取的敌人状态
     if (EditorMode) {
         map->applyEnemyStatusToMainWidget(this);
     }
     
-    // buildInitialStock();
 }
 
 void MainWidget::initAI() {
@@ -2427,72 +2424,6 @@ void MainWidget::clearDebugTextFile()
 }
 
 //***********************************************************************
-//设置初始资源
-void MainWidget::buildInitialStock()
-{
-    int minBDR = MAP_L / 2 - 10, minBUR = MAP_U / 2 - 10;
-    int maxBDR = MAP_L / 2 + 6, maxBUR = MAP_U / 2 + 6;
-    int lenth = 0, step;
-    Point StockPoint, judPoint;
-    vector<Point> findLab;
-    bool tasking = true;
-    int labSize, treeNum, maxtreeNum = 0;
-    int lx, ly, mx, my;
-
-    map->loadBarrierMap(true);
-    map->reset_Map_Object_Resource();
-    map->reset_resMap_AI();
-    while (tasking)
-    {
-        lenth = maxBDR - minBDR;
-        for (int y = minBUR; y <= maxBUR; y++)
-        {
-            if (y == minBUR || y == maxBUR) step = 1;
-            else step = lenth;
-
-            for (int x = minBDR; x <= maxBDR; x += lenth)
-                if (!map->isBarrier(x, y, 5) && map->isFlat(x + 1, y + 1, 3)) findLab.push_back(Point(x + 1, y + 1));
-        }
-
-        labSize = findLab.size();
-
-        if (labSize > 0)
-        {
-            for (int i = 0; i < labSize; i++)
-            {
-                judPoint = findLab[i];
-                lx = max(judPoint.x - 5, 0);
-                ly = max(judPoint.y - 5, 0);
-                mx = min(judPoint.x + 8, MAP_L);
-                my = min(judPoint.y + 8, MAP_U);
-                treeNum = 0;
-
-                for (int x = lx; x < mx; x++)
-                    for (int y = ly; y < my; y++)
-                        if (map->resMap_EnemyAI[x][y].type == RESOURCE_TREE) treeNum++;
-
-                if (treeNum > 10)
-                {
-                    tasking = false;
-                    if (treeNum > maxtreeNum)
-                    {
-                        maxtreeNum = treeNum;
-                        StockPoint = judPoint;
-                    }
-                }
-            }
-        }
-        findLab.clear();
-        minBDR = max(minBDR - 1, 0);
-        minBUR = max(minBUR - 1, 0);
-        maxBDR = min(maxBDR + 1, MAP_L - 5);
-        maxBUR = min(maxBUR + 1, MAP_U - 5);
-    }
-
-    //    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
-    return;
-}
-
 
 
 void MainWidget::on_option_2_clicked()

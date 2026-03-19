@@ -254,7 +254,6 @@ private:
     void initFarmer();
     void initArmy();
     void initMissile();
-    void buildInitialStock();
 
 //*****************************************
 
