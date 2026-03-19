@@ -1,5 +1,5 @@
 {
-    "OffScreen":true,
+    "OffScreen":false,
     "DefaultCivilization":2,
     "IsExamining": false,
     "TimePerFrame": 40,
