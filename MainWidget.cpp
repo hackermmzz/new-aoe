@@ -91,13 +91,15 @@ std::map<int, std::string> actNames = {
 };
 
 
-MainWidget::MainWidget(int MapJudge, QWidget* parent) :
+MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
 {
-    qInfo() << "主程序启动参数：" << MapJudge << " 开始初始化...";
+    qInfo() << " 开始初始化...";
     ui->setupUi(this);
     g_mainWidget = this; // 设置全局MainWidget实例指针
+    //申请资源
+    QResource::registerResource("./res.rcc");
     //初始化一些变量
     initVar();
     //初始化编辑器默认状态
@@ -119,7 +121,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     // 初始化玩家
     initPlayers();
     // 初始化地图
-    initMap(MapJudge);
+    initMap();
     // 设置内核
     setupCore();
     // 初始化AI
@@ -132,11 +134,12 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     initViewMap();
     // 设置背景音乐以及音乐播放线程初始化
     initMusic();
+    //注销资源
+    QResource::unregisterResource("./res.rcc");
     //
     debugText("blue", " 游戏开始");
     qInfo() << "初始化结束，游戏开始;";
-    //注销资源
-    QResource::unregisterResource("./res.rcc");
+
 
 }
 
@@ -1121,6 +1124,7 @@ void MainWidget::initGameResources() {
     qDebug() << "游戏资源初始化...";
     InitImageResMap(RESPATH); // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
+    //
 }
 void MainWidget::initGameElements() {
     qDebug() << "游戏元素初始化...";
@@ -1236,11 +1240,11 @@ void MainWidget::initPlayers() {
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
 
-void MainWidget::initMap(int MapJudge) {
+void MainWidget::initMap() {
     qDebug() << "初始化地图...";
     map = new Map;
     map->setPlayer(player);
-    map->init(MapJudge);
+    map->init();
     map->init_Map_Height();
 
     // 内存图开辟空间

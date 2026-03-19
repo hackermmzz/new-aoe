@@ -1798,7 +1798,7 @@ void Map::GenerateMapTxt(int MapJudge) {
  * 返回值：空。
  */
 
-void Map::loadGenerateMapText(int MapJudge)
+void Map::loadGenerateMapText()
 {
     // 使用高精度时间为种子的真随机数生成器
     auto AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX.c_str());
@@ -2142,9 +2142,9 @@ bool Map::CheckIsNearOcean(int x, int y)
  * 内容：初始化地图的总函数；
  * 返回值：空。
  */
-void Map::init(int MapJudge) {
+void Map::init() {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
-    loadGenerateMapText(MapJudge);  //载入地图
+    loadGenerateMapText();  //载入地图
     divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
     refineShore();
 }

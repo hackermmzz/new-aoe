@@ -28,7 +28,7 @@ class MainWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit MainWidget(int MapJudge, QWidget *parent = 0);
+    explicit MainWidget(QWidget *parent = 0);
     ~MainWidget();
 
     Player** player;
@@ -240,7 +240,7 @@ private:
     void initInfoPane();
     void initGameTimer();
     void initPlayers();
-    void initMap(int MapJudge);
+    void initMap();
     void initAI();
     void setupCore();
     void setupMouseTracking();

@@ -14,8 +14,6 @@ int main(int argc, char* argv[])
     ParseArguments(app);
     //开启GPU加速
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
-    //申请资源
-    QResource::registerResource("./res.rcc");
     //创建网络插件
     NetworkManager=new NetworkPlugin(&app);
     NetworkManager->start();
@@ -25,23 +23,8 @@ int main(int argc, char* argv[])
     // 添加排除文件，这些文件不会被Logger处理
     Logger::addExcludedFile("EnemyAI.cpp");
     Logger::addExcludedFile("UsrAI.cpp");
-
-    QStringList args = app.arguments();
-    QMap<QString, int> mapOptions = {
-        {"-l", 1},{"-last",1},    // 读取上一次的地图，"tmpMap.txt"
-        {"-s", 2},{"-select",2}   // 读取指定地图，"gameMap.txt"
-        // 添加更多启动参数...
-    };
-    int mapJudge = 0;  // 设置默认值
-
-    //提取选项对应的参数
-    for (const QString& arg : args) {
-        if (mapOptions.contains(arg)) {
-            mapJudge = mapOptions.value(arg);
-        }
-    }
-
-    MainWidget w(mapJudge);
+    //运行窗口
+    MainWidget w;
     w.show();
     return app.exec();
 }

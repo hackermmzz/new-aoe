@@ -15,7 +15,7 @@ class Map
 public:
     Map();
     ~Map();
-    void init(int MapJudge);
+    void init();
 
     // 重绘海岸
     void refineShore();
@@ -180,7 +180,7 @@ public:
     void InitCell(int Num, bool isExplored, bool isVisible);
     void ResetMapType(int blockL, int blockU);
     void GenerateMapTxt(int MapJudge);
-    void loadGenerateMapText(int MapJudge);
+    void loadGenerateMapText();
     
     // 应用敌人状态到MainWidget
     void applyEnemyStatusToMainWidget(class MainWidget* mainWidget);
