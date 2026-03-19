@@ -174,6 +174,7 @@ private:
 //*******************************
 
 //****************编辑器*****************
+    void EditorWidgetBind();    //编辑器槽绑定
     void SaveCurrentState();
     void ExportCurrentState(const char*file);
     void updateEditor();
@@ -244,7 +245,7 @@ private:
     void setupCore();
     void setupMouseTracking();
     void setupTipLabel();
-    void initBGM();
+    void initMusic();
     void initViewMap();
     void initBlock();
     void initBuilding();

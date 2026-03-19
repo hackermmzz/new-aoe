@@ -8,7 +8,6 @@
 #include<Rectarea.h>
 #include<CircleArea.h>
 #include<LineArea.h>
-#include <QtGui/private/qzipreader_p.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
 // 全局区域对象定义
@@ -98,6 +97,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
 {
     qInfo() << "主程序启动参数：" << MapJudge << " 开始初始化...";
     ui->setupUi(this);
+    g_mainWidget = this; // 设置全局MainWidget实例指针
     //初始化一些变量
     initVar();
     //初始化编辑器默认状态
@@ -130,150 +130,13 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     setupTipLabel();
     // 设置小地图
     initViewMap();
-    // 设置背景音乐
-    initBGM();
-    //开辟音乐播放线程
-    soundPlayThread = (new SoudPlayThread);
-    soundPlayThread->start();
+    // 设置背景音乐以及音乐播放线程初始化
+    initMusic();
     //
     debugText("blue", " 游戏开始");
-    qInfo() << "初始化结束，游戏开始！";
-
-    // 创建编辑器
-    editor = new Editor(this);
-    
-    // 初始化单位选择和区域管理相关变量
-    selectedUnits.clear();
-    
-    // 设置全局MainWidget实例指针
-    g_mainWidget = this;
-
-    // 显示编辑器
-    editor->show();
-    if (!EditorMode) editor->hide();
-
-    // 导出地图
-    connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
-        this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
-        call_debugText("green", " 导出地图", 0);
-        });
-    connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {
-        call_debugText("green", " 删除资源/建筑", 0);
-        this->currentSelected = DELETEOBJECT;
-        });
-    // 连接 QComboBox 的 currentIndexChanged 信号
-    connect(editor->ui->land_type, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        // 获取当前选中的选项索引
-        QString selectedText = text;
-        if (text == "草地") this->currentSelected = FLAT;
-        else if (text == "海洋") this->currentSelected = OCEAN;
-        if (text != "地皮类型") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->land_height, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "提升高度") this->currentSelected = HIGHTERLAND;
-        else if (text == "降低高度") this->currentSelected = LOWERLAND;
-        if (text != "地皮高度") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->player_building_and_source, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "玩家市中心") this->currentSelected = PLAYERDOWNTOWN;
-        else if (text == "玩家运输船") this->currentSelected = PLAYERTRANSPORTSHIP;
-        else if (text == "玩家渔船") this->currentSelected = PLAYERFISHINGBOAT;
-        else if (text == "玩家船坞") this->currentSelected = PLAYERDOCK;
-        else if (text == "玩家战船") this->currentSelected = PLAYERWARSHIP;
-        else if (text == "玩家仓库") this->currentSelected = PLAYERREPOSITORY;
-        else if (text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
-        else if (text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
-        else if (text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
-        else if (text == "玩家房子") this->currentSelected = PLAYERHOME;
-        if (text != "玩家资源/建筑") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->player_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "玩家农民") this->currentSelected = PLAYERFARMER;
-        else if (text == "玩家棍棒兵") this->currentSelected = PLAYERCLUBMAN;
-        else if (text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
-        else if (text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
-        else if (text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
-        if (text != "玩家人物") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->ai_building_and_resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "敌方战船") this->currentSelected = AIWARSHIP;
-        else if (text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
-        else if (text == "敌方武器攻城厂") this->currentSelected = AISIEGE;
-        if (text != "敌方资源/建筑") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->ai_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "敌方棍棒兵") this->currentSelected = AICLUBMAN;
-        else if (text == "敌方斧头兵") this->currentSelected = AIAXEMAN;
-        else if (text == "敌方侦察兵") this->currentSelected = AISCOUT;
-        else if (text == "敌方弓箭手") this->currentSelected = AIBOWMAN;
-        else if (text == "敌方祭司")   this->currentSelected = AIPRIEST;
-        else if (text == "敌方方阵兵") this->currentSelected = AIHOPLITE;
-        else if (text == "敌方阔剑兵") this->currentSelected = AIBROADSWORDSMAN;
-        else if (text == "敌方驷马战车") this->currentSelected = AICHARIOT;
-        else if (text == "敌方战车射手") this->currentSelected = AICHARIOTARCHER;
-        else if (text == "敌方复合弓手") this->currentSelected = AICOMPARCHER;
-        else if (text == "敌方投石车") this->currentSelected = AISTONETHROWER;
-        if (text != "敌方人物") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "瞪羚") this->currentSelected = GAZELLE;
-        else if (text == "狮子") this->currentSelected = LION;
-        else if (text == "大象") this->currentSelected = ELEPHANT;
-        if (text != "动物") call_debugText("green", " " + text, 0);
-        });
-    connect(editor->ui->resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        QString selectedText = text;
-        if (text == "树木") this->currentSelected = TREE;
-        else if (text == "石头") this->currentSelected = STONM;
-        else if (text == "金矿") this->currentSelected = GOLDORE;
-        if (text != "公立资源") call_debugText("green", " " + text, 0);
-        });
-    // 巡逻区域控制
-    connect(editor->ui->patrolArea, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        if (selectedUnits.empty()) return;  // 没有选中单位时不处理
-        QString selectedText = text;
-        if (text == "矩形区域") {
-            this->currentSelected = PATROL_RECT_AREA;
-            ((RectArea*)rectArea)->setCurrentAreaType(1);  // 1=巡逻区域(蓝色)
-            ((RectArea*)rectArea)->setTargetUnits(selectedUnits);
-        }
-        else if (text == "圆形区域") {
-            this->currentSelected = PATROL_CIRCLE_AREA;
-            ((CircleArea*)circleArea)->setCurrentAreaType(1);
-            ((CircleArea*)circleArea)->setTargetUnits(selectedUnits);
-        }
-        else if(text=="曲线区域") {
-            this->currentSelected = PATROL_LINE_AREA;
-            ((LineArea*)lineArea)->setCurrentAreaType(1);
-            ((LineArea*)lineArea)->setTargetUnits(selectedUnits);
-        }
-        if (text != "巡逻区域") call_debugText("green", " 巡逻区域: " + text, 0);
-        });
-    
-    // 敌人状态控制
-    connect(editor->ui->enemyStatus, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
-        if (text == "攻击") {
-            this->currentSelected = ENEMY_STATUS_ATTACK;
-            call_debugText("blue", " 敌人状态: 攻击模式", 0);
-        }
-        else if (text == "防守") {
-            this->currentSelected = ENEMY_STATUS_DEFEND;
-            call_debugText("yellow", " 敌人状态: 防守模式", 0);
-        }
-        });
-    
-    
-    // 鼠标按钮连接
-    connect(editor->ui->mouse_button, &QPushButton::clicked, this, [=]() {
-        this->currentSelected = NORMAL_MOUSE;
-        call_debugText("green", " 普通鼠标模式", 0);
-        });
+    qInfo() << "初始化结束，游戏开始;";
+    //注销资源
+    QResource::unregisterResource("./res.rcc");
 
 }
 
@@ -851,35 +714,6 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
 }
 
 
-// void MainWidget::SaveCurrentState()
-// {
-//     GameState* state = new GameState;
-//     ////////////////////////
-//     //保存地形
-//     for (int i = 0;i < MAP_L;++i)for (int j = 0;j < MAP_U;++j)state->cell[i][j] = map->cell[i][j];
-//     for (int i = 0;i < GENERATE_L;++i)for (int j = 0;j < GENERATE_U;++j)state->m_heightMap[i][j] = map->m_heightMap[i][j];
-//     //保存我方人物信息
-//     {
-//         Player* p = player[0];
-//         state->myBuilding = p->build;
-//         state->myHuman = p->human;
-//     }
-//     //保存敌方信息
-//     {
-//         Player* p = player[1];
-//         state->myBuilding = p->build;
-//         state->myHuman = p->human;
-//     }
-//     state->myHuman = player[0]->human;
-//     state->myBuilding = player[0]->build;
-//     state->enemyHuman = player[1]->human;
-//     state->enemyBuilding = player[1]->build;
-//     state->animal = map->animal;
-//     state->resource = map->staticres;
-//     //
-//     ////////////////////////
-//     ui->Game->SaveCurrentState(state);
-// }
 
 
 void MainWidget::HigherLand(int blockL, int blockU, int height)
@@ -1285,26 +1119,8 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
 //***************InitHelperFunctionBegin**************
 void MainWidget::initGameResources() {
     qDebug() << "游戏资源初始化...";
-    InitImageResMap(RESPATH);   // 图像资源
+    InitImageResMap(RESPATH); // 图像资源
     InitSoundResMap(RESPATH);   // 音频资源
-}
-void zip_decompress(const QString &fileName, const QString &outputPath) {
-    if (fileName.isEmpty()) return;
-
-    QZipReader reader(fileName);
-    foreach (const QZipReader::FileInfo &info, reader.fileInfoList()) {
-    QString filePath = QDir::cleanPath(outputPath + QDir::separator() + info.filePath);
-    if (info.isDir) {
-    QDir().mkpath(filePath);
-    } else {
-    QFile file(filePath);
-    if (file.open(QIODevice::WriteOnly)) {
-    file.write(reader.fileData(info.filePath));
-    file.close();
-    }
-    }
-    }
-    reader.close();
 }
 void MainWidget::initGameElements() {
     qDebug() << "游戏元素初始化...";
@@ -1476,13 +1292,16 @@ void MainWidget::setupTipLabel() {
     tipLbl = ui->tip;
 }
 
-void MainWidget::initBGM() {
+void MainWidget::initMusic() {
     qDebug() << "加载背景音乐...";
     bgm = SoundMap["BGM"];
     if (bgm != NULL) {
         bgm->setLoopCount(QSoundEffect::Infinite);
         responseMusicChange();
     }
+    //开辟音乐播放线程
+    soundPlayThread = (new SoudPlayThread);
+    soundPlayThread->start();
 }
 
 void MainWidget::initViewMap() {
@@ -2331,6 +2150,23 @@ void MainWidget::initVar()
 
 void MainWidget::initEditor()
 {
+    if(!EditorMode)return;
+    //创建editor对象
+    editor = new Editor(this);
+    // 初始化单位选择和区域管理相关变量
+    selectedUnits.clear();
+    //
+    rectArea=new RectArea(ui->Game);
+    circleArea=new CircleArea(ui->Game);
+    lineArea=new LineArea(ui->Game);
+    // 设置全局变量
+    g_rectArea = (RectArea*)rectArea;
+    g_circleArea = (CircleArea*)circleArea;
+    g_lineArea = (LineArea*)lineArea;
+    // 显示编辑器
+    editor->show();
+    // 地图编辑器按键绑定
+    EditorWidgetBind();
     //注册全局事件监听
     auto&e=::eventFilter;
     e->RegistReciver([&](){
@@ -2351,21 +2187,8 @@ void MainWidget::initEditor()
             mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
         }
         //轮询编辑器
-        if(EditorMode){
-            updateEditor();
-        }
+        updateEditor();
     });
-    //
-    if(EditorMode){
-        rectArea=new RectArea(ui->Game);
-        circleArea=new CircleArea(ui->Game);
-        lineArea=new LineArea(ui->Game);
-        
-        // 设置全局变量
-        g_rectArea = (RectArea*)rectArea;
-        g_circleArea = (CircleArea*)circleArea;
-        g_lineArea = (LineArea*)lineArea;
-    }
 }
 
 void MainWidget::ScoreSave(string gameResult)
@@ -3012,6 +2835,132 @@ string MainWidget::getEnemyStatus(Coordinate* unit) {
         return it->second;
     }
     return "";
+}
+
+void MainWidget::EditorWidgetBind()
+{
+    connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
+        this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
+        call_debugText("green", " 导出地图", 0);
+        });
+    connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {
+        call_debugText("green", " 删除资源/建筑", 0);
+        this->currentSelected = DELETEOBJECT;
+        });
+    // 连接 QComboBox 的 currentIndexChanged 信号
+    connect(editor->ui->land_type, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        // 获取当前选中的选项索引
+        QString selectedText = text;
+        if (text == "草地") this->currentSelected = FLAT;
+        else if (text == "海洋") this->currentSelected = OCEAN;
+        if (text != "地皮类型") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->land_height, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "提升高度") this->currentSelected = HIGHTERLAND;
+        else if (text == "降低高度") this->currentSelected = LOWERLAND;
+        if (text != "地皮高度") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->player_building_and_source, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "玩家市中心") this->currentSelected = PLAYERDOWNTOWN;
+        else if (text == "玩家运输船") this->currentSelected = PLAYERTRANSPORTSHIP;
+        else if (text == "玩家渔船") this->currentSelected = PLAYERFISHINGBOAT;
+        else if (text == "玩家船坞") this->currentSelected = PLAYERDOCK;
+        else if (text == "玩家战船") this->currentSelected = PLAYERWARSHIP;
+        else if (text == "玩家仓库") this->currentSelected = PLAYERREPOSITORY;
+        else if (text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
+        else if (text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
+        else if (text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
+        else if (text == "玩家房子") this->currentSelected = PLAYERHOME;
+        if (text != "玩家资源/建筑") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->player_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "玩家农民") this->currentSelected = PLAYERFARMER;
+        else if (text == "玩家棍棒兵") this->currentSelected = PLAYERCLUBMAN;
+        else if (text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
+        else if (text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
+        else if (text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
+        if (text != "玩家人物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->ai_building_and_resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "敌方战船") this->currentSelected = AIWARSHIP;
+        else if (text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
+        else if (text == "敌方武器攻城厂") this->currentSelected = AISIEGE;
+        if (text != "敌方资源/建筑") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->ai_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "敌方棍棒兵") this->currentSelected = AICLUBMAN;
+        else if (text == "敌方斧头兵") this->currentSelected = AIAXEMAN;
+        else if (text == "敌方侦察兵") this->currentSelected = AISCOUT;
+        else if (text == "敌方弓箭手") this->currentSelected = AIBOWMAN;
+        else if (text == "敌方祭司")   this->currentSelected = AIPRIEST;
+        else if (text == "敌方方阵兵") this->currentSelected = AIHOPLITE;
+        else if (text == "敌方阔剑兵") this->currentSelected = AIBROADSWORDSMAN;
+        else if (text == "敌方驷马战车") this->currentSelected = AICHARIOT;
+        else if (text == "敌方战车射手") this->currentSelected = AICHARIOTARCHER;
+        else if (text == "敌方复合弓手") this->currentSelected = AICOMPARCHER;
+        else if (text == "敌方投石车") this->currentSelected = AISTONETHROWER;
+        if (text != "敌方人物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "瞪羚") this->currentSelected = GAZELLE;
+        else if (text == "狮子") this->currentSelected = LION;
+        else if (text == "大象") this->currentSelected = ELEPHANT;
+        if (text != "动物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "树木") this->currentSelected = TREE;
+        else if (text == "石头") this->currentSelected = STONM;
+        else if (text == "金矿") this->currentSelected = GOLDORE;
+        if (text != "公立资源") call_debugText("green", " " + text, 0);
+        });
+    // 巡逻区域控制
+    connect(editor->ui->patrolArea, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        if (selectedUnits.empty()) return;  // 没有选中单位时不处理
+        QString selectedText = text;
+        if (text == "矩形区域") {
+            this->currentSelected = PATROL_RECT_AREA;
+            ((RectArea*)rectArea)->setCurrentAreaType(1);  // 1=巡逻区域(蓝色)
+            ((RectArea*)rectArea)->setTargetUnits(selectedUnits);
+        }
+        else if (text == "圆形区域") {
+            this->currentSelected = PATROL_CIRCLE_AREA;
+            ((CircleArea*)circleArea)->setCurrentAreaType(1);
+            ((CircleArea*)circleArea)->setTargetUnits(selectedUnits);
+        }
+        else if(text=="曲线区域") {
+            this->currentSelected = PATROL_LINE_AREA;
+            ((LineArea*)lineArea)->setCurrentAreaType(1);
+            ((LineArea*)lineArea)->setTargetUnits(selectedUnits);
+        }
+        if (text != "巡逻区域") call_debugText("green", " 巡逻区域: " + text, 0);
+        });
+
+    // 敌人状态控制
+    connect(editor->ui->enemyStatus, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        if (text == "攻击") {
+            this->currentSelected = ENEMY_STATUS_ATTACK;
+            call_debugText("blue", " 敌人状态: 攻击模式", 0);
+        }
+        else if (text == "防守") {
+            this->currentSelected = ENEMY_STATUS_DEFEND;
+            call_debugText("yellow", " 敌人状态: 防守模式", 0);
+        }
+        });
+
+
+    // 鼠标按钮连接
+    connect(editor->ui->mouse_button, &QPushButton::clicked, this, [=]() {
+        this->currentSelected = NORMAL_MOUSE;
+        call_debugText("green", " 普通鼠标模式", 0);
+        });
+
 }
 
 void MainWidget::handleEnemyStatusSelection(double DR, double UR) {

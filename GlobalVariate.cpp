@@ -610,27 +610,14 @@ int InitImageResMap(QString path)
         qDebug()<<"路径内无png和gif文件";
         return -1;
     }
-
-    //获取分隔符
-    //QChar separator = QDir::separator();
-    QChar separator = QChar('/');
-
-    if(!path.contains(separator))
-    {
-        separator = QChar('\\');
-    }
-    QChar lastChar = path.at(path.length()-1);
-    if(lastChar == separator)
-    {
-        separator = QChar();
-    }
+    //遍历所有文件
 
     for(int i=0; i<dirCount; i++)
     {
         //文件名称
         QString fileName = dir[i];
         //文件全路径
-        QString filePath = path + separator + fileName;
+        QString filePath = path + "/" + fileName;
 
         //debug用，可删
         QStringList ImageList;
@@ -643,14 +630,10 @@ int InitImageResMap(QString path)
         int index = fileName.lastIndexOf("_");
         QString imageMapName;
         imageMapName = fileName.left(index);
-
-        //debug用，可删
-        //        qDebug()<<"输出第"<<i + 1<<"张图片的信息：";
-        //        qDebug()<<"图片所在List名为："<<imageMapName;
-        //        qDebug()<<"图片是所在List中第"<<fileName.right(7).left(3)<<"张";
-
+        //
         std::string tmpListName = imageMapName.toStdString();
         resMap[tmpListName].push_back(QPixmap(filePath));
+
     }
     ////////////////////////////////对资源进行额外操作
     //对船的帧数进行调整
@@ -934,6 +917,7 @@ int Stone[5][5][5] =
 
 void loadResource(std::string name, std::list<ImageResource> *targetlist)
 {
+
     //
     targetlist->clear();
     auto temp=&resMap[name];

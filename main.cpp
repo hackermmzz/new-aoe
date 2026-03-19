@@ -7,16 +7,18 @@
 
 int main(int argc, char* argv[])
 {
-    //开启GPU加速
-    QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     //
     QApplication app(argc, argv);
     Logger::init(Logger::LogLevel::Debug);
+    //解析参数
+    ParseArguments(app);
+    //开启GPU加速
+    QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    //申请资源
+    QResource::registerResource("./res.rcc");
     //创建网络插件
     NetworkManager=new NetworkPlugin(&app);
     NetworkManager->start();
-    //解析参数
-    ParseArguments(app);
     //安装全局事件器
     eventFilter=new EventFilter();
     app.installEventFilter(eventFilter);
