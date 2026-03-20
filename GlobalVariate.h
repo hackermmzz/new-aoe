@@ -237,7 +237,6 @@ extern double HUMAN_SPEED;
 extern double WOOD_BOAT_SPEED;
 extern double ANIMAL_SPEED;
 extern QString RESPATH;
-extern int FRAMES_PER_SECOND;
 extern bool OPTION_MUSIC;
 extern bool OPTION_SOUND;
 extern bool OPTION_SELECT;
@@ -738,6 +737,8 @@ public:
         }
     }
     void update(tagInfo* newinfo);
+    bool tryLock();
+    void release();
     void insertInsRet(int id, instruction ins);
     tagInfo getInfo();
     void clearInsRet();

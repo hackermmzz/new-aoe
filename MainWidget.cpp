@@ -1215,7 +1215,7 @@ void MainWidget::initGameTimer() {
     qDebug() << "初始化计时器...";
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
-    timer->start(TimePerFrame);
+    timer->start(TimePerFrame/mapmoveFrequency);
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
@@ -1282,6 +1282,26 @@ void MainWidget::setupMouseTracking() {
     ui->Game->setMouseTracking(true);
     ui->Game->setAttribute(Qt::WA_MouseTracking, true);
     ui->Game->installEventFilter(this);
+    //注册鼠标事件
+    auto&e=::eventFilter;
+    e->RegistReciver([&](){
+    if(e->LeftMouseClicked()){
+       int x=e->MouseX(),y=e->MouseY();
+       mouseEvent->SetMemoeyMapX(x/4);
+       mouseEvent->SetMemoryMapY(y/4);
+       mouseEvent->SetMouseEventType(LEFT_PRESS);
+       mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
+       mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
+    }
+    else if(e->RightMouseClicked()){
+        int x=e->MouseX(),y=e->MouseY();
+        mouseEvent->SetMemoeyMapX(x/4);
+        mouseEvent->SetMemoryMapY(y/4);
+        mouseEvent->SetMouseEventType(RIGHT_PRESS);
+        mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
+        mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
+    }
+    });
 }
 
 void MainWidget::setupTipLabel() {
@@ -1920,10 +1940,17 @@ void MainWidget::gameDataUpdate()
     if (!pause)
     {
         core->gameUpdate();
-        //如果当前模式不是编辑器功能，那么不运行ai
+        //如果当前模式是编辑器功能，那么不运行ai
         if(!EditorMode){
-            core->infoShare();
-            emit startAI();
+            //尝试获取锁，如果获取不了那么就继续让内核跑下去
+            if(tagUsrGame.tryLock()&&tagEnemyGame.tryLock()){
+                core->infoShare();
+                //释放锁
+                tagUsrGame.release();
+                tagEnemyGame.release();
+                //AI继续跑
+                emit startAI();
+            }
         }
     }
     else
@@ -1935,14 +1962,17 @@ void MainWidget::gameDataUpdate()
 
 void MainWidget::paintUpdate()
 {
+    ////判断是否关闭了渲染模式
+    if(OffScreen)return;
+    //
     statusUpdate();
-
 
     ui->Game->update();
     ui->mapView->update();
     ui->tip->update();
     ui->statusLbl->update();
     emit mapmove();
+    //
 }
 
 bool MainWidget::isLoss()
@@ -2170,27 +2200,11 @@ void MainWidget::initEditor()
     // 地图编辑器按键绑定
     EditorWidgetBind();
     //注册全局事件监听
-    auto&e=::eventFilter;
-    e->RegistReciver([&](){
-        if(e->LeftMouseClicked()){
-           int x=e->MouseX(),y=e->MouseY();
-           mouseEvent->SetMemoeyMapX(x/4);
-           mouseEvent->SetMemoryMapY(y/4);
-           mouseEvent->SetMouseEventType(LEFT_PRESS);
-           mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
-           mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
-        }
-        else if(e->RightMouseClicked()){
-            int x=e->MouseX(),y=e->MouseY();
-            mouseEvent->SetMemoeyMapX(x/4);
-            mouseEvent->SetMemoryMapY(y/4);
-            mouseEvent->SetMouseEventType(RIGHT_PRESS);
-            mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
-            mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
-        }
+    ::eventFilter->RegistReciver([&](){
         //轮询编辑器
         updateEditor();
     });
+    auto&e=::eventFilter;
 }
 
 void MainWidget::ScoreSave(string gameResult)
@@ -2242,34 +2256,34 @@ void MainWidget::FrameUpdate()
     else if (mapmoveFrequency == 8) {
         if (gameframe % 3 == 0 || pause) paintUpdate();
     }
-    else {
-        qDebug() << "Speed setting error";
-    }
+    else if(!IsExamining||!OffScreen){//这种情况下可能是考核模式下开启得超高速倍速
+            qDebug() << "Speed setting error";
 
+    }
+    //更新游戏数据
     gameDataUpdate();
 
     return;
 }
 void MainWidget::onRadioClickSlot()
 {
-    static int interval = 40;
     switch (pbuttonGroup->checkedId())
     {
     case 0:
-        timer->setInterval(interval);
+        timer->setInterval(TimePerFrame);
         mapmoveFrequency = 1;
         break;
     case 1:
         mapmoveFrequency = 2;
-        timer->setInterval(interval / mapmoveFrequency);
+        timer->setInterval(TimePerFrame / mapmoveFrequency);
         break;
     case 2:
         mapmoveFrequency = 4;
-        timer->setInterval(interval / mapmoveFrequency);
+        timer->setInterval(TimePerFrame / mapmoveFrequency);
         break;
     case 3:
         mapmoveFrequency = 8;
-        timer->setInterval(interval / mapmoveFrequency);
+        timer->setInterval(TimePerFrame / mapmoveFrequency);
         nowobject = NULL;
         break;
     }

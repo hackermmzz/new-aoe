@@ -43,7 +43,6 @@ double HUMAN_SPEED;//人的速度
 double WOOD_BOAT_SPEED;//木船速度
 double ANIMAL_SPEED;//动物速度
 QString RESPATH;//资源文件的路径
-int FRAMES_PER_SECOND;//一帧占的毫秒数
 bool OPTION_MUSIC;//是否开启音乐
 bool OPTION_SOUND;//是否开启音效
 bool OPTION_SELECT;//
@@ -1195,7 +1194,7 @@ void ParseArguments(const QApplication&app){
     QCommandLineOption option3(
         QStringList()<<"freq",
          "开启几倍速",
-         "1|2|4|8"
+         "1|2|4|8|MAX"
        );
     QList<QCommandLineOption>options={option0,option1,option2,option3};
     parser.addOptions(options);
@@ -1216,7 +1215,8 @@ void ParseArguments(const QApplication&app){
     //
     if(parser.isSet("freq")){
         auto value=parser.value("freq");
-        INITIAL_FREQUENCY=value.toInt();
+        if(value=="MAX")INITIAL_FREQUENCY=INT_MAX;
+        else INITIAL_FREQUENCY=value.toInt();
     }
 }
 //Json化一个Map
@@ -1269,7 +1269,7 @@ QString ResultLogInfo::ToString()
 {
     QJsonObject obj;
     obj["win"]=win;
-    obj["time"]=g_frame/FRAMES_PER_SECOND;
+    obj["time"]=g_frame*TimePerFrame;
     obj["frame"]=g_frame;
     obj["score"]=score;
     obj["wood"]=wood;
@@ -1464,7 +1464,7 @@ void tagInfo::clear() {
 
 void tagGame::update(tagInfo *newinfo) {
     //控制ins_ret的大小小于100，若大于100，则优先删除旧值
-    QMutexLocker locker(&Locker);
+   // QMutexLocker locker(&Locker);//之前是严格的帧同步，现在改成严格的非帧同步
     if (this->Info != NULL) {
         while (Info->ins_ret.size() > 100) {
             Info->ins_ret.erase(Info->ins_ret.begin());
@@ -1475,9 +1475,7 @@ void tagGame::update(tagInfo *newinfo) {
     Info = newinfo;
     //对内部打乱
     static const bool openHunYao = 1;
-    // for (auto& building : Info->buildings) {
-    //     qDebug() << "before" << building.SN;
-    // }
+    //
     if (openHunYao) {
         WLHHunYao(Info->buildings);
         WLHHunYao(Info->farmers);
@@ -1487,9 +1485,16 @@ void tagGame::update(tagInfo *newinfo) {
         WLHHunYao(Info->enemy_armies);
         WLHHunYao(Info->resources);
     }
-    // for (auto& building : Info->buildings) {
-    //     qDebug() << "after" << building.SN;
-    // }
+}
+
+bool tagGame::tryLock()
+{
+    return Locker.tryLock();
+}
+
+void tagGame::release()
+{
+    Locker.unlock();
 }
 
 void tagGame::insertInsRet(int id, instruction ins) {
@@ -1789,7 +1794,6 @@ void ReadConfig()
     jsonDouble(WOOD_BOAT_SPEED);
     jsonDouble(ANIMAL_SPEED);
     jsonQString(RESPATH);
-    jsonInt(FRAMES_PER_SECOND);
     jsonBool(OPTION_MUSIC);
     jsonBool(OPTION_SOUND);
     jsonBool(OPTION_SELECT);

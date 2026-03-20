@@ -19,36 +19,35 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
 }
 
 
-
 void Core::gameUpdate()
 {
+
     //如果是考试状态,做出一些调整
-    if(IsExamining)ModifyDuringExam();
+    if(IsExamining)PreProcessDuringExam();
     //
     explored.clear();//清空上一帧带来的变化
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
+    //
 
     updateByObject();
     //重置人物的位置
     ResetHumanPos();
     loadRelationMap();
-
-
     //刷新视野并处理区域探索结果
     theMap->reset_ObjectExploreAndVisible();
-
-    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
+    //判断并标记碰撞，在Corelist里处理碰撞
+    judge_Crush();
 
     if (mouseEvent->HaveEvent())
     {
-        if (mapmoveFrequency == 8) resetNowObject_Click();
+        if (mapmoveFrequency >=8) resetNowObject_Click();
         else manageMouseEvent();
     }
     manageOrder(0);
     manageOrder(1);
     //
-    extern bool GenerateHumanLock;
+
     GenerateHumanLock=0;//每一帧都保证只能生产出一个人
     interactionList->update();
 
@@ -675,7 +674,8 @@ void Core::infoShare() {
     ///////
     tagUsrGame.update(&currentBuff[0]);
     tagEnemyGame.update(&currentBuff[1]);
-    buff = 1 - buff;    //轮换缓存
+    //轮换缓存
+    buff ^=1;
 }
 
 void Core::InitPlayerMap()
@@ -1425,8 +1425,8 @@ void Core::loadRelationMap()
 {
     //更新寻路用障碍表
     theMap->loadBarrierMap_ByObjectMap();
-    //对成片的树进行合并成一个大block
-    theMap->MergeTrees();
+    //对成片的树进行合并成一个大block(主要是怕图像编辑的人编辑时候树之间有空袭，导致人卡树里面，所以才加，但特别耗时
+        //theMap->MergeTrees();//如果仍然出现上述情况，请开启
     //更新寻路地图模板
     theMap->loadfindPathMapTemperature();
 }
@@ -1489,7 +1489,7 @@ void Core::requestSound_Click(Coordinate* object)
 
 
 
-void Core::ModifyDuringExam()
+void Core::PreProcessDuringExam()
 {
     //关闭作弊模式
     is_cheatAction=false;

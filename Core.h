@@ -13,7 +13,7 @@ public:
     Core() {}
     Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent);
 
-    void ModifyDuringExam();
+    void PreProcessDuringExam();
     void gameUpdate();
     void updateByObject();
     void ResetHumanPos();
