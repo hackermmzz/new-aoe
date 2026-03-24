@@ -101,6 +101,7 @@ void UsrAI::processData()
 {
 
     //
+    return;
     cheatAction();
     bool debug=0;
     if(debug){
