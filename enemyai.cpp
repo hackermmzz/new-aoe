@@ -71,6 +71,10 @@ static map<int, int> lastReissueFrame;
 // 每单位士兵当前的行动目标
 static map<int, int> currentTarget;
 
+//每轮攻击相应兵种数量
+static map<int, int> num1;
+static map<int, int> num2;
+
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
     switch(sort){
@@ -820,7 +824,7 @@ void EnemyAI::processData() {
             }
         }
     }
-    onWaveAttack(1);
+    if(g_frame>=1000)onWaveAttack(1);
     if(g_frame>=5000) onWaveAttack(mode);
     return;
     // 新的基于视野的攻击系统
@@ -905,9 +909,23 @@ void EnemyAI::FirstAttack()
             });
 
             // 取前5个距离最近的士兵进入骚扰小组，并记录其初始位置用于撤退
-            for(int i = 0; i < 5 && i < cmp_Distance.size(); i++) {
+            for(int i = 0;i < cmp_Distance.size()&&attackEnemy.size()<5; i++) {
                 const tagArmy& a = cmp_Distance[i].first;
-                attackEnemy.push_back(a);
+                if(a.Sort==AT_BROADSWORDSMAN&&num1[a.Sort]<3)
+                {
+                    attackEnemy.push_back(a);
+                    num1[a.Sort]++;
+                }
+                else if(a.Sort==AT_COMPOSITE_BOWMAN&&num1[a.Sort]==0)
+                {
+                    attackEnemy.push_back(a);
+                    num1[a.Sort]++;
+                }
+                else if(a.Sort==AT_CAVALRY&&num1[a.Sort]==0)
+                {
+                    attackEnemy.push_back(a);
+                    num1[a.Sort]++;
+                }
                 Army_location[a.SN] = std::make_pair(a.DR, a.UR);
             }
         }
@@ -1011,10 +1029,30 @@ void EnemyAI::SecondAttack()
             return a.second < b.second;
         });
 
-        // 取前5个距离最近的士兵进入骚扰小组，并记录其初始位置用于撤退
-        for(int i = 0; i < 5 && i < cmp_Distance.size(); i++) {
+        // 取相应条件士兵进入骚扰小组，并记录其初始位置用于撤退
+        for(int i = 0; i < cmp_Distance.size()&&attackEnemy2.size()<11; i++) {
             const tagArmy& a = cmp_Distance[i].first;
-            attackEnemy2.push_back(a);
+            int sort_=a.Sort;
+            if(sort_==AT_BROADSWORDSMAN&&num2[sort_]<5)   //这个后面得全部改成常量
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            else if(sort_==AT_COMPOSITE_BOWMAN&&num2[sort_]<2)
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            else if(sort_==AT_CHARIOT_ARCHER&&num2[sort_]<2)
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            else if(sort_==AT_CHARIOT&&num2[sort_]<2)
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
             Army_location2[a.SN] = std::make_pair(a.DR, a.UR);
         }
     }
@@ -1102,5 +1140,8 @@ void EnemyAI::SecondAttack()
 
 
 }
+
+//所有士兵都是defense状态，预计画出三个圆形区域，有敌军在这三个区域内就攻击
+    //主基地的防御范围就是主基地兵力的活动范围
 
 }
