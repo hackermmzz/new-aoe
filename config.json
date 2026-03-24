@@ -3,7 +3,7 @@
     "DefaultCivilization":2,
     "IsExamining": false,
     "TimePerFrame": 40,
-    "EditorMode": false,
+    "EditorMode": true,
     "GlobalVision": false,
     "only_debug_Player0": true,
     "filterRepetitionMessage": false,

@@ -112,6 +112,7 @@ public:
         AICHARIOT,
         AICHARIOTARCHER,
         AISTONETHROWER,
+        AICAVALRY,
         GAZELLE,
         LION,
         ELEPHANT,

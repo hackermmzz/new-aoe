@@ -207,6 +207,11 @@
    </item>
    <item>
     <property name="text">
+     <string>敌方骑兵</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>敌方投石车</string>
     </property>
    </item>
