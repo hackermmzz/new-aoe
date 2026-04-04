@@ -1,4 +1,4 @@
-﻿#include "Building.h"
+#include "Building.h"
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
 std::list<ImageResource>* Building::built[4][2][BUILDING_TYPE_MAXNUM];
@@ -17,6 +17,16 @@ array<int,BUILDING_TYPE_MAXNUM> Building::BuildingMaxBlood;
 array<int,BUILDING_TYPE_MAXNUM>Building::BuildingFundation;
 
 array<int,BUILDING_TYPE_MAXNUM> Building::BuildingVision;
+
+std::list<ImageResource>* Building::builtArrowTowerUpgraded[4][2];
+
+std::string Building::getArrowTowerUpgradedResourceName(int age, int isEnemy)
+{
+    (void)age;
+    // 与资源文件名一致：ArrowTower2_Egypt_###.png（我方）、ArrowTower2_Daiwa_###.png（敌方）
+    // resMap 键为最后一个 '_' 前的前缀（见 InitImageResMap）
+    return isEnemy ? std::string("ArrowTower2_Daiwa") : std::string("ArrowTower2_Egypt");
+}
 
 /********************构造与析构**************************/
 Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* playerScience, int playerRepresent, int Percent)
@@ -49,6 +59,12 @@ Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* play
 /***************状态与图像显示****************/
 void Building::nextframe()
 {
+    if (Num == BUILDING_ARROWTOWER && playerScience != NULL
+        && playerScience->getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
+        missionThrowStep = THROWMISSION_ARROWTOWER_UPGRADED;
+    else if (Num == BUILDING_ARROWTOWER)
+        missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
+
     setNowRes();
     if(Percent<100)
     {
@@ -91,7 +107,14 @@ void Building::setNowRes()
         // 判断敌我: 如果 playerRepresent != NOWPLAYERREPRESENT，则为敌方
         int isEnemy = (playerRepresent != NOWPLAYERREPRESENT) ? 1 : 0;
         int civ = get_civilization();
-        tempNowlist = Building::built[civ][isEnemy][Num];
+        if (Num == BUILDING_ARROWTOWER && playerScience != NULL
+            && playerScience->getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1
+            && civ >= 1 && civ <= 3
+            && builtArrowTowerUpgraded[civ][isEnemy] != NULL
+            && !builtArrowTowerUpgraded[civ][isEnemy]->empty())
+            tempNowlist = builtArrowTowerUpgraded[civ][isEnemy];
+        else
+            tempNowlist = Building::built[civ][isEnemy][Num];
         setFireNowRes();
     }
 
@@ -202,11 +225,18 @@ void Building::ActNumToActName()
     if(Num == BUILDING_CENTER)
     {
         if(actNum == BUILDING_CENTER_CREATEFARMER) actName = ACT_CREATEFARMER;
-        else if(actNum == BUILDING_CENTER_UPGRADE) actName = ACT_UPGRADE_AGE;
+        else if(actNum == BUILDING_CENTER_UPGRADE) {
+            // 与市场木材/工艺、仓库工具/金属加工相同：用 getActLevel 区分同 actCon 链上的阶段
+            if(playerScience != NULL && playerScience->getActLevel(BUILDING_CENTER, BUILDING_CENTER_UPGRADE) >= 1)
+                actName = ACT_UPGRADE_BRONZEAGE;
+            else
+                actName = ACT_UPGRADE_AGE;
+        }
     }
     else if( Num == BUILDING_GRANARY)
     {
         if(actNum == BUILDING_GRANARY_ARROWTOWER) actName = ACT_UPGRADE_TOWERBUILD;
+        else if(actNum == BUILDING_GRANARY_ARROWTOWE_UPGRADE) actName = ACT_UPGRADE_ARROWTOWER;
     }
     else if(Num == BUILDING_STOCK)
     {
@@ -303,6 +333,41 @@ double Building::getDis_attack()
     else return 0;
 }
 
+int Building::get_add_specialAttack()
+{
+    if (Num == BUILDING_ARROWTOWER && playerScience != NULL)
+        return playerScience->get_addition_Attack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, get_AttackType());
+    return 0;
+}
+
+int Building::showATK_Basic()
+{
+    if (Num == BUILDING_ARROWTOWER)
+        return atk;
+    return BloodHaver::showATK_Basic();
+}
+
+int Building::showATK_Addition()
+{
+    if (Num == BUILDING_ARROWTOWER)
+        return get_add_specialAttack();
+    return BloodHaver::showATK_Addition();
+}
+
+int Building::showArrowTowerRangeBaseBlocks() const
+{
+    if (Num != BUILDING_ARROWTOWER)
+        return 0;
+    return (int)dis_Attack;
+}
+
+int Building::showArrowTowerRangeBonusBlocks() const
+{
+    if (Num != BUILDING_ARROWTOWER || playerScience == NULL)
+        return 0;
+    return playerScience->get_addition_DisAttack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, ATTACKTYPE_SHOOT);
+}
+
 /********************虚函数**************************/
 
 
@@ -317,6 +382,15 @@ void Building::deallocatebuilt(int age, int isEnemy, int buildType)
 {
     delete built[age][isEnemy][buildType];
     built[age][isEnemy][buildType] = nullptr;
+}
+
+void Building::deallocateBuiltArrowTowerUpgraded(int age, int isEnemy)
+{
+    if (builtArrowTowerUpgraded[age][isEnemy] != nullptr)
+    {
+        delete builtArrowTowerUpgraded[age][isEnemy];
+        builtArrowTowerUpgraded[age][isEnemy] = nullptr;
+    }
 }
 
 void Building::deallocatebuildFire(int type)

@@ -11,6 +11,8 @@ public:
 /********************静态资源**************************/
   static std::list<ImageResource> *build[4];//建设list
   static std::list<ImageResource> *built[4][2][BUILDING_TYPE_MAXNUM]; //建设完成的list [时代][敌我][建筑类型]
+  // 箭塔强化后贴图：[时代][敌我]，资源键 ArrowTower2_Egypt / ArrowTower2_Daiwa（与 png 命名一致）
+  static std::list<ImageResource> *builtArrowTowerUpgraded[4][2];
   // 敌我标识: 0=我方, 1=敌方
   static std::list<ImageResource> *buildFire[3];
 
@@ -55,6 +57,13 @@ public:
     void setAttribute();
 
 
+    int get_add_specialAttack() override;
+    int showATK_Basic() override;
+    int showATK_Addition() override;
+    /** 箭塔射程（格）：基础 / 科技加成，供选中面板 "base+bonus" 显示 */
+    int showArrowTowerRangeBaseBlocks() const;
+    int showArrowTowerRangeBonusBlocks() const;
+
     /*******战斗相关*******/
     double getDis_attack();
     bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
@@ -85,14 +94,18 @@ public:
 
     static void allocatebuild(int i){ build[i]=new std::list<ImageResource>;}
     static void allocatebuilt(int age, int isEnemy, int buildType){built[age][isEnemy][buildType]=new std::list<ImageResource>;}
+    static void allocateBuiltArrowTowerUpgraded(int age, int isEnemy){ builtArrowTowerUpgraded[age][isEnemy] = new std::list<ImageResource>; }
     static void allocatebuildFire( int type ){ buildFire[type] = new std::list<ImageResource>; }
 
     static std::list<ImageResource>* getBuild(int i) {return build[i];}
     static std::list<ImageResource>* getBuilt(int age, int isEnemy, int buildType) { return built[age][isEnemy][buildType]; }
+    static std::list<ImageResource>* getBuiltArrowTowerUpgraded(int age, int isEnemy) { return builtArrowTowerUpgraded[age][isEnemy]; }
+    static std::string getArrowTowerUpgradedResourceName(int age, int isEnemy);
     static std::list<ImageResource>* getBuildFire(int type){ return buildFire[type]; }
 
     static void deallocatebuild(int i);
     static void deallocatebuilt(int age, int isEnemy, int buildType);
+    static void deallocateBuiltArrowTowerUpgraded(int age, int isEnemy);
     static void deallocatebuildFire(int type);
 
     static void setActNames(int buildNum , int num, int name){ actNames[buildNum][num] = name; }
@@ -181,6 +194,34 @@ public:
                     // 犁需要250食物和75木材，而驯养动物需要200食物和50木材
                     if (food >= 250)  // 如果资源消耗包含250食物，说明是铜器时代节点（犁）
                         return ACT_UPGRADE_PLOW;
+                }
+            }
+        }
+        // 谷仓：与市场「木材加工/工艺」同一槽位——static 仍为 ACT_UPGRADE_TOWERBUILD，显示在槽位 1 上在「研发箭塔」与「箭塔强化」间切换
+        else if (this->Num == BUILDING_GRANARY && playerScience != NULL)
+        {
+            int actNumSlot = actNames[this->Num][num];
+            if (actNumSlot == ACT_UPGRADE_TOWERBUILD)
+            {
+                if (playerScience->get_isBuildActionShowAble(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWER, civ))
+                    return ACT_UPGRADE_TOWERBUILD;
+                if (playerScience->get_isBuildActionShowAble(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE, civ))
+                    return ACT_UPGRADE_ARROWTOWER;
+            }
+        }
+        // 市镇中心：同仓库「工具使用/金属加工」——先判时代与可显示，再用当前节点资源消耗是否含黄金区分铜器段（BUILDING_CENTER_UPGRADE 链第二节点）
+        else if (this->Num == BUILDING_CENTER && playerScience != NULL)
+        {
+            int actNum = actNames[this->Num][num];
+            if (actNum == ACT_UPGRADE_AGE)
+            {
+                if (civ >= CIVILIZATION_TOOLAGE &&
+                    playerScience->get_isBuildActionShowAble(BUILDING_CENTER, BUILDING_CENTER_UPGRADE, civ))
+                {
+                    int wood, food, stone, gold;
+                    playerScience->get_Resource_Consume(BUILDING_CENTER, BUILDING_CENTER_UPGRADE, wood, food, stone, gold);
+                    if (gold > 0)
+                        return ACT_UPGRADE_BRONZEAGE;
                 }
             }
         }

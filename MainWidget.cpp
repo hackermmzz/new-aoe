@@ -34,7 +34,9 @@ ActWidget* acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
     {ACT_UPGRADE_AGE, ACT_UPGRADE_AGE_NAME},
+    {ACT_UPGRADE_BRONZEAGE, ACT_UPGRADE_BRONZEAGE_NAME},
     {ACT_UPGRADE_TOWERBUILD, ACT_UPGRADE_TOWERBUILD_NAME},
+    {ACT_UPGRADE_ARROWTOWER, ACT_UPGRADE_ARROWTOWER_NAME},
     {ACT_UPGRADE_WOOD, ACT_UPGRADE_WOOD_NAME},
     {ACT_UPGRADE_STONE, ACT_UPGRADE_STONE_NAME},
     {ACT_UPGRADE_GOLD, ACT_UPGRADE_GOLD_NAME},
@@ -1547,6 +1549,9 @@ void MainWidget::initBuilding()
                 loadResource(Building::getBuiltname(age, isEnemy, buildType),
                            Building::getBuilt(age, isEnemy, buildType));
             }
+            Building::allocateBuiltArrowTowerUpgraded(age, isEnemy);
+            loadResource(Building::getArrowTowerUpgradedResourceName(age, isEnemy),
+                        Building::getBuiltArrowTowerUpgraded(age, isEnemy));
         }
     }
 
@@ -1555,10 +1560,10 @@ void MainWidget::initBuilding()
         Building::allocatebuildFire(type);
         loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
     }
-    //市镇中心
+    //市镇中心（演进工具/铜器共用槽位 1，static 仍为 ACT_UPGRADE_AGE，铜器段由 Building::getActNames 返回 ACT_UPGRADE_BRONZEAGE，同仓库工具使用/金属加工）
     Building::setActNames(BUILDING_CENTER, 0, ACT_CREATEFARMER);
     Building::setActNames(BUILDING_CENTER, 1, ACT_UPGRADE_AGE);
-    //谷仓
+    //谷仓（箭塔研发与箭塔强化共用槽位 1，由 Building::getActNames 按可显示科技切换，同市场伐木/工艺）
     Building::setActNames(BUILDING_GRANARY, 0, ACT_RESEARCH_WALL);
     Building::setActNames(BUILDING_GRANARY, 1, ACT_UPGRADE_TOWERBUILD);
     //仓库
@@ -1874,6 +1879,7 @@ void MainWidget::deleteBuilding()
             {
                 Building::deallocatebuilt(age, isEnemy, buildType);
             }
+            Building::deallocateBuiltArrowTowerUpgraded(age, isEnemy);
         }
     }
 

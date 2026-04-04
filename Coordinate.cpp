@@ -1,4 +1,4 @@
-﻿#include "Coordinate.h"
+#include "Coordinate.h"
 
 vector<Point> Coordinate::viewLab[5][12];
 
@@ -11,7 +11,9 @@ int Coordinate::ActNameToActNum(int actName)
     */
     switch (actName) {
     case ACT_CREATEFARMER:  return BUILDING_CENTER_CREATEFARMER;
-    case ACT_UPGRADE_AGE:   return BUILDING_CENTER_UPGRADE;
+    case ACT_UPGRADE_AGE:
+    case ACT_UPGRADE_BRONZEAGE:
+        return BUILDING_CENTER_UPGRADE;
     case ACT_UPGRADE_WOOD : return BUILDING_MARKET_WOOD_UPGRADE;
     case ACT_UPGRADE_STONE :    return BUILDING_MARKET_STONE_UPGRADE;
     case ACT_UPGRADE_FARM : return BUILDING_MARKET_FARM_UPGRADE;
@@ -47,6 +49,7 @@ int Coordinate::ActNameToActNum(int actName)
     case ACT_STABLE_CREATE_CAVALRY :  return BUILDING_STABLE_CREATE_CAVALRY;
     case ACT_RESEARCH_WALL :    return BUILDING_GRANARY_WALL;
     case ACT_UPGRADE_TOWERBUILD:    return BUILDING_GRANARY_ARROWTOWER;
+    case ACT_UPGRADE_ARROWTOWER:    return BUILDING_GRANARY_ARROWTOWE_UPGRADE;
     case ACT_DOCK_CREATE_SAILING:   return BUILDING_DOCK_CREATE_SAILING;
     case ACT_DOCK_CREATE_WOOD_BOAT:   return BUILDING_DOCK_CREATE_WOOD_BOAT;
     case ACT_DOCK_CREATE_SHIP:   return BUILDING_DOCK_CREATE_SHIP;
