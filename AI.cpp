@@ -1,4 +1,4 @@
-#include "AI.h"
+#include "ai.h"
 
 std::vector<QString> AI::AIName= { "UsrAI", "EnemyAI" };
 

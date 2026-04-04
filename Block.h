@@ -80,7 +80,6 @@ public:
     static std::list<ImageResource> *grayblock[BLOCK_COUNT];
     static std::list<ImageResource> *blackblock[BLOCK_COUNT];
     static std::string Blockname[BLOCK_COUNT];
-    // int Environment=0;//当前地皮编号 考虑用num代替
     //用基类中num代替
 
     int getMapHeight() const;

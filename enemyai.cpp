@@ -1,4 +1,4 @@
-#include "EnemyAI.h"
+#include "enemyai.h"
 #include "MainWidget.h"
 #include "Human.h"
 #include <iostream>
@@ -51,18 +51,29 @@ static vector <int> Defend;
 static map<int, bool> ifA;
 static int sum;
 static int mode = -3;
+static bool Switch = false;
 
 static vector<tagFarmer>deadFirst;
+static vector<tagFarmer>deadSecond;
 static vector<tagArmy>attackEnemy;
+static vector<tagArmy>attackEnemy2;
 static vector<int> farmerSNs;
 // 第一波总目标（击杀 3 农民）是否已完成；完成后不再往 attackEnemy 里加人，避免反复加人/撤退
 static bool wave1Completed = false;
+static bool wave2Completed = false;
 // 撤退目标为细节坐标 (DR, UR)，HumanMove 需要 double 而非区块坐标
 static map<int, pair<double, double>> Army_location;
+static map<int, pair<double, double>> Army_location2;
 // 每单位上次分配攻击目标的帧号，避免每帧重复下令导致部分兵种抽搐
 static map<int, int> lastAssignFrame;
 // 每单位上次补发攻击指令的帧号（目标仍活着但引擎清空指令时），用较短间隔快速补发避免卡住
 static map<int, int> lastReissueFrame;
+// 每单位士兵当前的行动目标
+static map<int, int> currentTarget;
+
+//每轮攻击相应兵种数量
+static map<int, int> num1;
+static map<int, int> num2;
 
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
@@ -773,6 +784,24 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
     return nearestTarget;
 }
 
+tagArmy EnemyAI::Threated(tagArmy *army)
+{
+    tagArmy nearestTarget;
+    nearestTarget.SN = -1; // 标记为无效
+    double minDistance = 10;
+    
+    for(tagArmy& enemyarmy:enemyInfo.enemy_armies)
+    {
+        double Distance=pow(enemyarmy.BlockDR-army->BlockDR,2)+pow(enemyarmy.BlockUR-army->BlockUR,2);
+        if(enemyarmy.WorkObjectSN==army->SN&&Distance<=minDistance)
+        {
+            nearestTarget = enemyarmy;
+            minDistance = Distance;
+        }
+    }
+    return nearestTarget;
+}
+
 void EnemyAI::processData() {
 
     enemyInfo=getInfo();
@@ -795,7 +824,8 @@ void EnemyAI::processData() {
             }
         }
     }
-    onWaveAttack(1);
+    if(g_frame>=1000)onWaveAttack(1);
+    if(g_frame>=5000) onWaveAttack(mode);
     return;
     // 新的基于视野的攻击系统
     assignTargetsBasedOnVision();
@@ -846,7 +876,8 @@ void EnemyAI::onWaveAttack(int wave) {
        // return;
     }
     if(wave==1) FirstAttack();
-    mode = wave;
+    if(wave==2) SecondAttack();
+    //mode = wave;
 }
 
 void EnemyAI::FirstAttack()
@@ -878,9 +909,23 @@ void EnemyAI::FirstAttack()
             });
 
             // 取前5个距离最近的士兵进入骚扰小组，并记录其初始位置用于撤退
-            for(int i = 0; i < 5 && i < cmp_Distance.size(); i++) {
+            for(int i = 0;i < cmp_Distance.size()&&attackEnemy.size()<5; i++) {
                 const tagArmy& a = cmp_Distance[i].first;
-                attackEnemy.push_back(a);
+                if(a.Sort==AT_BROADSWORDSMAN&&num1[a.Sort]<3)
+                {
+                    attackEnemy.push_back(a);
+                    num1[a.Sort]++;
+                }
+                else if(a.Sort==AT_COMPOSITE_BOWMAN&&num1[a.Sort]==0)
+                {
+                    attackEnemy.push_back(a);
+                    num1[a.Sort]++;
+                }
+                else if(a.Sort==AT_CAVALRY&&num1[a.Sort]==0)
+                {
+                    attackEnemy.push_back(a);
+                    num1[a.Sort]++;
+                }
                 Army_location[a.SN] = std::make_pair(a.DR, a.UR);
             }
         }
@@ -898,7 +943,7 @@ void EnemyAI::FirstAttack()
             }
         }
         bool waveComplete = (currentTargetSN == -1);  // 3 个目标均已阵亡，集体撤退
-        if (waveComplete) wave1Completed = true;      // 标记第一波已完成，之后不再往 attackEnemy 加人
+        if (waveComplete) wave1Completed = true;      // 标记第一波已完成，之后不再往 attackEnemy 加人 ?
 
         // 4. 任务分配与状态监控
         auto it = attackEnemy.begin();
@@ -929,7 +974,7 @@ void EnemyAI::FirstAttack()
                 if (posIt != Army_location.end()) {
                     HumanMove(realArmy->SN, posIt->second.first, posIt->second.second);
                 }
-                lastAssignFrame.erase(realArmy->SN);
+                lastAssignFrame.erase(realArmy->SN);   //这个键值对并没有被使用？
                 lastReissueFrame.erase(realArmy->SN);
                 Army_location.erase(realArmy->SN);
                 it = attackEnemy.erase(it);
@@ -950,4 +995,153 @@ void EnemyAI::FirstAttack()
             }
             ++it;
         }
+        if (attackEnemy.empty() && wave1Completed && !Switch) {
+            lastReissueFrame.clear();
+            mode = 2;
+            Switch=true;
+        }
+}
+
+void EnemyAI::SecondAttack()
+{
+    //初始化第二波攻击农民数组
+    if(deadSecond.empty() && !enemyInfo.enemy_farmers.empty())
+    {
+        for(int i = 0; i < 8 && i < enemyInfo.enemy_farmers.size(); i++)
+            deadSecond.push_back(enemyInfo.enemy_farmers[i]);
+    }
+    // 2. 初始化进攻部队 (只在为空且第二波未完成时执行一次；完成后不再补人)
+    if(attackEnemy2.empty() && !deadSecond.empty() && !wave2Completed)
+    {
+        double sumBlockdr = 0, sumBlockur = 0;
+        for (tagFarmer& c : deadSecond) {
+            sumBlockdr += c.BlockDR;
+            sumBlockur += c.BlockUR;
+        }
+        int avgDr = sumBlockdr / deadSecond.size();
+        int avgUr = sumBlockur / deadSecond.size();
+
+        vector<pair<tagArmy, int>> cmp_Distance;
+        for(tagArmy& army : enemyInfo.armies) {
+            cmp_Distance.emplace_back(army, pow(army.BlockDR - avgDr, 2) + pow(army.BlockUR - avgUr, 2));
+        }
+        sort(cmp_Distance.begin(), cmp_Distance.end(), [](const pair<tagArmy, int>& a, const pair<tagArmy, int>& b){
+            return a.second < b.second;
+        });
+
+        // 取相应条件士兵进入骚扰小组，并记录其初始位置用于撤退
+        for(int i = 0; i < cmp_Distance.size()&&attackEnemy2.size()<11; i++) {
+            const tagArmy& a = cmp_Distance[i].first;
+            int sort_=a.Sort;
+            if(sort_==AT_BROADSWORDSMAN&&num2[sort_]<5)   //这个后面得全部改成常量
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            else if(sort_==AT_COMPOSITE_BOWMAN&&num2[sort_]<2)
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            else if(sort_==AT_CHARIOT_ARCHER&&num2[sort_]<2)
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            else if(sort_==AT_CHARIOT&&num2[sort_]<2)
+            {
+                attackEnemy2.push_back(a);
+                num2[sort_]++;
+            }
+            Army_location2[a.SN] = std::make_pair(a.DR, a.UR);
+        }
+    }
+
+    // 3. 当前集火目标：按顺序取 deadSecond 中第一个仍存活的农民，全队集火同一目标；全部击杀后才集体撤退
+    int currentTargetSN = -1;
+    for (size_t i = 0; i < deadSecond.size(); i++) {
+        bool alive = false;
+        for (const auto& f : enemyInfo.enemy_farmers) {
+            if (f.SN == deadSecond[i].SN && f.Blood > 0) { alive = true; break; }
+        }
+        if (alive) {
+            currentTargetSN = deadSecond[i].SN;
+            break;
+        }
+    }
+    bool waveComplete = (currentTargetSN == -1);  // 目标均已阵亡，集体撤退
+    if (waveComplete) wave2Completed = true;      // 标记第二波已完成
+
+    //士兵会攻击一定范围内对自己有攻击欲望的最近的物种，敌方士兵,敌方攻击性建筑都有可能
+
+    // 4. 任务分配与状态监控
+    auto it = attackEnemy2.begin();
+    while (it != attackEnemy2.end())
+    {
+        tagArmy& a_backup = *it;
+        tagArmy* realArmy = nullptr;
+
+        for (auto& real : enemyInfo.armies) {
+            if (real.SN == a_backup.SN) {
+                realArmy = &real;
+                break;
+            }
+        }
+
+        // A. 士兵已阵亡，从列表移除并清理状态
+        if (!realArmy) {
+            lastAssignFrame.erase(a_backup.SN);
+            lastReissueFrame.erase(a_backup.SN);
+            Army_location2.erase(a_backup.SN);
+            it = attackEnemy2.erase(it);
+            continue;
+        }
+
+        // D. 总目标已完成：集体撤退
+        tagArmy threat1 = Threated(realArmy);
+        if (waveComplete&&threat1.SN == -1) {
+            auto posIt = Army_location2.find(realArmy->SN);
+            if (posIt != Army_location2.end()) {
+                HumanMove(realArmy->SN, posIt->second.first, posIt->second.second);
+          }
+            lastReissueFrame.erase(realArmy->SN);
+            Army_location2.erase(realArmy->SN);
+            it = attackEnemy2.erase(it);
+            continue;
+        }
+
+        // B. 士兵未被攻击且无攻击对象，一同攻击同一目标
+        int unitSN = realArmy->SN;
+        tagArmy threat2 = Threated(realArmy);
+        if (realArmy->WorkObjectSN != currentTargetSN&&threat2.SN == -1) {
+            bool targetChanged = (a_backup.WorkObjectSN != currentTargetSN);
+            int now = g_frame;
+            bool throttleOk = (lastReissueFrame[unitSN] == 0 || now - lastReissueFrame[unitSN] >= 12);
+            if (targetChanged || throttleOk) {
+                HumanAction(unitSN, currentTargetSN);
+                a_backup.WorkObjectSN = currentTargetSN;
+                lastReissueFrame[unitSN] = now;
+            }
+            ++it;
+            continue;
+        }
+
+
+        // C. 士兵在攻击农民时被威胁到（敌人到攻击距离且有攻击欲望），那么就转变对象，攻击敌人
+        if (threat2.SN != -1&&realArmy->WorkObjectSN==currentTargetSN)
+        {
+            HumanAction(realArmy->SN, threat2.SN);
+            a_backup.WorkObjectSN=threat2.SN;
+            ++it;
+            continue;
+        }
+
+        ++it;
+
+
+}
+
+//所有士兵都是defense状态，预计画出三个圆形区域，有敌军在这三个区域内就攻击
+    //主基地的防御范围就是主基地兵力的活动范围
+
 }

@@ -1,7 +1,7 @@
 #ifndef ENEMYAI_H
 #define ENEMYAI_H
 
-#include "AI.h"
+#include "ai.h"
 #include <string>
 
 using std::string;
@@ -55,6 +55,8 @@ private:
 public slots:
     void onWaveAttack(int wave);
     void FirstAttack();
+    void SecondAttack();
+    tagArmy Threated(tagArmy* army);
 };
 /*##########DO NOT EDIT ABOVE##########*/
 

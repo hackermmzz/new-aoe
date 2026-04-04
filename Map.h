@@ -15,7 +15,7 @@ class Map
 public:
     Map();
     ~Map();
-    void init(int MapJudge);
+    void init();
 
     // 重绘海岸
     void refineShore();
@@ -57,7 +57,6 @@ public:
     bool isFlat(int blockDR , int blockUR,int blockSideLen = 1);
     vector<pair<Point,int>> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
     vector<Point>& findBlock_Free(Point blockPoint, int lenth,bool landUnit);
-    vector<Point> findBlock_Flat(int disLen = 1);
 
     bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }
 
@@ -157,16 +156,8 @@ public:
 
 
     /*************  取消使用，待删除   ***********************/
-    //后续若需要给出障碍物地图，则修改该部分并启用
-
-    vector<vector<tagMap>> resMap_UserAI;
-    vector<vector<tagMap>> resMap_EnemyAI;
     //当前已经探索的区域
     vector<vector<bool>> explored;
-    //更新用于AI的资源状况表
-    void reset_resMap_AI();
-    //传入player阵营，若是用户，传出已探索地图部分的地图资源信息，若是Enemy，传回完整的资源地图
-    void reset_resMap_ForUserAndEnemy();
     /************************************/
 
 public:
@@ -179,8 +170,7 @@ public:
     void InitFaultHandle();     // 初始化错误处理
     void InitCell(int Num, bool isExplored, bool isVisible);
     void ResetMapType(int blockL, int blockU);
-    void GenerateMapTxt(int MapJudge);
-    void loadGenerateMapText(int MapJudge);
+    void loadGenerateMapText();
     
     // 应用敌人状态到MainWidget
     void applyEnemyStatusToMainWidget(class MainWidget* mainWidget);
@@ -199,11 +189,8 @@ public:
 
     Player** player;
     vector<vector<short>> m_heightMap;
-    vector<vector<int>> Gamemap;  // 地图资源二维数组
-    vector<vector<bool>> mapFlag; // 地图标识二维数组，0为可放置，1为不可放置
     vector<vector<bool>> TreeBlock;//将森林按所处位置合并成森林
     vector<vector<int>> barrierMap;   //障碍物地图
-    vector<vector<tagMap>> resMap_AI; //为AI准备的资源地图
     map<int,pair<string,void*>>enemyAreaLimit;//记录敌人能活动的区域限制
     map<int,string>enemyStatusMap;//记录敌人的状态(attack/defend)
     int EL;

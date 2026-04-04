@@ -9,9 +9,9 @@
 #include <random>
 #include<map>
 #include<algorithm>
-#include<rectarea.h>
-#include<linearea.h>
-#include<circlearea.h>
+#include<Rectarea.h>
+#include<LineArea.h>
+#include<CircleArea.h>
 
 // 前向声明
 class RectArea;
@@ -22,8 +22,6 @@ class LineArea;
 extern RectArea* g_rectArea;
 extern CircleArea* g_circleArea;
 extern LineArea* g_lineArea;
-
-///////////////////////////
 Map*GlobalMap;
 ///////////////////////////
 Map::Map()
@@ -35,19 +33,14 @@ Map::Map()
     }
     //
     findPathMapTemperature=vector<vector<vector<int>>>(MAXPLAYER,vector<vector<int>>(MAP_L,vector<int>(MAP_U)));
-    blockIndex=vector<vector<int>>(MAP_L,vector<int>(MAP_U));
+    blockIndex=decltype(blockIndex)(MAP_L,vector<int>(MAP_U));
     map_Vision=vector<vector<vector<Coordinate*>>>(MAP_L,vector<vector<Coordinate*>>(MAP_U));
     map_Object=vector<vector<vector<Coordinate*>>>(MAP_L,vector<vector<Coordinate*>>(MAP_U));
     map_Height=decltype(map_Height)(MAP_L,vector<int>(MAP_U));
-    resMap_UserAI=decltype(resMap_UserAI)(MAP_L,vector<tagMap>(MAP_U));
-    resMap_EnemyAI=decltype(resMap_EnemyAI)(MAP_L,vector<tagMap>(MAP_U));
     explored=decltype(explored)(MAP_L,vector<bool>(MAP_U));
     m_heightMap=decltype(m_heightMap)(GENERATE_L,vector<short>(GENERATE_U));
-    Gamemap=decltype(Gamemap)(MAP_L,vector<int>(MAP_U));
-   mapFlag=decltype(mapFlag)(MAP_L,vector<bool>(MAP_U));
-   TreeBlock=decltype(TreeBlock)(MAP_L,vector<bool>(MAP_U));
+    TreeBlock=decltype(TreeBlock)(MAP_L,vector<bool>(MAP_U));
     barrierMap=decltype(barrierMap)(MAP_L,vector<int>(MAP_U));
-   resMap_AI=decltype(resMap_AI)(MAP_L,vector<tagMap>(MAP_U));
 }
 
 Map::~Map()
@@ -1171,64 +1164,6 @@ vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool landUnit)
     return Block_Free;
 }
 
-vector<Point> Map::findBlock_Flat(int disLen )
-{
-    /**
-    * 仅在地图资源初始化时可使用，用于寻找建筑可建筑地点
-    * 输入：建筑的边长
-    * 输出：建筑可建的位置表，从中心开始往外扩展
-    *
-    */
-    int blockDR = MAP_L / 2 - 2, blockUR = MAP_L / 2 - 2 , blockSideLen = 4;
-
-    int sideRM = blockDR+blockSideLen, sideUM = blockUR+blockSideLen;
-    int sideRL = blockDR - disLen , sideUL = blockUR - disLen;
-
-    int bDRL,bURD,bDRR,bURU;
-    vector<Point> Block_Flat;
-    Point tempPoint;
-    int maxh,minh,temph;
-    bool isfalse;
-
-    do{
-        bDRL = max(0, sideRL++) , bURD = max(0, sideUL++) , bDRR = min(sideRM++, MAP_L - disLen) , bURU = min(sideUM++, MAP_U  - disLen);
-        //在给定范围内找寻指定区域平坦的格子
-        for(int x = bDRL; x<bDRR; x++)
-        {
-            for(int y = bURD; y<bURU;y++)
-            {
-                maxh = minh = map_Height[x][y];
-                if(mapFlag[x][y]) continue;
-
-                isfalse = false;
-                for(int i = 0 ; i < disLen; i++)
-                {
-                    for(int j = 0 ; j<disLen; j++)
-                    {
-                        temph = map_Height[x+i][y+j];
-                        if(temph>maxh) maxh = temph;
-                        else if(temph < minh) minh = temph;
-
-                        if(mapFlag[x+i][y+j] || minh == -1 || maxh!=minh)
-                        {
-                            isfalse = true;
-                            break;
-                        }
-                    }
-                    if(isfalse) break;
-                }
-                if(isfalse) continue;
-                tempPoint.x = x;
-                tempPoint.y = y;
-                Block_Flat.push_back(tempPoint);
-            }
-        }
-    }while(Block_Flat.empty());
-
-    return Block_Flat;
-}
-
-
 
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {
@@ -1316,114 +1251,6 @@ void Map::add_Map_Vision( Coordinate* object )
     return;
  }
 
-//更新的resMap_AI是模板，对userAI，需要传入其于视野地图的&，对Enemy，直接使用resMap_AI（全视野）
-void Map::reset_resMap_AI()
-{
-    try {
-        int siz;
-        int sort,Num;
-        Animal* animalPrinter = NULL;
-        StaticRes* stResPrinter = NULL;
-        for(int x = 0;x<MAP_L;x++)
-        {
-            for(int y = 0 ; y<MAP_U;y++)
-            {
-                if(!resMap_AI[x][y].explore)
-                {
-                    resMap_AI[x][y].explore = true;
-                    resMap_AI[x][y].high = cell[x][y].getMapHeight();
-                }
-                if(!map_Object[x][y].empty())
-                {
-                    siz = map_Object[x][y].size();
-                    resMap_AI[x][y].clear_r();  //清除资源信息
-
-                    //重新设置资源信息
-                    for(int z = 0; z<siz; z++)
-                    {
-                        if(map_Object[x][y][z] != NULL)
-                        {
-                            sort = map_Object[x][y][z]->getSort();
-                            Num = map_Object[x][y][z]->getNum();
-                        }
-
-                        if(sort == SORT_ANIMAL && map_Object[x][y][z] != NULL)
-                        {
-                            switch (Num) {
-                            case ANIMAL_GAZELLE:
-                                resMap_AI[x][y].type = RESOURCE_GAZELLE;
-                                break;
-                            case ANIMAL_LION:
-                                resMap_AI[x][y].type = RESOURCE_LION;
-                                break;
-                            case ANIMAL_ELEPHANT:
-                                resMap_AI[x][y].type = RESOURCE_ELEPHANT;
-                                break;
-                            case ANIMAL_TREE:
-                            case ANIMAL_FOREST:
-                                resMap_AI[x][y].type = RESOURCE_TREE;
-                                break;
-                            default:
-                                break;
-                            }
-
-                            map_Object[x][y][z]->printer_ToAnimal((void**)&animalPrinter);
-                            if(animalPrinter != NULL)
-                            {
-                                resMap_AI[x][y].fundation = animalPrinter->get_BlockSizeLen();
-                                resMap_AI[x][y].SN = animalPrinter->getglobalNum();
-                                resMap_AI[x][y].ResType = animalPrinter->get_ResourceSort();
-                                resMap_AI[x][y].remain = animalPrinter->get_Cnt();
-                            }
-                        }
-                        else if(sort == SORT_STATICRES && map_Object[x][y][z] != NULL)
-                        {
-                            switch (Num) {
-                            case NUM_STATICRES_Bush:
-                                resMap_AI[x][y].type = RESOURCE_BUSH;
-                                break;
-                            case NUM_STATICRES_Stone:
-                                resMap_AI[x][y].type = RESOURCE_STONE;
-                                break;
-                            default:
-                                break;
-                            }
-
-                            map_Object[x][y][z]->printer_ToStaticRes((void**)&stResPrinter);
-                            if( stResPrinter != NULL)
-                            {
-                                resMap_AI[x][y].fundation = stResPrinter->get_BlockSizeLen();
-                                resMap_AI[x][y].SN = stResPrinter->getglobalNum();
-                                resMap_AI[x][y].ResType = stResPrinter->get_ResourceSort();
-                                resMap_AI[x][y].remain = stResPrinter->get_Cnt();
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-
-        reset_resMap_ForUserAndEnemy();
-        return;
-    }
-    catch (std::bad_alloc& ba)
-    {
-        std::cerr << "std::bad_alloc caught: " << ba.what() << '\n';
-    }
-}
-
-void Map::reset_resMap_ForUserAndEnemy()
-{
-    for(int x = 0; x<MAP_L;x++)
-        for(int y = 0 ; y<MAP_U;y++)
-        {
-            if(cell[x][y].Explored) resMap_UserAI[x][y] = resMap_EnemyAI[x][y] = resMap_AI[x][y];
-            else resMap_EnemyAI[x][y] = resMap_AI[x][y];
-        }
-
-    return;
-}
 
 QString Map::GetMapFileName()
 {
@@ -1519,49 +1346,6 @@ int Map::addStaticRes(int Num, int BlockDR, int BlockUR) {
 bool Map::addAnimal(int Num, double DR, double UR) {
     Animal *newanimal=new Animal(Num,DR,UR);
     this->animal.push_back(newanimal);
-    return true;
-}
-
-/*
- * 函数：Map::loadResource；
- * 参数：无；
- * 内容：随机生成资源；
- * 返回值：生成成功返回true。
- */
-bool Map::loadResource() {
-    for(int i = 0; i < MAP_L; i++)
-    {
-        for(int j = 0; j < MAP_U; j++)
-        {
-            if((Gamemap[i][j] == 1 || Gamemap[i][j] == 11) && this->cell[i][j].getMapType() != MAPTYPE_FLAT) continue;
-            int tOffsetX = 0, tOffsetY = 0;
-            if(Gamemap[i][j] == 7) addAnimal(2, tranL(i) + BLOCKSIDELENGTH / 2, tranU(j)+BLOCKSIDELENGTH / 2); // 大象
-            else if(Gamemap[i][j] == 5) addStaticRes(2, i, j); // 金矿
-            else if(Gamemap[i][j] == 4) addStaticRes(1, i, j); // 石头
-            else if(Gamemap[i][j] == 3) addAnimal(1, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j)+BLOCKSIDELENGTH / 2 + tOffsetY); // 瞪羚
-            else if(Gamemap[i][j] == 2) addStaticRes(0, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH / 2 + tOffsetY); // 浆果
-            else if(Gamemap[i][j] == 1) {
-                addAnimal(0, tranL(i) + BLOCKSIDELENGTH / 2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH/2 + tOffsetY); // 树
-            }
-            else if(Gamemap[i][j] == 11) addAnimal(0, tranL(i) + BLOCKSIDELENGTH/2 + tOffsetX, tranU(j) + BLOCKSIDELENGTH/2 + tOffsetY);
-            /*
-                    种类：
-                    0为空地；
-                    1为树木；
-                    2为浆果；
-                    3为瞪羚；
-                    4为石头；
-                    5为金矿；
-                    6为狮子；
-                    7为大象；
-                    9为主营；
-                    10为箭塔废墟；
-                    11为树林。
-                */
-            Gamemap[i][j] = 0;  // :)
-            mapFlag[i][j] = 0;
-        }
-    }
     return true;
 }
 
@@ -1731,74 +1515,13 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
 }
 
 /*
- * 函数：Map::GenerateMapTxt；
- * 参数：获取启动参数，判断是否输出地图；
- * 内容：导出地图txt文件；
- * 返回值：空。
- */
-void Map::GenerateMapTxt(int MapJudge) {
-    if(MapJudge == 0)       // 随机产生地图
-    {
-        std::ofstream outMapFile("tmpMap.txt");
-        if (outMapFile.is_open())
-        {
-            for(int i = 0 ; i < MAP_L; i++)
-            {
-                outMapFile<<Gamemap[i][0];
-
-                for(int j = 1; j < MAP_U; j++)
-                {
-                    outMapFile<<' '<<Gamemap[i][j];
-                }
-                outMapFile<<"\n";
-            }
-            outMapFile << "\n"; //隔三行
-            outMapFile << "\n";
-            outMapFile << "\n";
-
-            for (int i = 0; i < MAP_L; i++)
-            {
-                outMapFile<<this->cell[i][0].getMapHeight();
-
-                for (int j = 1; j < MAP_U; j++)
-                {
-                    outMapFile<< ' ' << this->cell[i][j].getMapHeight();
-                }
-                outMapFile << "\n";
-            }
-            outMapFile << "\n";
-            outMapFile << "\n";
-            outMapFile << "\n";
-
-            for (int i = 0; i < GENERATE_L; i++)
-            {
-                outMapFile<<m_heightMap[i][0];
-
-                for (int j = 1; j < GENERATE_U; j++)
-                {
-                    outMapFile << ' ' << m_heightMap[i][j];
-                }
-                outMapFile << "\n";
-            }
-
-            outMapFile.close();
-            qDebug() << "地图数据已导出为文件";
-        }
-        else
-        {
-            qDebug() << "无法导出地图文件";
-        }
-    }
-}
-
-/*
  * 函数：Map::loadGenerateMapText
  * 参数：获取启动参数，判断是否载入地图；
  * 内容：读取地图txt文件；
  * 返回值：空。
  */
 
-void Map::loadGenerateMapText(int MapJudge)
+void Map::loadGenerateMapText()
 {
     // 使用高精度时间为种子的真随机数生成器
     auto AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX.c_str());
@@ -1809,7 +1532,6 @@ void Map::loadGenerateMapText(int MapJudge)
     auto mapPath=AllMapFile[mapIdx];
     QFile file(mapPath);
     MapFileName=mapPath.split("/").back();
-//    QFile file("map3.txt");
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         qWarning() << "文件打开错误\n";
@@ -2142,9 +1864,9 @@ bool Map::CheckIsNearOcean(int x, int y)
  * 内容：初始化地图的总函数；
  * 返回值：空。
  */
-void Map::init(int MapJudge) {
+void Map::init() {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
-    loadGenerateMapText(MapJudge);  //载入地图
+    loadGenerateMapText();  //载入地图
     divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
     refineShore();
 }

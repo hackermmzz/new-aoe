@@ -8,12 +8,16 @@
 #include<QNetworkAccessManager>
 #include"networkplugin.h"
 #include<QNetworkReply>
+
 using namespace std;
 class Coordinate;
 //
+extern QString ResultLogFile;
+extern bool OffScreen;
 extern int DefaultCivilization;
 extern bool MAP_EXPLORE;
 extern bool MAP_VISIABLE;
+extern double MUSIC_VOLUME;
 extern int INITIAL_WOOD;
 extern int INITIAL_MEAT;
 extern int INITIAL_GOLD;
@@ -81,6 +85,8 @@ extern int BUILDING_GRANARY_UPGRADE_ARROWTOWER_FOOD;
 extern int BUILDING_GRANARY_UPGRADE_ARROWTOWER_STONE;
 extern int TIME_BUILDING_GRANARY_UPGRADE_ARROWTOWER;
 extern int BUILDING_GRANARY_UPGRADE_ARROWTOWER_ADDITION_ATK;
+extern int BUILDING_GRANARY_UPGRADE_ARROWTOWER_ADDITION_DIS;
+extern int THROWMISSION_ARROWTOWER_UPGRADED;
 extern int BLOOD_BUILD_GRANARY;
 extern int VISION_GRANARY;
 extern int BUILD_GRANARY_WOOD;
@@ -233,7 +239,6 @@ extern double HUMAN_SPEED;
 extern double WOOD_BOAT_SPEED;
 extern double ANIMAL_SPEED;
 extern QString RESPATH;
-extern int FRAMES_PER_SECOND;
 extern bool OPTION_MUSIC;
 extern bool OPTION_SOUND;
 extern bool OPTION_SELECT;
@@ -501,11 +506,6 @@ extern int NOWRES_TIMER_PRIEST;
 extern bool IsExamining;
 extern int TimePerFrame;
 extern NetworkPlugin*NetworkManager;
-extern QString GameServerAddr;
-extern int Indices;
-extern int DataPostIntervalFrame;
-extern QString API_Value;
-extern QString Id;
 //
 extern bool AIfinished;
 extern bool INSfinshed;
@@ -532,6 +532,19 @@ extern Coordinate* nowobject;
 extern Coordinate* LeftMouseObjCapture;
 extern Coordinate*RightMouseObjCaptrue;
 extern bool GenerateHumanLock;//
+//每一帧传输到输出日志的结构体
+struct ResultLogInfo{
+    bool win;
+    int wood;
+    int food;
+    int gold;
+    int stone;
+    int score;
+    string msg;
+    ResultLogInfo(bool win_,int score_,int wood_,int food_,int gold_,int stone_,string msg_="");
+    void LogOut();
+    QString ToString();
+};
 //当前选中对象
 //出于gamewidget和core均需要获取当前访问对象
 
@@ -539,11 +552,7 @@ struct st_DebugMassage {
     QString color;
     QString content;
     st_DebugMassage() {}
-    st_DebugMassage(QString color, QString content)
-    {
-        this->color = color;
-        this->content = content;
-    }
+    st_DebugMassage(QString color, QString content);
 };
 void call_debugText(QString color, QString content, int playerID);
 
@@ -552,129 +561,24 @@ extern bool only_debug_Player0;
 extern bool filterRepetitionMessage;
 extern std::map<QString, int>debugMessageRecord;
 
-enum ScoreType {
-    _WOOD = 0,
-    _STONE,
-    _GOLD,
-    _MEAT,
-
-    _BERRY,
-    _GAZELLE,
-    _ELEPHANT,
-    _FARM,
-    _FISH,
-    _ISWOOD,
-    _ISGOLD,
-    _ISSTONE,
-
-    _TECH,
-    _BUILDING1,
-    _BUILDING2,
-    _HUMAN1,
-    _HUMAN2,
-
-    _KILL2,
-    _KILL10,
-
-    _DESTORY2,
-    _DESTORY4,
-    _DESTORY5,
-    _DESTORY10,
-    _FINDENEMYLAND,
-    SCORE_TYPE_COUNT
-};
-
 struct Score {
 private:
     int id;
     int score;
     int scoreTypes[SCORE_TYPE_COUNT] = { 0 };
 
-    void addScore(int points, const QString& message) {
-        score += points;
-        if (id == 0)
-            call_debugText("blue", " 玩家" + message, REPRESENT_BOARDCAST_MESSAGE);
-        else
-            call_debugText("red", " 敌方" + message, REPRESENT_BOARDCAST_MESSAGE);
-    }
+    void addScore(int points, const QString& message);
 
 public:
-    Score(int id) : id(id), score(0) {}
-    int getScore() {
-        return score;
-    }
-    void update(int type, int num = 1) {
-        if(type==_FINDENEMYLAND){
-            addScore(10,"登录地方大陆,分数+10");
-            return;
-        }
-        if (type <= _ISSTONE && scoreTypes[type] == 0 && type > _MEAT) {
-            addScore(5, " 采集到新资源，分数+5");
-            if (type == _ISGOLD) {
-                addScore(10, " 采集到黄金，分数+10");
-            }
-        }
-
-        if (type > _MEAT && type <= _ISSTONE) {
-            scoreTypes[type] = scoreTypes[type] | 1;
-            return;
-        }
-
-        int before = scoreTypes[type] / 100;
-        scoreTypes[type] += num;
-
-        if (type <= _MEAT) {
-            int after = scoreTypes[type] / 100;
-            int change = after - before;
-            while (change > 0) {
-                addScore(1, " 单种资源收集满100个，分数+1");
-                change--;
-            }
-        }
-
-        switch (type) {
-        case _TECH:
-            addScore(2, " 解锁新科技，分数+2");
-            break;
-        case _HUMAN1:
-            addScore(1, " 生产普通单位，分数+1");
-            break;
-        case _HUMAN2:
-            addScore(2, " 生产特殊单位，分数+2");
-            break;
-        case _BUILDING1:
-            addScore(1, " 建造住房或农田，分数+1");
-            break;
-        case _BUILDING2:
-            addScore(2, " 建造一般建筑，分数+2");
-            break;
-        case _KILL2:
-            addScore(2, " 击杀一般敌人，分数+2");
-            break;
-        case _DESTORY2:
-            addScore(2, " 摧毁房屋或农田，分数+2");
-            break;
-        case _DESTORY4:
-            addScore(4, " 摧毁一般建筑，分数+4");
-            break;
-        case _DESTORY5:
-            addScore(5, " 摧毁箭塔，分数+5");
-            break;
-        case _DESTORY10:
-            addScore(10, " 摧毁主营，分数+10");
-            break;
-        default:
-            break;
-        }
-    }
+    Score(int id);
+    int getScore();
+    void update(int type, int num = 1);
 };
 //
 struct tagObj{
     int SN;// 序列号
     int BlockDR, BlockUR; //区块坐标
-    bool operator <(const tagObj&obj)const{
-        return SN<obj.SN;
-    }
+    bool operator <(const tagObj&obj)const;
 };
 struct tagBuilding:tagObj
 {
@@ -685,12 +589,7 @@ struct tagBuilding:tagObj
     int Project; // 当前项目
     int ProjectPercent; // 项目完成百分比
     int Cnt; // 剩余资源量（仅农田）
-    tagBuilding toEnemy() {
-        this->Cnt = -1;
-        this->Project = -1;
-        this->ProjectPercent = -1;
-        return *this;
-    }
+    tagBuilding toEnemy();
 };
 
 struct tagResource:tagObj
@@ -712,18 +611,7 @@ struct tagHuman:tagObj
     int attack; // 攻击力
     int rangedDefense; // 远程防御
     int meleeDefense; // 近战防御
-    void cast_from(tagHuman taghuman) {
-        this->DR = taghuman.DR;
-        this->UR = taghuman.UR;
-        this->BlockDR = taghuman.BlockDR;
-        this->BlockUR = taghuman.BlockUR;
-        this->DR0 = taghuman.DR0;
-        this->UR0 = taghuman.UR0;
-        this->NowState = taghuman.NowState;
-        this->WorkObjectSN = taghuman.WorkObjectSN;
-        this->Blood = taghuman.Blood;
-        this->SN = taghuman.SN;
-    }
+    void cast_from(tagHuman taghuman);
 };
 
 struct tagFarmer : public tagHuman
@@ -731,12 +619,7 @@ struct tagFarmer : public tagHuman
     int ResourceSort; // 手持资源种类
     int Resource; // 手持资源数量
     int FarmerSort;//农民的类型
-    tagFarmer toEnemy() {
-        Resource = -1;
-        DR0 = -1.0;
-        UR0 = -1.0;
-        return *this;
-    }
+    tagFarmer toEnemy();
 };
 
 struct tagArmy : public tagHuman
@@ -751,11 +634,7 @@ struct tagArmy : public tagHuman
     double destinaUR;
     bool ifAttack;
     int timelock;
-    tagArmy toEnemy() {
-        DR0 = -1.0;
-        UR0 = -1.0;
-        return *this;
-    }
+    tagArmy toEnemy();
 };
 //struct tagBlock{
 //    bool explored=false;
@@ -780,9 +659,7 @@ struct instruction {
     int BlockDR, BlockUR;
     int SN = -1, obSN = -1;
     double DR, UR;
-    bool isExist() {
-        return type != -1;
-    }
+    bool isExist();
     instruction() { type = -1; }
     instruction(int type, int SN, int obSN, bool twoCoredinate);
     instruction(int type, int SN, int BlockDR, int BlockUR, int option);
@@ -795,36 +672,7 @@ struct ins {
     std::queue<instruction> instructions;
     QMutex lock;
 };
-struct tagMap
-{
-    bool explore;
-    int high;
 
-    //该位置资源信息
-    int type;       //资源种类（浆果、树等）
-    int ResType;    //采集获得的资源种类（食物、木头等） human_WOOD...
-    int fundation;  //该资源占地图大小
-    int SN;
-    int remain;     //剩余资源量
-
-    //*********************************
-    tagMap() { clear(); }
-    void clear()
-    {
-        explore = false;
-        high = -1;
-        clear_r();
-    }
-
-    void clear_r()
-    {
-        type = -1;
-        ResType = -1;
-        fundation = -1;
-        SN = -1;
-        remain = -1;
-    }
-};
 struct tagTerrain {
     int height;
     int type;
@@ -834,14 +682,14 @@ struct Point {
     int x;
     int y;
 
-    Point() {}
-    Point(int x, int y) { this->x = x, this->y = y; }
-    Point(const Point& board) { x = board.x, y = board.y; }
+    Point();
+    Point(int x, int y);
+    Point(const Point& board);
 
-    Point operator +(const Point& ps) { return Point(x + ps.x, y + ps.y); }
-    Point operator -(const Point& ps) { return Point(x - ps.x, y - ps.y); }
-    bool operator ==(const Point& ps)const { return ps.x == x && ps.y == y; }
-    bool operator < (const Point& ps)const { return x < ps.x && y < ps.y; }
+    Point operator +(const Point& ps);
+    Point operator -(const Point& ps);
+    bool operator ==(const Point& ps)const;
+    bool operator < (const Point& ps)const;
 };
 
 struct tagInfo
@@ -866,47 +714,9 @@ struct tagInfo
     int Gold; // 黄金数量
     int Human_MaxNum; // 最大人口数量
     // Assignment operator
-    tagInfo& operator=(const tagInfo& other) {
-        if (this != &other) { // Check for self-assignment
-            buildings = other.buildings;
-            farmers = other.farmers;
-            armies = other.armies;
-            enemy_buildings = other.enemy_buildings;
-            enemy_farmers = other.enemy_farmers;
-            enemy_armies = other.enemy_armies;
-            resources = other.resources;
-            ins_ret = other.ins_ret;
+    tagInfo& operator=(const tagInfo& other);
 
-            // Deep copy theMap array
-            theMap=other.theMap;
-            /*
-            for (int i = 0; i < MAP_L; ++i) {
-                for (int j = 0; j < MAP_U; ++j) {
-                    theMap[i][j] = other.theMap[i][j];
-                }
-            }
-            */
-            GameFrame = other.GameFrame;
-            civilizationStage = other.civilizationStage;
-            Wood = other.Wood;
-            Meat = other.Meat;
-            Stone = other.Stone;
-            Gold = other.Gold;
-            Human_MaxNum = other.Human_MaxNum;
-        }
-        return *this;
-    }
-
-    void clear() {
-        buildings.clear();
-        farmers.clear();
-        armies.clear();
-        enemy_buildings.clear();
-        enemy_farmers.clear();
-        enemy_armies.clear();
-        resources.clear();
-        ins_ret.clear();
-    }
+    void clear();
 };
 
 
@@ -928,47 +738,12 @@ public:
             res.pop_back();
         }
     }
-    void update(tagInfo* newinfo) {
-        //控制ins_ret的大小小于100，若大于100，则优先删除旧值
-        QMutexLocker locker(&Locker);
-        if (this->Info != NULL) {
-            while (Info->ins_ret.size() > 100) {
-                Info->ins_ret.erase(Info->ins_ret.begin());
-            }
-        }
-        if (this->Info != NULL)
-            newinfo->ins_ret = this->Info->ins_ret;
-        Info = newinfo;
-        //对内部打乱
-        static const bool openHunYao = 1;
-        // for (auto& building : Info->buildings) {
-        //     qDebug() << "before" << building.SN;
-        // }
-        if (openHunYao) {
-            WLHHunYao(Info->buildings);
-            WLHHunYao(Info->farmers);
-            WLHHunYao(Info->armies);
-            WLHHunYao(Info->enemy_buildings);
-            WLHHunYao(Info->enemy_farmers);
-            WLHHunYao(Info->enemy_armies);
-            WLHHunYao(Info->resources);
-        }
-        // for (auto& building : Info->buildings) {
-        //     qDebug() << "after" << building.SN;
-        // }
-    }
-    void insertInsRet(int id, instruction ins) {
-        QMutexLocker locker(&Locker);
-        this->Info->ins_ret.insert(make_pair(id, ins.ret));
-    }
-    tagInfo getInfo() {
-        QMutexLocker locker(&Locker);
-        return *Info;
-    }
-    void clearInsRet() {
-        QMutexLocker locker(&Locker);
-        Info->ins_ret.clear();
-    }
+    void update(tagInfo* newinfo);
+    bool tryLock();
+    void release();
+    void insertInsRet(int id, instruction ins);
+    tagInfo getInfo();
+    void clearInsRet();
 };
 
 struct MouseEvent
@@ -1006,81 +781,18 @@ struct pixMemoryMap
     int height;
 
     // 构造函数
-    pixMemoryMap(int w, int h) : width(w), height(h) {
-        // 分配内存图空间
-        MemoryMap.resize(width * height);
-    }
+    pixMemoryMap(int w, int h);
 
-    pixMemoryMap() : width(0), height(0) {}
+    pixMemoryMap();
 
-    pixMemoryMap(const pixMemoryMap& other) : width(other.width), height(other.height)
-    {
+    pixMemoryMap(const pixMemoryMap& other);
 
-        MemoryMap = other.MemoryMap;
-    }
+    pixMemoryMap& operator=(const pixMemoryMap& other);
+    void setMemoryMap(int i, int j);
 
-    pixMemoryMap& operator=(const pixMemoryMap& other)
-    {
-        width = other.width;
-        height = other.height;
+    char getMemoryMap(int i, int j);
 
-        MemoryMap = other.MemoryMap;
-
-        return *this;
-    }
-    void setMemoryMap(int i, int j) {
-        int index = i * height + j;
-        MemoryMap[index] = 1;
-    }
-
-    char getMemoryMap(int i, int j) {
-        int index = i * height + j;
-        return MemoryMap[index];
-    }
-
-    void fillBlockMemoryMap()
-    {
-        for (int i = 0;i < width / 2;i++)
-        {
-            for (int j = 0;j < height / 2;j++)
-            {
-                if (j * width >= height * (width / 2 - i))
-                {
-                    setMemoryMap(i, j);
-                }
-            }
-        }
-        for (int i = width / 2;i < width;i++)
-        {
-            for (int j = 0;j < height / 2;j++)
-            {
-                if (j * width >= height * (i - width / 2))
-                {
-                    setMemoryMap(i, j);
-                }
-            }
-        }
-        for (int i = 0;i < width / 2;i++)
-        {
-            for (int j = height / 2;j < height;j++)
-            {
-                if (j * width <= height * (i + width / 2))
-                {
-                    setMemoryMap(i, j);
-                }
-            }
-        }
-        for (int i = width / 2;i < width;i++)
-        {
-            for (int j = height / 2;j < height;j++)
-            {
-                if (j * width <= -height * i + 3 * width * height / 2)
-                {
-                    setMemoryMap(i, j);
-                }
-            }
-        }
-    }
+    void fillBlockMemoryMap();
 };
 
 struct ImageResource
@@ -1088,18 +800,9 @@ struct ImageResource
     QPixmap pix;
     pixMemoryMap memorymap;
 
-    ImageResource(QPixmap pix) :pix(pix)
-    {
-        if (pix.isNull()) {
-            // 图片未成功加载，执行错误处理操作
-            qDebug() << "fault";
-        }
-    }
+    ImageResource(QPixmap pix);
 
-    ImageResource()
-    {
-
-    }
+    ImageResource();
 };
 
 
@@ -1127,65 +830,35 @@ struct conditionDevelop
 
     //**********************************************************
     //构造器 ， 创建conditionDevelop实例相关
-    conditionDevelop() {}
-    conditionDevelop(int civilization, int sort_building, double needTimes, int need_Wood = 0, int need_Food = 0, int need_Stone = 0, int need_Gold = 0)
-    {
-        this->civilization = civilization;
-        this->sort_building = sort_building;
-        this->need_Wood = need_Wood;
-        this->need_Food = need_Food;
-        this->need_Stone = need_Stone;
-        this->need_Gold = need_Gold;
-        this->times_second = needTimes;
-    }
+    conditionDevelop();
+    conditionDevelop(int civilization, int sort_building, double needTimes, int need_Wood = 0, int need_Food = 0, int need_Stone = 0, int need_Gold = 0);
 
     //添加该行动的前置行动
-    void addPreCondition(conditionDevelop* con_need) { preCondition.push_back(con_need); }
+    void addPreCondition(conditionDevelop* con_need);
 
     //添加行动结束后创建对象
-    void setCreatObjectAfterAction(int creatSort)
-    {
-        isCreatObjectAction = true;
-        creatObjectSort = creatSort;
-    }
-    void setCreatObjectAfterAction(int creatSort, int creatNum)
-    {
-        setCreatObjectAfterAction(creatSort);
-        creatObjectNum = creatNum;
-    }
+    void setCreatObjectAfterAction(int creatSort);
+    void setCreatObjectAfterAction(int creatSort, int creatNum);
 
     //**********************************************************
     //判断行动是否能进行
     //判断资源是否满足行动需要
-    bool executable(int wood, int food, int stone, int gold) { return wood >= need_Wood && food >= need_Food && stone >= need_Stone && gold >= need_Gold; }
-    void get_needResource(int& wood, int& food, int& stone, int& gold) { wood = need_Wood, food = need_Food, stone = need_Stone, gold = need_Gold; }
+    bool executable(int wood, int food, int stone, int gold);
+    void get_needResource(int& wood, int& food, int& stone, int& gold);
 
     //判断当前时代、已完成的建筑行动，是否解锁当前行动
-    bool isShowable(int nowcivilization)
-    {
-        if (civilization > nowcivilization) return false;
-
-        for (list<conditionDevelop*>::iterator iter = preCondition.begin(); iter != preCondition.end(); iter++)
-            if (!(*iter)->acttimes) return false;
-
-        return true;
-    }
+    bool isShowable(int nowcivilization);
 
     //**********************************************************
     //行动结束后相关操作
-    void finishAct() { acttimes++; }
+    void finishAct();
 
     //获取是否需要创建对象
-    bool isNeedCreatObject(int& creatSort, int& creatNum)
-    {
-        creatSort = creatObjectSort;
-        creatNum = creatObjectNum;
-        return isCreatObjectAction;
-    }
+    bool isNeedCreatObject(int& creatSort, int& creatNum);
 
-    bool isNeedCreatObject() { return isCreatObjectAction; }
+    bool isNeedCreatObject();
 
-    int getActTimes() { return acttimes; }
+    int getActTimes();
 };
 
 struct st_upgradeLab {
@@ -1193,70 +866,37 @@ struct st_upgradeLab {
     int haveFinishedPhaseNum = 0;
     bool nowExecuting = false;
 
-    st_upgradeLab() {}
-    ~st_upgradeLab()
-    {
-        while (headAct != endNode)
-        {
-            nowExecuteNode = headAct;
-            headAct = headAct->nextDevAction;
-            delete nowExecuteNode;
-        }
-        delete endNode;
-    }
+    st_upgradeLab();
+    ~st_upgradeLab();
 
-    void setHead(conditionDevelop* head) { endNode = nowExecuteNode = headAct = head; }
+    void setHead(conditionDevelop* head);
 
-    void push_back(conditionDevelop* node)
-    {
-        endNode->nextDevAction = node;
-        endNode = node;
-    }
+    void push_back(conditionDevelop* node);
 
     //设置建筑的行动没有下一个行动，但该行动可以重复地执行
-    void endNodeAsOver() { endNode->nextDevAction = endNode; }
+    void endNodeAsOver();
 
     //切换
-    void shift()
-    {
-        if (nowExecuteNode != NULL)
-        {
-            overExecute();
-            haveFinishedPhaseNum++;
-            nowExecuteNode = nowExecuteNode->nextDevAction;
-        }
-    }
+    void shift();
 
     //当前行动是否可在SelectWidget中显示
-    bool isShowAble(int nowcivilization)
-    {
-        if (nowExecuteNode == NULL) return false;
-        else return nowExecuteNode->isShowable(nowcivilization) && (!nowExecuting || nowExecuteNode == nowExecuteNode->nextDevAction);
-    }
+    bool isShowAble(int nowcivilization);
 
     //当前行动是否可执行
-    bool executable(int nowcivilization, int wood, int food, int stone, int gold) { return isShowAble(nowcivilization) && nowExecuteNode->executable(wood, food, stone, gold); }
+    bool executable(int nowcivilization, int wood, int food, int stone, int gold);
 
-    void beginExecute() { this->nowExecuting = true; }
-    void overExecute() { this->nowExecuting = false; }
+    void beginExecute();
+    void overExecute();
 
     //获取当前行动列表执行过几轮（一个链node算一轮）
-    int getPhaseTimes() { return this->haveFinishedPhaseNum; }
+    int getPhaseTimes();
     //获取需要的资源
-    void get_needResource(int& wood, int& food, int& stone, int& gold)
-    {
-        if (nowExecuteNode != NULL)
-            nowExecuteNode->get_needResource(wood, food, stone, gold);
-        else wood = 0, food = 0, stone = 0, gold = 0;
-    }
+    void get_needResource(int& wood, int& food, int& stone, int& gold);
     /**
     *考虑加入错误码，以判断错误类型
     */
 
-    bool isNeedCreatObject() {
-        if (nowExecuteNode != NULL) return nowExecuteNode->isNeedCreatObject();
-        else return false;
-    }
+    bool isNeedCreatObject();
 };
 
 struct st_buildAction
@@ -1267,22 +907,11 @@ struct st_buildAction
     //存储该建筑拥有哪些行动。第一键值为行动标号，第二键值为对应的行动表，行动表为链表，存储了执行条件
     map<int, st_upgradeLab> actCon;
 
-    st_buildAction() {}
-    ~st_buildAction()
-    {
-        if (buildCon != NULL)
-        {
-            delete buildCon;
-            buildCon = NULL;
-        }
-    }
+    st_buildAction();
+    ~st_buildAction();
 
-    void finishBuild() { buildCon->finishAct(); }
-    void finishAction(int actNum)
-    {
-        actCon[actNum].nowExecuteNode->finishAct();
-        actCon[actNum].shift();
-    }
+    void finishBuild();
+    void finishAction(int actNum);
 };
 
 
@@ -1319,7 +948,7 @@ double trans_BlockPointToDetailCenter(int p);
 QString JsonMap(const QMap<QString, QVariant>&data);
 
 int sgn(double __x);
-
+void ParseArguments(const QApplication&app);
 void ReadConfig();
 
 #endif // GLOBALVARIATE_H

@@ -1,4 +1,4 @@
-﻿#ifndef CONFIG_H
+#ifndef CONFIG_H
 #define CONFIG_H
 
 #include <QWidget>
@@ -28,8 +28,8 @@
 #include <sstream>
 #include <vector>
 #include <unordered_set>
-#include <Windows.h>
 #include <time.h>
+#include<array>
 /**********debug消息************/
 #define REPRESENT_BOARDCAST_MESSAGE -1
 /********** 游戏配置数据 **********/
@@ -301,7 +301,9 @@ enum CIVILIZATION {
 /********** 人物动作命名 **********/
 #define ACT_CREATEFARMER_NAME "创造村民(花费:50食物)"
 #define ACT_UPGRADE_AGE_NAME "演进到工具时代(花费:500食物)"
+#define ACT_UPGRADE_BRONZEAGE_NAME "演进到铜器时代(花费:1000食物,800黄金)"
 #define ACT_UPGRADE_TOWERBUILD_NAME "研发:建造箭塔(花费:50食物)"
+#define ACT_UPGRADE_ARROWTOWER_NAME "升级箭塔(花费:120食物,50石头)(需铜器时代且已完成建造箭塔研发)"
 #define ACT_UPGRADE_WOOD_NAME "研发木材加工:远程攻击距离+1,伐木+2(花费:120食物,75木头)"
 #define ACT_UPGRADE_STONE_NAME "研发石矿开采:采石+3(花费:100食物,50石头)"
 #define ACT_UPGRADE_GOLD_NAME "研发金矿开采:采金+3(花费:120食物,100木头)"
@@ -365,6 +367,7 @@ enum ACTION {
     ACT_NULL = 0,
     ACT_CREATEFARMER,
     ACT_UPGRADE_AGE,
+    ACT_UPGRADE_BRONZEAGE,
     ACT_UPGRADE_TOWERBUILD,
     ACT_UPGRADE_WOOD,
     ACT_UPGRADE_STONE,
@@ -418,6 +421,7 @@ enum ACTION {
     ACT_BUILD_COLLAGE,
     ACT_BUILD_SIEGE,
     ACT_SHIP_LAY,
+    ACT_UPGRADE_ARROWTOWER,
     ACT_STOP
 };
 /********** 地基编号 **********/
@@ -628,5 +632,34 @@ enum AiInstructionType{
     INS_HUMANBUILD, //人类建筑
     INS_BUILDINGACTION, //建筑动作
     INS_PINPOINT_STRIKE//定点打击
+};
+
+/******************得分的类型********************/
+enum ScoreType {
+    _WOOD = 0,
+    _STONE,
+    _GOLD,
+    _MEAT,
+    _BERRY,
+    _GAZELLE,
+    _ELEPHANT,
+    _FARM,
+    _FISH,
+    _ISWOOD,
+    _ISGOLD,
+    _ISSTONE,
+    _TECH,
+    _BUILDING1,
+    _BUILDING2,
+    _HUMAN1,
+    _HUMAN2,
+    _KILL2,
+    _KILL10,
+    _DESTORY2,
+    _DESTORY4,
+    _DESTORY5,
+    _DESTORY10,
+    _FINDENEMYLAND,
+    SCORE_TYPE_COUNT
 };
 #endif // CONFIG_H

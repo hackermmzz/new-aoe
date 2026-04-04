@@ -18,39 +18,36 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
     InitPlayerMap();
 }
 
+
 void Core::gameUpdate()
 {
-    //如果是考试状态,禁止cheat
-    if(IsExamining){
-        is_cheatAction=false;
-    }
+
+    //如果是考试状态,做出一些调整
+    if(IsExamining)PreProcessDuringExam();
     //
     explored.clear();//清空上一帧带来的变化
     theMap->clear_CellVisible();     //清空上一帧的视野
     theMap->init_Map_UseToMonitor(); //初始化各ob所处位置的信息地图和需要监视的ob的视野地图
+    //
 
     updateByObject();
     //重置人物的位置
     ResetHumanPos();
     loadRelationMap();
-
-    //更新AI用的资源表，该资源表是User/Enemy的通用模板
-    theMap->reset_resMap_AI();
-
     //刷新视野并处理区域探索结果
     theMap->reset_ObjectExploreAndVisible();
-
-    judge_Crush();  //判断并标记碰撞，在Corelist里处理碰撞
+    //判断并标记碰撞，在Corelist里处理碰撞
+    judge_Crush();
 
     if (mouseEvent->HaveEvent())
     {
-        if (mapmoveFrequency == 8) resetNowObject_Click();
+        if (mapmoveFrequency >=8) resetNowObject_Click();
         else manageMouseEvent();
     }
     manageOrder(0);
     manageOrder(1);
     //
-    extern bool GenerateHumanLock;
+
     GenerateHumanLock=0;//每一帧都保证只能生产出一个人
     interactionList->update();
 
@@ -61,11 +58,6 @@ void Core::gameUpdate()
             firstFrame=0;
             FirstFrameProcess();
         }
-    }
-    //进度记录(考试模式下开启)
-    if(IsExamining)
-    {
-        PostDataToServer();
     }
 }
 void Core::ResetHumanPos(){
@@ -634,15 +626,7 @@ void Core::updateCommon(tagInfo* taginfo,int id){
         //如果是敌人,直接给定固定全局可见的地图
         taginfo->theMap=&(data->theMap);
     }
-    /*
-    for (int i = 0; i < MAP_L; ++i) {
-        for (int j = 0; j < MAP_U; ++j) {
-            int height = theMap->cell[i][j].getMapHeight();
-            taginfo->theMap[i][j].height = theMap->map_Height[i][j];
-            taginfo->theMap[i][j].type = height == MAPHEIGHT_OCEAN ? MAPPATTERN_OCEAN : MAPPATTERN_GRASS;
-        }
-    }
-    */
+
 }
 
 
@@ -690,7 +674,8 @@ void Core::infoShare() {
     ///////
     tagUsrGame.update(&currentBuff[0]);
     tagEnemyGame.update(&currentBuff[1]);
-    buff = 1 - buff;    //轮换缓存
+    //轮换缓存
+    buff ^=1;
 }
 
 void Core::InitPlayerMap()
@@ -1440,8 +1425,8 @@ void Core::loadRelationMap()
 {
     //更新寻路用障碍表
     theMap->loadBarrierMap_ByObjectMap();
-    //对成片的树进行合并成一个大block
-    theMap->MergeTrees();
+    //对成片的树进行合并成一个大block(主要是怕图像编辑的人编辑时候树之间有空袭，导致人卡树里面，所以才加，但特别耗时
+        //theMap->MergeTrees();//如果仍然出现上述情况，请开启
     //更新寻路地图模板
     theMap->loadfindPathMapTemperature();
 }
@@ -1502,34 +1487,13 @@ void Core::requestSound_Click(Coordinate* object)
     return;
 }
 
-void Core::PostDataToServer()
-{
-    //记录下次一发送的帧率
-    static int recordLastFrame=0;
-    //第一帧或者间隔达到指定帧就发送
-    if(recordLastFrame==0 || g_frame-recordLastFrame>=DataPostIntervalFrame){
-        recordLastFrame=g_frame;
-    }else{
-        return;
-    }
-    //获取状态
-    QJsonObject obj;
-    obj.insert("indices",Indices);
-    obj.insert("id",Id);
-    obj.insert("status",2);
-    obj.insert("data",GetCurrentStatus());
-    //上传数据
-    NetworkManager->postJson(GameServerAddr,{{"api",API_Value}},obj);
-}
 
-QJsonObject Core::GetCurrentStatus()
+
+void Core::PreProcessDuringExam()
 {
-    QJsonObject ret;
-    Player*p=player[0];
-    ret.insert("score",usrScore.getScore());
-    ret.insert("meat",p->getFood());
-    ret.insert("gold",p->getGold());
-    ret.insert("stone",p->getStone());
-    ret.insert("wood",p->getWood());
-    return ret;
+    //关闭作弊模式
+    is_cheatAction=false;
+    //输出每帧的实时状态信息
+    Player*p=player[NOWPLAYERREPRESENT];
+    ResultLogInfo(0,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
 }

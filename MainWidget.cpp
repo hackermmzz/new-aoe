@@ -5,8 +5,8 @@
 #include <QString>
 #include <algorithm>
 #include <QApplication>
-#include<rectarea.h>
-#include<circlearea.h>
+#include<Rectarea.h>
+#include<CircleArea.h>
 #include<LineArea.h>
 int g_globalNum = rand() % 11;
 int g_frame = 0;
@@ -34,7 +34,9 @@ ActWidget* acts[ACT_WINDOW_NUM_FREE];
 std::map<int, std::string> actNames = {
     {ACT_CREATEFARMER, ACT_CREATEFARMER_NAME},
     {ACT_UPGRADE_AGE, ACT_UPGRADE_AGE_NAME},
+    {ACT_UPGRADE_BRONZEAGE, ACT_UPGRADE_BRONZEAGE_NAME},
     {ACT_UPGRADE_TOWERBUILD, ACT_UPGRADE_TOWERBUILD_NAME},
+    {ACT_UPGRADE_ARROWTOWER, ACT_UPGRADE_ARROWTOWER_NAME},
     {ACT_UPGRADE_WOOD, ACT_UPGRADE_WOOD_NAME},
     {ACT_UPGRADE_STONE, ACT_UPGRADE_STONE_NAME},
     {ACT_UPGRADE_GOLD, ACT_UPGRADE_GOLD_NAME},
@@ -91,16 +93,17 @@ std::map<int, std::string> actNames = {
 };
 
 
-MainWidget::MainWidget(int MapJudge, QWidget* parent) :
+MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
 {
-    qInfo() << "主程序启动参数：" << MapJudge << " 开始初始化...";
+    qInfo() << " 开始初始化...";
     ui->setupUi(this);
+    g_mainWidget = this; // 设置全局MainWidget实例指针
+    //申请资源
+    QResource::registerResource("./res.rcc");
     //初始化一些变量
     initVar();
-    //初始化编辑器默认状态
-    currentSelected = NORMAL_MOUSE;
     //初始化一些编辑器配置
     initEditor();
     // 初始化游戏资源
@@ -118,7 +121,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     // 初始化玩家
     initPlayers();
     // 初始化地图
-    initMap(MapJudge);
+    initMap();
     // 设置内核
     setupCore();
     // 初始化AI
@@ -129,15 +132,13 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     setupTipLabel();
     // 设置小地图
     initViewMap();
-    // 设置背景音乐
-    initBGM();
-    //开辟音乐播放线程
-    soundPlayThread = (new SoudPlayThread);
-    soundPlayThread->start();
+    // 设置背景音乐以及音乐播放线程初始化
+    initMusic();
+    //注销资源
+    QResource::unregisterResource("./res.rcc");
     //
     debugText("blue", " 游戏开始");
-    qInfo() << "初始化结束，游戏开始！";
-
+    qInfo() << "初始化结束，游戏开始;";
     // 创建编辑器
     editor = new Editor(this);
     
@@ -152,11 +153,11 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     if (!EditorMode) editor->hide();
 
     // 导出地图
-    connect(editor->ui->export_map, QPushButton::clicked, this, [=]() {
+    connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
         this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
         call_debugText("green", " 导出地图", 0);
         });
-    connect(editor->ui->delete_object, QPushButton::clicked, this, [=]() {
+    connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {
         call_debugText("green", " 删除资源/建筑", 0);
         this->currentSelected = DELETEOBJECT;
         });
@@ -201,6 +202,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         QString selectedText = text;
         if (text == "敌方战船") this->currentSelected = AIWARSHIP;
         else if (text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
+        else if (text == "敌方武器攻城厂") this->currentSelected = AISIEGE;
         if (text != "敌方资源/建筑") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->ai_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -216,6 +218,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
         else if (text == "敌方战车射手") this->currentSelected = AICHARIOTARCHER;
         else if (text == "敌方复合弓手") this->currentSelected = AICOMPARCHER;
         else if (text == "敌方投石车") this->currentSelected = AISTONETHROWER;
+        else if (text == "敌方骑兵") this->currentSelected = AICAVALRY;
         if (text != "敌方人物") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -268,7 +271,7 @@ MainWidget::MainWidget(int MapJudge, QWidget* parent) :
     
     
     // 鼠标按钮连接
-    connect(editor->ui->mouse_button, QPushButton::clicked, this, [=]() {
+    connect(editor->ui->mouse_button, &QPushButton::clicked, this, [=]() {
         this->currentSelected = NORMAL_MOUSE;
         call_debugText("green", " 普通鼠标模式", 0);
         });
@@ -637,6 +640,8 @@ void MainWidget::updateEditor()
         case AIARROWTOWER:
             MakeBuilding(L, U, AIARROWTOWER);
             break;
+        case AISIEGE:
+            MakeBuilding(L, U, AISIEGE);
         case PLAYERFARMER:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERFARMER);
             break;
@@ -684,6 +689,9 @@ void MainWidget::updateEditor()
             break;
         case AISTONETHROWER:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AISTONETHROWER);
+            break;
+        case AICAVALRY:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICAVALRY);
             break;
         case PLAYERDOCK:
             MakeBuilding(L, U, PLAYERDOCK);
@@ -842,40 +850,10 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
 
     // 更新障碍物地图和资源地图
     map->loadBarrierMap(true);
-    map->reset_resMap_AI();
     ui->Game->update();  // 触发界面重绘
 }
 
 
-// void MainWidget::SaveCurrentState()
-// {
-//     GameState* state = new GameState;
-//     ////////////////////////
-//     //保存地形
-//     for (int i = 0;i < MAP_L;++i)for (int j = 0;j < MAP_U;++j)state->cell[i][j] = map->cell[i][j];
-//     for (int i = 0;i < GENERATE_L;++i)for (int j = 0;j < GENERATE_U;++j)state->m_heightMap[i][j] = map->m_heightMap[i][j];
-//     //保存我方人物信息
-//     {
-//         Player* p = player[0];
-//         state->myBuilding = p->build;
-//         state->myHuman = p->human;
-//     }
-//     //保存敌方信息
-//     {
-//         Player* p = player[1];
-//         state->myBuilding = p->build;
-//         state->myHuman = p->human;
-//     }
-//     state->myHuman = player[0]->human;
-//     state->myBuilding = player[0]->build;
-//     state->enemyHuman = player[1]->human;
-//     state->enemyBuilding = player[1]->build;
-//     state->animal = map->animal;
-//     state->resource = map->staticres;
-//     //
-//     ////////////////////////
-//     ui->Game->SaveCurrentState(state);
-// }
 
 
 void MainWidget::HigherLand(int blockL, int blockU, int height)
@@ -1175,6 +1153,9 @@ void MainWidget::MakeBuilding(int blockL, int blockU, int type)
     else if (type == AIARROWTOWER) {
         player[1]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);
     }
+    else if (type == AISIEGE) {
+        player[1]->addBuilding(BUILDING_SIEGE, blockL,blockU, 100);
+    }
     else if (type == PLAYERDOCK) {
         player[0]->addBuilding(BUILDING_DOCK, blockL, blockU, 100);
     }
@@ -1262,6 +1243,9 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
     else if (type == AISTONETHROWER){
         player[1]->addArmy(AT_STONE_THROWER, DR, UR);
     }
+    else if (type == AICAVALRY){
+        player[1]->addArmy(AT_CAVALRY, DR, UR);
+    }
     else if (type == AIWARSHIP) {
         player[1]->addArmy(AT_SHIP, DR, UR);
     }
@@ -1278,10 +1262,11 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
 //***************InitHelperFunctionBegin**************
 void MainWidget::initGameResources() {
     qDebug() << "游戏资源初始化...";
-    InitImageResMap(RESPATH);   // 图像资源
-    InitSoundResMap(RESPATH);   // 音频资源
-}
+    InitImageResMap(RESPATH); // 图像资源
+    if(!OffScreen) InitSoundResMap(RESPATH);   // 音频资源
+    //
 
+}
 void MainWidget::initGameElements() {
     qDebug() << "游戏元素初始化...";
     initBlock();
@@ -1373,7 +1358,7 @@ void MainWidget::initGameTimer() {
     qDebug() << "初始化计时器...";
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
-    timer->start(TimePerFrame);
+    timer->start(TimePerFrame/mapmoveFrequency);
     //时间增加
     connect(timer, &QTimer::timeout, sel, &SelectWidget::frameUpdate);
     connect(timer, SIGNAL(timeout()), this, SLOT(FrameUpdate()));
@@ -1396,11 +1381,11 @@ void MainWidget::initPlayers() {
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
 
-void MainWidget::initMap(int MapJudge) {
+void MainWidget::initMap() {
     qDebug() << "初始化地图...";
     map = new Map;
     map->setPlayer(player);
-    map->init(MapJudge);
+    map->init();
     map->init_Map_Height();
 
     // 内存图开辟空间
@@ -1408,14 +1393,12 @@ void MainWidget::initMap(int MapJudge) {
     for (int i = 0; i < MEMORYROW; i++) {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
-    map->loadResource();
     
     // 应用从地图文件中读取的敌人状态
     if (EditorMode) {
         map->applyEnemyStatusToMainWidget(this);
     }
     
-    // buildInitialStock();
 }
 
 void MainWidget::initAI() {
@@ -1442,6 +1425,26 @@ void MainWidget::setupMouseTracking() {
     ui->Game->setMouseTracking(true);
     ui->Game->setAttribute(Qt::WA_MouseTracking, true);
     ui->Game->installEventFilter(this);
+    //注册鼠标事件
+    auto&e=::eventFilter;
+    e->RegistReciver([&](){
+    if(e->LeftMouseClicked()){
+       int x=e->MouseX(),y=e->MouseY();
+       mouseEvent->SetMemoeyMapX(x/4);
+       mouseEvent->SetMemoryMapY(y/4);
+       mouseEvent->SetMouseEventType(LEFT_PRESS);
+       mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
+       mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
+    }
+    else if(e->RightMouseClicked()){
+        int x=e->MouseX(),y=e->MouseY();
+        mouseEvent->SetMemoeyMapX(x/4);
+        mouseEvent->SetMemoryMapY(y/4);
+        mouseEvent->SetMouseEventType(RIGHT_PRESS);
+        mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
+        mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
+    }
+    });
 }
 
 void MainWidget::setupTipLabel() {
@@ -1452,13 +1455,16 @@ void MainWidget::setupTipLabel() {
     tipLbl = ui->tip;
 }
 
-void MainWidget::initBGM() {
+void MainWidget::initMusic() {
     qDebug() << "加载背景音乐...";
     bgm = SoundMap["BGM"];
     if (bgm != NULL) {
         bgm->setLoopCount(QSoundEffect::Infinite);
         responseMusicChange();
     }
+    //开辟音乐播放线程
+    soundPlayThread = (new SoudPlayThread);
+    soundPlayThread->start();
 }
 
 void MainWidget::initViewMap() {
@@ -1543,6 +1549,9 @@ void MainWidget::initBuilding()
                 loadResource(Building::getBuiltname(age, isEnemy, buildType),
                            Building::getBuilt(age, isEnemy, buildType));
             }
+            Building::allocateBuiltArrowTowerUpgraded(age, isEnemy);
+            loadResource(Building::getArrowTowerUpgradedResourceName(age, isEnemy),
+                        Building::getBuiltArrowTowerUpgraded(age, isEnemy));
         }
     }
 
@@ -1551,10 +1560,10 @@ void MainWidget::initBuilding()
         Building::allocatebuildFire(type);
         loadResource(Building::getBuildingFireName(type), Building::getBuildFire(type));
     }
-    //市镇中心
+    //市镇中心（演进工具/铜器共用槽位 1，static 仍为 ACT_UPGRADE_AGE，铜器段由 Building::getActNames 返回 ACT_UPGRADE_BRONZEAGE，同仓库工具使用/金属加工）
     Building::setActNames(BUILDING_CENTER, 0, ACT_CREATEFARMER);
     Building::setActNames(BUILDING_CENTER, 1, ACT_UPGRADE_AGE);
-    //谷仓
+    //谷仓（箭塔研发与箭塔强化共用槽位 1，由 Building::getActNames 按可显示科技切换，同市场伐木/工艺）
     Building::setActNames(BUILDING_GRANARY, 0, ACT_RESEARCH_WALL);
     Building::setActNames(BUILDING_GRANARY, 1, ACT_UPGRADE_TOWERBUILD);
     //仓库
@@ -1870,6 +1879,7 @@ void MainWidget::deleteBuilding()
             {
                 Building::deallocatebuilt(age, isEnemy, buildType);
             }
+            Building::deallocateBuiltArrowTowerUpgraded(age, isEnemy);
         }
     }
 
@@ -2077,10 +2087,17 @@ void MainWidget::gameDataUpdate()
     if (!pause)
     {
         core->gameUpdate();
-        //如果当前模式不是编辑器功能，那么不运行ai
+        //如果当前模式是编辑器功能，那么不运行ai
         if(!EditorMode){
-            core->infoShare();
-            emit startAI();
+            //尝试获取锁，如果获取不了那么就继续让内核跑下去
+            if(tagUsrGame.tryLock()&&tagEnemyGame.tryLock()){
+                core->infoShare();
+                //释放锁
+                tagUsrGame.release();
+                tagEnemyGame.release();
+                //AI继续跑
+                emit startAI();
+            }
         }
     }
     else
@@ -2092,14 +2109,17 @@ void MainWidget::gameDataUpdate()
 
 void MainWidget::paintUpdate()
 {
+    ////判断是否关闭了渲染模式
+    if(OffScreen)return;
+    //
     statusUpdate();
-
 
     ui->Game->update();
     ui->mapView->update();
     ui->tip->update();
     ui->statusLbl->update();
     emit mapmove();
+    //
 }
 
 bool MainWidget::isLoss()
@@ -2251,14 +2271,14 @@ void MainWidget::initVar()
             // 我方建筑 [0]
             {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""},
             // 敌方建筑 [1]
-            {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""}
+            {"House1","Granary","Center1","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Daiwa","Collage_Daiwa","",""}
         }},
         // 索引2 - 工具时代 (CIVILIZATION_TOOLAGE)
         {{
             // 我方建筑 [0]
             {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""},
             // 敌方建筑 [1]
-            {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Egypt","Collage_Egypt","",""}
+            {"House2","Granary","Center2","Stock","Farm","Market","ArrowTower","ArmyCamp","Stable","Range","Dock","Siege_Daiwa","Collage_Daiwa","",""}
         }},
         // 索引3 - 铜器时代 (CIVILIZATION_BRONZEAGE)
         {{
@@ -2307,41 +2327,31 @@ void MainWidget::initVar()
 
 void MainWidget::initEditor()
 {
-    //注册全局事件监听
-    auto&e=::eventFilter;
-    e->RegistReciver([&](){
-        if(e->LeftMouseClicked()){
-           int x=e->MouseX(),y=e->MouseY();
-           mouseEvent->SetMemoeyMapX(x/4);
-           mouseEvent->SetMemoryMapY(y/4);
-           mouseEvent->SetMouseEventType(LEFT_PRESS);
-           mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
-           mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
-        }
-        else if(e->RightMouseClicked()){
-            int x=e->MouseX(),y=e->MouseY();
-            mouseEvent->SetMemoeyMapX(x/4);
-            mouseEvent->SetMemoryMapY(y/4);
-            mouseEvent->SetMouseEventType(RIGHT_PRESS);
-            mouseEvent->SetDR(ui->Game->TranGlobalPosToDR(x,y));
-            mouseEvent->SetUR(ui->Game->TranGlobalPosToUR(x,y));
-        }
-        //轮询编辑器
-        if(EditorMode){
-            updateEditor();
-        }
-    });
+    if(!EditorMode)return;
+    //创建editor对象
+    editor = new Editor(this);
+    // 初始化单位选择和区域管理相关变量
+    selectedUnits.clear();
+    //初始化编辑器默认状态
+    currentSelected = NORMAL_MOUSE;
     //
-    if(EditorMode){
-        rectArea=new RectArea(ui->Game);
-        circleArea=new CircleArea(ui->Game);
-        lineArea=new LineArea(ui->Game);
-        
-        // 设置全局变量
-        g_rectArea = (RectArea*)rectArea;
-        g_circleArea = (CircleArea*)circleArea;
-        g_lineArea = (LineArea*)lineArea;
-    }
+    rectArea=new RectArea(ui->Game);
+    circleArea=new CircleArea(ui->Game);
+    lineArea=new LineArea(ui->Game);
+    // 设置全局变量
+    g_rectArea = (RectArea*)rectArea;
+    g_circleArea = (CircleArea*)circleArea;
+    g_lineArea = (LineArea*)lineArea;
+    // 显示编辑器
+    editor->show();
+    // 地图编辑器按键绑定
+    EditorWidgetBind();
+    //注册全局事件监听
+    ::eventFilter->RegistReciver([&](){
+        //轮询编辑器
+        updateEditor();
+    });
+    auto&e=::eventFilter;
 }
 
 void MainWidget::ScoreSave(string gameResult)
@@ -2366,14 +2376,8 @@ void MainWidget::HandleGameOver()
     //
     bool win=isWin();
     //
-    QJsonObject obj;
-    obj.insert("id",Id);
-    obj.insert("indices",Indices);
-    obj.insert("status",win?4:11);
-    if(win)obj.insert("data","游戏胜利");
-    else obj.insert("data",core->GetCurrentStatus());
-    NetworkManager->postJson(GameServerAddr,{{"api",API_Value}},obj);
-    NetworkManager->waitDone();
+    auto*p=player[NOWPLAYERREPRESENT];
+    ResultLogInfo(win,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
 }
 //**************槽函数***************
 // 游戏帧更新
@@ -2399,34 +2403,34 @@ void MainWidget::FrameUpdate()
     else if (mapmoveFrequency == 8) {
         if (gameframe % 3 == 0 || pause) paintUpdate();
     }
-    else {
-        qDebug() << "Speed setting error";
-    }
+    else if(!IsExamining||!OffScreen){//这种情况下可能是考核模式下开启得超高速倍速
+            qDebug() << "Speed setting error";
 
+    }
+    //更新游戏数据
     gameDataUpdate();
 
     return;
 }
 void MainWidget::onRadioClickSlot()
 {
-    static int interval = 40;
     switch (pbuttonGroup->checkedId())
     {
     case 0:
-        timer->setInterval(interval);
+        timer->setInterval(TimePerFrame);
         mapmoveFrequency = 1;
         break;
     case 1:
         mapmoveFrequency = 2;
-        timer->setInterval(interval / mapmoveFrequency);
+        timer->setInterval(TimePerFrame / mapmoveFrequency);
         break;
     case 2:
         mapmoveFrequency = 4;
-        timer->setInterval(interval / mapmoveFrequency);
+        timer->setInterval(TimePerFrame / mapmoveFrequency);
         break;
     case 3:
         mapmoveFrequency = 8;
-        timer->setInterval(interval / mapmoveFrequency);
+        timer->setInterval(TimePerFrame / mapmoveFrequency);
         nowobject = NULL;
         break;
     }
@@ -2581,72 +2585,6 @@ void MainWidget::clearDebugTextFile()
 }
 
 //***********************************************************************
-//设置初始资源
-void MainWidget::buildInitialStock()
-{
-    int minBDR = MAP_L / 2 - 10, minBUR = MAP_U / 2 - 10;
-    int maxBDR = MAP_L / 2 + 6, maxBUR = MAP_U / 2 + 6;
-    int lenth = 0, step;
-    Point StockPoint, judPoint;
-    vector<Point> findLab;
-    bool tasking = true;
-    int labSize, treeNum, maxtreeNum = 0;
-    int lx, ly, mx, my;
-
-    map->loadBarrierMap(true);
-    map->reset_Map_Object_Resource();
-    map->reset_resMap_AI();
-    while (tasking)
-    {
-        lenth = maxBDR - minBDR;
-        for (int y = minBUR; y <= maxBUR; y++)
-        {
-            if (y == minBUR || y == maxBUR) step = 1;
-            else step = lenth;
-
-            for (int x = minBDR; x <= maxBDR; x += lenth)
-                if (!map->isBarrier(x, y, 5) && map->isFlat(x + 1, y + 1, 3)) findLab.push_back(Point(x + 1, y + 1));
-        }
-
-        labSize = findLab.size();
-
-        if (labSize > 0)
-        {
-            for (int i = 0; i < labSize; i++)
-            {
-                judPoint = findLab[i];
-                lx = max(judPoint.x - 5, 0);
-                ly = max(judPoint.y - 5, 0);
-                mx = min(judPoint.x + 8, MAP_L);
-                my = min(judPoint.y + 8, MAP_U);
-                treeNum = 0;
-
-                for (int x = lx; x < mx; x++)
-                    for (int y = ly; y < my; y++)
-                        if (map->resMap_EnemyAI[x][y].type == RESOURCE_TREE) treeNum++;
-
-                if (treeNum > 10)
-                {
-                    tasking = false;
-                    if (treeNum > maxtreeNum)
-                    {
-                        maxtreeNum = treeNum;
-                        StockPoint = judPoint;
-                    }
-                }
-            }
-        }
-        findLab.clear();
-        minBDR = max(minBDR - 1, 0);
-        minBUR = max(minBUR - 1, 0);
-        maxBDR = min(maxBDR + 1, MAP_L - 5);
-        maxBUR = min(maxBUR + 1, MAP_U - 5);
-    }
-
-    //    player[0]->finishBuild(player[0]->addBuilding(BUILDING_STOCK , StockPoint.x, StockPoint.y , 100));
-    return;
-}
-
 
 
 void MainWidget::on_option_2_clicked()
@@ -2994,6 +2932,132 @@ string MainWidget::getEnemyStatus(Coordinate* unit) {
         return it->second;
     }
     return "";
+}
+
+void MainWidget::EditorWidgetBind()
+{
+    connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
+        this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
+        call_debugText("green", " 导出地图", 0);
+        });
+    connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {
+        call_debugText("green", " 删除资源/建筑", 0);
+        this->currentSelected = DELETEOBJECT;
+        });
+    // 连接 QComboBox 的 currentIndexChanged 信号
+    connect(editor->ui->land_type, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        // 获取当前选中的选项索引
+        QString selectedText = text;
+        if (text == "草地") this->currentSelected = FLAT;
+        else if (text == "海洋") this->currentSelected = OCEAN;
+        if (text != "地皮类型") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->land_height, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "提升高度") this->currentSelected = HIGHTERLAND;
+        else if (text == "降低高度") this->currentSelected = LOWERLAND;
+        if (text != "地皮高度") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->player_building_and_source, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "玩家市中心") this->currentSelected = PLAYERDOWNTOWN;
+        else if (text == "玩家运输船") this->currentSelected = PLAYERTRANSPORTSHIP;
+        else if (text == "玩家渔船") this->currentSelected = PLAYERFISHINGBOAT;
+        else if (text == "玩家船坞") this->currentSelected = PLAYERDOCK;
+        else if (text == "玩家战船") this->currentSelected = PLAYERWARSHIP;
+        else if (text == "玩家仓库") this->currentSelected = PLAYERREPOSITORY;
+        else if (text == "玩家兵营") this->currentSelected = PLAYERBARRACKS;
+        else if (text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
+        else if (text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
+        else if (text == "玩家房子") this->currentSelected = PLAYERHOME;
+        if (text != "玩家资源/建筑") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->player_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "玩家农民") this->currentSelected = PLAYERFARMER;
+        else if (text == "玩家棍棒兵") this->currentSelected = PLAYERCLUBMAN;
+        else if (text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
+        else if (text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
+        else if (text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
+        if (text != "玩家人物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->ai_building_and_resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "敌方战船") this->currentSelected = AIWARSHIP;
+        else if (text == "敌方箭塔") this->currentSelected = AIARROWTOWER;
+        else if (text == "敌方武器攻城厂") this->currentSelected = AISIEGE;
+        if (text != "敌方资源/建筑") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->ai_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "敌方棍棒兵") this->currentSelected = AICLUBMAN;
+        else if (text == "敌方斧头兵") this->currentSelected = AIAXEMAN;
+        else if (text == "敌方侦察兵") this->currentSelected = AISCOUT;
+        else if (text == "敌方弓箭手") this->currentSelected = AIBOWMAN;
+        else if (text == "敌方祭司")   this->currentSelected = AIPRIEST;
+        else if (text == "敌方方阵兵") this->currentSelected = AIHOPLITE;
+        else if (text == "敌方阔剑兵") this->currentSelected = AIBROADSWORDSMAN;
+        else if (text == "敌方驷马战车") this->currentSelected = AICHARIOT;
+        else if (text == "敌方战车射手") this->currentSelected = AICHARIOTARCHER;
+        else if (text == "敌方复合弓手") this->currentSelected = AICOMPARCHER;
+        else if (text == "敌方投石车") this->currentSelected = AISTONETHROWER;
+        if (text != "敌方人物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->animal, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "瞪羚") this->currentSelected = GAZELLE;
+        else if (text == "狮子") this->currentSelected = LION;
+        else if (text == "大象") this->currentSelected = ELEPHANT;
+        if (text != "动物") call_debugText("green", " " + text, 0);
+        });
+    connect(editor->ui->resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        QString selectedText = text;
+        if (text == "树木") this->currentSelected = TREE;
+        else if (text == "石头") this->currentSelected = STONM;
+        else if (text == "金矿") this->currentSelected = GOLDORE;
+        if (text != "公立资源") call_debugText("green", " " + text, 0);
+        });
+    // 巡逻区域控制
+    connect(editor->ui->patrolArea, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        if (selectedUnits.empty()) return;  // 没有选中单位时不处理
+        QString selectedText = text;
+        if (text == "矩形区域") {
+            this->currentSelected = PATROL_RECT_AREA;
+            ((RectArea*)rectArea)->setCurrentAreaType(1);  // 1=巡逻区域(蓝色)
+            ((RectArea*)rectArea)->setTargetUnits(selectedUnits);
+        }
+        else if (text == "圆形区域") {
+            this->currentSelected = PATROL_CIRCLE_AREA;
+            ((CircleArea*)circleArea)->setCurrentAreaType(1);
+            ((CircleArea*)circleArea)->setTargetUnits(selectedUnits);
+        }
+        else if(text=="曲线区域") {
+            this->currentSelected = PATROL_LINE_AREA;
+            ((LineArea*)lineArea)->setCurrentAreaType(1);
+            ((LineArea*)lineArea)->setTargetUnits(selectedUnits);
+        }
+        if (text != "巡逻区域") call_debugText("green", " 巡逻区域: " + text, 0);
+        });
+
+    // 敌人状态控制
+    connect(editor->ui->enemyStatus, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
+        if (text == "攻击") {
+            this->currentSelected = ENEMY_STATUS_ATTACK;
+            call_debugText("blue", " 敌人状态: 攻击模式", 0);
+        }
+        else if (text == "防守") {
+            this->currentSelected = ENEMY_STATUS_DEFEND;
+            call_debugText("yellow", " 敌人状态: 防守模式", 0);
+        }
+        });
+
+
+    // 鼠标按钮连接
+    connect(editor->ui->mouse_button, &QPushButton::clicked, this, [=]() {
+        this->currentSelected = NORMAL_MOUSE;
+        call_debugText("green", " 普通鼠标模式", 0);
+        });
+
 }
 
 void MainWidget::handleEnemyStatusSelection(double DR, double UR) {

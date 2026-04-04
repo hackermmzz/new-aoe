@@ -6,14 +6,14 @@
 #include "Option.h"
 #include "Core.h"
 #include "UsrAI.h"
-#include "EnemyAI.h"
+#include "enemyai.h"
 #include "ActWidget.h"
 #include "AboutDialog.h"
 #include "GlobalVariate.h"
 #include "soudplaythread.h"
 #include "Editor.h"
 #include "ui_Editor.h"
-#include"areaselected.h"
+#include"AreaSelected.h"
 
 // 前向声明，避免循环包含
 struct RectAreaData;
@@ -28,7 +28,7 @@ class MainWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit MainWidget(int MapJudge, QWidget *parent = 0);
+    explicit MainWidget(QWidget *parent = 0);
     ~MainWidget();
 
     Player** player;
@@ -100,6 +100,7 @@ public:
         PLAYERBOWMAN,
         AIWARSHIP,
         AIARROWTOWER,
+        AISIEGE,
         AICLUBMAN,
         AIAXEMAN,
         AISCOUT,
@@ -111,6 +112,7 @@ public:
         AICHARIOT,
         AICHARIOTARCHER,
         AISTONETHROWER,
+        AICAVALRY,
         GAZELLE,
         LION,
         ELEPHANT,
@@ -173,6 +175,7 @@ private:
 //*******************************
 
 //****************编辑器*****************
+    void EditorWidgetBind();    //编辑器槽绑定
     void SaveCurrentState();
     void ExportCurrentState(const char*file);
     void updateEditor();
@@ -238,12 +241,12 @@ private:
     void initInfoPane();
     void initGameTimer();
     void initPlayers();
-    void initMap(int MapJudge);
+    void initMap();
     void initAI();
     void setupCore();
     void setupMouseTracking();
     void setupTipLabel();
-    void initBGM();
+    void initMusic();
     void initViewMap();
     void initBlock();
     void initBuilding();
@@ -252,7 +255,6 @@ private:
     void initFarmer();
     void initArmy();
     void initMissile();
-    void buildInitialStock();
 
 //*****************************************
 

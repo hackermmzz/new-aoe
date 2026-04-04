@@ -24,6 +24,7 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_CREATEFARMER] = "Button_Villager";
     actionResourceMap[ACT_STOP] = "Button_Stop";
     actionResourceMap[ACT_UPGRADE_AGE] = "ButtonTech_Center1";
+    actionResourceMap[ACT_UPGRADE_BRONZEAGE] = "ButtonTech_Center2";
     actionResourceMap[ACT_UPGRADE_FARM] = "ButtonTech_Cow";
     actionResourceMap[ACT_UPGRADE_STONE] = "ButtonTech_Stone";
     actionResourceMap[ACT_UPGRADE_GOLD] = "ButtonTech_GoldOre";
@@ -32,6 +33,8 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_UPGRADE_CRAFT] = "ButtonTech_Craft";  // 工艺科技按钮图标
     actionResourceMap[ACT_UPGRADE_PLOW] = "ButtonTech_Plow";   // 犁科技按钮图标
     actionResourceMap[ACT_UPGRADE_TOWERBUILD] = "ButtonTech_ArrowTower";
+    // 谷仓「箭塔升为二级」科技按钮：资源键 ButtonTech_ArrowTower2（如 ButtonTech_ArrowTower2_001.png）
+    actionResourceMap[ACT_UPGRADE_ARROWTOWER] = "ButtonTech_ArrowTower2";
     actionResourceMap[ACT_STOCK_UPGRADE_USETOOL] = "ButtonTech_Spear";
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_INFANTRY] = "ButtonTech_Sword";
     actionResourceMap[ACT_STOCK_UPGRADE_DEFENSE_ARCHER] = "ButtonTech_Arrow";
@@ -60,6 +63,7 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_STONE_THROWER_PINPOINT_STRIKE] = "Button_PinPointStrike";
     actionResourceMap[ACT_STONE_THROWER_CANCEL_PINPOINT_STRIKE] = "Exit";
     actionResourceMap[ACT_BUILD] = "Button_Build";
+    // 默认图标；若已完成谷仓箭塔强化且存在 Button_ArrowTower2_Egypt，则由 drawActs 优先选用
     actionResourceMap[ACT_BUILD_ARROWTOWER] = "Button_ArrowTower";
     actionResourceMap[ACT_BUILD_CANCEL] = "Exit";
 //    actionResourceMap[ACT_BUILD_FARM] = "Button_Farm";
@@ -375,6 +379,7 @@ void SelectWidget::refreshActs()
             buildingActType = BUILDING_CENTER_CREATEFARMER;
             break;
         case ACT_UPGRADE_AGE:
+        case ACT_UPGRADE_BRONZEAGE:
             isBuildingAct = true;
             buildType = BUILDING_CENTER;
             buildingActType = BUILDING_CENTER_UPGRADE;
@@ -655,33 +660,41 @@ void SelectWidget::refreshActs()
                 }
                 else if (objBuilding->getNum() == BUILDING_ARROWTOWER)
                 {
-                    // 箭塔：在"血量上方"显示【攻击力】和【射程】
-                    // 说明：
-                    // - 第一行（y=10）：显示攻击力，复用兵种的攻击栏位（objIconSmall_ATK + objText_ATK）
-                    // - 第二行（y=40）：显示射程，复用兵种的近战防御栏位（objIconSmall_DEF_melee + objText_DEF_melee）
-                    // - 第三行（y=70）：清空，不显示防御力
+                    // 箭塔：攻击 / 射程两行；有加成时 "base+bonus"（如图：剑 + "3+1"，靶 + "6+1"）
+                    auto pickSmallIconKey = [](const char* a, const char* b, const char* c) -> const char*
+                    {
+                        for (const char* key : {a, b, c})
+                        {
+                            if (resMap.find(key) != resMap.end() && !resMap[key].empty())
+                                return key;
+                        }
+                        return nullptr;
+                    };
 
-                    // 1) 攻击力（第一行，y=10）：复用兵种的攻击栏位
-                    if (resMap.find("SmallIcon_Attack") != resMap.end() && !resMap["SmallIcon_Attack"].empty())
-                        ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30));
-                    ui->objText_ATK->setText(QString::number(objBuilding->showATK_Basic()));
+                    const char* atkIconKey = pickSmallIconKey("SmallIcon_Sword", "SmallIcon_Melee", "SmallIcon_Attack");
+                    if (atkIconKey != nullptr)
+                        ui->objIconSmall_ATK->setPixmap(resMap[atkIconKey].front().scaled(40, 30));
+                    {
+                        int ab = objBuilding->showATK_Basic();
+                        int aa = objBuilding->showATK_Addition();
+                        if (aa > 0)
+                            ui->objText_ATK->setText(QString::number(ab) + "+" + QString::number(aa));
+                        else
+                            ui->objText_ATK->setText(QString::number(ab + aa));
+                    }
 
-                    // 2) 射程（第二行，y=40）：复用兵种的近战防御栏位显示射程
-                    // Building::getDis_attack() 返回的是距离 * BLOCKSIDELENGTH（像素单位），这里转回"格子"显示
-                    int rangeInBlock = 0;
-                    if (BLOCKSIDELENGTH > 0)
-                        rangeInBlock = (int)(objBuilding->getDis_attack() / BLOCKSIDELENGTH);
-                    ui->objText_DEF_melee->setText(QString::number(rangeInBlock));
+                    const char* rangeIconKey = pickSmallIconKey("SmallIcon_Target", "SmallIcon_Range", "SmallIcon_Defense_Range");
+                    if (rangeIconKey != nullptr)
+                        ui->objIconSmall_DEF_melee->setPixmap(resMap[rangeIconKey].front().scaled(40, 30));
+                    {
+                        int rb = objBuilding->showArrowTowerRangeBaseBlocks();
+                        int rbonus = objBuilding->showArrowTowerRangeBonusBlocks();
+                        if (rbonus > 0)
+                            ui->objText_DEF_melee->setText(QString::number(rb) + "+" + QString::number(rbonus));
+                        else
+                            ui->objText_DEF_melee->setText(QString::number(rb));
+                    }
 
-                    // 射程图标：优先 SmallIcon_Range（如果你准备了这个资源），否则用 SmallIcon_Defense_Range / SmallIcon_Attack 兜底
-                    if (resMap.find("SmallIcon_Range") != resMap.end() && !resMap["SmallIcon_Range"].empty())
-                        ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Range"].front().scaled(40, 30));
-                    else if (resMap.find("SmallIcon_Defense_Range") != resMap.end() && !resMap["SmallIcon_Defense_Range"].empty())
-                        ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
-                    else if (resMap.find("SmallIcon_Attack") != resMap.end() && !resMap["SmallIcon_Attack"].empty())
-                        ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30));
-
-                    // 3) 其他栏位清空，避免和"房屋人口/农场产量"等信息混在一起
                     ui->objText->setText("");
                     ui->objIconSmall->setPixmap(QPixmap());
                     ui->objText_DEF_range->setText("");
@@ -980,6 +993,16 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         setCursorAndBuildModeByBuilding(BUILDING_MARKET, "Market");
         break;
     case ACT_BUILD_ARROWTOWER:
+        if (mainPtr->player[0]->get_buildActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
+        {
+            const QString upKey("ArrowTower2_Egypt");
+            auto it = resMap.find(upKey.toStdString());
+            if (it != resMap.end() && !it->second.empty())
+            {
+                setCursorAndBuildMode(upKey, BUILDING_ARROWTOWER);
+                break;
+            }
+        }
         setCursorAndBuildModeByBuilding(BUILDING_ARROWTOWER, "ArrowTower");
         break;
     case ACT_BUILD_ARMYCAMP:
@@ -1013,11 +1036,15 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_CENTER_CREATEFARMER);
         break;
     case ACT_UPGRADE_AGE:
+    case ACT_UPGRADE_BRONZEAGE:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_CENTER_UPGRADE);
         // if (mainPtr->player[0]->get_civiBuild_Times(mainPtr->player[0]->getCiv()) >= 2) 这个条件在内核满足就行，这里不需要给
         break;
     case ACT_UPGRADE_TOWERBUILD:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_GRANARY_ARROWTOWER);
+        break;
+    case ACT_UPGRADE_ARROWTOWER:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_GRANARY_ARROWTOWE_UPGRADE);
         break;
     case ACT_UPGRADE_WOOD:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_MARKET_WOOD_UPGRADE);
@@ -1263,7 +1290,20 @@ void SelectWidget::drawActs()
         case ACT_BUILD_GRANARY:    handled = setBuildActionKeyIfExists(BUILDING_GRANARY); break;
         case ACT_BUILD_STOCK:      handled = setBuildActionKeyIfExists(BUILDING_STOCK); break;
         case ACT_BUILD_MARKET:     handled = setBuildActionKeyIfExists(BUILDING_MARKET); break;
-        case ACT_BUILD_ARROWTOWER: handled = setBuildActionKeyIfExists(BUILDING_ARROWTOWER); break;
+        case ACT_BUILD_ARROWTOWER:
+            if (mainPtr->player[0]->get_buildActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
+            {
+                const std::string upKey = "Button_ArrowTower2_Egypt";
+                auto itUp = resMap.find(upKey);
+                if (itUp != resMap.end() && !itUp->second.empty())
+                {
+                    actionKey = QString::fromStdString(upKey);
+                    handled = true;
+                }
+            }
+            if (!handled)
+                handled = setBuildActionKeyIfExists(BUILDING_ARROWTOWER);
+            break;
         case ACT_BUILD_ARMYCAMP:   handled = setBuildActionKeyIfExists(BUILDING_ARMYCAMP); break;
         case ACT_BUILD_RANGE:      handled = setBuildActionKeyIfExists(BUILDING_RANGE); break;
         case ACT_BUILD_STABLE:     handled = setBuildActionKeyIfExists(BUILDING_STABLE); break;

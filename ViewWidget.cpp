@@ -8,6 +8,9 @@ ViewWidget::ViewWidget(QWidget *parent) : QWidget(parent)
 
 void ViewWidget::paintEvent(QPaintEvent *)
 {
+    //判断是否关闭了渲染模式
+    if(OffScreen)return;
+    //
     QPainter painter(this);
     //////////////////////////////////////////////////////
     /*

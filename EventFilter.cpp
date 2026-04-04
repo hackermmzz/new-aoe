@@ -2,7 +2,8 @@
 #include"QMouseEvent"
 #include<QDateTime>
 #include<functional>
-using std::function;
+#include<iostream>
+using namespace std;
 void EventFilter::ResetState()
 {
     leftmouseClicked=0;

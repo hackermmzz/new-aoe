@@ -79,15 +79,9 @@ int Development::get_addition_Attack(int sort, int type, int armyClass, int atta
         }
 
     }
-    if(sort==SORT_BUILDING&&type==BUILDING_ARMYCAMP){
-        level=getActLevel(BUILDING_GRANARY,BUILDING_GRANARY_ARROWTOWE_UPGRADE);
-        switch (level) {
-        case 1:
-            addition+=BUILDING_GRANARY_UPGRADE_ARROWTOWER_ADDITION_ATK;
-        default:
-            break;
-        }
-    }
+    if (sort == SORT_BUILDING && type == BUILDING_ARROWTOWER
+        && getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
+        addition += BUILDING_GRANARY_UPGRADE_ARROWTOWER_ADDITION_ATK;
     return addition;
 }
 
@@ -111,6 +105,9 @@ int Development::get_addition_DisAttack(int sort, int type, int armyClass, int a
     }
     else if (attackType == ATTACKTYPE_SHOOT)
     {
+        if (sort == SORT_BUILDING && type == BUILDING_ARROWTOWER
+            && getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
+            addition += BUILDING_GRANARY_UPGRADE_ARROWTOWER_ADDITION_DIS;
         // 检查木材加工科技（工具时代）
         if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 1)
         {
@@ -468,8 +465,11 @@ void Development::init_DevelopLab()
         //研发、升级箭塔
         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE, BUILDING_GRANARY, TIME_BUILDING_GRANARY_RESEARCH_ARROWTOWER, 0, BUILDING_GRANARY_ARROWTOWER_FOOD);
         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].setHead(newNode);
-        //铜器时代可以升级箭塔
-        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_GRANARY,TIME_BUILDING_GRANARY_UPGRADE_ARROWTOWER,0,BUILDING_GRANARY_UPGRADE_ARROWTOWER_FOOD,BUILDING_GRANARY_UPGRADE_ARROWTOWER_STONE,0);
+        //铜器时代：强化箭塔（前置：谷仓内“建造箭塔”研发已完成）
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_GRANARY, TIME_BUILDING_GRANARY_UPGRADE_ARROWTOWER,
+                                       0, BUILDING_GRANARY_UPGRADE_ARROWTOWER_FOOD, BUILDING_GRANARY_UPGRADE_ARROWTOWER_STONE, 0);
+        newNode->addPreCondition(developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWER].headAct);
+        developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_ARROWTOWE_UPGRADE].setHead(newNode);
         //研发城墙
 //         newNode = new conditionDevelop(CIVILIZATION_TOOLAGE , BUILDING_GRANARY , TIME_BUILDING_GRANARY_RESEARCH_WALL , 0 , BUILDING_GRANARY_RESEARCH_WALL_FOOD);
 //         developLab[BUILDING_GRANARY].actCon[BUILDING_GRANARY_WALL].setHead(newNode);

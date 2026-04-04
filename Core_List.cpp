@@ -1,4 +1,4 @@
-#include "Core_list.h"
+#include "Core_List.h"
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
@@ -241,7 +241,7 @@ int Core_List::addRelation(Coordinate* object1, int BlockDR, int BlockUR, int ev
             int playerRepresent = object1->getPlayerRepresent();
             int wrongCode = is_BuildingCanBuild(type, BlockDR, BlockUR, playerRepresent, chineseName);
 
-            if (wrongCode < 0) return wrongCode;
+            if (wrongCode > 0) return wrongCode;
 
             //判断是否已解锁建筑
             if (!player[playerRepresent]->get_isBuildingShowAble(type))
