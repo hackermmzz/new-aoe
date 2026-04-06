@@ -7,9 +7,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cfloat>
+#include <unordered_map>
 
 using std::string;
 using std::vector;
+using std::unordered_map;
 
 tagGame tagEnemyGame;
 ins EnemyIns;
@@ -37,6 +39,11 @@ ins EnemyIns;
 #define TAGBUILDING 3
 tagInfo enemyInfo;
 //-----------新参数--------------//
+#define FAT 4500     //第一波骚扰时间
+#define SAT 10500    //第二波骚扰时间
+#define radius_Outer 15
+#define radius_Inner 10
+
 static int vision[128][128];
 static int around[100];
 static bool ifAttack[50];
@@ -52,6 +59,9 @@ static map<int, bool> ifA;
 static int sum;
 static int mode = -3;
 static bool Switch = false;
+
+static pair<double,double>Enemy_Center;                    //enemy武器工程厂
+static unordered_map<int,int> Defend_Center_Enemy;         //仅在内圈防御武器工程厂的人
 
 static vector<tagFarmer>deadFirst;
 static vector<tagFarmer>deadSecond;
@@ -824,8 +834,8 @@ void EnemyAI::processData() {
             }
         }
     }
-    if(g_frame>=1000)onWaveAttack(1);
-    if(g_frame>=5000) onWaveAttack(mode);
+    if(g_frame>=FAT) onWaveAttack(1);
+    if(g_frame>=SAT) onWaveAttack(mode);
     return;
     // 新的基于视野的攻击系统
     assignTargetsBasedOnVision();
@@ -868,6 +878,31 @@ void EnemyAI::processData() {
     }
 }
      /*###########YOUR CODE ENDS HERE###########*/
+void EnemyAI::Initialize_Enemycenter()
+{
+    if(Enemy_Center.first) return;
+    for(tagBuilding&building:enemyInfo.buildings)
+    {
+        if(building.Type==BUILDING_SIEGE)
+        {
+            Enemy_Center=make_pair(building.BlockDR,building.BlockUR);
+            break;
+        }
+    }
+    return;
+}
+void EnemyAI::Initialize_Enemymap()     //初始化内圈守卫攻城厂的enemy
+{
+    for(tagArmy&army:enemyInfo.armies)
+    {
+        auto Distance=pow(army.BlockDR-Enemy_Center.first,2)+pow(army.BlockUR-Enemy_Center.second,2);
+        if(Distance<radius_Inner*radius_Inner) Defend_Center_Enemy[army.SN]=1;
+    }
+}
+void EnemyAI::AssignDefense()
+{
+
+}
 void EnemyAI::onWaveAttack(int wave) {
     // TODO: 发起第wave波进攻
     if (wave < 1 || wave > 3) {
@@ -1141,6 +1176,8 @@ void EnemyAI::SecondAttack()
 
 }
 
+    if(wave2Completed&&attackEnemy2.size()==0)
+        mode=3;
 //所有士兵都是defense状态，预计画出三个圆形区域，有敌军在这三个区域内就攻击
     //主基地的防御范围就是主基地兵力的活动范围
 
