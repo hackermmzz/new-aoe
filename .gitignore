@@ -8,6 +8,7 @@ Makefile*
 moc_*
 ui_*.h
 qrc_*.cpp
+*.autosave
 object_script.*
 *.qmake.stash
 *.pro.user*
