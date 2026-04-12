@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
     // 添加排除文件，这些文件不会被Logger处理
     Logger::addExcludedFile("EnemyAI.cpp");
     Logger::addExcludedFile("UsrAI.cpp");
+
+    cout<<"HELLO"<<endl;
     //运行窗口
     MainWidget w;
     w.show();
