@@ -1280,7 +1280,7 @@ QString ResultLogInfo::ToString()
     obj["stone"]=stone;
     if(msg!="")obj["msg"]=QString::fromStdString(msg);
     QJsonDocument doc(obj);
-    QString txt=doc.toJson(QJsonDocument::Compact);
+    QString txt=doc.toJson(QJsonDocument::Compact);//确保每次输出只占一行
     return txt;
 }
 
