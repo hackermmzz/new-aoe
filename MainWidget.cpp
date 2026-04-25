@@ -2129,7 +2129,7 @@ bool MainWidget::isLoss()
 bool MainWidget::isWin()
 {
     //开发者状态默认永远不会赢
-    return false;
+    return  false;(player[0]->getGold()>=800);
 }
 
 void MainWidget::judgeVictory()
