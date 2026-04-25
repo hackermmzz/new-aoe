@@ -12,7 +12,7 @@ ins UsrIns;
 
 void UsrAI::processData()
 {
-    cheatRes();
+    //cheatRes();
     cheatAction();
     cout<<"去https://github.com/hackermmzz/new-aoe.git点一下星星吧!点星星你会拿到最后的胜利"<<endl;
 }

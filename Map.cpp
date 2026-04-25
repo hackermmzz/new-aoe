@@ -649,7 +649,7 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
     cell.setOffsetY(ret[1]);
 }
 
-/*void Map::divideTheMap()
+void Map::divideTheMap()
 {
     vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
     int idx=0;
@@ -773,8 +773,8 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
         }
     }
 }
-*/
-void Map::divideTheMap()
+
+/*void Map::divideTheMap()
 {
     Point centerPos;
     for(auto&build:player[0]->build){
@@ -813,7 +813,7 @@ void Map::divideTheMap()
             }
         }
     }
-}
+}*/
 
 int Map::getCellOffsetX(int l, int u)
 {
