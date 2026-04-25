@@ -649,7 +649,9 @@ void Map::CalCellOffset(int BlockDR, int BlockUR)
     cell.setOffsetY(ret[1]);
 }
 
-void Map::divideTheMap()
+
+//海战，对己方大陆开视野
+void Map::divideTheMap_oceanPlay()
 {
     vector<vector<bool>>vis(MAP_L,vector<bool>(MAP_U));
     int idx=0;
@@ -774,7 +776,7 @@ void Map::divideTheMap()
     }
 }
 
-/*void Map::divideTheMap()
+void Map::divideTheMap_commonPlay()
 {
     Point centerPos;
     for(auto&build:player[0]->build){
@@ -813,7 +815,7 @@ void Map::divideTheMap()
             }
         }
     }
-}*/
+}
 
 int Map::getCellOffsetX(int l, int u)
 {
@@ -1867,7 +1869,7 @@ bool Map::CheckIsNearOcean(int x, int y)
 void Map::init() {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText();  //载入地图
-    divideTheMap();                 //把地图化分成一个一个连通块,并且对己方地图可见化
+    divideTheMap_oceanPlay();                 //把地图化分成一个一个连通块
     refineShore();
 }
 

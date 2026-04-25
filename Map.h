@@ -34,7 +34,8 @@ public:
     array<int,2> GetCellOffset(int BlockDR, int BlockUR);
     void CalCellOffset(int BlockDR,int BlockUR);
     //划分地图
-     void divideTheMap();
+     void divideTheMap_oceanPlay();
+     void divideTheMap_commonPlay();
     //获取指定cell的偏移
     int getCellOffsetX(int l,int u);
     int getCellOffsetY(int l,int u);
