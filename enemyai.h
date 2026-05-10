@@ -55,11 +55,14 @@ private:
      void Initialize_Enemycenter();
      void Initialize_Enemymap();
      void AssignDefense();
+     void AssignFieldSelfDefense();
 
     public slots:
     void onWaveAttack(int wave);
     void FirstAttack();
     void SecondAttack();
+    void ThirdAttack();
+    void OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN);
     tagArmy Threated(tagArmy* army);
 };
 /*##########DO NOT EDIT ABOVE##########*/
