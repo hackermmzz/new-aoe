@@ -130,6 +130,10 @@ struct relation_Object
     void set_AlterPoint(double DR, double UR) { DR_alter = DR; UR_alter = UR; }
 
     void set_distance_AllowWork() {
+        if (goalObject == NULL) {
+            distance_AllowWork = 0;
+            return;
+        }
         distance_AllowWork = goalObject->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB;
         //如果是建造船坞(首先得确定他是建筑)
         {
@@ -151,11 +155,15 @@ struct relation_Object
     }
 
     void set_dis_AllowWork_alter() {
+        if (alterOb == NULL) {
+            dis_AllowWork_alter = 0;
+            return;
+        }
         dis_AllowWork_alter = alterOb->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB;
         {
             void* obj = 0;alterOb->printer_ToBuilding(&obj);
             if (obj && alterOb->getNum() == BUILDING_DOCK) {
-                dis_AllowWork_alter = goalObject->getSideLength();
+                dis_AllowWork_alter = alterOb->getSideLength();
                 return;
             }
         }

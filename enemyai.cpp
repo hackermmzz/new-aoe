@@ -8,6 +8,8 @@
 #include <cmath>
 #include <cfloat>
 #include <unordered_map>
+#include <map>
+#include <utility>
 
 using std::string;
 using std::vector;
@@ -58,22 +60,12 @@ static vector <int> Defend;
 static map<int, bool> ifA;
 static int sum;
 static int mode = -3;
-static bool Switch = false;
 
 static pair<double,double>Enemy_Center;                    //enemy武器工程厂
 static unordered_map<int,int> Defend_Center_Enemy;         //仅在内圈防御武器工程厂的人
-
-static vector<tagFarmer>deadFirst;
-static vector<tagFarmer>deadSecond;
-static vector<tagArmy>attackEnemy;
-static vector<tagArmy>attackEnemy2;
-static vector<int> farmerSNs;
 // 第一波总目标（击杀 3 农民）是否已完成；完成后不再往 attackEnemy 里加人，避免反复加人/撤退
 static bool wave1Completed = false;
 static bool wave2Completed = false;
-// 撤退目标为细节坐标 (DR, UR)，HumanMove 需要 double 而非区块坐标
-static map<int, pair<double, double>> Army_location;
-static map<int, pair<double, double>> Army_location2;
 // 每单位上次分配攻击目标的帧号，避免每帧重复下令导致部分兵种抽搐
 static map<int, int> lastAssignFrame;
 // 每单位上次补发攻击指令的帧号（目标仍活着但引擎清空指令时），用较短间隔快速补发避免卡住
@@ -81,9 +73,40 @@ static map<int, int> lastReissueFrame;
 // 每单位士兵当前的行动目标
 static map<int, int> currentTarget;
 
-//每轮攻击相应兵种数量
-static map<int, int> num1;
-static map<int, int> num2;
+
+static bool wave1Started = false;
+static bool wave2Started = false;
+static bool wave3Started = false;
+static bool wave3Completed = false;
+
+static vector<int> wave1Units;   // 第一波派出的 5 个兵
+static vector<int> wave2Units;   // 第二波：10 个新铜器兵 + 第一波残兵
+static vector<int> wave3Units;   // 第三波：20 个新铜器兵 + 前两波残兵
+
+static vector<int> wave1TouchedFarmers;
+static vector<int> wave2TouchedFarmers;
+static vector<int> wave1KilledFarmers;
+static vector<int> wave2KilledFarmers;
+
+// 所有骚扰兵原始位置，用于撤退
+static map<int, pair<double, double>> HarassHome;
+
+// 武器攻城厂附近防守兵原始位置
+static map<int, pair<double, double>> DefenseHome;
+
+// 防止每帧重复下令导致单位抽搐
+static map<int, int> waveLastOrderFrame;
+static map<int, int> defenseLastOrderFrame;
+
+static map<int, int> fieldSelfDefenseLastOrderFrame;
+
+#define FIELD_SELF_DEFENSE_ORDER_INTERVAL 12
+#define FIELD_ASSIST_RADIUS 8
+
+#define TOWER_DANGER_RANGE (ATK_BUILD_ARROWTOWER + 1)
+#define WAVE_ORDER_INTERVAL 50
+#define DEFENSE_ORDER_INTERVAL 20
+#define DEFENSE_CHASE_LIMIT (radius_Outer + 3)
 
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
@@ -474,12 +497,578 @@ static void ifDead(vector <int> &x,int sort){
             if(i>x.size()) break;
         }
          break;
+    }
 }
+
+
+static int BlockDis(int x1, int y1, int x2, int y2)
+{
+    return abs(x1 - x2) + abs(y1 - y2);
+}
+
+static int BlockDis2(int x1, int y1, int x2, int y2)
+{
+    int dx = x1 - x2;
+    int dy = y1 - y2;
+    return dx * dx + dy * dy;
+}
+
+static bool ContainsInt(const vector<int>& v, int x)
+{
+    return find(v.begin(), v.end(), x) != v.end();
+}
+
+static void AddUnique(vector<int>& v, int x)
+{
+    if (!ContainsInt(v, x)) v.push_back(x);
+}
+
+static tagArmy* FindMyArmyBySN(int sn)
+{
+    for (tagArmy& a : enemyInfo.armies) {
+        if (a.SN == sn) return &a;
+    }
+    return nullptr;
+}
+
+static bool EnemyFarmerAlive(int sn)
+{
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        if (f.SN == sn) return true;
+    }
+    return false;
+}
+
+static bool EnemyArmyAlive(int sn)
+{
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.SN == sn) return true;
+    }
+    return false;
+}
+
+static bool EnemyBuildingAlive(int sn)
+{
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.SN == sn) return true;
+    }
+    return false;
+}
+
+static void CleanDeadUnits(vector<int>& units)
+{
+    for (int i = 0; i < units.size(); ) {
+        if (FindMyArmyBySN(units[i]) == nullptr) {
+            units.erase(units.begin() + i);
+        } else {
+            i++;
+        }
+    }
+}
+
+static void MarkTouchedFarmer(vector<int>& touched, int targetSN)
+{
+    if (EnemyFarmerAlive(targetSN)) {
+        AddUnique(touched, targetSN);
+    }
+}
+
+static void UpdateKilledFarmers(vector<int>& touched, vector<int>& killed)
+{
+    for (int sn : touched) {
+        if (!EnemyFarmerAlive(sn)) {
+            AddUnique(killed, sn);
+        }
+    }
+}
+
+static bool IsDefenseArmySN(int sn)
+{
+    return Defend_Center_Enemy.find(sn) != Defend_Center_Enemy.end();
+}
+
+// 第一波兵种：棍棒兵、战斧、骑兵、弓箭手、侦察兵
+static bool IsFirstWaveSort(int sort)
+{
+    return sort == AT_CLUBMAN
+        || sort == AT_SWORDSMAN
+        || sort == AT_CAVALRY
+        || sort == AT_BOWMAN
+        || sort == AT_SCOUT;
+}
+
+// 第二、三波铜器时代陆地兵种
+static bool IsBronzeLandSort(int sort)
+{
+    return sort == AT_BROADSWORDSMAN
+        || sort == AT_COMPOSITE_BOWMAN
+        || sort == AT_CHARIOT_ARCHER
+        || sort == AT_CHARIOT
+        || sort == AT_CAVALRY
+        || sort == AT_HOPLITE;
+}
+
+static pair<int, int> GetHarassCenterBlock()
+{
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.Type == BUILDING_ARROWTOWER) {
+            return make_pair(b.BlockDR, b.BlockUR);
+        }
+    }
+
+    if (!enemyInfo.enemy_farmers.empty()) {
+        return make_pair(enemyInfo.enemy_farmers[0].BlockDR,
+                         enemyInfo.enemy_farmers[0].BlockUR);
+    }
+
+    if (!enemyInfo.enemy_buildings.empty()) {
+        return make_pair(enemyInfo.enemy_buildings[0].BlockDR,
+                         enemyInfo.enemy_buildings[0].BlockUR);
+    }
+
+    return make_pair(64, 64);
+}
+
+static bool IsInsideEnemyTowerRange(int blockDR, int blockUR)
+{
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.Type != BUILDING_ARROWTOWER) continue;
+
+        int d = BlockDis(blockDR, blockUR, b.BlockDR, b.BlockUR);
+        if (d <= TOWER_DANGER_RANGE) return true;
+    }
+
+    return false;
+}
+
+static int FindNearestEnemyTower(int blockDR, int blockUR)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.Type != BUILDING_ARROWTOWER) continue;
+
+        int d = BlockDis2(blockDR, blockUR, b.BlockDR, b.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = b.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindNearestFarmerByTowerState(int blockDR, int blockUR, bool wantInsideTower)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        bool inside = IsInsideEnemyTowerRange(f.BlockDR, f.BlockUR);
+        if (inside != wantInsideTower) continue;
+
+        int d = BlockDis2(blockDR, blockUR, f.BlockDR, f.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = f.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindThreatToArmy(const tagArmy& army)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.WorkObjectSN != army.SN) continue;
+
+        int d = BlockDis2(army.BlockDR, army.BlockUR,
+                          enemyArmy.BlockDR, enemyArmy.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = enemyArmy.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindWaveTarget(const tagArmy& army, int wave)
+{
+    // 第二波最高优先级：反击正在攻击自己的敌方士兵
+    if (wave == 2) {
+        int threat = FindThreatToArmy(army);
+        if (threat != -1) return threat;
+    }
+
+    // 第一、二波：优先攻击箭塔范围外的农民
+    int farmerOutside = FindNearestFarmerByTowerState(army.BlockDR, army.BlockUR, false);
+    if (farmerOutside != -1) return farmerOutside;
+
+    // 没有安全农民，就攻击箭塔
+    int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
+    if (tower != -1) return tower;
+
+    // 第二波最后才攻击塔范围内农民
+    if (wave == 2) {
+        int farmerInside = FindNearestFarmerByTowerState(army.BlockDR, army.BlockUR, true);
+        if (farmerInside != -1) return farmerInside;
+    }
+
+    return -1;
+}
+
+static int FindNearestEnemyArmy(int blockDR, int blockUR)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.Sort == AT_SHIP) continue;
+
+        int d = BlockDis2(blockDR, blockUR, a.BlockDR, a.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = a.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindNearestEnemyFarmer(int blockDR, int blockUR)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        int d = BlockDis2(blockDR, blockUR, f.BlockDR, f.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = f.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindNearestEnemyBuilding(int blockDR, int blockUR)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        int d = BlockDis2(blockDR, blockUR, b.BlockDR, b.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = b.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static bool NoPlayerFarmersLeft()
+{
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        if (f.FarmerSort == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static int FindNearestArrowTowerForUnits(const vector<int>& units)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (int sn : units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        for (tagBuilding& b : enemyInfo.enemy_buildings) {
+            if (b.Type != BUILDING_ARROWTOWER) continue;
+
+            int d = BlockDis2(army->BlockDR, army->BlockUR,
+                              b.BlockDR, b.BlockUR);
+
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = b.SN;
+            }
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindPlayerBaseForUnits(const vector<int>& units)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    // 优先找玩家基地 / 市镇中心
+    for (int sn : units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        for (tagBuilding& b : enemyInfo.enemy_buildings) {
+            if (b.Type != BUILDING_CENTER) continue;
+
+            int d = BlockDis2(army->BlockDR, army->BlockUR,
+                              b.BlockDR, b.BlockUR);
+
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = b.SN;
+            }
+        }
+    }
+
+    if (bestSN != -1) return bestSN;
+
+    // 兜底：如果 BUILDING_CENTER 已经没了，就拆最近的非箭塔建筑
+    for (int sn : units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        for (tagBuilding& b : enemyInfo.enemy_buildings) {
+            if (b.Type == BUILDING_ARROWTOWER) continue;
+
+            int d = BlockDis2(army->BlockDR, army->BlockUR,
+                              b.BlockDR, b.BlockUR);
+
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = b.SN;
+            }
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindTowerThenBaseTargetForUnits(const vector<int>& units)
+{
+    // 第一优先级：剩余箭塔
+    int towerSN = FindNearestArrowTowerForUnits(units);
+    if (towerSN != -1) return towerSN;
+
+    // 第二优先级：玩家基地 / 市镇中心
+    int baseSN = FindPlayerBaseForUnits(units);
+    if (baseSN != -1) return baseSN;
+
+    return -1;
+}
+
+void EnemyAI::OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN)
+{
+    if (targetSN == -1) return;
+
+    for (int sn : units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        if (army->WorkObjectSN != targetSN ||
+            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+            HumanAction(sn, targetSN);
+            waveLastOrderFrame[sn] = g_frame;
+        }
+    }
+}
+
+static int FindFullAttackTarget(const tagArmy& army)
+{
+    // 第三波全面进攻优先级：
+    // 敌方军队 > 敌方箭塔 > 敌方农民 > 敌方普通建筑
+    int enemyArmy = FindNearestEnemyArmy(army.BlockDR, army.BlockUR);
+    if (enemyArmy != -1) return enemyArmy;
+
+    int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
+    if (tower != -1) return tower;
+
+    int farmer = FindNearestEnemyFarmer(army.BlockDR, army.BlockUR);
+    if (farmer != -1) return farmer;
+
+    int building = FindNearestEnemyBuilding(army.BlockDR, army.BlockUR);
+    if (building != -1) return building;
+
+    return -1;
+}
+
+static void SelectWaveUnits(vector<int>& dst,
+                            int needCount,
+                            bool (*sortChecker)(int),
+                            const vector<int>& alreadyUsed)
+{
+    pair<int, int> center = GetHarassCenterBlock();
+
+    vector<pair<int, int>> candidates;
+
+    for (tagArmy& a : enemyInfo.armies) {
+        if (IsDefenseArmySN(a.SN)) continue;
+        if (ContainsInt(dst, a.SN)) continue;
+        if (ContainsInt(alreadyUsed, a.SN)) continue;
+        if (!sortChecker(a.Sort)) continue;
+
+        int d = BlockDis2(a.BlockDR, a.BlockUR, center.first, center.second);
+        candidates.push_back(make_pair(a.SN, d));
+    }
+
+    sort(candidates.begin(), candidates.end(),
+         [](const pair<int, int>& x, const pair<int, int>& y) {
+             return x.second < y.second;
+         });
+
+    for (int i = 0; i < candidates.size() && needCount > 0; i++) {
+        int sn = candidates[i].first;
+        tagArmy* a = FindMyArmyBySN(sn);
+        if (!a) continue;
+
+        dst.push_back(sn);
+        HarassHome[sn] = make_pair(a->DR, a->UR);
+        needCount--;
+    }
+}
+
+static bool IsCurrentActiveHarassUnit(int sn)
+{
+    // 第一波正在执行时，第一波兵不走普通自卫逻辑
+    if (wave1Started && !wave1Completed && ContainsInt(wave1Units, sn)) {
+        return true;
+    }
+
+    // 第二波正在执行时，第二波兵不走普通自卫逻辑
+    // 因为 SecondAttack() 自己已经有反击逻辑
+    if (wave2Started && !wave2Completed && ContainsInt(wave2Units, sn)) {
+        return true;
+    }
+
+    // 第三波正在执行时，第三波兵不走普通自卫逻辑
+    if (wave3Started && !wave3Completed && ContainsInt(wave3Units, sn)) {
+        return true;
+    }
+
+    return false;
+}
+
+static int FindDirectThreatToArmySN(int myArmySN)
+{
+    tagArmy* myArmy = FindMyArmyBySN(myArmySN);
+    if (!myArmy) return -1;
+
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    // 玩家士兵正在攻击我方这个 enemy 士兵
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.WorkObjectSN != myArmySN) continue;
+
+        int d = BlockDis2(myArmy->BlockDR, myArmy->BlockUR,
+                          enemyArmy.BlockDR, enemyArmy.BlockUR);
+
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = enemyArmy.SN;
+        }
+    }
+
+    // 玩家农民正在攻击我方这个 enemy 士兵
+    for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+        if (enemyFarmer.WorkObjectSN != myArmySN) continue;
+
+        int d = BlockDis2(myArmy->BlockDR, myArmy->BlockUR,
+                          enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = enemyFarmer.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindAssistThreatNearArmy(const tagArmy& myArmy)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    // 如果附近友军被玩家士兵攻击，则协助反击
+    for (tagArmy& ally : enemyInfo.armies) {
+        if (ally.SN == myArmy.SN) continue;
+        if (IsDefenseArmySN(ally.SN)) continue;
+
+        int allyDist = BlockDis(myArmy.BlockDR, myArmy.BlockUR,
+                                ally.BlockDR, ally.BlockUR);
+
+        if (allyDist > FIELD_ASSIST_RADIUS) continue;
+
+        for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+            if (enemyArmy.WorkObjectSN != ally.SN) continue;
+
+            int d = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                              enemyArmy.BlockDR, enemyArmy.BlockUR);
+
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = enemyArmy.SN;
+            }
+        }
+
+        for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+            if (enemyFarmer.WorkObjectSN != ally.SN) continue;
+
+            int d = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                              enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = enemyFarmer.SN;
+            }
+        }
+    }
+
+    return bestSN;
+}
+
+void EnemyAI::AssignFieldSelfDefense()
+{
+    for (tagArmy& army : enemyInfo.armies) {
+        // 厂区防守兵不归这里管
+        if (IsDefenseArmySN(army.SN)) continue;
+
+        // 正在执行波次骚扰/全面进攻的兵，不归这里管
+        if (IsCurrentActiveHarassUnit(army.SN)) continue;
+
+        int targetSN = -1;
+
+        // 最高优先级：谁正在打我，我就反击谁
+        targetSN = FindDirectThreatToArmySN(army.SN);
+
+        // 如果我自己没被打，但附近友军被打，则过去帮忙
+        if (targetSN == -1) {
+            targetSN = FindAssistThreatNearArmy(army);
+        }
+
+        if (targetSN == -1) continue;
+
+        if (army.WorkObjectSN != targetSN ||
+            g_frame - fieldSelfDefenseLastOrderFrame[army.SN] >= FIELD_SELF_DEFENSE_ORDER_INTERVAL) {
+            HumanAction(army.SN, targetSN);
+            fieldSelfDefenseLastOrderFrame[army.SN] = g_frame;
+        }
+    }
 }
 
 //基于视野的目标分配系统
 void EnemyAI::assignTargetsBasedOnVision(){
-    // 第一阶段：收集所有陆地单位和战船发现的目标
+ /*   // 第一阶段：收集所有陆地单位和战船发现的目标
     vector<int> sharedLandTargets;  // 陆地单位共享的目标
     vector<int> sharedSeaTargets;   // 战船共享的目标
     
@@ -608,7 +1197,76 @@ void EnemyAI::assignTargetsBasedOnVision(){
         if(bestTarget != -1){
             HumanAction(buildingSN, bestTarget);
         }
-    }
+    }*/
+    vector<int> sharedLandTargets;
+
+        // 攻击状态陆军提供共享视野目标
+        for (tagArmy& army : enemyInfo.armies) {
+            if (army.Sort == AT_SHIP) continue;
+            if (IsDefenseArmySN(army.SN)) continue;
+
+            string status = getEnemyStatus(army.SN);
+            if (!(status == "attack" || status.empty())) continue;
+
+            int visionRange = getVisionRange(army.Sort);
+            int foundTarget = findBestTargetInVision(army.BlockDR,
+                                                     army.BlockUR,
+                                                     visionRange,
+                                                     army.Sort);
+
+            if (foundTarget != -1) {
+                AddUnique(sharedLandTargets, foundTarget);
+            }
+        }
+
+        // 箭塔也可以提供共享目标
+        for (tagBuilding& b : enemyInfo.buildings) {
+            if (b.Type != BUILDING_ARROWTOWER) continue;
+
+            int foundTarget = findBestTargetInVision(b.BlockDR, b.BlockUR, 7, -1);
+            if (foundTarget != -1) {
+                AddUnique(sharedLandTargets, foundTarget);
+            }
+        }
+
+        // 给陆军分配目标，防守兵不参与普通协同
+        for (tagArmy& army : enemyInfo.armies) {
+            if (army.Sort == AT_SHIP) continue;
+            if (IsDefenseArmySN(army.SN)) continue;
+            if (army.WorkObjectSN != -1) continue;
+
+            string status = getEnemyStatus(army.SN);
+            if (!(status == "attack" || status.empty())) continue;
+
+            int targetSN = -1;
+
+            if (!sharedLandTargets.empty()) {
+                targetSN = findNearestTarget(army.BlockDR, army.BlockUR, sharedLandTargets);
+            }
+
+            if (targetSN == -1) {
+                int visionRange = getVisionRange(army.Sort);
+                targetSN = findBestTargetInVision(army.BlockDR,
+                                                  army.BlockUR,
+                                                  visionRange,
+                                                  army.Sort);
+            }
+
+            if (targetSN != -1) {
+                HumanAction(army.SN, targetSN);
+            }
+        }
+
+        // 箭塔自己攻击
+        for (tagBuilding& b : enemyInfo.buildings) {
+            if (b.Type != BUILDING_ARROWTOWER) continue;
+            if (b.Project != -1) continue;
+
+            int targetSN = findBestTargetInVision(b.BlockDR, b.BlockUR, 7, -1);
+            if (targetSN != -1) {
+                HumanAction(b.SN, targetSN);
+            }
+        }
 }
 
 //获取单位的视野范围
@@ -813,70 +1471,71 @@ tagArmy EnemyAI::Threated(tagArmy *army)
 }
 
 void EnemyAI::processData() {
+        enemyInfo = getInfo();
 
-    enemyInfo=getInfo();
+        Initialize_Enemycenter();
+        Initialize_Enemymap();
 
-    for(tagBuilding&b:enemyInfo.buildings)
-    {
-        if(b.Type == BUILDING_ARROWTOWER&&b.Project==-1)
-        {
-            //找一个最近的
-            int tar=-1;
-            int dd=INT_MAX;
-            for(tagHuman&obj:enemyInfo.enemy_armies){
-                if(abs(obj.BlockDR-b.BlockDR)+abs(obj.BlockUR-b.BlockUR)<dd){
-                    dd=abs(obj.BlockDR-b.BlockDR)+abs(obj.BlockUR-b.BlockUR);
-                    tar=obj.SN;
+        // 武器攻城厂周围防守兵逻辑，永远优先执行
+        AssignDefense();
+        AssignFieldSelfDefense();
+        // 自家箭塔自动攻击靠近的玩家单位
+        for (tagBuilding& b : enemyInfo.buildings) {
+            if (b.Type != BUILDING_ARROWTOWER) continue;
+            if (b.Project != -1) continue;
+
+            int targetSN = -1;
+            int bestDis = 1000000000;
+
+            for (tagArmy& obj : enemyInfo.enemy_armies) {
+                int d = BlockDis(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
+                if (d < bestDis) {
+                    bestDis = d;
+                    targetSN = obj.SN;
                 }
             }
-            if(tar!=-1&&dd<=ATK_BUILD_ARROWTOWER){
-                HumanAction(b.SN,tar);
+
+            for (tagFarmer& obj : enemyInfo.enemy_farmers) {
+                int d = BlockDis(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
+                if (d < bestDis) {
+                    bestDis = d;
+                    targetSN = obj.SN;
+                }
+            }
+
+            if (targetSN != -1 && bestDis <= ATK_BUILD_ARROWTOWER) {
+                HumanAction(b.SN, targetSN);
             }
         }
-    }
-    if(g_frame>=FAT) onWaveAttack(1);
-    if(g_frame>=SAT) onWaveAttack(mode);
-    return;
-    // 新的基于视野的攻击系统
-    assignTargetsBasedOnVision();
-    return;
-    //
-    //军队数据初始化
-    if(g_frame==50){
-        for(int i=0;i<enemyInfo.armies.size();i++){
-            ifA.insert(std::pair<int,bool>(enemyInfo.armies[i].SN,false));
-            timer.insert(std::pair<int,int>(enemyInfo.armies[i].SN,0));
+
+        // 第一波：4500 帧开始，没完成就一直执行第一波
+        if (g_frame >= FAT && !wave1Completed) {
+            onWaveAttack(1);
+            return;
         }
-        for(int i=0;i<enemyInfo.buildings.size();i++){
-            if(enemyInfo.buildings[i].Type==BUILDING_ARROWTOWER){
-                ifA.insert(std::pair<int,bool>(enemyInfo.buildings[i].SN,false));
-                timer.insert(std::pair<int,int>(enemyInfo.buildings[i].SN,0));
-            }
+
+        // 第一波完成但第二波时间没到：只保留防守逻辑，不让残兵乱跑
+        if (wave1Completed && g_frame < SAT && !wave2Started) {
+            return;
+        }
+
+        // 第二波：10500 帧开始，必须第一波完成后才进入
+        if (wave1Completed && g_frame >= SAT && !wave2Completed) {
+            onWaveAttack(2);
+            return;
+        }
+
+        // 第二波完成但第三波时间没到：只保留防守逻辑
+        if (wave2Completed && g_frame < MODE3 && !wave3Started) {
+            return;
+        }
+
+        // 第三波：21250 帧开始
+        if (wave2Completed && g_frame >= MODE3 && !wave3Completed) {
+            onWaveAttack(3);
+            return;
         }
     }
-    if(g_frame>50&&g_frame % 8==0){
-        visionChange();
-        ifVisible();
-    }
-    if(g_frame>1000){
-        Around();
-        seek();
-        ifATTACK();
-        Attack();
-    }
-    if(g_frame>50&&g_frame % 10==0){
-        int s=Farmer.size();
-        int t=enemyInfo.buildings.size();
-        ifDead(Farmer,VECTORFARMER);
-        if(s!=Farmer.size())
-            ifDead(Army,VECTORARMY);
-        ifDead(Boat,VECTORBOAT);
-        ifDead(Ship,VECTORSHIP);
-        ifDead(Defend,VECTORDEFEND);
-        ifDead(Arrowtower,VECTORARROWTOWER);
-        ifDead(Building,VECTORBUILDING);
-    }
-}
      /*###########YOUR CODE ENDS HERE###########*/
 void EnemyAI::Initialize_Enemycenter()
 {
@@ -891,294 +1550,322 @@ void EnemyAI::Initialize_Enemycenter()
     }
     return;
 }
-void EnemyAI::Initialize_Enemymap()     //初始化内圈守卫攻城厂的enemy
+void EnemyAI::Initialize_Enemymap()
 {
-    for(tagArmy&army:enemyInfo.armies)
-    {
-        auto Distance=pow(army.BlockDR-Enemy_Center.first,2)+pow(army.BlockUR-Enemy_Center.second,2);
-        if(Distance<radius_Inner*radius_Inner) Defend_Center_Enemy[army.SN]=1;
+    if (Enemy_Center.first == 0 && Enemy_Center.second == 0) return;
+
+    for (tagArmy& army : enemyInfo.armies) {
+        int d2 = BlockDis2(army.BlockDR, army.BlockUR,
+                           Enemy_Center.first, Enemy_Center.second);
+
+        if (d2 < radius_Inner * radius_Inner) {
+            Defend_Center_Enemy[army.SN] = 1;
+
+            if (DefenseHome.find(army.SN) == DefenseHome.end()) {
+                DefenseHome[army.SN] = make_pair(army.DR, army.UR);
+            }
+        }
     }
 }
 void EnemyAI::AssignDefense()
 {
+    if (Enemy_Center.first == 0 && Enemy_Center.second == 0) return;
 
-}
-void EnemyAI::onWaveAttack(int wave) {
-    // TODO: 发起第wave波进攻
-    if (wave < 1 || wave > 3) {
-        // std::string debugStr = "非法波次：" + std::to_string(wave);
-        // call_debugText("black", " AI" + QString::number(0) + "打印：" + QString::fromStdString(debugStr), 0);
-       // return;
+    for (auto it = Defend_Center_Enemy.begin(); it != Defend_Center_Enemy.end(); ) {
+        int sn = it->first;
+        tagArmy* army = FindMyArmyBySN(sn);
+
+        if (!army) {
+            DefenseHome.erase(sn);
+            defenseLastOrderFrame.erase(sn);
+            it = Defend_Center_Enemy.erase(it);
+            continue;
+        }
+
+        int distToCenter = BlockDis(army->BlockDR, army->BlockUR,
+                                    Enemy_Center.first, Enemy_Center.second);
+
+        // 如果防守兵追太远，立刻回防
+        if (distToCenter > DEFENSE_CHASE_LIMIT) {
+            if (g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
+                auto home = DefenseHome.find(sn);
+                if (home != DefenseHome.end()) {
+                    HumanMove(sn, home->second.first, home->second.second);
+                } else {
+                    HumanMove(sn, Enemy_Center.first, Enemy_Center.second);
+                }
+                defenseLastOrderFrame[sn] = g_frame;
+            }
+
+            ++it;
+            continue;
+        }
+
+        // 只攻击靠近武器攻城厂的玩家单位
+        int targetSN = -1;
+        int bestDis = 1000000000;
+
+        for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+            int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                     Enemy_Center.first, Enemy_Center.second);
+            if (dToCenter > radius_Outer) continue;
+
+            int d = BlockDis2(army->BlockDR, army->BlockUR,
+                              enemyArmy.BlockDR, enemyArmy.BlockUR);
+            if (d < bestDis) {
+                bestDis = d;
+                targetSN = enemyArmy.SN;
+            }
+        }
+
+        for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+            int dToCenter = BlockDis(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
+                                     Enemy_Center.first, Enemy_Center.second);
+            if (dToCenter > radius_Outer) continue;
+
+            int d = BlockDis2(army->BlockDR, army->BlockUR,
+                              enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+            if (d < bestDis) {
+                bestDis = d;
+                targetSN = enemyFarmer.SN;
+            }
+        }
+
+        if (targetSN != -1) {
+            if (army->WorkObjectSN != targetSN ||
+                g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
+                HumanAction(sn, targetSN);
+                defenseLastOrderFrame[sn] = g_frame;
+            }
+        } else {
+            // 没敌人靠近，防守兵回原位
+            if (distToCenter > radius_Inner &&
+                g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
+                auto home = DefenseHome.find(sn);
+                if (home != DefenseHome.end()) {
+                    HumanMove(sn, home->second.first, home->second.second);
+                    defenseLastOrderFrame[sn] = g_frame;
+                }
+            }
+        }
+
+        ++it;
     }
-    if(wave==1) FirstAttack();
-    if(wave==2) SecondAttack();
-    //mode = wave;
+}
+void EnemyAI::onWaveAttack(int wave)
+{
+    if (wave == 1) {
+        FirstAttack();
+    } else if (wave == 2) {
+        SecondAttack();
+    } else if (wave == 3) {
+        ThirdAttack();
+    }
 }
 
 void EnemyAI::FirstAttack()
 {
-    // 1. 初始化目标农民 (只在为空时执行一次)
-        if(deadFirst.empty() && !enemyInfo.enemy_farmers.empty())
-        {
-            for(int i = 0; i < 3 && i < enemyInfo.enemy_farmers.size(); i++)
-                deadFirst.push_back(enemyInfo.enemy_farmers[i]);
-        }
+    if (wave1Completed) return;
 
-        // 2. 初始化进攻部队 (只在为空且第一波未完成时执行一次；完成后不再补人)
-        if(attackEnemy.empty() && !deadFirst.empty() && !wave1Completed)
-        {
-            double sumBlockdr = 0, sumBlockur = 0;
-            for (tagFarmer& c : deadFirst) {
-                sumBlockdr += c.BlockDR;
-                sumBlockur += c.BlockUR;
-            }
-            int avgDr = sumBlockdr / deadFirst.size();
-            int avgUr = sumBlockur / deadFirst.size();
+    // 第一次进入第一波时，选 5 个工具时代兵种
+    if (!wave1Started) {
+        vector<int> emptyUsed;
+        SelectWaveUnits(wave1Units, 5, IsFirstWaveSort, emptyUsed);
+        wave1Started = true;
+    }
 
-            vector<pair<tagArmy, int>> cmp_Distance;
-            for(tagArmy& army : enemyInfo.armies) {
-                cmp_Distance.emplace_back(army, pow(army.BlockDR - avgDr, 2) + pow(army.BlockUR - avgUr, 2));
-            }
-            sort(cmp_Distance.begin(), cmp_Distance.end(), [](const pair<tagArmy, int>& a, const pair<tagArmy, int>& b){
-                return a.second < b.second;
-            });
+    CleanDeadUnits(wave1Units);
+    UpdateKilledFarmers(wave1TouchedFarmers, wave1KilledFarmers);
 
-            // 取前5个距离最近的士兵进入骚扰小组，并记录其初始位置用于撤退
-            for(int i = 0;i < cmp_Distance.size()&&attackEnemy.size()<5; i++) {
-                const tagArmy& a = cmp_Distance[i].first;
-                if(a.Sort==AT_BROADSWORDSMAN&&num1[a.Sort]<3)
-                {
-                    attackEnemy.push_back(a);
-                    num1[a.Sort]++;
-                }
-                else if(a.Sort==AT_COMPOSITE_BOWMAN&&num1[a.Sort]==0)
-                {
-                    attackEnemy.push_back(a);
-                    num1[a.Sort]++;
-                }
-                else if(a.Sort==AT_CAVALRY&&num1[a.Sort]==0)
-                {
-                    attackEnemy.push_back(a);
-                    num1[a.Sort]++;
-                }
-                Army_location[a.SN] = std::make_pair(a.DR, a.UR);
+    // 第一波派出去的兵全死，第一波结束
+    if (wave1Units.empty()) {
+        wave1Completed = true;
+        mode = 2;
+        return;
+    }
+
+    // 杀够 3 个农民，有兵存活，撤退回原位置
+    if (wave1KilledFarmers.size() >= 3) {
+        for (int sn : wave1Units) {
+            tagArmy* army = FindMyArmyBySN(sn);
+            if (!army) continue;
+
+            auto home = HarassHome.find(sn);
+            if (home != HarassHome.end()) {
+                HumanMove(sn, home->second.first, home->second.second);
             }
         }
 
-        // 3. 当前集火目标：按顺序取 deadFirst 中第一个仍存活的农民，全队集火同一目标；全部击杀后才集体撤退
-        int currentTargetSN = -1;
-        for (size_t i = 0; i < deadFirst.size(); i++) {
-            bool alive = false;
-            for (const auto& f : enemyInfo.enemy_farmers) {
-                if (f.SN == deadFirst[i].SN && f.Blood > 0) { alive = true; break; }
-            }
-            if (alive) {
-                currentTargetSN = deadFirst[i].SN;
-                break;
-            }
-        }
-        bool waveComplete = (currentTargetSN == -1);  // 3 个目标均已阵亡，集体撤退
-        if (waveComplete) wave1Completed = true;      // 标记第一波已完成，之后不再往 attackEnemy 加人 ?
+        wave1Completed = true;
+        mode = 2;
+        return;
+    }
 
-        // 4. 任务分配与状态监控
-        auto it = attackEnemy.begin();
-        while (it != attackEnemy.end())
-        {
-            tagArmy& a_backup = *it;
-            tagArmy* realArmy = nullptr;
+    // 没杀够 3 个农民，但玩家农民已经死完：
+    // 本波不撤退，先拆剩余箭塔，再拆玩家基地
+    if (NoPlayerFarmersLeft() && wave1KilledFarmers.size() < 3) {
+        int targetSN = FindTowerThenBaseTargetForUnits(wave1Units);
 
-            for (auto& real : enemyInfo.armies) {
-                if (real.SN == a_backup.SN) {
-                    realArmy = &real;
-                    break;
-                }
-            }
-
-            // A. 士兵已阵亡，从列表移除并清理状态
-            if (!realArmy) {
-                lastAssignFrame.erase(a_backup.SN);
-                lastReissueFrame.erase(a_backup.SN);
-                Army_location.erase(a_backup.SN);
-                it = attackEnemy.erase(it);
-                continue;
-            }
-
-            // B. 总目标已完成：集体撤退
-            if (waveComplete) {
-                auto posIt = Army_location.find(realArmy->SN);
-                if (posIt != Army_location.end()) {
-                    HumanMove(realArmy->SN, posIt->second.first, posIt->second.second);
-                }
-                lastAssignFrame.erase(realArmy->SN);   //这个键值对并没有被使用？
-                lastReissueFrame.erase(realArmy->SN);
-                Army_location.erase(realArmy->SN);
-                it = attackEnemy.erase(it);
-                continue;
-            }
-
-            // C. 未完成总目标：所有人集火 currentTargetSN；需要时补发指令（目标切换或引擎清空）
-            int unitSN = realArmy->SN;
-            if (realArmy->WorkObjectSN != currentTargetSN) {
-                bool targetChanged = (a_backup.WorkObjectSN != currentTargetSN);
-                int now = g_frame;
-                bool throttleOk = (lastReissueFrame[unitSN] == 0 || now - lastReissueFrame[unitSN] >= 12);
-                if (targetChanged || throttleOk) {
-                    HumanAction(unitSN, currentTargetSN);
-                    a_backup.WorkObjectSN = currentTargetSN;
-                    lastReissueFrame[unitSN] = now;
-                }
-            }
-            ++it;
-        }
-        if (attackEnemy.empty() && wave1Completed && !Switch) {
-            lastReissueFrame.clear();
+        if (targetSN != -1) {
+            OrderWaveUnitsToAttackTarget(wave1Units, targetSN);
+        } else {
+            // 已经没有箭塔、没有基地/建筑可拆了，本波可以结束
+            wave1Completed = true;
             mode = 2;
-            Switch=true;
         }
+
+        return;
+    }
+    // 未杀够：动态寻找 塔外农民 > 箭塔
+    for (int sn : wave1Units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        int targetSN = FindWaveTarget(*army, 1);
+        if (targetSN == -1) continue;
+
+        MarkTouchedFarmer(wave1TouchedFarmers, targetSN);
+
+        if (army->WorkObjectSN != targetSN ||
+            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+            HumanAction(sn, targetSN);
+            waveLastOrderFrame[sn] = g_frame;
+        }
+    }
 }
 
 void EnemyAI::SecondAttack()
 {
-    //初始化第二波攻击农民数组
-    if(deadSecond.empty() && !enemyInfo.enemy_farmers.empty())
-    {
-        for(int i = 0; i < 8 && i < enemyInfo.enemy_farmers.size(); i++)
-            deadSecond.push_back(enemyInfo.enemy_farmers[i]);
-    }
-    // 2. 初始化进攻部队 (只在为空且第二波未完成时执行一次；完成后不再补人)
-    if(attackEnemy2.empty() && !deadSecond.empty() && !wave2Completed)
-    {
-        double sumBlockdr = 0, sumBlockur = 0;
-        for (tagFarmer& c : deadSecond) {
-            sumBlockdr += c.BlockDR;
-            sumBlockur += c.BlockUR;
-        }
-        int avgDr = sumBlockdr / deadSecond.size();
-        int avgUr = sumBlockur / deadSecond.size();
+    if (wave2Completed) return;
 
-        vector<pair<tagArmy, int>> cmp_Distance;
-        for(tagArmy& army : enemyInfo.armies) {
-            cmp_Distance.emplace_back(army, pow(army.BlockDR - avgDr, 2) + pow(army.BlockUR - avgUr, 2));
-        }
-        sort(cmp_Distance.begin(), cmp_Distance.end(), [](const pair<tagArmy, int>& a, const pair<tagArmy, int>& b){
-            return a.second < b.second;
-        });
+    // 第一次进入第二波：第一波残兵 + 10 个新铜器兵
+    if (!wave2Started) {
+        CleanDeadUnits(wave1Units);
 
-        // 取相应条件士兵进入骚扰小组，并记录其初始位置用于撤退
-        for(int i = 0; i < cmp_Distance.size()&&attackEnemy2.size()<11; i++) {
-            const tagArmy& a = cmp_Distance[i].first;
-            int sort_=a.Sort;
-            if(sort_==AT_BROADSWORDSMAN&&num2[sort_]<5)   //这个后面得全部改成常量
-            {
-                attackEnemy2.push_back(a);
-                num2[sort_]++;
+        // 加入第一波残兵
+        for (int sn : wave1Units) {
+            tagArmy* army = FindMyArmyBySN(sn);
+            if (!army) continue;
+
+            AddUnique(wave2Units, sn);
+
+            if (HarassHome.find(sn) == HarassHome.end()) {
+                HarassHome[sn] = make_pair(army->DR, army->UR);
             }
-            else if(sort_==AT_COMPOSITE_BOWMAN&&num2[sort_]<2)
-            {
-                attackEnemy2.push_back(a);
-                num2[sort_]++;
-            }
-            else if(sort_==AT_CHARIOT_ARCHER&&num2[sort_]<2)
-            {
-                attackEnemy2.push_back(a);
-                num2[sort_]++;
-            }
-            else if(sort_==AT_CHARIOT&&num2[sort_]<2)
-            {
-                attackEnemy2.push_back(a);
-                num2[sort_]++;
-            }
-            Army_location2[a.SN] = std::make_pair(a.DR, a.UR);
         }
+
+        // 选 10 个新的铜器时代陆地兵
+        SelectWaveUnits(wave2Units, 10, IsBronzeLandSort, wave1Units);
+
+        wave2Started = true;
     }
 
-    // 3. 当前集火目标：按顺序取 deadSecond 中第一个仍存活的农民，全队集火同一目标；全部击杀后才集体撤退
-    int currentTargetSN = -1;
-    for (size_t i = 0; i < deadSecond.size(); i++) {
-        bool alive = false;
-        for (const auto& f : enemyInfo.enemy_farmers) {
-            if (f.SN == deadSecond[i].SN && f.Blood > 0) { alive = true; break; }
+    CleanDeadUnits(wave2Units);
+    UpdateKilledFarmers(wave2TouchedFarmers, wave2KilledFarmers);
+
+    // 第二波派出去的兵全死，第二波结束
+    if (wave2Units.empty()) {
+        wave2Completed = true;
+        return;
+    }
+
+    // 杀够 8 个农民，有兵存活，撤退
+    if (wave2KilledFarmers.size() >= 8) {
+        for (int sn : wave2Units) {
+            tagArmy* army = FindMyArmyBySN(sn);
+            if (!army) continue;
+
+            auto home = HarassHome.find(sn);
+            if (home != HarassHome.end()) {
+                HumanMove(sn, home->second.first, home->second.second);
+            }
         }
-        if (alive) {
-            currentTargetSN = deadSecond[i].SN;
-            break;
+
+        wave2Completed = true;
+        return;
+    }
+
+    // 没杀够 8 个农民，但玩家农民已经死完：
+    // 本波不撤退，先拆剩余箭塔，再拆玩家基地
+    if (NoPlayerFarmersLeft() && wave2KilledFarmers.size() < 8) {
+        int targetSN = FindTowerThenBaseTargetForUnits(wave2Units);
+
+        if (targetSN != -1) {
+            OrderWaveUnitsToAttackTarget(wave2Units, targetSN);
+        } else {
+            // 已经没有箭塔、没有基地/建筑可拆了，本波可以结束
+            wave2Completed = true;
+        }
+
+        return;
+    }
+
+    // 第二波目标优先级：
+    // 攻击我方士兵的敌方士兵 > 塔外农民 > 箭塔 > 塔内农民
+    for (int sn : wave2Units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        int targetSN = FindWaveTarget(*army, 2);
+        if (targetSN == -1) continue;
+
+        MarkTouchedFarmer(wave2TouchedFarmers, targetSN);
+
+        if (army->WorkObjectSN != targetSN ||
+            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+            HumanAction(sn, targetSN);
+            waveLastOrderFrame[sn] = g_frame;
         }
     }
-    bool waveComplete = (currentTargetSN == -1);  // 目标均已阵亡，集体撤退
-    if (waveComplete) wave2Completed = true;      // 标记第二波已完成
-
-    //士兵会攻击一定范围内对自己有攻击欲望的最近的物种，敌方士兵,敌方攻击性建筑都有可能
-
-    // 4. 任务分配与状态监控
-    auto it = attackEnemy2.begin();
-    while (it != attackEnemy2.end())
-    {
-        tagArmy& a_backup = *it;
-        tagArmy* realArmy = nullptr;
-
-        for (auto& real : enemyInfo.armies) {
-            if (real.SN == a_backup.SN) {
-                realArmy = &real;
-                break;
-            }
-        }
-
-        // A. 士兵已阵亡，从列表移除并清理状态
-        if (!realArmy) {
-            lastAssignFrame.erase(a_backup.SN);
-            lastReissueFrame.erase(a_backup.SN);
-            Army_location2.erase(a_backup.SN);
-            it = attackEnemy2.erase(it);
-            continue;
-        }
-
-        // D. 总目标已完成：集体撤退
-        tagArmy threat1 = Threated(realArmy);
-        if (waveComplete&&threat1.SN == -1) {
-            auto posIt = Army_location2.find(realArmy->SN);
-            if (posIt != Army_location2.end()) {
-                HumanMove(realArmy->SN, posIt->second.first, posIt->second.second);
-          }
-            lastReissueFrame.erase(realArmy->SN);
-            Army_location2.erase(realArmy->SN);
-            it = attackEnemy2.erase(it);
-            continue;
-        }
-
-        // B. 士兵未被攻击且无攻击对象，一同攻击同一目标
-        int unitSN = realArmy->SN;
-        tagArmy threat2 = Threated(realArmy);
-        if (realArmy->WorkObjectSN != currentTargetSN&&threat2.SN == -1) {
-            bool targetChanged = (a_backup.WorkObjectSN != currentTargetSN);
-            int now = g_frame;
-            bool throttleOk = (lastReissueFrame[unitSN] == 0 || now - lastReissueFrame[unitSN] >= 12);
-            if (targetChanged || throttleOk) {
-                HumanAction(unitSN, currentTargetSN);
-                a_backup.WorkObjectSN = currentTargetSN;
-                lastReissueFrame[unitSN] = now;
-            }
-            ++it;
-            continue;
-        }
-
-
-        // C. 士兵在攻击农民时被威胁到（敌人到攻击距离且有攻击欲望），那么就转变对象，攻击敌人
-        if (threat2.SN != -1&&realArmy->WorkObjectSN==currentTargetSN)
-        {
-            HumanAction(realArmy->SN, threat2.SN);
-            a_backup.WorkObjectSN=threat2.SN;
-            ++it;
-            continue;
-        }
-
-        ++it;
-
-
 }
 
-    if(wave2Completed&&attackEnemy2.size()==0)
-        mode=3;
-//所有士兵都是defense状态，预计画出三个圆形区域，有敌军在这三个区域内就攻击
-    //主基地的防御范围就是主基地兵力的活动范围
+void EnemyAI::ThirdAttack()
+{
+    if (wave3Completed) return;
 
+    // 第一次进入第三波：前两波残兵 + 20 个新铜器兵
+    if (!wave3Started) {
+        CleanDeadUnits(wave1Units);
+        CleanDeadUnits(wave2Units);
+
+        for (int sn : wave1Units) {
+            tagArmy* army = FindMyArmyBySN(sn);
+            if (!army) continue;
+            AddUnique(wave3Units, sn);
+        }
+
+        for (int sn : wave2Units) {
+            tagArmy* army = FindMyArmyBySN(sn);
+            if (!army) continue;
+            AddUnique(wave3Units, sn);
+        }
+
+        vector<int> alreadyUsed = wave3Units;
+        SelectWaveUnits(wave3Units, 20, IsBronzeLandSort, alreadyUsed);
+
+        wave3Started = true;
+    }
+
+    CleanDeadUnits(wave3Units);
+
+    if (wave3Units.empty()) {
+        wave3Completed = true;
+        return;
+    }
+
+    // 第三波全面进攻：
+    // 敌方军队 > 敌方箭塔 > 敌方农民 > 敌方普通建筑
+    for (int sn : wave3Units) {
+        tagArmy* army = FindMyArmyBySN(sn);
+        if (!army) continue;
+
+        int targetSN = FindFullAttackTarget(*army);
+        if (targetSN == -1) continue;
+
+        if (army->WorkObjectSN != targetSN ||
+            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+            HumanAction(sn, targetSN);
+            waveLastOrderFrame[sn] = g_frame;
+        }
+    }
 }

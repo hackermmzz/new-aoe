@@ -1371,9 +1371,18 @@ void MainWidget::initPlayers() {
     for (int i = 0; i < MAXPLAYER; i++) {
         player[i] = new Player(i);
     }
-    //设置初始科技
+    //设置初始科技（敌方）：-1 = 全部研发链走到尽头；否则为时代上限（与 CIVILIZATION_* 枚举一致：石器=1，工具=2，铜器=3，铁器=4）
     // player[0]->set_AllTechnology();
-    player[1]->set_AllTechnology();
+    if (EnemyTechnologyMaxCivilization < 0)
+        player[1]->set_AllTechnology();
+    else {
+        int cap = EnemyTechnologyMaxCivilization;
+        if (cap < CIVILIZATION_STONEAGE)
+            cap = CIVILIZATION_STONEAGE;
+        if (cap > CIVILIZATION_IRONAGE)
+            cap = CIVILIZATION_IRONAGE;
+        player[1]->setTechnologyUpToMaxEra(cap);
+    }
     //设置初始时代
     player[0]->setCiv(DefaultCivilization);
     //设置初始资源
@@ -2129,7 +2138,7 @@ bool MainWidget::isLoss()
 bool MainWidget::isWin()
 {
     //开发者状态默认永远不会赢
-    return  (player[0]->getGold()>=800);
+    return  (player[0]->getGold()>=8000000);
 }
 
 void MainWidget::judgeVictory()

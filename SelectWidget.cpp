@@ -1229,9 +1229,9 @@ void SelectWidget::showBuildActLab()
     manageBuildBottom(6, ACT_BUILD_RANGE, BUILDING_RANGE);
     manageBuildBottom(7, ACT_BUILD_STABLE, BUILDING_STABLE);
     manageBuildBottom(8, ACT_BUILD_FARM, BUILDING_FARM);
-    // manageBuildBottom(9, ACT_BUILD_DOCK, BUILDING_DOCK);
-    manageBuildBottom(10, ACT_BUILD_COLLAGE, BUILDING_COLLAGE);
-    manageBuildBottom(9, ACT_BUILD_SIEGE, BUILDING_SIEGE);
+    //manageBuildBottom(9, ACT_BUILD_DOCK, BUILDING_DOCK);
+    manageBuildBottom(9, ACT_BUILD_COLLAGE, BUILDING_COLLAGE);
+    manageBuildBottom(10, ACT_BUILD_SIEGE, BUILDING_SIEGE);
 
     actions[11] = ACT_BUILD_CANCEL;
     actionStatus[11] = ACT_STATUS_ENABLED;

@@ -1,4 +1,4 @@
-﻿#ifndef PLAYER_H
+#ifndef PLAYER_H
 #define PLAYER_H
 
 #include "Missile.h"
@@ -105,6 +105,7 @@ public:
    /*以上建筑行动相关********************************************/
 
     void set_AllTechnology(){ playerScience->all_technology_tree(); }
+    void setTechnologyUpToMaxEra(int max_civilization){ playerScience->technology_tree_up_to(max_civilization); }
 
     int getScore()
     {
