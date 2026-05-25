@@ -108,6 +108,8 @@ public:
   /*************以上科技树维护与查询**********************/
 
     void all_technology_tree();
+    /** 将敌方等作弊开局限定到某一时代：时代上限 max_civilization 与 civ 枚举一致（石器=1 …）；市镇中心升时代进度由 set_civilization 对齐，其余建筑的研发链仅快进「节点所需时代 ≤ max」的阶段，不会超过该时代对应的研发尽头。 */
+    void technology_tree_up_to(int max_civilization);
 
 
 private:

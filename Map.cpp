@@ -1869,7 +1869,7 @@ bool Map::CheckIsNearOcean(int x, int y)
 void Map::init() {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
     loadGenerateMapText();  //载入地图
-    divideTheMap_oceanPlay();                 //把地图化分成一个一个连通块
+    divideTheMap_commonPlay();                 //把地图化分成一个一个连通块
     refineShore();
 }
 

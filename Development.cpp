@@ -346,10 +346,14 @@ bool Development::get_isBuildActionAble(int buildingNum, int actNum, int civiliz
 void Development::set_civilization(int civ)
 {
     civilization = civ;
-    while (developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode != NULL && \
-        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].nowExecuteNode->civilization < civilization)
-        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].shift();
-
+    // 市镇中心升时代链末尾经 endNodeAsOver() 后 endNode->nextDevAction == endNode（自环）。
+    // 若目标时代高于链上最后一个节点的 civilization，原先只判断「当前 < civ」会 shift 到自身并死循环（例如 cap=3 时末节点为工具时代）。
+    st_upgradeLab& centerUp = developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE];
+    while (centerUp.nowExecuteNode != NULL && centerUp.nowExecuteNode->civilization < civilization) {
+        if (centerUp.nowExecuteNode == centerUp.endNode && centerUp.nowExecuteNode->nextDevAction == centerUp.endNode)
+            break;
+        centerUp.shift();
+    }
 }
 
 /*****************游戏进程信息*******************/
@@ -374,6 +378,37 @@ void Development::all_technology_tree()
             while (iter1->second.nowExecuteNode != NULL)
             {
                 if (iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode)
+                    break;
+
+                iter1->second.shift();
+            }
+        }
+
+        iter++;
+    }
+}
+
+void Development::technology_tree_up_to(int max_civilization)
+{
+    set_civilization(max_civilization);
+
+    map< int, st_buildAction >::iterator iter = developLab.begin(), itere = developLab.end();
+    map<int, st_upgradeLab>::iterator iter1, iter1e;
+
+    while (iter != itere)
+    {
+        for (iter1 = iter->second.actCon.begin(), iter1e = iter->second.actCon.end(); iter1 != iter1e; iter1++)
+        {
+            // 市镇中心「升级时代」链已由 set_civilization 对齐到上限，此处若再 shift 会越过设定时代（例如停在工具时代却仍执行升铜器）。
+            if (iter->first == BUILDING_CENTER && iter1->first == BUILDING_CENTER_UPGRADE)
+                continue;
+
+            while (iter1->second.nowExecuteNode != NULL)
+            {
+                if (iter1->second.nowExecuteNode == iter1->second.endNode && iter1->second.nowExecuteNode->nextDevAction == iter1->second.endNode)
+                    break;
+
+                if (iter1->second.nowExecuteNode->civilization > max_civilization)
                     break;
 
                 iter1->second.shift();
@@ -409,6 +444,7 @@ void Development::init_DevelopLab()
                                        0,BUILDING_CENTER_UPGRADE_BRONZEAGE_FOOD,0,BUILDING_CENTER_UPGRADE_BRONZEAGE_GOLD);
         developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].push_back(newNode);
         /** 缺少石器时代两个建筑的前置条件*/
+        developLab[BUILDING_CENTER].actCon[BUILDING_CENTER_UPGRADE].endNodeAsOver();
     }
 
 

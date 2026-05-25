@@ -29,6 +29,7 @@ SOURCES += \
         MainWidget.cpp \
     GameWidget.cpp \
     Coordinate.cpp \
+    RuntimeConfig.cpp \
     GlobalVariate.cpp \
     Map.cpp \
     Block.cpp \
@@ -68,6 +69,8 @@ SOURCES += \
 HEADERS += \
         MainWidget.h \
     GameWidget.h \
+    RuntimeConfig.h \
+    RuntimeConfig_private.h \
     config.h \
     Coordinate.h \
     GlobalVariate.h \

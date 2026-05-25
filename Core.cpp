@@ -1369,7 +1369,11 @@ void Core::judge_Crush()
         {
             if (judOb->getCrashOb() != NULL) break;
             /////////////
-            auto& v = theMap->map_Object[(int)judBlock[j].x][(int)judBlock[j].y];
+            int x = (int)judBlock[j].x;
+            int y = (int)judBlock[j].y;
+            // 检查坐标是否在地图范围内
+            if (x < 0 || x >= MAP_L || y < 0 || y >= MAP_U) continue;
+            auto& v = theMap->map_Object[x][y];
             obSize = v.size();
             if (obSize == 0) continue;
             for (int k = 0; k < obSize; k++)
