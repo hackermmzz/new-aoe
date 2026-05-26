@@ -98,6 +98,7 @@ public:
         PLAYERAXEMAN,
         PLAYERSCOUT,
         PLAYERBOWMAN,
+        PLAYERPRIEST,
         AIWARSHIP,
         AIARROWTOWER,
         AISIEGE,

@@ -167,6 +167,11 @@
    </item>
    <item>
     <property name="text">
+     <string>玩家英雄祭司</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>玩家农民</string>
     </property>
    </item>
