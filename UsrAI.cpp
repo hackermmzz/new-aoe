@@ -32,6 +32,7 @@ cheatAction();
 cheatRes();
 logo++;
 }
+return;
     const tagInfo info = getInfo();
     // Sidebar: UsrAI打印: -1 idle, or target SN (first finished tower that is attacking).
     int towerLogSN = -1;

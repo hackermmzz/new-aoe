@@ -196,6 +196,7 @@ MainWidget::MainWidget(QWidget* parent) :
         else if (text == "玩家斧头兵") this->currentSelected = PLAYERAXEMAN;
         else if (text == "玩家侦察兵") this->currentSelected = PLAYERSCOUT;
         else if (text == "玩家弓箭手") this->currentSelected = PLAYERBOWMAN;
+        else if (text == "玩家英雄祭司") this->currentSelected = PLAYERPRIEST;
         if (text != "玩家人物") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->ai_building_and_resource, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -656,6 +657,9 @@ void MainWidget::updateEditor()
             break;
         case PLAYERBOWMAN:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERBOWMAN);
+            break;
+        case PLAYERPRIEST:
+            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERPRIEST);
             break;
         case AICLUBMAN:
             MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICLUBMAN);
@@ -1209,6 +1213,9 @@ void MainWidget::MakeHuman(double DR, double UR, int type)
     }
     else if (type == PLAYERBOWMAN) {
         player[0]->addArmy(AT_BOWMAN, DR, UR);
+    }
+    else if (type == PLAYERPRIEST) {
+        player[0]->addArmy(AT_PRIEST, DR, UR);
     }
     else if (type == AISCOUT) {
         player[1]->addArmy(AT_SCOUT, DR, UR);
