@@ -71,6 +71,7 @@ private:
     int handleBuildingAction(Coordinate* self, int option, int id);
     int handlePinPointStrike(Coordinate* self, double dr0,double ur0, int id);
     void deduplicateInstructions(std::queue<instruction>& instructions); // 去重指令队列
+    bool filter_instruction(const instruction& ins);
     void FirstFrameProcess();//游戏开始的第一帧需要干的事情
 public:
     Core_List* interactionList;

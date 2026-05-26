@@ -519,7 +519,7 @@ void SelectWidget::refreshActs()
 
         if (isBuild)
         {
-            if (!mainPtr->player[0]->get_isBuildingShowAble(buildType) || !mainPtr->player[0]->get_isBuildingAble(buildType))
+            if (!mainPtr->player[0]->get_isBuildingShowAble(buildType) || !mainPtr->player[0]->get_isBuildingAble(buildType) || RuntimeConfig_isPlayerBuildingDisabled(buildType))
                 actionStatus[i] = ACT_STATUS_DISABLED;
             else
                 actionStatus[i] = ACT_STATUS_ENABLED;
@@ -932,7 +932,7 @@ int SelectWidget::aiAct(int actName, Coordinate* self)
 
 void SelectWidget::manageBuildBottom(int position, int actNum, int buildingNum)
 {
-    if (mainPtr->player[0]->get_isBuildingShowAble(buildingNum))
+    if (mainPtr->player[0]->get_isBuildingShowAble(buildingNum) && !RuntimeConfig_isPlayerBuildingDisabled(buildingNum))
     {
         actions[position] = actNum;
         if (mainPtr->player[0]->get_isBuildingAble(buildingNum))
@@ -970,6 +970,15 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
 
             setCursorAndBuildMode(key, buildingNum);
         };
+    auto rejectDisabledBuilding = [&](int buildingNum) -> bool
+        {
+            if (RuntimeConfig_isPlayerBuildingDisabled(buildingNum)) {
+                QString chineseName = QString::fromStdString(Building::getDisplayName(buildingNum));
+                call_debugText("red", " 建造" + chineseName + " 建造失败,该建筑已被禁用", 0);
+                return true;
+            }
+            return false;
+        };
     // Handle building actions
     switch (actName)
     {
@@ -978,21 +987,27 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         showBuildActLab();
         break;
     case ACT_BUILD_HOUSE:
+        if (rejectDisabledBuilding(BUILDING_HOME)) break;
         setCursorAndBuildModeByBuilding(BUILDING_HOME, "House1");
         break;
     case ACT_BUILD_GRANARY:
+        if (rejectDisabledBuilding(BUILDING_GRANARY)) break;
         setCursorAndBuildModeByBuilding(BUILDING_GRANARY, "Granary");
         break;
     case ACT_BUILD_STOCK:
+        if (rejectDisabledBuilding(BUILDING_STOCK)) break;
         setCursorAndBuildModeByBuilding(BUILDING_STOCK, "Stock");
         break;
     case ACT_BUILD_FARM:
+        if (rejectDisabledBuilding(BUILDING_FARM)) break;
         setCursorAndBuildModeByBuilding(BUILDING_FARM, "Farm");
         break;
     case ACT_BUILD_MARKET:
+        if (rejectDisabledBuilding(BUILDING_MARKET)) break;
         setCursorAndBuildModeByBuilding(BUILDING_MARKET, "Market");
         break;
     case ACT_BUILD_ARROWTOWER:
+        if (rejectDisabledBuilding(BUILDING_ARROWTOWER)) break;
         if (mainPtr->player[0]->get_buildActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
         {
             const QString upKey("ArrowTower2_Egypt");
@@ -1006,21 +1021,27 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         setCursorAndBuildModeByBuilding(BUILDING_ARROWTOWER, "ArrowTower");
         break;
     case ACT_BUILD_ARMYCAMP:
+        if (rejectDisabledBuilding(BUILDING_ARMYCAMP)) break;
         setCursorAndBuildModeByBuilding(BUILDING_ARMYCAMP, "ArmyCamp");
         break;
     case ACT_BUILD_RANGE:
+        if (rejectDisabledBuilding(BUILDING_RANGE)) break;
         setCursorAndBuildModeByBuilding(BUILDING_RANGE, "Range");
         break;
     case ACT_BUILD_STABLE:
+        if (rejectDisabledBuilding(BUILDING_STABLE)) break;
         setCursorAndBuildModeByBuilding(BUILDING_STABLE, "Stable");
         break;
     case ACT_BUILD_DOCK:
+        if (rejectDisabledBuilding(BUILDING_DOCK)) break;
         setCursorAndBuildModeByBuilding(BUILDING_DOCK, "Dock");
         break;
     case ACT_BUILD_COLLAGE:
+        if (rejectDisabledBuilding(BUILDING_COLLAGE)) break;
         setCursorAndBuildModeByBuilding(BUILDING_COLLAGE, "Collage_Egypt");
         break;
     case ACT_BUILD_SIEGE:
+        if (rejectDisabledBuilding(BUILDING_SIEGE)) break;
         setCursorAndBuildModeByBuilding(BUILDING_SIEGE, "Siege_Egypt");
         break;
     case ACT_BUILD_CANCEL:

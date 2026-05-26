@@ -549,13 +549,10 @@ void Core::updateByPlayer(int id) {
         building.MaxBlood = build->getMaxBlood();
         building.Percent = build->getPercent();
         if (build->getNum() == BUILDING_ARROWTOWER) {
-            int obj = interactionList->getObjectSN(build);
-            if (build->isAttacking() && obj != -1) {
-                building.Project = obj;
-            }
-            else {
-                building.Project = -1;
-            }
+            // Report pending/active attack target while relation exists (like WorkObjectSN for units).
+            // Requiring isAttacking() here left Project at -1 during the move-to-attack phase, so AI
+            // re-issued HumanAction every frame, suspendRelation reset the relation, and towers never fired.
+            building.Project = interactionList->getObjectSN(build);
         }
         else {
             building.Project = build->getActNum();
@@ -1189,6 +1186,13 @@ void Core::FirstFrameProcess()
 }
 
 
+bool Core::filter_instruction(const instruction& ins)
+{
+    if (ins.type == INS_HUMANBUILD)
+        return !RuntimeConfig_isPlayerBuildingDisabled(ins.option);
+    return true;
+}
+
 //后续编写，用于处理AI指令
 void Core::manageOrder(int id)
 {
@@ -1219,6 +1223,16 @@ void Core::manageOrder(int id)
         // 判断是否是己方对象 并 再次判断SN对象是否存在
         if (g_Object[cur.SN] == NULL || self->getPlayerRepresent() != id) {
             cur.ret = ACTION_INVALID_SN;
+            tagAIGame->insertInsRet(cur.id, cur);
+            continue;
+        }
+
+        if (id == 0 && !filter_instruction(cur)) {
+            cur.ret = ACTION_INVALID_HUMANBUILD_LOCK;
+            if (cur.type == INS_HUMANBUILD) {
+                QString chineseName = QString::fromStdString(Building::getDisplayName(cur.option));
+                call_debugText("red", " 建造" + chineseName + " 建造失败,该建筑已被禁用", 0);
+            }
             tagAIGame->insertInsRet(cur.id, cur);
             continue;
         }
