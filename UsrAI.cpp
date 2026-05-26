@@ -12,31 +12,26 @@ ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 int logo=0;
 
-static int towerBlockDis(int x1, int y1, int x2, int y2)
+static bool towerTargetInRange(int towerDR, int towerUR, int objDR, int objUR)
 {
-    return abs(x1 - x2) + abs(y1 - y2);
-}
-
-// Match Core_CondiFunc::condition_ObjectNearby for arrow towers (OPERATECON_NEAR_ATTACK).
-static bool towerTargetInRange(const tagBuilding& tower, double targetDR, double targetUR)
-{
-    const double towerDR = (tower.BlockDR + 0.5) * BLOCKSIDELENGTH;
-    const double towerUR = (tower.BlockUR + 0.5) * BLOCKSIDELENGTH;
-    return isNear_Manhattan(towerDR, towerUR, targetDR, targetUR, DIS_ARROWTOWER * BLOCKSIDELENGTH);
+    const int range = static_cast<int>(DIS_ARROWTOWER);
+    return abs(objDR - towerDR) <= range && abs(objUR - towerUR) <= range;
 }
 
 void UsrAI::processData()
 {
 while(logo<15){
-cheatAction();
+
 cheatRes();
 logo++;
 }
     const tagInfo info = getInfo();
-    // Sidebar: UsrAI打印: -1 idle, or target SN (first finished tower that is attacking).
+
     int towerLogSN = -1;
     for (const tagBuilding& b : info.buildings) {
-        if (b.Type != BUILDING_ARROWTOWER || b.Percent < 100)
+        if (b.Type != BUILDING_ARROWTOWER)
+            continue;
+        if (b.Percent < 100)
             continue;
         if (b.Project != -1) {
             towerLogSN = b.Project;
@@ -57,9 +52,9 @@ logo++;
         int bestDis = 1000000000;
 
         for (const tagArmy& obj : info.enemy_armies) {
-            if (!towerTargetInRange(b, obj.DR, obj.UR))
+            if (!towerTargetInRange(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR))
                 continue;
-            int d = towerBlockDis(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
+            int d = abs(b.BlockDR - obj.BlockDR) + abs(b.BlockUR - obj.BlockUR);
             if (d < bestDis) {
                 bestDis = d;
                 targetSN = obj.SN;
@@ -67,9 +62,9 @@ logo++;
         }
 
         for (const tagFarmer& obj : info.enemy_farmers) {
-            if (!towerTargetInRange(b, obj.DR, obj.UR))
+            if (!towerTargetInRange(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR))
                 continue;
-            int d = towerBlockDis(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
+            int d = abs(b.BlockDR - obj.BlockDR) + abs(b.BlockUR - obj.BlockUR);
             if (d < bestDis) {
                 bestDis = d;
                 targetSN = obj.SN;
