@@ -301,7 +301,7 @@ enum CIVILIZATION {
 /********** 人物动作命名 **********/
 #define ACT_CREATEFARMER_NAME "创造村民(花费:50食物)"
 #define ACT_UPGRADE_AGE_NAME "演进到工具时代(花费:500食物)"
-#define ACT_UPGRADE_BRONZEAGE_NAME "演进到铜器时代(花费:1000食物,800黄金)"
+#define ACT_UPGRADE_BRONZEAGE_NAME "演进到铜器时代(花费:800食物)"
 #define ACT_UPGRADE_TOWERBUILD_NAME "研发:建造箭塔(花费:50食物)"
 #define ACT_UPGRADE_ARROWTOWER_NAME "升级箭塔(花费:120食物,50石头)(需铜器时代且已完成建造箭塔研发)"
 #define ACT_UPGRADE_WOOD_NAME "研发木材加工:远程攻击距离+1,伐木+2(花费:120食物,75木头)"

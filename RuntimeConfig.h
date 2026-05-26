@@ -1421,6 +1421,9 @@ bool RuntimeConfig_OffScreen();
 double RuntimeConfig_MUSIC_VOLUME();
 #define MUSIC_VOLUME (RuntimeConfig_MUSIC_VOLUME())
 
+bool RuntimeConfig_isPlayerBuildingDisabled(int buildingNum);
+#define isPlayerBuildingDisabled(b) (RuntimeConfig_isPlayerBuildingDisabled(b))
+
 void ApplyRuntimeConfigFromJson(const QJsonObject& config);
 
 #endif // RUNTIMECONFIG_H

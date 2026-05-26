@@ -243,6 +243,12 @@ int Core_List::addRelation(Coordinate* object1, int BlockDR, int BlockUR, int ev
 
             if (wrongCode > 0) return wrongCode;
 
+            if (playerRepresent == 0 && RuntimeConfig_isPlayerBuildingDisabled(type))
+            {
+                call_debugText("red", " 在(" + QString::number(BlockDR) + "," + QString::number(BlockUR) + ")建造" + chineseName + " 建造失败,该建筑已被禁用", object1->getPlayerRepresent());
+                return ACTION_INVALID_HUMANBUILD_LOCK;
+            }
+
             //判断是否已解锁建筑
             if (!player[playerRepresent]->get_isBuildingShowAble(type))
             {
@@ -1352,7 +1358,7 @@ void Core_List::deal_RangeAttack(Coordinate* attacker, Coordinate* attackee)
                 if (bloodee && countdistance(attacker->getDR(), attacker->getUR(), judOb->getDR(), judOb->getUR()) <= blooder->getDis_attack())
                 {
                     damage = blooder->getATK() - bloodee->getDEF(blooder->get_AttackType());   //统一伤害计算公式
-                    if (damage < 0) damage = 0;
+                    if (damage < 1) damage = 1;
                     bloodee->updateBlood(damage);  //damage反映到受攻击者血量减少
                 }
             }
@@ -1960,7 +1966,7 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
     //普通伤害攻击
     else{
         auto damage = attacker->getATK() - attackee->getDEF(attacker->get_AttackType()) + extraDamage;   //统一伤害计算公式
-        if (damage < 0) damage = 0;
+        if (damage < 1) damage = 1;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
 
         //更新得分

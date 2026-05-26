@@ -1,5 +1,7 @@
 #include "RuntimeConfig.h"
+#include <QJsonArray>
 #include <QJsonObject>
+#include <QSet>
 
 namespace {
 
@@ -474,6 +476,7 @@ int g_DefaultCivilization = 0;
 int g_EnemyTechnologyMaxCivilization = -1;
 bool g_OffScreen = false;
 double g_MUSIC_VOLUME = 0.0;
+QSet<int> g_PLAYER_DISABLED_BUILDINGS;
 
 } // namespace
 
@@ -2827,6 +2830,11 @@ bool RuntimeConfig_OffScreen()
     return g_OffScreen;
 }
 
+bool RuntimeConfig_isPlayerBuildingDisabled(int buildingNum)
+{
+    return g_PLAYER_DISABLED_BUILDINGS.contains(buildingNum);
+}
+
 double RuntimeConfig_MUSIC_VOLUME()
 {
     return g_MUSIC_VOLUME;
@@ -3305,6 +3313,15 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_EnemyTechnologyMaxCivilization = config.value(QStringLiteral("EnemyTechnologyMaxCivilization")).toInt();
     g_OffScreen = config.value(QStringLiteral("OffScreen")).toBool();
     g_MUSIC_VOLUME = config.value(QStringLiteral("MUSIC_VOLUME")).toDouble();
+    g_PLAYER_DISABLED_BUILDINGS.clear();
+    const QJsonValue disabledBuildingsVal = config.value(QStringLiteral("PLAYER_DISABLED_BUILDINGS"));
+    if (disabledBuildingsVal.isArray()) {
+        const QJsonArray disabledBuildingsArr = disabledBuildingsVal.toArray();
+        for (const QJsonValue& v : disabledBuildingsArr) {
+            if (v.isDouble())
+                g_PLAYER_DISABLED_BUILDINGS.insert(v.toInt());
+        }
+    }
 }
 
 void RuntimeConfig_setIsExamining(bool v) { g_IsExamining = v; }
