@@ -1,4 +1,6 @@
 #include "Building.h"
+#include "Player.h"
+#include "RuntimeConfig.h"
 /********************静态资源**************************/
 std::list<ImageResource>* Building::build[4];
 std::list<ImageResource>* Building::built[4][2][BUILDING_TYPE_MAXNUM];
@@ -407,6 +409,47 @@ void Building::deallocatebuildFire(int type)
 
 /********************************************/
 /*****************act相关***************/
+bool Building::tryDeductRepairHpCost(double hpFractionRepaired, Player* owner)
+{
+    if (owner == NULL || hpFractionRepaired <= 0.0 || !isConstructed() || playerScience == NULL)
+        return true;
+
+    int wood = 0, food = 0, stone = 0, gold = 0;
+    playerScience->get_Resource_Consume(Num, wood, food, stone, gold);
+    const double mult = REPAIR_COST_RATIO * hpFractionRepaired;
+
+    repairResDebtWood += wood * mult;
+    repairResDebtFood += food * mult;
+    repairResDebtStone += stone * mult;
+    repairResDebtGold += gold * mult;
+
+    const int costWood = static_cast<int>(repairResDebtWood);
+    const int costFood = static_cast<int>(repairResDebtFood);
+    const int costStone = static_cast<int>(repairResDebtStone);
+    const int costGold = static_cast<int>(repairResDebtGold);
+
+    repairResDebtWood -= costWood;
+    repairResDebtFood -= costFood;
+    repairResDebtStone -= costStone;
+    repairResDebtGold -= costGold;
+
+    if (costWood == 0 && costFood == 0 && costStone == 0 && costGold == 0)
+        return true;
+
+    if (owner->getWood() < costWood || owner->getFood() < costFood
+        || owner->getStone() < costStone || owner->getGold() < costGold)
+    {
+        repairResDebtWood += costWood;
+        repairResDebtFood += costFood;
+        repairResDebtStone += costStone;
+        repairResDebtGold += costGold;
+        return false;
+    }
+
+    owner->changeResource(costWood, costFood, costStone, costGold, true);
+    return true;
+}
+
 void Building::update_Build()
 {
     double ratio = get_retio_Build();

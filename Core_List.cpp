@@ -1,4 +1,5 @@
 #include "Core_List.h"
+#include <algorithm>
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
@@ -1079,6 +1080,24 @@ void Core_List::object_RatioChange(Coordinate* object1, relation_Object& relatio
     {
         Farmer* farmer = (Farmer*)object1;
         if (!farmer->isWorking()) farmer->setPreWork();
+
+        if (buildGoalOb->isConstructed() && !buildGoalOb->isFullHp())
+        {
+            const double bloodBefore = buildGoalOb->getBloodPercent();
+            const double ratio = buildGoalOb->get_retio_Build();
+            const double hpGain = std::min(1.0, bloodBefore + ratio / 100.0) - bloodBefore;
+
+            if (hpGain > 0.0)
+            {
+                const int playerRep = buildGoalOb->getPlayerRepresent();
+                if (!buildGoalOb->tryDeductRepairHpCost(hpGain, player[playerRep]))
+                {
+                    suspendRelation(object1);
+                    return;
+                }
+            }
+        }
+
         buildGoalOb->update_Build();
     }
     else if (relation.relationAct == CoreEven_BuildingAct && buildOb != NULL)
