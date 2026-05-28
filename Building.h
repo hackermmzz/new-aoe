@@ -240,6 +240,8 @@ public:
     bool isRepresentHumanHaveSpace(){ return playerScience->get_isHumanHaveSpace(); }
     void update_Action();
     void update_Build();
+    /** 按修复血量比例扣修理费；资源不足返回 false。仅对已完工建筑收费。 */
+    bool tryDeductRepairHpCost(double hpFractionRepaired, class Player* owner);
 
     void BuildingActionOver();
 
@@ -323,6 +325,12 @@ protected:
     int food_TS = 0;
     int stone_TS = 0;
     int gold_TS = 0;
+
+    //修理资源小数累积（按帧扣费时取整）
+    double repairResDebtWood = 0;
+    double repairResDebtFood = 0;
+    double repairResDebtStone = 0;
+    double repairResDebtGold = 0;
 
     std::list<ImageResource>::iterator fireNowRes;
     std::list<ImageResource> *fireNowList = NULL;

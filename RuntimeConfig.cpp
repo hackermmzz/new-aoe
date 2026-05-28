@@ -72,6 +72,7 @@ double g_FARMER_GATHERSPEED_FOOD = 0.0;
 double g_FARMER_GATHERSPEED_GOLD = 0.0;
 double g_FARMER_GATHERSPEED_STONE = 0.0;
 double g_FARMER_CONSTRUCTSPEED = 0.0;
+double g_REPAIR_COST_RATIO = 0.5;
 int g_CNT_UPGRADEFARM = 0;
 int g_CNT_BUSH = 0;
 int g_CNT_STONE = 0;
@@ -813,6 +814,11 @@ double RuntimeConfig_FARMER_GATHERSPEED_STONE()
 double RuntimeConfig_FARMER_CONSTRUCTSPEED()
 {
     return g_FARMER_CONSTRUCTSPEED;
+}
+
+double RuntimeConfig_REPAIR_COST_RATIO()
+{
+    return g_REPAIR_COST_RATIO;
 }
 
 int RuntimeConfig_CNT_UPGRADEFARM()
@@ -2909,6 +2915,9 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_FARMER_GATHERSPEED_GOLD = config.value(QStringLiteral("FARMER_GATHERSPEED_GOLD")).toDouble();
     g_FARMER_GATHERSPEED_STONE = config.value(QStringLiteral("FARMER_GATHERSPEED_STONE")).toDouble();
     g_FARMER_CONSTRUCTSPEED = config.value(QStringLiteral("FARMER_CONSTRUCTSPEED")).toDouble();
+    g_REPAIR_COST_RATIO = config.contains(QStringLiteral("REPAIR_COST_RATIO"))
+        ? config.value(QStringLiteral("REPAIR_COST_RATIO")).toDouble()
+        : 0.5;
     g_CNT_UPGRADEFARM = config.value(QStringLiteral("CNT_UPGRADEFARM")).toInt();
     g_CNT_BUSH = config.value(QStringLiteral("CNT_BUSH")).toInt();
     g_CNT_STONE = config.value(QStringLiteral("CNT_STONE")).toInt();

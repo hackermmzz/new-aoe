@@ -209,6 +209,9 @@ double RuntimeConfig_FARMER_GATHERSPEED_STONE();
 double RuntimeConfig_FARMER_CONSTRUCTSPEED();
 #define FARMER_CONSTRUCTSPEED (RuntimeConfig_FARMER_CONSTRUCTSPEED())
 
+double RuntimeConfig_REPAIR_COST_RATIO();
+#define REPAIR_COST_RATIO (RuntimeConfig_REPAIR_COST_RATIO())
+
 int RuntimeConfig_CNT_UPGRADEFARM();
 #define CNT_UPGRADEFARM (RuntimeConfig_CNT_UPGRADEFARM())
 
