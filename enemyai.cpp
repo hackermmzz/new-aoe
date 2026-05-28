@@ -686,6 +686,32 @@ static int FindNearestFarmerByTowerState(int blockDR, int blockUR, bool wantInsi
     return bestSN;
 }
 
+static int FindNearestFarmerByTowerStateAvoiding(int blockDR,
+                                                 int blockUR,
+                                                 bool wantInsideTower,
+                                                 const vector<int>& reservedFarmers)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        if (ContainsInt(reservedFarmers, f.SN)) continue;
+
+        bool inside = IsInsideEnemyTowerRange(f.BlockDR, f.BlockUR);
+        if (inside != wantInsideTower) continue;
+
+        int d = BlockDis2(blockDR, blockUR, f.BlockDR, f.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = f.SN;
+        }
+    }
+
+    if (bestSN != -1) return bestSN;
+
+    return FindNearestFarmerByTowerState(blockDR, blockUR, wantInsideTower);
+}
+
 static int FindThreatToArmy(const tagArmy& army)
 {
     int bestSN = -1;
@@ -703,6 +729,43 @@ static int FindThreatToArmy(const tagArmy& army)
     }
 
     return bestSN;
+}
+
+static void ReserveCurrentFarmerTargets(const vector<int>& units, vector<int>& reservedFarmers)
+{
+    for (int sn : units) {
+        auto it = currentTarget.find(sn);
+        if (it != currentTarget.end() && EnemyFarmerAlive(it->second)) {
+            AddUnique(reservedFarmers, it->second);
+        }
+    }
+}
+
+static int FindStickyWaveTarget(const tagArmy& army, int wave)
+{
+    if (EnemyArrowTowerAlive(army.WorkObjectSN)) {
+        currentTarget[army.SN] = army.WorkObjectSN;
+        return army.WorkObjectSN;
+    }
+
+    if (wave == 2) {
+        int threat = FindThreatToArmy(army);
+        if (threat != -1) {
+            currentTarget[army.SN] = threat;
+            return threat;
+        }
+    }
+
+    auto it = currentTarget.find(army.SN);
+    if (it == currentTarget.end()) return -1;
+
+    int targetSN = it->second;
+    if (EnemyFarmerAlive(targetSN) || EnemyArrowTowerAlive(targetSN)) {
+        return targetSN;
+    }
+
+    currentTarget.erase(it);
+    return -1;
 }
 
 static int FindWaveTarget(const tagArmy& army, int wave)
@@ -728,6 +791,39 @@ static int FindWaveTarget(const tagArmy& army, int wave)
     // 第二波最后才攻击塔范围内农民
     if (wave == 2) {
         int farmerInside = FindNearestFarmerByTowerState(army.BlockDR, army.BlockUR, true);
+        if (farmerInside != -1) return farmerInside;
+    }
+
+    return -1;
+}
+
+static int FindWaveTargetAvoidingReserved(const tagArmy& army,
+                                          int wave,
+                                          const vector<int>& reservedFarmers)
+{
+    if (EnemyArrowTowerAlive(army.WorkObjectSN)) {
+        return army.WorkObjectSN;
+    }
+
+    if (wave == 2) {
+        int threat = FindThreatToArmy(army);
+        if (threat != -1) return threat;
+    }
+
+    int farmerOutside = FindNearestFarmerByTowerStateAvoiding(army.BlockDR,
+                                                              army.BlockUR,
+                                                              false,
+                                                              reservedFarmers);
+    if (farmerOutside != -1) return farmerOutside;
+
+    int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
+    if (tower != -1) return tower;
+
+    if (wave == 2) {
+        int farmerInside = FindNearestFarmerByTowerStateAvoiding(army.BlockDR,
+                                                                 army.BlockUR,
+                                                                 true,
+                                                                 reservedFarmers);
         if (farmerInside != -1) return farmerInside;
     }
 
@@ -886,8 +982,7 @@ void EnemyAI::OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN)
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1754,17 +1849,29 @@ void EnemyAI::FirstAttack()
         return;
     }
     // 未杀够：动态寻找 塔外农民 > 箭塔
+    vector<int> assignedFarmers;
+    ReserveCurrentFarmerTargets(wave1Units, assignedFarmers);
+
     for (int sn : wave1Units) {
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        int targetSN = FindWaveTarget(*army, 1);
-        if (targetSN == -1) continue;
+        int targetSN = FindStickyWaveTarget(*army, 1);
+        if (targetSN == -1) {
+            targetSN = FindWaveTargetAvoidingReserved(*army, 1, assignedFarmers);
+        }
+        if (targetSN == -1) {
+            currentTarget.erase(sn);
+            continue;
+        }
 
         MarkTouchedFarmer(wave1TouchedFarmers, targetSN);
+        if (EnemyFarmerAlive(targetSN)) {
+            AddUnique(assignedFarmers, targetSN);
+        }
+        currentTarget[sn] = targetSN;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1842,17 +1949,29 @@ void EnemyAI::SecondAttack()
 
     // 第二波目标优先级：
     // 攻击我方士兵的敌方士兵 > 塔外农民 > 箭塔 > 塔内农民
+    vector<int> assignedFarmers;
+    ReserveCurrentFarmerTargets(wave2Units, assignedFarmers);
+
     for (int sn : wave2Units) {
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        int targetSN = FindWaveTarget(*army, 2);
-        if (targetSN == -1) continue;
+        int targetSN = FindStickyWaveTarget(*army, 2);
+        if (targetSN == -1) {
+            targetSN = FindWaveTargetAvoidingReserved(*army, 2, assignedFarmers);
+        }
+        if (targetSN == -1) {
+            currentTarget.erase(sn);
+            continue;
+        }
 
         MarkTouchedFarmer(wave2TouchedFarmers, targetSN);
+        if (EnemyFarmerAlive(targetSN)) {
+            AddUnique(assignedFarmers, targetSN);
+        }
+        currentTarget[sn] = targetSN;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1908,8 +2027,7 @@ void EnemyAI::ThirdAttack()
 
         hasTarget = true;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
