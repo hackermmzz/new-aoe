@@ -726,6 +726,13 @@ void Core_List::change_HumanRepresent(Human *human, int represent)
     human->setPlayerRepresent(represent);
     theMap->player[represent]->insertHuman(human);
     theMap->player[origin_rep]->removeHuman(human);
+
+    // 转换成功且阵营确实变化后，立刻下达一次“原地移动”来打断当前行为
+    if (origin_rep != represent)
+    {
+        suspendRelation(human);
+        addRelation(human, human->getDR(), human->getUR(), CoreEven_JustMoveTo, false);
+    }
 }
 
 
