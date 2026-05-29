@@ -25,6 +25,7 @@ while(logo<15){
 cheatRes();
 logo++;
 }
+return;
     const tagInfo info = getInfo();
 
     int towerLogSN = -1;
