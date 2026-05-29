@@ -1,4 +1,4 @@
-#include "enemyai.h"
+﻿#include "enemyai.h"
 #include "MainWidget.h"
 #include "Human.h"
 #include <iostream>
@@ -27,7 +27,6 @@ ins EnemyIns;
 #define AROUND 1
 #define MODE1 15
 #define MODE2 15000
-#define MODE3 21250
 #define MODE4 30000
 #define VECTORARMY 1
 #define VECTORFARMER 2
@@ -41,8 +40,9 @@ ins EnemyIns;
 #define TAGBUILDING 3
 tagInfo enemyInfo;
 //-----------新参数--------------//
-#define FAT 4500     //第一波骚扰时间
-#define SAT 10500    //第二波骚扰时间
+#define FAT 6000     //第一波骚扰时间
+#define SAT 12000    //第二波骚扰时间
+#define TAT 19500    //第三波骚扰时间
 #define radius_Outer 15
 #define radius_Inner 10
 
@@ -79,9 +79,9 @@ static bool wave2Started = false;
 static bool wave3Started = false;
 static bool wave3Completed = false;
 
-static vector<int> wave1Units;   // 第一波派出的 5 个兵
-static vector<int> wave2Units;   // 第二波：10 个新铜器兵 + 第一波残兵
-static vector<int> wave3Units;   // 第三波：20 个新铜器兵 + 前两波残兵
+static vector<int> wave1Units;   // 第一波：2 个棍棒兵 + 2 个侦察兵
+static vector<int> wave2Units;   // 第二波：指定铜器兵组合 + 第一波残兵
+static vector<int> wave3Units;   // 第三波：20 个铜器陆军 + 前两波残兵
 
 static vector<int> wave1TouchedFarmers;
 static vector<int> wave2TouchedFarmers;
@@ -555,6 +555,14 @@ static bool EnemyBuildingAlive(int sn)
     return false;
 }
 
+static bool EnemyArrowTowerAlive(int sn)
+{
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.SN == sn && b.Type == BUILDING_ARROWTOWER) return true;
+    }
+    return false;
+}
+
 static void CleanDeadUnits(vector<int>& units)
 {
     for (int i = 0; i < units.size(); ) {
@@ -699,6 +707,10 @@ static int FindThreatToArmy(const tagArmy& army)
 
 static int FindWaveTarget(const tagArmy& army, int wave)
 {
+    if (EnemyArrowTowerAlive(army.WorkObjectSN)) {
+        return army.WorkObjectSN;
+    }
+
     // 第二波最高优先级：反击正在攻击自己的敌方士兵
     if (wave == 2) {
         int threat = FindThreatToArmy(army);
@@ -915,6 +927,40 @@ static void SelectWaveUnits(vector<int>& dst,
         if (ContainsInt(dst, a.SN)) continue;
         if (ContainsInt(alreadyUsed, a.SN)) continue;
         if (!sortChecker(a.Sort)) continue;
+
+        int d = BlockDis2(a.BlockDR, a.BlockUR, center.first, center.second);
+        candidates.push_back(make_pair(a.SN, d));
+    }
+
+    sort(candidates.begin(), candidates.end(),
+         [](const pair<int, int>& x, const pair<int, int>& y) {
+             return x.second < y.second;
+         });
+
+    for (int i = 0; i < candidates.size() && needCount > 0; i++) {
+        int sn = candidates[i].first;
+        tagArmy* a = FindMyArmyBySN(sn);
+        if (!a) continue;
+
+        dst.push_back(sn);
+        HarassHome[sn] = make_pair(a->DR, a->UR);
+        needCount--;
+    }
+}
+
+static void SelectWaveUnitsBySort(vector<int>& dst,
+                                  int unitSort,
+                                  int needCount,
+                                  const vector<int>& alreadyUsed)
+{
+    pair<int, int> center = GetHarassCenterBlock();
+    vector<pair<int, int>> candidates;
+
+    for (tagArmy& a : enemyInfo.armies) {
+        if (IsDefenseArmySN(a.SN)) continue;
+        if (ContainsInt(dst, a.SN)) continue;
+        if (ContainsInt(alreadyUsed, a.SN)) continue;
+        if (a.Sort != unitSort) continue;
 
         int d = BlockDis2(a.BlockDR, a.BlockUR, center.first, center.second);
         candidates.push_back(make_pair(a.SN, d));
@@ -1504,35 +1550,25 @@ void EnemyAI::processData() {
             }
 
             if (targetSN != -1 && bestDis <= ATK_BUILD_ARROWTOWER) {
-                HumanAction(b.SN, targetSN);
+                if (g_frame - timer[b.SN] >= DEFENSE_ORDER_INTERVAL) {
+                    HumanAction(b.SN, targetSN);
+                    timer[b.SN] = g_frame;
+                }
             }
         }
-
-        // 第一波：4500 帧开始，没完成就一直执行第一波
-        if (g_frame >= FAT && !wave1Completed) {
-            onWaveAttack(1);
+        // 到点强制触发：倒序判断，避免第二波未完成时挡住第三波。
+        if (g_frame >= TAT && !wave3Completed) {
+            onWaveAttack(3);
             return;
         }
 
-        // 第一波完成但第二波时间没到：只保留防守逻辑，不让残兵乱跑
-        if (wave1Completed && g_frame < SAT && !wave2Started) {
-            return;
-        }
-
-        // 第二波：10500 帧开始，必须第一波完成后才进入
-        if (wave1Completed && g_frame >= SAT && !wave2Completed) {
+        if (g_frame >= SAT && !wave2Completed) {
             onWaveAttack(2);
             return;
         }
 
-        // 第二波完成但第三波时间没到：只保留防守逻辑
-        if (wave2Completed && g_frame < MODE3 && !wave3Started) {
-            return;
-        }
-
-        // 第三波：21250 帧开始
-        if (wave2Completed && g_frame >= MODE3 && !wave3Completed) {
-            onWaveAttack(3);
+        if (g_frame >= FAT && !wave1Completed) {
+            onWaveAttack(1);
             return;
         }
     }
@@ -1667,10 +1703,11 @@ void EnemyAI::FirstAttack()
 {
     if (wave1Completed) return;
 
-    // 第一次进入第一波时，选 5 个工具时代兵种
+    // 第一次进入第一波时，选 2 个棍棒兵和 2 个侦察兵
     if (!wave1Started) {
         vector<int> emptyUsed;
-        SelectWaveUnits(wave1Units, 5, IsFirstWaveSort, emptyUsed);
+        SelectWaveUnitsBySort(wave1Units, AT_CLUBMAN, 2, emptyUsed);
+        SelectWaveUnitsBySort(wave1Units, AT_SCOUT, 2, emptyUsed);
         wave1Started = true;
     }
 
@@ -1738,9 +1775,10 @@ void EnemyAI::SecondAttack()
 {
     if (wave2Completed) return;
 
-    // 第一次进入第二波：第一波残兵 + 10 个新铜器兵
+    // 第一次进入第二波：第一波残兵 + 指定铜器兵组合
     if (!wave2Started) {
         CleanDeadUnits(wave1Units);
+        wave1Completed = true;
 
         // 加入第一波残兵
         for (int sn : wave1Units) {
@@ -1754,8 +1792,10 @@ void EnemyAI::SecondAttack()
             }
         }
 
-        // 选 10 个新的铜器时代陆地兵
-        SelectWaveUnits(wave2Units, 10, IsBronzeLandSort, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_HOPLITE, 3, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_BROADSWORDSMAN, 2, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_COMPOSITE_BOWMAN, 3, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_CHARIOT_ARCHER, 1, wave1Units);
 
         wave2Started = true;
     }
@@ -1827,6 +1867,8 @@ void EnemyAI::ThirdAttack()
     if (!wave3Started) {
         CleanDeadUnits(wave1Units);
         CleanDeadUnits(wave2Units);
+        wave1Completed = true;
+        wave2Completed = true;
 
         for (int sn : wave1Units) {
             tagArmy* army = FindMyArmyBySN(sn);
@@ -1855,6 +1897,8 @@ void EnemyAI::ThirdAttack()
 
     // 第三波全面进攻：
     // 敌方军队 > 敌方箭塔 > 敌方农民 > 敌方普通建筑
+    bool hasTarget = false;
+
     for (int sn : wave3Units) {
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
@@ -1862,10 +1906,16 @@ void EnemyAI::ThirdAttack()
         int targetSN = FindFullAttackTarget(*army);
         if (targetSN == -1) continue;
 
+        hasTarget = true;
+
         if (army->WorkObjectSN != targetSN ||
             g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
+    }
+
+    if (!hasTarget) {
+        wave3Completed = true;
     }
 }
