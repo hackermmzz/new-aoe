@@ -712,6 +712,17 @@ static int FindNearestFarmerByTowerStateAvoiding(int blockDR,
     return FindNearestFarmerByTowerState(blockDR, blockUR, wantInsideTower);
 }
 
+static bool IsFarmerInsideEnemyTowerRange(int farmerSN)
+{
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        if (f.SN == farmerSN) {
+            return IsInsideEnemyTowerRange(f.BlockDR, f.BlockUR);
+        }
+    }
+
+    return false;
+}
+
 static int FindThreatToArmy(const tagArmy& army)
 {
     int bestSN = -1;
@@ -760,7 +771,16 @@ static int FindStickyWaveTarget(const tagArmy& army, int wave)
     if (it == currentTarget.end()) return -1;
 
     int targetSN = it->second;
-    if (EnemyFarmerAlive(targetSN) || EnemyArrowTowerAlive(targetSN)) {
+    if (EnemyFarmerAlive(targetSN)) {
+        if (IsFarmerInsideEnemyTowerRange(targetSN)) {
+            currentTarget.erase(it);
+            return -1;
+        }
+
+        return targetSN;
+    }
+
+    if (EnemyArrowTowerAlive(targetSN)) {
         return targetSN;
     }
 
@@ -788,12 +808,6 @@ static int FindWaveTarget(const tagArmy& army, int wave)
     int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
     if (tower != -1) return tower;
 
-    // 第二波最后才攻击塔范围内农民
-    if (wave == 2) {
-        int farmerInside = FindNearestFarmerByTowerState(army.BlockDR, army.BlockUR, true);
-        if (farmerInside != -1) return farmerInside;
-    }
-
     return -1;
 }
 
@@ -818,14 +832,6 @@ static int FindWaveTargetAvoidingReserved(const tagArmy& army,
 
     int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
     if (tower != -1) return tower;
-
-    if (wave == 2) {
-        int farmerInside = FindNearestFarmerByTowerStateAvoiding(army.BlockDR,
-                                                                 army.BlockUR,
-                                                                 true,
-                                                                 reservedFarmers);
-        if (farmerInside != -1) return farmerInside;
-    }
 
     return -1;
 }
