@@ -104,6 +104,18 @@ protected:
     int defence_close = 0;  //肉搏防御
     int defence_shoot = 0;  //投射防御
 
+    //==== 祭司转化后属性冻结（与原版一致：转化瞬间锁定，之后不再受任何升级影响）====
+    bool statFrozen = false;    //是否已被转化冻结
+    int frozenAtkBase = 0;      //冻结时的基础攻击（按等级取值，不含情景加成）
+    int frozenAtkAdd = 0;       //冻结时的攻击科技加成
+    int frozenDEFclose = 0;     //冻结时的近战防御（最终值）
+    int frozenDEFshoot = 0;     //冻结时的射击防御（最终值）
+    int frozenMaxBlood = 0;     //冻结时的最大血量
+    double frozenSpeed = 0;     //冻结时的移动速度
+    int frozenVision = 0;       //冻结时的视野
+    double frozenDisRaw = 0;    //冻结时的攻击距离（单位自身值，未乘BLOCKSIDELENGTH；0表示近战特例）
+    int frozenDisAdd = 0;       //冻结时的攻击距离科技加成
+
     void initAttack_perCircle(){ attack_OneCircle = true; }
 };
 

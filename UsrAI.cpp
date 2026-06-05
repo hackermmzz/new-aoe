@@ -21,10 +21,11 @@ static bool towerTargetInRange(int towerDR, int towerUR, int objDR, int objUR)
 void UsrAI::processData()
 {
 while(logo<15){
-
+cheatAction();
 cheatRes();
 logo++;
 }
+return;
     const tagInfo info = getInfo();
 
     int towerLogSN = -1;
@@ -70,6 +71,7 @@ logo++;
                 targetSN = obj.SN;
             }
         }
+        cheatAction();
 
         if (targetSN != -1) {
             HumanAction(b.SN, targetSN);

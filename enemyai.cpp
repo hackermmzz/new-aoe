@@ -686,6 +686,32 @@ static int FindNearestFarmerByTowerState(int blockDR, int blockUR, bool wantInsi
     return bestSN;
 }
 
+static int FindNearestFarmerByTowerStateAvoiding(int blockDR,
+                                                 int blockUR,
+                                                 bool wantInsideTower,
+                                                 const vector<int>& reservedFarmers)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        if (ContainsInt(reservedFarmers, f.SN)) continue;
+
+        bool inside = IsInsideEnemyTowerRange(f.BlockDR, f.BlockUR);
+        if (inside != wantInsideTower) continue;
+
+        int d = BlockDis2(blockDR, blockUR, f.BlockDR, f.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = f.SN;
+        }
+    }
+
+    if (bestSN != -1) return bestSN;
+
+    return FindNearestFarmerByTowerState(blockDR, blockUR, wantInsideTower);
+}
+
 static int FindThreatToArmy(const tagArmy& army)
 {
     int bestSN = -1;
@@ -703,6 +729,43 @@ static int FindThreatToArmy(const tagArmy& army)
     }
 
     return bestSN;
+}
+
+static void ReserveCurrentFarmerTargets(const vector<int>& units, vector<int>& reservedFarmers)
+{
+    for (int sn : units) {
+        auto it = currentTarget.find(sn);
+        if (it != currentTarget.end() && EnemyFarmerAlive(it->second)) {
+            AddUnique(reservedFarmers, it->second);
+        }
+    }
+}
+
+static int FindStickyWaveTarget(const tagArmy& army, int wave)
+{
+    if (EnemyArrowTowerAlive(army.WorkObjectSN)) {
+        currentTarget[army.SN] = army.WorkObjectSN;
+        return army.WorkObjectSN;
+    }
+
+    if (wave == 2) {
+        int threat = FindThreatToArmy(army);
+        if (threat != -1) {
+            currentTarget[army.SN] = threat;
+            return threat;
+        }
+    }
+
+    auto it = currentTarget.find(army.SN);
+    if (it == currentTarget.end()) return -1;
+
+    int targetSN = it->second;
+    if (EnemyFarmerAlive(targetSN) || EnemyArrowTowerAlive(targetSN)) {
+        return targetSN;
+    }
+
+    currentTarget.erase(it);
+    return -1;
 }
 
 static int FindWaveTarget(const tagArmy& army, int wave)
@@ -728,6 +791,39 @@ static int FindWaveTarget(const tagArmy& army, int wave)
     // 第二波最后才攻击塔范围内农民
     if (wave == 2) {
         int farmerInside = FindNearestFarmerByTowerState(army.BlockDR, army.BlockUR, true);
+        if (farmerInside != -1) return farmerInside;
+    }
+
+    return -1;
+}
+
+static int FindWaveTargetAvoidingReserved(const tagArmy& army,
+                                          int wave,
+                                          const vector<int>& reservedFarmers)
+{
+    if (EnemyArrowTowerAlive(army.WorkObjectSN)) {
+        return army.WorkObjectSN;
+    }
+
+    if (wave == 2) {
+        int threat = FindThreatToArmy(army);
+        if (threat != -1) return threat;
+    }
+
+    int farmerOutside = FindNearestFarmerByTowerStateAvoiding(army.BlockDR,
+                                                              army.BlockUR,
+                                                              false,
+                                                              reservedFarmers);
+    if (farmerOutside != -1) return farmerOutside;
+
+    int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
+    if (tower != -1) return tower;
+
+    if (wave == 2) {
+        int farmerInside = FindNearestFarmerByTowerStateAvoiding(army.BlockDR,
+                                                                 army.BlockUR,
+                                                                 true,
+                                                                 reservedFarmers);
         if (farmerInside != -1) return farmerInside;
     }
 
@@ -886,8 +982,7 @@ void EnemyAI::OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN)
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1117,7 +1212,7 @@ void EnemyAI::assignTargetsBasedOnVision(){
  /*   // 第一阶段：收集所有陆地单位和战船发现的目标
     vector<int> sharedLandTargets;  // 陆地单位共享的目标
     vector<int> sharedSeaTargets;   // 战船共享的目标
-    
+
     // 遍历所有敌方单位，收集视野内的目标
     for(int i = 0; i < enemyInfo.armies.size(); i++){
         int unitSN = enemyInfo.armies[i].SN;
@@ -1125,14 +1220,14 @@ void EnemyAI::assignTargetsBasedOnVision(){
         int unitY = enemyInfo.armies[i].BlockUR;
         int unitSort = enemyInfo.armies[i].Sort;
         int visionRange = getVisionRange(unitSort);
-        
+
         // 只有攻击状态的单位或战船才贡献共享视野
         string status = getEnemyStatus(unitSN);
         bool contributeToSharedVision = (unitSort == AT_SHIP) || (isLandUnit(unitSort) && (status == "attack" || status.empty()));
         if(contributeToSharedVision) {
             // 寻找视野范围内的目标
             int foundTarget = findBestTargetInVision(unitX, unitY, visionRange, unitSort);
-            
+
             if(foundTarget != -1) {
                 if(unitSort == AT_SHIP) {
                     // 战船发现的目标加入海上共享目标
@@ -1148,52 +1243,52 @@ void EnemyAI::assignTargetsBasedOnVision(){
             }
         }
     }
-    
+
     // 遍历所有敌方箭塔，收集其视野内的目标并加入共享视野
     for(int i = 0; i < enemyInfo.buildings.size(); i++){
         if(enemyInfo.buildings[i].Type != BUILDING_ARROWTOWER) continue;
-        
+
         int buildingX = enemyInfo.buildings[i].BlockDR;
         int buildingY = enemyInfo.buildings[i].BlockUR;
         int visionRange = 7; // 箭塔视野范围
-        
+
         // 箭塔发现的目标加入陆地共享目标（箭塔主要支援陆军）
         int foundTarget = findBestTargetInVision(buildingX, buildingY, visionRange, -1);
-        
+
         if(foundTarget != -1) {
             if(find(sharedLandTargets.begin(), sharedLandTargets.end(), foundTarget) == sharedLandTargets.end()) {
                 sharedLandTargets.push_back(foundTarget);
             }
         }
     }
-    
+
     // 第二阶段：根据单位状态分配攻击目标
     for(int i = 0; i < enemyInfo.armies.size(); i++){
         // 如果单位已经有攻击目标，跳过
         if(enemyInfo.armies[i].WorkObjectSN != -1) continue;
-        
+
         int unitSN = enemyInfo.armies[i].SN;
         int unitX = enemyInfo.armies[i].BlockDR;
         int unitY = enemyInfo.armies[i].BlockUR;
         int unitSort = enemyInfo.armies[i].Sort;
         int visionRange = getVisionRange(unitSort);
-        
+
         string status = getEnemyStatus(unitSN);
-        
+
         // 战船：默认攻击状态，参与协同攻击
         if(unitSort == AT_SHIP) {
             int bestTarget = -1;
-            
+
             // 优先从海上共享目标中选择最近的目标
             if(!sharedSeaTargets.empty()) {
                 bestTarget = findNearestTarget(unitX, unitY, sharedSeaTargets);
             }
-            
+
             // 如果没有共享目标，寻找自己视野内的目标
             if(bestTarget == -1) {
                 bestTarget = findBestTargetInVision(unitX, unitY, visionRange, unitSort);
             }
-            
+
             if(bestTarget != -1) {
                 HumanAction(unitSN, bestTarget);
             }
@@ -1202,17 +1297,17 @@ void EnemyAI::assignTargetsBasedOnVision(){
         else if(isLandUnit(unitSort)) {
             if(status == "attack" || status.empty()) {  // 攻击状态（默认）
                 int bestTarget = -1;
-                
+
                 // 优先从陆地共享目标中选择最近的目标
                 if(!sharedLandTargets.empty()) {
                     bestTarget = findNearestTarget(unitX, unitY, sharedLandTargets);
                 }
-                
+
                 // 如果没有共享目标，寻找自己视野内的目标
                 if(bestTarget == -1) {
                     bestTarget = findBestTargetInVision(unitX, unitY, visionRange, unitSort);
                 }
-                
+
                 if(bestTarget != -1) {
                     HumanAction(unitSN, bestTarget);
                 }
@@ -1220,7 +1315,7 @@ void EnemyAI::assignTargetsBasedOnVision(){
             else if(status == "defend") {  // 防守状态
                 // 只攻击自己视野内的目标，不参与协同攻击
                 int bestTarget = findBestTargetInVision(unitX, unitY, visionRange, unitSort);
-                
+
                 if(bestTarget != -1) {
                     HumanAction(unitSN, bestTarget);
                 }
@@ -1344,7 +1439,7 @@ int EnemyAI::findBestTargetInVision(int centerX, int centerY, int range, int att
             }
         }
     }
-    
+
     // 优先攻击最近的农民
     if(!farmersInVision.empty()){
         return findNearestTarget(centerX, centerY, farmersInVision);
@@ -1366,7 +1461,7 @@ int EnemyAI::findBestTargetInVision(int centerX, int centerY, int range, int att
             }
         }
     }
-    
+
     // 如果有军队目标，攻击最近的
     if(!armiesInVision.empty()){
         return findNearestTarget(centerX, centerY, armiesInVision);
@@ -1381,7 +1476,7 @@ int EnemyAI::findBestTargetInVision(int centerX, int centerY, int range, int att
             buildingsInVision.push_back(enemyInfo.enemy_buildings[i].SN);
         }
     }
-    
+
     // 最后攻击最近的建筑
     if(!buildingsInVision.empty()){
         return findNearestTarget(centerX, centerY, buildingsInVision);
@@ -1394,7 +1489,7 @@ int EnemyAI::findBestTargetInVision(int centerX, int centerY, int range, int att
 string EnemyAI::getEnemyStatus(int unitSN) {
     extern MainWidget* g_mainWidget;
     if (!g_mainWidget) return "";
-    
+
     // 通过SN找到对应的Coordinate对象
     // SN在这里应该对应globalNum，使用getglobalNum()进行匹配
     for (Human* human : g_mainWidget->player[1]->human) {
@@ -1415,12 +1510,12 @@ bool EnemyAI::shouldCooperateAttack(int unitSN) {
     for(int i = 0; i < enemyInfo.armies.size(); i++) {
         if(enemyInfo.armies[i].SN == unitSN) {
             int unitSort = enemyInfo.armies[i].Sort;
-            
+
             // 战船总是协同攻击
             if (unitSort == AT_SHIP) {
                 return true;
             }
-            
+
             // 陆地单位根据状态决定
             if (isLandUnit(unitSort)) {
                 string status = getEnemyStatus(unitSN);
@@ -1443,15 +1538,15 @@ double EnemyAI::calculateDistance(int x1, int y1, int x2, int y2) {
 // 从目标列表中找到最近的目标
 int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& targets) {
     if (targets.empty()) return -1;
-    
+
     int nearestTarget = -1;
     double minDistance = DBL_MAX;
-    
+
     for (int targetSN : targets) {
         // 找到目标的坐标
         bool found = false;
         int targetX = -1, targetY = -1;
-        
+
         // 在农民中查找
         for (int i = 0; i < enemyInfo.enemy_farmers.size(); i++) {
             if (enemyInfo.enemy_farmers[i].SN == targetSN) {
@@ -1461,7 +1556,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
                 break;
             }
         }
-        
+
         // 在军队中查找
         if (!found) {
             for (int i = 0; i < enemyInfo.enemy_armies.size(); i++) {
@@ -1473,7 +1568,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
                 }
             }
         }
-        
+
         // 在建筑中查找
         if (!found) {
             for (int i = 0; i < enemyInfo.enemy_buildings.size(); i++) {
@@ -1485,7 +1580,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
                 }
             }
         }
-        
+
         if (found) {
             double distance = calculateDistance(attackerX, attackerY, targetX, targetY);
             if (distance < minDistance) {
@@ -1494,7 +1589,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
             }
         }
     }
-    
+
     return nearestTarget;
 }
 
@@ -1503,7 +1598,7 @@ tagArmy EnemyAI::Threated(tagArmy *army)
     tagArmy nearestTarget;
     nearestTarget.SN = -1; // 标记为无效
     double minDistance = 10;
-    
+
     for(tagArmy& enemyarmy:enemyInfo.enemy_armies)
     {
         double Distance=pow(enemyarmy.BlockDR-army->BlockDR,2)+pow(enemyarmy.BlockUR-army->BlockUR,2);
@@ -1754,17 +1849,29 @@ void EnemyAI::FirstAttack()
         return;
     }
     // 未杀够：动态寻找 塔外农民 > 箭塔
+    vector<int> assignedFarmers;
+    ReserveCurrentFarmerTargets(wave1Units, assignedFarmers);
+
     for (int sn : wave1Units) {
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        int targetSN = FindWaveTarget(*army, 1);
-        if (targetSN == -1) continue;
+        int targetSN = FindStickyWaveTarget(*army, 1);
+        if (targetSN == -1) {
+            targetSN = FindWaveTargetAvoidingReserved(*army, 1, assignedFarmers);
+        }
+        if (targetSN == -1) {
+            currentTarget.erase(sn);
+            continue;
+        }
 
         MarkTouchedFarmer(wave1TouchedFarmers, targetSN);
+        if (EnemyFarmerAlive(targetSN)) {
+            AddUnique(assignedFarmers, targetSN);
+        }
+        currentTarget[sn] = targetSN;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1842,17 +1949,29 @@ void EnemyAI::SecondAttack()
 
     // 第二波目标优先级：
     // 攻击我方士兵的敌方士兵 > 塔外农民 > 箭塔 > 塔内农民
+    vector<int> assignedFarmers;
+    ReserveCurrentFarmerTargets(wave2Units, assignedFarmers);
+
     for (int sn : wave2Units) {
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        int targetSN = FindWaveTarget(*army, 2);
-        if (targetSN == -1) continue;
+        int targetSN = FindStickyWaveTarget(*army, 2);
+        if (targetSN == -1) {
+            targetSN = FindWaveTargetAvoidingReserved(*army, 2, assignedFarmers);
+        }
+        if (targetSN == -1) {
+            currentTarget.erase(sn);
+            continue;
+        }
 
         MarkTouchedFarmer(wave2TouchedFarmers, targetSN);
+        if (EnemyFarmerAlive(targetSN)) {
+            AddUnique(assignedFarmers, targetSN);
+        }
+        currentTarget[sn] = targetSN;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+        if (army->WorkObjectSN != targetSN) {
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1908,8 +2027,9 @@ void EnemyAI::ThirdAttack()
 
         hasTarget = true;
 
-        if (army->WorkObjectSN != targetSN ||
-            g_frame - waveLastOrderFrame[sn] >= WAVE_ORDER_INTERVAL) {
+
+        if (army->WorkObjectSN != targetSN) {
+
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -1918,4 +2038,6 @@ void EnemyAI::ThirdAttack()
     if (!hasTarget) {
         wave3Completed = true;
     }
+
 }
+

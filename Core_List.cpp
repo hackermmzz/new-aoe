@@ -727,9 +727,16 @@ void Core_List::change_HumanRepresent(Human *human, int represent)
     theMap->player[represent]->insertHuman(human);
     theMap->player[origin_rep]->removeHuman(human);
 
-    // 转换成功且阵营确实变化后，立刻下达一次“原地移动”来打断当前行为
+    // 转换成功且阵营确实变化后处理
     if (origin_rep != represent)
     {
+        // 与原版一致：在切换科技归属之前，用原主人科技把整套战斗属性快照冻结到单位本身，
+        // 此后该单位属性永久锁定，不再受任何一方科技升级影响
+        human->freezeStats();
+        // 攻防已定格，把科技指针切到新主人，避免长期持有(可能被销毁的)原主人科技树
+        human->setPlayerScience(theMap->player[represent]->getPlayerScience());
+
+        // 立刻下达一次“原地移动”来打断当前行为
         suspendRelation(human);
         addRelation(human, human->getDR(), human->getUR(), CoreEven_JustMoveTo, false);
     }
