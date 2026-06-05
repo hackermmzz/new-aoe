@@ -76,7 +76,12 @@ public:
 
     bool get_isRangeAttack(){return isRangeAttack;}
 
+    //祭司转化休整冷却：g_frame 小于该值表示仍在休整、不能再次转化
+    int getConvertRestEndFrame(){ return convertRestEndFrame; }
+    void setConvertRestEndFrame(int frame){ convertRestEndFrame = frame; }
+
 protected:
+    int convertRestEndFrame = 0;    //转化休整结束帧
     double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
     int MaxBlood = 100;
 

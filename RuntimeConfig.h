@@ -1382,6 +1382,9 @@ int RuntimeConfig_NOWRES_TIMER_STONE_THROWER();
 int RuntimeConfig_NOWRES_TIMER_PRIEST();
 #define NOWRES_TIMER_PRIEST (RuntimeConfig_NOWRES_TIMER_PRIEST())
 
+int RuntimeConfig_PRIEST_REST_TIME();
+#define PRIEST_REST_TIME (RuntimeConfig_PRIEST_REST_TIME())
+
 int RuntimeConfig_BLOOD_HOPLITE();
 #define BLOOD_HOPLITE (RuntimeConfig_BLOOD_HOPLITE())
 

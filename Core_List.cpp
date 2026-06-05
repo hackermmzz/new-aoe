@@ -1989,11 +1989,16 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
             attackee->updateBlood(-attacker->getATK());
         }else{
             //不同阵营转换敌人为己方阵营
+            //转化休整冷却：与原版一致，转化成功后需休整一段时间，期间无法再次转化
+            if(g_frame < attacker->getConvertRestEndFrame()) return;
+
             Human*human=0;
             object2->printer_ToHuman((void**)&human);
             if(human==0)return; //这里按道理不可能出现这种情况
             //设置阵营以及相关一些操作
             change_HumanRepresent(human,object1->getPlayerRepresent());
+            //转化成功，进入休整冷却（PRIEST_REST_TIME 单位为秒，换算成帧）
+            attacker->setConvertRestEndFrame(g_frame + PRIEST_REST_TIME*1000/TimePerFrame);
         }
     }
     //普通伤害攻击

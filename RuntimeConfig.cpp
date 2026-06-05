@@ -463,6 +463,7 @@ int g_NOWRES_TIMER_ELEPHANT = 0;
 int g_NOWRES_TIMER_SHIP = 0;
 int g_NOWRES_TIMER_STONE_THROWER = 0;
 int g_NOWRES_TIMER_PRIEST = 0;
+int g_PRIEST_REST_TIME = 0;
 int g_BLOOD_HOPLITE = 0;
 double g_SPEED_HOPLITE = 0.0;
 int g_VISION_HOPLITE = 0;
@@ -2771,6 +2772,11 @@ int RuntimeConfig_NOWRES_TIMER_PRIEST()
     return g_NOWRES_TIMER_PRIEST;
 }
 
+int RuntimeConfig_PRIEST_REST_TIME()
+{
+    return g_PRIEST_REST_TIME;
+}
+
 int RuntimeConfig_BLOOD_HOPLITE()
 {
     return g_BLOOD_HOPLITE;
@@ -3308,6 +3314,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_NOWRES_TIMER_SHIP = config.value(QStringLiteral("NOWRES_TIMER_SHIP")).toInt();
     g_NOWRES_TIMER_STONE_THROWER = config.value(QStringLiteral("NOWRES_TIMER_STONE_THROWER")).toInt();
     g_NOWRES_TIMER_PRIEST = config.value(QStringLiteral("NOWRES_TIMER_PRIEST")).toInt();
+    g_PRIEST_REST_TIME = config.value(QStringLiteral("PRIEST_REST_TIME")).toInt();
     g_BLOOD_HOPLITE = config.value(QStringLiteral("BLOOD_HOPLITE")).toInt();
     g_SPEED_HOPLITE = config.value(QStringLiteral("SPEED_HOPLITE")).toDouble();
     g_VISION_HOPLITE = config.value(QStringLiteral("VISION_HOPLITE")).toInt();

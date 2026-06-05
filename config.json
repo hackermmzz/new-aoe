@@ -399,6 +399,7 @@
     "INTERVAL_PRIEST": 1.4,
     "DEFCLOSE_PRIEST": 0,
     "DEFSHOOT_PRIEST": 0,
+    "PRIEST_REST_TIME": 10,
     "Missile_Speed_Spear": 8.94427190999916,
     "Missile_Speed_Arrow": 20.12461179749811,
     "Missile_Speed_Cobblestone": 20.12461179749811,
