@@ -1695,7 +1695,7 @@ void EnemyAI::Initialize_Enemymap()
         int d2 = BlockDis2(army.BlockDR, army.BlockUR,
                            Enemy_Center.first, Enemy_Center.second);
 
-        if (d2 < radius_Inner * radius_Inner) {
+        if (d2 <   radius_Inner * radius_Inner) {
             Defend_Center_Enemy[army.SN] = 1;
 
             if (DefenseHome.find(army.SN) == DefenseHome.end()) {
