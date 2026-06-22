@@ -1295,6 +1295,9 @@ int RuntimeConfig_ATK_STONE_THROWER();
 double RuntimeConfig_DIS_STONE_THROWER();
 #define DIS_STONE_THROWER (RuntimeConfig_DIS_STONE_THROWER())
 
+double RuntimeConfig_DIS_MIN_STONE_THROWER();
+#define DIS_MIN_STONE_THROWER (RuntimeConfig_DIS_MIN_STONE_THROWER())
+
 int RuntimeConfig_INTERVAL_STONE_THROWER();
 #define INTERVAL_STONE_THROWER (RuntimeConfig_INTERVAL_STONE_THROWER())
 
@@ -1381,6 +1384,9 @@ int RuntimeConfig_NOWRES_TIMER_STONE_THROWER();
 
 int RuntimeConfig_NOWRES_TIMER_PRIEST();
 #define NOWRES_TIMER_PRIEST (RuntimeConfig_NOWRES_TIMER_PRIEST())
+
+int RuntimeConfig_PRIEST_REST_TIME();
+#define PRIEST_REST_TIME (RuntimeConfig_PRIEST_REST_TIME())
 
 int RuntimeConfig_BLOOD_HOPLITE();
 #define BLOOD_HOPLITE (RuntimeConfig_BLOOD_HOPLITE())

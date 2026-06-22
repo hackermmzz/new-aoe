@@ -727,9 +727,16 @@ void Core_List::change_HumanRepresent(Human *human, int represent)
     theMap->player[represent]->insertHuman(human);
     theMap->player[origin_rep]->removeHuman(human);
 
-    // 转换成功且阵营确实变化后，立刻下达一次“原地移动”来打断当前行为
+    // 转换成功且阵营确实变化后处理
     if (origin_rep != represent)
     {
+        // 与原版一致：在切换科技归属之前，用原主人科技把整套战斗属性快照冻结到单位本身，
+        // 此后该单位属性永久锁定，不再受任何一方科技升级影响
+        human->freezeStats();
+        // 攻防已定格，把科技指针切到新主人，避免长期持有(可能被销毁的)原主人科技树
+        human->setPlayerScience(theMap->player[represent]->getPlayerScience());
+
+        // 立刻下达一次“原地移动”来打断当前行为
         suspendRelation(human);
         addRelation(human, human->getDR(), human->getUR(), CoreEven_JustMoveTo, false);
     }
@@ -834,7 +841,10 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             {
                 if (attacker->is_missileThrow())
                 {
-                    addRelation(creatMissile(object1, object2), object2, CoreEven_MissileAttack, false);
+                    //最小射程盲区：目标太近则不投射（投石车等），但仍消耗本次攻击周期，避免向目标靠近
+                    double minDis = attacker->getMinDis_attack();
+                    if (!(minDis > 0 && countdistance(object1->getDR(), object1->getUR(), object2->getDR(), object2->getUR()) < minDis))
+                        addRelation(creatMissile(object1, object2), object2, CoreEven_MissileAttack, false);
                     attacker->haveAttack();
                 }
             }
@@ -914,7 +924,10 @@ void Core_List::object_PinPoint_Attack(Coordinate *object, double dr, double ur)
         //只有远程抛射才有定点攻击
         if (attacker->is_missileAttack()&&attacker->is_missileThrow())
         {
-            addRelation(creatMissile(object, dr,ur), dr,ur, CoreEven_MissileAttack, false);
+            //最小射程盲区：定点目标太近则不投射
+            double minDis = attacker->getMinDis_attack();
+            if (!(minDis > 0 && countdistance(object->getDR(), object->getUR(), dr, ur) < minDis))
+                addRelation(creatMissile(object, dr,ur), dr,ur, CoreEven_MissileAttack, false);
             attacker->haveAttack();
         }
     }
@@ -1982,11 +1995,16 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
             attackee->updateBlood(-attacker->getATK());
         }else{
             //不同阵营转换敌人为己方阵营
+            //转化休整冷却：与原版一致，转化成功后需休整一段时间，期间无法再次转化
+            if(g_frame < attacker->getConvertRestEndFrame()) return;
+
             Human*human=0;
             object2->printer_ToHuman((void**)&human);
             if(human==0)return; //这里按道理不可能出现这种情况
             //设置阵营以及相关一些操作
             change_HumanRepresent(human,object1->getPlayerRepresent());
+            //转化成功，进入休整冷却（PRIEST_REST_TIME 单位为秒，换算成帧）
+            attacker->setConvertRestEndFrame(g_frame + PRIEST_REST_TIME*1000/TimePerFrame);
         }
     }
     //普通伤害攻击

@@ -2111,7 +2111,9 @@ void EnemyAI::ThirdAttack()
 
         hasTarget = true;
 
+
         if (army->WorkObjectSN != targetSN) {
+
             HumanAction(sn, targetSN);
             waveLastOrderFrame[sn] = g_frame;
         }
@@ -2120,4 +2122,6 @@ void EnemyAI::ThirdAttack()
     if (!hasTarget) {
         wave3Completed = true;
     }
+
 }
+

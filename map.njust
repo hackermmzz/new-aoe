@@ -6355,6 +6355,12 @@
         "Num": 6,
         "Own": "LZ"
     },
+    "Building_14": {
+        "BlockDR": 26,
+        "BlockUR": 16,
+        "Num": 1,
+        "Own": "WLH"
+    },
     "Building_2": {
         "BlockDR": 22,
         "BlockUR": 16,

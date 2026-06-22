@@ -47,6 +47,8 @@ public:
     int getATK();
     int getDEF(int attackType_got);
     double getDis_attack();
+    double getMinDis_attack();
+    void freezeStats();
     //军队自动化
     int getstatus();
     int getstarttime();
@@ -63,12 +65,12 @@ public:
 
     //用于显示的战斗属性
     int showATK_Basic();
-    int showATK_Addition(){return playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());}
+    int showATK_Addition(){return statFrozen ? frozenAtkAdd : playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());}
 
     int showDEF_Close();
     int showDEF_Shoot();
-    int showDEF_Close_Addition(){ return playerScience->get_addition_Defence(getSort(),Num,armyClass,ATTACKTYPE_CLOSE);}
-    int showDEF_Shoot_Addition(){ return playerScience->get_addition_Defence(getSort(),Num,armyClass,ATTACKTYPE_SHOOT);}
+    int showDEF_Close_Addition(){ return statFrozen ? 0 : playerScience->get_addition_Defence(getSort(),Num,armyClass,ATTACKTYPE_CLOSE);}
+    int showDEF_Shoot_Addition(){ return statFrozen ? 0 : playerScience->get_addition_Defence(getSort(),Num,armyClass,ATTACKTYPE_SHOOT);}
     /***************指针强制转化****************/
     //若要将Army类指针转化为父类指针,务必用以下函数!
     void printer_ToBloodHaver(void** ptr){ *ptr = dynamic_cast<BloodHaver*>(this); }    //传入ptr为BloodHaver类指针的地址

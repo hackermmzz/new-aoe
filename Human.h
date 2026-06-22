@@ -15,13 +15,18 @@ public:
     void nextframe();
     bool isPlayerControl(){ return true; }
 
-    double getSpeed(){ return speed*playerScience->get_rate_Move(getSort(),Num); }
-    int getMaxBlood(){ return MaxBlood*playerScience->get_rate_Blood(getSort(),Num)+\
+    double getSpeed(){ return statFrozen ? frozenSpeed : speed*playerScience->get_rate_Move(getSort(),Num); }
+    int getMaxBlood(){ return statFrozen ? frozenMaxBlood : MaxBlood*playerScience->get_rate_Blood(getSort(),Num)+\
                         playerScience->get_addition_Blood(getSort(),Num); }
     int getPlayerRepresent(){ return playerRepresent; }
-    int getATK(){ return (int)(atk*playerScience->get_rate_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType())) \
-                 +get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); }
+    int getATK(){ int atkBase = statFrozen ? frozenAtkBase : atk; \
+                  int atkAdd  = statFrozen ? frozenAtkAdd  : playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); \
+                  return (int)(atkBase*playerScience->get_rate_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType())) \
+                 +get_add_specialAttack() + atkAdd; }
     int getDEF(int attackType_got);
+
+    //转化冻结：把当前（原主人科技下的）属性快照存到实例，之后 getter 读快照
+    virtual void freezeStats();
 
     void setPreAttack( ){ this->prestate = MOVEOBJECT_STATE_ATTACK; }
     bool isAttacking(){ return nowstate == MOVEOBJECT_STATE_ATTACK;}
@@ -30,7 +35,7 @@ public:
 
     bool is_attackHit(){ return get_isActionEnd() && attack_OneCircle;  }
     //用于显示的属性
-    int showATK_Addition(){ return  playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); }
+    int showATK_Addition(){ return statFrozen ? frozenAtkAdd : playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); }
     /***************指针强制转化****************/
     //若要将Human类指针转化为父类指针,务必用以下函数!
     void printer_ToHuman(void** ptr){ *ptr = this; }        //传入ptr为Human类指针的地址,需要强制转换为（void**）
