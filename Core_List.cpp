@@ -841,7 +841,10 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             {
                 if (attacker->is_missileThrow())
                 {
-                    addRelation(creatMissile(object1, object2), object2, CoreEven_MissileAttack, false);
+                    //最小射程盲区：目标太近则不投射（投石车等），但仍消耗本次攻击周期，避免向目标靠近
+                    double minDis = attacker->getMinDis_attack();
+                    if (!(minDis > 0 && countdistance(object1->getDR(), object1->getUR(), object2->getDR(), object2->getUR()) < minDis))
+                        addRelation(creatMissile(object1, object2), object2, CoreEven_MissileAttack, false);
                     attacker->haveAttack();
                 }
             }
@@ -921,7 +924,10 @@ void Core_List::object_PinPoint_Attack(Coordinate *object, double dr, double ur)
         //只有远程抛射才有定点攻击
         if (attacker->is_missileAttack()&&attacker->is_missileThrow())
         {
-            addRelation(creatMissile(object, dr,ur), dr,ur, CoreEven_MissileAttack, false);
+            //最小射程盲区：定点目标太近则不投射
+            double minDis = attacker->getMinDis_attack();
+            if (!(minDis > 0 && countdistance(object->getDR(), object->getUR(), dr, ur) < minDis))
+                addRelation(creatMissile(object, dr,ur), dr,ur, CoreEven_MissileAttack, false);
             attacker->haveAttack();
         }
     }

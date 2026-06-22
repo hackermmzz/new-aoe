@@ -1295,6 +1295,9 @@ int RuntimeConfig_ATK_STONE_THROWER();
 double RuntimeConfig_DIS_STONE_THROWER();
 #define DIS_STONE_THROWER (RuntimeConfig_DIS_STONE_THROWER())
 
+double RuntimeConfig_DIS_MIN_STONE_THROWER();
+#define DIS_MIN_STONE_THROWER (RuntimeConfig_DIS_MIN_STONE_THROWER())
+
 int RuntimeConfig_INTERVAL_STONE_THROWER();
 #define INTERVAL_STONE_THROWER (RuntimeConfig_INTERVAL_STONE_THROWER())
 

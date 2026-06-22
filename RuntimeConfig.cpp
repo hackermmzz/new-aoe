@@ -434,6 +434,7 @@ double g_SPEED_STONE_THROWER = 0.0;
 int g_VISION_STONE_THROWER = 0;
 int g_ATK_STONE_THROWER = 0;
 double g_DIS_STONE_THROWER = 0.0;
+double g_DIS_MIN_STONE_THROWER = 0.0;
 int g_INTERVAL_STONE_THROWER = 0;
 int g_DEFCLOSE_STONE_THROWER = 0;
 int g_DEFSHOOT_STONE_THROWER = 0;
@@ -2627,6 +2628,11 @@ double RuntimeConfig_DIS_STONE_THROWER()
     return g_DIS_STONE_THROWER;
 }
 
+double RuntimeConfig_DIS_MIN_STONE_THROWER()
+{
+    return g_DIS_MIN_STONE_THROWER;
+}
+
 int RuntimeConfig_INTERVAL_STONE_THROWER()
 {
     return g_INTERVAL_STONE_THROWER;
@@ -3285,6 +3291,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_VISION_STONE_THROWER = config.value(QStringLiteral("VISION_STONE_THROWER")).toInt();
     g_ATK_STONE_THROWER = config.value(QStringLiteral("ATK_STONE_THROWER")).toInt();
     g_DIS_STONE_THROWER = config.value(QStringLiteral("DIS_STONE_THROWER")).toDouble();
+    g_DIS_MIN_STONE_THROWER = config.value(QStringLiteral("DIS_MIN_STONE_THROWER")).toDouble();
     g_INTERVAL_STONE_THROWER = config.value(QStringLiteral("INTERVAL_STONE_THROWER")).toInt();
     g_DEFCLOSE_STONE_THROWER = config.value(QStringLiteral("DEFCLOSE_STONE_THROWER")).toInt();
     g_DEFSHOOT_STONE_THROWER = config.value(QStringLiteral("DEFSHOOT_STONE_THROWER")).toInt();

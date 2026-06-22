@@ -388,6 +388,13 @@ double Army::getDis_attack()
     return dis;
 }
 
+//最小攻击距离（盲区下限，像素）：投石车太近的目标打不到；其余兵种无盲区
+double Army::getMinDis_attack()
+{
+    if(Num == AT_STONE_THROWER) return DIS_MIN_STONE_THROWER * BLOCKSIDELENGTH;
+    return 0;
+}
+
 //转化冻结（士兵）：快照当前(原主人科技下的)整套战斗属性，之后永久锁定
 void Army::freezeStats()
 {

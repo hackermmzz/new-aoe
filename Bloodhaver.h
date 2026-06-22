@@ -21,6 +21,8 @@ public:
     virtual int get_add_specialAttack(){ return 0; }
     virtual int getDEF(int attackType_got);
     virtual double getDis_attack(){ return dis_Attack; }
+    //最小攻击距离（盲区下限，像素）。默认0表示无盲区；投石车等可重写
+    virtual double getMinDis_attack(){ return 0; }
     virtual int get_AttackType(){ return attackType; }
 
     virtual void init_Blood(){ Blood = 1; }

@@ -47,6 +47,7 @@ public:
     int getATK();
     int getDEF(int attackType_got);
     double getDis_attack();
+    double getMinDis_attack();
     void freezeStats();
     //军队自动化
     int getstatus();
