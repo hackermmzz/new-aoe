@@ -53,6 +53,9 @@ public:
     int getCiv(){ return playerScience->get_civilization(); }
     void setCiv(int civ){playerScience->set_civilization(civ);}
 
+    //获取该玩家科技树（转化时切换被转化单位的科技指针用）
+    Development* getPlayerScience(){ return playerScience; }
+
     //***控制资源****
     //获取资源持有数量
     int getWood(){return this->wood;}

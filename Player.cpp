@@ -37,8 +37,12 @@ Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent
 
     build.push_back(newbuilding);
     
-    // 只在建筑100%完成时（编辑器模式）才更新计数，避免与finishBuild中的调用重复
+    // 只在建筑100%完成时（地图加载/编辑器直接放置）才更新计数，避免与finishBuild中的调用重复
     if(percent >= 100) {
+        // 登记进科技树并标记已建成，使其能解锁依赖它的后续建筑
+        //（例如：开局自带谷仓 → 解锁市场的建造按钮）
+        playerScience->finishAction(Num);
+        newbuilding->recordConstruct();
         // 如果是房屋类型，增加房屋数量计数
         if(Num == BUILDING_HOME) {
             playerScience->addHome();

@@ -21,6 +21,8 @@ public:
     virtual int get_add_specialAttack(){ return 0; }
     virtual int getDEF(int attackType_got);
     virtual double getDis_attack(){ return dis_Attack; }
+    //最小攻击距离（盲区下限，像素）。默认0表示无盲区；投石车等可重写
+    virtual double getMinDis_attack(){ return 0; }
     virtual int get_AttackType(){ return attackType; }
 
     virtual void init_Blood(){ Blood = 1; }
@@ -76,7 +78,12 @@ public:
 
     bool get_isRangeAttack(){return isRangeAttack;}
 
+    //祭司转化休整冷却：g_frame 小于该值表示仍在休整、不能再次转化
+    int getConvertRestEndFrame(){ return convertRestEndFrame; }
+    void setConvertRestEndFrame(int frame){ convertRestEndFrame = frame; }
+
 protected:
+    int convertRestEndFrame = 0;    //转化休整结束帧
     double Blood = 0;   //Blood区间[0,1],以血量百分比表示当前血量. 当前血量数值为Blood*当前的血量最大值
     int MaxBlood = 100;
 
@@ -103,6 +110,18 @@ protected:
     double inter_Attack = 0; //攻击间隔
     int defence_close = 0;  //肉搏防御
     int defence_shoot = 0;  //投射防御
+
+    //==== 祭司转化后属性冻结（与原版一致：转化瞬间锁定，之后不再受任何升级影响）====
+    bool statFrozen = false;    //是否已被转化冻结
+    int frozenAtkBase = 0;      //冻结时的基础攻击（按等级取值，不含情景加成）
+    int frozenAtkAdd = 0;       //冻结时的攻击科技加成
+    int frozenDEFclose = 0;     //冻结时的近战防御（最终值）
+    int frozenDEFshoot = 0;     //冻结时的射击防御（最终值）
+    int frozenMaxBlood = 0;     //冻结时的最大血量
+    double frozenSpeed = 0;     //冻结时的移动速度
+    int frozenVision = 0;       //冻结时的视野
+    double frozenDisRaw = 0;    //冻结时的攻击距离（单位自身值，未乘BLOCKSIDELENGTH；0表示近战特例）
+    int frozenDisAdd = 0;       //冻结时的攻击距离科技加成
 
     void initAttack_perCircle(){ attack_OneCircle = true; }
 };

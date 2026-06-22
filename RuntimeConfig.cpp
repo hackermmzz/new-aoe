@@ -434,6 +434,7 @@ double g_SPEED_STONE_THROWER = 0.0;
 int g_VISION_STONE_THROWER = 0;
 int g_ATK_STONE_THROWER = 0;
 double g_DIS_STONE_THROWER = 0.0;
+double g_DIS_MIN_STONE_THROWER = 0.0;
 int g_INTERVAL_STONE_THROWER = 0;
 int g_DEFCLOSE_STONE_THROWER = 0;
 int g_DEFSHOOT_STONE_THROWER = 0;
@@ -463,6 +464,7 @@ int g_NOWRES_TIMER_ELEPHANT = 0;
 int g_NOWRES_TIMER_SHIP = 0;
 int g_NOWRES_TIMER_STONE_THROWER = 0;
 int g_NOWRES_TIMER_PRIEST = 0;
+int g_PRIEST_REST_TIME = 0;
 int g_BLOOD_HOPLITE = 0;
 double g_SPEED_HOPLITE = 0.0;
 int g_VISION_HOPLITE = 0;
@@ -2626,6 +2628,11 @@ double RuntimeConfig_DIS_STONE_THROWER()
     return g_DIS_STONE_THROWER;
 }
 
+double RuntimeConfig_DIS_MIN_STONE_THROWER()
+{
+    return g_DIS_MIN_STONE_THROWER;
+}
+
 int RuntimeConfig_INTERVAL_STONE_THROWER()
 {
     return g_INTERVAL_STONE_THROWER;
@@ -2769,6 +2776,11 @@ int RuntimeConfig_NOWRES_TIMER_STONE_THROWER()
 int RuntimeConfig_NOWRES_TIMER_PRIEST()
 {
     return g_NOWRES_TIMER_PRIEST;
+}
+
+int RuntimeConfig_PRIEST_REST_TIME()
+{
+    return g_PRIEST_REST_TIME;
 }
 
 int RuntimeConfig_BLOOD_HOPLITE()
@@ -3279,6 +3291,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_VISION_STONE_THROWER = config.value(QStringLiteral("VISION_STONE_THROWER")).toInt();
     g_ATK_STONE_THROWER = config.value(QStringLiteral("ATK_STONE_THROWER")).toInt();
     g_DIS_STONE_THROWER = config.value(QStringLiteral("DIS_STONE_THROWER")).toDouble();
+    g_DIS_MIN_STONE_THROWER = config.value(QStringLiteral("DIS_MIN_STONE_THROWER")).toDouble();
     g_INTERVAL_STONE_THROWER = config.value(QStringLiteral("INTERVAL_STONE_THROWER")).toInt();
     g_DEFCLOSE_STONE_THROWER = config.value(QStringLiteral("DEFCLOSE_STONE_THROWER")).toInt();
     g_DEFSHOOT_STONE_THROWER = config.value(QStringLiteral("DEFSHOOT_STONE_THROWER")).toInt();
@@ -3308,6 +3321,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_NOWRES_TIMER_SHIP = config.value(QStringLiteral("NOWRES_TIMER_SHIP")).toInt();
     g_NOWRES_TIMER_STONE_THROWER = config.value(QStringLiteral("NOWRES_TIMER_STONE_THROWER")).toInt();
     g_NOWRES_TIMER_PRIEST = config.value(QStringLiteral("NOWRES_TIMER_PRIEST")).toInt();
+    g_PRIEST_REST_TIME = config.value(QStringLiteral("PRIEST_REST_TIME")).toInt();
     g_BLOOD_HOPLITE = config.value(QStringLiteral("BLOOD_HOPLITE")).toInt();
     g_SPEED_HOPLITE = config.value(QStringLiteral("SPEED_HOPLITE")).toDouble();
     g_VISION_HOPLITE = config.value(QStringLiteral("VISION_HOPLITE")).toInt();

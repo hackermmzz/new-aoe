@@ -238,6 +238,8 @@ void Army::requestSound_Walk()
 //移速
 double Army::getSpeed()
 {
+    if(statFrozen) return frozenSpeed;
+
     double moveSpeed;
 
     if( upgradable ) moveSpeed = speed_change[getLevel()];
@@ -249,6 +251,8 @@ double Army::getSpeed()
 //血量
 int Army::getMaxBlood()
 {
+    if(statFrozen) return frozenMaxBlood;
+
     int realmBlood;
 
     if(upgradable) realmBlood = MaxBlood_change[getLevel()];
@@ -260,6 +264,8 @@ int Army::getMaxBlood()
 //视野
 int Army::getVision()
 {
+    if(statFrozen) return frozenVision;
+
     int realVision;
     if(upgradable) realVision = vision_change[getLevel()];
     else realVision = vision;
@@ -271,22 +277,37 @@ int Army::getVision()
 int Army::getATK()
 {
     int atkValue;//用于存储初始攻击力
+    int atkAdd;  //科技攻击加成
 
-    //赋值初始攻击力,依据兵种是否能升级,划分两类赋值方式
-    if(upgradable) atkValue = atk_change[getLevel()];
-    else atkValue = atk;
+    //赋值初始攻击力,依据兵种是否能升级,划分两类赋值方式；已冻结则取转化时的快照
+    if(statFrozen)
+    {
+        atkValue = frozenAtkBase;
+        atkAdd   = frozenAtkAdd;
+    }
+    else
+    {
+        if(upgradable) atkValue = atk_change[getLevel()];
+        else atkValue = atk;
+        atkAdd = playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+    }
 
-    //再atkValue基础上,计算player及科技带来的加成,并返回
-//    return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType()), interactSort, interactNum) + \
-//             get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
-
+    //在atkValue基础上,计算情景倍率(对建筑×2等)与特攻(实时,与主人科技无关),再加上(冻结或实时的)科技加成
     return (int)( atkValue*playerScience->get_rate_Attack(getSort(),Num,armyClass,get_AttackType(), interactSort, interactNum)) + \
-            get_add_specialAttack() + playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+            get_add_specialAttack() + atkAdd;
 }
 
 //防御力,分为获取肉搏防御力和投射物防御力
 int Army::getDEF(int attackType_got)
 {
+    //已冻结：直接返回转化时锁定的最终防御值
+    if(statFrozen)
+    {
+        if(attackType_got == ATTACKTYPE_CLOSE || attackType_got == ATTACKTYPE_ANIMAL) return frozenDEFclose;
+        else if(attackType_got == ATTACKTYPE_SHOOT) return frozenDEFshoot;
+        else return 0;
+    }
+
     int defValue = 0;//用于存储初始防御力
 
     //赋值defValue;根据attackType_got即收到的伤害类型,选择相应的防御类型:肉盾防御或投射防御.若为祭司转化或(投石车?等)无伤害减免
@@ -308,6 +329,8 @@ int Army::getDEF(int attackType_got)
 
 int Army::showATK_Basic()
 {
+    if(statFrozen) return frozenAtkBase + get_add_specialAttack();
+
     int atkValue;//用于存储初始攻击力
 
     //赋值初始攻击力,依据兵种是否能升级,划分两类赋值方式
@@ -319,6 +342,8 @@ int Army::showATK_Basic()
 
 int Army::showDEF_Close()
 {
+    if(statFrozen) return frozenDEFclose;
+
     int defValue = 0;
 
     if(upgradable) defValue = defence_close_change[getLevel()];
@@ -329,6 +354,8 @@ int Army::showDEF_Close()
 
 int Army::showDEF_Shoot()
 {
+    if(statFrozen) return frozenDEFshoot;
+
     int defValue = 0;
 
     if(upgradable) defValue = defence_shoot_change[getLevel()];
@@ -341,14 +368,56 @@ int Army::showDEF_Shoot()
 double Army::getDis_attack()
 {
     double dis;
+    int    disAdd;
 
-    if(upgradable) dis = dis_Attack_change[getLevel()];
-    else dis = dis_Attack;
+    if(statFrozen)
+    {
+        dis    = frozenDisRaw;
+        disAdd = frozenDisAdd;
+    }
+    else
+    {
+        if(upgradable) dis = dis_Attack_change[getLevel()];
+        else dis = dis_Attack;
+        disAdd = playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType());
+    }
 
     if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0;
-    else dis = ( dis + playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType() ) )*BLOCKSIDELENGTH;
+    else dis = ( dis + disAdd )*BLOCKSIDELENGTH;
 
     return dis;
+}
+
+//最小攻击距离（盲区下限，像素）：投石车太近的目标打不到；其余兵种无盲区
+double Army::getMinDis_attack()
+{
+    if(Num == AT_STONE_THROWER) return DIS_MIN_STONE_THROWER * BLOCKSIDELENGTH;
+    return 0;
+}
+
+//转化冻结（士兵）：快照当前(原主人科技下的)整套战斗属性，之后永久锁定
+void Army::freezeStats()
+{
+    if(statFrozen) return;      //已冻结则保持，不重复快照（永久锁定）
+
+    //攻击：基础值(按等级)与科技加成分开存，保留对建筑×2/特攻等情景加成实时叠加
+    if(upgradable) frozenAtkBase = atk_change[getLevel()];
+    else frozenAtkBase = atk;
+    frozenAtkAdd = playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
+
+    //防御/血量/移速/视野：直接存最终值
+    frozenDEFclose = getDEF(ATTACKTYPE_CLOSE);
+    frozenDEFshoot = getDEF(ATTACKTYPE_SHOOT);
+    frozenMaxBlood = getMaxBlood();
+    frozenSpeed    = getSpeed();
+    frozenVision   = getVision();
+
+    //攻击距离：存单位自身值与科技加成，近战特例(0)保持实时
+    if(upgradable) frozenDisRaw = dis_Attack_change[getLevel()];
+    else frozenDisRaw = dis_Attack;
+    frozenDisAdd = playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType());
+
+    statFrozen = true;
 }
 
 int Army::get_add_specialAttack()
