@@ -43,3 +43,6 @@ output/
 # 静态图片文件
 res/
 res.rcc
+
+# 本地生成的架构文档
+docs/architecture/
