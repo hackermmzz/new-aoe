@@ -41,8 +41,8 @@ ins EnemyIns;
 tagInfo enemyInfo;
 //-----------新参数--------------//
 #define FAT 6000     //第一波骚扰时间
-#define SAT 12000    //第二波骚扰时间
-#define TAT 19500    //第三波骚扰时间
+#define SAT 13500    //第二波骚扰时间
+#define TAT 21000    //第三波骚扰时间
 #define radius_Outer 15
 #define radius_Inner 10
 
@@ -63,6 +63,7 @@ static int mode = -3;
 
 static pair<double,double>Enemy_Center;                    //enemy武器工程厂
 static unordered_map<int,int> Defend_Center_Enemy;         //仅在内圈防御武器工程厂的人
+static unordered_map<int,int> PriestGuard_Center_Enemy;    //从厂区防守兵中抽调的祭司猎手
 // 第一波总目标（击杀 3 农民）是否已完成；完成后不再往 attackEnemy 里加人，避免反复加人/撤退
 static bool wave1Completed = false;
 static bool wave2Completed = false;
@@ -107,6 +108,10 @@ static map<int, int> fieldSelfDefenseLastOrderFrame;
 #define WAVE_ORDER_INTERVAL 50
 #define DEFENSE_ORDER_INTERVAL 20
 #define DEFENSE_CHASE_LIMIT (radius_Outer + 3)
+#define PRIEST_GUARD_RANGE (radius_Outer + 5)
+#define PRIEST_GUARD_COMPOSITE_BOWMAN_COUNT 3
+#define PRIEST_GUARD_CHARIOT_ARCHER_COUNT 1
+#define PRIEST_GUARD_CHARIOT_COUNT 1
 
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
@@ -593,6 +598,63 @@ static void UpdateKilledFarmers(vector<int>& touched, vector<int>& killed)
 static bool IsDefenseArmySN(int sn)
 {
     return Defend_Center_Enemy.find(sn) != Defend_Center_Enemy.end();
+}
+
+static int NeedPriestGuardCountBySort(int sort)
+{
+    if (sort == AT_COMPOSITE_BOWMAN) return PRIEST_GUARD_COMPOSITE_BOWMAN_COUNT;
+    if (sort == AT_CHARIOT_ARCHER) return PRIEST_GUARD_CHARIOT_ARCHER_COUNT;
+    if (sort == AT_CHARIOT) return PRIEST_GUARD_CHARIOT_COUNT;
+
+    return 0;
+}
+
+static int CountPriestGuardsBySort(int sort)
+{
+    int count = 0;
+
+    for (auto& kv : PriestGuard_Center_Enemy) {
+        if (kv.second == sort) count++;
+    }
+
+    return count;
+}
+
+static void TryAddPriestGuard(const tagArmy& army)
+{
+    if (PriestGuard_Center_Enemy.find(army.SN) != PriestGuard_Center_Enemy.end()) {
+        return;
+    }
+
+    int needCount = NeedPriestGuardCountBySort(army.Sort);
+    if (needCount <= 0) return;
+
+    if (CountPriestGuardsBySort(army.Sort) < needCount) {
+        PriestGuard_Center_Enemy[army.SN] = army.Sort;
+    }
+}
+
+static int FindNearestPriestNearSiegeCenter(const tagArmy& army)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.Sort != AT_PRIEST) continue;
+
+        int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                 Enemy_Center.first, Enemy_Center.second);
+        if (dToCenter > PRIEST_GUARD_RANGE) continue;
+
+        int d = BlockDis2(army.BlockDR, army.BlockUR,
+                          enemyArmy.BlockDR, enemyArmy.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = enemyArmy.SN;
+        }
+    }
+
+    return bestSN;
 }
 
 // 第一波兵种：棍棒兵、战斧、骑兵、弓箭手、侦察兵
@@ -1695,8 +1757,9 @@ void EnemyAI::Initialize_Enemymap()
         int d2 = BlockDis2(army.BlockDR, army.BlockUR,
                            Enemy_Center.first, Enemy_Center.second);
 
-        if (d2 < radius_Inner * radius_Inner) {
+        if (d2 <   radius_Inner * radius_Inner) {
             Defend_Center_Enemy[army.SN] = 1;
+            TryAddPriestGuard(army);
 
             if (DefenseHome.find(army.SN) == DefenseHome.end()) {
                 DefenseHome[army.SN] = make_pair(army.DR, army.UR);
@@ -1715,6 +1778,7 @@ void EnemyAI::AssignDefense()
         if (!army) {
             DefenseHome.erase(sn);
             defenseLastOrderFrame.erase(sn);
+            PriestGuard_Center_Enemy.erase(sn);
             it = Defend_Center_Enemy.erase(it);
             continue;
         }
@@ -1736,6 +1800,21 @@ void EnemyAI::AssignDefense()
 
             ++it;
             continue;
+        }
+
+        // 祭司猎手小队优先处理靠近武器攻城厂的玩家祭司
+        if (PriestGuard_Center_Enemy.find(sn) != PriestGuard_Center_Enemy.end()) {
+            int priestSN = FindNearestPriestNearSiegeCenter(*army);
+            if (priestSN != -1) {
+                if (army->WorkObjectSN != priestSN ||
+                    g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
+                    HumanAction(sn, priestSN);
+                    defenseLastOrderFrame[sn] = g_frame;
+                }
+
+                ++it;
+                continue;
+            }
         }
 
         // 只攻击靠近武器攻城厂的玩家单位
@@ -1807,8 +1886,7 @@ void EnemyAI::FirstAttack()
     // 第一次进入第一波时，选 2 个棍棒兵和 2 个侦察兵
     if (!wave1Started) {
         vector<int> emptyUsed;
-        SelectWaveUnitsBySort(wave1Units, AT_CLUBMAN, 2, emptyUsed);
-        SelectWaveUnitsBySort(wave1Units, AT_SCOUT, 2, emptyUsed);
+        SelectWaveUnitsBySort(wave1Units, AT_CLUBMAN, 3, emptyUsed);
         wave1Started = true;
     }
 
@@ -1905,9 +1983,9 @@ void EnemyAI::SecondAttack()
             }
         }
 
-        SelectWaveUnitsBySort(wave2Units, AT_HOPLITE, 3, wave1Units);
-        SelectWaveUnitsBySort(wave2Units, AT_BROADSWORDSMAN, 2, wave1Units);
-        SelectWaveUnitsBySort(wave2Units, AT_COMPOSITE_BOWMAN, 3, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_HOPLITE, 2, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_BROADSWORDSMAN, 1, wave1Units);
+        SelectWaveUnitsBySort(wave2Units, AT_COMPOSITE_BOWMAN, 1, wave1Units);
         SelectWaveUnitsBySort(wave2Units, AT_CHARIOT_ARCHER, 1, wave1Units);
 
         wave2Started = true;
