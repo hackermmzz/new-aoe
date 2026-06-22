@@ -73,6 +73,8 @@ static map<int, int> lastAssignFrame;
 static map<int, int> lastReissueFrame;
 // 每单位士兵当前的行动目标
 static map<int, int> currentTarget;
+// 第三波因祭司进入箭塔范围而触发的锁塔目标
+static map<int, int> priestTriggeredTowerLock;
 
 
 static bool wave1Started = false;
@@ -82,7 +84,8 @@ static bool wave3Completed = false;
 
 static vector<int> wave1Units;   // 第一波：2 个棍棒兵 + 2 个侦察兵
 static vector<int> wave2Units;   // 第二波：指定铜器兵组合 + 第一波残兵
-static vector<int> wave3Units;   // 第三波：20 个铜器陆军 + 前两波残兵
+static vector<int> wave3Units;   // 第三波：10 个铜器陆军 + 前两波残兵
+static vector<int> wave3PriestHunters; // 第三波最多 3 人负责最高优先级追杀祭司
 
 static vector<int> wave1TouchedFarmers;
 static vector<int> wave2TouchedFarmers;
@@ -109,6 +112,7 @@ static map<int, int> fieldSelfDefenseLastOrderFrame;
 #define DEFENSE_ORDER_INTERVAL 20
 #define DEFENSE_CHASE_LIMIT (radius_Outer + 3)
 #define PRIEST_GUARD_RANGE (radius_Outer + 5)
+#define WAVE3_PRIEST_HUNTER_LIMIT 3
 #define PRIEST_GUARD_COMPOSITE_BOWMAN_COUNT 3
 #define PRIEST_GUARD_CHARIOT_ARCHER_COUNT 1
 #define PRIEST_GUARD_CHARIOT_COUNT 1
@@ -552,6 +556,14 @@ static bool EnemyArmyAlive(int sn)
     return false;
 }
 
+static bool EnemyPriestAlive(int sn)
+{
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.SN == sn && a.Sort == AT_PRIEST) return true;
+    }
+    return false;
+}
+
 static bool EnemyBuildingAlive(int sn)
 {
     for (tagBuilding& b : enemyInfo.enemy_buildings) {
@@ -729,6 +741,128 @@ static int FindNearestEnemyTower(int blockDR, int blockUR)
     return bestSN;
 }
 
+static int FindEnemyTowerCoveringBlock(int blockDR, int blockUR)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.Type != BUILDING_ARROWTOWER) continue;
+
+        int d = BlockDis(blockDR, blockUR, b.BlockDR, b.BlockUR);
+        if (d > TOWER_DANGER_RANGE) continue;
+
+        int d2 = BlockDis2(blockDR, blockUR, b.BlockDR, b.BlockUR);
+        if (d2 < bestDis) {
+            bestDis = d2;
+            bestSN = b.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static int FindTowerCoveringPriest(int priestSN)
+{
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.SN != priestSN || a.Sort != AT_PRIEST) continue;
+        return FindEnemyTowerCoveringBlock(a.BlockDR, a.BlockUR);
+    }
+
+    return -1;
+}
+
+static int FindNearestPriestByTowerState(int blockDR,
+                                         int blockUR,
+                                         bool wantInsideTower)
+{
+    int bestSN = -1;
+    int bestDis = 1000000000;
+
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.Sort != AT_PRIEST) continue;
+
+        bool inside = IsInsideEnemyTowerRange(a.BlockDR, a.BlockUR);
+        if (inside != wantInsideTower) continue;
+
+        int d = BlockDis2(blockDR, blockUR, a.BlockDR, a.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = a.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static bool HasEnemyPriestOutsideTowerRange()
+{
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.Sort != AT_PRIEST) continue;
+        if (!IsInsideEnemyTowerRange(a.BlockDR, a.BlockUR)) return true;
+    }
+
+    return false;
+}
+
+static int DistanceToNearestPriestOutsideTower(const tagArmy& army)
+{
+    int bestDis = 1000000000;
+
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.Sort != AT_PRIEST) continue;
+        if (IsInsideEnemyTowerRange(enemyArmy.BlockDR, enemyArmy.BlockUR)) continue;
+
+        int d = BlockDis2(army.BlockDR, army.BlockUR,
+                          enemyArmy.BlockDR, enemyArmy.BlockUR);
+        if (d < bestDis) bestDis = d;
+    }
+
+    return bestDis;
+}
+
+static bool IsWave3PriestHunter(int sn)
+{
+    return ContainsInt(wave3PriestHunters, sn);
+}
+
+static void RefreshWave3PriestHunters()
+{
+    for (int i = 0; i < wave3PriestHunters.size(); ) {
+        int sn = wave3PriestHunters[i];
+        if (FindMyArmyBySN(sn) == nullptr || !ContainsInt(wave3Units, sn)) {
+            currentTarget.erase(sn);
+            priestTriggeredTowerLock.erase(sn);
+            wave3PriestHunters.erase(wave3PriestHunters.begin() + i);
+        } else {
+            i++;
+        }
+    }
+
+    if (!HasEnemyPriestOutsideTowerRange()) return;
+
+    while (wave3PriestHunters.size() < WAVE3_PRIEST_HUNTER_LIMIT) {
+        int bestSN = -1;
+        int bestDis = 1000000000;
+
+        for (int sn : wave3Units) {
+            if (IsWave3PriestHunter(sn)) continue;
+
+            tagArmy* army = FindMyArmyBySN(sn);
+            if (!army) continue;
+
+            int d = DistanceToNearestPriestOutsideTower(*army);
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = sn;
+            }
+        }
+
+        if (bestSN == -1) break;
+        wave3PriestHunters.push_back(bestSN);
+    }
+}
+
 static int FindNearestFarmerByTowerState(int blockDR, int blockUR, bool wantInsideTower)
 {
     int bestSN = -1;
@@ -791,6 +925,8 @@ static int FindThreatToArmy(const tagArmy& army)
     int bestDis = 1000000000;
 
     for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        // 祭司由波次专用逻辑处理，以便进入箭塔范围后立即转火箭塔。
+        if (enemyArmy.Sort == AT_PRIEST) continue;
         if (enemyArmy.WorkObjectSN != army.SN) continue;
 
         int d = BlockDis2(army.BlockDR, army.BlockUR,
@@ -833,6 +969,16 @@ static int FindStickyWaveTarget(const tagArmy& army, int wave)
     if (it == currentTarget.end()) return -1;
 
     int targetSN = it->second;
+    if (wave == 2 && EnemyPriestAlive(targetSN)) {
+        int coveringTower = FindTowerCoveringPriest(targetSN);
+        if (coveringTower != -1) {
+            currentTarget[army.SN] = coveringTower;
+            return coveringTower;
+        }
+
+        return targetSN;
+    }
+
     if (EnemyFarmerAlive(targetSN)) {
         if (IsFarmerInsideEnemyTowerRange(targetSN)) {
             currentTarget.erase(it);
@@ -860,6 +1006,12 @@ static int FindWaveTarget(const tagArmy& army, int wave)
     if (wave == 2) {
         int threat = FindThreatToArmy(army);
         if (threat != -1) return threat;
+
+        // 祭司优先于农民；只追击箭塔范围外的祭司。
+        int priestOutside = FindNearestPriestByTowerState(army.BlockDR,
+                                                          army.BlockUR,
+                                                          false);
+        if (priestOutside != -1) return priestOutside;
     }
 
     // 第一、二波：优先攻击箭塔范围外的农民
@@ -884,6 +1036,11 @@ static int FindWaveTargetAvoidingReserved(const tagArmy& army,
     if (wave == 2) {
         int threat = FindThreatToArmy(army);
         if (threat != -1) return threat;
+
+        int priestOutside = FindNearestPriestByTowerState(army.BlockDR,
+                                                          army.BlockUR,
+                                                          false);
+        if (priestOutside != -1) return priestOutside;
     }
 
     int farmerOutside = FindNearestFarmerByTowerStateAvoiding(army.BlockDR,
@@ -904,7 +1061,7 @@ static int FindNearestEnemyArmy(int blockDR, int blockUR)
     int bestDis = 1000000000;
 
     for (tagArmy& a : enemyInfo.enemy_armies) {
-        if (a.Sort == AT_SHIP) continue;
+        if (a.Sort == AT_SHIP || a.Sort == AT_PRIEST) continue;
 
         int d = BlockDis2(blockDR, blockUR, a.BlockDR, a.BlockUR);
         if (d < bestDis) {
@@ -1057,10 +1214,41 @@ void EnemyAI::OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN)
     }
 }
 
-static int FindFullAttackTarget(const tagArmy& army)
+static int FindFullAttackTarget(const tagArmy& army, bool isPriestHunter)
 {
+    if (isPriestHunter) {
+        auto lockIt = priestTriggeredTowerLock.find(army.SN);
+        if (lockIt != priestTriggeredTowerLock.end()) {
+            if (EnemyArrowTowerAlive(lockIt->second)) {
+                return lockIt->second;
+            }
+
+            priestTriggeredTowerLock.erase(lockIt);
+        }
+
+        int previousTargetSN = army.WorkObjectSN;
+        auto currentIt = currentTarget.find(army.SN);
+        if (currentIt != currentTarget.end()) {
+            previousTargetSN = currentIt->second;
+        }
+
+        if (EnemyPriestAlive(previousTargetSN)) {
+            int coveringTower = FindTowerCoveringPriest(previousTargetSN);
+            if (coveringTower != -1) {
+                priestTriggeredTowerLock[army.SN] = coveringTower;
+                return coveringTower;
+            }
+        }
+
+        // 第三波祭司猎杀组：祭司是最高优先级。
+        int priestOutside = FindNearestPriestByTowerState(army.BlockDR,
+                                                          army.BlockUR,
+                                                          false);
+        if (priestOutside != -1) return priestOutside;
+    }
+
     // 第三波全面进攻优先级：
-    // 敌方军队 > 敌方箭塔 > 敌方农民 > 敌方普通建筑
+    // 普通单位：敌方非祭司军队 > 敌方箭塔 > 敌方农民 > 敌方普通建筑
     int enemyArmy = FindNearestEnemyArmy(army.BlockDR, army.BlockUR);
     if (enemyArmy != -1) return enemyArmy;
 
@@ -1680,6 +1868,7 @@ tagArmy EnemyAI::Threated(tagArmy *army)
 }
 
 void EnemyAI::processData() {
+
         enemyInfo = getInfo();
 
         Initialize_Enemycenter();
@@ -2018,7 +2207,9 @@ void EnemyAI::SecondAttack()
 
     // 没杀够 8 个农民，但玩家农民已经死完：
     // 本波不撤退，先拆剩余箭塔，再拆玩家基地
-    if (NoPlayerFarmersLeft() && wave2KilledFarmers.size() < 8) {
+    if (NoPlayerFarmersLeft() &&
+        wave2KilledFarmers.size() < 8 &&
+        !HasEnemyPriestOutsideTowerRange()) {
         int targetSN = FindTowerThenBaseTargetForUnits(wave2Units);
 
         if (targetSN != -1) {
@@ -2032,7 +2223,7 @@ void EnemyAI::SecondAttack()
     }
 
     // 第二波目标优先级：
-    // 攻击我方士兵的敌方士兵 > 塔外农民 > 箭塔 > 塔内农民
+    // 攻击我方士兵的非祭司敌军 > 塔外祭司 > 塔外农民 > 箭塔
     vector<int> assignedFarmers;
     ReserveCurrentFarmerTargets(wave2Units, assignedFarmers);
 
@@ -2066,7 +2257,7 @@ void EnemyAI::ThirdAttack()
 {
     if (wave3Completed) return;
 
-    // 第一次进入第三波：前两波残兵 + 20 个新铜器兵
+    // 第一次进入第三波：前两波残兵 + 10 个新铜器兵
     if (!wave3Started) {
         CleanDeadUnits(wave1Units);
         CleanDeadUnits(wave2Units);
@@ -2086,12 +2277,13 @@ void EnemyAI::ThirdAttack()
         }
 
         vector<int> alreadyUsed = wave3Units;
-        SelectWaveUnits(wave3Units, 20, IsBronzeLandSort, alreadyUsed);
+        SelectWaveUnits(wave3Units, 10, IsBronzeLandSort, alreadyUsed);
 
         wave3Started = true;
     }
 
     CleanDeadUnits(wave3Units);
+    RefreshWave3PriestHunters();
 
     if (wave3Units.empty()) {
         wave3Completed = true;
@@ -2099,17 +2291,22 @@ void EnemyAI::ThirdAttack()
     }
 
     // 第三波全面进攻：
-    // 敌方军队 > 敌方箭塔 > 敌方农民 > 敌方普通建筑
+    // 最多 3 名祭司猎手：塔外祭司 > 其他目标；其余士兵保持原全面进攻优先级
     bool hasTarget = false;
 
     for (int sn : wave3Units) {
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        int targetSN = FindFullAttackTarget(*army);
-        if (targetSN == -1) continue;
+        int targetSN = FindFullAttackTarget(*army, IsWave3PriestHunter(sn));
+        if (targetSN == -1) {
+            currentTarget.erase(sn);
+            priestTriggeredTowerLock.erase(sn);
+            continue;
+        }
 
         hasTarget = true;
+        currentTarget[sn] = targetSN;
 
 
         if (army->WorkObjectSN != targetSN) {
