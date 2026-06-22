@@ -5,7 +5,7 @@
     "PLAYER_DISABLED_BUILDINGS": [11],
     "IsExamining": false,
     "TimePerFrame": 40,
-    "EditorMode":false,
+    "EditorMode":true,
     "GlobalVision":true,
     "only_debug_Player0": true,
     "filterRepetitionMessage": false,
