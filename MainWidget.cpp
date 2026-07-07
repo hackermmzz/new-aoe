@@ -2138,9 +2138,42 @@ void MainWidget::paintUpdate()
     //
 }
 
+static bool HasAlivePlayerCenter(Player* p)
+{
+    if (p == nullptr) return false;
+
+    for (Building* building : p->build) {
+        if (building == nullptr) continue;
+        if (building->getNum() == BUILDING_CENTER && !building->isDie()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool HasAlivePlayerPriest(Player* p)
+{
+    if (p == nullptr) return false;
+
+    for (Human* human : p->human) {
+        if (human == nullptr) continue;
+        if (human->getSort() == SORT_ARMY &&
+            human->getNum() == AT_PRIEST &&
+            !human->isDie()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool MainWidget::isLoss()
 {
-    return sel->getSecend() > GAME_LOSE_SEC;
+    Player* currentPlayer = player[NOWPLAYERREPRESENT];
+    return sel->getSecend() > GAME_LOSE_SEC
+        || !HasAlivePlayerCenter(currentPlayer)
+        || !HasAlivePlayerPriest(currentPlayer);
 }
 bool MainWidget::isWin()
 {
