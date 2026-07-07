@@ -223,6 +223,10 @@ private:
     bool isWin();
     void ScoreSave(string gameResult);
     void HandleGameOver();
+    //本局是否曾拥有存活的巫师英雄(祭司)/市镇中心，作为"死亡/被摧毁"失败判定的前提，
+    //避免地图开局未放置对应单位/建筑时开局即误判失败
+    bool everHavePriest = false;
+    bool everHaveCenter = false;
 //*****************************************
 
 //****************Music*********************

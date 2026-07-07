@@ -63,6 +63,9 @@ public:
     /** 箭塔射程（格）：基础 / 科技加成，供选中面板 "base+bonus" 显示 */
     int showArrowTowerRangeBaseBlocks() const;
     int showArrowTowerRangeBonusBlocks() const;
+    /** 箭塔强化等级/射程科技加成：取当前主人科技实时值与转化冻结值中的较高者 */
+    int getArrowTowerUpgradeLevel() const;
+    int getArrowTowerRangeAddition() const;
 
     /*******战斗相关*******/
     double getDis_attack();
@@ -263,6 +266,10 @@ public:
     void setPlayerScience(Development* science){ this->playerScience = science; }
     //设置隶属player
     void setPlayerRepresent( int represent ){ playerRepresent = represent; }
+    //转化等级冻结：把转化时刻(原主人科技下的)时代与箭塔科技等级快照到实例，保证转化后不降级
+    void freezeLevel();
+    //是否为祭司转化而来(转化时会冻结等级快照)，用于胜负判定等
+    bool isConverted(){ return levelFrozen; }
 
 
     /*******状态与属性设置、获取*******/
@@ -309,6 +316,13 @@ protected:
     int civ;
     //建筑所处时代 来确定不同时代建筑有何变化 ？时代要不要用player类下的
     bool constructed = false;   //是否已完成建造
+
+    //==== 祭司转化等级快照（与原版一致：转化后建筑不降级；新主人科技更高时仍取较高者生效）====
+    bool levelFrozen = false;               //是否已被转化冻结等级
+    int frozenCiv = CIVILIZATION_STONEAGE;  //冻结时的时代（决定建筑贴图风格）
+    int frozenArrowTowerLevel = 0;          //冻结时的箭塔强化等级
+    int frozenAtkAddition = 0;              //冻结时的攻击科技加成（箭塔）
+    int frozenRangeAddition = 0;            //冻结时的射程/视野科技加成（箭塔）
 
     int Foundation;
     //地基类型

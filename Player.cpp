@@ -172,6 +172,22 @@ void Player::insertHuman(Human *target)
     human.push_back(target);
 }
 
+void Player::removeBuilding(Building *target)
+{
+    for(auto itr=build.begin();itr!=build.end();++itr){
+        auto*x=*itr;
+        if(x==target){
+            build.erase(itr);
+            break;
+        }
+    }
+}
+
+void Player::insertBuilding(Building *target)
+{
+    build.push_back(target);
+}
+
 //删除实例对象
 list<Human*>::iterator Player::deleteHuman( list<Human*>::iterator iterDele )
 {

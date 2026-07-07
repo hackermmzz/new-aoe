@@ -93,6 +93,7 @@ private:
 
     void requestSound_Action( Coordinate* object, int actionType, Coordinate* goalObject = NULL);
     void change_HumanRepresent(Human*human,int represent);
+    void change_BuildingRepresent(Building*building,int represent);
     /************控制行动************/
     void object_Move(Coordinate * object , double DR , double UR);  //控制移动
     void object_Attack(Coordinate* , Coordinate*); //控制因object1影响object2血量

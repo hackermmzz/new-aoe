@@ -38,6 +38,10 @@ public:
     void removeHuman(Human*target);
     //插入实例对象
     void insertHuman(Human*target);
+    //移除建筑实例对象(仅从池子摘除，不清理内存，转化时使用)
+    void removeBuilding(Building*target);
+    //插入建筑实例对象(转化时使用)
+    void insertBuilding(Building*target);
     //删除实例对象(会清理内存)
     list<Human*>::iterator deleteHuman( list<Human*>::iterator iterDele );
     list<Building*>::iterator deleteBuilding( list<Building*>::iterator iterDele );

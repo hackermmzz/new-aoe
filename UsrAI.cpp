@@ -9,6 +9,7 @@ tagGame tagUsrGame;
 ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 
+int logo=0;
 
 static bool towerTargetInRange(int towerDR, int towerUR, int objDR, int objUR)
 {

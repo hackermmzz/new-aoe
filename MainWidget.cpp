@@ -2140,12 +2140,46 @@ void MainWidget::paintUpdate()
 
 bool MainWidget::isLoss()
 {
-    return sel->getSecend() > GAME_LOSE_SEC;
+    //失败条件(任一满足即失败)：
+    //1.游戏时长耗尽(时长上限由 config.json 的 GAME_LOSE_SEC 配置，当前为25分钟)
+    if (sel->getSecend() > GAME_LOSE_SEC) return true;
+
+    //遍历玩家单位与建筑，查看当前是否拥有存活的巫师英雄(祭司)与市镇中心
+    bool havePriest = false, haveCenter = false;
+
+    for (Human* theHuman : player[0]->human)
+        if (theHuman->getSort() == SORT_ARMY && theHuman->getNum() == AT_PRIEST && !theHuman->isDie())
+        {
+            havePriest = true;
+            break;
+        }
+
+    for (Building* theBuild : player[0]->build)
+        if (theBuild->getNum() == BUILDING_CENTER && !theBuild->isDie())
+        {
+            haveCenter = true;
+            break;
+        }
+
+    if (havePriest) everHavePriest = true;
+    if (haveCenter) everHaveCenter = true;
+
+    //2.巫师英雄(祭司)死亡：曾拥有过，现不再拥有存活的祭司
+    if (everHavePriest && !havePriest) return true;
+    //3.市镇中心被摧毁：曾拥有过，现不再拥有存活的市镇中心
+    if (everHaveCenter && !haveCenter) return true;
+
+    return false;
 }
 bool MainWidget::isWin()
 {
-    //开发者状态默认永远不会赢
-    return  (player[0]->getGold()>=8000000);
+    //胜利条件：用巫师英雄(祭司)将敌方武器工程厂(攻城武器厂)转变为己方。
+    //转化而来的建筑带有转化冻结标记(isConverted)，以此区分玩家自建的攻城武器厂
+    for (Building* theBuild : player[0]->build)
+        if (theBuild->getNum() == BUILDING_SIEGE && theBuild->isConverted() && !theBuild->isDie())
+            return true;
+
+    return false;
 }
 
 void MainWidget::judgeVictory()

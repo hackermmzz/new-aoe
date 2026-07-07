@@ -742,6 +742,65 @@ void Core_List::change_HumanRepresent(Human *human, int represent)
     }
 }
 
+void Core_List::change_BuildingRepresent(Building *building, int represent)
+{
+    int origin_rep = building->getPlayerRepresent();
+    // 阵营未变化或建筑未建成(地基/半成品)则不处理
+    if (origin_rep == represent || !building->isConstructed()) return;
+
+    // 与 change_HumanRepresent 类似，但建筑关联的状态更多，以下步骤顺序不可调换
+
+    // 1.在切换阵营之前打断建筑当前行动：
+    //   若正在生产/研究，suspendRelation 内部会把预扣资源退还给原主人，
+    //   并经 initAction 回滚原主人科技树的“执行中”标记；
+    //   若是箭塔正在攻击，也一并打断，避免其继续射击转换后的友军
+    suspendRelation(building);
+
+    // 2.暂停原主人单位以该建筑为目标的采集/修理行动，避免其继续为敌方建筑工作
+    //   (正在攻击该建筑的行动不打断，它现在确实是敌方建筑)
+    for (map<Coordinate*, relation_Object>::iterator iter = relate_AllObject.begin(); iter != relate_AllObject.end(); iter++)
+    {
+        relation_Object& thisRelation = iter->second;
+        if (!thisRelation.isExist || thisRelation.goalObject != building) continue;
+        if (iter->first->getPlayerRepresent() != origin_rep) continue;
+        if (thisRelation.relationAct == CoreEven_Gather || thisRelation.relationAct == CoreEven_FixBuilding)
+            suspendRelation(iter->first);
+    }
+
+    Development* originScience = theMap->player[origin_rep]->getPlayerScience();
+    Development* newScience = theMap->player[represent]->getPlayerScience();
+
+    // 3.计数迁移(人口上限、时代建筑数)，与 Player::deleteBuilding 的递减逻辑对称，
+    //   保证该建筑将来被拆毁时新主人的计数不会被多减
+    if (building->getNum() == BUILDING_HOME) { originScience->subHome(); newScience->addHome(); }
+    else if (building->getNum() == BUILDING_CENTER) { originScience->subCenter(); newScience->addCenter(); }
+    else if (building->getNum() != BUILDING_FARM) { originScience->sub_civiBuildNum(building->getNum()); newScience->add_civiBuildNum(building->getNum()); }
+
+    // 4.在新主人科技树中登记“已建成该建筑”，否则该建筑行动(生产/研究)的前置条件不满足，
+    //   转换后新主人无法使用该建筑
+    newScience->finishAction(building->getNum());
+
+    // 5.与单位转化的 freezeStats 类似：在切换科技归属之前，用原主人科技把建筑等级
+    //   (时代贴图、箭塔强化等级及攻击/射程科技加成)快照冻结，保证转化后建筑不降级；
+    //   此后若新主人研究出更高等级的相关科技，仍取较高者生效(与原版一致)
+    building->freezeLevel();
+
+    // 6.切换阵营与科技指针；贴图敌我、指令合法性、视野、小地图均由阵营与池子归属自动推导
+    building->setPlayerRepresent(represent);
+    building->setPlayerScience(newScience);
+    theMap->player[represent]->insertBuilding(building);
+    theMap->player[origin_rep]->removeBuilding(building);
+
+    // 7.交付点类建筑易主后，通知农民重新选择最近的资源交付建筑
+    if (building->getNum() == BUILDING_CENTER || building->getNum() == BUILDING_STOCK || building->getNum() == BUILDING_GRANARY)
+        resourceBuildHaveChange();
+
+    // 血量不作任何处理：Blood 为比例存储且建筑血量上限双方一致，转换后当前血量自然不变
+
+    call_debugText("red", " " + building->getChineseName() + "(编号:" + QString::number(building->getglobalNum()) + \
+        ")被祭司转换,归属阵营" + QString::number(origin_rep) + "->" + QString::number(represent), REPRESENT_BOARDCAST_MESSAGE);
+}
+
 
 //****************************************************************************************
 //通用的控制对象行动函数
@@ -1991,7 +2050,10 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
         //判断阵营
         bool samRep=object1->getPlayerRepresent()==object2->getPlayerRepresent();
         if(samRep){
-            //相同阵营回复血量
+            //相同阵营回复血量;建筑不可被祭司"治疗"(修理应由农民完成)
+            Building*building=0;
+            object2->printer_ToBuilding((void**)&building);
+            if(building!=0)return;
             attackee->updateBlood(-attacker->getATK());
         }else{
             //不同阵营转换敌人为己方阵营
@@ -1999,10 +2061,24 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
             if(g_frame < attacker->getConvertRestEndFrame()) return;
 
             Human*human=0;
+            Building*building=0;
             object2->printer_ToHuman((void**)&human);
-            if(human==0)return; //这里按道理不可能出现这种情况
-            //设置阵营以及相关一些操作
-            change_HumanRepresent(human,object1->getPlayerRepresent());
+            object2->printer_ToBuilding((void**)&building);
+            if(human!=0){
+                //设置阵营以及相关一些操作
+                change_HumanRepresent(human,object1->getPlayerRepresent());
+            }
+            else if(building!=0){
+                //转换敌方建筑
+                /** 提醒：目前游戏尚无神庙，转换建筑暂不设科技门槛；
+                    将来加入神庙后，此处应改为先判断祭司所属玩家是否已在神庙中研究相应科技，解锁后才可转换建筑 */
+                //未建成的建筑(地基/半成品)不可转换
+                if(!building->isConstructed())return;
+                change_BuildingRepresent(building,object1->getPlayerRepresent());
+                //转换成功后目标已变为友军，令祭司停手，避免其继续对建筑空挥
+                suspendRelation(object1);
+            }
+            else return; //这里按道理不可能出现这种情况
             //转化成功，进入休整冷却（PRIEST_REST_TIME 单位为秒，换算成帧）
             attacker->setConvertRestEndFrame(g_frame + PRIEST_REST_TIME*1000/TimePerFrame);
         }

@@ -15,7 +15,7 @@
     "GAME_TITLE": "Age of Empires",
     "MAPFILE_SUFFIX": "njust",
     "MUSIC_VOLUME": 0.5,
-    "GAME_LOSE_SEC": 1800,
+    "GAME_LOSE_SEC": 1500,
     "MAXPLAYER": 8,
     "NOWPLAYER": 2,
     "NOWPLAYERREPRESENT": 0,

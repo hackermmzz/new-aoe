@@ -61,8 +61,7 @@ Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* play
 /***************状态与图像显示****************/
 void Building::nextframe()
 {
-    if (Num == BUILDING_ARROWTOWER && playerScience != NULL
-        && playerScience->getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
+    if (Num == BUILDING_ARROWTOWER && getArrowTowerUpgradeLevel() >= 1)
         missionThrowStep = THROWMISSION_ARROWTOWER_UPGRADED;
     else if (Num == BUILDING_ARROWTOWER)
         missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
@@ -109,8 +108,9 @@ void Building::setNowRes()
         // 判断敌我: 如果 playerRepresent != NOWPLAYERREPRESENT，则为敌方
         int isEnemy = (playerRepresent != NOWPLAYERREPRESENT) ? 1 : 0;
         int civ = get_civilization();
-        if (Num == BUILDING_ARROWTOWER && playerScience != NULL
-            && playerScience->getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1
+        //转化后的建筑保持转化时刻的时代贴图不降级(取较高者)
+        if (levelFrozen && frozenCiv > civ) civ = frozenCiv;
+        if (Num == BUILDING_ARROWTOWER && getArrowTowerUpgradeLevel() >= 1
             && civ >= 1 && civ <= 3
             && builtArrowTowerUpgraded[civ][isEnemy] != NULL
             && !builtArrowTowerUpgraded[civ][isEnemy]->empty())
@@ -173,7 +173,7 @@ void Building::setAttribute()
 int Building::getVision()
 {
     if(getNum() == BUILDING_ARROWTOWER)
-        return vision + playerScience->get_addition_DisAttack(getSort(), Num, 0, get_AttackType());
+        return vision + getArrowTowerRangeAddition();
     else
         return vision;
 }
@@ -331,14 +331,19 @@ void Building::ActNumToActName()
 double Building::getDis_attack()
 {
     if(getNum() == BUILDING_ARROWTOWER)
-        return ( dis_Attack + playerScience->get_addition_DisAttack(getSort(),Num,0,get_AttackType()) )*BLOCKSIDELENGTH;
+        return ( dis_Attack + getArrowTowerRangeAddition() )*BLOCKSIDELENGTH;
     else return 0;
 }
 
 int Building::get_add_specialAttack()
 {
-    if (Num == BUILDING_ARROWTOWER && playerScience != NULL)
-        return playerScience->get_addition_Attack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, get_AttackType());
+    if (Num == BUILDING_ARROWTOWER)
+    {
+        int addition = (playerScience != NULL) ? playerScience->get_addition_Attack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, get_AttackType()) : 0;
+        //转化后的箭塔保持转化时刻的攻击科技加成不降级(取较高者)
+        if (levelFrozen && frozenAtkAddition > addition) addition = frozenAtkAddition;
+        return addition;
+    }
     return 0;
 }
 
@@ -365,9 +370,44 @@ int Building::showArrowTowerRangeBaseBlocks() const
 
 int Building::showArrowTowerRangeBonusBlocks() const
 {
-    if (Num != BUILDING_ARROWTOWER || playerScience == NULL)
+    if (Num != BUILDING_ARROWTOWER)
         return 0;
-    return playerScience->get_addition_DisAttack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, ATTACKTYPE_SHOOT);
+    return getArrowTowerRangeAddition();
+}
+
+int Building::getArrowTowerUpgradeLevel() const
+{
+    int level = (playerScience != NULL) ? playerScience->getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) : 0;
+    //转化后的箭塔保持转化时刻的强化等级不降级(取较高者)
+    if (levelFrozen && frozenArrowTowerLevel > level) level = frozenArrowTowerLevel;
+    return level;
+}
+
+int Building::getArrowTowerRangeAddition() const
+{
+    int addition = (playerScience != NULL) ? playerScience->get_addition_DisAttack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, ATTACKTYPE_SHOOT) : 0;
+    //转化后的箭塔保持转化时刻的射程/视野科技加成不降级(取较高者)
+    if (levelFrozen && frozenRangeAddition > addition) addition = frozenRangeAddition;
+    return addition;
+}
+
+//转化等级冻结（建筑）：快照转化时刻(原主人科技下的)时代与箭塔科技等级。
+//与单位的 freezeStats 不同，此处不做永久锁定，而是此后取"快照值"与"当前主人科技实时值"
+//中的较高者，保证转化后不降级，且新主人后续研究更高科技时仍能生效（与原版一致：
+//建筑升级科技作用于所有己方建筑）。血量与血量上限不在快照范围内，保持原有机制不变
+void Building::freezeLevel()
+{
+    if (levelFrozen) return;    //已冻结则保持首次快照
+
+    frozenCiv = get_civilization();
+    if (Num == BUILDING_ARROWTOWER && playerScience != NULL)
+    {
+        frozenArrowTowerLevel = playerScience->getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE);
+        frozenAtkAddition = playerScience->get_addition_Attack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, ATTACKTYPE_SHOOT);
+        frozenRangeAddition = playerScience->get_addition_DisAttack(SORT_BUILDING, BUILDING_ARROWTOWER, 0, ATTACKTYPE_SHOOT);
+    }
+
+    levelFrozen = true;
 }
 
 /********************虚函数**************************/

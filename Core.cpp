@@ -893,6 +893,9 @@ void Core::logActionResult(int ret, Coordinate* self, Coordinate* obj, int actio
             if (desc.contains("攻击"))
                 logMsg = " HumanAction:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
                 " 设置攻击目标为 " + obj->getChineseName() + " " + QString::number(obj->getglobalNum());
+            else if (desc.contains("转换"))
+                logMsg = " HumanAction:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
+                " 设置转换目标为 " + obj->getChineseName() + " " + QString::number(obj->getglobalNum());
             else if (desc.contains("运输") || desc.contains("收纳"))
                 logMsg = " HumanAction:" + self->getChineseName() + " " + QString::number(self->getglobalNum()) +
                 " " + desc + " " + obj->getChineseName() + " " + QString::number(obj->getglobalNum());
@@ -1065,6 +1068,9 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
         }
         else if (obj->getPlayerRepresent() != self->getPlayerRepresent()) {
             ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
+            //祭司对敌方建筑的动作记为"转换"，其余仍为普通攻击
+            if (self->getSort() == SORT_ARMY && self->getNum() == AT_PRIEST && obj->getSort() != SORT_FARMER)
+                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "转换", id);
         }
         break;
     case SORT_ARMY:

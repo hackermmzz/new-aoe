@@ -69,6 +69,7 @@ public:
     int get_homeNum(){ return (int)(centerNum>0) + homeNum; }
     void addHome(){ homeNum++; }
     void subHome(){ homeNum--; }
+    void addCenter(){ centerNum++; }
     void subCenter(){ centerNum--; }
   /*****************以上游戏进程信息*******************/
 
