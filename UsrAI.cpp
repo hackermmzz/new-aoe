@@ -10,7 +10,7 @@ ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
 int lunx=0;
 
-
+void UsrAI::processData(){
     tagInfo x=getInfo();
     while(lunx<15&&x.Gold<150000)
     {

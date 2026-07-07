@@ -84,7 +84,7 @@ static bool wave3Completed = false;
 
 static vector<int> wave1Units;   // 第一波：2 个棍棒兵 + 2 个侦察兵
 static vector<int> wave2Units;   // 第二波：指定铜器兵组合 + 第一波残兵
-static vector<int> wave3Units;   // 第三波：10 个铜器陆军 + 前两波残兵
+static vector<int> wave3Units;   // 第三波：4 复合弓兵 + 2 骑兵 + 2 方阵兵 + 2 投石车 + 前两波残兵
 static vector<int> wave3PriestHunters; // 第三波最多 3 人负责最高优先级追杀祭司
 
 static vector<int> wave1TouchedFarmers;
@@ -113,6 +113,7 @@ static map<int, int> fieldSelfDefenseLastOrderFrame;
 #define DEFENSE_CHASE_LIMIT (radius_Outer + 3)
 #define PRIEST_GUARD_RANGE (radius_Outer + 5)
 #define WAVE3_PRIEST_HUNTER_LIMIT 3
+#define STONE_THROWER_EVADE_BUFFER_BLOCKS 1.5
 #define PRIEST_GUARD_COMPOSITE_BOWMAN_COUNT 3
 #define PRIEST_GUARD_CHARIOT_ARCHER_COUNT 1
 #define PRIEST_GUARD_CHARIOT_COUNT 1
@@ -667,6 +668,135 @@ static int FindNearestPriestNearSiegeCenter(const tagArmy& army)
     }
 
     return bestSN;
+}
+
+static bool IsStoneThrowerRangedDefenseTarget(int sort)
+{
+    return sort == AT_SLINGER
+        || sort == AT_BOWMAN
+        || sort == AT_IMPROVED
+        || sort == AT_CHARIOT_ARCHER
+        || sort == AT_STONE_THROWER;
+}
+
+static int StoneThrowerDefensePriority(int sort)
+{
+    if (sort == AT_COMPOSITE_BOWMAN) return 0;
+    if (IsStoneThrowerRangedDefenseTarget(sort)) return 1;
+
+    return 2;
+}
+
+static int FindStoneThrowerDefenseTarget(const tagArmy& army)
+{
+    int bestSN = -1;
+    int bestPriority = 1000000000;
+    int bestDis = 1000000000;
+
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                 Enemy_Center.first, Enemy_Center.second);
+        if (dToCenter > radius_Outer) continue;
+
+        int priority = StoneThrowerDefensePriority(enemyArmy.Sort);
+        int d = BlockDis2(army.BlockDR, army.BlockUR,
+                          enemyArmy.BlockDR, enemyArmy.BlockUR);
+        if (priority < bestPriority ||
+            (priority == bestPriority && d < bestDis)) {
+            bestPriority = priority;
+            bestDis = d;
+            bestSN = enemyArmy.SN;
+        }
+    }
+
+    if (bestSN != -1) return bestSN;
+
+    // 没有玩家军队靠近时，沿用普通防守逻辑，把靠近厂区的农民作为最后兜底目标
+    for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+        int dToCenter = BlockDis(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
+                                 Enemy_Center.first, Enemy_Center.second);
+        if (dToCenter > radius_Outer) continue;
+
+        int d = BlockDis2(army.BlockDR, army.BlockUR,
+                          enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = enemyFarmer.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+static bool FindEnemyTargetDetailPosition(int targetSN, double& dr, double& ur)
+{
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.SN == targetSN) {
+            dr = enemyArmy.DR;
+            ur = enemyArmy.UR;
+            return true;
+        }
+    }
+
+    for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+        if (enemyFarmer.SN == targetSN) {
+            dr = enemyFarmer.DR;
+            ur = enemyFarmer.UR;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool GetStoneThrowerEvadePoint(const tagArmy& army,
+                                      int targetSN,
+                                      double& evadeDR,
+                                      double& evadeUR)
+{
+    double targetDR = 0;
+    double targetUR = 0;
+    if (!FindEnemyTargetDetailPosition(targetSN, targetDR, targetUR)) return false;
+
+    double minRange = DIS_MIN_STONE_THROWER * BLOCKSIDELENGTH;
+    double distance = countdistance(army.DR, army.UR, targetDR, targetUR);
+    if (distance >= minRange) return false;
+
+    double awayDR = army.DR - targetDR;
+    double awayUR = army.UR - targetUR;
+
+    if (distance <= 0.0001) {
+        auto home = DefenseHome.find(army.SN);
+        if (home != DefenseHome.end()) {
+            awayDR = home->second.first - targetDR;
+            awayUR = home->second.second - targetUR;
+        } else {
+            awayDR = Enemy_Center.first * BLOCKSIDELENGTH - targetDR;
+            awayUR = Enemy_Center.second * BLOCKSIDELENGTH - targetUR;
+        }
+
+        distance = countdistance(0, 0, awayDR, awayUR);
+        if (distance <= 0.0001) {
+            awayDR = BLOCKSIDELENGTH;
+            awayUR = 0;
+            distance = BLOCKSIDELENGTH;
+        }
+    }
+
+    double desiredDistance = (DIS_MIN_STONE_THROWER + STONE_THROWER_EVADE_BUFFER_BLOCKS) * BLOCKSIDELENGTH;
+    double moveDistance = desiredDistance - countdistance(army.DR, army.UR, targetDR, targetUR);
+    if (moveDistance < BLOCKSIDELENGTH) moveDistance = BLOCKSIDELENGTH;
+
+    evadeDR = army.DR + awayDR / distance * moveDistance;
+    evadeUR = army.UR + awayUR / distance * moveDistance;
+
+    double minDetail = BLOCKSIDELENGTH / 2.0;
+    double maxDR = (MAP_L - 0.5) * BLOCKSIDELENGTH;
+    double maxUR = (MAP_U - 0.5) * BLOCKSIDELENGTH;
+    evadeDR = std::max(minDetail, std::min(evadeDR, maxDR));
+    evadeUR = std::max(minDetail, std::min(evadeUR, maxUR));
+
+    return true;
 }
 
 // 第一波兵种：棍棒兵、战斧、骑兵、弓箭手、侦察兵
@@ -2006,37 +2136,56 @@ void EnemyAI::AssignDefense()
             }
         }
 
-        // 只攻击靠近武器攻城厂的玩家单位
         int targetSN = -1;
-        int bestDis = 1000000000;
 
-        for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
-            int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
-                                     Enemy_Center.first, Enemy_Center.second);
-            if (dToCenter > radius_Outer) continue;
+        if (army->Sort == AT_STONE_THROWER) {
+            // 攻城厂守卫投石车：复合弓兵 > 其他远程攻击单位 > 其他军队；范围/回防仍沿用普通防守逻辑
+            targetSN = FindStoneThrowerDefenseTarget(*army);
+        } else {
+            // 只攻击靠近武器攻城厂的玩家单位
+            int bestDis = 1000000000;
 
-            int d = BlockDis2(army->BlockDR, army->BlockUR,
-                              enemyArmy.BlockDR, enemyArmy.BlockUR);
-            if (d < bestDis) {
-                bestDis = d;
-                targetSN = enemyArmy.SN;
+            for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+                int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                         Enemy_Center.first, Enemy_Center.second);
+                if (dToCenter > radius_Outer) continue;
+
+                int d = BlockDis2(army->BlockDR, army->BlockUR,
+                                  enemyArmy.BlockDR, enemyArmy.BlockUR);
+                if (d < bestDis) {
+                    bestDis = d;
+                    targetSN = enemyArmy.SN;
+                }
             }
-        }
 
-        for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
-            int dToCenter = BlockDis(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
-                                     Enemy_Center.first, Enemy_Center.second);
-            if (dToCenter > radius_Outer) continue;
+            for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+                int dToCenter = BlockDis(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
+                                         Enemy_Center.first, Enemy_Center.second);
+                if (dToCenter > radius_Outer) continue;
 
-            int d = BlockDis2(army->BlockDR, army->BlockUR,
-                              enemyFarmer.BlockDR, enemyFarmer.BlockUR);
-            if (d < bestDis) {
-                bestDis = d;
-                targetSN = enemyFarmer.SN;
+                int d = BlockDis2(army->BlockDR, army->BlockUR,
+                                  enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+                if (d < bestDis) {
+                    bestDis = d;
+                    targetSN = enemyFarmer.SN;
+                }
             }
         }
 
         if (targetSN != -1) {
+            double evadeDR = 0;
+            double evadeUR = 0;
+            if (army->Sort == AT_STONE_THROWER &&
+                GetStoneThrowerEvadePoint(*army, targetSN, evadeDR, evadeUR)) {
+                if (g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
+                    HumanMove(sn, evadeDR, evadeUR);
+                    defenseLastOrderFrame[sn] = g_frame;
+                }
+
+                ++it;
+                continue;
+            }
+
             if (army->WorkObjectSN != targetSN ||
                 g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
                 HumanAction(sn, targetSN);
@@ -2257,7 +2406,7 @@ void EnemyAI::ThirdAttack()
 {
     if (wave3Completed) return;
 
-    // 第一次进入第三波：前两波残兵 + 10 个新铜器兵
+    // 第一次进入第三波：前两波残兵 + 固定 10 个新兵
     if (!wave3Started) {
         CleanDeadUnits(wave1Units);
         CleanDeadUnits(wave2Units);
@@ -2277,7 +2426,10 @@ void EnemyAI::ThirdAttack()
         }
 
         vector<int> alreadyUsed = wave3Units;
-        SelectWaveUnits(wave3Units, 10, IsBronzeLandSort, alreadyUsed);
+        SelectWaveUnitsBySort(wave3Units, AT_COMPOSITE_BOWMAN, 4, alreadyUsed);
+        SelectWaveUnitsBySort(wave3Units, AT_CAVALRY, 2, alreadyUsed);
+        SelectWaveUnitsBySort(wave3Units, AT_HOPLITE, 2, alreadyUsed);
+        SelectWaveUnitsBySort(wave3Units, AT_STONE_THROWER, 2, alreadyUsed);
 
         wave3Started = true;
     }
