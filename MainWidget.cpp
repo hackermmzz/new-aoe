@@ -2138,28 +2138,46 @@ void MainWidget::paintUpdate()
     //
 }
 
+static bool HasAlivePlayerCenter(Player* p)
+{
+    if (p == nullptr) return false;
+
+    for (Building* building : p->build) {
+        if (building == nullptr) continue;
+        if (building->getNum() == BUILDING_CENTER && !building->isDie()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool HasAlivePlayerPriest(Player* p)
+{
+    if (p == nullptr) return false;
+
+    for (Human* human : p->human) {
+        if (human == nullptr) continue;
+        if (human->getSort() == SORT_ARMY &&
+            human->getNum() == AT_PRIEST &&
+            !human->isDie()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool MainWidget::isLoss()
 {
     //失败条件(任一满足即失败)：
     //1.游戏时长耗尽(时长上限由 config.json 的 GAME_LOSE_SEC 配置，当前为25分钟)
     if (sel->getSecend() > GAME_LOSE_SEC) return true;
 
-    //遍历玩家单位与建筑，查看当前是否拥有存活的巫师英雄(祭司)与市镇中心
-    bool havePriest = false, haveCenter = false;
-
-    for (Human* theHuman : player[0]->human)
-        if (theHuman->getSort() == SORT_ARMY && theHuman->getNum() == AT_PRIEST && !theHuman->isDie())
-        {
-            havePriest = true;
-            break;
-        }
-
-    for (Building* theBuild : player[0]->build)
-        if (theBuild->getNum() == BUILDING_CENTER && !theBuild->isDie())
-        {
-            haveCenter = true;
-            break;
-        }
+    //查看当前是否拥有存活的巫师英雄(祭司)与市镇中心
+    Player* currentPlayer = player[NOWPLAYERREPRESENT];
+    bool havePriest = HasAlivePlayerPriest(currentPlayer);
+    bool haveCenter = HasAlivePlayerCenter(currentPlayer);
 
     if (havePriest) everHavePriest = true;
     if (haveCenter) everHaveCenter = true;
