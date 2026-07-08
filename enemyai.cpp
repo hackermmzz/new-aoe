@@ -43,8 +43,8 @@ tagInfo enemyInfo;
 #define FAT 6000     //第一波骚扰时间
 #define SAT 13500    //第二波骚扰时间
 #define TAT 21000    //第三波骚扰时间
-#define radius_Outer 15
-#define radius_Inner 10
+#define radius_Outer 20
+#define radius_Inner 15
 
 static int vision[128][128];
 static int around[100];
