@@ -2069,6 +2069,10 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
                 change_HumanRepresent(human,object1->getPlayerRepresent());
             }
             else if(building!=0){
+                //转换敌方建筑需贴邻，与农民修理建筑的工作距离一致(见 set_distance_AllowWork)
+                if(!isNear_Manhattan(object1->getDR(), object1->getUR(), object2->getDR(), object2->getUR(),
+                    object2->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB))
+                    return;
                 //转换敌方建筑
                 /** 提醒：目前游戏尚无神庙，转换建筑暂不设科技门槛；
                     将来加入神庙后，此处应改为先判断祭司所属玩家是否已在神庙中研究相应科技，解锁后才可转换建筑 */

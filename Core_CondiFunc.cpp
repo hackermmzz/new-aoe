@@ -283,6 +283,14 @@ void relation_Object::init_AttackAb( Coordinate* object1 )
     {
          attacker->setAttackObject(goalObject); //攻击者记录攻击目标, 用于对于army会计算特攻,farmer计算距离
          disAttack = attacker->getDis_attack();
+         //祭司转换建筑需贴邻发动，攻击/移动判定距离与农民修理建筑的 OPERATECON_NEAR_WORK 一致
+         if (object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST && goalObject != NULL)
+         {
+             Building* buildGoal = NULL;
+             goalObject->printer_ToBuilding((void**)&buildGoal);
+             if (buildGoal != NULL)
+                 disAttack = goalObject->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB;
+         }
     }
 }
 
