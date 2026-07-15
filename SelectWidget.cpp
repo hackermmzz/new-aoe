@@ -48,8 +48,7 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_ARMYCAMP_CREATE_SLINGER] = "Button_Slinger";
     actionResourceMap[ACT_ARMYCAMP_CREATE_BROADSWORD] = "Button_BroadSwordsman";
     actionResourceMap[ACT_ARMYCAMP_UPGRADE_BROADSWORD] = "ButtonTech_Broadsword";
-    // 暂无独立后勤图标，使用项目通用空白按钮。
-    actionResourceMap[ACT_ARMYCAMP_RESEARCH_LOGISTICS] = "Button";
+    actionResourceMap[ACT_ARMYCAMP_RESEARCH_LOGISTICS] = "ButtonTech_Logistics";
     actionResourceMap[ACT_COLLAGE_CREATE_HOPLITE] = "Button_Hoplite";
     actionResourceMap[ACT_RANGE_CREATE_BOWMAN] = "Button_Archer";
     actionResourceMap[ACT_RANGE_CREATE_COMPOSITE_BOWMAN] = "Button_CompositeBowman";
