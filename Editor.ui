@@ -67,6 +67,11 @@
    </item>
    <item>
     <property name="text">
+     <string>玩家谷仓</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>玩家房子</string>
     </property>
    </item>
@@ -286,6 +291,11 @@
    <item>
     <property name="text">
      <string>公立资源</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>浆果</string>
     </property>
    </item>
    <item>
