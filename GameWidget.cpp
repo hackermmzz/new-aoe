@@ -29,6 +29,8 @@ void GameWidget::paintEvent(QPaintEvent *)
     }
     //
     QPainter painter(&gameBuffer);
+    showLine = mainwidget->isPaused() && !IsExamining && !EditorMode;
+    QPainterPath debugGridPath;
 
     painter.setPen(Qt::black);
 
@@ -103,6 +105,16 @@ void GameWidget::paintEvent(QPaintEvent *)
                 //绘制
                 if(pix)
                 painter.drawPixmap(x,y,w,h,*pix);
+                if(showLine)
+                {
+                    const int cellWidth = qMax(1, w - 1);
+                    const int cellHeight = qMax(1, h - 1);
+                    debugGridPath.moveTo(x + cellWidth / 2.0, y);
+                    debugGridPath.lineTo(x + cellWidth, y + cellHeight / 2.0);
+                    debugGridPath.lineTo(x + cellWidth / 2.0, y + cellHeight);
+                    debugGridPath.lineTo(x, y + cellHeight / 2.0);
+                    debugGridPath.closeSubpath();
+                }
             }
             x2++;
             y2++;
@@ -258,6 +270,19 @@ void GameWidget::paintEvent(QPaintEvent *)
             (*iter)->setInWidget();
             iter++;
         }
+    }
+
+    if(showLine)
+    {
+        painter.save();
+        QPen gridPen(QColor(255, 255, 255, 55));
+        gridPen.setWidthF(1.0);
+        gridPen.setCosmetic(true);
+        painter.setPen(gridPen);
+        painter.setBrush(Qt::NoBrush);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.drawPath(debugGridPath);
+        painter.restore();
     }
 
     //对飞行物进行绘制拖尾特效

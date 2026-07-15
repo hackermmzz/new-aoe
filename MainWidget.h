@@ -45,6 +45,7 @@ public:
     // 获取核心对象
     Core* getCore() const { return core; }
     AI* getUsrAI(){return UsrAi;}
+    bool isPaused() const { return pause; }
     // 敌人状态相关函数 - 需要被外部调用，所以放在public中
     void setEnemyStatus(Coordinate* unit, const string& status);  // 设置敌人状态
     string getEnemyStatus(Coordinate* unit);  // 获取敌人状态
