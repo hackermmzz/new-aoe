@@ -188,6 +188,7 @@ MainWidget::MainWidget(QWidget* parent) :
         else if (text == "玩家箭塔") this->currentSelected = PLAYERARROWTOWER;
         else if (text == "玩家渔场") this->currentSelected = PLAYERFISHERY;
         else if (text == "玩家房子") this->currentSelected = PLAYERHOME;
+        else if (text == "玩家谷仓") this->currentSelected = PLAYERGRANARY;
         if (text != "玩家资源/建筑") call_debugText("green", " " + text, 0);
         });
     connect(editor->ui->player_human, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, [=](const QString& text) {
@@ -235,6 +236,7 @@ MainWidget::MainWidget(QWidget* parent) :
         if (text == "树木") this->currentSelected = TREE;
         else if (text == "石头") this->currentSelected = STONM;
         else if (text == "金矿") this->currentSelected = GOLDORE;
+        else if (text == "浆果") this->currentSelected = BERRY;
         if (text != "公立资源") call_debugText("green", " " + text, 0);
         });
     // 巡逻区域控制
@@ -618,6 +620,9 @@ void MainWidget::updateEditor()
         case STONM:
             MakeStaticRes(L, U, STONM);
             break;
+        case BERRY:
+            MakeStaticRes(L, U, BERRY);
+            break;
         case ELEPHANT:
             MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), ELEPHANT);
             break;
@@ -639,6 +644,8 @@ void MainWidget::updateEditor()
         case PLAYERHOME:
             MakeBuilding(L, U, PLAYERHOME);
             break;
+        case PLAYERGRANARY:
+            MakeBuilding(L, U, PLAYERGRANARY);
         case AIARROWTOWER:
             MakeBuilding(L, U, AIARROWTOWER);
             break;
@@ -1116,6 +1123,10 @@ void MainWidget::MakeStaticRes(int blockL, int blockU, int type)
     {
         map->addStaticRes(1, blockL, blockU);
     }
+    else if (type == BERRY)
+    {
+        map->addStaticRes(0, blockL, blockU);
+    }
     else if (type == PLAYERFISHERY)
     {
         map->addStaticRes(3, blockL, blockU);
@@ -1154,6 +1165,9 @@ void MainWidget::MakeBuilding(int blockL, int blockU, int type)
     }
     else if(type == PLAYERHOME){
         player[0]->addBuilding(BUILDING_HOME, blockL, blockU, 100);
+    }
+    else if(type == PLAYERGRANARY){
+        player[0]->addBuilding(BUILDING_GRANARY, blockL, blockU, 100);
     }
     else if (type == AIARROWTOWER) {
         player[1]->addBuilding(BUILDING_ARROWTOWER, blockL, blockU, 100);

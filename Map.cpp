@@ -9,6 +9,8 @@
 #include <random>
 #include<map>
 #include<algorithm>
+#include <QFileInfo>
+#include <QDir>
 #include<Rectarea.h>
 #include<LineArea.h>
 #include<CircleArea.h>
@@ -1526,12 +1528,34 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
 void Map::loadGenerateMapText()
 {
     // 使用高精度时间为种子的真随机数生成器
-    auto AllMapFile=GetAllTargetFiles(MAPFILE_SUFFIX.c_str());
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::mt19937 gen(seed);
-    std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
-    int mapIdx = dis(gen); // 1~4
-    auto mapPath=AllMapFile[mapIdx];
+    QString mapPath;
+    QString fixedMapFile = RuntimeConfig_FixedMapFile().trimmed();
+    QString mapSuffix = QString::fromStdString(MAPFILE_SUFFIX);
+
+    if(!fixedMapFile.isEmpty()){
+        mapPath = fixedMapFile;
+        if(QFileInfo(mapPath).suffix().isEmpty()){
+            mapPath += "." + mapSuffix;
+        }
+        if(!QFileInfo(mapPath).isAbsolute()){
+            mapPath = QDir::current().absoluteFilePath(mapPath);
+        }
+        if(!QFileInfo(mapPath).isFile()){
+            qWarning() << "fixed map file not found:" << mapPath;
+            return;
+        }
+    }else{
+        auto AllMapFile=GetAllTargetFiles(mapSuffix);
+        if(AllMapFile.empty()){
+            qWarning() << "map file not found, suffix:" << mapSuffix;
+            return;
+        }
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        std::mt19937 gen(seed);
+        std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
+        int mapIdx = dis(gen); // 1~4
+        mapPath=AllMapFile[mapIdx];
+    }
     QFile file(mapPath);
     MapFileName=mapPath.split("/").back();
 

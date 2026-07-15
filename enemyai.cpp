@@ -1099,7 +1099,7 @@ static int FindStickyWaveTarget(const tagArmy& army, int wave)
     if (it == currentTarget.end()) return -1;
 
     int targetSN = it->second;
-    if (wave == 2 && EnemyPriestAlive(targetSN)) {
+    if ((wave == 1 || wave == 2) && EnemyPriestAlive(targetSN)) {
         int coveringTower = FindTowerCoveringPriest(targetSN);
         if (coveringTower != -1) {
             currentTarget[army.SN] = coveringTower;
@@ -1136,7 +1136,9 @@ static int FindWaveTarget(const tagArmy& army, int wave)
     if (wave == 2) {
         int threat = FindThreatToArmy(army);
         if (threat != -1) return threat;
+    }
 
+    if (wave == 1 || wave == 2) {
         // 祭司优先于农民；只追击箭塔范围外的祭司。
         int priestOutside = FindNearestPriestByTowerState(army.BlockDR,
                                                           army.BlockUR,
@@ -1166,7 +1168,9 @@ static int FindWaveTargetAvoidingReserved(const tagArmy& army,
     if (wave == 2) {
         int threat = FindThreatToArmy(army);
         if (threat != -1) return threat;
+    }
 
+    if (wave == 1 || wave == 2) {
         int priestOutside = FindNearestPriestByTowerState(army.BlockDR,
                                                           army.BlockUR,
                                                           false);
@@ -2255,9 +2259,11 @@ void EnemyAI::FirstAttack()
         return;
     }
 
-    // 没杀够 3 个农民，但玩家农民已经死完：
+    // 没杀够 3 个农民，但玩家农民已经死完，且没有塔外祭司：
     // 本波不撤退，先拆剩余箭塔，再拆玩家基地
-    if (NoPlayerFarmersLeft() && wave1KilledFarmers.size() < 3) {
+    if (NoPlayerFarmersLeft() &&
+        wave1KilledFarmers.size() < 3 &&
+        !HasEnemyPriestOutsideTowerRange()) {
         int targetSN = FindTowerThenBaseTargetForUnits(wave1Units);
 
         if (targetSN != -1) {
@@ -2270,7 +2276,7 @@ void EnemyAI::FirstAttack()
 
         return;
     }
-    // 未杀够：动态寻找 塔外农民 > 箭塔
+    // 未杀够：动态寻找 塔外祭司 > 塔外农民 > 箭塔
     vector<int> assignedFarmers;
     ReserveCurrentFarmerTargets(wave1Units, assignedFarmers);
 

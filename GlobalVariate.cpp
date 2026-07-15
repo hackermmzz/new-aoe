@@ -623,6 +623,7 @@ void MouseEvent::Reset()
 void ParseArguments(const QApplication&app){
     ////////////////////////////////解析参数
     QCommandLineParser parser;
+    parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     // 添加帮助选项（自动处理--help/-h）
     parser.addHelpOption();
     QCommandLineOption option0(
@@ -643,7 +644,12 @@ void ParseArguments(const QApplication&app){
          "开启几倍速",
          "1|2|4|8|MAX"
        );
-    QList<QCommandLineOption>options={option0,option1,option2,option3};
+    QCommandLineOption option4(
+        QStringList()<<"fix",
+         "fixed map file for debugging",
+         "map.njust"
+       );
+    QList<QCommandLineOption>options={option0,option1,option2,option3,option4};
     parser.addOptions(options);
     parser.process(app);
     //
@@ -664,6 +670,10 @@ void ParseArguments(const QApplication&app){
         auto value=parser.value("freq");
         if(value=="MAX")RuntimeConfig_setINITIAL_FREQUENCY(INT_MAX);
         else RuntimeConfig_setINITIAL_FREQUENCY(value.toInt());
+    }
+    //
+    if(parser.isSet("fix")){
+        RuntimeConfig_setFixedMapFile(parser.value("fix"));
     }
 }
 //Json化一个Map

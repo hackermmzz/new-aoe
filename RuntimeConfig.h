@@ -44,6 +44,8 @@ QString RuntimeConfig_GAME_TITLE();
 std::string RuntimeConfig_MAPFILE_SUFFIX();
 #define MAPFILE_SUFFIX (RuntimeConfig_MAPFILE_SUFFIX())
 
+QString RuntimeConfig_FixedMapFile();
+
 int RuntimeConfig_MAXPLAYER();
 #define MAXPLAYER (RuntimeConfig_MAXPLAYER())
 
