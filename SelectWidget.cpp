@@ -583,11 +583,18 @@ void SelectWidget::refreshActs()
             // 根据不同时代设置不同的图标
             // 判断是否为敌方建筑
             int isEnemy = (objBuilding->getPlayerRepresent() != NOWPLAYERREPRESENT) ? 1 : 0;
-            string name = "Button_" + Building::getBuiltname(mainPtr->player[0]->getCiv(), isEnemy, buildType);
+            string buildingName = Building::getBuiltname(mainPtr->player[0]->getCiv(), isEnemy, buildType);
+            string name = "Button_" + buildingName;
             if (resMap.find(name) != resMap.end() && !resMap[name].empty())
             {
                 // 如果找到了对应的图片，设置该图片
                 ui->objIcon->setPixmap(resMap[name].front().scaled(110, 110));
+            }
+            else if (resMap.find(buildingName) != resMap.end() && !resMap[buildingName].empty())
+            {
+                // 没有专用 Button_ 图标时，回退到当前时代、当前阵营的建筑本体图片。
+                ui->objIcon->setPixmap(resMap[buildingName].front().scaled(
+                    110, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             }
             else
             {

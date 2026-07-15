@@ -212,20 +212,14 @@ public:
                     return ACT_UPGRADE_ARROWTOWER;
             }
         }
-        // 市镇中心：同仓库「工具使用/金属加工」——先判时代与可显示，再用当前节点资源消耗是否含黄金区分铜器段（BUILDING_CENTER_UPGRADE 链第二节点）
+        // 市镇中心：根据升时代科技链的已完成阶段切换“工具时代/铜器时代”按钮，避免资源配置变化影响 UI。
         else if (this->Num == BUILDING_CENTER && playerScience != NULL)
         {
-            int actNum = actNames[this->Num][num];
-            if (actNum == ACT_UPGRADE_AGE)
+            int action = actNames[this->Num][num];
+            if (action == ACT_UPGRADE_AGE &&
+                playerScience->getActLevel(BUILDING_CENTER, BUILDING_CENTER_UPGRADE) >= 1)
             {
-                if (civ >= CIVILIZATION_TOOLAGE &&
-                    playerScience->get_isBuildActionShowAble(BUILDING_CENTER, BUILDING_CENTER_UPGRADE, civ))
-                {
-                    int wood, food, stone, gold;
-                    playerScience->get_Resource_Consume(BUILDING_CENTER, BUILDING_CENTER_UPGRADE, wood, food, stone, gold);
-                    if (gold > 0)
-                        return ACT_UPGRADE_BRONZEAGE;
-                }
+                return ACT_UPGRADE_BRONZEAGE;
             }
         }
         return actNames[this->Num][num];
