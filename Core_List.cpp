@@ -376,6 +376,9 @@ void Core_List::manageRelationList()
             int exePhaseNum = nowPhaseNum;
             detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
             object2 = thisRelation.goalObject;
+            bool isEnemyPriestConversion = object2 != NULL &&
+                object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
+                object1->getPlayerRepresent() != object2->getPlayerRepresent();
             conditionF* recordCondition;
             //该部分为强制中止行动部分代码
             list<conditionF>& forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
@@ -456,12 +459,25 @@ void Core_List::manageRelationList()
                 switch (thisDetailEven.phaseList[nowPhaseNum])
                 {
                 case CoreDetail_Move:
+                    //目标离开施法范围后取消本次转换计时；再次靠近时重新随机
+                    if (isEnemyPriestConversion) thisRelation.wait(0);
                     object1->printer_ToMoveObject((void**)&moveOb);
                     if (moveOb != NULL)
                         moveOb->setPath(stack<Point>(), object1->getDR(), object1->getUR());
                     break;
                 case CoreDetail_Attack:
                     if (thisRelation.relationAct == CoreEven_MissileAttack) thisRelation.set_ExecutionTime(1);
+                    else if (isEnemyPriestConversion)
+                    {
+                        BloodHaver* priest = NULL;
+                        object1->printer_ToBloodHaver((void**)&priest);
+
+                        const int minConvertFrames = 2000 / TimePerFrame;
+                        const int maxConvertFrames = 6000 / TimePerFrame;
+                        const int randomConvertFrames = minConvertFrames + rand() % (maxConvertFrames - minConvertFrames + 1);
+                        const int restFrames = priest == NULL ? 0 : std::max(0, priest->getConvertRestEndFrame() - g_frame);
+                        thisRelation.wait(restFrames + randomConvertFrames);
+                    }
                     break;
                 case CoreDetail_Gather:
                     thisRelation.needResourceBuilding = true;
@@ -877,6 +893,9 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
     if (object2) object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
     object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
+    bool isEnemyPriestConversion = object2 != NULL &&
+        object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
+        object1->getPlayerRepresent() != object2->getPlayerRepresent();
     set<pair<Coordinate*,int>>attackees;
     if (attackee != NULL && attacker != NULL && attacker->canAttack())  //若指针均非空
     {
@@ -907,7 +926,8 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
                     attacker->haveAttack();
                 }
             }
-            else if (attacker->is_attackHit())
+            //敌方目标的祭司转换由关系计时控制；其他攻击仍按动画命中帧结算
+            else if (isEnemyPriestConversion ? !relate_AllObject[object1].isWaiting() : attacker->is_attackHit())
             {
                 NeedCalculateDamage = true;
                 attackees.insert({object2,0});
@@ -2079,12 +2099,12 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
                 //未建成的建筑(地基/半成品)不可转换
                 if(!building->isConstructed())return;
                 change_BuildingRepresent(building,object1->getPlayerRepresent());
-                //转换成功后目标已变为友军，令祭司停手，避免其继续对建筑空挥
-                suspendRelation(object1);
             }
             else return; //这里按道理不可能出现这种情况
             //转化成功，进入休整冷却（PRIEST_REST_TIME 单位为秒，换算成帧）
             attacker->setConvertRestEndFrame(g_frame + PRIEST_REST_TIME*1000/TimePerFrame);
+            //转换成功后目标已变为友军，令祭司停手，避免继续攻击或治疗刚转换的目标
+            suspendRelation(object1);
         }
     }
     //普通伤害攻击
