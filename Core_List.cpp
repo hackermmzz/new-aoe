@@ -739,9 +739,18 @@ void Core_List::requestSound_Action(Coordinate* object, int actionType, Coordina
 void Core_List::change_HumanRepresent(Human *human, int represent)
 {
     int origin_rep=human->getPlayerRepresent();
+    if (origin_rep == represent) return;
+
+    Player* originPlayer = theMap->player[origin_rep];
+    Player* newPlayer = theMap->player[represent];
+
+    // 按双方各自的后勤科技迁移人口占用；转换允许暂时超过人口上限。
+    originPlayer->humanNumDecrease(human);
+    newPlayer->humanNumIncrease(human);
+
     human->setPlayerRepresent(represent);
-    theMap->player[represent]->insertHuman(human);
-    theMap->player[origin_rep]->removeHuman(human);
+    newPlayer->insertHuman(human);
+    originPlayer->removeHuman(human);
 
     // 转换成功且阵营确实变化后处理
     if (origin_rep != represent)
@@ -750,7 +759,7 @@ void Core_List::change_HumanRepresent(Human *human, int represent)
         // 此后该单位属性永久锁定，不再受任何一方科技升级影响
         human->freezeStats();
         // 攻防已定格，把科技指针切到新主人，避免长期持有(可能被销毁的)原主人科技树
-        human->setPlayerScience(theMap->player[represent]->getPlayerScience());
+        human->setPlayerScience(newPlayer->getPlayerScience());
 
         // 立刻下达一次“原地移动”来打断当前行为
         suspendRelation(human);

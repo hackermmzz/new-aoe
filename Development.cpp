@@ -332,10 +332,40 @@ void Development::finishAction(int buildingType, int buildact)
     developLab[buildingType].finishAction(buildact);
 }
 
+bool Development::isLogisticsResearched()
+{
+    return getActLevel(BUILDING_ARMYCAMP, BUILDING_ARMYCAMP_RESEARCH_LOGISTICS) > 0;
+}
+
+int Development::getPopulationHalfSlots(int sourceBuilding, int objectSort)
+{
+    if (objectSort == SORT_ARMY &&
+        sourceBuilding == BUILDING_ARMYCAMP &&
+        isLogisticsResearched())
+    {
+        return 1;
+    }
+
+    return 2;
+}
+
+int Development::getActionPopulationHalfSlots(int buildingNum, int actNum)
+{
+    conditionDevelop* node = developLab[buildingNum].actCon[actNum].nowExecuteNode;
+    if (node == NULL) return 0;
+
+    int createSort = -1;
+    int createNum = -1;
+    if (!node->isNeedCreatObject(createSort, createNum)) return 0;
+
+    return getPopulationHalfSlots(buildingNum, createSort);
+}
+
 bool Development::get_isBuildActionAble(int buildingNum, int actNum, int civilization, int wood, int food, int stone, int gold, int* oper)
 {
-    //如果需要创建人口，判断是否有容量添加人
-    if (developLab[buildingNum].actCon[actNum].isNeedCreatObject() && !get_isHumanHaveSpace())
+    //如果需要创建人口，按照该行动的实际人口权重判断容量。
+    int requiredHalfSlots = getActionPopulationHalfSlots(buildingNum, actNum);
+    if (requiredHalfSlots > 0 && !get_isHumanHaveSpace(requiredHalfSlots))
     {
         if (oper != NULL) *oper = 1;
         return false;
@@ -543,6 +573,13 @@ void Development::init_DevelopLab()
         newNode->setCreatObjectAfterAction(SORT_ARMY, AT_BROADSWORDSMAN);
         developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_CREATE_BROADSWORD].setHead(newNode);
         developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_CREATE_BROADSWORD].endNodeAsOver();
+
+        //研究后勤：铜器时代，兵营单位人口占用减半（一次性科技）
+        newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_ARMYCAMP,
+                                       TIME_BUILDING_ARMYCAMP_RESEARCH_LOGISTICS,
+                                       0, BUILDING_ARMYCAMP_RESEARCH_LOGISTICS_FOOD,
+                                       0, BUILDING_ARMYCAMP_RESEARCH_LOGISTICS_GOLD);
+        developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_RESEARCH_LOGISTICS].setHead(newNode);
 
     }
 

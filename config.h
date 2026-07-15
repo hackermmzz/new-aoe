@@ -177,6 +177,8 @@ enum BuildingAction{
     BUILDING_SIEGE_CREATE_STONE_THROWER,
     //学院
     BUILDING_COLLAGE_CREATE_HOPLITE,
+    // 兼容性追加：兵营后勤科技（避免改变已有建筑动作编号）
+    BUILDING_ARMYCAMP_RESEARCH_LOGISTICS,
 };
 
 
@@ -330,6 +332,7 @@ enum CIVILIZATION {
 #define ACT_ARMYCAMP_UPGRADE_CLUBMAN_NAME "升级为战斧(花费:100食物)"
 #define ACT_ARMYCAMP_CREATE_BROADSWORD_NAME "训练阔剑兵(花费:35食物,15黄金)(需要阔剑科技)"
 #define ACT_ARMYCAMP_UPGRADE_BROADSWORD_NAME "升级为阔剑(花费:140食物,50黄金)"
+#define ACT_ARMYCAMP_RESEARCH_LOGISTICS_NAME "研究后勤:兵营单位人口占用减半(花费:180食物,100黄金)"
 #define ACT_BUILD_ARMYCAMP_NAME "建造兵营(花费:125木头)"
 #define ACT_BUILD_RANGE_NAME "建造靶场(花费:150木头)"
 #define ACT_BUILD_STABLE_NAME "建造马厩(花费:150木头)"
@@ -422,7 +425,9 @@ enum ACTION {
     ACT_BUILD_SIEGE,
     ACT_SHIP_LAY,
     ACT_UPGRADE_ARROWTOWER,
-    ACT_STOP
+    ACT_STOP,
+    // 兼容性追加：兵营后勤科技（避免改变已有界面动作编号）
+    ACT_ARMYCAMP_RESEARCH_LOGISTICS
 };
 /********** 地基编号 **********/
 enum FOUNDATION {

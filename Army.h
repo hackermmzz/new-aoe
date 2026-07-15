@@ -144,14 +144,16 @@ public:
 
     //获取士兵的部队种类 如步兵、骑兵、弓兵等
     int getArmyClass(){ return armyClass; }
+    //获取该兵种的训练建筑，用于后勤等建筑来源型科技。
+    int getDependBuildNum() const { return dependBuildNum; }
     //获取士兵等级
     int getLevel();
 
 private:
     int armyClass;
     bool upgradable = false;
-    int dependBuildNum;
-    int dependBuildAct;
+    int dependBuildNum = -1;
+    int dependBuildAct = -1;
     int status;
     int starttime;
     int finishtime;

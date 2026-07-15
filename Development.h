@@ -52,16 +52,25 @@ public:
     void set_civilization( int civ );
 
     /*****************人口信息*******************/
-    void addHumanNum(){ humanNum++; }
-    void subHumanNum(){ humanNum--; }
+    // 使用“半人口槽”精确表示 0.5 人口：普通单位占 2 槽，后勤兵营单位占 1 槽。
+    void addHumanPopulationHalfSlots(int halfSlots){ humanPopulationHalfSlots += halfSlots; }
+    void subHumanPopulationHalfSlots(int halfSlots){ humanPopulationHalfSlots = std::max(0, humanPopulationHalfSlots - halfSlots); }
+    void setHumanPopulationHalfSlots(int halfSlots){ humanPopulationHalfSlots = std::max(0, halfSlots); }
+    int getHumanPopulationHalfSlots(){ return humanPopulationHalfSlots; }
     //当前人口数目
-    int get_humanNum(){ return humanNum; }
+    double get_humanNum(){ return humanPopulationHalfSlots / 2.0; }
     //获取人口上限
     int getMaxHumanNum(){return get_homeNum()*HOUSE_HUMAN_NUM;}
     //当前能达到的最大人口数目
     int getHumanNumCanReach(){ return getMaxHumanNum()<humanNum_Top? getMaxHumanNum(): humanNum_Top; }
-    //是否仍有空间添加人口
-    bool get_isHumanHaveSpace(){return get_humanNum()<getHumanNumCanReach(); }
+    //是否仍有空间容纳指定数量的半人口槽
+    bool get_isHumanHaveSpace(int requiredHalfSlots = 2)
+        { return humanPopulationHalfSlots + requiredHalfSlots <= getHumanNumCanReach() * 2; }
+
+    // 后勤科技及人口权重统一入口。
+    bool isLogisticsResearched();
+    int getPopulationHalfSlots(int sourceBuilding, int objectSort);
+    int getActionPopulationHalfSlots(int buildingNum, int actNum);
 
     int get_centerNum(){ return centerNum; }
     /***************当前建筑信息*******************/
@@ -121,7 +130,7 @@ private:
     //home数量，用于计算当前最大人口
     int homeNum = 0;
     int centerNum = 1;
-    int humanNum = 0;   //当前人口数量
+    int humanPopulationHalfSlots = 0; //当前人口占用（单位：半人口槽）
     int humanNum_Top = 50;  //最大人口上限
 
     //研发工艺带来的数值加成

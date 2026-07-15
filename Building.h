@@ -234,7 +234,11 @@ public:
 
     bool is_ActionFinish(){ return actPercent>=100; }
     bool isActionNeedCreatObject(int &creatObjectSort, int& creatObjectNum){ return playerScience->isNeedCreatObjectAfterAction(getNum() , getActNum() , creatObjectSort , creatObjectNum);}
-    bool isRepresentHumanHaveSpace(){ return playerScience->get_isHumanHaveSpace(); }
+    bool isRepresentHumanHaveSpace()
+    {
+        int requiredHalfSlots = playerScience->getActionPopulationHalfSlots(Num, actNum);
+        return playerScience->get_isHumanHaveSpace(requiredHalfSlots);
+    }
     void update_Action();
     void update_Build();
     /** 按修复血量比例扣修理费；资源不足返回 false。仅对已完工建筑收费。 */

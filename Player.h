@@ -83,7 +83,7 @@ public:
     //获取人口上限(可达到的)，最高50
     int getMaxHumanNum(){return playerScience->getHumanNumCanReach();}
     //获取当前人口
-    int getHumanNum(){ return playerScience->get_humanNum(); }
+    double getHumanNum(){ return playerScience->get_humanNum(); }
 
    /*建筑行动相关********************************************/
     //判断是否可建筑
@@ -111,8 +111,8 @@ public:
     int get_civiBuild_Times( int civilization ){ return playerScience->get_civiBuild_Times(civilization); }
    /*以上建筑行动相关********************************************/
 
-    void set_AllTechnology(){ playerScience->all_technology_tree(); }
-    void setTechnologyUpToMaxEra(int max_civilization){ playerScience->technology_tree_up_to(max_civilization); }
+    void set_AllTechnology();
+    void setTechnologyUpToMaxEra(int max_civilization);
 
     int getScore()
     {
@@ -133,9 +133,11 @@ public:
     }
 
 
-    //增加人口，考虑未来可能有政府中心兵营兵种人口减半，故留函数接口以重写
-    void humanNumIncrease(Human* newHuman){ playerScience->addHumanNum(); }
-    void humanNumDecrease(Human* delHuman){ playerScience->subHumanNum(); }
+    //人口权重统一入口；后勤完成后兵营单位占一个半人口槽，其余单位占两个。
+    int getHumanPopulationHalfSlots(Human* humanObject);
+    void humanNumIncrease(Human* newHuman);
+    void humanNumDecrease(Human* delHuman);
+    void recalculateHumanPopulation();
 
     int get_centerNum(){ return playerScience->get_centerNum(); }
     

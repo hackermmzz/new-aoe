@@ -48,6 +48,8 @@ void SelectWidget::initActionResourceMap()
     actionResourceMap[ACT_ARMYCAMP_CREATE_SLINGER] = "Button_Slinger";
     actionResourceMap[ACT_ARMYCAMP_CREATE_BROADSWORD] = "Button_BroadSwordsman";
     actionResourceMap[ACT_ARMYCAMP_UPGRADE_BROADSWORD] = "ButtonTech_Broadsword";
+    // 暂无独立后勤图标，使用项目通用空白按钮。
+    actionResourceMap[ACT_ARMYCAMP_RESEARCH_LOGISTICS] = "Button";
     actionResourceMap[ACT_COLLAGE_CREATE_HOPLITE] = "Button_Hoplite";
     actionResourceMap[ACT_RANGE_CREATE_BOWMAN] = "Button_Archer";
     actionResourceMap[ACT_RANGE_CREATE_COMPOSITE_BOWMAN] = "Button_CompositeBowman";
@@ -475,6 +477,12 @@ void SelectWidget::refreshActs()
             buildingActType = BUILDING_ARMYCAMP_UPGRADE_BROADSWORD;
             break;
 
+        case ACT_ARMYCAMP_RESEARCH_LOGISTICS:
+            isBuildingAct = true;
+            buildType = BUILDING_ARMYCAMP;
+            buildingActType = BUILDING_ARMYCAMP_RESEARCH_LOGISTICS;
+            break;
+
         case ACT_STOCK_UPGRADE_MISSILE_DEFENSE_INFANTRY:
             isBuildingAct = true;
             buildType = BUILDING_STOCK;
@@ -652,7 +660,11 @@ void SelectWidget::refreshActs()
                 // 详细设置
                 if (objBuilding->getNum() == BUILDING_HOME)
                 {
-                    ui->objText->setText(QString::number(human_num) + "/" + QString::number(build_hold_human_num));
+                    const int populationHalfSlots = qRound(human_num * 2.0);
+                    const QString populationText = (populationHalfSlots % 2 == 0)
+                        ? QString::number(populationHalfSlots / 2)
+                        : QString::number(human_num, 'f', 1);
+                    ui->objText->setText(populationText + "/" + QString::number(build_hold_human_num));
                     ui->objIconSmall->setPixmap(resMap["SmallIcon_People"].front());
                 }
                 else if (objBuilding->getNum() == BUILDING_FARM)
@@ -1136,6 +1148,9 @@ int SelectWidget::doActs(int actName, Coordinate* nowobject)
         break;
     case ACT_ARMYCAMP_CREATE_SLINGER:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_ARMYCAMP_CREATE_SLINGER);
+        break;
+    case ACT_ARMYCAMP_RESEARCH_LOGISTICS:
+        g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_ARMYCAMP_RESEARCH_LOGISTICS);
         break;
     case ACT_COLLAGE_CREATE_HOPLITE:
         g_mainWidget->getUsrAI()->BuildingAction(nowobject->getglobalNum(), BUILDING_COLLAGE_CREATE_HOPLITE);

@@ -172,6 +172,52 @@ void Player::insertHuman(Human *target)
     human.push_back(target);
 }
 
+int Player::getHumanPopulationHalfSlots(Human* humanObject)
+{
+    if (humanObject == NULL) return 0;
+
+    int sourceBuilding = -1;
+    int objectSort = humanObject->getSort();
+    if (objectSort == SORT_ARMY)
+    {
+        Army* army = static_cast<Army*>(humanObject);
+        sourceBuilding = army->getDependBuildNum();
+    }
+
+    return playerScience->getPopulationHalfSlots(sourceBuilding, objectSort);
+}
+
+void Player::humanNumIncrease(Human* newHuman)
+{
+    playerScience->addHumanPopulationHalfSlots(getHumanPopulationHalfSlots(newHuman));
+}
+
+void Player::humanNumDecrease(Human* delHuman)
+{
+    playerScience->subHumanPopulationHalfSlots(getHumanPopulationHalfSlots(delHuman));
+}
+
+void Player::recalculateHumanPopulation()
+{
+    int totalHalfSlots = 0;
+    for (Human* humanObject : human)
+        totalHalfSlots += getHumanPopulationHalfSlots(humanObject);
+
+    playerScience->setHumanPopulationHalfSlots(totalHalfSlots);
+}
+
+void Player::set_AllTechnology()
+{
+    playerScience->all_technology_tree();
+    recalculateHumanPopulation();
+}
+
+void Player::setTechnologyUpToMaxEra(int max_civilization)
+{
+    playerScience->technology_tree_up_to(max_civilization);
+    recalculateHumanPopulation();
+}
+
 void Player::removeBuilding(Building *target)
 {
     for(auto itr=build.begin();itr!=build.end();++itr){
@@ -300,6 +346,8 @@ void Player::enforcementAction( Building* actBuild, vector<pair<Point,int>>Block
     bool isNeedCreatObject = false; //是否需要创建对象
     int creatObjectSort , creatObjectNum;   //需创建对象的Sort和具体Num
     Point block;
+    const int finishedBuildingNum = actBuild->getNum();
+    const int finishedActionNum = actBuild->getActNum();
 
     //查科技树表，以判断当前建筑的行动是否需要造人
     isNeedCreatObject = playerScience->isNeedCreatObjectAfterAction(actBuild->getNum() , actBuild->getActNum() , creatObjectSort , creatObjectNum);
@@ -309,7 +357,13 @@ void Player::enforcementAction( Building* actBuild, vector<pair<Point,int>>Block
     block.y = actBuild->getBlockUR();
 
     //建筑行动结束，处理其带来的不需要创建对象的影响
-    playerScience->finishAction(actBuild->getNum() ,actBuild->getActNum());
+    playerScience->finishAction(finishedBuildingNum, finishedActionNum);
+    if (finishedBuildingNum == BUILDING_ARMYCAMP &&
+        finishedActionNum == BUILDING_ARMYCAMP_RESEARCH_LOGISTICS)
+    {
+        // 后勤对已经存在的兵营单位立即生效。
+        recalculateHumanPopulation();
+    }
     actBuild->init_Resouce_TS();    //重置行动建筑的返还资源
 
     if(isNeedCreatObject)   //如果该行动需要造人
@@ -373,5 +427,4 @@ void Player::beginAttack()
 }
 
 //**********************************************************
-
 
