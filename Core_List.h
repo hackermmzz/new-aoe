@@ -87,7 +87,7 @@ private:
     Missile* creatMissile(Coordinate* , Coordinate*);
     Missile *creatMissile(Coordinate *, double dr,double ur);
     void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
-    vector<pair<Coordinate*,int>> deal_RangeAttack(Missile* missile,const array<double,2>&center);
+    void deal_RangeAttack(Missile* missile,const array<double,2>&center);
     void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
     void init_resetResBuild(){ needReset_resBuild = false; }
 
@@ -126,7 +126,7 @@ private:
     bool checkIsCoast(int x,int y);
     bool checkIsLandUint(Coordinate*obj);
     bool checkIsOcean(int x,int y);
-    void calculateDamage(Coordinate*object1,Coordinate*object2,int extraDamage=0);
+    void calculateDamage(Coordinate*object1,Coordinate*object2,int extraDamage=0,double damageRate=1.0);
 };
 
 #endif // CORE_LIST_H

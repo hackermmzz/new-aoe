@@ -944,11 +944,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
         }
     }
     else if(missile!=NULL && missile->IsRangeAttack()){ //判断是否为溅射伤害
-        NeedCalculateDamage=true;
-        auto&&ret=deal_RangeAttack(missile,array<double,2>{missile->getDR0(),missile->getUR0()});
-        for(auto&x:ret){
-            attackees.insert(x);
-        }
+        deal_RangeAttack(missile,array<double,2>{missile->getDR0(),missile->getUR0()});
     }
     else if (missile != NULL && missile->is_HitTarget() && attackee != NULL)
     {
@@ -1485,43 +1481,43 @@ void Core_List::deal_RangeAttack(Coordinate* attacker, Coordinate* attackee)
 
 }
 
-vector<pair<Coordinate*,int>> Core_List::deal_RangeAttack(Missile *missile, const array<double, 2> &center)
+void Core_List::deal_RangeAttack(Missile *missile, const array<double, 2> &center)
 {
-    int rad=0;
-    //
-    if(missile->getSort()==SORT_MISSILE){
-        auto type=missile->getNum();
-        switch (type) {
-        case Missile_Boulders:
-            rad=Missile_Boulders_Range;
-            break;
-        default:
-            break;
-        }
-    }
-    //
-    set<pair<Coordinate*,int>>ret;
-    if(rad>0){
-        int dr=center[0]/BLOCKSIDELENGTH,ur=center[1]/BLOCKSIDELENGTH;
-        for(int i=-rad;i<=rad;++i){
-            int t=rad-abs(i);
-            for(int j=-t;j<=t;++j){
-                int dr0=dr+i,ur0=ur+j;
-                if(dr0>=0&&dr0<MAP_L&&ur0>=0&&ur0<MAP_U){
-                    auto&objects=theMap->map_Object[dr0][ur0];
-                    for(auto*obj:objects){
-                        BloodHaver*attackee=0;
-                        obj->printer_ToBloodHaver((void**)&attackee);
-                        if(attackee){
-                             auto extra_damage = missile->get_AttackAddition_Height(theMap->get_MapHeight(obj->getBlockDR(), obj->getBlockUR()));
-                            ret.insert({obj,extra_damage});
-                        }
-                    }
-                }
+    if(missile==NULL || missile->getNum()!=Missile_Boulders)return;
+
+    const double blastRadius=Missile_Boulders_Range*BLOCKSIDELENGTH;
+    if(blastRadius<=0)return;
+
+    const int centerDR=(int)(center[0]/BLOCKSIDELENGTH);
+    const int centerUR=(int)(center[1]/BLOCKSIDELENGTH);
+    const int searchRadius=(int)ceil(Missile_Boulders_Range)+1;
+    set<Coordinate*> damagedObjects;
+
+    for(int i=-searchRadius;i<=searchRadius;++i){
+        for(int j=-searchRadius;j<=searchRadius;++j){
+            const int blockDR=centerDR+i;
+            const int blockUR=centerUR+j;
+            if(blockDR<0 || blockDR>=MAP_L || blockUR<0 || blockUR>=MAP_U)continue;
+
+            for(auto*obj:theMap->map_Object[blockDR][blockUR]){
+                if(!damagedObjects.insert(obj).second)continue;
+
+                BloodHaver*attackee=NULL;
+                obj->printer_ToBloodHaver((void**)&attackee);
+                // 军队、农民、建筑、动物和树木拥有血量；石头、黄金等静态资源没有血量，直接排除。
+                if(attackee==NULL)continue;
+
+                const double centerDistance=countdistance(center[0],center[1],obj->getDR(),obj->getUR());
+                const double effectiveDistance=max(0.0,centerDistance-obj->getCrashLength());
+                if(effectiveDistance>blastRadius)continue;
+
+                const double damageRate=max(0.0,min(1.0,1.0-effectiveDistance/blastRadius));
+                const int extraDamage=missile->get_AttackAddition_Height(
+                    theMap->get_MapHeight(obj->getBlockDR(),obj->getBlockUR()));
+                calculateDamage(missile,obj,extraDamage,damageRate);
             }
         }
     }
-    return vector<pair<Coordinate*,int>>{ret.begin(),ret.end()};
 }
 
 
@@ -2044,14 +2040,14 @@ bool Core_List::checkIsOcean(int x, int y)
     return 0;
 }
 
-void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int extraDamage)
+void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int extraDamage, double damageRate)
 {
     BloodHaver*attackee=0,*attacker=0;
+    Missile*missile=0;
     object2->printer_ToBloodHaver((void**)&attackee);
     object1->printer_ToBloodHaver((void**)&attacker);
     if(attacker==NULL){
         //看看是不是投射攻击
-        Missile*missile=0;
         object1->printer_ToMissile((void**)&missile);
         if(missile){
             attacker=missile->getAttackAponsor();
@@ -2109,7 +2105,17 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
     }
     //普通伤害攻击
     else{
-        auto damage = attacker->getATK() - attackee->getDEF(attacker->get_AttackType()) + extraDamage;   //统一伤害计算公式
+        const bool isBoulder=missile!=NULL && missile->getNum()==Missile_Boulders;
+        const int defenceType=isBoulder ? ATTACKTYPE_CLOSE : attacker->get_AttackType();
+        double rawDamage=attacker->getATK()-attackee->getDEF(defenceType)+extraDamage;
+
+        // 原版投石车对建筑有分类加成，建筑最终只承受20%的攻城伤害。
+        if(isBoulder && object2->getSort()==SORT_BUILDING){
+            const int buildingBonus=object2->getNum()==BUILDING_ARROWTOWER ? 50 : 140;
+            rawDamage=(rawDamage+buildingBonus)*0.2;
+        }
+
+        int damage=(int)round(rawDamage*damageRate);
         if (damage < 1) damage = 1;
         attackee->updateBlood(damage);  //damage反映到受攻击者血量减少
 

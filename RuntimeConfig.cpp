@@ -450,7 +450,7 @@ double g_Missile_Speed_Spear = 0.0;
 double g_Missile_Speed_Arrow = 0.0;
 double g_Missile_Speed_Cobblestone = 0.0;
 double g_Missile_Speed_Boulders = 0.0;
-int g_Missile_Boulders_Range = 0;
+double g_Missile_Boulders_Range = 0.0;
 int g_NOWRES_TIMER_FARMER = 0;
 int g_NOWRES_TIMER_CLUBMAN = 0;
 int g_NOWRES_TIMER_BOWMAN = 0;
@@ -2708,7 +2708,7 @@ double RuntimeConfig_Missile_Speed_Boulders()
     return g_Missile_Speed_Boulders;
 }
 
-int RuntimeConfig_Missile_Boulders_Range()
+double RuntimeConfig_Missile_Boulders_Range()
 {
     return g_Missile_Boulders_Range;
 }
@@ -3307,7 +3307,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_Missile_Speed_Arrow = config.value(QStringLiteral("Missile_Speed_Arrow")).toDouble();
     g_Missile_Speed_Cobblestone = config.value(QStringLiteral("Missile_Speed_Cobblestone")).toDouble();
     g_Missile_Speed_Boulders = config.value(QStringLiteral("Missile_Speed_Boulders")).toDouble();
-    g_Missile_Boulders_Range = config.value(QStringLiteral("Missile_Boulders_Range")).toInt();
+    g_Missile_Boulders_Range = config.value(QStringLiteral("Missile_Boulders_Range")).toDouble();
     g_NOWRES_TIMER_FARMER = config.value(QStringLiteral("NOWRES_TIMER_FARMER")).toInt();
     g_NOWRES_TIMER_CLUBMAN = config.value(QStringLiteral("NOWRES_TIMER_CLUBMAN")).toInt();
     g_NOWRES_TIMER_BOWMAN = config.value(QStringLiteral("NOWRES_TIMER_BOWMAN")).toInt();

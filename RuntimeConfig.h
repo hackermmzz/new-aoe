@@ -1343,7 +1343,7 @@ double RuntimeConfig_Missile_Speed_Cobblestone();
 double RuntimeConfig_Missile_Speed_Boulders();
 #define Missile_Speed_Boulders (RuntimeConfig_Missile_Speed_Boulders())
 
-int RuntimeConfig_Missile_Boulders_Range();
+double RuntimeConfig_Missile_Boulders_Range();
 #define Missile_Boulders_Range (RuntimeConfig_Missile_Boulders_Range())
 
 int RuntimeConfig_NOWRES_TIMER_FARMER();
