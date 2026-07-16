@@ -103,7 +103,10 @@ int Development::get_addition_DisAttack(int sort, int type, int armyClass, int a
             break;
         }
     }
-    else if (attackType == ATTACKTYPE_SHOOT)
+    // 原版木材科技只影响弓箭类、侦察船系和箭塔；投石车等攻城武器不在此列。
+    else if (attackType == ATTACKTYPE_SHOOT &&
+        ((sort == SORT_ARMY && armyClass == ARMY_ARCHER) ||
+         (sort == SORT_BUILDING && type == BUILDING_ARROWTOWER)))
     {
         if (sort == SORT_BUILDING && type == BUILDING_ARROWTOWER
             && getActLevel(BUILDING_GRANARY, BUILDING_GRANARY_ARROWTOWE_UPGRADE) >= 1)
