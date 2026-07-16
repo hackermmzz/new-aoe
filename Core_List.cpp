@@ -1,5 +1,44 @@
 #include "Core_List.h"
 #include <algorithm>
+
+namespace {
+int scoreTypeForDefeatedObject(Coordinate* object)
+{
+    if (object->getSort() == SORT_BUILDING || object->getSort() == SORT_Building_Resource)
+    {
+        switch (object->getNum())
+        {
+        case BUILDING_HOME:
+        case BUILDING_FARM:
+            return _DESTORY2;
+        case BUILDING_ARROWTOWER:
+            return _DESTORY5;
+        case BUILDING_CENTER:
+            return _DESTORY10;
+        default:
+            return _DESTORY4;
+        }
+    }
+
+    if (object->getSort() == SORT_ARMY && object->getNum() > 3)
+        return _KILL4;
+    return _KILL2;
+}
+
+void updateDefeatScore(Score& score, Coordinate* object, int multiplier = 1, bool isConversion = false)
+{
+    score.update(scoreTypeForDefeatedObject(object), multiplier, isConversion);
+}
+
+int scoreTypeForCreatedObject(int objectSort, int objectNum)
+{
+    if (objectSort == SORT_FARMER)
+        return objectNum == FARMERTYPE_WOOD_BOAT ? _HUMAN2 : _HUMAN1;
+    if (objectSort == SORT_ARMY)
+        return objectNum <= AT_BOWMAN ? _HUMAN1 : _HUMAN2;
+    return _TECH;
+}
+}
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
 {
@@ -59,6 +98,20 @@ void Core_List::update()
 int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventType, bool respond)
 {
     if (object1 == NULL) return ACTION_INVALID_NULLWORKER;
+    if (object2 == NULL) return ACTION_INVALID_NULLGOALOBJECT;
+
+    const bool isFriendlyPriestHeal = eventType == CoreEven_Attacking &&
+        object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
+        object1->getPlayerRepresent() == object2->getPlayerRepresent();
+    if (isFriendlyPriestHeal)
+    {
+        BloodHaver* healTarget = NULL;
+        object2->printer_ToBloodHaver((void**)&healTarget);
+        const bool isHuman = object2->getSort() == SORT_FARMER || object2->getSort() == SORT_ARMY;
+        if (!isHuman || !checkIsLandUint(object2) || healTarget == NULL ||
+            healTarget->isDie() || healTarget->isFullHp())
+            return ACTION_INVALID_PRIEST_TARGET_ERROR;
+    }
 
     if (relate_AllObject[object1].isExist && relate_AllObject[object1].respondConduct) suspendRelation(object1);
 
@@ -379,6 +432,20 @@ void Core_List::manageRelationList()
             bool isEnemyPriestConversion = object2 != NULL &&
                 object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
                 object1->getPlayerRepresent() != object2->getPlayerRepresent();
+            bool isFriendlyPriestHealing = object2 != NULL &&
+                object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
+                object1->getPlayerRepresent() == object2->getPlayerRepresent();
+            if (isFriendlyPriestHealing)
+            {
+                BloodHaver* healTarget = NULL;
+                object2->printer_ToBloodHaver((void**)&healTarget);
+                if (healTarget == NULL || healTarget->isDie() || healTarget->isFullHp())
+                {
+                    suspendRelation(object1);
+                    iter++;
+                    continue;
+                }
+            }
             conditionF* recordCondition;
             //该部分为强制中止行动部分代码
             list<conditionF>& forcedInterrupCondition = thisDetailEven.forcedInterrupCondition;
@@ -905,9 +972,17 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     bool isEnemyPriestConversion = object2 != NULL &&
         object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
         object1->getPlayerRepresent() != object2->getPlayerRepresent();
+    bool isFriendlyPriestHealing = object2 != NULL &&
+        object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
+        object1->getPlayerRepresent() == object2->getPlayerRepresent();
     set<pair<Coordinate*,int>>attackees;
     if (attackee != NULL && attacker != NULL && attacker->canAttack())  //若指针均非空
     {
+        if (isFriendlyPriestHealing && attackee->isFullHp())
+        {
+            suspendRelation(object1);
+            return;
+        }
         if (!attacker->isAttacking())
         {
             object2->printer_ToAnimal((void**)&animalOb);
@@ -922,6 +997,13 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
         {
             object1->printer_ToMoveObject((void**)&moveOb);
             if (moveOb != NULL) moveOb->adjustAngle(object2->getDR(), object2->getUR());
+            if (isFriendlyPriestHealing)
+            {
+                const double healAmount = attacker->getATK() * TimePerFrame / 1000.0;
+                attackee->updateBlood(-healAmount);
+                if (attackee->isFullHp()) suspendRelation(object1);
+                return;
+            }
             //非祭司,是普通的伤害计算公式
             /** 后续版本若有投石车等喷溅伤害,判断还需细化*/
             if (attacker->is_missileAttack())
@@ -1041,11 +1123,12 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
         else if (res->isFarmerGatherable(gatherer) && gatherer->get_isActionEnd())
         {
             res->updateCnt_byGather(gatherer->get_quantityGather());
+            Score& gatherScore = scoreForPlayerRepresent(gatherer->getPlayerRepresent());
 
             //更新首次收集得分
             if (object2->getSort() == SORT_STATICRES && s_res->getNum() == 0)
             {
-                usrScore.update(_BERRY);
+                gatherScore.update(_BERRY);
             }
             else if (object2->getSort() == SORT_ANIMAL)
             {
@@ -1053,28 +1136,28 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
                 object2->printer_ToAnimal((void**)&animal);
                 if (animal->getNum() == ANIMAL_GAZELLE)
                 {
-                    usrScore.update(_GAZELLE);
+                    gatherScore.update(_GAZELLE);
                 }
                 else if (animal->getNum() == ANIMAL_ELEPHANT)
                 {
-                    usrScore.update(_ELEPHANT);
+                    gatherScore.update(_ELEPHANT);
                 }
             }
             else if (object2->getSort() == SORT_Building_Resource)
             {
-                usrScore.update(_FARM);
+                gatherScore.update(_FARM);
             }
             if (res->get_ResourceSort() == HUMAN_WOOD)
             {
-                usrScore.update(_ISWOOD);
+                gatherScore.update(_ISWOOD);
             }
             else if (res->get_ResourceSort() == HUMAN_STONE)
             {
-                usrScore.update(_ISSTONE);
+                gatherScore.update(_ISSTONE);
             }
             else if (res->get_ResourceSort() == HUMAN_GOLD)
             {
-                usrScore.update(_ISGOLD);
+                gatherScore.update(_ISGOLD);
             }
 
             gatherer->update_addResource();
@@ -1112,8 +1195,7 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
                     //加登陆分
                     if(theMap->enemyLandExplored==0&&theMap->blockIndex[L][U]==theMap->enemyBlockIdx){
                         theMap->enemyLandExplored=1;
-                        extern Score usrScore;
-                        usrScore.update(_FINDENEMYLAND);
+                        scoreForPlayerRepresent(object1->getPlayerRepresent()).update(_FINDENEMYLAND);
                     }
 
                 }
@@ -1150,21 +1232,22 @@ void Core_List::object_ResourceChange(Coordinate* object1, relation_Object& rela
         else
         {
             player[worker->getPlayerRepresent()]->changeResource(worker->getResourceSort(), worker->getResourceNowHave());
+            Score& resourceScore = scoreForPlayerRepresent(worker->getPlayerRepresent());
             //更新累计收集得分
             switch (worker->getResourceSort()) {
             case HUMAN_WOOD:
-                usrScore.update(_WOOD, worker->getResourceNowHave());
+                resourceScore.update(_WOOD, worker->getResourceNowHave());
                 break;
             case HUMAN_STONE:
-                usrScore.update(_STONE, worker->getResourceNowHave());
+                resourceScore.update(_STONE, worker->getResourceNowHave());
                 break;
             case HUMAN_GOLD:
-                usrScore.update(_GOLD, worker->getResourceNowHave());
+                resourceScore.update(_GOLD, worker->getResourceNowHave());
                 break;
             case HUMAN_DOCKFOOD:
             case HUMAN_GRANARYFOOD:
             case HUMAN_STOCKFOOD:
-                usrScore.update(_MEAT, worker->getResourceNowHave());
+                resourceScore.update(_MEAT, worker->getResourceNowHave());
                 break;
             }
             worker->update_resourceClear();
@@ -1229,7 +1312,9 @@ void Core_List::object_FinishAction(Coordinate* object1)
     //    Building* buildGoalOb = NULL;
     Building_Resource* buildResGoalOb = NULL;
     vector<pair<Point, int>> Block_Free;
-    int actNum = -1;
+    int createdObjectSort = -1;
+    int createdObjectNum = -1;
+    bool createsObject = false;
 
     switch (relate_AllObject[object1].relationAct) {
     case CoreEven_FixBuilding:
@@ -1247,22 +1332,24 @@ void Core_List::object_FinishAction(Coordinate* object1)
         }
         break;
     case CoreEven_BuildingAct:
+    {
         Block_Free = theMap->findBlock_Free(object1);
         object1->printer_ToBuilding((void**)&buildOb);
 
         if (buildOb != NULL)
+        {
+            createsObject = buildOb->isActionNeedCreatObject(createdObjectSort, createdObjectNum);
             player[object1->getPlayerRepresent()]->enforcementAction(buildOb, Block_Free);  //进行建筑行动的结果处理
+        }
 
-        actNum = object1->getActNum();
-        if (actNum == BUILDING_CENTER_CREATEFARMER || actNum == BUILDING_ARMYCAMP_CREATE_CLUBMAN
-            || actNum == BUILDING_ARMYCAMP_CREATE_SLINGER || actNum == BUILDING_RANGE_CREATE_BOWMAN || actNum == BUILDING_DOCK_CREATE_SAILING)
-            usrScore.update(_HUMAN1);
-        else if (actNum == BUILDING_STABLE_CREATE_SCOUT || actNum == BUILDING_DOCK_CREATE_SHIP || actNum == BUILDING_DOCK_CREATE_WOOD_BOAT|| actNum == BUILDING_STABLE_CREATE_CAVALRY)
-            usrScore.update(_HUMAN2);
+        Score& actionScore = scoreForPlayerRepresent(object1->getPlayerRepresent());
+        if (createsObject)
+            actionScore.update(scoreTypeForCreatedObject(createdObjectSort, createdObjectNum));
         else
-            usrScore.update(_TECH);
+            actionScore.update(_TECH);
 
         break;
+    }
     case CoreEven_MissileAttack:
         object1->printer_ToMissile((void**)&misOb);
         if (misOb != NULL) misOb->needDelete();
@@ -1378,7 +1465,22 @@ void Core_List::manageMontorAct()
                     ob_ed = theMap->map_Object[x][y][j];
                     if (ob_m == ob_ed) continue;
 
-                    if (ob_m->isMonitorObject(ob_ed))
+                    const bool isPriest = ob_m->getSort() == SORT_ARMY && ob_m->getNum() == AT_PRIEST;
+                    bool shouldMonitor = false;
+                    if (isPriest)
+                    {
+                        BloodHaver* healTarget = NULL;
+                        ob_ed->printer_ToBloodHaver((void**)&healTarget);
+                        const bool isHuman = ob_ed->getSort() == SORT_FARMER || ob_ed->getSort() == SORT_ARMY;
+                        const bool isAdjacent = abs(ob_m->getBlockDR() - ob_ed->getBlockDR()) <= 1 &&
+                            abs(ob_m->getBlockUR() - ob_ed->getBlockUR()) <= 1;
+                        shouldMonitor = isObject_Free(ob_m) && isHuman && checkIsLandUint(ob_ed) &&
+                            ob_m->getPlayerRepresent() == ob_ed->getPlayerRepresent() &&
+                            healTarget != NULL && !healTarget->isDie() && !healTarget->isFullHp() && isAdjacent;
+                    }
+                    else shouldMonitor = ob_m->isMonitorObject(ob_ed);
+
+                    if (shouldMonitor)
                     {
                         if (pendingLab[ob_m] == NULL) pendingLab[ob_m] = ob_ed;
                         else if (ob_m->getDis_E_Detail(ob_ed) < ob_m->getDis_E_Detail(pendingLab[ob_m]))
@@ -2075,11 +2177,8 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
         //判断阵营
         bool samRep=object1->getPlayerRepresent()==object2->getPlayerRepresent();
         if(samRep){
-            //相同阵营回复血量;建筑不可被祭司"治疗"(修理应由农民完成)
-            Building*building=0;
-            object2->printer_ToBuilding((void**)&building);
-            if(building!=0)return;
-            attackee->updateBlood(-attacker->getATK());
+            //友军治疗在 object_Attack 中按帧持续结算
+            return;
         }else{
             //不同阵营转换敌人为己方阵营
             //转化休整冷却：与原版一致，转化成功后需休整一段时间，期间无法再次转化
@@ -2106,6 +2205,9 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
                 change_BuildingRepresent(building,object1->getPlayerRepresent());
             }
             else return; //这里按道理不可能出现这种情况
+            // 转换得分为同类目标正常击杀或摧毁得分的两倍
+            Score& converterScore = scoreForPlayerRepresent(object1->getPlayerRepresent());
+            updateDefeatScore(converterScore, object2, 2, true);
             //转化成功，进入休整冷却（PRIEST_REST_TIME 单位为秒，换算成帧）
             attacker->setConvertRestEndFrame(g_frame + PRIEST_REST_TIME*1000/TimePerFrame);
             //转换成功后目标已变为友军，令祭司停手，避免继续攻击或治疗刚转换的目标
@@ -2131,34 +2233,11 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
         //更新得分
         if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 1 && object2->getSort() == SORT_ARMY && object1->getPlayerRepresent() == NOWPLAYERREPRESENT)
         {
-            if (object2->getNum() > 3) {
-                usrScore.update(_KILL10);
-            }
-            else {
-                usrScore.update(_KILL2);
-            }
+            updateDefeatScore(usrScore, object2);
         }
 
         if (!isDead && attackee->isDie() && object2->getPlayerRepresent() == 0 && object1->getPlayerRepresent() == 1) {
-            if (object2->getSort() == SORT_BUILDING) {
-                switch (object2->getNum()) {
-                case BUILDING_HOME:
-                case BUILDING_FARM:
-                    enemyScore.update(_DESTORY2);
-                    break;
-                case BUILDING_ARROWTOWER:
-                    enemyScore.update(_DESTORY5);
-                    break;
-                case BUILDING_CENTER:
-                    enemyScore.update(_DESTORY10);
-                    break;
-                default:
-                    enemyScore.update(_DESTORY4);
-                }
-            }
-            else {
-                enemyScore.update(_KILL2);
-            }
+            updateDefeatScore(enemyScore, object2);
         }
     }
 }

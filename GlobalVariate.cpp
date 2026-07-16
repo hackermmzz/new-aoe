@@ -22,6 +22,11 @@ map<string, QSoundEffect*> SoundMap;
 std::queue<string> soundQueue;
 Score usrScore=Score(0);
 Score enemyScore=Score(1);
+
+Score& scoreForPlayerRepresent(int playerRepresent)
+{
+    return playerRepresent == NOWPLAYERREPRESENT ? usrScore : enemyScore;
+}
 Coordinate *nowobject=NULL;
 bool tryCaptured=0;//尝试捕获点击对象后置1
 Coordinate* LeftMouseObjCapture=0;
@@ -759,7 +764,7 @@ int Score::getScore() {
     return score;
 }
 
-void Score::update(int type, int num) {
+void Score::update(int type, int num, bool isConversion) {
     if(type==_FINDENEMYLAND){
         addScore(10,"登录地方大陆,分数+10");
         return;
@@ -805,19 +810,22 @@ void Score::update(int type, int num) {
         addScore(2, " 建造一般建筑，分数+2");
         break;
     case _KILL2:
-        addScore(2, " 击杀一般敌人，分数+2");
+        addScore(2 * num, (isConversion ? " 转换一般敌人，分数+" : " 击杀一般敌人，分数+") + QString::number(2 * num));
+        break;
+    case _KILL4:
+        addScore(4 * num, (isConversion ? " 转换高级敌人，分数+" : " 击杀高级敌人，分数+") + QString::number(4 * num));
         break;
     case _DESTORY2:
-        addScore(2, " 摧毁房屋或农田，分数+2");
+        addScore(2 * num, (isConversion ? " 转换房屋或农田，分数+" : " 摧毁房屋或农田，分数+") + QString::number(2 * num));
         break;
     case _DESTORY4:
-        addScore(4, " 摧毁一般建筑，分数+4");
+        addScore(4 * num, (isConversion ? " 转换一般建筑，分数+" : " 摧毁一般建筑，分数+") + QString::number(4 * num));
         break;
     case _DESTORY5:
-        addScore(5, " 摧毁箭塔，分数+5");
+        addScore(5 * num, (isConversion ? " 转换箭塔，分数+" : " 摧毁箭塔，分数+") + QString::number(5 * num));
         break;
     case _DESTORY10:
-        addScore(10, " 摧毁主营，分数+10");
+        addScore(10 * num, (isConversion ? " 转换主营，分数+" : " 摧毁主营，分数+") + QString::number(10 * num));
         break;
     default:
         break;

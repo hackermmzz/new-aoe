@@ -257,10 +257,11 @@ void Core::updateByObject()
 
                     (*builditer)->initAction();
 
+                    Score& buildingScore = scoreForPlayerRepresent((*builditer)->getPlayerRepresent());
                     if ((*builditer)->getNum() == BUILDING_HOME || (*builditer)->getNum() == BUILDING_FARM)
-                        usrScore.update(_BUILDING1);
+                        buildingScore.update(_BUILDING1);
                     else
-                        usrScore.update(_BUILDING2);
+                        buildingScore.update(_BUILDING2);
 
                     player[playerIndx]->finishBuild(*builditer);
                     if ((*builditer)->getNum() == BUILDING_STOCK || (*builditer)->getNum() == BUILDING_GRANARY)
@@ -1055,6 +1056,13 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
         return ret;
     }
 
+    const bool isPriest = self->getSort() == SORT_ARMY && self->getNum() == AT_PRIEST;
+    if (isPriest && self->getPlayerRepresent() == obj->getPlayerRepresent() && judge_IsHuman(obj)) {
+        ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
+        logActionResult(ret, self, obj, INS_HUMANACTION, 0, "治疗", id);
+        return ret;
+    }
+
     switch (obj->getSort()) {
     case SORT_ANIMAL:
         ret = ACTION_INVALID_OBSN; // 不能攻击动物
@@ -1068,25 +1076,13 @@ int Core::handleMilitaryAction(Coordinate* self, Coordinate* obj, int id)
         }
         else if (obj->getPlayerRepresent() != self->getPlayerRepresent()) {
             ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-            //祭司对敌方建筑的动作记为"转换"，其余仍为普通攻击
-            if (self->getSort() == SORT_ARMY && self->getNum() == AT_PRIEST && obj->getSort() != SORT_FARMER)
-                logActionResult(ret, self, obj, INS_HUMANACTION, 0, "转换", id);
+            logActionResult(ret, self, obj, INS_HUMANACTION, 0, isPriest ? "转换" : "攻击", id);
         }
         break;
     case SORT_ARMY:
         if (self->getPlayerRepresent() != obj->getPlayerRepresent()) {
             ret = interactionList->addRelation(self, obj, CoreEven_Attacking);
-            logActionResult(ret, self, obj,INS_HUMANACTION, 0, "攻击", id);
-        }
-        else if(self->getNum()==AT_PRIEST){
-            //判断目标是否为人类
-            if(judge_IsHuman(obj))ret=ACTION_INVALID_PRIEST_TARGET_ERROR;
-            //祭司可以选中所有阵营的人类单位
-            else{
-                bool samRep=self->getPlayerRepresent()==obj->getPlayerRepresent();
-                ret=interactionList->addRelation(self,obj,CoreEven_Attacking);
-                logActionResult(ret,self,obj,INS_HUMANACTION,0,samRep?"治疗":"转换",id);
-            }
+            logActionResult(ret, self, obj,INS_HUMANACTION, 0, isPriest ? "转换" : "攻击", id);
         }
         else {
             ret = ACTION_INVALID_ACTION; // 不能攻击友方单位

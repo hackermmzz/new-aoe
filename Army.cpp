@@ -783,7 +783,7 @@ void Army::setAttribute()
         MaxBlood = BLOOD_PRIEST;
         speed = SPEED_PRIEST;
         vision = VISION_PRIEST;
-        atk=ATK_PRIEST;//祭司的攻击力就是它对相同阵营恢复的血量
+        atk=ATK_PRIEST;//祭司的基础每秒治疗量；敌方转换不使用该数值
         dis_Attack = DIS_PRIEST;
         inter_Attack = INTERVAL_PRIEST;
         defence_close = DEFCLOSE_PRIEST;
@@ -885,4 +885,3 @@ Army::~Army()
     }
 
 }
-

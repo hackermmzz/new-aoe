@@ -659,7 +659,7 @@ enum ScoreType {
     _HUMAN1,
     _HUMAN2,
     _KILL2,
-    _KILL10,
+    _KILL4,
     _DESTORY2,
     _DESTORY4,
     _DESTORY5,

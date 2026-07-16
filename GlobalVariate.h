@@ -82,8 +82,9 @@ private:
 public:
     Score(int id);
     int getScore();
-    void update(int type, int num = 1);
+    void update(int type, int num = 1, bool isConversion = false);
 };
+Score& scoreForPlayerRepresent(int playerRepresent);
 //
 struct tagObj{
     int SN;// 序列号
