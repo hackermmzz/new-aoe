@@ -145,6 +145,7 @@ struct tagArmy : public tagHuman
     double destinaUR;
     bool ifAttack;
     int timelock;
+    int ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
     tagArmy toEnemy();
 };
 //struct tagBlock{

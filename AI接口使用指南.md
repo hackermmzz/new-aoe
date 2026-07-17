@@ -156,7 +156,14 @@ struct tagArmy : public tagHuman
     double destinaDR, destinaUR;
     bool ifAttack;
     int timelock;
+    int ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
 };
+```
+
+判断己方祭司是否处于转换冷却：
+
+```cpp
+bool isCoolingDown = army.Sort == AT_PRIEST && army.ConvertCooldown > 0;
 ```
 
 地形信息：
@@ -372,7 +379,7 @@ for (const tagArmy& army : info.armies) {
 | 农民手持资源 | `HUMAN_WOOD`、`HUMAN_STOCKFOOD`、`HUMAN_STONE`、`HUMAN_GOLD`、`HUMAN_GRANARYFOOD`、`HUMAN_DOCKFOOD` |
 | 农民类型 | `FARMERTYPE_FARMER`、`FARMERTYPE_WOOD_BOAT`、`FARMERTYPE_SAILING` |
 | 文明阶段 | `CIVILIZATION_STONEAGE`、`CIVILIZATION_TOOLAGE`、`CIVILIZATION_BRONZEAGE`、`CIVILIZATION_IRONAGE` |
-| 单位状态 | `HUMAN_STATE_IDLE`、`HUMAN_STATE_WALKING`、`HUMAN_STATE_WORKING`、`HUMAN_STATE_ATTACKING` |
+| 单位状态 | `HUMAN_STATE_IDLE`、`HUMAN_STATE_WALKING`、`HUMAN_STATE_WORKING`（含祭司治疗）、`HUMAN_STATE_ATTACKING`（含祭司转换） |
 | 指令类型 | `INS_CANCEL`、`INS_HUMANMOVE`、`INS_HUMANACTION`、`INS_HUMANBUILD`、`INS_BUILDINGACTION`、`INS_PINPOINT_STRIKE` |
 
 ## 6. 常见返回码

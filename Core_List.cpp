@@ -2450,6 +2450,12 @@ int Core_List::getNowPhaseNum(Coordinate* object)
     case CoreEven_Transport:
         return HUMAN_STATE_IDLE;
     case CoreEven_Attacking:
+        // 祭司对友军执行的是治疗，对外归类为工作状态；
+        // 对敌军的转换仍与普通攻击一样归类为攻击状态。
+        if (object->getSort() == SORT_ARMY && object->getNum() == AT_PRIEST &&
+            thisRelation.goalObject != NULL &&
+            object->getPlayerRepresent() == thisRelation.goalObject->getPlayerRepresent())
+            return HUMAN_STATE_WORKING;
         return HUMAN_STATE_ATTACKING;
     case CoreEven_Gather:
     case CoreEven_FixBuilding:

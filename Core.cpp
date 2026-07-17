@@ -452,6 +452,8 @@ void Core::updateByPlayer(int id) {
             tagarmy.destinaUR = army->getdestinaUR();
             tagarmy.ifAttack = army->getifAttack();
             tagarmy.timelock = army->gettimelock();
+            int convertRestFrames = army->getConvertRestEndFrame() - g_frame;
+            tagarmy.ConvertCooldown = convertRestFrames > 0 ? convertRestFrames * TimePerFrame : 0;
             taginfo.armies.push_back(tagarmy);
             //同步更新其他ai的信息
             for (int i = 0;i < NOWPLAYER;i++)

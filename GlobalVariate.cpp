@@ -866,6 +866,7 @@ tagFarmer tagFarmer::toEnemy() {
 tagArmy tagArmy::toEnemy() {
     DR0 = -1.0;
     UR0 = -1.0;
+    ConvertCooldown = -1;
     return *this;
 }
 
