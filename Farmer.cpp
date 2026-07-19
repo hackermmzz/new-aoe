@@ -15,7 +15,7 @@ array<std::string,8> Farmer::FarmerDisplayName;
 string Farmer::sound_click;
 array<std::string,8> Farmer::sound_work ;
 
-Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepresent,int farmerType_)
+Farmer::Farmer(Double DR, Double UR , Development* playerScience, int playerRepresent,int farmerType_)
 {
     FarmerType=farmerType_;
     this->playerScience = playerScience;
@@ -54,8 +54,8 @@ Farmer::Farmer(double DR, double UR , Development* playerScience, int playerRepr
     isAttackable = true;
     type_Missile = Missile_Spear;
     setNowRes();
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    this->imageX=this->nowres->pix.width()/Double(2);
+    this->imageY=this->nowres->pix.width()/Double(4);
     this->imageH=DR-UR;
     this->globalNum=10000*getSort()+g_globalNum;
     g_Object.insert({this->globalNum,this});
@@ -122,7 +122,7 @@ void Farmer::setNowRes()
             templist=this->Stand[this->state][this->Angle];
             break;
         case MOVEOBJECT_STATE_WALK:
-            if(get_MatchingOfResourceAndCarry() && resource > 0 && resourceSort!=HUMAN_GRANARYFOOD)
+            if(get_MatchingOfResourceAndCarry() && resource > Double::Zero() && resourceSort!=HUMAN_GRANARYFOOD)
                 templist = this->Carry[this->resourceSort][this->Angle];
             else
                 templist=this->Walk[this->state][this->Angle];
@@ -157,19 +157,19 @@ void Farmer::setNowRes()
     }
 }
 
-double Farmer::getDis_attack()
+Double Farmer::getDis_attack()
 {
-    double dis;
+    Double dis;
 
     if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
     else dis = 0;
 
-    if(dis == 0)
+    if(dis == Double::Zero())
     {
         dis = DISTANCE_ATTACK_CLOSE;
 
         if(attackObject != NULL)
-            dis += (attackObject->getSideLength())/2.0 ;
+            dis += (attackObject->getSideLength())/Double(2) ;
     }
     else dis = ( dis + playerScience->get_addition_DisAttack(getSort(), Num , 0 ,get_AttackType() ) )*BLOCKSIDELENGTH;
 

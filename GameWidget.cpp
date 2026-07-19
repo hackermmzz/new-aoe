@@ -222,7 +222,7 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(iter!=drawlist.end())
         {
             // x、y坐标偏移量
-            double dr=(*iter)->getViewDR(),ur=(*iter)->getViewUR();
+            Double dr=(*iter)->getViewDR(),ur=(*iter)->getViewUR();
             int tx = tranX(dr-DR, ur-UR), ty = tranY(dr-DR, ur-UR);
             // BlockDR、BlockUR
             int tmpBlockDR = dr/ BLOCKSIDELENGTH, tmpBlockUR = ur / BLOCKSIDELENGTH;
@@ -302,7 +302,7 @@ void GameWidget::paintEdge(QPainter &painter)
     }
 }
 
-void GameWidget::paintEdge(QPainter &painter,double dr,double ur,double w,double h,QColor color)
+void GameWidget::paintEdge(QPainter &painter,Double dr,Double ur,Double w,Double h,QColor color)
 {
     painter.setPen(color);
     int width=w*4;
@@ -323,7 +323,7 @@ void GameWidget::paintLine(QPainter &painter)
     while(LineQueue.empty()==false){
         auto ele=LineQueue.front();
         LineQueue.pop();
-        double dr0=get<0>(ele),ur0=get<1>(ele),dr1=get<2>(ele),ur1=get<3>(ele);
+        Double dr0=get<0>(ele),ur0=get<1>(ele),dr1=get<2>(ele),ur1=get<3>(ele);
         QColor color=get<4>(ele);
         painter.setPen(color);
         int tempBlockDR0 = dr0 / BLOCKSIDELENGTH, tempBlockUR0 = ur0 / BLOCKSIDELENGTH;
@@ -350,7 +350,7 @@ void GameWidget::paintEffect(QPainter &painter)
     }
     //拖尾数据类型
     struct Data{
-        double dr,ur;
+        Double dr,ur;
         int time;
         int index;
     };
@@ -368,24 +368,24 @@ void GameWidget::paintEffect(QPainter &painter)
     //创建数据
     for(auto*missile:missiles){
         if(missile->isNeedDelete())continue;
-        double dr=missile->getViewDR(),ur=missile->getViewUR();
+        Double dr=missile->getViewDR(),ur=missile->getViewUR();
         data.push_back({dr,ur,g_frame,rand()%trail_effect.size()});
     }
     //开始绘制
     for(auto itr=data.begin();itr!=data.end();){
         auto &d=*itr;
-        double dr=d.dr,ur=d.ur;
+        Double dr=d.dr,ur=d.ur;
         int tmpBlockDR=dr/BLOCKSIDELENGTH,tmpBlockUR=ur/BLOCKSIDELENGTH;
         int tx = tranX(dr-DR, ur-UR), ty = tranY(dr-DR, ur-UR);
         int x=tx+ mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX();
         int y=ty +  mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
-        double alpha=1.0-(g_frame-d.time)*1.0/Boulder_Trail_Effect_Duration;
-        if(alpha<0){
+        Double alpha=Double(1)-(g_frame-d.time)*Double(1)/Boulder_Trail_Effect_Duration;
+        if(alpha<Double(0)){
             itr=data.erase(itr);
             continue;
         }
         auto&pm=trail_effect[d.index];
-        painter.setOpacity(alpha);
+        painter.setOpacity(double(alpha));
         painter.drawPixmap(x-pm.width()/2,y-pm.height()/2,pm.width(),pm.height(),pm);
         ++itr;
     }
@@ -444,12 +444,12 @@ void GameWidget::ResumePreState()
     delete state;
 }
 
-double GameWidget::TranGlobalPosToDR(int x, int y)
+Double GameWidget::TranGlobalPosToDR(int x, int y)
 {
     return (tranDR(x, y) + DR) ;
 }
 
-double GameWidget::TranGlobalPosToUR(int x, int y)
+Double GameWidget::TranGlobalPosToUR(int x, int y)
 {
      return (tranUR(x, y) + UR) ;
 }
@@ -486,9 +486,9 @@ void GameWidget::mousePressEvent(QMouseEvent *event)
     }
 }
 
-bool GameWidget::judgeinWindow(double x, double y)
+bool GameWidget::judgeinWindow(Double x, Double y)
 {
-    if(x>0&&x<GAMEWIDGET_WIDTH&&y>0&&y<GAMEWIDGET_HEIGHT)
+    if(x>Double(0)&&x<Double(GAMEWIDGET_WIDTH)&&y>Double(0)&&y<Double(GAMEWIDGET_HEIGHT))
     {
         return 1;
     }
@@ -498,7 +498,7 @@ bool GameWidget::judgeinWindow(double x, double y)
 QImage GameWidget::GenBoulderTrailEffect()
 {
     const int siz=50;
-    auto fade=[&](double t)->double{
+    auto fade=[&](Double t)->Double{
            return pow(t,3)*(t*(6*t-15)+10);
          };
     int w=siz,h=siz;
@@ -517,11 +517,11 @@ QImage GameWidget::GenBoulderTrailEffect()
             uchar &g = pixel[1];
             uchar &r = pixel[2];
             uchar &a= pixel[3];
-            double dx=(x-hw)*1.0/hw,dy=(y-hh)*1.0/hh;
-            float v=perlin.octave2D_01(dx+ox,dy+oy,4);
-            double fac=fade(1.0-sqrt(((pow(dx,2)+pow(dy,2)))/2));
+            Double dx=(x-hw)*Double(1)/hw,dy=(y-hh)*Double(1)/hh;
+            Double v=Double::FromDouble(perlin.octave2D_01(double(dx+ox),double(dy+oy),4));
+            Double fac=fade(Double(1)-sqrt(((pow(dx,2)+pow(dy,2)))/2));
             v*=fac;
-            if(v<0.35)v=0.0;
+            if(v<Double("0.35"))v=Double::Zero();
             uchar c=uchar(v*255);
             b=g=r=a=c;
         }
@@ -550,14 +550,14 @@ int GameWidget::tranY(int DR, int UR)
 int GameWidget::tranDR(int X, int Y)
 {
     int DR;
-    DR = X * gen5 / 4.0 + Y * gen5 / 2.0;
+    DR = X * gen5 / Double(4) + Y * gen5 / Double(2);
     return DR;
 }
 
 int GameWidget::tranUR(int X, int Y)
 {
     int UR;
-    UR=X*gen5/4.0-Y*gen5/2.0;
+    UR=X*gen5/Double(4)-Y*gen5/Double(2);
     return UR;
 }
 //根据当前对象插入drawlist
@@ -600,14 +600,14 @@ void GameWidget::emptymemorymap()
     }
 }
 
-void GameWidget::AddEdge(double dr, double ur, double w, double h,QColor color)
+void GameWidget::AddEdge(Double dr, Double ur, Double w, Double h,QColor color)
 {
-    EdgeQueue.push(tuple<double,double,double,double,QColor>{dr,ur,w,h,color});
+    EdgeQueue.push(tuple<Double,Double,Double,Double,QColor>{dr,ur,w,h,color});
 }
 
-void GameWidget::AddLine(double dr0, double ur0, double dr1, double ur1,QColor color)
+void GameWidget::AddLine(Double dr0, Double ur0, Double dr1, Double ur1,QColor color)
 {
-    LineQueue.push(tuple<double,double,double,double,QColor>{dr0,ur0,dr1,ur1,color});
+    LineQueue.push(tuple<Double,Double,Double,Double,QColor>{dr0,ur0,dr1,ur1,color});
 }
 
 //地图移动
@@ -668,8 +668,8 @@ void GameWidget::movemap()
     {
         BlockDR--;
     }
-    DR=(BlockDR+0.5)*16*gen5;
-    UR=(BlockUR+0.5)*16*gen5;
+    DR=(BlockDR+Double("0.5"))*16*gen5;
+    UR=(BlockUR+Double("0.5"))*16*gen5;
 
 }
 

@@ -29,7 +29,7 @@ Player::~Player()
 
 //***************************************************************
 //添加实例对象
-Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent)
+Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , Double percent)
 {
     Building *newbuilding = NULL;
     if(Num == BUILDING_FARM) newbuilding = new Building_Resource(Num,BlockDR,BlockUR,getCiv() , playerScience , represent , percent);
@@ -38,7 +38,7 @@ Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent
     build.push_back(newbuilding);
     
     // 只在建筑100%完成时（地图加载/编辑器直接放置）才更新计数，避免与finishBuild中的调用重复
-    if(percent >= 100) {
+    if(percent >= Double(100)) {
         // 登记进科技树并标记已建成，使其能解锁依赖它的后续建筑
         //（例如：开局自带谷仓 → 解锁市场的建造按钮）
         playerScience->finishAction(Num);
@@ -52,7 +52,7 @@ Building* Player::addBuilding(int Num, int BlockDR, int BlockUR , double percent
     return newbuilding;
 }
 
-int Player::addHuman(int Num, double DR, double UR)
+int Player::addHuman(int Num, Double DR, Double UR)
 {
     Human *newhuman=new Human(Num,DR,UR , playerScience , represent);
 
@@ -63,7 +63,7 @@ int Player::addHuman(int Num, double DR, double UR)
     return 0;
 }
 
-Army* Player::addArmy(int Num , double DR , double UR)
+Army* Player::addArmy(int Num , Double DR , Double UR)
 {
     Army *newArmy = new Army(DR , UR, Num ,  playerScience , represent);
     call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
@@ -76,7 +76,7 @@ Army* Player::addArmy(int Num , double DR , double UR)
     return newArmy;
 }
 
-Army* Player::addArmyAROUND(int Num,double DR,double UR,int status,int starttime,int finishtime,double dDR,double dUR){
+Army* Player::addArmyAROUND(int Num,Double DR,Double UR,int status,int starttime,int finishtime,Double dDR,Double dUR){
     Army *newArmy = new Army(DR , UR, Num ,status,playerScience , represent,starttime,finishtime,dDR,dUR);
     call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
 
@@ -87,7 +87,7 @@ Army* Player::addArmyAROUND(int Num,double DR,double UR,int status,int starttime
     humanNumIncrease(newArmy);
     return newArmy;
 }
-Army* Player::addArmyDEFENSE(int Num,double DR,double UR,int status){
+Army* Player::addArmyDEFENSE(int Num,Double DR,Double UR,int status){
     Army *newArmy = new Army(DR , UR, Num ,status,playerScience , represent);
     call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
 
@@ -98,7 +98,7 @@ Army* Player::addArmyDEFENSE(int Num,double DR,double UR,int status){
     humanNumIncrease(newArmy);
     return newArmy;
 }
-Army* Player::addArmyATTACK(int Num,double DR,double UR,int status,int starttime,int finishtime){
+Army* Player::addArmyATTACK(int Num,Double DR,Double UR,int status,int starttime,int finishtime){
     Army *newArmy = new Army(DR , UR, Num ,status,playerScience , represent,starttime,finishtime);
     call_debugText("blue"," 产生了新的"+newArmy->getChineseName()+"(编号:" + QString::number(newArmy->getglobalNum()) + ")",represent);
 
@@ -109,7 +109,7 @@ Army* Player::addArmyATTACK(int Num,double DR,double UR,int status,int starttime
     humanNumIncrease(newArmy);
     return newArmy;
 }
-int Player::addFarmer(double DR, double UR)
+int Player::addFarmer(Double DR, Double UR)
 {
     Farmer *newfarmer=new Farmer(DR,UR , playerScience , represent);
     call_debugText("blue"," 产生了新的村民(编号:" + QString::number(newfarmer->getglobalNum()) + ")",represent);
@@ -122,7 +122,7 @@ int Player::addFarmer(double DR, double UR)
     return 0;
 }
 
-int Player::addShip(int Num, double DR, double UR)
+int Player::addShip(int Num, Double DR, Double UR)
 {
     Farmer *ship=new Farmer(DR,UR , playerScience , represent,Num);
     call_debugText("blue"," 产生了新的船民(编号:" + QString::number(ship->getglobalNum()) + ")",represent);
@@ -140,7 +140,7 @@ Missile* Player::addMissile( Coordinate* attacker , Coordinate* attackee , int b
    return addMissile(attacker,attackee->getDR(),attackee->getUR(),beginHeight);
 }
 
-Missile *Player::addMissile(Coordinate *attacker, double dr, double ur, int beginHeight)
+Missile *Player::addMissile(Coordinate *attacker, Double dr, Double ur, int beginHeight)
 {
     Missile* newMissile = NULL;
     BloodHaver* aterOb = NULL;

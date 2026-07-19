@@ -4,7 +4,7 @@
 #include <QString>
 #include <string>
 #include <QJsonObject>
-
+#include "config.h"
 /** 由 config.json 填充；存储在 RuntimeConfig.cpp，对外只读（getter + 宏）。
  *  命令行覆盖见 RuntimeConfig_private.h（仅 GlobalVariate.cpp 可包含）。 */
 
@@ -70,7 +70,7 @@ int RuntimeConfig_GAMEWIDGET_WIDTH();
 int RuntimeConfig_GAMEWIDGET_HEIGHT();
 #define GAMEWIDGET_HEIGHT (RuntimeConfig_GAMEWIDGET_HEIGHT())
 
-double RuntimeConfig_BLOCKSIDELENGTH();
+Double RuntimeConfig_BLOCKSIDELENGTH();
 #define BLOCKSIDELENGTH (RuntimeConfig_BLOCKSIDELENGTH())
 
 int RuntimeConfig_UNLOAD_RADIAN();
@@ -82,13 +82,13 @@ int RuntimeConfig_MAP_L();
 int RuntimeConfig_MAP_U();
 #define MAP_U (RuntimeConfig_MAP_U())
 
-double RuntimeConfig_HUMAN_SPEED();
+Double RuntimeConfig_HUMAN_SPEED();
 #define HUMAN_SPEED (RuntimeConfig_HUMAN_SPEED())
 
-double RuntimeConfig_WOOD_BOAT_SPEED();
+Double RuntimeConfig_WOOD_BOAT_SPEED();
 #define WOOD_BOAT_SPEED (RuntimeConfig_WOOD_BOAT_SPEED())
 
-double RuntimeConfig_ANIMAL_SPEED();
+Double RuntimeConfig_ANIMAL_SPEED();
 #define ANIMAL_SPEED (RuntimeConfig_ANIMAL_SPEED())
 
 QString RuntimeConfig_RESPATH();
@@ -112,13 +112,13 @@ bool RuntimeConfig_OPTION_POS();
 bool RuntimeConfig_OPTION_OVERLAP();
 #define OPTION_OVERLAP (RuntimeConfig_OPTION_OVERLAP())
 
-double RuntimeConfig_BUILDING_BLOOD_FIRE_SMALL();
+Double RuntimeConfig_BUILDING_BLOOD_FIRE_SMALL();
 #define BUILDING_BLOOD_FIRE_SMALL (RuntimeConfig_BUILDING_BLOOD_FIRE_SMALL())
 
-double RuntimeConfig_BUILDING_BLOOD_FIRE_MIDDLE();
+Double RuntimeConfig_BUILDING_BLOOD_FIRE_MIDDLE();
 #define BUILDING_BLOOD_FIRE_MIDDLE (RuntimeConfig_BUILDING_BLOOD_FIRE_MIDDLE())
 
-double RuntimeConfig_BUILDING_BLOOD_FIRE_BIG();
+Double RuntimeConfig_BUILDING_BLOOD_FIRE_BIG();
 #define BUILDING_BLOOD_FIRE_BIG (RuntimeConfig_BUILDING_BLOOD_FIRE_BIG())
 
 int RuntimeConfig_HOUSE_HUMAN_NUM();
@@ -151,7 +151,7 @@ int RuntimeConfig_VISION_ELEPHANT();
 int RuntimeConfig_BLOOD_ELEPHANT();
 #define BLOOD_ELEPHANT (RuntimeConfig_BLOOD_ELEPHANT())
 
-double RuntimeConfig_SPEED_ELEPHANT();
+Double RuntimeConfig_SPEED_ELEPHANT();
 #define SPEED_ELEPHANT (RuntimeConfig_SPEED_ELEPHANT())
 
 int RuntimeConfig_CNT_ELEPHANT();
@@ -196,22 +196,22 @@ int RuntimeConfig_FARMER_CARRYLIMIT_UPGRADEGOLD();
 int RuntimeConfig_FARMER_CARRYLIMIT_UPGRADESTONE();
 #define FARMER_CARRYLIMIT_UPGRADESTONE (RuntimeConfig_FARMER_CARRYLIMIT_UPGRADESTONE())
 
-double RuntimeConfig_FARMER_GATHERSPEED_WOOD();
+Double RuntimeConfig_FARMER_GATHERSPEED_WOOD();
 #define FARMER_GATHERSPEED_WOOD (RuntimeConfig_FARMER_GATHERSPEED_WOOD())
 
-double RuntimeConfig_FARMER_GATHERSPEED_FOOD();
+Double RuntimeConfig_FARMER_GATHERSPEED_FOOD();
 #define FARMER_GATHERSPEED_FOOD (RuntimeConfig_FARMER_GATHERSPEED_FOOD())
 
-double RuntimeConfig_FARMER_GATHERSPEED_GOLD();
+Double RuntimeConfig_FARMER_GATHERSPEED_GOLD();
 #define FARMER_GATHERSPEED_GOLD (RuntimeConfig_FARMER_GATHERSPEED_GOLD())
 
-double RuntimeConfig_FARMER_GATHERSPEED_STONE();
+Double RuntimeConfig_FARMER_GATHERSPEED_STONE();
 #define FARMER_GATHERSPEED_STONE (RuntimeConfig_FARMER_GATHERSPEED_STONE())
 
-double RuntimeConfig_FARMER_CONSTRUCTSPEED();
+Double RuntimeConfig_FARMER_CONSTRUCTSPEED();
 #define FARMER_CONSTRUCTSPEED (RuntimeConfig_FARMER_CONSTRUCTSPEED())
 
-double RuntimeConfig_REPAIR_COST_RATIO();
+Double RuntimeConfig_REPAIR_COST_RATIO();
 #define REPAIR_COST_RATIO (RuntimeConfig_REPAIR_COST_RATIO())
 
 int RuntimeConfig_CNT_UPGRADEFARM();
@@ -247,31 +247,31 @@ int RuntimeConfig_INITIAL_GOLD();
 int RuntimeConfig_INITIAL_STONE();
 #define INITIAL_STONE (RuntimeConfig_INITIAL_STONE())
 
-double RuntimeConfig_CRASHBOX_MICRO();
+Double RuntimeConfig_CRASHBOX_MICRO();
 #define CRASHBOX_MICRO (RuntimeConfig_CRASHBOX_MICRO())
 
-double RuntimeConfig_CRASHBOX_SINGLEBLOCK();
+Double RuntimeConfig_CRASHBOX_SINGLEBLOCK();
 #define CRASHBOX_SINGLEBLOCK (RuntimeConfig_CRASHBOX_SINGLEBLOCK())
 
-double RuntimeConfig_CRASHBOX_SMALLBLOCK();
+Double RuntimeConfig_CRASHBOX_SMALLBLOCK();
 #define CRASHBOX_SMALLBLOCK (RuntimeConfig_CRASHBOX_SMALLBLOCK())
 
-double RuntimeConfig_CRASHBOX_SMALL();
+Double RuntimeConfig_CRASHBOX_SMALL();
 #define CRASHBOX_SMALL (RuntimeConfig_CRASHBOX_SMALL())
 
-double RuntimeConfig_CRASHBOX_MIDDLE();
+Double RuntimeConfig_CRASHBOX_MIDDLE();
 #define CRASHBOX_MIDDLE (RuntimeConfig_CRASHBOX_MIDDLE())
 
-double RuntimeConfig_CRASHBOX_BIG();
+Double RuntimeConfig_CRASHBOX_BIG();
 #define CRASHBOX_BIG (RuntimeConfig_CRASHBOX_BIG())
 
-double RuntimeConfig_CRASHBOX_SINGLEOB();
+Double RuntimeConfig_CRASHBOX_SINGLEOB();
 #define CRASHBOX_SINGLEOB (RuntimeConfig_CRASHBOX_SINGLEOB())
 
-double RuntimeConfig_CRASHBOX_SMALLOB();
+Double RuntimeConfig_CRASHBOX_SMALLOB();
 #define CRASHBOX_SMALLOB (RuntimeConfig_CRASHBOX_SMALLOB())
 
-double RuntimeConfig_CRASHBOX_BIGOB();
+Double RuntimeConfig_CRASHBOX_BIGOB();
 #define CRASHBOX_BIGOB (RuntimeConfig_CRASHBOX_BIGOB())
 
 int RuntimeConfig_BLOOD_BUILD_CENTER();
@@ -814,7 +814,7 @@ int RuntimeConfig_TIME_BUILD_FARM();
 int RuntimeConfig_BLOOD_BUILD_ARROWTOWER();
 #define BLOOD_BUILD_ARROWTOWER (RuntimeConfig_BLOOD_BUILD_ARROWTOWER())
 
-double RuntimeConfig_VISION_ARROWTOWER();
+Double RuntimeConfig_VISION_ARROWTOWER();
 #define VISION_ARROWTOWER (RuntimeConfig_VISION_ARROWTOWER())
 
 int RuntimeConfig_DIS_BUILD_ARROWTOWER();
@@ -844,34 +844,34 @@ int RuntimeConfig_BUILD_WALL_STONE();
 int RuntimeConfig_TIME_BUILD_WALL();
 #define TIME_BUILD_WALL (RuntimeConfig_TIME_BUILD_WALL())
 
-double RuntimeConfig_DISTANCE_Manhattan_MoveEndNEAR();
+Double RuntimeConfig_DISTANCE_Manhattan_MoveEndNEAR();
 #define DISTANCE_Manhattan_MoveEndNEAR (RuntimeConfig_DISTANCE_Manhattan_MoveEndNEAR())
 
-double RuntimeConfig_DISTANCE_Manhattan_PathMove();
+Double RuntimeConfig_DISTANCE_Manhattan_PathMove();
 #define DISTANCE_Manhattan_PathMove (RuntimeConfig_DISTANCE_Manhattan_PathMove())
 
-double RuntimeConfig_DISTANCE_Manhattan_Unload();
+Double RuntimeConfig_DISTANCE_Manhattan_Unload();
 #define DISTANCE_Manhattan_Unload (RuntimeConfig_DISTANCE_Manhattan_Unload())
 
-double RuntimeConfig_DISTANCE_Manhattan_Transport();
+Double RuntimeConfig_DISTANCE_Manhattan_Transport();
 #define DISTANCE_Manhattan_Transport (RuntimeConfig_DISTANCE_Manhattan_Transport())
 
-double RuntimeConfig_DISTANCE_ATTACK_CLOSE();
+Double RuntimeConfig_DISTANCE_ATTACK_CLOSE();
 #define DISTANCE_ATTACK_CLOSE (RuntimeConfig_DISTANCE_ATTACK_CLOSE())
 
-double RuntimeConfig_DISTANCE_HIT_TARGET();
+Double RuntimeConfig_DISTANCE_HIT_TARGET();
 #define DISTANCE_HIT_TARGET (RuntimeConfig_DISTANCE_HIT_TARGET())
 
-double RuntimeConfig_DISTANCE_ELEPHANT_ATTACK();
+Double RuntimeConfig_DISTANCE_ELEPHANT_ATTACK();
 #define DISTANCE_ELEPHANT_ATTACK (RuntimeConfig_DISTANCE_ELEPHANT_ATTACK())
 
-double RuntimeConfig_SHIP_ACT_MAX_DISTANCE();
+Double RuntimeConfig_SHIP_ACT_MAX_DISTANCE();
 #define SHIP_ACT_MAX_DISTANCE (RuntimeConfig_SHIP_ACT_MAX_DISTANCE())
 
-double RuntimeConfig_DIS_ARROWTOWER();
+Double RuntimeConfig_DIS_ARROWTOWER();
 #define DIS_ARROWTOWER (RuntimeConfig_DIS_ARROWTOWER())
 
-double RuntimeConfig_SPEED_CLUBMAN1();
+Double RuntimeConfig_SPEED_CLUBMAN1();
 #define SPEED_CLUBMAN1 (RuntimeConfig_SPEED_CLUBMAN1())
 
 int RuntimeConfig_VISION_CLUBMAN1();
@@ -880,7 +880,7 @@ int RuntimeConfig_VISION_CLUBMAN1();
 int RuntimeConfig_DIS_CLUBMAN1();
 #define DIS_CLUBMAN1 (RuntimeConfig_DIS_CLUBMAN1())
 
-double RuntimeConfig_INTERVAL_CLUBMAN1();
+Double RuntimeConfig_INTERVAL_CLUBMAN1();
 #define INTERVAL_CLUBMAN1 (RuntimeConfig_INTERVAL_CLUBMAN1())
 
 int RuntimeConfig_ATK_CLUBMAN1();
@@ -898,7 +898,7 @@ int RuntimeConfig_BLOOD_CLUBMAN1();
 int RuntimeConfig_BLOOD_CLUBMAN2();
 #define BLOOD_CLUBMAN2 (RuntimeConfig_BLOOD_CLUBMAN2())
 
-double RuntimeConfig_SPEED_CLUBMAN2();
+Double RuntimeConfig_SPEED_CLUBMAN2();
 #define SPEED_CLUBMAN2 (RuntimeConfig_SPEED_CLUBMAN2())
 
 int RuntimeConfig_VISION_CLUBMAN2();
@@ -907,7 +907,7 @@ int RuntimeConfig_VISION_CLUBMAN2();
 int RuntimeConfig_DIS_CLUBMAN2();
 #define DIS_CLUBMAN2 (RuntimeConfig_DIS_CLUBMAN2())
 
-double RuntimeConfig_INTERVAL_CLUBMAN2();
+Double RuntimeConfig_INTERVAL_CLUBMAN2();
 #define INTERVAL_CLUBMAN2 (RuntimeConfig_INTERVAL_CLUBMAN2())
 
 int RuntimeConfig_ATK_CLUBMAN2();
@@ -922,7 +922,7 @@ int RuntimeConfig_DEFSHOOT_CLUBMAN2();
 int RuntimeConfig_BLOOD_SHORTSWORDSMAN1();
 #define BLOOD_SHORTSWORDSMAN1 (RuntimeConfig_BLOOD_SHORTSWORDSMAN1())
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN1();
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN1();
 #define SPEED_SHORTSWORDSMAN1 (RuntimeConfig_SPEED_SHORTSWORDSMAN1())
 
 int RuntimeConfig_VISION_SHORTSWORDSMAN1();
@@ -931,7 +931,7 @@ int RuntimeConfig_VISION_SHORTSWORDSMAN1();
 int RuntimeConfig_DIS_SHORTSWORDSMAN1();
 #define DIS_SHORTSWORDSMAN1 (RuntimeConfig_DIS_SHORTSWORDSMAN1())
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN1();
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN1();
 #define INTERVAL_SHORTSWORDSMAN1 (RuntimeConfig_INTERVAL_SHORTSWORDSMAN1())
 
 int RuntimeConfig_ATK_SHORTSWORSMAN1();
@@ -946,7 +946,7 @@ int RuntimeConfig_DEFSHOOT_SHORTSWORSMAN1();
 int RuntimeConfig_BLOOD_SHORTSWORDSMAN2();
 #define BLOOD_SHORTSWORDSMAN2 (RuntimeConfig_BLOOD_SHORTSWORDSMAN2())
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN2();
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN2();
 #define SPEED_SHORTSWORDSMAN2 (RuntimeConfig_SPEED_SHORTSWORDSMAN2())
 
 int RuntimeConfig_VISION_SHORTSWORDSMAN2();
@@ -955,7 +955,7 @@ int RuntimeConfig_VISION_SHORTSWORDSMAN2();
 int RuntimeConfig_DIS_SHORTSWORDSMAN2();
 #define DIS_SHORTSWORDSMAN2 (RuntimeConfig_DIS_SHORTSWORDSMAN2())
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN2();
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN2();
 #define INTERVAL_SHORTSWORDSMAN2 (RuntimeConfig_INTERVAL_SHORTSWORDSMAN2())
 
 int RuntimeConfig_ATK_SHORTSWORSMAN2();
@@ -970,7 +970,7 @@ int RuntimeConfig_DEFSHOOT_SHORTSWORSMAN2();
 int RuntimeConfig_BLOOD_SHORTSWORDSMAN3();
 #define BLOOD_SHORTSWORDSMAN3 (RuntimeConfig_BLOOD_SHORTSWORDSMAN3())
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN3();
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN3();
 #define SPEED_SHORTSWORDSMAN3 (RuntimeConfig_SPEED_SHORTSWORDSMAN3())
 
 int RuntimeConfig_VISION_SHORTSWORDSMAN3();
@@ -979,7 +979,7 @@ int RuntimeConfig_VISION_SHORTSWORDSMAN3();
 int RuntimeConfig_DIS_SHORTSWORDSMAN3();
 #define DIS_SHORTSWORDSMAN3 (RuntimeConfig_DIS_SHORTSWORDSMAN3())
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN3();
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN3();
 #define INTERVAL_SHORTSWORDSMAN3 (RuntimeConfig_INTERVAL_SHORTSWORDSMAN3())
 
 int RuntimeConfig_ATK_SHORTSWORSMAN3();
@@ -994,7 +994,7 @@ int RuntimeConfig_DEFSHOOT_SHORTSWORSMAN3();
 int RuntimeConfig_BLOOD_SHORTSWORDSMAN4();
 #define BLOOD_SHORTSWORDSMAN4 (RuntimeConfig_BLOOD_SHORTSWORDSMAN4())
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN4();
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN4();
 #define SPEED_SHORTSWORDSMAN4 (RuntimeConfig_SPEED_SHORTSWORDSMAN4())
 
 int RuntimeConfig_VISION_SHORTSWORDSMAN4();
@@ -1003,7 +1003,7 @@ int RuntimeConfig_VISION_SHORTSWORDSMAN4();
 int RuntimeConfig_DIS_SHORTSWORDSMAN4();
 #define DIS_SHORTSWORDSMAN4 (RuntimeConfig_DIS_SHORTSWORDSMAN4())
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN4();
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN4();
 #define INTERVAL_SHORTSWORDSMAN4 (RuntimeConfig_INTERVAL_SHORTSWORDSMAN4())
 
 int RuntimeConfig_ATK_SHORTSWORSMAN4();
@@ -1018,7 +1018,7 @@ int RuntimeConfig_DEFSHOOT_SHORTSWORSMAN4();
 int RuntimeConfig_BLOOD_BROADSWORDSMAN();
 #define BLOOD_BROADSWORDSMAN (RuntimeConfig_BLOOD_BROADSWORDSMAN())
 
-double RuntimeConfig_SPEED_BROADSWORDSMAN();
+Double RuntimeConfig_SPEED_BROADSWORDSMAN();
 #define SPEED_BROADSWORDSMAN (RuntimeConfig_SPEED_BROADSWORDSMAN())
 
 int RuntimeConfig_VISION_BROADSWORDSMAN();
@@ -1027,10 +1027,10 @@ int RuntimeConfig_VISION_BROADSWORDSMAN();
 int RuntimeConfig_ATK_BROADSWORDSMAN();
 #define ATK_BROADSWORDSMAN (RuntimeConfig_ATK_BROADSWORDSMAN())
 
-double RuntimeConfig_DIS_BROADSWORDSMAN();
+Double RuntimeConfig_DIS_BROADSWORDSMAN();
 #define DIS_BROADSWORDSMAN (RuntimeConfig_DIS_BROADSWORDSMAN())
 
-double RuntimeConfig_INTERVAL_BROADSWORDSMAN();
+Double RuntimeConfig_INTERVAL_BROADSWORDSMAN();
 #define INTERVAL_BROADSWORDSMAN (RuntimeConfig_INTERVAL_BROADSWORDSMAN())
 
 int RuntimeConfig_DEFCLOSE_BROADSWORDSMAN();
@@ -1045,7 +1045,7 @@ int RuntimeConfig_NOWRES_TIMER_BROADSWORDSMAN();
 int RuntimeConfig_BLOOD_SLINGER();
 #define BLOOD_SLINGER (RuntimeConfig_BLOOD_SLINGER())
 
-double RuntimeConfig_SPEED_SLINGER();
+Double RuntimeConfig_SPEED_SLINGER();
 #define SPEED_SLINGER (RuntimeConfig_SPEED_SLINGER())
 
 int RuntimeConfig_VISION_SLINGER();
@@ -1054,7 +1054,7 @@ int RuntimeConfig_VISION_SLINGER();
 int RuntimeConfig_DIS_SLINGER();
 #define DIS_SLINGER (RuntimeConfig_DIS_SLINGER())
 
-double RuntimeConfig_INTERVAL_SLINGER();
+Double RuntimeConfig_INTERVAL_SLINGER();
 #define INTERVAL_SLINGER (RuntimeConfig_INTERVAL_SLINGER())
 
 int RuntimeConfig_ATK_SLINGER();
@@ -1069,7 +1069,7 @@ int RuntimeConfig_DEFSHOOT_SLINGER();
 int RuntimeConfig_BLOOD_BOWMAN();
 #define BLOOD_BOWMAN (RuntimeConfig_BLOOD_BOWMAN())
 
-double RuntimeConfig_SPEED_BOWMAN();
+Double RuntimeConfig_SPEED_BOWMAN();
 #define SPEED_BOWMAN (RuntimeConfig_SPEED_BOWMAN())
 
 int RuntimeConfig_VISION_BOWMAN();
@@ -1078,7 +1078,7 @@ int RuntimeConfig_VISION_BOWMAN();
 int RuntimeConfig_DIS_BOWMAN();
 #define DIS_BOWMAN (RuntimeConfig_DIS_BOWMAN())
 
-double RuntimeConfig_INTERVAL_BOWMAN();
+Double RuntimeConfig_INTERVAL_BOWMAN();
 #define INTERVAL_BOWMAN (RuntimeConfig_INTERVAL_BOWMAN())
 
 int RuntimeConfig_ATK_BOWMAN();
@@ -1093,7 +1093,7 @@ int RuntimeConfig_DEFSHOOT_BOWMAN();
 int RuntimeConfig_BLOOD_COMPOSITE_BOWMAN();
 #define BLOOD_COMPOSITE_BOWMAN (RuntimeConfig_BLOOD_COMPOSITE_BOWMAN())
 
-double RuntimeConfig_SPEED_COMPOSITE_BOWMAN();
+Double RuntimeConfig_SPEED_COMPOSITE_BOWMAN();
 #define SPEED_COMPOSITE_BOWMAN (RuntimeConfig_SPEED_COMPOSITE_BOWMAN())
 
 int RuntimeConfig_VISION_COMPOSITE_BOWMAN();
@@ -1102,10 +1102,10 @@ int RuntimeConfig_VISION_COMPOSITE_BOWMAN();
 int RuntimeConfig_ATK_COMPOSITE_BOWMAN();
 #define ATK_COMPOSITE_BOWMAN (RuntimeConfig_ATK_COMPOSITE_BOWMAN())
 
-double RuntimeConfig_DIS_COMPOSITE_BOWMAN();
+Double RuntimeConfig_DIS_COMPOSITE_BOWMAN();
 #define DIS_COMPOSITE_BOWMAN (RuntimeConfig_DIS_COMPOSITE_BOWMAN())
 
-double RuntimeConfig_INTERVAL_COMPOSITE_BOWMAN();
+Double RuntimeConfig_INTERVAL_COMPOSITE_BOWMAN();
 #define INTERVAL_COMPOSITE_BOWMAN (RuntimeConfig_INTERVAL_COMPOSITE_BOWMAN())
 
 int RuntimeConfig_DEFCLOSE_COMPOSITE_BOWMAN();
@@ -1120,7 +1120,7 @@ int RuntimeConfig_NOWRES_TIMER_COMPOSITE_BOWMAN();
 int RuntimeConfig_BLOOD_CHARIOT_ARCHER();
 #define BLOOD_CHARIOT_ARCHER (RuntimeConfig_BLOOD_CHARIOT_ARCHER())
 
-double RuntimeConfig_SPEED_CHARIOT_ARCHER();
+Double RuntimeConfig_SPEED_CHARIOT_ARCHER();
 #define SPEED_CHARIOT_ARCHER (RuntimeConfig_SPEED_CHARIOT_ARCHER())
 
 int RuntimeConfig_VISION_CHARIOT_ARCHER();
@@ -1129,10 +1129,10 @@ int RuntimeConfig_VISION_CHARIOT_ARCHER();
 int RuntimeConfig_ATK_CHARIOT_ARCHER();
 #define ATK_CHARIOT_ARCHER (RuntimeConfig_ATK_CHARIOT_ARCHER())
 
-double RuntimeConfig_DIS_CHARIOT_ARCHER();
+Double RuntimeConfig_DIS_CHARIOT_ARCHER();
 #define DIS_CHARIOT_ARCHER (RuntimeConfig_DIS_CHARIOT_ARCHER())
 
-double RuntimeConfig_INTERVAL_CHARIOT_ARCHER();
+Double RuntimeConfig_INTERVAL_CHARIOT_ARCHER();
 #define INTERVAL_CHARIOT_ARCHER (RuntimeConfig_INTERVAL_CHARIOT_ARCHER())
 
 int RuntimeConfig_DEFCLOSE_CHARIOT_ARCHER();
@@ -1147,7 +1147,7 @@ int RuntimeConfig_NOWRES_TIMER_CHARIOT_ARCHER();
 int RuntimeConfig_BLOOD_IMPROVEDBOWMAN1();
 #define BLOOD_IMPROVEDBOWMAN1 (RuntimeConfig_BLOOD_IMPROVEDBOWMAN1())
 
-double RuntimeConfig_SPEED_IMPROVEDBOWMAN1();
+Double RuntimeConfig_SPEED_IMPROVEDBOWMAN1();
 #define SPEED_IMPROVEDBOWMAN1 (RuntimeConfig_SPEED_IMPROVEDBOWMAN1())
 
 int RuntimeConfig_VISION_IMPROVEDBOWMAN1();
@@ -1156,7 +1156,7 @@ int RuntimeConfig_VISION_IMPROVEDBOWMAN1();
 int RuntimeConfig_DIS_IMPROVEDBOWMAN1();
 #define DIS_IMPROVEDBOWMAN1 (RuntimeConfig_DIS_IMPROVEDBOWMAN1())
 
-double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN1();
+Double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN1();
 #define INTERVAL_IMPROVEDBOWMAN1 (RuntimeConfig_INTERVAL_IMPROVEDBOWMAN1())
 
 int RuntimeConfig_ATK_IMPROVEDBOWMAN1();
@@ -1171,7 +1171,7 @@ int RuntimeConfig_DEFSHOOT_IMPROVEDBOWMAN1();
 int RuntimeConfig_BLOOD_IMPROVEDBOWMAN2();
 #define BLOOD_IMPROVEDBOWMAN2 (RuntimeConfig_BLOOD_IMPROVEDBOWMAN2())
 
-double RuntimeConfig_SPEED_IMPROVEDBOWMAN2();
+Double RuntimeConfig_SPEED_IMPROVEDBOWMAN2();
 #define SPEED_IMPROVEDBOWMAN2 (RuntimeConfig_SPEED_IMPROVEDBOWMAN2())
 
 int RuntimeConfig_VISION_IMPROVEDBOWMAN2();
@@ -1180,7 +1180,7 @@ int RuntimeConfig_VISION_IMPROVEDBOWMAN2();
 int RuntimeConfig_DIS_IMPROVEDBOWMAN2();
 #define DIS_IMPROVEDBOWMAN2 (RuntimeConfig_DIS_IMPROVEDBOWMAN2())
 
-double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN2();
+Double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN2();
 #define INTERVAL_IMPROVEDBOWMAN2 (RuntimeConfig_INTERVAL_IMPROVEDBOWMAN2())
 
 int RuntimeConfig_ATK_IMPROVEDBOWMAN2();
@@ -1195,7 +1195,7 @@ int RuntimeConfig_DEFSHOOT_IMPROVEDBOWMAN2();
 int RuntimeConfig_BLOOD_SCOUT();
 #define BLOOD_SCOUT (RuntimeConfig_BLOOD_SCOUT())
 
-double RuntimeConfig_SPEED_SCOUT();
+Double RuntimeConfig_SPEED_SCOUT();
 #define SPEED_SCOUT (RuntimeConfig_SPEED_SCOUT())
 
 int RuntimeConfig_VISION_SCOUT();
@@ -1204,7 +1204,7 @@ int RuntimeConfig_VISION_SCOUT();
 int RuntimeConfig_DIS_SCOUT();
 #define DIS_SCOUT (RuntimeConfig_DIS_SCOUT())
 
-double RuntimeConfig_INTERVAL_SCOUT();
+Double RuntimeConfig_INTERVAL_SCOUT();
 #define INTERVAL_SCOUT (RuntimeConfig_INTERVAL_SCOUT())
 
 int RuntimeConfig_ATK_SCOUT();
@@ -1219,7 +1219,7 @@ int RuntimeConfig_DEFSHOOT_SCOUT();
 int RuntimeConfig_BLOOD_CHARIOT();
 #define BLOOD_CHARIOT (RuntimeConfig_BLOOD_CHARIOT())
 
-double RuntimeConfig_SPEED_CHARIOT();
+Double RuntimeConfig_SPEED_CHARIOT();
 #define SPEED_CHARIOT (RuntimeConfig_SPEED_CHARIOT())
 
 int RuntimeConfig_VISION_CHARIOT();
@@ -1228,10 +1228,10 @@ int RuntimeConfig_VISION_CHARIOT();
 int RuntimeConfig_ATK_CHARIOT();
 #define ATK_CHARIOT (RuntimeConfig_ATK_CHARIOT())
 
-double RuntimeConfig_DIS_CHARIOT();
+Double RuntimeConfig_DIS_CHARIOT();
 #define DIS_CHARIOT (RuntimeConfig_DIS_CHARIOT())
 
-double RuntimeConfig_INTERVAL_CHARIOT();
+Double RuntimeConfig_INTERVAL_CHARIOT();
 #define INTERVAL_CHARIOT (RuntimeConfig_INTERVAL_CHARIOT())
 
 int RuntimeConfig_DEFCLOSE_CHARIOT();
@@ -1246,7 +1246,7 @@ int RuntimeConfig_NOWRES_TIMER_CHARIOT();
 int RuntimeConfig_BLOOD_CAVALRY();
 #define BLOOD_CAVALRY (RuntimeConfig_BLOOD_CAVALRY())
 
-double RuntimeConfig_SPEED_CAVALRY();
+Double RuntimeConfig_SPEED_CAVALRY();
 #define SPEED_CAVALRY (RuntimeConfig_SPEED_CAVALRY())
 
 int RuntimeConfig_VISION_CAVALRY();
@@ -1255,7 +1255,7 @@ int RuntimeConfig_VISION_CAVALRY();
 int RuntimeConfig_DIS_CAVALRY();
 #define DIS_CAVALRY (RuntimeConfig_DIS_CAVALRY())
 
-double RuntimeConfig_INTERVAL_CAVALRY();
+Double RuntimeConfig_INTERVAL_CAVALRY();
 #define INTERVAL_CAVALRY (RuntimeConfig_INTERVAL_CAVALRY())
 
 int RuntimeConfig_ATK_CAVALRY();
@@ -1270,7 +1270,7 @@ int RuntimeConfig_DEFSHOOT_CAVALRY();
 int RuntimeConfig_BLOOD_SHIP();
 #define BLOOD_SHIP (RuntimeConfig_BLOOD_SHIP())
 
-double RuntimeConfig_SPEED_SHIP();
+Double RuntimeConfig_SPEED_SHIP();
 #define SPEED_SHIP (RuntimeConfig_SPEED_SHIP())
 
 int RuntimeConfig_VISION_SHIP();
@@ -1279,7 +1279,7 @@ int RuntimeConfig_VISION_SHIP();
 int RuntimeConfig_ATK_SHIP();
 #define ATK_SHIP (RuntimeConfig_ATK_SHIP())
 
-double RuntimeConfig_DIS_SHIP();
+Double RuntimeConfig_DIS_SHIP();
 #define DIS_SHIP (RuntimeConfig_DIS_SHIP())
 
 int RuntimeConfig_INTERVAL_SHIP();
@@ -1294,7 +1294,7 @@ int RuntimeConfig_DEFSHOOT_SHIP();
 int RuntimeConfig_BLOOD_STONE_THROWER();
 #define BLOOD_STONE_THROWER (RuntimeConfig_BLOOD_STONE_THROWER())
 
-double RuntimeConfig_SPEED_STONE_THROWER();
+Double RuntimeConfig_SPEED_STONE_THROWER();
 #define SPEED_STONE_THROWER (RuntimeConfig_SPEED_STONE_THROWER())
 
 int RuntimeConfig_VISION_STONE_THROWER();
@@ -1303,10 +1303,10 @@ int RuntimeConfig_VISION_STONE_THROWER();
 int RuntimeConfig_ATK_STONE_THROWER();
 #define ATK_STONE_THROWER (RuntimeConfig_ATK_STONE_THROWER())
 
-double RuntimeConfig_DIS_STONE_THROWER();
+Double RuntimeConfig_DIS_STONE_THROWER();
 #define DIS_STONE_THROWER (RuntimeConfig_DIS_STONE_THROWER())
 
-double RuntimeConfig_DIS_MIN_STONE_THROWER();
+Double RuntimeConfig_DIS_MIN_STONE_THROWER();
 #define DIS_MIN_STONE_THROWER (RuntimeConfig_DIS_MIN_STONE_THROWER())
 
 int RuntimeConfig_INTERVAL_STONE_THROWER();
@@ -1321,7 +1321,7 @@ int RuntimeConfig_DEFSHOOT_STONE_THROWER();
 int RuntimeConfig_BLOOD_PRIEST();
 #define BLOOD_PRIEST (RuntimeConfig_BLOOD_PRIEST())
 
-double RuntimeConfig_SPEED_PRIEST();
+Double RuntimeConfig_SPEED_PRIEST();
 #define SPEED_PRIEST (RuntimeConfig_SPEED_PRIEST())
 
 int RuntimeConfig_VISION_PRIEST();
@@ -1330,7 +1330,7 @@ int RuntimeConfig_VISION_PRIEST();
 int RuntimeConfig_ATK_PRIEST();
 #define ATK_PRIEST (RuntimeConfig_ATK_PRIEST())
 
-double RuntimeConfig_DIS_PRIEST();
+Double RuntimeConfig_DIS_PRIEST();
 #define DIS_PRIEST (RuntimeConfig_DIS_PRIEST())
 
 int RuntimeConfig_INTERVAL_PRIEST();
@@ -1342,19 +1342,19 @@ int RuntimeConfig_DEFCLOSE_PRIEST();
 int RuntimeConfig_DEFSHOOT_PRIEST();
 #define DEFSHOOT_PRIEST (RuntimeConfig_DEFSHOOT_PRIEST())
 
-double RuntimeConfig_Missile_Speed_Spear();
+Double RuntimeConfig_Missile_Speed_Spear();
 #define Missile_Speed_Spear (RuntimeConfig_Missile_Speed_Spear())
 
-double RuntimeConfig_Missile_Speed_Arrow();
+Double RuntimeConfig_Missile_Speed_Arrow();
 #define Missile_Speed_Arrow (RuntimeConfig_Missile_Speed_Arrow())
 
-double RuntimeConfig_Missile_Speed_Cobblestone();
+Double RuntimeConfig_Missile_Speed_Cobblestone();
 #define Missile_Speed_Cobblestone (RuntimeConfig_Missile_Speed_Cobblestone())
 
-double RuntimeConfig_Missile_Speed_Boulders();
+Double RuntimeConfig_Missile_Speed_Boulders();
 #define Missile_Speed_Boulders (RuntimeConfig_Missile_Speed_Boulders())
 
-double RuntimeConfig_Missile_Boulders_Range();
+Double RuntimeConfig_Missile_Boulders_Range();
 #define Missile_Boulders_Range (RuntimeConfig_Missile_Boulders_Range())
 
 int RuntimeConfig_NOWRES_TIMER_FARMER();
@@ -1402,7 +1402,7 @@ int RuntimeConfig_PRIEST_REST_TIME();
 int RuntimeConfig_BLOOD_HOPLITE();
 #define BLOOD_HOPLITE (RuntimeConfig_BLOOD_HOPLITE())
 
-double RuntimeConfig_SPEED_HOPLITE();
+Double RuntimeConfig_SPEED_HOPLITE();
 #define SPEED_HOPLITE (RuntimeConfig_SPEED_HOPLITE())
 
 int RuntimeConfig_VISION_HOPLITE();
@@ -1411,10 +1411,10 @@ int RuntimeConfig_VISION_HOPLITE();
 int RuntimeConfig_ATK_HOPLITE();
 #define ATK_HOPLITE (RuntimeConfig_ATK_HOPLITE())
 
-double RuntimeConfig_DIS_HOPLITE();
+Double RuntimeConfig_DIS_HOPLITE();
 #define DIS_HOPLITE (RuntimeConfig_DIS_HOPLITE())
 
-double RuntimeConfig_INTERVAL_HOPLITE();
+Double RuntimeConfig_INTERVAL_HOPLITE();
 #define INTERVAL_HOPLITE (RuntimeConfig_INTERVAL_HOPLITE())
 
 int RuntimeConfig_DEFCLOSE_HOPLITE();
@@ -1438,7 +1438,7 @@ int RuntimeConfig_EnemyTechnologyMaxCivilization();
 bool RuntimeConfig_OffScreen();
 #define OffScreen (RuntimeConfig_OffScreen())
 
-double RuntimeConfig_MUSIC_VOLUME();
+Double RuntimeConfig_MUSIC_VOLUME();
 #define MUSIC_VOLUME (RuntimeConfig_MUSIC_VOLUME())
 
 bool RuntimeConfig_isPlayerBuildingDisabled(int buildingNum);

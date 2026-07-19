@@ -5,7 +5,7 @@
 void Building_Resource::nextframe()
 {
     setNowRes();
-    if(Percent<100)
+    if(Percent<Double(100))
     {
         nowres = nowlist->begin();
         advance(nowres , (int)(Percent/25));

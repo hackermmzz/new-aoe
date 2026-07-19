@@ -10,9 +10,9 @@ Development::Development(int represent)
     init_DevelopLab();
 }
 
-double Development::get_rate_Move(int sort, int type)
+Double Development::get_rate_Move(int sort, int type)
 {
-    double rate = 1;
+    Double rate = 1;
     if (sort == SORT_FARMER) rate += rate_FarmerMove;
 
     return rate;
@@ -20,9 +20,9 @@ double Development::get_rate_Move(int sort, int type)
 
 /***************************************************************/
 
-double Development::get_rate_Blood(int sort, int type)
+Double Development::get_rate_Blood(int sort, int type)
 {
-    double rate = 1;
+    Double rate = 1;
     if (sort == SORT_FARMER) rate += rate_FarmerBlood;
 
 
@@ -38,9 +38,9 @@ int Development::get_addition_Blood(int sort, int type)
 
 /***************************************************************/
 //攻击倍率加成
-double Development::get_rate_Attack(int sort, int type, int armyClass, int attackType, int interSort, int interNum)
+Double Development::get_rate_Attack(int sort, int type, int armyClass, int attackType, int interSort, int interNum)
 {
-    double rate = 1;
+    Double rate = 1;
 
     if (interSort != -1 && interNum != -1)
     {
@@ -130,9 +130,9 @@ int Development::get_addition_DisAttack(int sort, int type, int armyClass, int a
 
 /***************************************************************/
 //防御减伤倍率
-double Development::get_rate_Defence(int sort, int type, int armyClass, int attackType_got)
+Double Development::get_rate_Defence(int sort, int type, int armyClass, int attackType_got)
 {
-    double rate = 1;
+    Double rate = 1;
 
     return rate;
 }
@@ -141,7 +141,7 @@ double Development::get_rate_Defence(int sort, int type, int armyClass, int atta
 //防御减伤加成
 int Development::get_addition_Defence(int sort, int type, int armyClass, int attackType_got)
 {
-    double addition = 0;
+    Double addition = 0;
     int level = 0;
 
     if (sort == SORT_ARMY)
@@ -244,7 +244,7 @@ int Development::get_addition_ResourceSort(int resourceSort)
     return addition;
 }
 
-double Development::get_rate_ResorceGather(int resourceSort)
+Double Development::get_rate_ResorceGather(int resourceSort)
 {
     int rate = 1;
 
@@ -329,7 +329,7 @@ void Development::finishAction(int buildingType, int buildact)
     // 升级车轮：村民移速提升30%
     if (buildingType == BUILDING_MARKET && buildact == BUILDING_MARKET_WHEEL_UPGRADE)
     {
-        rate_FarmerMove = 0.3;  // 村民移速提升30%
+        rate_FarmerMove = Double("0.3");  // 村民移速提升30%
     }
 
     developLab[buildingType].finishAction(buildact);

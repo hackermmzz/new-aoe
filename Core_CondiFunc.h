@@ -95,12 +95,12 @@ struct relation_Object
     int resourceBuildingType;
     int relationAct;    //记录当前行动的种类
     int nowPhaseNum = 0;    //记录当前行动所属的detail阶段
-    double DR_goal, UR_goal, DR_alter, UR_alter;   //移动等目标位置，alter为暂时更改的目标的位置
-    double DR_Predicted, UR_Predicted;   //object1下一步的移动位置
-    double crashLength_goal = 0, crashLength_alter = 0;
-    double distance_AllowWork = 0, dis_AllowWork_alter = 0;  //若goalObject为可工作对象，human对其的可工作距离（游戏中具体距离）
-    double distance_Record; //游戏中的距离的记录,为曼哈顿距离，用于更新relation
-    double disAttack = 0;
+    Double DR_goal, UR_goal, DR_alter, UR_alter;   //移动等目标位置，alter为暂时更改的目标的位置
+    Double DR_Predicted, UR_Predicted;   //object1下一步的移动位置
+    Double crashLength_goal = 0, crashLength_alter = 0;
+    Double distance_AllowWork = 0, dis_AllowWork_alter = 0;  //若goalObject为可工作对象，human对其的可工作距离（游戏中具体距离）
+    Double distance_Record; //游戏中的距离的记录,为曼哈顿距离，用于更新relation
+    Double disAttack = 0;
     int height_Object = 0, height_GoalObject = 0;
 
     bool crash_DealPhase = false;
@@ -124,17 +124,17 @@ struct relation_Object
     relation_Object() { isExist = false; goalObject = NULL; }
     relation_Object(int evenClass);
     relation_Object(Coordinate* goal, int eventClass);
-    relation_Object(double DR_goal, double UR_goal, int eventClass);
+    relation_Object(Double DR_goal, Double UR_goal, int eventClass);
 
-    void set_goalPoint(double DR, double UR) { DR_goal = DR; UR_goal = UR; }
-    void set_AlterPoint(double DR, double UR) { DR_alter = DR; UR_alter = UR; }
+    void set_goalPoint(Double DR, Double UR) { DR_goal = DR; UR_goal = UR; }
+    void set_AlterPoint(Double DR, Double UR) { DR_alter = DR; UR_alter = UR; }
 
     void set_distance_AllowWork() {
         if (goalObject == NULL) {
             distance_AllowWork = 0;
             return;
         }
-        distance_AllowWork = goalObject->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB;
+        distance_AllowWork = goalObject->getSideLength() / Double(2) + 2 * CRASHBOX_SINGLEOB;
         //如果是建造船坞(首先得确定他是建筑)
         {
             void* obj = 0;goalObject->printer_ToBuilding(&obj);
@@ -148,7 +148,7 @@ struct relation_Object
         {
             void* obj = 0;goalObject->printer_ToStaticRes(&obj);
             if (obj && goalObject->getNum() == NUM_STATICRES_Fish) {
-                distance_AllowWork = goalObject->getSideLength() * 1.2;
+                distance_AllowWork = goalObject->getSideLength() * Double("1.2");
                 return;
             }
         }
@@ -159,7 +159,7 @@ struct relation_Object
             dis_AllowWork_alter = 0;
             return;
         }
-        dis_AllowWork_alter = alterOb->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB;
+        dis_AllowWork_alter = alterOb->getSideLength() / Double(2) + 2 * CRASHBOX_SINGLEOB;
         {
             void* obj = 0;alterOb->printer_ToBuilding(&obj);
             if (obj && alterOb->getNum() == BUILDING_DOCK) {
@@ -172,7 +172,7 @@ struct relation_Object
     //如果goalObject是Resource的子类，则根据资源种类设置对应资源建筑的类型
     void set_ResourceBuildingType();
 
-    void set_AlterOb(Coordinate* AlterObject, double dis_record);
+    void set_AlterOb(Coordinate* AlterObject, Double dis_record);
 
     void reset_Object1Predicted(Coordinate* object1);
 

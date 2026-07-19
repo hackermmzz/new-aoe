@@ -4,7 +4,7 @@
 #include <GameWidget.h>
 //
 struct LineAreaData{
-    using PD=array<double,2>;
+    using PD=array<Double,2>;
     vector<PD>data;
     int areaType;  // 0=原有区域(灰色), 1=巡逻区域(蓝色)
     
@@ -30,7 +30,7 @@ public:
     virtual void Draw();
     virtual void onRightMouseClick();
     virtual void onRightMouseDown();
-    LineAreaData *GetPosIn(double dr,double ur);
+    LineAreaData *GetPosIn(Double dr,Double ur);
     static string Name();
     
     // 新增功能

@@ -43,7 +43,7 @@ private:
 bool compareSN(tagObj, tagObj);
 bool compareDistance(tagObj, tagObj);
 bool compareBlood(tagHuman, tagHuman);
-double getDistance(tagObj, tagObj);
+Double getDistance(tagObj, tagObj);
 void getBuilding();
 void getResource();
 void getOccupied();

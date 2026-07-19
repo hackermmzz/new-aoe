@@ -29,7 +29,7 @@ public:
 
     /*********关系表控制***********/
     int addRelation( Coordinate* object1, Coordinate * object2, int eventType , bool respond = true);
-    int addRelation( Coordinate* object1, double DR , double UR, int eventType , bool respond = true);  //移动
+    int addRelation( Coordinate* object1, Double DR , Double UR, int eventType , bool respond = true);  //移动
     int addRelation( Coordinate* object1, int BlockDR , int BlockUR, int eventType , bool respond = true , int type = -1); //建造
     int addRelation( Coordinate* object1, int evenType , int actNum);  //建筑行动 actpercent
     void suspendRelation(Coordinate * object);  //指令手动停止
@@ -85,9 +85,9 @@ private:
     bool canBuildDock(int BlockDR,int BlockUR,int w);
     int is_BuildingCanBuild(int buildtype , int BlockDR , int BlockUR ,int PlayerID, QString& chineseName);
     Missile* creatMissile(Coordinate* , Coordinate*);
-    Missile *creatMissile(Coordinate *, double dr,double ur);
+    Missile *creatMissile(Coordinate *, Double dr,Double ur);
     void deal_RangeAttack( Coordinate* attacker , Coordinate* attackee );
-    void deal_RangeAttack(Missile* missile,const array<double,2>&center);
+    void deal_RangeAttack(Missile* missile,const array<Double,2>&center);
     void jud_resetResBuild(){ if(resourceBuildingChange){ resourceBuildingChange = false; needReset_resBuild = true; } }
     void init_resetResBuild(){ needReset_resBuild = false; }
 
@@ -95,9 +95,9 @@ private:
     void change_HumanRepresent(Human*human,int represent);
     void change_BuildingRepresent(Building*building,int represent);
     /************控制行动************/
-    void object_Move(Coordinate * object , double DR , double UR);  //控制移动
+    void object_Move(Coordinate * object , Double DR , Double UR);  //控制移动
     void object_Attack(Coordinate* , Coordinate*); //控制因object1影响object2血量
-    void object_PinPoint_Attack(Coordinate*,double dr,double ur);
+    void object_PinPoint_Attack(Coordinate*,Double dr,Double ur);
     void object_Gather(Coordinate* , Coordinate* ); //控制采集
     void object_Transport(Coordinate* , Coordinate* );//控制运输
      void object_Unload(Coordinate* , Coordinate* );//控制运输
@@ -114,19 +114,19 @@ private:
     bool isHaveJud( int blockDR , int blockUR ){ return map_HaveJud[blockDR][blockUR]; }
     bool isHaveJud( Point judPoi){ return map_HaveJud[judPoi.x][judPoi.y]; }
 
-    void setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0);
+    void setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Double UR0);
     void crashHandle(MoveObject* moveOb);
     void work_CrashPhase(MoveObject* moveOb);
-    pair<stack<Point>,array<double,2>> findPath(Map::TypeRef&findpathMap,Map *map, const Point& start, Point destination , Coordinate*object,Coordinate* goalOb);
+    pair<stack<Point>,array<Double,2>> findPath(Map::TypeRef&findpathMap,Map *map, const Point& start, Point destination , Coordinate*object,Coordinate* goalOb);
 
-    int tranBlockDR(double DR){return DR/BLOCKSIDELENGTH;}
-    int tranBlockUR(double UR){return UR/BLOCKSIDELENGTH;}
+    int tranBlockDR(Double DR){return int(DR/BLOCKSIDELENGTH);}
+    int tranBlockUR(Double UR){return int(UR/BLOCKSIDELENGTH);}
     Point GetSameBlockInLine(const Point&point0,const Point&point1);
     Point GetSameBlockInLineNearest(const Point&point0,const Point&point1);
     bool checkIsCoast(int x,int y);
     bool checkIsLandUint(Coordinate*obj);
     bool checkIsOcean(int x,int y);
-    void calculateDamage(Coordinate*object1,Coordinate*object2,int extraDamage=0,double damageRate=1.0);
+    void calculateDamage(Coordinate*object1,Coordinate*object2,int extraDamage=0,Double damageRate=1);
 };
 
 #endif // CORE_LIST_H

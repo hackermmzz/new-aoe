@@ -203,7 +203,7 @@ relation_Object::relation_Object( Coordinate* goal , int eventClass)
     init_AlterOb();
 }
 
-relation_Object::relation_Object(double DR_goal , double UR_goal , int eventClass )
+relation_Object::relation_Object(Double DR_goal , Double UR_goal , int eventClass )
 {
     isExist = true;
     goalObject = NULL;
@@ -223,7 +223,7 @@ void relation_Object::set_ResourceBuildingType()
     else resourceBuildingType = resource->get_ReturnBuildingType();
 }
 
-void relation_Object::set_AlterOb(Coordinate* AlterObject , double dis_record)
+void relation_Object::set_AlterOb(Coordinate* AlterObject , Double dis_record)
 {
     alterOb = AlterObject;
     distance_Record = dis_record;
@@ -269,8 +269,8 @@ void relation_Object::update_Attrib_alter()
 void relation_Object::init_AlterOb()
 {
     alterOb = NULL;
-    dis_AllowWork_alter = 1e6;
-    distance_Record = 1e6;
+    dis_AllowWork_alter =Double::FromDouble(1e6);
+    distance_Record = Double::FromDouble(1e6);
 }
 
 void relation_Object::init_AttackAb( Coordinate* object1 )
@@ -294,7 +294,7 @@ void relation_Object::init_AttackAb( Coordinate* object1 )
                  Building* buildGoal = NULL;
                  goalObject->printer_ToBuilding((void**)&buildGoal);
                  if (buildGoal != NULL)
-                     disAttack = goalObject->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB;
+                     disAttack = goalObject->getSideLength() / 2 + 2 * CRASHBOX_SINGLEOB;
              }
          }
     }
@@ -465,8 +465,8 @@ bool condition_Object1_FullBackpack( Coordinate* object1 , relation_Object& rela
 //位置距离接近
 bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int& operate , bool isNegation )
 {
-    double dr1 = object1->getDR() , ur1 = object1->getUR() ,dr2 , ur2;
-    double dis = 1e6;
+    Double dr1 = object1->getDR() , ur1 = object1->getUR() ,dr2 , ur2;
+    Double dis = Double::FromDouble(1e6);
     BloodHaver* attacker = NULL;
     int heightAdd = 0;
     //对上船的人需要特殊判定，如果此时船满了，那么不再去靠近船
@@ -476,7 +476,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
         if(obj){
             Farmer*ship=(Farmer*)obj;
             if(ship->get_farmerType()==FARMERTYPE_WOOD_BOAT){
-                if(ship->getResourceNowHave()>=5)
+                if(ship->getResourceNowHave()>=Double(5))
                     return true;
             }
         }
@@ -519,7 +519,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
                 {
                     heightAdd = relation.height_Object - relation.height_GoalObject;
                     if(heightAdd > 0)
-                        dis = min( dis + heightAdd*BLOCKSIDELENGTH , object1->getVision() * BLOCKSIDELENGTH );
+                        dis = min( dis + Double(heightAdd)*BLOCKSIDELENGTH , Double(object1->getVision()) * BLOCKSIDELENGTH );
                 }
                 break;
             case OPERATECON_NEAR_ATTACK_MOVE:
@@ -549,7 +549,7 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     //对飞行物的距离判定进行特判
     if(operate == OPERATECON_NEAR_MISSILE)
     {
-        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 ) <= dis+relation.goalObject->getCrashLength()/2.0 )
+        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 ) <= dis+relation.goalObject->getCrashLength()/2 )
             ((Missile*)object1)->hitTarget();
         return isNegation^((Missile*)object1)->isMissileFinishTask();
     }
@@ -626,7 +626,7 @@ bool condition_Object1_Unload(Coordinate *object1, relation_Object &relation, in
             Block&block=GlobalMap->cell[L][U];
 
             if(block.getMapType()!=MAPTYPE_OCEAN&&GlobalMap->map_Object[L][U].empty()){//如果不为海洋，那就是陆地，并且无障碍物
-                double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
+                Double dr=ship->getDR()-block.getDR()-BLOCKSIDELENGTH/2,ur=ship->getUR()-block.getUR()-BLOCKSIDELENGTH/2;
                 if(dr*dr+ur*ur<=SHIP_ACT_MAX_DISTANCE)return true;
             }
         }

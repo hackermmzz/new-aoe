@@ -20,19 +20,19 @@ public:
     int get_Cnt(){ return (int)Cnt; }
     int get_ReturnBuildingType();
 
-    void updateCnt_byGather( double gather){  Cnt -= gather ;}
+    void updateCnt_byGather( Double gather){  Cnt -= gather ;}
     void updateCnt_byDecay(){ Cnt*=(1-DecayRate); }
-    bool is_Surplus(){ return Cnt>=0.5;} //按娄老师和学生要求，对于小于1个得直接判死}
+    bool is_Surplus(){ return Cnt>=Double("0.5");} //按娄老师和学生要求，对于小于1个得直接判死}
 
 protected:
-    double Cnt; //Cnt表示当前剩余的实际资源量
+    Double Cnt; //Cnt表示当前剩余的实际资源量
 
     int MaxCnt;
 
     bool gatherable = true;
     //false为不可采集 true为可以采集且不再具有其他功能
 
-    double DecayRate=0;
+    Double DecayRate=0;
     //腐烂速度
 
     int resourceSort;

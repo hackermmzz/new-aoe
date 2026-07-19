@@ -43,7 +43,7 @@ private:
     int elapsedSec = 0;
     int elapsedFrame = 0;
 
-    double human_num = 0;
+    Double human_num = 0;
     int build_hold_human_num = 0;
     bool isGranaryBuilt = false;
     bool isStockBuilt = false;

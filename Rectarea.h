@@ -5,8 +5,8 @@
 //
 struct RectAreaData{
     //
-    double dr,ur;
-    double w,h;
+    Double dr,ur;
+    Double w,h;
     int areaType;  // 0=原有区域(灰色), 1=巡逻区域(蓝色)
     
     RectAreaData() : dr(0), ur(0), w(0), h(0), areaType(0) {}
@@ -29,7 +29,7 @@ public:
     virtual void Draw();
     virtual void onRightMouseClick();
     virtual void onRightMouseDown();
-    RectAreaData* GetPosIn(double dr,double ur);
+    RectAreaData* GetPosIn(Double dr,Double ur);
     static string Name();
     
     // 新增功能

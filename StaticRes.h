@@ -18,7 +18,7 @@ public:
 
 
     StaticRes(){}
-    StaticRes(int Num,double DR,double UR);
+    StaticRes(int Num,Double DR,Double UR);
     StaticRes(int Num, int BlockDR, int BlockUR);
 
   /**********************虚函数**************************/

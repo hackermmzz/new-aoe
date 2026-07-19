@@ -39,7 +39,7 @@ public:
 
     void paintEvent(QPaintEvent *);
     void paintEdge(QPainter&painter);
-    void paintEdge(QPainter&painter,double dr,double ur,double w,double h,QColor color=Qt::white);
+    void paintEdge(QPainter&painter,Double dr,Double ur,Double w,Double h,QColor color=Qt::white);
     void paintLine(QPainter&painter);
     void paintEffect(QPainter&painter);
     void mousePressEvent(QMouseEvent *event);
@@ -47,8 +47,8 @@ public:
     void SaveCurrentState(void*state);
     void *RollBackState();
     void ResumePreState();
-    double TranGlobalPosToDR(int x,int y);
-    double TranGlobalPosToUR(int x,int y);
+    Double TranGlobalPosToDR(int x,int y);
+    Double TranGlobalPosToUR(int x,int y);
     int tranX(int DR, int UR);
     int tranY(int DR,int UR);
     int tranDR(int X,int Y);
@@ -56,9 +56,9 @@ public:
     void insert(Coordinate *p,std::vector<Coordinate*> *drawlist);
     void drawmemory(int X, int Y,  ImageResource&res, int globalNum);
     void emptymemorymap();
-    void AddEdge(double dr,double ur,double w,double h,QColor color=Qt::white);
-    void AddLine(double dr0,double ur0,double dr1,double ur1,QColor color=Qt::white);
-    bool judgeinWindow(double x, double y);
+    void AddEdge(Double dr,Double ur,Double w,Double h,QColor color=Qt::white);
+    void AddLine(Double dr0,Double ur0,Double dr1,Double ur1,QColor color=Qt::white);
+    bool judgeinWindow(Double x, Double y);
     QImage GenBoulderTrailEffect();
     int getBlockDR(){
         return BlockDR;
@@ -74,8 +74,8 @@ public:
     //由于左上角有半个block且上边这个blockl就是那半个块所在位置
     //于是对应到相应的L,U中坐标应该为
 
-    double DR=(BlockDR+0.5)*16*gen5;
-    double UR=(BlockUR+0.5)*16*gen5;
+    Double DR=(BlockDR+Double("0.5"))*16*gen5;
+    Double UR=(BlockUR+Double("0.5"))*16*gen5;
     //边长为16倍根号5
 
     MainWidget *mainwidget;
@@ -91,9 +91,9 @@ public:
 //    bool pos = false;
     deque<void*>AllState;
     //需要矩形画线框的队列
-    queue<tuple<double,double,double,double,QColor>>EdgeQueue;
+    queue<tuple<Double,Double,Double,Double,QColor>>EdgeQueue;
     //需要画单条直线的队列
-    queue<tuple<double,double,double,double,QColor>>LineQueue;
+    queue<tuple<Double,Double,Double,Double,QColor>>LineQueue;
 private slots:
     void movemap();
     void UpdateData();

@@ -6,8 +6,8 @@
 //
 struct CircleAreaData{
     //
-    double dr,ur;
-    double rad;
+    Double dr,ur;
+    Double rad;
     int areaType;  // 0=原有区域(灰色), 1=巡逻区域(蓝色)
     
     CircleAreaData() : dr(0), ur(0), rad(0), areaType(0) {}
@@ -30,8 +30,8 @@ public:
     virtual void Draw();
     virtual void onRightMouseClick();
     virtual void onRightMouseDown();
-    vector<array<double,4>>GetCircle(CircleAreaData&data);
-    CircleAreaData* GetPosIn(double dr, double ur);
+    vector<array<Double,4>>GetCircle(CircleAreaData&data);
+    CircleAreaData* GetPosIn(Double dr, Double ur);
     static string Name();
     
     // 新增功能

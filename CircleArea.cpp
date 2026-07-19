@@ -20,7 +20,7 @@ void CircleArea::onLeftMouseDown()
 void CircleArea::onLeftMouseUp()
 {
     triger=0;
-    if(current.rad!=0){
+    if(current.rad!=Double::Zero()){
         area.push_back(current);
         //将关联对象与当前区域进行关联
         for(auto*coor:coordinate){
@@ -93,16 +93,16 @@ void CircleArea::onRightMouseDown()
     }
 }
 
-vector<array<double, 4> > CircleArea::GetCircle(CircleAreaData &data)
+vector<array<Double, 4> > CircleArea::GetCircle(CircleAreaData &data)
 {
     const static int freq=30;
-    vector<array<double,4>>ret;
-    vector<array<double,2>>points;
+    vector<array<Double,4>>ret;
+    vector<array<Double,2>>points;
     //计算出所有的点
-    for(double deg=0.0;deg<=360.0;deg+=360.0/freq){
-        double r=deg*3.1415926/180;
-        double x=cos(r)*data.rad+data.dr;
-        double y=sin(r)*data.rad+data.ur;
+    for(Double deg=Double::Zero();deg<=Double(360);deg+=Double(360)/freq){
+        Double r=deg*Double("3.1415926")/180;
+        Double x=Double::FromDouble(cos(double(r)))*data.rad+data.dr;
+        Double y=Double::FromDouble(sin(double(r)))*data.rad+data.ur;
         points.push_back({x,y});
     }
     //连点成线
@@ -114,11 +114,11 @@ vector<array<double, 4> > CircleArea::GetCircle(CircleAreaData &data)
     return ret;
 }
 
-CircleAreaData *CircleArea::GetPosIn(double dr, double ur)
+CircleAreaData *CircleArea::GetPosIn(Double dr, Double ur)
 {
     for(auto itr=area.rbegin();itr!=area.rend();++itr){
-        double dr_=dr-itr->dr,ur_=ur-itr->ur;
-        double dis=sqrt(dr_*dr_+ur_*ur_);
+        Double dr_=dr-itr->dr,ur_=ur-itr->ur;
+        Double dis=sqrt(dr_*dr_+ur_*ur_);
         if(dis<=itr->rad)return &*itr;
     }
     return NULL;

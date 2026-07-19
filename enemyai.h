@@ -50,7 +50,7 @@ private:
      bool shouldCooperateAttack(int unitSN);
      
      // 距离计算和目标优化
-     double calculateDistance(int x1, int y1, int x2, int y2);
+     Double calculateDistance(int x1, int y1, int x2, int y2);
      int findNearestTarget(int attackerX, int attackerY, const vector<int>& targets);
      void Initialize_Enemycenter();
      void Initialize_Enemymap();

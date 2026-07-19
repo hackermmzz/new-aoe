@@ -103,7 +103,7 @@ void LineArea::onRightMouseDown()
     }
 }
 
-LineAreaData *LineArea::GetPosIn(double dr, double ur)
+LineAreaData *LineArea::GetPosIn(Double dr, Double ur)
 {
 
 }

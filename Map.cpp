@@ -1328,7 +1328,7 @@ void Map::reset_ObjectExploreAndVisible()
     return;
 }
 
-int Map::addStaticRes(int Num, double DR, double UR) {
+int Map::addStaticRes(int Num, Double DR, Double UR) {
     StaticRes *newstaticres=new StaticRes(Num,DR,UR);
     this->staticres.push_back(newstaticres);
     return 0;
@@ -1347,7 +1347,7 @@ int Map::addStaticRes(int Num, int BlockDR, int BlockUR) {
  * 内容：在对应坐标生成一个动物；
  * 返回值：生成成功返回true。
  */
-bool Map::addAnimal(int Num, double DR, double UR) {
+bool Map::addAnimal(int Num, Double DR, Double UR) {
     Animal *newanimal=new Animal(Num,DR,UR);
     this->animal.push_back(newanimal);
     return true;
@@ -1572,7 +1572,7 @@ void Map::loadGenerateMapText()
     file.close();
     /////////////////////////////////判断位置是否合法
     auto checkBlockLegal=[&](int dr,int ur)->bool{return dr>=0&&dr<MAP_L&&ur>=0&&ur<MAP_U;};
-    auto checkDetailBlockLegal=[&](double dr,double ur)->bool{return checkBlockLegal(floor(dr/BLOCKSIDELENGTH),floor(ur/BLOCKSIDELENGTH));};
+    auto checkDetailBlockLegal=[&](Double dr,Double ur)->bool{return checkBlockLegal(floor(dr/BLOCKSIDELENGTH),floor(ur/BLOCKSIDELENGTH));};
     /////////////////////////////////解析区域到relation映射的函数
     auto ParseAreaToRelation=[&](Coordinate* unit, const string& type, QJsonObject& obj, int areaType) -> void {
         // 只有在编辑器模式下才建立relation映射
@@ -1586,25 +1586,25 @@ void Map::loadGenerateMapText()
             QJsonArray points = obj["Point"].toArray();
             for(auto ele : points){
                 QJsonArray point = ele.toArray();
-                areaData.data.push_back({point[0].toDouble(), point[1].toDouble()});
+                areaData.data.push_back({Double::FromDouble(point[0].toDouble()), Double::FromDouble(point[1].toDouble())});
             }
             g_lineArea->relation.insert({unit, areaData});
         }
         else if(type == CircleArea::Name()){
             CircleAreaData areaData;
             areaData.areaType = areaType;
-            areaData.dr = obj["DR"].toDouble();
-            areaData.ur = obj["UR"].toDouble();
-            areaData.rad = obj["R"].toDouble();
+            areaData.dr =Double::FromDouble(obj["DR"].toDouble());
+            areaData.ur = Double::FromDouble(obj["UR"].toDouble());
+            areaData.rad = Double::FromDouble(obj["R"].toDouble());
             g_circleArea->relation.insert({unit, areaData});
         }
         else if(type == RectArea::Name()){
             RectAreaData areaData;
             areaData.areaType = areaType;
-            areaData.dr = obj["DR"].toDouble();
-            areaData.ur = obj["UR"].toDouble();
-            areaData.w = obj["W"].toDouble();
-            areaData.h = obj["H"].toDouble();
+            areaData.dr = Double::FromDouble(obj["DR"].toDouble());
+            areaData.ur = Double::FromDouble(obj["UR"].toDouble());
+            areaData.w =Double::FromDouble( obj["W"].toDouble());
+            areaData.h = Double::FromDouble(obj["H"].toDouble());
             g_rectArea->relation.insert({unit, areaData});
         }
     };
@@ -1613,20 +1613,21 @@ void Map::loadGenerateMapText()
     auto ParseArea=[&](int sn,const string&type,QJsonObject&obj)->void{
         void*data=0;
         if(type==LineArea::Name()){
-            auto*block=new vector<array<double,2>>();
+            auto*block=new vector<array<Double,2>>();
             QJsonArray points=obj["Point"].toArray();
             for(auto ele:points){
                 QJsonArray point=ele.toArray();
-                block->push_back({point[0].toDouble(),point[1].toDouble()});
+                block->push_back({Double::FromDouble(point[0].toDouble()),Double::FromDouble(point[1].toDouble())});
             }
             data=block;
         }else if(type==CircleArea::Name()){
-            double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble(),r=obj["R"].toDouble();
-            auto*dat=new array<double,3>{dr,ur,r};
+            Double dr=Double::FromDouble(obj["DR"].toDouble()),ur=Double::FromDouble(obj["UR"].toDouble()),r=Double::FromDouble(obj["R"].toDouble());
+            auto*dat=new array<Double,3>{{dr,ur,r}};
             data=dat;
         }else if(type==RectArea::Name()){
-            double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble(),w=obj["W"].toDouble(),h=obj["H"].toDouble();
-            auto*dat=new array<double,4>{dr,ur,w,h};
+            Double dr=Double::FromDouble(obj["DR"].toDouble()),ur=Double::FromDouble(obj["UR"].toDouble()),
+                    w=Double::FromDouble(obj["W"].toDouble()),h=Double::FromDouble(obj["H"].toDouble());
+            auto*dat=new array<Double,4>{{dr,ur,w,h}};
             data=dat;
         }
         //
@@ -1636,11 +1637,11 @@ void Map::loadGenerateMapText()
             if(existing.second != nullptr){
                 // 根据类型释放内存
                 if(existing.first == LineArea::Name()){
-                    delete (vector<array<double,2>>*)existing.second;
+                    delete (vector<array<Double,2>>*)existing.second;
                 } else if(existing.first == CircleArea::Name()){
-                    delete (array<double,3>*)existing.second;
+                    delete (array<Double,3>*)existing.second;
                 } else if(existing.first == RectArea::Name()){
-                    delete (array<double,4>*)existing.second;
+                    delete (array<Double,4>*)existing.second;
                 }
             }
         }
@@ -1683,7 +1684,7 @@ void Map::loadGenerateMapText()
         }else if(key.contains("Human")){
             Player&me=*(player[0]),&enemy=(*player[1]);
             Player&cur=obj["Own"].toString()=="WLH"?me:enemy;
-            double UR=obj["UR"].toDouble(),DR=obj["DR"].toDouble();
+            Double UR=Double::FromDouble(obj["UR"].toDouble()),DR=Double::FromDouble(obj["DR"].toDouble());
             if(!checkDetailBlockLegal(DR,UR))continue;
             if(obj["Sort"].toString()=="Farmer")
             {
@@ -1748,7 +1749,7 @@ void Map::loadGenerateMapText()
                 }
             }
         }else if(key.contains("Animal")){
-            double dr=obj["DR"].toDouble(),ur=obj["UR"].toDouble();
+            Double dr=Double::FromDouble(obj["DR"].toDouble()),ur=Double::FromDouble(obj["UR"].toDouble());
             if(!checkDetailBlockLegal(ur,dr))continue;
             addAnimal(obj["Num"].toInt(),dr,ur);
         }else if(key.contains("StaticRes")){
@@ -1775,13 +1776,13 @@ void Map::loadGenerateMapText()
             for(const QJsonValue& shipValue : patrolShips) {
                 QJsonObject ship = shipValue.toObject();
                 QString type = ship["type"].toString();
-                double x = ship["x"].toDouble();
-                double y = ship["y"].toDouble();
+                Double x = Double::FromDouble(ship["x"].toDouble());
+                Double y = Double::FromDouble(ship["y"].toDouble());
                 int status = ship["status"].toString() == "ARMY_STATE_AROUND" ? ARMY_STATE_AROUND : 0;
                 int starttime = ship["starttime"].toInt();
                 int finishtime = ship["finishtime"].toInt();
-                double destX = ship["destX"].toDouble();
-                double destY = ship["destY"].toDouble();
+                Double destX = Double::FromDouble(ship["destX"].toDouble());
+                Double destY = Double::FromDouble(ship["destY"].toDouble());
 
                 if(type == "AT_SHIP"&&checkDetailBlockLegal(x,y)&&checkDetailBlockLegal(destX,destY)) {
                     enemy.addArmyAROUND(AT_SHIP, x, y, status, starttime, finishtime, destX, destY);
@@ -1795,13 +1796,13 @@ void Map::loadGenerateMapText()
             for(const QJsonValue& scoutValue : patrolScouts) {
                 QJsonObject scout = scoutValue.toObject();
                 QString type = scout["type"].toString();
-                double x = scout["x"].toDouble();
-                double y = scout["y"].toDouble();
+                Double x = Double::FromDouble(scout["x"].toDouble());
+                Double y = Double::FromDouble(scout["y"].toDouble());
                 int status = scout["status"].toString() == "ARMY_STATE_AROUND" ? ARMY_STATE_AROUND : 0;
                 int starttime = scout["starttime"].toInt();
                 int finishtime = scout["finishtime"].toInt();
-                double destX = scout["destX"].toDouble();
-                double destY = scout["destY"].toDouble();
+                Double destX = Double::FromDouble(scout["destX"].toDouble());
+                Double destY = Double::FromDouble(scout["destY"].toDouble());
 
                 if(type == "AT_SCOUT"&&checkDetailBlockLegal(x,y)&&checkDetailBlockLegal(destX,destY)) {
                     enemy.addArmyAROUND(AT_SCOUT, x, y, status, starttime, finishtime, destX, destY);
@@ -1815,8 +1816,8 @@ void Map::loadGenerateMapText()
             for(const QJsonValue& armyValue : attackArmies) {
                 QJsonObject army = armyValue.toObject();
                 int type = army["type"].toInt();
-                double x = army["x"].toDouble();
-                double y = army["y"].toDouble();
+                Double x = Double::FromDouble(army["x"].toDouble());
+                Double y = Double::FromDouble(army["y"].toDouble());
                 int status = army["status"].toInt();
                 int starttime = army["starttime"].toInt();
                 int finishtime = army["finishtime"].toInt();
@@ -1831,8 +1832,8 @@ void Map::loadGenerateMapText()
             for(const QJsonValue& armyValue : defenseArmies) {
                 QJsonObject army = armyValue.toObject();
                 int type = army["type"].toInt();
-                double x = army["x"].toDouble();
-                double y = army["y"].toDouble();
+                Double x = Double::FromDouble(army["x"].toDouble());
+                Double y = Double::FromDouble(army["y"].toDouble());
                 int status = army["status"].toInt();
                 if(checkDetailBlockLegal(x,y))
                 enemy.addArmyDEFENSE(type, x, y, status);
@@ -1904,16 +1905,16 @@ void Map::ResetMapType(int blockL, int blockU)
     this->cell[i][j].setMapType(MAPTYPE_FLAT);
 }
 
-double Map::tranL(double BlockL)
+Double Map::tranL(Double BlockL)
 {
-    double L;
+    Double L;
     L = BlockL * BLOCKSIDELENGTH;
     return L;
 }
 
-double Map::tranU(double BlockU)
+Double Map::tranU(Double BlockU)
 {
-    double U;
+    Double U;
     U = BlockU * BLOCKSIDELENGTH;
     return U;
 }

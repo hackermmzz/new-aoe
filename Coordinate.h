@@ -76,30 +76,30 @@ public:
 
     /*******坐标相关*******/
     //获取坐标
-    double getDR(){return this->DR;}
-    double getUR(){return this->UR;}
+    Double getDR(){return this->DR;}
+    Double getUR(){return this->UR;}
     int getBlockDR(){return this->BlockDR;}
     int getBlockUR(){return this->BlockUR;}
     //获取游戏绘制得经过处理的DR,
-    virtual double getViewDR(){return getDR();}
-    virtual double getViewUR(){return getUR();}
+    virtual Double getViewDR(){return getDR();}
+    virtual Double getViewUR(){return getUR();}
     //块、细节坐标转换
-    double transDetail( int blockNum ){ return blockNum*BLOCKSIDELENGTH;  }
-    int transBlock( double detailNum ){ return (int)detailNum/BLOCKSIDELENGTH; }
+    Double transDetail( int blockNum ){ return BLOCKSIDELENGTH*blockNum;  }
+    int transBlock( Double detailNum ){ return (int)(detailNum/BLOCKSIDELENGTH); }
 
     //获取中心点块坐标
     Point getBlockPosition(){ return Point(transBlock(DR), transBlock(UR)); }
 
     //获取两点间欧几里得距离
-    double getDis_E_Detail(Coordinate* __x){return countdistance(DR ,UR , __x->getDR() , __x->getUR());}
-    double getDis_E_Detail(Coordinate& __x){return countdistance(DR ,UR , __x.getDR() , __x.getUR());}
+    Double getDis_E_Detail(Coordinate* __x){return countdistance(DR ,UR , __x->getDR() , __x->getUR());}
+    Double getDis_E_Detail(Coordinate& __x){return countdistance(DR ,UR , __x.getDR() , __x.getUR());}
 
     // 获取地图块高度导致的偏移量
     int getMapHeightOffsetY(){ return MapHeightOffsetY; }
     void setMapHeightOffsetY(int m_MapHeightOffsetY){ MapHeightOffsetY = m_MapHeightOffsetY; }
 
-    double getSideLength(){return this->SideLength;}
-    double get_BlockSizeLen(){ return BlockSizeLen; }
+    Double getSideLength(){return this->SideLength;}
+    Double get_BlockSizeLen(){ return BlockSizeLen; }
 
     /*******可见性相关*******/
     void setExplored(int explored){ this->explored = explored; }
@@ -111,12 +111,12 @@ public:
 
 
     /*******碰撞相关*******/
-    double getCrashLength(){ return crashLength; }
+    Double getCrashLength(){ return crashLength; }
 
 
     /*******image资源相关信息*******/
-    double getimageX(){return this->imageX;}
-    double getimageY(){return this->imageY;}
+    Double getimageX(){return this->imageX;}
+    Double getimageY(){return this->imageY;}
     int getimageH(){return this->imageH;}
     std::list<ImageResource>::iterator getNowRes(){return this->nowres;}
 
@@ -128,8 +128,8 @@ public:
 
 
     /*****************act相关***************/
-    double getActPercent() {return this->actPercent;}
-    double getActSpeed(){ return this->actSpeed;}
+    Double getActPercent() {return this->actPercent;}
+    Double getActSpeed(){ return this->actSpeed;}
     int getActName(){return this->actName;}
     int getActNum(){ return this->actNum;}
 
@@ -147,7 +147,7 @@ public:
     void setInWidget(){ this->inWindow = 1; }
     void setNotInWidget(){ this->inWindow = 0; }
     bool isInWidget(){return this->inWindow == 1; }
-    void setDRUR( double DR, double UR ){ this->DR = DR; this->UR = UR; }
+    void setDRUR( Double DR, Double UR ){ this->DR = DR; this->UR = UR; }
     void setBlockDRUR( int BlockDR, int BlockUR ){ this->BlockDR = BlockDR; this->BlockUR = BlockUR; }
 public:
     int Num;//对象在对应类中的编号
@@ -161,8 +161,8 @@ public:
     bool interactBui_builtUp = false;
     bool interact_sameRepresent = false;
 
-    double DR;//当前物体中心所在的坐标位置
-    double UR;//在块类中该坐标即为正中心
+    Double DR;//当前物体中心所在的坐标位置
+    Double UR;//在块类中该坐标即为正中心
     //此DR，UR所指游戏中坐标
     int BlockDR = INT_MAX;
     int BlockUR = INT_MAX;
@@ -170,13 +170,13 @@ public:
 
     int vision = 0; //视野
 
-    double imageX;//该物体的长宽（即占地面积）
-    double imageY;//需要根据占地大小来就算确切的绘制偏移量
+    Double imageX;//该物体的长宽（即占地面积）
+    Double imageY;//需要根据占地大小来就算确切的绘制偏移量
 
-    double BlockSizeLen = SIZELEN_SINGEL; //物体占地,块坐标， 如小房子，为2，中型房子为3，动物为1
-    double SideLength; //占地大小转换成游戏内坐标 边长
+    Double BlockSizeLen{SIZELEN_SINGEL}; //物体占地,块坐标， 如小房子，为2，中型房子为3，动物为1
+    Double SideLength; //占地大小转换成游戏内坐标 边长
 
-    double crashLength = 0; //碰撞箱大小
+    Double crashLength = 0; //碰撞箱大小
 
     int imageH;//绘制y坐标
     //该物体在平面中的上下位置
@@ -204,8 +204,8 @@ public:
     static vector<Point> viewLab[5][12];
 
     /*****************act获取***************/
-    double actPercent = 0;
-    double actSpeed = 0;
+    Double actPercent = 0;
+    Double actSpeed = 0;
     int actName = ACT_NULL;
     //执行行动时的进度、速率和行动类型
     int actNum=ACT_NULL;

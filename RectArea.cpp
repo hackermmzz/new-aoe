@@ -23,7 +23,7 @@ void RectArea::onLeftMouseDown()
 void RectArea::onLeftMouseUp()
 {
     triger=0;
-    if(current.w!=0&&current.h!=0){
+    if(current.w!=Double::Zero()&&current.h!=Double::Zero()){
         area.push_back(current);
         //将关联对象与当前区域进行关联
         for(auto*coor:coordinate){
@@ -56,9 +56,9 @@ void RectArea::onMouseMove(int delta_x, int delta_y)
 void RectArea::Draw()
 {
     //
-    using Point=array<double,2>;
+    using Point=array<Double,2>;
     auto AddLine=[&](RectAreaData&current,QColor color)->void{
-        using Data=array<double,2>;
+        using Data=array<Double,2>;
         Data point[4];
         point[0]={current.dr,current.ur};
         point[1]={current.dr+current.w,current.ur};
@@ -108,7 +108,7 @@ void RectArea::onRightMouseDown()
 }
 
 
-RectAreaData *RectArea::GetPosIn(double dr, double ur)
+RectAreaData *RectArea::GetPosIn(Double dr, Double ur)
 {
     for(auto itr=area.rbegin();itr!=area.rend();++itr){
         RectAreaData&data=*itr;

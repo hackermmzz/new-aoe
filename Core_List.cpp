@@ -140,7 +140,7 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
             Farmer* f0 = (Farmer*)object2;
             Human* f1 = (Human*)object1;
             //如果满载,返回错误码
-            if (f0->getResourceNowHave() >= 5)return ACTION_INVALID_FULLY_LOAD;
+            if (f0->getResourceNowHave() >= Double(5))return ACTION_INVALID_FULLY_LOAD;
         }
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
@@ -160,7 +160,7 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
             relate_AllObject[object1] = relation_Object(NULL, eventType);
 
             relate_AllObject[object1].set_goalPoint(object1->getDR(), object1->getUR());
-            relate_AllObject[object1].distance_AllowWork = 1e6;
+            relate_AllObject[object1].distance_AllowWork = Double::FromDouble(1e6);
             relate_AllObject[object1].alterOb = object2;
             relate_AllObject[object1].update_Attrib_alter();
             relate_AllObject[object1].distance_Record = 0;
@@ -199,7 +199,7 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
  * 内容：添加moveobject对象进行移动的行动到动态关系表中，并返回该操作的结果（成功或相关错误）
  * 返回值：动作返回编号及action错误码，详见常量表
  */
-int Core_List::addRelation(Coordinate* object1, double DR, double UR, int eventType, bool respond)
+int Core_List::addRelation(Coordinate* object1, Double DR, Double UR, int eventType, bool respond)
 {
     if (object1 == NULL) return ACTION_INVALID_NULLWORKER;
 
@@ -214,8 +214,8 @@ int Core_List::addRelation(Coordinate* object1, double DR, double UR, int eventT
         if (eventType == CoreEven_JustMoveTo)
         {
             //锁定目的地
-            DR=max(min(MAP_L * BLOCKSIDELENGTH,DR),0.0);
-            UR=max(min(MAP_U * BLOCKSIDELENGTH,UR),0.0);
+            DR=max(min(MAP_L * BLOCKSIDELENGTH,DR),Double::Zero());
+            UR=max(min(MAP_U * BLOCKSIDELENGTH,UR),Double::Zero());
             //如果是运输船,并且指定的位置是岸边,那么执行卸货动作(就算木有人也执行卸货,反正就多一个细节罢了)
             if (object1->getSort() == SORT_FARMER && ((Farmer*)object1)->get_farmerType() == FARMERTYPE_WOOD_BOAT) {
                 Farmer* obj = (Farmer*)object1;
@@ -245,7 +245,7 @@ int Core_List::addRelation(Coordinate* object1, double DR, double UR, int eventT
         }
         else if(eventType==CoreEven_PinPoint_Attacking || eventType==CoreEven_MissileAttack){//定点攻击
             //必须保证目的地在地图上
-            if(DR<0||UR<0||DR>=MAP_L*BLOCKSIDELENGTH||UR>=MAP_U*BLOCKSIDELENGTH){
+            if(DR<Double::Zero()||UR<Double::Zero()||DR>=MAP_L*BLOCKSIDELENGTH||UR>=MAP_U*BLOCKSIDELENGTH){
                  return ACTION_INVALID_PINPOINT_NOT_FIT;
             }
             relate_AllObject[object1] =relation_Object(DR,UR,eventType);
@@ -638,7 +638,7 @@ void Core_List::eraseObject(Coordinate* eraseOb)
 void Core_List::findResourceBuiding(relation_Object& relation, list<Building*>& building, Coordinate* obj1)
 {
     int type = relation.resourceBuildingType;
-    double dis, dis_opti = relation.distance_Record, dr = relation.DR_goal, ur = relation.UR_goal;
+    Double dis, dis_opti = relation.distance_Record, dr = relation.DR_goal, ur = relation.UR_goal;
     Building* judeBuild, * optimum = NULL;
 
     list<Building*>::iterator iterNow = building.begin(), iterEnd = building.end();
@@ -896,7 +896,7 @@ void Core_List::change_BuildingRepresent(Building *building, int represent)
 
 //****************************************************************************************
 //通用的控制对象行动函数
-void Core_List::object_Move(Coordinate* object, double DR, double UR)
+void Core_List::object_Move(Coordinate* object, Double DR, Double UR)
 {
     MoveObject* moveObject = NULL;
     Coordinate* goalOb;
@@ -916,13 +916,13 @@ void Core_List::object_Move(Coordinate* object, double DR, double UR)
             relate_AllObject[object].useless();
         else
         {
-            double DR0, UR0, thisDR, thisUR;
+            Double DR0, UR0, thisDR, thisUR;
             DR0 = moveObject->getDR0();
             UR0 = moveObject->getUR0();
             thisDR = moveObject->getDR();
             thisUR = moveObject->getUR();
 
-            if (thisDR == DR0 && thisUR == UR0 && (DR0 != DR || UR0 != UR) || countdistance(DR0, UR0, DR, UR) > 1e7)
+            if (thisDR == DR0 && thisUR == UR0 && (DR0 != DR || UR0 != UR) || countdistance(DR0, UR0, DR, UR) > Double::FromDouble(1e7))
             {
                 //为moveObject设置路径
                 setPath(moveObject, goalOb, DR, UR);
@@ -999,7 +999,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             if (moveOb != NULL) moveOb->adjustAngle(object2->getDR(), object2->getUR());
             if (isFriendlyPriestHealing)
             {
-                const double healAmount = attacker->getATK() * TimePerFrame / 1000.0;
+                const Double healAmount = attacker->getATK() * TimePerFrame / 1000;
                 attackee->updateBlood(-healAmount);
                 if (attackee->isFullHp()) suspendRelation(object1);
                 return;
@@ -1011,8 +1011,8 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
                 if (attacker->is_missileThrow())
                 {
                     //最小射程盲区：目标太近则不投射（投石车等），但仍消耗本次攻击周期，避免向目标靠近
-                    double minDis = attacker->getMinDis_attack();
-                    if (!(minDis > 0 && countdistance(object1->getDR(), object1->getUR(), object2->getDR(), object2->getUR()) < minDis))
+                    Double minDis = attacker->getMinDis_attack();
+                    if (!(minDis > Double::Zero() && countdistance(object1->getDR(), object1->getUR(), object2->getDR(), object2->getUR()) < minDis))
                         addRelation(creatMissile(object1, object2), object2, CoreEven_MissileAttack, false);
                     attacker->haveAttack();
                 }
@@ -1035,7 +1035,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
         }
     }
     else if(missile!=NULL && missile->IsRangeAttack()){ //判断是否为溅射伤害
-        deal_RangeAttack(missile,array<double,2>{missile->getDR0(),missile->getUR0()});
+        deal_RangeAttack(missile,array<Double,2>{missile->getDR0(),missile->getUR0()});
     }
     else if (missile != NULL && missile->is_HitTarget() && attackee != NULL)
     {
@@ -1047,7 +1047,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
         {
             if (missile->isAttackerHaveDie())
             {
-                double DR, UR;
+                Double DR, UR;
                 missile->get_AttackSponsor_Position(DR, UR);
                 attackee->setAvangeObject(DR, UR);
             }
@@ -1070,7 +1070,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     }
 }
 
-void Core_List::object_PinPoint_Attack(Coordinate *object, double dr, double ur)
+void Core_List::object_PinPoint_Attack(Coordinate *object, Double dr, Double ur)
 {
     //与object_Attack不同的是，这里投射出的missile会在object_Attack进行统一处理，也就是这里只负责投掷工作,因为投掷物造成的伤害属于attack部分
     BloodHaver*attacker=0;
@@ -1079,7 +1079,7 @@ void Core_List::object_PinPoint_Attack(Coordinate *object, double dr, double ur)
     if (!attacker->isAttacking())
     {
         call_debugText("red", " " + object->getChineseName() + "(编号:" + QString::number(object->getglobalNum()) + \
-            ")开始向:(" +QString::number(dr)+","+QString::number(ur)+")定点攻击", REPRESENT_BOARDCAST_MESSAGE);
+            ")开始向:(" +QString::number(double(dr))+","+QString::number(double(ur))+")定点攻击", REPRESENT_BOARDCAST_MESSAGE);
         attacker->setPreAttack();
     }
     else
@@ -1091,8 +1091,8 @@ void Core_List::object_PinPoint_Attack(Coordinate *object, double dr, double ur)
         if (attacker->is_missileAttack()&&attacker->is_missileThrow())
         {
             //最小射程盲区：定点目标太近则不投射
-            double minDis = attacker->getMinDis_attack();
-            if (!(minDis > 0 && countdistance(object->getDR(), object->getUR(), dr, ur) < minDis))
+            Double minDis = attacker->getMinDis_attack();
+            if (!(minDis > Double::Zero() && countdistance(object->getDR(), object->getUR(), dr, ur) < minDis))
                 addRelation(creatMissile(object, dr,ur), dr,ur, CoreEven_MissileAttack, false);
             attacker->haveAttack();
         }
@@ -1170,7 +1170,7 @@ void Core_List::object_Transport(Coordinate* object1, Coordinate* object2)
     //
     Human* human1 = (Human*)object1;
     Farmer* human2 = (Farmer*)object2;
-    if (human2->getResourceNowHave() < 5) {
+    if (human2->getResourceNowHave() < Double(5)) {
         human1->setTransported(true);
         human2->update_transportHuman(human1);
         human2->set_ResourceSort(SORT_HUMAN);
@@ -1183,7 +1183,7 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
     Farmer* ship = (Farmer*)object1;
     //寻找没有障碍的陆地
     extern Map* GlobalMap;
-    vector<array<double, 2>>satisfy;
+    vector<array<Double, 2>>satisfy;
     for (int i = -UNLOAD_RADIAN;i <= UNLOAD_RADIAN;++i)
         for (int j = -UNLOAD_RADIAN;j <= UNLOAD_RADIAN;++j)
         {
@@ -1202,9 +1202,9 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
             }
         }
     //随机生成浮点数
-    static auto generateRandomDouble = [&](double min, double max) {
+    static auto generateRandomDouble = [&](Double min, Double max) {
         // 生成一个0到RAND_MAX之间的随机整数
-        double random = rand() * 1.0 / RAND_MAX;
+        Double random = Double(rand())/RAND_MAX;
         // 将随机整数映射到指定的范围
         return min + random * (max - min);
         };
@@ -1213,8 +1213,8 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
         auto&& humans = ship->getHumanTransport();
         for (Human* human : humans) {
             int idx = rand() % satisfy.size();
-            double targetDr = satisfy[idx][0], targetUr = satisfy[idx][1];
-            human->ForceStand(targetDr + generateRandomDouble(1.0, BLOCKSIDELENGTH - 1.0),targetUr + generateRandomDouble(1.0, BLOCKSIDELENGTH - 1.0));
+            Double targetDr = satisfy[idx][0], targetUr = satisfy[idx][1];
+            human->ForceStand(targetDr + generateRandomDouble(1, BLOCKSIDELENGTH - 1),targetUr + generateRandomDouble(1, BLOCKSIDELENGTH - 1));
             human->setTransported(0);
         }
         ship->update_resourceClear();
@@ -1270,11 +1270,11 @@ void Core_List::object_RatioChange(Coordinate* object1, relation_Object& relatio
 
         if (buildGoalOb->isConstructed() && !buildGoalOb->isFullHp())
         {
-            const double bloodBefore = buildGoalOb->getBloodPercent();
-            const double ratio = buildGoalOb->get_retio_Build();
-            const double hpGain = std::min(1.0, bloodBefore + ratio / 100.0) - bloodBefore;
+            const Double bloodBefore = buildGoalOb->getBloodPercent();
+            const Double ratio = buildGoalOb->get_retio_Build();
+            const Double hpGain = std::min(Double(1), bloodBefore + ratio / 100) - bloodBefore;
 
-            if (hpGain > 0.0)
+            if (hpGain > Double::Zero())
             {
                 const int playerRep = buildGoalOb->getPlayerRepresent();
                 if (!buildGoalOb->tryDeductRepairHpCost(hpGain, player[playerRep]))
@@ -1371,7 +1371,7 @@ void Core_List::initMap_HaveJud(){
 //处理受到攻击的诱发行动
 void Core_List::conduct_Attacked(Coordinate* object)
 {
-    double dr, ur;
+    Double dr, ur;
     Coordinate* attacker = NULL;
     BloodHaver* attackee = NULL;
     object->printer_ToBloodHaver((void**)&attackee);
@@ -1402,7 +1402,7 @@ void Core_List::conduct_Attacked(Coordinate* object)
                 switch (((Animal*)object)->get_Friendly())
                 {
                 case FRIENDLY_FRI:
-                    calMirrorPoint(dr, ur, object->getDR(), object->getUR(), 3.5 * BLOCKSIDELENGTH);
+                    calMirrorPoint(dr, ur, object->getDR(), object->getUR(), Double("3.5") * BLOCKSIDELENGTH);
                     suspendRelation(object);
                     if (addRelation(object, dr, ur, CoreEven_JustMoveTo, false) == ACTION_SUCCESS) ((MoveObject*)object)->beginRun();
                     break;
@@ -1426,7 +1426,7 @@ void Core_List::conduct_Attacked(Coordinate* object)
                     else
                     {
                         //受到敌对ai的攻击，逃命
-                        calMirrorPoint(dr, ur, object->getDR(), object->getUR(), 3.5 * BLOCKSIDELENGTH);
+                        calMirrorPoint(dr, ur, object->getDR(), object->getUR(), Double("3.5") * BLOCKSIDELENGTH);
                         suspendRelation(object);
                         addRelation(object, dr, ur, CoreEven_JustMoveTo);
                     }
@@ -1445,7 +1445,7 @@ void Core_List::manageMontorAct()
     map< Coordinate*, Coordinate* >pendingLab;
     Coordinate* ob_m, * ob_ed;
     map< Coordinate*, Coordinate* >::iterator iter, itere;
-    double dr, ur;
+    Double dr, ur;
 
     int size_ob, size_vision;
 
@@ -1502,7 +1502,7 @@ void Core_List::manageMontorAct()
         {
             if (ob_m->getSort() == SORT_ANIMAL && ob_m->getNum() == ANIMAL_GAZELLE)
             {
-                static const double dis = 3.5 * BLOCKSIDELENGTH;
+                static const Double dis = Double("3.5") * BLOCKSIDELENGTH;
                 dr = ob_ed->getDR();
                 ur = ob_ed->getUR();
                 calMirrorPoint(dr, ur, ob_m->getDR(), ob_m->getUR(), dis);
@@ -1510,10 +1510,10 @@ void Core_List::manageMontorAct()
                 bool flag = 0;
                 int loopCnt = 0;
                 do {
-                    int L = dr / BLOCKSIDELENGTH, U = ur / BLOCKSIDELENGTH;
+                    int L = int(dr / BLOCKSIDELENGTH), U = int(ur / BLOCKSIDELENGTH);
                     if (L >= 0 && U >= 0 && L < MAP_L && U < MAP_U && theMap->cell[L][U].getMapType() == MAPTYPE_OCEAN) {
-                        double dir0 = rand() * 1.0 / RAND_MAX*((rand()&1)?-1:1);
-                        double dir1 = sqrt(1.0 - dir0 * dir0)*((rand()&1)?-1:1);
+                        Double dir0 = Double(rand()) / RAND_MAX*((rand()&1)?-1:1);
+                        Double dir1 = sqrt(1 - dir0 * dir0)*((rand()&1)?-1:1);
                         dr = ob_m->getDR() + dir0 * dis;
                         ur = ob_m->getUR() + dir1 * dis;
                         flag = 1;
@@ -1592,12 +1592,12 @@ void Core_List::deal_RangeAttack(Coordinate* attacker, Coordinate* attackee)
 
 }
 
-void Core_List::deal_RangeAttack(Missile *missile, const array<double, 2> &center)
+void Core_List::deal_RangeAttack(Missile *missile, const array<Double, 2> &center)
 {
     if(missile==NULL || missile->getNum()!=Missile_Boulders)return;
 
-    const double blastRadius=Missile_Boulders_Range*BLOCKSIDELENGTH;
-    if(blastRadius<=0)return;
+    const Double blastRadius=Missile_Boulders_Range*BLOCKSIDELENGTH;
+    if(blastRadius<=Double::Zero())return;
 
     const int centerDR=(int)(center[0]/BLOCKSIDELENGTH);
     const int centerUR=(int)(center[1]/BLOCKSIDELENGTH);
@@ -1618,11 +1618,11 @@ void Core_List::deal_RangeAttack(Missile *missile, const array<double, 2> &cente
                 // 军队、农民、建筑、动物和树木拥有血量；石头、黄金等静态资源没有血量，直接排除。
                 if(attackee==NULL)continue;
 
-                const double centerDistance=countdistance(center[0],center[1],obj->getDR(),obj->getUR());
-                const double effectiveDistance=max(0.0,centerDistance-obj->getCrashLength());
+                const Double centerDistance=countdistance(center[0],center[1],obj->getDR(),obj->getUR());
+                const Double effectiveDistance=max(Double::Zero(),centerDistance-obj->getCrashLength());
                 if(effectiveDistance>blastRadius)continue;
 
-                const double damageRate=max(0.0,min(1.0,1.0-effectiveDistance/blastRadius));
+                const Double damageRate=max(Double::Zero(),min(Double(1),Double(1)-effectiveDistance/blastRadius));
                 const int extraDamage=missile->get_AttackAddition_Height(
                     theMap->get_MapHeight(obj->getBlockDR(),obj->getBlockUR()));
                 calculateDamage(missile,obj,extraDamage,damageRate);
@@ -1634,7 +1634,7 @@ void Core_List::deal_RangeAttack(Missile *missile, const array<double, 2> &cente
 
 //**************************************************************
 //寻路相关
-void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, double UR0)
+void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Double UR0)
 {
 
     //设置起点
@@ -1661,7 +1661,7 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, double DR0, doub
         auto&& ret = findPath(findPathMap, theMap, start, destination, moveOb, goalOb);
         path = ret.first;
         auto& dest = ret.second;
-        if (dest[0] < 1e9) {
+        if (dest[0] < Double::FromDouble(1e9)) {
             DR0 = dest[0];
             UR0 = dest[1];
         }
@@ -1747,7 +1747,7 @@ bool Core_List::JudgeMoveObjIsLandUnit(MoveObject* moveOb)
     return !ship;
 }
 
-pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMap, Map* map, const Point& start, Point destination, Coordinate* object, Coordinate* goalOb)
+pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMap, Map* map, const Point& start, Point destination, Coordinate* object, Coordinate* goalOb)
 {
     /////////////////////////////////////////////////////////
     static unsigned long long mask = 0;
@@ -1756,17 +1756,17 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     static Point dire[8] = { Point(1,1) , Point(1,-1) ,Point(-1,-1),Point(-1,1),\
                              Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1) };
     static vector<vector<Data>> preNode(MAP_L + 1, vector<Data>(MAP_U + 1));
-    static vector<vector<float>>mndis(MAP_L + 1, vector<float>(MAP_U + 1));
+    static vector<vector<Double>>mndis(MAP_L + 1, vector<Double>(MAP_U + 1));
     static vector<Data>vis;
-    static double Sqrt2 = sqrt(2.0);
+    static Double Sqrt2 = sqrt(Double(2));
     static vector<Data>goalPoint;
     /////////////////////////////////////////////////////////启发函数
-    static auto PredictDistance = [&](const Data& start, const Data& end)->double {
-        static vector<double>power((MAP_L+MAP_U+1)*(MAP_L+MAP_U+1));
+    static auto PredictDistance = [&](const Data& start, const Data& end)->Double {
+        static vector<Double>power((MAP_L+MAP_U+1)*(MAP_L+MAP_U+1));
         static bool init=1;
         if(init){
             init=0;
-            for(int i=1;i<power.size();++i)power[i]=sqrt(i);
+            for(int i=1;i<power.size();++i)power[i]=sqrt(Double(i));
         }
         //
         auto d0=start[0]-end[0],d1=start[1]-end[1];
@@ -1827,7 +1827,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
         }
         //
         if (!flag && (tx != start.x || ty != start.y)) {
-            static const double fac = 0.001;
+            static const Double fac = Double("0.001");
             goalOb = 0;
             destination.x = tx, destination.y = ty;
         }
@@ -1837,7 +1837,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     goalPoint.clear();
     stack<Point> path;
     bool meetGoal = false;
-    double dr0 = 1e9, ur0 = 1e9;
+    Double dr0 = Double::FromDouble(1e9), ur0 =  Double::FromDouble(1e9);
     ++mask;//把寻路掩码递增1
     //initMap_HaveJud();
     //memset(goalMap,0,sizeof(goalMap));
@@ -1849,15 +1849,15 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     //如果res!=end，说明不可达，也就是目的地变成res了
     if (res.x != end.x || res.y != end.y)
     {
-        dr0 = (res.x + 0.5) * BLOCKSIDELENGTH;
-        ur0 = (res.y + 0.5) * BLOCKSIDELENGTH;
+        dr0 = (res.x + Double("0.5")) * BLOCKSIDELENGTH;
+        ur0 = (res.y + Double("0.5")) * BLOCKSIDELENGTH;
         destination = res, goalOb = 0;
     }
     //判断目的地和起点是否位于同一个连通块,如果不在，那么正向寻找一个最优点
     if (map->blockIndex[start.x][start.y] != map->blockIndex[res.x][res.y]) {
         Point res = GetSameBlockInLineNearest(start, end);
-        dr0 = (res.x + 0.5) * BLOCKSIDELENGTH;
-        ur0 = (res.y + 0.5) * BLOCKSIDELENGTH;
+        dr0 = (res.x + Double("0.5")) * BLOCKSIDELENGTH;
+        ur0 = (res.y + Double("0.5")) * BLOCKSIDELENGTH;
         destination = res, goalOb = 0;
     }
     //起始点标记
@@ -1915,10 +1915,10 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     {
         meetGoal = true;
     }
-    using Info = tuple<double, int, int>;
+    using Info = tuple<Double, int, int>;
     priority_queue<Info, vector<Info>, greater<Info>>qu;//这里我采用dijstra+A*算法寻路,因为很明显斜着的路劲和直走的路径的全值是不一样的
-    qu.push(Info{ 0.0f,start.x,start.y });
-    mndis[start.x][start.y] = 0.0;
+    qu.push(Info{ Double::Zero(),start.x,start.y });
+    mndis[start.x][start.y] =Double::Zero();
     Data targetPoint = { start.x,start.y };
     vis.clear();
     vis.push_back({ start.x,start.y });
@@ -1936,7 +1936,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
             if (xx >= 0 && yy >= 0 && xx < MAP_L && yy < MAP_U) {
                 Block& block = theMap->cell[xx][yy];
                 bool isLand = block.getMapType() != MAPTYPE_OCEAN;
-                float dd = mndis[x][y] + (i < 4 ? Sqrt2 : 1.0f);
+                Double dd = mndis[x][y] + (i < 4 ? Sqrt2 : Double(1));
                 //判断格子是否可走、未走过
                 //斜线方向需要多判断马脚操作
                 if (isLand ^ isShip) {
@@ -1949,7 +1949,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
                         mndis[xx][yy] = dd;
                         //算出预估最小值
                         Data start = { xx,yy };
-                        double mnPd = 1e9;
+                        Double mnPd = Double::FromDouble(1e9);
                         for (auto& tp : goalPoint)mnPd = min(mnPd, PredictDistance(start, tp));
                         //
                         qu.push(Info{ dd + mnPd,xx,yy });
@@ -1976,8 +1976,8 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
                     targetPoint = point;
                 }
                 else {
-                    double dr0 = point[0] - destination.x, ur0 = point[1] - destination.y;
-                    double dr1 = targetPoint[0] - destination.x, ur1 = targetPoint[1] - destination.y;
+                    Double dr0 = point[0] - destination.x, ur0 = point[1] - destination.y;
+                    Double dr1 = targetPoint[0] - destination.x, ur1 = targetPoint[1] - destination.y;
                     if (dr0 * dr0 + ur0 * ur0 < dr1 * dr1 + ur1 * ur1)targetPoint = point;
                 }
             }
@@ -1986,7 +1986,7 @@ pair<stack<Point>, array<double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
             object->printer_ToMoveObject((void**)&obj);
             if (obj && targetPoint[0] != -119)
             {
-                dr0 = (targetPoint[0] + 0.5) * BLOCKSIDELENGTH, ur0 = (targetPoint[1] + 0.5) * BLOCKSIDELENGTH;
+                dr0 = (targetPoint[0] + Double("0.5")) * BLOCKSIDELENGTH, ur0 = (targetPoint[1] + Double("0.5")) * BLOCKSIDELENGTH;
             }
         }
         //
@@ -2151,7 +2151,7 @@ bool Core_List::checkIsOcean(int x, int y)
     return 0;
 }
 
-void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int extraDamage, double damageRate)
+void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int extraDamage, Double damageRate)
 {
     BloodHaver*attackee=0,*attacker=0;
     Missile*missile=0;
@@ -2195,7 +2195,7 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
             else if(building!=0){
                 //转换敌方建筑需贴邻，与农民修理建筑的工作距离一致(见 set_distance_AllowWork)
                 if(!isNear_Manhattan(object1->getDR(), object1->getUR(), object2->getDR(), object2->getUR(),
-                    object2->getSideLength() / 2.0 + 2 * CRASHBOX_SINGLEOB))
+                    object2->getSideLength() / 2 + 2 * CRASHBOX_SINGLEOB))
                     return;
                 //转换敌方建筑
                 /** 提醒：目前游戏尚无神庙，转换建筑暂不设科技门槛；
@@ -2218,12 +2218,12 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
     else{
         const bool isBoulder=missile!=NULL && missile->getNum()==Missile_Boulders;
         const int defenceType=isBoulder ? ATTACKTYPE_CLOSE : attacker->get_AttackType();
-        double rawDamage=attacker->getATK()-attackee->getDEF(defenceType)+extraDamage;
+        Double rawDamage=attacker->getATK()-attackee->getDEF(defenceType)+extraDamage;
 
         // 原版投石车对建筑有分类加成，建筑最终只承受20%的攻城伤害。
         if(isBoulder && object2->getSort()==SORT_BUILDING){
             const int buildingBonus=object2->getNum()==BUILDING_ARROWTOWER ? 50 : 140;
-            rawDamage=(rawDamage+buildingBonus)*0.2;
+            rawDamage=(rawDamage+buildingBonus)*Double("0.2");
         }
 
         int damage=(int)round(rawDamage*damageRate);
@@ -2251,7 +2251,7 @@ Missile* Core_List::creatMissile(Coordinate* attacker, Coordinate* attackee)
     return creatMissile(attacker,attackee->getDR(),attackee->getUR());
 }
 
-Missile *Core_List::creatMissile(Coordinate *attacker, double dr, double ur)
+Missile *Core_List::creatMissile(Coordinate *attacker, Double dr, Double ur)
 {
     int playerRepresent = MAXPLAYER;
     Human* judHuman = NULL;

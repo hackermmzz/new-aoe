@@ -68,7 +68,7 @@ public:
     int getArrowTowerRangeAddition() const;
 
     /*******战斗相关*******/
-    double getDis_attack();
+    Double getDis_attack();
     bool is_missileThrow(){ return missionThrowTimer == missionThrowStep; }
 
 
@@ -229,10 +229,10 @@ public:
     void setActStatus(int wood = 0 , int food = 0 , int stone = 0 , int gold = 0);
     void setActStatus(int num, int status){this->actStatus[num] = status;}
 
-    double get_retio_Build();
-    double get_retio_Action();
+    Double get_retio_Build();
+    Double get_retio_Action();
 
-    bool is_ActionFinish(){ return actPercent>=100; }
+    bool is_ActionFinish(){ return actPercent>=Double(100); }
     bool isActionNeedCreatObject(int &creatObjectSort, int& creatObjectNum){ return playerScience->isNeedCreatObjectAfterAction(getNum() , getActNum() , creatObjectSort , creatObjectNum);}
     bool isRepresentHumanHaveSpace()
     {
@@ -242,7 +242,7 @@ public:
     void update_Action();
     void update_Build();
     /** 按修复血量比例扣修理费；资源不足返回 false。仅对已完工建筑收费。 */
-    bool tryDeductRepairHpCost(double hpFractionRepaired, class Player* owner);
+    bool tryDeductRepairHpCost(Double hpFractionRepaired, class Player* owner);
 
     void BuildingActionOver();
 
@@ -273,8 +273,8 @@ public:
     /*******状态与属性设置、获取*******/
     void setFundation();
 
-    bool isFinish(){return this->Percent>=100;}
-    double getPercent() {return this->Percent;}
+    bool isFinish(){return this->Percent>=Double(100);}
+    Double getPercent() {return this->Percent;}
     bool isConstructed(){ return constructed; } //判断已建造完成
     void recordConstruct(){ constructed = true; }
 
@@ -290,8 +290,8 @@ public:
 
 
     /***************状态与图像显示****************/
-    double getFireImageX(){ return fireImageX; }
-    double getFireImageY(){ return fireImageY; }
+    Double getFireImageX(){ return fireImageX; }
+    Double getFireImageY(){ return fireImageY; }
 
     std::list<ImageResource>::iterator getFireNowRes(){return this->fireNowRes;}
     std::list<ImageResource>* getFireNowList(){ return fireNowList; }
@@ -325,7 +325,7 @@ protected:
     int Foundation;
     //地基类型
 
-    double Percent = 0;
+    Double Percent = 0;
     //完成百分比 100时表示建筑已经被建造完成 根据完成度有不同的贴图
 
     int Finish=0;//0为未完成 1为完成
@@ -339,16 +339,16 @@ protected:
     int gold_TS = 0;
 
     //修理资源小数累积（按帧扣费时取整）
-    double repairResDebtWood = 0;
-    double repairResDebtFood = 0;
-    double repairResDebtStone = 0;
-    double repairResDebtGold = 0;
+    Double repairResDebtWood = 0;
+    Double repairResDebtFood = 0;
+    Double repairResDebtStone = 0;
+    Double repairResDebtGold = 0;
 
     std::list<ImageResource>::iterator fireNowRes;
     std::list<ImageResource> *fireNowList = NULL;
 
-    double fireImageX;
-    double fireImageY;
+    Double fireImageX;
+    Double fireImageY;
 
 
     /***************状态与图像显示****************/

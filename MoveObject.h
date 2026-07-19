@@ -6,7 +6,7 @@
 class MoveObject:public Coordinate
 {
 protected:
-    double speed;   //移动速度
+    Double speed;   //移动速度
     bool changeToRun = false;   //用于切换nowlist,
 
     int Angle;
@@ -20,26 +20,28 @@ protected:
     */
 
     //下一个格子中的具体位置
-    double nextDR,nextUR;
+    Double nextDR,nextUR;
     //下一个格子的坐标位置
     int nextBlockDR,nextBlockUR;
 
     //目的地的格子位置
     int nextBlockDR0=0,nextBlockUR0=0;
-    double DR0,UR0;//目的地
+    Double DR0,UR0;//目的地
 
     int dMove_BDR = 0 , dMove_BUR = 0;
     //ΔDR ΔUR
-    double VDR=0,VUR=0;
+    Double VDR=0,VUR=0;
     // 单位向量
-    double VariationDR[8] = {1 / sqrt(2), 0, -1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1};
-    double VariationUR[8] = {-1 / sqrt(2), -1, -1 / sqrt(2), 0, 1 / sqrt(2), 1, 1 / sqrt(2), 0};
+    Double VariationDR[8] = {Double(1) / sqrt(Double(2)), Double(0), Double(-1) / sqrt(Double(2)),
+                             Double(-1), Double(-1) / sqrt(Double(2)), Double(0), Double(1) / sqrt(Double(2)), Double(1)};
+    Double VariationUR[8] = {Double(-1) / sqrt(Double(2)), Double(-1), Double(-1) / sqrt(Double(2)),Double(0),
+                             Double(1) / sqrt(Double(2)), Double(1), Double(1) / sqrt(Double(2)), Double(0)};
 
     //上一位置
-    double PreviousDR,PreviousUR;
+    Double PreviousDR,PreviousUR;
     int PreviousBlockDR , PreviousBlockUR;
     //预判位置
-    double PredictedDR,PredictedUR;
+    Double PredictedDR,PredictedUR;
 
     stack<Point> path;    //记录路径
 //    int pathN=0;    //路径长度
@@ -72,26 +74,26 @@ protected:
     void change_Angel(int Angel_new);
     void update_PredictPoint();
 
-    void jud_ArrivePhaseGoal(double dDR , double dUR , double distance);
+    void jud_ArrivePhaseGoal(Double dDR , Double dUR , Double distance);
 
-    void update_moveDire( double dDR , double dUR );
+    void update_moveDire( Double dDR , Double dUR );
 
 
-    void setPredictedDRUR( double PredictedDR, double PredictedUR){ this->PredictedDR = PredictedDR; this->PredictedUR = PredictedUR; }
+    void setPredictedDRUR( Double PredictedDR, Double PredictedUR){ this->PredictedDR = PredictedDR; this->PredictedUR = PredictedUR; }
 
-    void setPreviousDRUR( double PreviousDR, double PreviousUR ){ this->PreviousDR = PreviousDR; this->PreviousUR = PreviousUR; }
+    void setPreviousDRUR( Double PreviousDR, Double PreviousUR ){ this->PreviousDR = PreviousDR; this->PreviousUR = PreviousUR; }
 public:
     bool stateCrash=false;//用于传递状态给tagGame 判断碰撞
 
     MoveObject(){}
 
   /**********************虚函数**************************/
-    virtual int calculateAngle(double nextDR, double nextUR);
-    virtual double getSpeed(){ return speed; }
+    virtual int calculateAngle(Double nextDR, Double nextUR);
+    virtual Double getSpeed(){ return speed; }
     bool get_isActionEnd(){ return this->nowres == prev(nowlist->end()); }
 
     void resetCoreAttribute(){ changeToRun = false; }
-    void setDR0UR0( double DR0, double UR0 ){ this->DR0 = DR0; this->UR0 = UR0; }
+    void setDR0UR0( Double DR0, Double UR0 ){ this->DR0 = DR0; this->UR0 = UR0; }
     virtual void updateMove();
     /***************指针强制转化****************/
     void printer_ToMoveObject(void** ptr){ *ptr = this; }   //传入ptr为MoveObject类指针的地址,需要强制转换为（void**）
@@ -106,9 +108,9 @@ public:
 
   /*******************以上静态函数***********************/
     //强制设置位置
-    void setPosForced(double DR,double UR);
+    void setPosForced(Double DR,Double UR);
     //强制设置空闲
-    void ForceStand(double dr,double ur);
+    void ForceStand(Double dr,Double ur);
     //设置状态（预设）
     void setPreStand(){this->prestate=MOVEOBJECT_STATE_STAND;}
     void setPreWalk(){this->prestate=MOVEOBJECT_STATE_WALK;}
@@ -133,28 +135,28 @@ public:
     //判断动作执行进程——通过nowres在nowlist中位置判断
     bool isAction_ResBegin(){ return nowres == nowlist->begin(); }
 
-    void adjustAngle(double goalDR,double goalUR){ Angle = calculateAngle(goalDR,goalUR); }
+    void adjustAngle(Double goalDR,Double goalUR){ Angle = calculateAngle(goalDR,goalUR); }
     //*****路劲设置相关*****
     //设置寻路得到的路劲
-    void setPath(const stack<Point>&path , double goalDR, double goalUR);
+    void setPath(const stack<Point>&path , Double goalDR, Double goalUR);
     //获取路径
     stack<Point> getPath(){return this->path;}
     int getPath_size(){ return path.size(); }
     //设置目标点
-    void setdestination(double DR0,double UR0);
-    void setDR0(double DR0);
-    void setUR0(double UR0);
+    void setdestination(Double DR0,Double UR0);
+    void setDR0(Double DR0);
+    void setUR0(Double UR0);
     //获取目标点
-    double getDR0(){return this->DR0;}
-    double getUR0(){return this->UR0;}
+    Double getDR0(){return this->DR0;}
+    Double getUR0(){return this->UR0;}
 
     void pathOptimize( Point addPoint );
 
     //*****处理移动*****
     void GoBackLU();
     void updateLU();
-    double get_PredictedDR(){ return PredictedDR; }
-    double get_PredictedUR(){ return PredictedUR; }
+    Double get_PredictedDR(){ return PredictedDR; }
+    Double get_PredictedUR(){ return PredictedUR; }
     Point get_PreviousBlock(){ return Point(PreviousBlockDR , PreviousBlockUR); }
     Point get_NextBlockPoint(){ return Point(nextBlockDR , nextBlockUR); }
     bool is_MoveFirstStep(){ return pathI == 0; }

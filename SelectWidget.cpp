@@ -181,7 +181,7 @@ void SelectWidget::initActs()
     if (type == SORT_BUILDING) // 建筑
     {
         Building* buildOb = (Building*)nowobject;
-        bool isActing = buildOb->isFinish() && buildOb->getActSpeed() > 0;
+        bool isActing = buildOb->isFinish() && buildOb->getActSpeed() > Double::Zero();
         //        int nowActPosition = -1;
 
         if (isActing)
@@ -284,7 +284,7 @@ void SelectWidget::refreshActs()
     int buildType, buildingActType;
     if (nowobject != NULL)
     {
-        if (nowobject->getActSpeed() > 0)
+        if (nowobject->getActSpeed() > Double::Zero())
             ui->objText->setText(QString::number((int)(nowobject->getActPercent())) + "%"); // 如果有进行中的任务则显示进度
         else
             ui->objText->setText("");
@@ -583,7 +583,7 @@ void SelectWidget::refreshActs()
         if (type == SORT_BUILDING || type == SORT_Building_Resource) // 建筑
         {
             Building* objBuilding = (Building*)nowobject;
-            bool isActing = objBuilding->isFinish() && objBuilding->getActSpeed() > 0;
+            bool isActing = objBuilding->isFinish() && objBuilding->getActSpeed() > Double::Zero();
             buildType = objBuilding->getNum();                                                    // 获取建筑种类
             ui->objName->setText(QString::fromStdString(objBuilding->getDisplayName(buildType))); // 设置显示名称
 
@@ -609,7 +609,7 @@ void SelectWidget::refreshActs()
                 ui->objIcon->setPixmap(resMap["Button"].front().scaled(110, 110));
             }
 
-            if (objBuilding->getActSpeed() != 0)
+            if (objBuilding->getActSpeed() != Double::Zero())
             {
                 ui->objIconSmall->setPixmap(resMap["SmallIcon_Sandglass"].front()); // 如果在行动中，在进度条百分比旁显示一个沙漏小图标
             }
@@ -659,7 +659,7 @@ void SelectWidget::refreshActs()
                 // 详细设置
                 if (objBuilding->getNum() == BUILDING_HOME)
                 {
-                    const int populationHalfSlots = qRound(human_num * 2.0);
+                    const int populationHalfSlots = round(human_num * Double(2));
                     const QString populationText = (populationHalfSlots % 2 == 0)
                         ? QString::number(populationHalfSlots / 2)
                         : QString::number(human_num, 'f', 1);
@@ -808,7 +808,7 @@ void SelectWidget::refreshActs()
             else if (objFarmer->get_farmerType() == 1)
                 ui->objIconSmall->setPixmap(resMap["SmallIcon_People"].front());
             // 如果当前村民没有资源
-            if (objFarmer->getResourceNowHave() == 0)
+            if (objFarmer->getResourceNowHave() == Double::Zero())
             {
                 ui->objIconSmall->setPixmap(QPixmap());
                 ui->objText->setText("");
@@ -859,7 +859,7 @@ void SelectWidget::refreshActs()
                 // 弓兵类型：显示射程
                 // Army::getDis_attack() 返回的是距离 * BLOCKSIDELENGTH（像素单位），这里转回"格子"显示
                 int rangeInBlock = 0;
-                if (BLOCKSIDELENGTH > 0)
+                if (BLOCKSIDELENGTH > Double::Zero())
                     rangeInBlock = (int)(objArmy->getDis_attack() / BLOCKSIDELENGTH);
                 ui->objText_DEF_range->setText(QString::number(rangeInBlock));
 

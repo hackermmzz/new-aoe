@@ -11,7 +11,7 @@ int BloodHaver::getDEF(int attackType_got)
 }
 
 
-void BloodHaver::updateBlood(double damage){
-    double maxBlood=(double)getMaxBlood();
-    Blood -= damage/maxBlood; Blood=max(min(1.0,Blood),0.0);
+void BloodHaver::updateBlood(Double damage){
+    Double maxBlood=(Double)getMaxBlood();
+    Blood -= damage/maxBlood; Blood=max(min(Double(1),Blood),Double::Zero());
 }

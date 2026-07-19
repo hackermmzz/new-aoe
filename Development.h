@@ -17,23 +17,23 @@ public:
 
 
    /*****************加成信息*****************/
-    double get_rate_Move(int sort,int type);
-    double get_rate_Blood(int sort , int type);
+    Double get_rate_Move(int sort,int type);
+    Double get_rate_Blood(int sort , int type);
     int get_addition_Blood( int sort , int type );
 
-    double get_rate_Attack( int sort , int type , int armyClass , int attackType, int interSort = -1, int interNum = -1 );
+    Double get_rate_Attack( int sort , int type , int armyClass , int attackType, int interSort = -1, int interNum = -1 );
     int get_addition_Attack( int sort , int type , int armyClass , int attackType );
 
     int get_addition_DisAttack( int sort, int type , int armyClass , int attackType );
 
-    double get_rate_Defence( int sort , int type , int armyClass , int attackType_got );
+    Double get_rate_Defence( int sort , int type , int armyClass , int attackType_got );
     int get_addition_Defence( int sort , int type , int armyClass , int attackType_got );
 
-    double get_rate_HitTarget(){ return 1+rate_hitTarget; }
+    Double get_rate_HitTarget(){ return 1+rate_hitTarget; }
     /**************资源相关**************/
     int get_addition_ResourceSort( int resourceSort );
     int get_addition_MaxCnt( int sort , int type );
-    double get_rate_ResorceGather( int resourceSort );
+    Double get_rate_ResorceGather( int resourceSort );
 
    /******************加成信息*******************/
 
@@ -58,7 +58,7 @@ public:
     void setHumanPopulationHalfSlots(int halfSlots){ humanPopulationHalfSlots = std::max(0, halfSlots); }
     int getHumanPopulationHalfSlots(){ return humanPopulationHalfSlots; }
     //当前人口数目
-    double get_humanNum(){ return humanPopulationHalfSlots / 2.0; }
+    Double get_humanNum(){ return humanPopulationHalfSlots / Double(2); }
     //获取人口上限
     int getMaxHumanNum(){return get_homeNum()*HOUSE_HUMAN_NUM;}
     //当前能达到的最大人口数目
@@ -106,8 +106,8 @@ public:
     void get_Resource_Consume( int buildNum ,int& wood,int& food,int& stone,int& gold ){ developLab[buildNum].buildCon->get_needResource(wood,food,stone,gold); }
     void get_Resource_Consume( int buildNum , int actNum ,int& wood,int& food,int& stone,int& gold  ){ developLab[buildNum].actCon[actNum].get_needResource(wood,food,stone,gold);}
     //获取消耗时间
-    double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
-    double get_actTime( int buildingNum, int actNum ){ return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
+    Double get_buildTime( int buildingNum ){ return developLab[buildingNum].buildCon->times_second; }
+    Double get_actTime( int buildingNum, int actNum ){ return developLab[buildingNum].actCon[actNum].nowExecuteNode->times_second;}
 
     void BuildingActionExecuting(int buildNum, int actNum){ developLab[buildNum].actCon[actNum].beginExecute(); }
     void BuildingActionOverExecuting(int buildNum, int actNum){ developLab[buildNum].actCon[actNum].overExecute(); }
@@ -134,9 +134,9 @@ private:
     int humanNum_Top = 50;  //最大人口上限
 
     //研发工艺带来的数值加成
-    double rate_FarmerMove = 0;
-    double rate_FarmerBlood = 0;
-    double rate_hitTarget = 0;
+    Double rate_FarmerMove = 0;
+    Double rate_FarmerBlood = 0;
+    Double rate_hitTarget = 0;
 
     int buildingNumber[6] = {0};
 

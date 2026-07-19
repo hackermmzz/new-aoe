@@ -5,7 +5,7 @@ array<std::string,10> StaticRes::StaticResname;
 array<std::string,10> StaticRes::StaticResDisplayName;
 
 
-StaticRes::StaticRes(int Num, double DR, double UR)
+StaticRes::StaticRes(int Num, Double DR, Double UR)
 {
     this->Num=Num;
 

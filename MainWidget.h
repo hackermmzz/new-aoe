@@ -188,18 +188,18 @@ private:
     void MakeOcean(int blockL,int blockU);
     void DeleteOcean(int blockL,int blockU);
     void MakeGrassland(int blockL,int blockU);
-    void MakeTree(double DR,double UR);
+    void MakeTree(Double DR,Double UR);
     void MakeStaticRes(int blockL,int blockU,int type);
-    void MakeAnimal(double DR,double UR,int type);
+    void MakeAnimal(Double DR,Double UR,int type);
     void MakeBuilding(int blockL,int blockU,int type);
-    void MakeHuman(double DR,double UR,int type);
+    void MakeHuman(Double DR,Double UR,int type);
     void clearArea(int blockL, int blockU, int radius = 1);  // 清空指定区域资源
     
     // 单位选择和区域管理相关函数
     void selectUnit(Coordinate* unit, bool addToSelection = false);  // 选择单位
     void clearSelection();  // 清空选择
     void updateAreaButtons();  // 更新区域按钮状态
-    Coordinate* getUnitAtPosition(double DR, double UR);  // 获取指定位置的单位
+    Coordinate* getUnitAtPosition(Double DR, Double UR);  // 获取指定位置的单位
     void highlightUnitAreas(Coordinate* unit);  // 高亮显示单位的区域
     void highlightSelectedUnitAreas(Coordinate* unit);  // 添加单位区域到高亮列表（不清空现有的）
     void clearHighlightedAreas();  // 清空高亮区域
@@ -207,7 +207,7 @@ private:
     void checkAndDisplayPatrolArea(Coordinate* unit);  // 检查并显示单位的巡逻区域信息
     
     // handleEnemyStatusSelection函数保留在private中，因为它是内部使用的
-    void handleEnemyStatusSelection(double DR, double UR);  // 处理敌人状态选择
+    void handleEnemyStatusSelection(Double DR, Double UR);  // 处理敌人状态选择
 
 //**************************************
 

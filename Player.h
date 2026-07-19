@@ -24,16 +24,16 @@ public:
     std::list<Missile*> missile;
     //***************************************************************
     //添加对象
-    Building* addBuilding(int Num,int BlockDR,int BlockUR , double percent = 0);
-    int addHuman(int Num,double DR,double UR);
-    Army* addArmy(int Num , double DR , double UR);
-    Army* addArmyAROUND(int Num,double DR,double UR,int status,int starttime,int finishtime,double dDR,double dUR);
-    Army* addArmyDEFENSE(int Num,double DR,double UR,int status);
-    Army* addArmyATTACK(int Num,double DR,double UR,int status,int starttime,int finishtime);
-    int addFarmer(double DR,double UR);
-    int addShip(int Num,double DR,double UR);
+    Building* addBuilding(int Num,int BlockDR,int BlockUR , Double percent = 0);
+    int addHuman(int Num,Double DR,Double UR);
+    Army* addArmy(int Num , Double DR , Double UR);
+    Army* addArmyAROUND(int Num,Double DR,Double UR,int status,int starttime,int finishtime,Double dDR,Double dUR);
+    Army* addArmyDEFENSE(int Num,Double DR,Double UR,int status);
+    Army* addArmyATTACK(int Num,Double DR,Double UR,int status,int starttime,int finishtime);
+    int addFarmer(Double DR,Double UR);
+    int addShip(int Num,Double DR,Double UR);
     Missile* addMissile( Coordinate* attacker , Coordinate* attackee  , int beginHeight);
-    Missile *addMissile(Coordinate *attacker, double dr,double ur, int beginHeight);
+    Missile *addMissile(Coordinate *attacker, Double dr,Double ur, int beginHeight);
     //移除实例对象
     void removeHuman(Human*target);
     //插入实例对象
@@ -83,7 +83,7 @@ public:
     //获取人口上限(可达到的)，最高50
     int getMaxHumanNum(){return playerScience->getHumanNumCanReach();}
     //获取当前人口
-    double getHumanNum(){ return playerScience->get_humanNum(); }
+    Double getHumanNum(){ return playerScience->get_humanNum(); }
 
    /*建筑行动相关********************************************/
     //判断是否可建筑

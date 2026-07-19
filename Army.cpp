@@ -38,7 +38,7 @@ Army::Army()
 
 }
 
-Army::Army(double DR,double UR,int Num , Development* playerScience, int playerRepresent)
+Army::Army(Double DR,Double UR,int Num , Development* playerScience, int playerRepresent)
 {
     //设置科技树和阵营
     this->playerScience = playerScience;
@@ -76,7 +76,7 @@ Army::Army(double DR,double UR,int Num , Development* playerScience, int playerR
     g_globalNum++;
 }
 
-Army::Army(double DR,double UR,int Num ,int status, Development* playerScience, int playerRepresent,int starttime,int finishtime,double dDR,double dUR)
+Army::Army(Double DR,Double UR,int Num ,int status, Development* playerScience, int playerRepresent,int starttime,int finishtime,Double dDR,Double dUR)
 {
     //设置科技树和阵营
     this->playerScience = playerScience;
@@ -236,11 +236,11 @@ void Army::requestSound_Walk()
 /***********************************************************/
 //获取军队的各项数据
 //移速
-double Army::getSpeed()
+Double Army::getSpeed()
 {
     if(statFrozen) return frozenSpeed;
 
-    double moveSpeed;
+    Double moveSpeed;
 
     if( upgradable ) moveSpeed = speed_change[getLevel()];
     else moveSpeed = speed;
@@ -365,9 +365,9 @@ int Army::showDEF_Shoot()
 }
 
 //攻击距离
-double Army::getDis_attack()
+Double Army::getDis_attack()
 {
-    double dis;
+    Double dis;
     int    disAdd;
 
     if(statFrozen)
@@ -382,14 +382,14 @@ double Army::getDis_attack()
         disAdd = playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType());
     }
 
-    if(dis == 0) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/2.0;
+    if(dis == Double::Zero()) dis = DISTANCE_ATTACK_CLOSE + (attackObject->getSideLength())/Double(2);
     else dis = ( dis + disAdd )*BLOCKSIDELENGTH;
 
     return dis;
 }
 
 //最小攻击距离（盲区下限，像素）：投石车太近的目标打不到；其余兵种无盲区
-double Army::getMinDis_attack()
+Double Army::getMinDis_attack()
 {
     if(Num == AT_STONE_THROWER) return DIS_MIN_STONE_THROWER * BLOCKSIDELENGTH;
     return 0;
@@ -458,16 +458,16 @@ int Army::getstarttime(){
 int Army::getfinishtime(){
     return this->finishtime;
 }
-double Army::getstartpointDR(){
+Double Army::getstartpointDR(){
     return this->startpointDR;
 }
-double Army::getstartpointUR(){
+Double Army::getstartpointUR(){
       return this->startpointUR;
 }
-double Army::getdestinaDR(){
+Double Army::getdestinaDR(){
     return this->destinaDR;
 }
-double Army::getdestinaUR(){
+Double Army::getdestinaUR(){
      return this->destinaUR;
 }
 bool Army::getifAttack(){
@@ -493,11 +493,11 @@ void Army::setAttribute()
         attackType = ATTACKTYPE_CLOSE;
 
         MaxBlood_change = new int[2]{ BLOOD_CLUBMAN1,BLOOD_CLUBMAN2 };
-        speed_change = new double[2]{ SPEED_CLUBMAN1,SPEED_CLUBMAN2 };
+        speed_change = new Double[2]{ SPEED_CLUBMAN1,SPEED_CLUBMAN2 };
         vision_change = new int[2]{ VISION_CLUBMAN1,VISION_CLUBMAN2 };
         atk_change  = new int[2]{ATK_CLUBMAN1,ATK_CLUBMAN2};
-        dis_Attack_change  = new double[2]{DIS_CLUBMAN1 , DIS_CLUBMAN2};
-        inter_Attack_change = new double[2]{ INTERVAL_CLUBMAN1,INTERVAL_CLUBMAN2 };
+        dis_Attack_change  = new Double[2]{DIS_CLUBMAN1 , DIS_CLUBMAN2};
+        inter_Attack_change = new Double[2]{ INTERVAL_CLUBMAN1,INTERVAL_CLUBMAN2 };
         defence_close_change  = new int[2]{ DEFCLOSE_CLUBMAN1,DEFCLOSE_CLUBMAN2 };
         defence_shoot_change  = new int[2]{ DEFSHOOT_CLUBMAN1,DEFSHOOT_CLUBMAN2 };
 
@@ -532,11 +532,11 @@ void Army::setAttribute()
 //        attackType = ATTACKTYPE_CLOSE;
 
 //        MaxBlood_change = new int[4]{ BLOOD_SHORTSWORDSMAN1,BLOOD_SHORTSWORDSMAN2,BLOOD_SHORTSWORDSMAN3,BLOOD_SHORTSWORDSMAN4 };
-//        speed_change = new double[4]{ SPEED_SHORTSWORDSMAN1,SPEED_SHORTSWORDSMAN2,SPEED_SHORTSWORDSMAN3,SPEED_SHORTSWORDSMAN4 };
+//        speed_change = new Double[4]{ SPEED_SHORTSWORDSMAN1,SPEED_SHORTSWORDSMAN2,SPEED_SHORTSWORDSMAN3,SPEED_SHORTSWORDSMAN4 };
 //        vision_change = new int[4]{ VISION_SHORTSWORDSMAN1,VISION_SHORTSWORDSMAN2,VISION_SHORTSWORDSMAN3,VISION_SHORTSWORDSMAN4 };
 //        atk_change  = new int[4]{ATK_SHORTSWORSMAN1,ATK_SHORTSWORSMAN2,ATK_SHORTSWORSMAN3,ATK_SHORTSWORSMAN4};
-//        dis_Attack_change  = new double[4]{DIS_SHORTSWORDSMAN1 , DIS_SHORTSWORDSMAN2,DIS_SHORTSWORDSMAN3,DIS_SHORTSWORDSMAN4};
-//        inter_Attack_change = new double[4]{ INTERVAL_SHORTSWORDSMAN1,INTERVAL_SHORTSWORDSMAN2,INTERVAL_SHORTSWORDSMAN3,INTERVAL_SHORTSWORDSMAN4 };
+//        dis_Attack_change  = new Double[4]{DIS_SHORTSWORDSMAN1 , DIS_SHORTSWORDSMAN2,DIS_SHORTSWORDSMAN3,DIS_SHORTSWORDSMAN4};
+//        inter_Attack_change = new Double[4]{ INTERVAL_SHORTSWORDSMAN1,INTERVAL_SHORTSWORDSMAN2,INTERVAL_SHORTSWORDSMAN3,INTERVAL_SHORTSWORDSMAN4 };
 //        defence_close_change  = new int[4]{ DEFCLOSE_SHORTSWORSMAN1,DEFCLOSE_SHORTSWORSMAN2,DEFCLOSE_SHORTSWORSMAN3,DEFCLOSE_SHORTSWORSMAN4 };
 //        defence_shoot_change  = new int[4]{ DEFSHOOT_SHORTSWORSMAN1,DEFSHOOT_SHORTSWORSMAN2,DEFSHOOT_SHORTSWORSMAN3,DEFSHOOT_SHORTSWORSMAN4 };
 //        break;

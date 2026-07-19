@@ -8,7 +8,7 @@ Missile::Missile(int type, Coordinate* attacker , Coordinate* attackee,int begin
     Missile(type,attacker,attackee->getDR(),attackee->getUR(),beginHeight,playerScience,playerRepresent);
 }
 
-Missile::Missile(int type, Coordinate *attacker, double target_dr, double target_ur, int beginHeight, Development *playerScience, int playerRepresent)
+Missile::Missile(int type, Coordinate *attacker, Double target_dr, Double target_ur, int beginHeight, Development *playerScience, int playerRepresent)
 {
     //划分玩家阵营
     this->playerScience = playerScience;
@@ -80,43 +80,43 @@ void Missile::setNowRes()
 
 void Missile::calculateDMove()
 {
-    double total;
+    Double total;
 
     dDR = DR0 - DR;
     dUR = UR0 - UR;
     total = sqrt(dDR*dDR+dUR*dUR);
 
-    if(total>0.1)
+    if(total>Double("0.1"))
     {
         dDR = dDR*speed/total;
         dUR = dUR*speed/total;
     }
 }
 
-int Missile::calculateAngle(double nextDR, double nextUR)
+int Missile::calculateAngle(Double nextDR, Double nextUR)
 {
     int tempAngle = 0 , partNum = 32;
-    double dDR =nextDR - viewDR , dUR = nextUR - viewUR , sita = atan2(dUR,dDR) , gama , neta;
-    const double pi = 3.1415926 ;
-    double halfPi = pi/2, quarterPi = pi/4 , circle = 2*pi;
+    Double dDR =nextDR - viewDR , dUR = nextUR - viewUR , sita = atan2(dUR,dDR) , gama , neta;
+    const Double pi = Double::pi() ;
+    Double halfPi = pi/2, quarterPi = pi/4 , circle = 2*pi;
 
-    if(sita>0)
+    if(sita>Double::Zero())
     {
         gama = circle;
 
         neta = sita - halfPi;
-        if(neta<0) gama -= sita*0.5;
-        else gama -= quarterPi+ neta*1.5;
+        if(neta<Double::Zero()) gama -= sita/Double(2);
+        else gama -= quarterPi+ neta*Double("1.5");
     }
     else
     {
         sita *=-1;
         neta = sita-halfPi;
-        if(neta<0) gama = sita*1.5;
-        else gama = halfPi + quarterPi + neta*0.5;
+        if(neta<Double::Zero()) gama = sita*Double("1.5");
+        else gama = halfPi + quarterPi + neta/Double(2);
     }
 
-    tempAngle = 3 + round( gama* partNum / circle );
+    tempAngle = 3 + int(round( gama* partNum / circle ));
     if(tempAngle>31) tempAngle-=32;
 
     return tempAngle;
@@ -126,7 +126,7 @@ void Missile::updateMove()
 {
     if(!isWorking())setPreWalk();
 
-    if(fabs(DR0-DR)<fabs(dDR) || fabs(UR0-UR)<fabs(dUR))
+    if(abs(DR0-DR)<abs(dDR) || abs(UR0-UR)<abs(dUR))
     {
         PredictedDR=DR0;
         PredictedUR=UR0;
@@ -184,7 +184,7 @@ BloodHaver* Missile::getAttackAponsor()
     return attacker;
 }
 
-void Missile::get_AttackSponsor_Position(double& DR , double& UR)
+void Missile::get_AttackSponsor_Position(Double& DR , Double& UR)
 {
     if(isAttackerDie)
     {
@@ -221,31 +221,31 @@ void Missile::updateViewPosition()
    this->updateImageXYByNowRes();
 }
 
-std::array<double, 2> Missile::calculateViewPosition(double curDR, double curUR)
+std::array<Double, 2> Missile::calculateViewPosition(Double curDR, Double curUR)
 {
     //////////////////////////////////////////////////这里作者汪，只提供最简单的变换，更加逼真的仿射变换交给你
     //这边有bug，除以0的bug
-    static double factor=1.732050807568877;
-    static double sqrt2=sqrt(2);
-    double x0=abs(initDR-DR0)/2.0;
-    if(x0==0)return std::array<double,2>{curDR,curUR};
-    double x=abs(x0-abs(curDR-initDR));
-    double y=-factor*(x-x0)*(x+x0)/x0;
+    static Double factor("1.732050807568877");
+    static Double sqrt2=sqrt(Double(2));
+    Double x0=abs(initDR-DR0)/Double(2);
+    if(x0==Double::Zero())return std::array<Double,2>{curDR,curUR};
+    Double x=abs(x0-abs(curDR-initDR));
+    Double y=-factor*(x-x0)*(x+x0)/x0;
     //计算向量
-    double dx=initDR-DR0,dy=initUR-UR0;
-    double div=2*(dx*dx+dy*dy);
-    if(div==0)return std::array<double,2>{curDR,curUR};
-    double cosP=(dx+dy)*(dx+dy)/div;
+    Double dx=initDR-DR0,dy=initUR-UR0;
+    Double div=2*(dx*dx+dy*dy);
+    if(div==Double::Zero())return std::array<Double,2>{curDR,curUR};
+    Double cosP=(dx+dy)*(dx+dy)/div;
     y*=cosP;
-    return std::array<double,2>{curDR-y/sqrt2,curUR+y/sqrt2};
+    return std::array<Double,2>{curDR-y/sqrt2,curUR+y/sqrt2};
 }
 
-double Missile::getViewDR()
+Double Missile::getViewDR()
 {
     return viewDR;
 }
 
-double Missile::getViewUR()
+Double Missile::getViewUR()
 {
     return viewUR;
 }

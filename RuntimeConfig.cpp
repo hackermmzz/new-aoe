@@ -26,13 +26,13 @@ int g_MEMORYROW = 0;
 int g_MEMORYCOLUMN = 0;
 int g_GAMEWIDGET_WIDTH = 0;
 int g_GAMEWIDGET_HEIGHT = 0;
-double g_BLOCKSIDELENGTH = 0.0;
+Double g_BLOCKSIDELENGTH = Double::Zero();
 int g_UNLOAD_RADIAN = 0;
 int g_MAP_L = 0;
 int g_MAP_U = 0;
-double g_HUMAN_SPEED = 0.0;
-double g_WOOD_BOAT_SPEED = 0.0;
-double g_ANIMAL_SPEED = 0.0;
+Double g_HUMAN_SPEED = Double::Zero();
+Double g_WOOD_BOAT_SPEED = Double::Zero();
+Double g_ANIMAL_SPEED = Double::Zero();
 QString g_RESPATH = QString();
 bool g_OPTION_MUSIC = false;
 bool g_OPTION_SOUND = false;
@@ -40,9 +40,9 @@ bool g_OPTION_SELECT = false;
 bool g_OPTION_LINE = false;
 bool g_OPTION_POS = false;
 bool g_OPTION_OVERLAP = false;
-double g_BUILDING_BLOOD_FIRE_SMALL = 0.0;
-double g_BUILDING_BLOOD_FIRE_MIDDLE = 0.0;
-double g_BUILDING_BLOOD_FIRE_BIG = 0.0;
+Double g_BUILDING_BLOOD_FIRE_SMALL = Double::Zero();
+Double g_BUILDING_BLOOD_FIRE_MIDDLE = Double::Zero();
+Double g_BUILDING_BLOOD_FIRE_BIG = Double::Zero();
 int g_HOUSE_HUMAN_NUM = 0;
 int g_VISION_GAZELLE = 0;
 int g_BLOOD_GAZELLE = 0;
@@ -53,7 +53,7 @@ int g_CNT_LION = 0;
 int g_ANIMAL_ATTACKRANGE_LION = 0;
 int g_VISION_ELEPHANT = 0;
 int g_BLOOD_ELEPHANT = 0;
-double g_SPEED_ELEPHANT = 0.0;
+Double g_SPEED_ELEPHANT = Double::Zero();
 int g_CNT_ELEPHANT = 0;
 int g_ANIMAL_ATTACKRANGE_ELEPHANT = 0;
 int g_BLOOD_TREE = 0;
@@ -68,12 +68,12 @@ int g_FARMER_CARRYLIMIT_UPGRADEWOOD = 0;
 int g_FARMER_CARRYLIMIT_UPGRADEFOOD = 0;
 int g_FARMER_CARRYLIMIT_UPGRADEGOLD = 0;
 int g_FARMER_CARRYLIMIT_UPGRADESTONE = 0;
-double g_FARMER_GATHERSPEED_WOOD = 0.0;
-double g_FARMER_GATHERSPEED_FOOD = 0.0;
-double g_FARMER_GATHERSPEED_GOLD = 0.0;
-double g_FARMER_GATHERSPEED_STONE = 0.0;
-double g_FARMER_CONSTRUCTSPEED = 0.0;
-double g_REPAIR_COST_RATIO = 0.5;
+Double g_FARMER_GATHERSPEED_WOOD = Double::Zero();
+Double g_FARMER_GATHERSPEED_FOOD = Double::Zero();
+Double g_FARMER_GATHERSPEED_GOLD = Double::Zero();
+Double g_FARMER_GATHERSPEED_STONE = Double::Zero();
+Double g_FARMER_CONSTRUCTSPEED = Double::Zero();
+Double g_REPAIR_COST_RATIO = Double("0.5");
 int g_CNT_UPGRADEFARM = 0;
 int g_CNT_BUSH = 0;
 int g_CNT_STONE = 0;
@@ -85,15 +85,15 @@ int g_INITIAL_WOOD = 0;
 int g_INITIAL_MEAT = 0;
 int g_INITIAL_GOLD = 0;
 int g_INITIAL_STONE = 0;
-double g_CRASHBOX_MICRO = 0.0;
-double g_CRASHBOX_SINGLEBLOCK = 0.0;
-double g_CRASHBOX_SMALLBLOCK = 0.0;
-double g_CRASHBOX_SMALL = 0.0;
-double g_CRASHBOX_MIDDLE = 0.0;
-double g_CRASHBOX_BIG = 0.0;
-double g_CRASHBOX_SINGLEOB = 0.0;
-double g_CRASHBOX_SMALLOB = 0.0;
-double g_CRASHBOX_BIGOB = 0.0;
+Double g_CRASHBOX_MICRO = Double::Zero();
+Double g_CRASHBOX_SINGLEBLOCK = Double::Zero();
+Double g_CRASHBOX_SMALLBLOCK = Double::Zero();
+Double g_CRASHBOX_SMALL = Double::Zero();
+Double g_CRASHBOX_MIDDLE = Double::Zero();
+Double g_CRASHBOX_BIG = Double::Zero();
+Double g_CRASHBOX_SINGLEOB = Double::Zero();
+Double g_CRASHBOX_SMALLOB = Double::Zero();
+Double g_CRASHBOX_BIGOB = Double::Zero();
 int g_BLOOD_BUILD_CENTER = 0;
 int g_VISION_CENTER = 0;
 int g_BUILD_CENTER_WOOD = 0;
@@ -274,7 +274,7 @@ int g_VISION_FARM = 0;
 int g_BUILD_FARM_WOOD = 0;
 int g_TIME_BUILD_FARM = 0;
 int g_BLOOD_BUILD_ARROWTOWER = 0;
-double g_VISION_ARROWTOWER = 0.0;
+Double g_VISION_ARROWTOWER = Double::Zero();
 int g_DIS_BUILD_ARROWTOWER = 0;
 int g_ATK_BUILD_ARROWTOWER = 0;
 int g_DEFSHOOT_BUILD_ARROWTOWER = 0;
@@ -284,177 +284,177 @@ int g_BLOOD_BUILD_WALL = 0;
 int g_DEFSHOOT_BUILD_WALL = 0;
 int g_BUILD_WALL_STONE = 0;
 int g_TIME_BUILD_WALL = 0;
-double g_DISTANCE_Manhattan_MoveEndNEAR = 0.0;
-double g_DISTANCE_Manhattan_PathMove = 0.0;
-double g_DISTANCE_Manhattan_Unload = 0.0;
-double g_DISTANCE_Manhattan_Transport = 0.0;
-double g_DISTANCE_ATTACK_CLOSE = 0.0;
-double g_DISTANCE_HIT_TARGET = 0.0;
-double g_DISTANCE_ELEPHANT_ATTACK = 0.0;
-double g_SHIP_ACT_MAX_DISTANCE = 0.0;
-double g_DIS_ARROWTOWER = 0.0;
-double g_SPEED_CLUBMAN1 = 0.0;
+Double g_DISTANCE_Manhattan_MoveEndNEAR = Double::Zero();
+Double g_DISTANCE_Manhattan_PathMove = Double::Zero();
+Double g_DISTANCE_Manhattan_Unload = Double::Zero();
+Double g_DISTANCE_Manhattan_Transport = Double::Zero();
+Double g_DISTANCE_ATTACK_CLOSE = Double::Zero();
+Double g_DISTANCE_HIT_TARGET = Double::Zero();
+Double g_DISTANCE_ELEPHANT_ATTACK = Double::Zero();
+Double g_SHIP_ACT_MAX_DISTANCE = Double::Zero();
+Double g_DIS_ARROWTOWER = Double::Zero();
+Double g_SPEED_CLUBMAN1 = Double::Zero();
 int g_VISION_CLUBMAN1 = 0;
 int g_DIS_CLUBMAN1 = 0;
-double g_INTERVAL_CLUBMAN1 = 0.0;
+Double g_INTERVAL_CLUBMAN1 = Double::Zero();
 int g_ATK_CLUBMAN1 = 0;
 int g_DEFCLOSE_CLUBMAN1 = 0;
 int g_DEFSHOOT_CLUBMAN1 = 0;
 int g_BLOOD_CLUBMAN1 = 0;
 int g_BLOOD_CLUBMAN2 = 0;
-double g_SPEED_CLUBMAN2 = 0.0;
+Double g_SPEED_CLUBMAN2 = Double::Zero();
 int g_VISION_CLUBMAN2 = 0;
 int g_DIS_CLUBMAN2 = 0;
-double g_INTERVAL_CLUBMAN2 = 0.0;
+Double g_INTERVAL_CLUBMAN2 = Double::Zero();
 int g_ATK_CLUBMAN2 = 0;
 int g_DEFCLOSE_CLUBMAN2 = 0;
 int g_DEFSHOOT_CLUBMAN2 = 0;
 int g_BLOOD_SHORTSWORDSMAN1 = 0;
-double g_SPEED_SHORTSWORDSMAN1 = 0.0;
+Double g_SPEED_SHORTSWORDSMAN1 = Double::Zero();
 int g_VISION_SHORTSWORDSMAN1 = 0;
 int g_DIS_SHORTSWORDSMAN1 = 0;
-double g_INTERVAL_SHORTSWORDSMAN1 = 0.0;
+Double g_INTERVAL_SHORTSWORDSMAN1 = Double::Zero();
 int g_ATK_SHORTSWORSMAN1 = 0;
 int g_DEFCLOSE_SHORTSWORSMAN1 = 0;
 int g_DEFSHOOT_SHORTSWORSMAN1 = 0;
 int g_BLOOD_SHORTSWORDSMAN2 = 0;
-double g_SPEED_SHORTSWORDSMAN2 = 0.0;
+Double g_SPEED_SHORTSWORDSMAN2 = Double::Zero();
 int g_VISION_SHORTSWORDSMAN2 = 0;
 int g_DIS_SHORTSWORDSMAN2 = 0;
-double g_INTERVAL_SHORTSWORDSMAN2 = 0.0;
+Double g_INTERVAL_SHORTSWORDSMAN2 = Double::Zero();
 int g_ATK_SHORTSWORSMAN2 = 0;
 int g_DEFCLOSE_SHORTSWORSMAN2 = 0;
 int g_DEFSHOOT_SHORTSWORSMAN2 = 0;
 int g_BLOOD_SHORTSWORDSMAN3 = 0;
-double g_SPEED_SHORTSWORDSMAN3 = 0.0;
+Double g_SPEED_SHORTSWORDSMAN3 = Double::Zero();
 int g_VISION_SHORTSWORDSMAN3 = 0;
 int g_DIS_SHORTSWORDSMAN3 = 0;
-double g_INTERVAL_SHORTSWORDSMAN3 = 0.0;
+Double g_INTERVAL_SHORTSWORDSMAN3 = Double::Zero();
 int g_ATK_SHORTSWORSMAN3 = 0;
 int g_DEFCLOSE_SHORTSWORSMAN3 = 0;
 int g_DEFSHOOT_SHORTSWORSMAN3 = 0;
 int g_BLOOD_SHORTSWORDSMAN4 = 0;
-double g_SPEED_SHORTSWORDSMAN4 = 0.0;
+Double g_SPEED_SHORTSWORDSMAN4 = Double::Zero();
 int g_VISION_SHORTSWORDSMAN4 = 0;
 int g_DIS_SHORTSWORDSMAN4 = 0;
-double g_INTERVAL_SHORTSWORDSMAN4 = 0.0;
+Double g_INTERVAL_SHORTSWORDSMAN4 = Double::Zero();
 int g_ATK_SHORTSWORSMAN4 = 0;
 int g_DEFCLOSE_SHORTSWORSMAN4 = 0;
 int g_DEFSHOOT_SHORTSWORSMAN4 = 0;
 int g_BLOOD_BROADSWORDSMAN = 0;
-double g_SPEED_BROADSWORDSMAN = 0.0;
+Double g_SPEED_BROADSWORDSMAN = Double::Zero();
 int g_VISION_BROADSWORDSMAN = 0;
 int g_ATK_BROADSWORDSMAN = 0;
-double g_DIS_BROADSWORDSMAN = 0.0;
-double g_INTERVAL_BROADSWORDSMAN = 0.0;
+Double g_DIS_BROADSWORDSMAN = Double::Zero();
+Double g_INTERVAL_BROADSWORDSMAN = Double::Zero();
 int g_DEFCLOSE_BROADSWORDSMAN = 0;
 int g_DEFSHOOT_BROADSWORDSMAN = 0;
 int g_NOWRES_TIMER_BROADSWORDSMAN = 0;
 int g_BLOOD_SLINGER = 0;
-double g_SPEED_SLINGER = 0.0;
+Double g_SPEED_SLINGER = Double::Zero();
 int g_VISION_SLINGER = 0;
 int g_DIS_SLINGER = 0;
-double g_INTERVAL_SLINGER = 0.0;
+Double g_INTERVAL_SLINGER = Double::Zero();
 int g_ATK_SLINGER = 0;
 int g_DEFCLOSE_SLINGER = 0;
 int g_DEFSHOOT_SLINGER = 0;
 int g_BLOOD_BOWMAN = 0;
-double g_SPEED_BOWMAN = 0.0;
+Double g_SPEED_BOWMAN = Double::Zero();
 int g_VISION_BOWMAN = 0;
 int g_DIS_BOWMAN = 0;
-double g_INTERVAL_BOWMAN = 0.0;
+Double g_INTERVAL_BOWMAN = Double::Zero();
 int g_ATK_BOWMAN = 0;
 int g_DEFCLOSE_BOWMAN = 0;
 int g_DEFSHOOT_BOWMAN = 0;
 int g_BLOOD_COMPOSITE_BOWMAN = 0;
-double g_SPEED_COMPOSITE_BOWMAN = 0.0;
+Double g_SPEED_COMPOSITE_BOWMAN = Double::Zero();
 int g_VISION_COMPOSITE_BOWMAN = 0;
 int g_ATK_COMPOSITE_BOWMAN = 0;
-double g_DIS_COMPOSITE_BOWMAN = 0.0;
-double g_INTERVAL_COMPOSITE_BOWMAN = 0.0;
+Double g_DIS_COMPOSITE_BOWMAN = Double::Zero();
+Double g_INTERVAL_COMPOSITE_BOWMAN = Double::Zero();
 int g_DEFCLOSE_COMPOSITE_BOWMAN = 0;
 int g_DEFSHOOT_COMPOSITE_BOWMAN = 0;
 int g_NOWRES_TIMER_COMPOSITE_BOWMAN = 0;
 int g_BLOOD_CHARIOT_ARCHER = 0;
-double g_SPEED_CHARIOT_ARCHER = 0.0;
+Double g_SPEED_CHARIOT_ARCHER = Double::Zero();
 int g_VISION_CHARIOT_ARCHER = 0;
 int g_ATK_CHARIOT_ARCHER = 0;
-double g_DIS_CHARIOT_ARCHER = 0.0;
-double g_INTERVAL_CHARIOT_ARCHER = 0.0;
+Double g_DIS_CHARIOT_ARCHER = Double::Zero();
+Double g_INTERVAL_CHARIOT_ARCHER = Double::Zero();
 int g_DEFCLOSE_CHARIOT_ARCHER = 0;
 int g_DEFSHOOT_CHARIOT_ARCHER = 0;
 int g_NOWRES_TIMER_CHARIOT_ARCHER = 0;
 int g_BLOOD_IMPROVEDBOWMAN1 = 0;
-double g_SPEED_IMPROVEDBOWMAN1 = 0.0;
+Double g_SPEED_IMPROVEDBOWMAN1 = Double::Zero();
 int g_VISION_IMPROVEDBOWMAN1 = 0;
 int g_DIS_IMPROVEDBOWMAN1 = 0;
-double g_INTERVAL_IMPROVEDBOWMAN1 = 0.0;
+Double g_INTERVAL_IMPROVEDBOWMAN1 = Double::Zero();
 int g_ATK_IMPROVEDBOWMAN1 = 0;
 int g_DEFCLOSE_IMPROVEDBOWMAN1 = 0;
 int g_DEFSHOOT_IMPROVEDBOWMAN1 = 0;
 int g_BLOOD_IMPROVEDBOWMAN2 = 0;
-double g_SPEED_IMPROVEDBOWMAN2 = 0.0;
+Double g_SPEED_IMPROVEDBOWMAN2 = Double::Zero();
 int g_VISION_IMPROVEDBOWMAN2 = 0;
 int g_DIS_IMPROVEDBOWMAN2 = 0;
-double g_INTERVAL_IMPROVEDBOWMAN2 = 0.0;
+Double g_INTERVAL_IMPROVEDBOWMAN2 = Double::Zero();
 int g_ATK_IMPROVEDBOWMAN2 = 0;
 int g_DEFCLOSE_IMPROVEDBOWMAN2 = 0;
 int g_DEFSHOOT_IMPROVEDBOWMAN2 = 0;
 int g_BLOOD_SCOUT = 0;
-double g_SPEED_SCOUT = 0.0;
+Double g_SPEED_SCOUT = Double::Zero();
 int g_VISION_SCOUT = 0;
 int g_DIS_SCOUT = 0;
-double g_INTERVAL_SCOUT = 0.0;
+Double g_INTERVAL_SCOUT = Double::Zero();
 int g_ATK_SCOUT = 0;
 int g_DEFCLOSE_SCOUT = 0;
 int g_DEFSHOOT_SCOUT = 0;
 int g_BLOOD_CHARIOT = 0;
-double g_SPEED_CHARIOT = 0.0;
+Double g_SPEED_CHARIOT = Double::Zero();
 int g_VISION_CHARIOT = 0;
 int g_ATK_CHARIOT = 0;
-double g_DIS_CHARIOT = 0.0;
-double g_INTERVAL_CHARIOT = 0.0;
+Double g_DIS_CHARIOT = Double::Zero();
+Double g_INTERVAL_CHARIOT = Double::Zero();
 int g_DEFCLOSE_CHARIOT = 0;
 int g_DEFSHOOT_CHARIOT = 0;
 int g_NOWRES_TIMER_CHARIOT = 0;
 int g_BLOOD_CAVALRY = 0;
-double g_SPEED_CAVALRY = 0.0;
+Double g_SPEED_CAVALRY = Double::Zero();
 int g_VISION_CAVALRY = 0;
 int g_DIS_CAVALRY = 0;
-double g_INTERVAL_CAVALRY = 0.0;
+Double g_INTERVAL_CAVALRY = Double::Zero();
 int g_ATK_CAVALRY = 0;
 int g_DEFCLOSE_CAVALRY = 0;
 int g_DEFSHOOT_CAVALRY = 0;
 int g_BLOOD_SHIP = 0;
-double g_SPEED_SHIP = 0.0;
+Double g_SPEED_SHIP = Double::Zero();
 int g_VISION_SHIP = 0;
 int g_ATK_SHIP = 0;
-double g_DIS_SHIP = 0.0;
+Double g_DIS_SHIP = Double::Zero();
 int g_INTERVAL_SHIP = 0;
 int g_DEFCLOSE_SHIP = 0;
 int g_DEFSHOOT_SHIP = 0;
 int g_BLOOD_STONE_THROWER = 0;
-double g_SPEED_STONE_THROWER = 0.0;
+Double g_SPEED_STONE_THROWER = Double::Zero();
 int g_VISION_STONE_THROWER = 0;
 int g_ATK_STONE_THROWER = 0;
-double g_DIS_STONE_THROWER = 0.0;
-double g_DIS_MIN_STONE_THROWER = 0.0;
+Double g_DIS_STONE_THROWER = Double::Zero();
+Double g_DIS_MIN_STONE_THROWER = Double::Zero();
 int g_INTERVAL_STONE_THROWER = 0;
 int g_DEFCLOSE_STONE_THROWER = 0;
 int g_DEFSHOOT_STONE_THROWER = 0;
 int g_BLOOD_PRIEST = 0;
-double g_SPEED_PRIEST = 0.0;
+Double g_SPEED_PRIEST = Double::Zero();
 int g_VISION_PRIEST = 0;
 int g_ATK_PRIEST = 0;
-double g_DIS_PRIEST = 0.0;
+Double g_DIS_PRIEST = Double::Zero();
 int g_INTERVAL_PRIEST = 0;
 int g_DEFCLOSE_PRIEST = 0;
 int g_DEFSHOOT_PRIEST = 0;
-double g_Missile_Speed_Spear = 0.0;
-double g_Missile_Speed_Arrow = 0.0;
-double g_Missile_Speed_Cobblestone = 0.0;
-double g_Missile_Speed_Boulders = 0.0;
-double g_Missile_Boulders_Range = 0.0;
+Double g_Missile_Speed_Spear = Double::Zero();
+Double g_Missile_Speed_Arrow = Double::Zero();
+Double g_Missile_Speed_Cobblestone = Double::Zero();
+Double g_Missile_Speed_Boulders = Double::Zero();
+Double g_Missile_Boulders_Range = Double::Zero();
 int g_NOWRES_TIMER_FARMER = 0;
 int g_NOWRES_TIMER_CLUBMAN = 0;
 int g_NOWRES_TIMER_BOWMAN = 0;
@@ -470,11 +470,11 @@ int g_NOWRES_TIMER_STONE_THROWER = 0;
 int g_NOWRES_TIMER_PRIEST = 0;
 int g_PRIEST_REST_TIME = 0;
 int g_BLOOD_HOPLITE = 0;
-double g_SPEED_HOPLITE = 0.0;
+Double g_SPEED_HOPLITE = Double::Zero();
 int g_VISION_HOPLITE = 0;
 int g_ATK_HOPLITE = 0;
-double g_DIS_HOPLITE = 0.0;
-double g_INTERVAL_HOPLITE = 0.0;
+Double g_DIS_HOPLITE = Double::Zero();
+Double g_INTERVAL_HOPLITE = Double::Zero();
 int g_DEFCLOSE_HOPLITE = 0;
 int g_DEFSHOOT_HOPLITE = 0;
 int g_NOWRES_TIMER_HOPLITE = 0;
@@ -482,7 +482,7 @@ int g_Boulder_Trail_Effect_Duration = 0;
 int g_DefaultCivilization = 0;
 int g_EnemyTechnologyMaxCivilization = -1;
 bool g_OffScreen = false;
-double g_MUSIC_VOLUME = 0.0;
+Double g_MUSIC_VOLUME = Double::Zero();
 QSet<int> g_PLAYER_DISABLED_BUILDINGS;
 
 } // namespace
@@ -592,7 +592,7 @@ int RuntimeConfig_GAMEWIDGET_HEIGHT()
     return g_GAMEWIDGET_HEIGHT;
 }
 
-double RuntimeConfig_BLOCKSIDELENGTH()
+Double RuntimeConfig_BLOCKSIDELENGTH()
 {
     return g_BLOCKSIDELENGTH;
 }
@@ -612,17 +612,17 @@ int RuntimeConfig_MAP_U()
     return g_MAP_U;
 }
 
-double RuntimeConfig_HUMAN_SPEED()
+Double RuntimeConfig_HUMAN_SPEED()
 {
     return g_HUMAN_SPEED;
 }
 
-double RuntimeConfig_WOOD_BOAT_SPEED()
+Double RuntimeConfig_WOOD_BOAT_SPEED()
 {
     return g_WOOD_BOAT_SPEED;
 }
 
-double RuntimeConfig_ANIMAL_SPEED()
+Double RuntimeConfig_ANIMAL_SPEED()
 {
     return g_ANIMAL_SPEED;
 }
@@ -662,17 +662,17 @@ bool RuntimeConfig_OPTION_OVERLAP()
     return g_OPTION_OVERLAP;
 }
 
-double RuntimeConfig_BUILDING_BLOOD_FIRE_SMALL()
+Double RuntimeConfig_BUILDING_BLOOD_FIRE_SMALL()
 {
     return g_BUILDING_BLOOD_FIRE_SMALL;
 }
 
-double RuntimeConfig_BUILDING_BLOOD_FIRE_MIDDLE()
+Double RuntimeConfig_BUILDING_BLOOD_FIRE_MIDDLE()
 {
     return g_BUILDING_BLOOD_FIRE_MIDDLE;
 }
 
-double RuntimeConfig_BUILDING_BLOOD_FIRE_BIG()
+Double RuntimeConfig_BUILDING_BLOOD_FIRE_BIG()
 {
     return g_BUILDING_BLOOD_FIRE_BIG;
 }
@@ -727,7 +727,7 @@ int RuntimeConfig_BLOOD_ELEPHANT()
     return g_BLOOD_ELEPHANT;
 }
 
-double RuntimeConfig_SPEED_ELEPHANT()
+Double RuntimeConfig_SPEED_ELEPHANT()
 {
     return g_SPEED_ELEPHANT;
 }
@@ -802,32 +802,32 @@ int RuntimeConfig_FARMER_CARRYLIMIT_UPGRADESTONE()
     return g_FARMER_CARRYLIMIT_UPGRADESTONE;
 }
 
-double RuntimeConfig_FARMER_GATHERSPEED_WOOD()
+Double RuntimeConfig_FARMER_GATHERSPEED_WOOD()
 {
     return g_FARMER_GATHERSPEED_WOOD;
 }
 
-double RuntimeConfig_FARMER_GATHERSPEED_FOOD()
+Double RuntimeConfig_FARMER_GATHERSPEED_FOOD()
 {
     return g_FARMER_GATHERSPEED_FOOD;
 }
 
-double RuntimeConfig_FARMER_GATHERSPEED_GOLD()
+Double RuntimeConfig_FARMER_GATHERSPEED_GOLD()
 {
     return g_FARMER_GATHERSPEED_GOLD;
 }
 
-double RuntimeConfig_FARMER_GATHERSPEED_STONE()
+Double RuntimeConfig_FARMER_GATHERSPEED_STONE()
 {
     return g_FARMER_GATHERSPEED_STONE;
 }
 
-double RuntimeConfig_FARMER_CONSTRUCTSPEED()
+Double RuntimeConfig_FARMER_CONSTRUCTSPEED()
 {
     return g_FARMER_CONSTRUCTSPEED;
 }
 
-double RuntimeConfig_REPAIR_COST_RATIO()
+Double RuntimeConfig_REPAIR_COST_RATIO()
 {
     return g_REPAIR_COST_RATIO;
 }
@@ -887,47 +887,47 @@ int RuntimeConfig_INITIAL_STONE()
     return g_INITIAL_STONE;
 }
 
-double RuntimeConfig_CRASHBOX_MICRO()
+Double RuntimeConfig_CRASHBOX_MICRO()
 {
     return g_CRASHBOX_MICRO;
 }
 
-double RuntimeConfig_CRASHBOX_SINGLEBLOCK()
+Double RuntimeConfig_CRASHBOX_SINGLEBLOCK()
 {
     return g_CRASHBOX_SINGLEBLOCK;
 }
 
-double RuntimeConfig_CRASHBOX_SMALLBLOCK()
+Double RuntimeConfig_CRASHBOX_SMALLBLOCK()
 {
     return g_CRASHBOX_SMALLBLOCK;
 }
 
-double RuntimeConfig_CRASHBOX_SMALL()
+Double RuntimeConfig_CRASHBOX_SMALL()
 {
     return g_CRASHBOX_SMALL;
 }
 
-double RuntimeConfig_CRASHBOX_MIDDLE()
+Double RuntimeConfig_CRASHBOX_MIDDLE()
 {
     return g_CRASHBOX_MIDDLE;
 }
 
-double RuntimeConfig_CRASHBOX_BIG()
+Double RuntimeConfig_CRASHBOX_BIG()
 {
     return g_CRASHBOX_BIG;
 }
 
-double RuntimeConfig_CRASHBOX_SINGLEOB()
+Double RuntimeConfig_CRASHBOX_SINGLEOB()
 {
     return g_CRASHBOX_SINGLEOB;
 }
 
-double RuntimeConfig_CRASHBOX_SMALLOB()
+Double RuntimeConfig_CRASHBOX_SMALLOB()
 {
     return g_CRASHBOX_SMALLOB;
 }
 
-double RuntimeConfig_CRASHBOX_BIGOB()
+Double RuntimeConfig_CRASHBOX_BIGOB()
 {
     return g_CRASHBOX_BIGOB;
 }
@@ -1832,7 +1832,7 @@ int RuntimeConfig_BLOOD_BUILD_ARROWTOWER()
     return g_BLOOD_BUILD_ARROWTOWER;
 }
 
-double RuntimeConfig_VISION_ARROWTOWER()
+Double RuntimeConfig_VISION_ARROWTOWER()
 {
     return g_VISION_ARROWTOWER;
 }
@@ -1882,52 +1882,52 @@ int RuntimeConfig_TIME_BUILD_WALL()
     return g_TIME_BUILD_WALL;
 }
 
-double RuntimeConfig_DISTANCE_Manhattan_MoveEndNEAR()
+Double RuntimeConfig_DISTANCE_Manhattan_MoveEndNEAR()
 {
     return g_DISTANCE_Manhattan_MoveEndNEAR;
 }
 
-double RuntimeConfig_DISTANCE_Manhattan_PathMove()
+Double RuntimeConfig_DISTANCE_Manhattan_PathMove()
 {
     return g_DISTANCE_Manhattan_PathMove;
 }
 
-double RuntimeConfig_DISTANCE_Manhattan_Unload()
+Double RuntimeConfig_DISTANCE_Manhattan_Unload()
 {
     return g_DISTANCE_Manhattan_Unload;
 }
 
-double RuntimeConfig_DISTANCE_Manhattan_Transport()
+Double RuntimeConfig_DISTANCE_Manhattan_Transport()
 {
     return g_DISTANCE_Manhattan_Transport;
 }
 
-double RuntimeConfig_DISTANCE_ATTACK_CLOSE()
+Double RuntimeConfig_DISTANCE_ATTACK_CLOSE()
 {
     return g_DISTANCE_ATTACK_CLOSE;
 }
 
-double RuntimeConfig_DISTANCE_HIT_TARGET()
+Double RuntimeConfig_DISTANCE_HIT_TARGET()
 {
     return g_DISTANCE_HIT_TARGET;
 }
 
-double RuntimeConfig_DISTANCE_ELEPHANT_ATTACK()
+Double RuntimeConfig_DISTANCE_ELEPHANT_ATTACK()
 {
     return g_DISTANCE_ELEPHANT_ATTACK;
 }
 
-double RuntimeConfig_SHIP_ACT_MAX_DISTANCE()
+Double RuntimeConfig_SHIP_ACT_MAX_DISTANCE()
 {
     return g_SHIP_ACT_MAX_DISTANCE;
 }
 
-double RuntimeConfig_DIS_ARROWTOWER()
+Double RuntimeConfig_DIS_ARROWTOWER()
 {
     return g_DIS_ARROWTOWER;
 }
 
-double RuntimeConfig_SPEED_CLUBMAN1()
+Double RuntimeConfig_SPEED_CLUBMAN1()
 {
     return g_SPEED_CLUBMAN1;
 }
@@ -1942,7 +1942,7 @@ int RuntimeConfig_DIS_CLUBMAN1()
     return g_DIS_CLUBMAN1;
 }
 
-double RuntimeConfig_INTERVAL_CLUBMAN1()
+Double RuntimeConfig_INTERVAL_CLUBMAN1()
 {
     return g_INTERVAL_CLUBMAN1;
 }
@@ -1972,7 +1972,7 @@ int RuntimeConfig_BLOOD_CLUBMAN2()
     return g_BLOOD_CLUBMAN2;
 }
 
-double RuntimeConfig_SPEED_CLUBMAN2()
+Double RuntimeConfig_SPEED_CLUBMAN2()
 {
     return g_SPEED_CLUBMAN2;
 }
@@ -1987,7 +1987,7 @@ int RuntimeConfig_DIS_CLUBMAN2()
     return g_DIS_CLUBMAN2;
 }
 
-double RuntimeConfig_INTERVAL_CLUBMAN2()
+Double RuntimeConfig_INTERVAL_CLUBMAN2()
 {
     return g_INTERVAL_CLUBMAN2;
 }
@@ -2012,7 +2012,7 @@ int RuntimeConfig_BLOOD_SHORTSWORDSMAN1()
     return g_BLOOD_SHORTSWORDSMAN1;
 }
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN1()
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN1()
 {
     return g_SPEED_SHORTSWORDSMAN1;
 }
@@ -2027,7 +2027,7 @@ int RuntimeConfig_DIS_SHORTSWORDSMAN1()
     return g_DIS_SHORTSWORDSMAN1;
 }
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN1()
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN1()
 {
     return g_INTERVAL_SHORTSWORDSMAN1;
 }
@@ -2052,7 +2052,7 @@ int RuntimeConfig_BLOOD_SHORTSWORDSMAN2()
     return g_BLOOD_SHORTSWORDSMAN2;
 }
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN2()
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN2()
 {
     return g_SPEED_SHORTSWORDSMAN2;
 }
@@ -2067,7 +2067,7 @@ int RuntimeConfig_DIS_SHORTSWORDSMAN2()
     return g_DIS_SHORTSWORDSMAN2;
 }
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN2()
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN2()
 {
     return g_INTERVAL_SHORTSWORDSMAN2;
 }
@@ -2092,7 +2092,7 @@ int RuntimeConfig_BLOOD_SHORTSWORDSMAN3()
     return g_BLOOD_SHORTSWORDSMAN3;
 }
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN3()
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN3()
 {
     return g_SPEED_SHORTSWORDSMAN3;
 }
@@ -2107,7 +2107,7 @@ int RuntimeConfig_DIS_SHORTSWORDSMAN3()
     return g_DIS_SHORTSWORDSMAN3;
 }
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN3()
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN3()
 {
     return g_INTERVAL_SHORTSWORDSMAN3;
 }
@@ -2132,7 +2132,7 @@ int RuntimeConfig_BLOOD_SHORTSWORDSMAN4()
     return g_BLOOD_SHORTSWORDSMAN4;
 }
 
-double RuntimeConfig_SPEED_SHORTSWORDSMAN4()
+Double RuntimeConfig_SPEED_SHORTSWORDSMAN4()
 {
     return g_SPEED_SHORTSWORDSMAN4;
 }
@@ -2147,7 +2147,7 @@ int RuntimeConfig_DIS_SHORTSWORDSMAN4()
     return g_DIS_SHORTSWORDSMAN4;
 }
 
-double RuntimeConfig_INTERVAL_SHORTSWORDSMAN4()
+Double RuntimeConfig_INTERVAL_SHORTSWORDSMAN4()
 {
     return g_INTERVAL_SHORTSWORDSMAN4;
 }
@@ -2172,7 +2172,7 @@ int RuntimeConfig_BLOOD_BROADSWORDSMAN()
     return g_BLOOD_BROADSWORDSMAN;
 }
 
-double RuntimeConfig_SPEED_BROADSWORDSMAN()
+Double RuntimeConfig_SPEED_BROADSWORDSMAN()
 {
     return g_SPEED_BROADSWORDSMAN;
 }
@@ -2187,12 +2187,12 @@ int RuntimeConfig_ATK_BROADSWORDSMAN()
     return g_ATK_BROADSWORDSMAN;
 }
 
-double RuntimeConfig_DIS_BROADSWORDSMAN()
+Double RuntimeConfig_DIS_BROADSWORDSMAN()
 {
     return g_DIS_BROADSWORDSMAN;
 }
 
-double RuntimeConfig_INTERVAL_BROADSWORDSMAN()
+Double RuntimeConfig_INTERVAL_BROADSWORDSMAN()
 {
     return g_INTERVAL_BROADSWORDSMAN;
 }
@@ -2217,7 +2217,7 @@ int RuntimeConfig_BLOOD_SLINGER()
     return g_BLOOD_SLINGER;
 }
 
-double RuntimeConfig_SPEED_SLINGER()
+Double RuntimeConfig_SPEED_SLINGER()
 {
     return g_SPEED_SLINGER;
 }
@@ -2232,7 +2232,7 @@ int RuntimeConfig_DIS_SLINGER()
     return g_DIS_SLINGER;
 }
 
-double RuntimeConfig_INTERVAL_SLINGER()
+Double RuntimeConfig_INTERVAL_SLINGER()
 {
     return g_INTERVAL_SLINGER;
 }
@@ -2257,7 +2257,7 @@ int RuntimeConfig_BLOOD_BOWMAN()
     return g_BLOOD_BOWMAN;
 }
 
-double RuntimeConfig_SPEED_BOWMAN()
+Double RuntimeConfig_SPEED_BOWMAN()
 {
     return g_SPEED_BOWMAN;
 }
@@ -2272,7 +2272,7 @@ int RuntimeConfig_DIS_BOWMAN()
     return g_DIS_BOWMAN;
 }
 
-double RuntimeConfig_INTERVAL_BOWMAN()
+Double RuntimeConfig_INTERVAL_BOWMAN()
 {
     return g_INTERVAL_BOWMAN;
 }
@@ -2297,7 +2297,7 @@ int RuntimeConfig_BLOOD_COMPOSITE_BOWMAN()
     return g_BLOOD_COMPOSITE_BOWMAN;
 }
 
-double RuntimeConfig_SPEED_COMPOSITE_BOWMAN()
+Double RuntimeConfig_SPEED_COMPOSITE_BOWMAN()
 {
     return g_SPEED_COMPOSITE_BOWMAN;
 }
@@ -2312,12 +2312,12 @@ int RuntimeConfig_ATK_COMPOSITE_BOWMAN()
     return g_ATK_COMPOSITE_BOWMAN;
 }
 
-double RuntimeConfig_DIS_COMPOSITE_BOWMAN()
+Double RuntimeConfig_DIS_COMPOSITE_BOWMAN()
 {
     return g_DIS_COMPOSITE_BOWMAN;
 }
 
-double RuntimeConfig_INTERVAL_COMPOSITE_BOWMAN()
+Double RuntimeConfig_INTERVAL_COMPOSITE_BOWMAN()
 {
     return g_INTERVAL_COMPOSITE_BOWMAN;
 }
@@ -2342,7 +2342,7 @@ int RuntimeConfig_BLOOD_CHARIOT_ARCHER()
     return g_BLOOD_CHARIOT_ARCHER;
 }
 
-double RuntimeConfig_SPEED_CHARIOT_ARCHER()
+Double RuntimeConfig_SPEED_CHARIOT_ARCHER()
 {
     return g_SPEED_CHARIOT_ARCHER;
 }
@@ -2357,12 +2357,12 @@ int RuntimeConfig_ATK_CHARIOT_ARCHER()
     return g_ATK_CHARIOT_ARCHER;
 }
 
-double RuntimeConfig_DIS_CHARIOT_ARCHER()
+Double RuntimeConfig_DIS_CHARIOT_ARCHER()
 {
     return g_DIS_CHARIOT_ARCHER;
 }
 
-double RuntimeConfig_INTERVAL_CHARIOT_ARCHER()
+Double RuntimeConfig_INTERVAL_CHARIOT_ARCHER()
 {
     return g_INTERVAL_CHARIOT_ARCHER;
 }
@@ -2387,7 +2387,7 @@ int RuntimeConfig_BLOOD_IMPROVEDBOWMAN1()
     return g_BLOOD_IMPROVEDBOWMAN1;
 }
 
-double RuntimeConfig_SPEED_IMPROVEDBOWMAN1()
+Double RuntimeConfig_SPEED_IMPROVEDBOWMAN1()
 {
     return g_SPEED_IMPROVEDBOWMAN1;
 }
@@ -2402,7 +2402,7 @@ int RuntimeConfig_DIS_IMPROVEDBOWMAN1()
     return g_DIS_IMPROVEDBOWMAN1;
 }
 
-double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN1()
+Double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN1()
 {
     return g_INTERVAL_IMPROVEDBOWMAN1;
 }
@@ -2427,7 +2427,7 @@ int RuntimeConfig_BLOOD_IMPROVEDBOWMAN2()
     return g_BLOOD_IMPROVEDBOWMAN2;
 }
 
-double RuntimeConfig_SPEED_IMPROVEDBOWMAN2()
+Double RuntimeConfig_SPEED_IMPROVEDBOWMAN2()
 {
     return g_SPEED_IMPROVEDBOWMAN2;
 }
@@ -2442,7 +2442,7 @@ int RuntimeConfig_DIS_IMPROVEDBOWMAN2()
     return g_DIS_IMPROVEDBOWMAN2;
 }
 
-double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN2()
+Double RuntimeConfig_INTERVAL_IMPROVEDBOWMAN2()
 {
     return g_INTERVAL_IMPROVEDBOWMAN2;
 }
@@ -2467,7 +2467,7 @@ int RuntimeConfig_BLOOD_SCOUT()
     return g_BLOOD_SCOUT;
 }
 
-double RuntimeConfig_SPEED_SCOUT()
+Double RuntimeConfig_SPEED_SCOUT()
 {
     return g_SPEED_SCOUT;
 }
@@ -2482,7 +2482,7 @@ int RuntimeConfig_DIS_SCOUT()
     return g_DIS_SCOUT;
 }
 
-double RuntimeConfig_INTERVAL_SCOUT()
+Double RuntimeConfig_INTERVAL_SCOUT()
 {
     return g_INTERVAL_SCOUT;
 }
@@ -2507,7 +2507,7 @@ int RuntimeConfig_BLOOD_CHARIOT()
     return g_BLOOD_CHARIOT;
 }
 
-double RuntimeConfig_SPEED_CHARIOT()
+Double RuntimeConfig_SPEED_CHARIOT()
 {
     return g_SPEED_CHARIOT;
 }
@@ -2522,12 +2522,12 @@ int RuntimeConfig_ATK_CHARIOT()
     return g_ATK_CHARIOT;
 }
 
-double RuntimeConfig_DIS_CHARIOT()
+Double RuntimeConfig_DIS_CHARIOT()
 {
     return g_DIS_CHARIOT;
 }
 
-double RuntimeConfig_INTERVAL_CHARIOT()
+Double RuntimeConfig_INTERVAL_CHARIOT()
 {
     return g_INTERVAL_CHARIOT;
 }
@@ -2552,7 +2552,7 @@ int RuntimeConfig_BLOOD_CAVALRY()
     return g_BLOOD_CAVALRY;
 }
 
-double RuntimeConfig_SPEED_CAVALRY()
+Double RuntimeConfig_SPEED_CAVALRY()
 {
     return g_SPEED_CAVALRY;
 }
@@ -2567,7 +2567,7 @@ int RuntimeConfig_DIS_CAVALRY()
     return g_DIS_CAVALRY;
 }
 
-double RuntimeConfig_INTERVAL_CAVALRY()
+Double RuntimeConfig_INTERVAL_CAVALRY()
 {
     return g_INTERVAL_CAVALRY;
 }
@@ -2592,7 +2592,7 @@ int RuntimeConfig_BLOOD_SHIP()
     return g_BLOOD_SHIP;
 }
 
-double RuntimeConfig_SPEED_SHIP()
+Double RuntimeConfig_SPEED_SHIP()
 {
     return g_SPEED_SHIP;
 }
@@ -2607,7 +2607,7 @@ int RuntimeConfig_ATK_SHIP()
     return g_ATK_SHIP;
 }
 
-double RuntimeConfig_DIS_SHIP()
+Double RuntimeConfig_DIS_SHIP()
 {
     return g_DIS_SHIP;
 }
@@ -2632,7 +2632,7 @@ int RuntimeConfig_BLOOD_STONE_THROWER()
     return g_BLOOD_STONE_THROWER;
 }
 
-double RuntimeConfig_SPEED_STONE_THROWER()
+Double RuntimeConfig_SPEED_STONE_THROWER()
 {
     return g_SPEED_STONE_THROWER;
 }
@@ -2647,12 +2647,12 @@ int RuntimeConfig_ATK_STONE_THROWER()
     return g_ATK_STONE_THROWER;
 }
 
-double RuntimeConfig_DIS_STONE_THROWER()
+Double RuntimeConfig_DIS_STONE_THROWER()
 {
     return g_DIS_STONE_THROWER;
 }
 
-double RuntimeConfig_DIS_MIN_STONE_THROWER()
+Double RuntimeConfig_DIS_MIN_STONE_THROWER()
 {
     return g_DIS_MIN_STONE_THROWER;
 }
@@ -2677,7 +2677,7 @@ int RuntimeConfig_BLOOD_PRIEST()
     return g_BLOOD_PRIEST;
 }
 
-double RuntimeConfig_SPEED_PRIEST()
+Double RuntimeConfig_SPEED_PRIEST()
 {
     return g_SPEED_PRIEST;
 }
@@ -2692,7 +2692,7 @@ int RuntimeConfig_ATK_PRIEST()
     return g_ATK_PRIEST;
 }
 
-double RuntimeConfig_DIS_PRIEST()
+Double RuntimeConfig_DIS_PRIEST()
 {
     return g_DIS_PRIEST;
 }
@@ -2712,27 +2712,27 @@ int RuntimeConfig_DEFSHOOT_PRIEST()
     return g_DEFSHOOT_PRIEST;
 }
 
-double RuntimeConfig_Missile_Speed_Spear()
+Double RuntimeConfig_Missile_Speed_Spear()
 {
     return g_Missile_Speed_Spear;
 }
 
-double RuntimeConfig_Missile_Speed_Arrow()
+Double RuntimeConfig_Missile_Speed_Arrow()
 {
     return g_Missile_Speed_Arrow;
 }
 
-double RuntimeConfig_Missile_Speed_Cobblestone()
+Double RuntimeConfig_Missile_Speed_Cobblestone()
 {
     return g_Missile_Speed_Cobblestone;
 }
 
-double RuntimeConfig_Missile_Speed_Boulders()
+Double RuntimeConfig_Missile_Speed_Boulders()
 {
     return g_Missile_Speed_Boulders;
 }
 
-double RuntimeConfig_Missile_Boulders_Range()
+Double RuntimeConfig_Missile_Boulders_Range()
 {
     return g_Missile_Boulders_Range;
 }
@@ -2812,7 +2812,7 @@ int RuntimeConfig_BLOOD_HOPLITE()
     return g_BLOOD_HOPLITE;
 }
 
-double RuntimeConfig_SPEED_HOPLITE()
+Double RuntimeConfig_SPEED_HOPLITE()
 {
     return g_SPEED_HOPLITE;
 }
@@ -2827,12 +2827,12 @@ int RuntimeConfig_ATK_HOPLITE()
     return g_ATK_HOPLITE;
 }
 
-double RuntimeConfig_DIS_HOPLITE()
+Double RuntimeConfig_DIS_HOPLITE()
 {
     return g_DIS_HOPLITE;
 }
 
-double RuntimeConfig_INTERVAL_HOPLITE()
+Double RuntimeConfig_INTERVAL_HOPLITE()
 {
     return g_INTERVAL_HOPLITE;
 }
@@ -2877,7 +2877,7 @@ bool RuntimeConfig_isPlayerBuildingDisabled(int buildingNum)
     return g_PLAYER_DISABLED_BUILDINGS.contains(buildingNum);
 }
 
-double RuntimeConfig_MUSIC_VOLUME()
+Double RuntimeConfig_MUSIC_VOLUME()
 {
     return g_MUSIC_VOLUME;
 }
@@ -2904,13 +2904,13 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_MEMORYCOLUMN = config.value(QStringLiteral("MEMORYCOLUMN")).toInt();
     g_GAMEWIDGET_WIDTH = config.value(QStringLiteral("GAMEWIDGET_WIDTH")).toInt();
     g_GAMEWIDGET_HEIGHT = config.value(QStringLiteral("GAMEWIDGET_HEIGHT")).toInt();
-    g_BLOCKSIDELENGTH = config.value(QStringLiteral("BLOCKSIDELENGTH")).toDouble();
+    g_BLOCKSIDELENGTH = Double::FromDouble(config.value(QStringLiteral("BLOCKSIDELENGTH")).toDouble());
     g_UNLOAD_RADIAN = config.value(QStringLiteral("UNLOAD_RADIAN")).toInt();
     g_MAP_L = config.value(QStringLiteral("MAP_L")).toInt();
     g_MAP_U = config.value(QStringLiteral("MAP_U")).toInt();
-    g_HUMAN_SPEED = config.value(QStringLiteral("HUMAN_SPEED")).toDouble();
-    g_WOOD_BOAT_SPEED = config.value(QStringLiteral("WOOD_BOAT_SPEED")).toDouble();
-    g_ANIMAL_SPEED = config.value(QStringLiteral("ANIMAL_SPEED")).toDouble();
+    g_HUMAN_SPEED = Double::FromDouble(config.value(QStringLiteral("HUMAN_SPEED")).toDouble());
+    g_WOOD_BOAT_SPEED = Double::FromDouble(config.value(QStringLiteral("WOOD_BOAT_SPEED")).toDouble());
+    g_ANIMAL_SPEED = Double::FromDouble(config.value(QStringLiteral("ANIMAL_SPEED")).toDouble());
     g_RESPATH = config.value(QStringLiteral("RESPATH")).toString();
     g_OPTION_MUSIC = config.value(QStringLiteral("OPTION_MUSIC")).toBool();
     g_OPTION_SOUND = config.value(QStringLiteral("OPTION_SOUND")).toBool();
@@ -2918,9 +2918,9 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_OPTION_LINE = config.value(QStringLiteral("OPTION_LINE")).toBool();
     g_OPTION_POS = config.value(QStringLiteral("OPTION_POS")).toBool();
     g_OPTION_OVERLAP = config.value(QStringLiteral("OPTION_OVERLAP")).toBool();
-    g_BUILDING_BLOOD_FIRE_SMALL = config.value(QStringLiteral("BUILDING_BLOOD_FIRE_SMALL")).toDouble();
-    g_BUILDING_BLOOD_FIRE_MIDDLE = config.value(QStringLiteral("BUILDING_BLOOD_FIRE_MIDDLE")).toDouble();
-    g_BUILDING_BLOOD_FIRE_BIG = config.value(QStringLiteral("BUILDING_BLOOD_FIRE_BIG")).toDouble();
+    g_BUILDING_BLOOD_FIRE_SMALL = Double::FromDouble(config.value(QStringLiteral("BUILDING_BLOOD_FIRE_SMALL")).toDouble());
+    g_BUILDING_BLOOD_FIRE_MIDDLE = Double::FromDouble(config.value(QStringLiteral("BUILDING_BLOOD_FIRE_MIDDLE")).toDouble());
+    g_BUILDING_BLOOD_FIRE_BIG = Double::FromDouble(config.value(QStringLiteral("BUILDING_BLOOD_FIRE_BIG")).toDouble());
     g_HOUSE_HUMAN_NUM = config.value(QStringLiteral("HOUSE_HUMAN_NUM")).toInt();
     g_VISION_GAZELLE = config.value(QStringLiteral("VISION_GAZELLE")).toInt();
     g_BLOOD_GAZELLE = config.value(QStringLiteral("BLOOD_GAZELLE")).toInt();
@@ -2931,7 +2931,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_ANIMAL_ATTACKRANGE_LION = config.value(QStringLiteral("ANIMAL_ATTACKRANGE_LION")).toInt();
     g_VISION_ELEPHANT = config.value(QStringLiteral("VISION_ELEPHANT")).toInt();
     g_BLOOD_ELEPHANT = config.value(QStringLiteral("BLOOD_ELEPHANT")).toInt();
-    g_SPEED_ELEPHANT = config.value(QStringLiteral("SPEED_ELEPHANT")).toDouble();
+    g_SPEED_ELEPHANT = Double::FromDouble(config.value(QStringLiteral("SPEED_ELEPHANT")).toDouble());
     g_CNT_ELEPHANT = config.value(QStringLiteral("CNT_ELEPHANT")).toInt();
     g_ANIMAL_ATTACKRANGE_ELEPHANT = config.value(QStringLiteral("ANIMAL_ATTACKRANGE_ELEPHANT")).toInt();
     g_BLOOD_TREE = config.value(QStringLiteral("BLOOD_TREE")).toInt();
@@ -2946,14 +2946,14 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_FARMER_CARRYLIMIT_UPGRADEFOOD = config.value(QStringLiteral("FARMER_CARRYLIMIT_UPGRADEFOOD")).toInt();
     g_FARMER_CARRYLIMIT_UPGRADEGOLD = config.value(QStringLiteral("FARMER_CARRYLIMIT_UPGRADEGOLD")).toInt();
     g_FARMER_CARRYLIMIT_UPGRADESTONE = config.value(QStringLiteral("FARMER_CARRYLIMIT_UPGRADESTONE")).toInt();
-    g_FARMER_GATHERSPEED_WOOD = config.value(QStringLiteral("FARMER_GATHERSPEED_WOOD")).toDouble();
-    g_FARMER_GATHERSPEED_FOOD = config.value(QStringLiteral("FARMER_GATHERSPEED_FOOD")).toDouble();
-    g_FARMER_GATHERSPEED_GOLD = config.value(QStringLiteral("FARMER_GATHERSPEED_GOLD")).toDouble();
-    g_FARMER_GATHERSPEED_STONE = config.value(QStringLiteral("FARMER_GATHERSPEED_STONE")).toDouble();
-    g_FARMER_CONSTRUCTSPEED = config.value(QStringLiteral("FARMER_CONSTRUCTSPEED")).toDouble();
+    g_FARMER_GATHERSPEED_WOOD = Double::FromDouble(config.value(QStringLiteral("FARMER_GATHERSPEED_WOOD")).toDouble());
+    g_FARMER_GATHERSPEED_FOOD = Double::FromDouble(config.value(QStringLiteral("FARMER_GATHERSPEED_FOOD")).toDouble());
+    g_FARMER_GATHERSPEED_GOLD = Double::FromDouble(config.value(QStringLiteral("FARMER_GATHERSPEED_GOLD")).toDouble());
+    g_FARMER_GATHERSPEED_STONE = Double::FromDouble(config.value(QStringLiteral("FARMER_GATHERSPEED_STONE")).toDouble());
+    g_FARMER_CONSTRUCTSPEED = Double::FromDouble(config.value(QStringLiteral("FARMER_CONSTRUCTSPEED")).toDouble());
     g_REPAIR_COST_RATIO = config.contains(QStringLiteral("REPAIR_COST_RATIO"))
-        ? config.value(QStringLiteral("REPAIR_COST_RATIO")).toDouble()
-        : 0.5;
+        ? Double::FromDouble(config.value(QStringLiteral("REPAIR_COST_RATIO")).toDouble())
+        : Double("0.5");
     g_CNT_UPGRADEFARM = config.value(QStringLiteral("CNT_UPGRADEFARM")).toInt();
     g_CNT_BUSH = config.value(QStringLiteral("CNT_BUSH")).toInt();
     g_CNT_STONE = config.value(QStringLiteral("CNT_STONE")).toInt();
@@ -2965,15 +2965,15 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_INITIAL_MEAT = config.value(QStringLiteral("INITIAL_MEAT")).toInt();
     g_INITIAL_GOLD = config.value(QStringLiteral("INITIAL_GOLD")).toInt();
     g_INITIAL_STONE = config.value(QStringLiteral("INITIAL_STONE")).toInt();
-    g_CRASHBOX_MICRO = config.value(QStringLiteral("CRASHBOX_MICRO")).toDouble();
-    g_CRASHBOX_SINGLEBLOCK = config.value(QStringLiteral("CRASHBOX_SINGLEBLOCK")).toDouble();
-    g_CRASHBOX_SMALLBLOCK = config.value(QStringLiteral("CRASHBOX_SMALLBLOCK")).toDouble();
-    g_CRASHBOX_SMALL = config.value(QStringLiteral("CRASHBOX_SMALL")).toDouble();
-    g_CRASHBOX_MIDDLE = config.value(QStringLiteral("CRASHBOX_MIDDLE")).toDouble();
-    g_CRASHBOX_BIG = config.value(QStringLiteral("CRASHBOX_BIG")).toDouble();
-    g_CRASHBOX_SINGLEOB = config.value(QStringLiteral("CRASHBOX_SINGLEOB")).toDouble();
-    g_CRASHBOX_SMALLOB = config.value(QStringLiteral("CRASHBOX_SMALLOB")).toDouble();
-    g_CRASHBOX_BIGOB = config.value(QStringLiteral("CRASHBOX_BIGOB")).toDouble();
+    g_CRASHBOX_MICRO = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_MICRO")).toDouble());
+    g_CRASHBOX_SINGLEBLOCK = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_SINGLEBLOCK")).toDouble());
+    g_CRASHBOX_SMALLBLOCK = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_SMALLBLOCK")).toDouble());
+    g_CRASHBOX_SMALL = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_SMALL")).toDouble());
+    g_CRASHBOX_MIDDLE = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_MIDDLE")).toDouble());
+    g_CRASHBOX_BIG = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_BIG")).toDouble());
+    g_CRASHBOX_SINGLEOB = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_SINGLEOB")).toDouble());
+    g_CRASHBOX_SMALLOB = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_SMALLOB")).toDouble());
+    g_CRASHBOX_BIGOB = Double::FromDouble(config.value(QStringLiteral("CRASHBOX_BIGOB")).toDouble());
     g_BLOOD_BUILD_CENTER = config.value(QStringLiteral("BLOOD_BUILD_CENTER")).toInt();
     g_VISION_CENTER = config.value(QStringLiteral("VISION_CENTER")).toInt();
     g_BUILD_CENTER_WOOD = config.value(QStringLiteral("BUILD_CENTER_WOOD")).toInt();
@@ -3154,7 +3154,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_BUILD_FARM_WOOD = config.value(QStringLiteral("BUILD_FARM_WOOD")).toInt();
     g_TIME_BUILD_FARM = config.value(QStringLiteral("TIME_BUILD_FARM")).toInt();
     g_BLOOD_BUILD_ARROWTOWER = config.value(QStringLiteral("BLOOD_BUILD_ARROWTOWER")).toInt();
-    g_VISION_ARROWTOWER = config.value(QStringLiteral("VISION_ARROWTOWER")).toDouble();
+    g_VISION_ARROWTOWER = Double::FromDouble(config.value(QStringLiteral("VISION_ARROWTOWER")).toDouble());
     g_DIS_BUILD_ARROWTOWER = config.value(QStringLiteral("DIS_BUILD_ARROWTOWER")).toInt();
     g_ATK_BUILD_ARROWTOWER = config.value(QStringLiteral("ATK_BUILD_ARROWTOWER")).toInt();
     g_DEFSHOOT_BUILD_ARROWTOWER = config.value(QStringLiteral("DEFSHOOT_BUILD_ARROWTOWER")).toInt();
@@ -3164,177 +3164,177 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_DEFSHOOT_BUILD_WALL = config.value(QStringLiteral("DEFSHOOT_BUILD_WALL")).toInt();
     g_BUILD_WALL_STONE = config.value(QStringLiteral("BUILD_WALL_STONE")).toInt();
     g_TIME_BUILD_WALL = config.value(QStringLiteral("TIME_BUILD_WALL")).toInt();
-    g_DISTANCE_Manhattan_MoveEndNEAR = config.value(QStringLiteral("DISTANCE_Manhattan_MoveEndNEAR")).toDouble();
-    g_DISTANCE_Manhattan_PathMove = config.value(QStringLiteral("DISTANCE_Manhattan_PathMove")).toDouble();
-    g_DISTANCE_Manhattan_Unload = config.value(QStringLiteral("DISTANCE_Manhattan_Unload")).toDouble();
-    g_DISTANCE_Manhattan_Transport = config.value(QStringLiteral("DISTANCE_Manhattan_Transport")).toDouble();
-    g_DISTANCE_ATTACK_CLOSE = config.value(QStringLiteral("DISTANCE_ATTACK_CLOSE")).toDouble();
-    g_DISTANCE_HIT_TARGET = config.value(QStringLiteral("DISTANCE_HIT_TARGET")).toDouble();
-    g_DISTANCE_ELEPHANT_ATTACK = config.value(QStringLiteral("DISTANCE_ELEPHANT_ATTACK")).toDouble();
-    g_SHIP_ACT_MAX_DISTANCE = config.value(QStringLiteral("SHIP_ACT_MAX_DISTANCE")).toDouble();
-    g_DIS_ARROWTOWER = config.value(QStringLiteral("DIS_ARROWTOWER")).toDouble();
-    g_SPEED_CLUBMAN1 = config.value(QStringLiteral("SPEED_CLUBMAN1")).toDouble();
+    g_DISTANCE_Manhattan_MoveEndNEAR = Double::FromDouble(config.value(QStringLiteral("DISTANCE_Manhattan_MoveEndNEAR")).toDouble());
+    g_DISTANCE_Manhattan_PathMove = Double::FromDouble(config.value(QStringLiteral("DISTANCE_Manhattan_PathMove")).toDouble());
+    g_DISTANCE_Manhattan_Unload = Double::FromDouble(config.value(QStringLiteral("DISTANCE_Manhattan_Unload")).toDouble());
+    g_DISTANCE_Manhattan_Transport = Double::FromDouble(config.value(QStringLiteral("DISTANCE_Manhattan_Transport")).toDouble());
+    g_DISTANCE_ATTACK_CLOSE = Double::FromDouble(config.value(QStringLiteral("DISTANCE_ATTACK_CLOSE")).toDouble());
+    g_DISTANCE_HIT_TARGET = Double::FromDouble(config.value(QStringLiteral("DISTANCE_HIT_TARGET")).toDouble());
+    g_DISTANCE_ELEPHANT_ATTACK = Double::FromDouble(config.value(QStringLiteral("DISTANCE_ELEPHANT_ATTACK")).toDouble());
+    g_SHIP_ACT_MAX_DISTANCE = Double::FromDouble(config.value(QStringLiteral("SHIP_ACT_MAX_DISTANCE")).toDouble());
+    g_DIS_ARROWTOWER = Double::FromDouble(config.value(QStringLiteral("DIS_ARROWTOWER")).toDouble());
+    g_SPEED_CLUBMAN1 = Double::FromDouble(config.value(QStringLiteral("SPEED_CLUBMAN1")).toDouble());
     g_VISION_CLUBMAN1 = config.value(QStringLiteral("VISION_CLUBMAN1")).toInt();
     g_DIS_CLUBMAN1 = config.value(QStringLiteral("DIS_CLUBMAN1")).toInt();
-    g_INTERVAL_CLUBMAN1 = config.value(QStringLiteral("INTERVAL_CLUBMAN1")).toDouble();
+    g_INTERVAL_CLUBMAN1 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_CLUBMAN1")).toDouble());
     g_ATK_CLUBMAN1 = config.value(QStringLiteral("ATK_CLUBMAN1")).toInt();
     g_DEFCLOSE_CLUBMAN1 = config.value(QStringLiteral("DEFCLOSE_CLUBMAN1")).toInt();
     g_DEFSHOOT_CLUBMAN1 = config.value(QStringLiteral("DEFSHOOT_CLUBMAN1")).toInt();
     g_BLOOD_CLUBMAN1 = config.value(QStringLiteral("BLOOD_CLUBMAN1")).toInt();
     g_BLOOD_CLUBMAN2 = config.value(QStringLiteral("BLOOD_CLUBMAN2")).toInt();
-    g_SPEED_CLUBMAN2 = config.value(QStringLiteral("SPEED_CLUBMAN2")).toDouble();
+    g_SPEED_CLUBMAN2 = Double::FromDouble(config.value(QStringLiteral("SPEED_CLUBMAN2")).toDouble());
     g_VISION_CLUBMAN2 = config.value(QStringLiteral("VISION_CLUBMAN2")).toInt();
     g_DIS_CLUBMAN2 = config.value(QStringLiteral("DIS_CLUBMAN2")).toInt();
-    g_INTERVAL_CLUBMAN2 = config.value(QStringLiteral("INTERVAL_CLUBMAN2")).toDouble();
+    g_INTERVAL_CLUBMAN2 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_CLUBMAN2")).toDouble());
     g_ATK_CLUBMAN2 = config.value(QStringLiteral("ATK_CLUBMAN2")).toInt();
     g_DEFCLOSE_CLUBMAN2 = config.value(QStringLiteral("DEFCLOSE_CLUBMAN2")).toInt();
     g_DEFSHOOT_CLUBMAN2 = config.value(QStringLiteral("DEFSHOOT_CLUBMAN2")).toInt();
     g_BLOOD_SHORTSWORDSMAN1 = config.value(QStringLiteral("BLOOD_SHORTSWORDSMAN1")).toInt();
-    g_SPEED_SHORTSWORDSMAN1 = config.value(QStringLiteral("SPEED_SHORTSWORDSMAN1")).toDouble();
+    g_SPEED_SHORTSWORDSMAN1 = Double::FromDouble(config.value(QStringLiteral("SPEED_SHORTSWORDSMAN1")).toDouble());
     g_VISION_SHORTSWORDSMAN1 = config.value(QStringLiteral("VISION_SHORTSWORDSMAN1")).toInt();
     g_DIS_SHORTSWORDSMAN1 = config.value(QStringLiteral("DIS_SHORTSWORDSMAN1")).toInt();
-    g_INTERVAL_SHORTSWORDSMAN1 = config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN1")).toDouble();
+    g_INTERVAL_SHORTSWORDSMAN1 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN1")).toDouble());
     g_ATK_SHORTSWORSMAN1 = config.value(QStringLiteral("ATK_SHORTSWORSMAN1")).toInt();
     g_DEFCLOSE_SHORTSWORSMAN1 = config.value(QStringLiteral("DEFCLOSE_SHORTSWORSMAN1")).toInt();
     g_DEFSHOOT_SHORTSWORSMAN1 = config.value(QStringLiteral("DEFSHOOT_SHORTSWORSMAN1")).toInt();
     g_BLOOD_SHORTSWORDSMAN2 = config.value(QStringLiteral("BLOOD_SHORTSWORDSMAN2")).toInt();
-    g_SPEED_SHORTSWORDSMAN2 = config.value(QStringLiteral("SPEED_SHORTSWORDSMAN2")).toDouble();
+    g_SPEED_SHORTSWORDSMAN2 = Double::FromDouble(config.value(QStringLiteral("SPEED_SHORTSWORDSMAN2")).toDouble());
     g_VISION_SHORTSWORDSMAN2 = config.value(QStringLiteral("VISION_SHORTSWORDSMAN2")).toInt();
     g_DIS_SHORTSWORDSMAN2 = config.value(QStringLiteral("DIS_SHORTSWORDSMAN2")).toInt();
-    g_INTERVAL_SHORTSWORDSMAN2 = config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN2")).toDouble();
+    g_INTERVAL_SHORTSWORDSMAN2 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN2")).toDouble());
     g_ATK_SHORTSWORSMAN2 = config.value(QStringLiteral("ATK_SHORTSWORSMAN2")).toInt();
     g_DEFCLOSE_SHORTSWORSMAN2 = config.value(QStringLiteral("DEFCLOSE_SHORTSWORSMAN2")).toInt();
     g_DEFSHOOT_SHORTSWORSMAN2 = config.value(QStringLiteral("DEFSHOOT_SHORTSWORSMAN2")).toInt();
     g_BLOOD_SHORTSWORDSMAN3 = config.value(QStringLiteral("BLOOD_SHORTSWORDSMAN3")).toInt();
-    g_SPEED_SHORTSWORDSMAN3 = config.value(QStringLiteral("SPEED_SHORTSWORDSMAN3")).toDouble();
+    g_SPEED_SHORTSWORDSMAN3 = Double::FromDouble(config.value(QStringLiteral("SPEED_SHORTSWORDSMAN3")).toDouble());
     g_VISION_SHORTSWORDSMAN3 = config.value(QStringLiteral("VISION_SHORTSWORDSMAN3")).toInt();
     g_DIS_SHORTSWORDSMAN3 = config.value(QStringLiteral("DIS_SHORTSWORDSMAN3")).toInt();
-    g_INTERVAL_SHORTSWORDSMAN3 = config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN3")).toDouble();
+    g_INTERVAL_SHORTSWORDSMAN3 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN3")).toDouble());
     g_ATK_SHORTSWORSMAN3 = config.value(QStringLiteral("ATK_SHORTSWORSMAN3")).toInt();
     g_DEFCLOSE_SHORTSWORSMAN3 = config.value(QStringLiteral("DEFCLOSE_SHORTSWORSMAN3")).toInt();
     g_DEFSHOOT_SHORTSWORSMAN3 = config.value(QStringLiteral("DEFSHOOT_SHORTSWORSMAN3")).toInt();
     g_BLOOD_SHORTSWORDSMAN4 = config.value(QStringLiteral("BLOOD_SHORTSWORDSMAN4")).toInt();
-    g_SPEED_SHORTSWORDSMAN4 = config.value(QStringLiteral("SPEED_SHORTSWORDSMAN4")).toDouble();
+    g_SPEED_SHORTSWORDSMAN4 = Double::FromDouble(config.value(QStringLiteral("SPEED_SHORTSWORDSMAN4")).toDouble());
     g_VISION_SHORTSWORDSMAN4 = config.value(QStringLiteral("VISION_SHORTSWORDSMAN4")).toInt();
     g_DIS_SHORTSWORDSMAN4 = config.value(QStringLiteral("DIS_SHORTSWORDSMAN4")).toInt();
-    g_INTERVAL_SHORTSWORDSMAN4 = config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN4")).toDouble();
+    g_INTERVAL_SHORTSWORDSMAN4 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SHORTSWORDSMAN4")).toDouble());
     g_ATK_SHORTSWORSMAN4 = config.value(QStringLiteral("ATK_SHORTSWORSMAN4")).toInt();
     g_DEFCLOSE_SHORTSWORSMAN4 = config.value(QStringLiteral("DEFCLOSE_SHORTSWORSMAN4")).toInt();
     g_DEFSHOOT_SHORTSWORSMAN4 = config.value(QStringLiteral("DEFSHOOT_SHORTSWORSMAN4")).toInt();
     g_BLOOD_BROADSWORDSMAN = config.value(QStringLiteral("BLOOD_BROADSWORDSMAN")).toInt();
-    g_SPEED_BROADSWORDSMAN = config.value(QStringLiteral("SPEED_BROADSWORDSMAN")).toDouble();
+    g_SPEED_BROADSWORDSMAN = Double::FromDouble(config.value(QStringLiteral("SPEED_BROADSWORDSMAN")).toDouble());
     g_VISION_BROADSWORDSMAN = config.value(QStringLiteral("VISION_BROADSWORDSMAN")).toInt();
     g_ATK_BROADSWORDSMAN = config.value(QStringLiteral("ATK_BROADSWORDSMAN")).toInt();
-    g_DIS_BROADSWORDSMAN = config.value(QStringLiteral("DIS_BROADSWORDSMAN")).toDouble();
-    g_INTERVAL_BROADSWORDSMAN = config.value(QStringLiteral("INTERVAL_BROADSWORDSMAN")).toDouble();
+    g_DIS_BROADSWORDSMAN = Double::FromDouble(config.value(QStringLiteral("DIS_BROADSWORDSMAN")).toDouble());
+    g_INTERVAL_BROADSWORDSMAN = Double::FromDouble(config.value(QStringLiteral("INTERVAL_BROADSWORDSMAN")).toDouble());
     g_DEFCLOSE_BROADSWORDSMAN = config.value(QStringLiteral("DEFCLOSE_BROADSWORDSMAN")).toInt();
     g_DEFSHOOT_BROADSWORDSMAN = config.value(QStringLiteral("DEFSHOOT_BROADSWORDSMAN")).toInt();
     g_NOWRES_TIMER_BROADSWORDSMAN = config.value(QStringLiteral("NOWRES_TIMER_BROADSWORDSMAN")).toInt();
     g_BLOOD_SLINGER = config.value(QStringLiteral("BLOOD_SLINGER")).toInt();
-    g_SPEED_SLINGER = config.value(QStringLiteral("SPEED_SLINGER")).toDouble();
+    g_SPEED_SLINGER = Double::FromDouble(config.value(QStringLiteral("SPEED_SLINGER")).toDouble());
     g_VISION_SLINGER = config.value(QStringLiteral("VISION_SLINGER")).toInt();
     g_DIS_SLINGER = config.value(QStringLiteral("DIS_SLINGER")).toInt();
-    g_INTERVAL_SLINGER = config.value(QStringLiteral("INTERVAL_SLINGER")).toDouble();
+    g_INTERVAL_SLINGER = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SLINGER")).toDouble());
     g_ATK_SLINGER = config.value(QStringLiteral("ATK_SLINGER")).toInt();
     g_DEFCLOSE_SLINGER = config.value(QStringLiteral("DEFCLOSE_SLINGER")).toInt();
     g_DEFSHOOT_SLINGER = config.value(QStringLiteral("DEFSHOOT_SLINGER")).toInt();
     g_BLOOD_BOWMAN = config.value(QStringLiteral("BLOOD_BOWMAN")).toInt();
-    g_SPEED_BOWMAN = config.value(QStringLiteral("SPEED_BOWMAN")).toDouble();
+    g_SPEED_BOWMAN = Double::FromDouble(config.value(QStringLiteral("SPEED_BOWMAN")).toDouble());
     g_VISION_BOWMAN = config.value(QStringLiteral("VISION_BOWMAN")).toInt();
     g_DIS_BOWMAN = config.value(QStringLiteral("DIS_BOWMAN")).toInt();
-    g_INTERVAL_BOWMAN = config.value(QStringLiteral("INTERVAL_BOWMAN")).toDouble();
+    g_INTERVAL_BOWMAN = Double::FromDouble(config.value(QStringLiteral("INTERVAL_BOWMAN")).toDouble());
     g_ATK_BOWMAN = config.value(QStringLiteral("ATK_BOWMAN")).toInt();
     g_DEFCLOSE_BOWMAN = config.value(QStringLiteral("DEFCLOSE_BOWMAN")).toInt();
     g_DEFSHOOT_BOWMAN = config.value(QStringLiteral("DEFSHOOT_BOWMAN")).toInt();
     g_BLOOD_COMPOSITE_BOWMAN = config.value(QStringLiteral("BLOOD_COMPOSITE_BOWMAN")).toInt();
-    g_SPEED_COMPOSITE_BOWMAN = config.value(QStringLiteral("SPEED_COMPOSITE_BOWMAN")).toDouble();
+    g_SPEED_COMPOSITE_BOWMAN = Double::FromDouble(config.value(QStringLiteral("SPEED_COMPOSITE_BOWMAN")).toDouble());
     g_VISION_COMPOSITE_BOWMAN = config.value(QStringLiteral("VISION_COMPOSITE_BOWMAN")).toInt();
     g_ATK_COMPOSITE_BOWMAN = config.value(QStringLiteral("ATK_COMPOSITE_BOWMAN")).toInt();
-    g_DIS_COMPOSITE_BOWMAN = config.value(QStringLiteral("DIS_COMPOSITE_BOWMAN")).toDouble();
-    g_INTERVAL_COMPOSITE_BOWMAN = config.value(QStringLiteral("INTERVAL_COMPOSITE_BOWMAN")).toDouble();
+    g_DIS_COMPOSITE_BOWMAN = Double::FromDouble(config.value(QStringLiteral("DIS_COMPOSITE_BOWMAN")).toDouble());
+    g_INTERVAL_COMPOSITE_BOWMAN = Double::FromDouble(config.value(QStringLiteral("INTERVAL_COMPOSITE_BOWMAN")).toDouble());
     g_DEFCLOSE_COMPOSITE_BOWMAN = config.value(QStringLiteral("DEFCLOSE_COMPOSITE_BOWMAN")).toInt();
     g_DEFSHOOT_COMPOSITE_BOWMAN = config.value(QStringLiteral("DEFSHOOT_COMPOSITE_BOWMAN")).toInt();
     g_NOWRES_TIMER_COMPOSITE_BOWMAN = config.value(QStringLiteral("NOWRES_TIMER_COMPOSITE_BOWMAN")).toInt();
     g_BLOOD_CHARIOT_ARCHER = config.value(QStringLiteral("BLOOD_CHARIOT_ARCHER")).toInt();
-    g_SPEED_CHARIOT_ARCHER = config.value(QStringLiteral("SPEED_CHARIOT_ARCHER")).toDouble();
+    g_SPEED_CHARIOT_ARCHER = Double::FromDouble(config.value(QStringLiteral("SPEED_CHARIOT_ARCHER")).toDouble());
     g_VISION_CHARIOT_ARCHER = config.value(QStringLiteral("VISION_CHARIOT_ARCHER")).toInt();
     g_ATK_CHARIOT_ARCHER = config.value(QStringLiteral("ATK_CHARIOT_ARCHER")).toInt();
-    g_DIS_CHARIOT_ARCHER = config.value(QStringLiteral("DIS_CHARIOT_ARCHER")).toDouble();
-    g_INTERVAL_CHARIOT_ARCHER = config.value(QStringLiteral("INTERVAL_CHARIOT_ARCHER")).toDouble();
+    g_DIS_CHARIOT_ARCHER = Double::FromDouble(config.value(QStringLiteral("DIS_CHARIOT_ARCHER")).toDouble());
+    g_INTERVAL_CHARIOT_ARCHER = Double::FromDouble(config.value(QStringLiteral("INTERVAL_CHARIOT_ARCHER")).toDouble());
     g_DEFCLOSE_CHARIOT_ARCHER = config.value(QStringLiteral("DEFCLOSE_CHARIOT_ARCHER")).toInt();
     g_DEFSHOOT_CHARIOT_ARCHER = config.value(QStringLiteral("DEFSHOOT_CHARIOT_ARCHER")).toInt();
     g_NOWRES_TIMER_CHARIOT_ARCHER = config.value(QStringLiteral("NOWRES_TIMER_CHARIOT_ARCHER")).toInt();
     g_BLOOD_IMPROVEDBOWMAN1 = config.value(QStringLiteral("BLOOD_IMPROVEDBOWMAN1")).toInt();
-    g_SPEED_IMPROVEDBOWMAN1 = config.value(QStringLiteral("SPEED_IMPROVEDBOWMAN1")).toDouble();
+    g_SPEED_IMPROVEDBOWMAN1 = Double::FromDouble(config.value(QStringLiteral("SPEED_IMPROVEDBOWMAN1")).toDouble());
     g_VISION_IMPROVEDBOWMAN1 = config.value(QStringLiteral("VISION_IMPROVEDBOWMAN1")).toInt();
     g_DIS_IMPROVEDBOWMAN1 = config.value(QStringLiteral("DIS_IMPROVEDBOWMAN1")).toInt();
-    g_INTERVAL_IMPROVEDBOWMAN1 = config.value(QStringLiteral("INTERVAL_IMPROVEDBOWMAN1")).toDouble();
+    g_INTERVAL_IMPROVEDBOWMAN1 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_IMPROVEDBOWMAN1")).toDouble());
     g_ATK_IMPROVEDBOWMAN1 = config.value(QStringLiteral("ATK_IMPROVEDBOWMAN1")).toInt();
     g_DEFCLOSE_IMPROVEDBOWMAN1 = config.value(QStringLiteral("DEFCLOSE_IMPROVEDBOWMAN1")).toInt();
     g_DEFSHOOT_IMPROVEDBOWMAN1 = config.value(QStringLiteral("DEFSHOOT_IMPROVEDBOWMAN1")).toInt();
     g_BLOOD_IMPROVEDBOWMAN2 = config.value(QStringLiteral("BLOOD_IMPROVEDBOWMAN2")).toInt();
-    g_SPEED_IMPROVEDBOWMAN2 = config.value(QStringLiteral("SPEED_IMPROVEDBOWMAN2")).toDouble();
+    g_SPEED_IMPROVEDBOWMAN2 = Double::FromDouble(config.value(QStringLiteral("SPEED_IMPROVEDBOWMAN2")).toDouble());
     g_VISION_IMPROVEDBOWMAN2 = config.value(QStringLiteral("VISION_IMPROVEDBOWMAN2")).toInt();
     g_DIS_IMPROVEDBOWMAN2 = config.value(QStringLiteral("DIS_IMPROVEDBOWMAN2")).toInt();
-    g_INTERVAL_IMPROVEDBOWMAN2 = config.value(QStringLiteral("INTERVAL_IMPROVEDBOWMAN2")).toDouble();
+    g_INTERVAL_IMPROVEDBOWMAN2 = Double::FromDouble(config.value(QStringLiteral("INTERVAL_IMPROVEDBOWMAN2")).toDouble());
     g_ATK_IMPROVEDBOWMAN2 = config.value(QStringLiteral("ATK_IMPROVEDBOWMAN2")).toInt();
     g_DEFCLOSE_IMPROVEDBOWMAN2 = config.value(QStringLiteral("DEFCLOSE_IMPROVEDBOWMAN2")).toInt();
     g_DEFSHOOT_IMPROVEDBOWMAN2 = config.value(QStringLiteral("DEFSHOOT_IMPROVEDBOWMAN2")).toInt();
     g_BLOOD_SCOUT = config.value(QStringLiteral("BLOOD_SCOUT")).toInt();
-    g_SPEED_SCOUT = config.value(QStringLiteral("SPEED_SCOUT")).toDouble();
+    g_SPEED_SCOUT = Double::FromDouble(config.value(QStringLiteral("SPEED_SCOUT")).toDouble());
     g_VISION_SCOUT = config.value(QStringLiteral("VISION_SCOUT")).toInt();
     g_DIS_SCOUT = config.value(QStringLiteral("DIS_SCOUT")).toInt();
-    g_INTERVAL_SCOUT = config.value(QStringLiteral("INTERVAL_SCOUT")).toDouble();
+    g_INTERVAL_SCOUT = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SCOUT")).toDouble());
     g_ATK_SCOUT = config.value(QStringLiteral("ATK_SCOUT")).toInt();
     g_DEFCLOSE_SCOUT = config.value(QStringLiteral("DEFCLOSE_SCOUT")).toInt();
     g_DEFSHOOT_SCOUT = config.value(QStringLiteral("DEFSHOOT_SCOUT")).toInt();
     g_BLOOD_CHARIOT = config.value(QStringLiteral("BLOOD_CHARIOT")).toInt();
-    g_SPEED_CHARIOT = config.value(QStringLiteral("SPEED_CHARIOT")).toDouble();
+    g_SPEED_CHARIOT = Double::FromDouble(config.value(QStringLiteral("SPEED_CHARIOT")).toDouble());
     g_VISION_CHARIOT = config.value(QStringLiteral("VISION_CHARIOT")).toInt();
     g_ATK_CHARIOT = config.value(QStringLiteral("ATK_CHARIOT")).toInt();
-    g_DIS_CHARIOT = config.value(QStringLiteral("DIS_CHARIOT")).toDouble();
-    g_INTERVAL_CHARIOT = config.value(QStringLiteral("INTERVAL_CHARIOT")).toDouble();
+    g_DIS_CHARIOT = Double::FromDouble(config.value(QStringLiteral("DIS_CHARIOT")).toDouble());
+    g_INTERVAL_CHARIOT = Double::FromDouble(config.value(QStringLiteral("INTERVAL_CHARIOT")).toDouble());
     g_DEFCLOSE_CHARIOT = config.value(QStringLiteral("DEFCLOSE_CHARIOT")).toInt();
     g_DEFSHOOT_CHARIOT = config.value(QStringLiteral("DEFSHOOT_CHARIOT")).toInt();
     g_NOWRES_TIMER_CHARIOT = config.value(QStringLiteral("NOWRES_TIMER_CHARIOT")).toInt();
     g_BLOOD_CAVALRY = config.value(QStringLiteral("BLOOD_CAVALRY")).toInt();
-    g_SPEED_CAVALRY = config.value(QStringLiteral("SPEED_CAVALRY")).toDouble();
+    g_SPEED_CAVALRY = Double::FromDouble(config.value(QStringLiteral("SPEED_CAVALRY")).toDouble());
     g_VISION_CAVALRY = config.value(QStringLiteral("VISION_CAVALRY")).toInt();
     g_DIS_CAVALRY = config.value(QStringLiteral("DIS_CAVALRY")).toInt();
-    g_INTERVAL_CAVALRY = config.value(QStringLiteral("INTERVAL_CAVALRY")).toDouble();
+    g_INTERVAL_CAVALRY = Double::FromDouble(config.value(QStringLiteral("INTERVAL_CAVALRY")).toDouble());
     g_ATK_CAVALRY = config.value(QStringLiteral("ATK_CAVALRY")).toInt();
     g_DEFCLOSE_CAVALRY = config.value(QStringLiteral("DEFCLOSE_CAVALRY")).toInt();
     g_DEFSHOOT_CAVALRY = config.value(QStringLiteral("DEFSHOOT_CAVALRY")).toInt();
     g_BLOOD_SHIP = config.value(QStringLiteral("BLOOD_SHIP")).toInt();
-    g_SPEED_SHIP = config.value(QStringLiteral("SPEED_SHIP")).toDouble();
+    g_SPEED_SHIP = Double::FromDouble(config.value(QStringLiteral("SPEED_SHIP")).toDouble());
     g_VISION_SHIP = config.value(QStringLiteral("VISION_SHIP")).toInt();
     g_ATK_SHIP = config.value(QStringLiteral("ATK_SHIP")).toInt();
-    g_DIS_SHIP = config.value(QStringLiteral("DIS_SHIP")).toDouble();
+    g_DIS_SHIP = Double::FromDouble(config.value(QStringLiteral("DIS_SHIP")).toDouble());
     g_INTERVAL_SHIP = config.value(QStringLiteral("INTERVAL_SHIP")).toInt();
     g_DEFCLOSE_SHIP = config.value(QStringLiteral("DEFCLOSE_SHIP")).toInt();
     g_DEFSHOOT_SHIP = config.value(QStringLiteral("DEFSHOOT_SHIP")).toInt();
     g_BLOOD_STONE_THROWER = config.value(QStringLiteral("BLOOD_STONE_THROWER")).toInt();
-    g_SPEED_STONE_THROWER = config.value(QStringLiteral("SPEED_STONE_THROWER")).toDouble();
+    g_SPEED_STONE_THROWER = Double::FromDouble(config.value(QStringLiteral("SPEED_STONE_THROWER")).toDouble());
     g_VISION_STONE_THROWER = config.value(QStringLiteral("VISION_STONE_THROWER")).toInt();
     g_ATK_STONE_THROWER = config.value(QStringLiteral("ATK_STONE_THROWER")).toInt();
-    g_DIS_STONE_THROWER = config.value(QStringLiteral("DIS_STONE_THROWER")).toDouble();
-    g_DIS_MIN_STONE_THROWER = config.value(QStringLiteral("DIS_MIN_STONE_THROWER")).toDouble();
+    g_DIS_STONE_THROWER = Double::FromDouble(config.value(QStringLiteral("DIS_STONE_THROWER")).toDouble());
+    g_DIS_MIN_STONE_THROWER = Double::FromDouble(config.value(QStringLiteral("DIS_MIN_STONE_THROWER")).toDouble());
     g_INTERVAL_STONE_THROWER = config.value(QStringLiteral("INTERVAL_STONE_THROWER")).toInt();
     g_DEFCLOSE_STONE_THROWER = config.value(QStringLiteral("DEFCLOSE_STONE_THROWER")).toInt();
     g_DEFSHOOT_STONE_THROWER = config.value(QStringLiteral("DEFSHOOT_STONE_THROWER")).toInt();
     g_BLOOD_PRIEST = config.value(QStringLiteral("BLOOD_PRIEST")).toInt();
-    g_SPEED_PRIEST = config.value(QStringLiteral("SPEED_PRIEST")).toDouble();
+    g_SPEED_PRIEST = Double::FromDouble(config.value(QStringLiteral("SPEED_PRIEST")).toDouble());
     g_VISION_PRIEST = config.value(QStringLiteral("VISION_PRIEST")).toInt();
     g_ATK_PRIEST = config.value(QStringLiteral("ATK_PRIEST")).toInt();
-    g_DIS_PRIEST = config.value(QStringLiteral("DIS_PRIEST")).toDouble();
+    g_DIS_PRIEST = Double::FromDouble(config.value(QStringLiteral("DIS_PRIEST")).toDouble());
     g_INTERVAL_PRIEST = config.value(QStringLiteral("INTERVAL_PRIEST")).toInt();
     g_DEFCLOSE_PRIEST = config.value(QStringLiteral("DEFCLOSE_PRIEST")).toInt();
     g_DEFSHOOT_PRIEST = config.value(QStringLiteral("DEFSHOOT_PRIEST")).toInt();
-    g_Missile_Speed_Spear = config.value(QStringLiteral("Missile_Speed_Spear")).toDouble();
-    g_Missile_Speed_Arrow = config.value(QStringLiteral("Missile_Speed_Arrow")).toDouble();
-    g_Missile_Speed_Cobblestone = config.value(QStringLiteral("Missile_Speed_Cobblestone")).toDouble();
-    g_Missile_Speed_Boulders = config.value(QStringLiteral("Missile_Speed_Boulders")).toDouble();
-    g_Missile_Boulders_Range = config.value(QStringLiteral("Missile_Boulders_Range")).toDouble();
+    g_Missile_Speed_Spear = Double::FromDouble(config.value(QStringLiteral("Missile_Speed_Spear")).toDouble());
+    g_Missile_Speed_Arrow = Double::FromDouble(config.value(QStringLiteral("Missile_Speed_Arrow")).toDouble());
+    g_Missile_Speed_Cobblestone = Double::FromDouble(config.value(QStringLiteral("Missile_Speed_Cobblestone")).toDouble());
+    g_Missile_Speed_Boulders = Double::FromDouble(config.value(QStringLiteral("Missile_Speed_Boulders")).toDouble());
+    g_Missile_Boulders_Range = Double::FromDouble(config.value(QStringLiteral("Missile_Boulders_Range")).toDouble());
     g_NOWRES_TIMER_FARMER = config.value(QStringLiteral("NOWRES_TIMER_FARMER")).toInt();
     g_NOWRES_TIMER_CLUBMAN = config.value(QStringLiteral("NOWRES_TIMER_CLUBMAN")).toInt();
     g_NOWRES_TIMER_BOWMAN = config.value(QStringLiteral("NOWRES_TIMER_BOWMAN")).toInt();
@@ -3350,11 +3350,11 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_NOWRES_TIMER_PRIEST = config.value(QStringLiteral("NOWRES_TIMER_PRIEST")).toInt();
     g_PRIEST_REST_TIME = config.value(QStringLiteral("PRIEST_REST_TIME")).toInt();
     g_BLOOD_HOPLITE = config.value(QStringLiteral("BLOOD_HOPLITE")).toInt();
-    g_SPEED_HOPLITE = config.value(QStringLiteral("SPEED_HOPLITE")).toDouble();
+    g_SPEED_HOPLITE = Double::FromDouble(config.value(QStringLiteral("SPEED_HOPLITE")).toDouble());
     g_VISION_HOPLITE = config.value(QStringLiteral("VISION_HOPLITE")).toInt();
     g_ATK_HOPLITE = config.value(QStringLiteral("ATK_HOPLITE")).toInt();
-    g_DIS_HOPLITE = config.value(QStringLiteral("DIS_HOPLITE")).toDouble();
-    g_INTERVAL_HOPLITE = config.value(QStringLiteral("INTERVAL_HOPLITE")).toDouble();
+    g_DIS_HOPLITE = Double::FromDouble(config.value(QStringLiteral("DIS_HOPLITE")).toDouble());
+    g_INTERVAL_HOPLITE = Double::FromDouble(config.value(QStringLiteral("INTERVAL_HOPLITE")).toDouble());
     g_DEFCLOSE_HOPLITE = config.value(QStringLiteral("DEFCLOSE_HOPLITE")).toInt();
     g_DEFSHOOT_HOPLITE = config.value(QStringLiteral("DEFSHOOT_HOPLITE")).toInt();
     g_NOWRES_TIMER_HOPLITE = config.value(QStringLiteral("NOWRES_TIMER_HOPLITE")).toInt();
@@ -3362,7 +3362,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_DefaultCivilization = config.value(QStringLiteral("DefaultCivilization")).toInt();
     g_EnemyTechnologyMaxCivilization = config.value(QStringLiteral("EnemyTechnologyMaxCivilization")).toInt();
     g_OffScreen = config.value(QStringLiteral("OffScreen")).toBool();
-    g_MUSIC_VOLUME = config.value(QStringLiteral("MUSIC_VOLUME")).toDouble();
+    g_MUSIC_VOLUME = Double::FromDouble(config.value(QStringLiteral("MUSIC_VOLUME")).toDouble());
     g_PLAYER_DISABLED_BUILDINGS.clear();
     const QJsonValue disabledBuildingsVal = config.value(QStringLiteral("PLAYER_DISABLED_BUILDINGS"));
     if (disabledBuildingsVal.isArray()) {

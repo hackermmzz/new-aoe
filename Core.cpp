@@ -65,13 +65,13 @@ void Core::ResetHumanPos(){
     auto ResetLandUnit=[&](MoveObject&obj)->void{
         if(theMap->cell[obj.BlockDR][obj.BlockUR].getMapType()==MAPTYPE_OCEAN){
             Point&&p=obj.get_PreviousBlock();
-            obj.ForceStand((p.x+0.5)*BLOCKSIDELENGTH,(p.y+0.5)*BLOCKSIDELENGTH);
+            obj.ForceStand((p.x+Double("0.5"))*BLOCKSIDELENGTH,(p.y+Double("0.5"))*BLOCKSIDELENGTH);
         }
     };
     auto ResetOceanUnit=[&](MoveObject&obj)->void{
         if(theMap->cell[obj.BlockDR][obj.BlockUR].getMapType()!=MAPTYPE_OCEAN){
             Point&&p=obj.get_PreviousBlock();
-            obj.ForceStand((p.x+0.5)*BLOCKSIDELENGTH,(p.y+0.5)*BLOCKSIDELENGTH);
+            obj.ForceStand((p.x+Double("0.5"))*BLOCKSIDELENGTH,(p.y+Double("0.5"))*BLOCKSIDELENGTH);
         }
     };
     auto ResetPos=[&](MoveObject&obj)->void{
@@ -136,6 +136,7 @@ void Core::updateByObject()
 
             if ((*humaniter)->getBlockDR() != INT_MAX && (*humaniter)->getBlockUR() != INT_MAX)
             {
+                static Double Val16Gen5=Double(16)*gen5;
                 // 更新人物Y轴偏移（伪三维）
                 Human* theHuman = (*humaniter);
                 int blockDR = theHuman->getBlockDR(), blockUR = theHuman->getBlockUR();
@@ -152,38 +153,38 @@ void Core::updateByObject()
 
                     // 判断mapType以确定上升方向
                     int curMapType = theMap->cell[blockDR][blockUR].getMapType();
-                    pair<double, double> curHumanCoor = { theHuman->getDR(), theHuman->getUR() };   // 当前人物细节坐标
-                    pair<double, double> curBlockCoor = { blockDR * BLOCKSIDELENGTH, blockUR * BLOCKSIDELENGTH }; // 当前人物所在格（最左端的）细节坐标
+                    pair<Double, Double> curHumanCoor = { theHuman->getDR(), theHuman->getUR() };   // 当前人物细节坐标
+                    pair<Double, Double> curBlockCoor = { blockDR * BLOCKSIDELENGTH, blockUR * BLOCKSIDELENGTH }; // 当前人物所在格（最左端的）细节坐标
 
                     // 左高右低：
                     if (curMapType == MAPTYPE_L1_UPTOLU || curMapType == MAPTYPE_A1_UPTOL || curMapType == MAPTYPE_A3_DOWNTOR || curMapType == MAPTYPE_L0_UPTOLD)
                     {
-                        double leftOffsetPercent = fabs((16.0 * gen5 - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5));
-                        if (leftOffsetPercent > 1) leftOffsetPercent = 1;
+                        Double leftOffsetPercent = abs(Val16Gen5 - (curHumanCoor.first - curBlockCoor.first)) / Val16Gen5;
+                        if (leftOffsetPercent > Double(1)) leftOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent);
                         //qDebug() << "左高右低，leftOffsetPercent == " << leftOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * leftOffsetPercent;
                     }
                     // 右高左低：
                     else if (curMapType == MAPTYPE_L2_UPTORU || curMapType == MAPTYPE_A3_UPTOR || curMapType == MAPTYPE_A1_DOWNTOL || curMapType == MAPTYPE_L3_UPTORD)
                     {
-                        double rightOffsetPercent = fabs((curHumanCoor.second - curBlockCoor.second) / (16.0 * gen5));
-                        if (rightOffsetPercent > 1) rightOffsetPercent = 1;
+                        Double rightOffsetPercent = abs(curHumanCoor.second - curBlockCoor.second) / Val16Gen5;
+                        if (rightOffsetPercent > Double(1)) rightOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent);
                         //qDebug() << "右高左低， rightOfsetPercent == " << rightOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * rightOffsetPercent;
                     }
                     // 下高上低：
                     else if (curMapType == MAPTYPE_A0_UPTOD || curMapType == MAPTYPE_A2_DOWNTOU)
                     {
-                        double downOffsetPercent = (16.0 * gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / (16.0 * gen5);
-                        if (downOffsetPercent > 1) downOffsetPercent = 1;
+                        Double downOffsetPercent = (Val16Gen5 - ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first))) / Val16Gen5;
+                        if (downOffsetPercent > Double(1)) downOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent);
                         //qDebug() << "下高上低，downOffsetPercent == " << downOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * downOffsetPercent;
                     }
                     // 上高下低：
                     else if (curMapType == MAPTYPE_A2_UPTOU || curMapType == MAPTYPE_A0_DOWNTOD)
                     {
-                        double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / (16.0 * gen5);
-                        if (upOffsetPercent > 1) upOffsetPercent = 1;
+                        Double upOffsetPercent = ((curHumanCoor.second - curBlockCoor.second) - (curHumanCoor.first - curBlockCoor.first)) / Val16Gen5;
+                        if (upOffsetPercent > Double(1)) upOffsetPercent = 1;
                         theHuman->setMapHeightOffsetY(DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent);
                         //qDebug() << "上高下低，upOffsetPercent == " << upOffsetPercent << ", MapHeightOffsetY == " << DRAW_OFFSET * curMapHeight + DRAW_OFFSET * upOffsetPercent;
                     }
@@ -728,8 +729,8 @@ void Core::manageMouseEvent()
         if (strikeUnit != nullptr && mouseEvent->GetMouseEventType() == RIGHT_PRESS)
         {
             // 执行定点投射
-            double dr = mouseEvent->GetDR();
-            double ur = mouseEvent->GetUR();
+            Double dr = mouseEvent->GetDR();
+            Double ur = mouseEvent->GetUR();
             g_mainWidget->getUsrAI()->PinPointStrike(strikeUnit->getglobalNum(), dr, ur);
             // 重置状态
             g_mainWidget->setWaitingForPinPointStrike(false);
@@ -1134,7 +1135,7 @@ int Core::handleBuildingAction(Coordinate* self, int option, int id)
     return ret;
 }
 
-int Core::handlePinPointStrike(Coordinate *self, double dr0,double ur0, int id)
+int Core::handlePinPointStrike(Coordinate *self, Double dr0,Double ur0, int id)
 {
     int ret = ACTION_INVALID_SN;
     QString desc="";
@@ -1144,7 +1145,7 @@ int Core::handlePinPointStrike(Coordinate *self, double dr0,double ur0, int id)
         case SORT_ARMY:
         if(num==AT_STONE_THROWER){
             ret=interactionList->addRelation(self,dr0,ur0,CoreEven_PinPoint_Attacking);
-            desc=QString("(")+QString::number(dr0)+","+QString::number(ur0)+")";
+            desc=QString("(")+QString::number(double(dr0))+","+QString::number(double(ur0))+")";
         }
         default:
             ret=ACTION_INVALID_SN;
@@ -1250,12 +1251,12 @@ void Core::manageOrder(int id)
 
         case INS_HUMANMOVE:    // 命令单位self走向指定坐标L，U
             // 检查坐标是否有效
-            if (cur.DR < 0 || cur.UR < 0 || cur.DR >= BLOCKSIDELENGTH * MAP_L || cur.UR >= BLOCKSIDELENGTH * MAP_L) {
+            if (cur.DR < Double::Zero() || cur.UR < Double::Zero() || cur.DR >= BLOCKSIDELENGTH * MAP_L || cur.UR >= BLOCKSIDELENGTH * MAP_L) {
                 ret = ACTION_INVALID_LOCATION;
             }
             else {
                 ret = interactionList->addRelation(self, cur.DR, cur.UR, CoreEven_JustMoveTo);
-                logActionResult(ret, self, NULL, INS_HUMANMOVE, 0, QString::number(cur.DR) + "," + QString::number(cur.UR), id);
+                logActionResult(ret, self, NULL, INS_HUMANMOVE, 0, QString::number(double(cur.DR)) + "," + QString::number(double(cur.UR)), id);
             }
             break;
 
@@ -1468,7 +1469,7 @@ void Core::resetNowObject_Click(bool isStop)
     {
         if (isStop)
         {
-            call_debugText("blue", " 细节坐标 (" + QString::number(mouseEvent->GetDR()) + "," + QString::number(mouseEvent->GetUR())\
+            call_debugText("blue", " 细节坐标 (" + QString::number(double(mouseEvent->GetDR())) + "," + QString::number(double(mouseEvent->GetUR()))\
                 + "), 块坐标 (" + QString::number((int)(mouseEvent->GetDR() / BLOCKSIDELENGTH)) + "," + QString::number((int)(mouseEvent->GetUR() / BLOCKSIDELENGTH)) + ")", REPRESENT_BOARDCAST_MESSAGE);
         }
 

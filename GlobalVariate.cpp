@@ -424,13 +424,13 @@ void initMemory(ImageResource *res)
     }
 }
 
-double countdistance(double L, double U, double L0, double U0)
+Double countdistance(Double L, Double U, Double L0, Double U0)
 {
     return sqrt((L-L0)*(L-L0)+(U-U0)*(U-U0));
 }
-bool isNear_Manhattan( double dr , double ur , double dr1  , double ur1 , double distance )
+bool isNear_Manhattan( Double dr , Double ur , Double dr1  , Double ur1 , Double distance )
 {
-    return fabs(dr - dr1)<=distance && fabs(ur - ur1)<=distance;
+    return abs(dr - dr1)<=distance && abs(ur - ur1)<=distance;
 }
 
 
@@ -483,24 +483,24 @@ int calculateManhattanDistance(int x1, int y1, int x2, int y2)
         return distance;
 }
 
-double calculateManhattanDistance(double x1, double y1, double x2, double y2)
+Double calculateManhattanDistance(Double x1, Double y1, Double x2, Double y2)
 {
-    return fabs(x1-x2)+fabs(y1-y2);
+    return abs(x1-x2)+abs(y1-y2);
 }
 
-void calMirrorPoint( double& dr , double &ur , double dr_mirror, double ur_mirror , double dis)
+void calMirrorPoint( Double& dr , Double &ur , Double dr_mirror, Double ur_mirror , Double dis)
 {
-    double dr_deta = dr_mirror-dr, ur_deta = ur_mirror - ur;
-    double total = fabs(dr_deta)+fabs(ur_deta);
+    Double dr_deta = dr_mirror-dr, ur_deta = ur_mirror - ur;
+    Double total = abs(dr_deta)+abs(ur_deta);
 
     dr = dr_mirror+dr_deta/total*dis;
     ur = ur_mirror+ur_deta/total*dis;
 
 }
 
-double trans_BlockPointToDetailCenter( int p )
+Double trans_BlockPointToDetailCenter( int p )
 {
-    return (p+0.5)*BLOCKSIDELENGTH;
+    return (p+Double("0.5"))*BLOCKSIDELENGTH;
 }
 
 void call_debugText(QString color, QString content,int playerID)
@@ -535,7 +535,7 @@ instruction::instruction(int type,int SN,int BL,int BU,int option){
     this->BlockUR=BU;
     this->option=option;
 }
-instruction::instruction(int type,int SN,double L,double U){
+instruction::instruction(int type,int SN,Double L,Double U){
     this->SN = SN;
     this->type=type;
     this->self=g_Object[SN];
@@ -549,10 +549,10 @@ instruction::instruction(int type,int SN,int option){
     this->option=option;
 }
 
-int sgn(double __x)
+int sgn(Double __x)
 {
-    if(__x > 0) return 1;
-    else if(__x < 0) return -1;
+    if(__x > Double(0)) return 1;
+    else if(__x < Double(0)) return -1;
     else return 0;
 }
 
@@ -596,22 +596,22 @@ void MouseEvent::SetMemoryMapY(int v)
     memoryMapY=v;
 }
 
-double MouseEvent::GetDR()
+Double MouseEvent::GetDR()
 {
     return DR;
 }
 
-double MouseEvent::GetUR()
+Double MouseEvent::GetUR()
 {
     return UR;
 }
 
-void MouseEvent::SetDR(double v)
+void MouseEvent::SetDR(Double v)
 {
     DR=v;
 }
 
-void MouseEvent::SetUR(double v)
+void MouseEvent::SetUR(Double v)
 {
     UR=v;
 }
@@ -858,14 +858,14 @@ void tagHuman::cast_from(tagHuman taghuman) {
 
 tagFarmer tagFarmer::toEnemy() {
     Resource = -1;
-    DR0 = -1.0;
-    UR0 = -1.0;
+    DR0 = Double(-1);
+    UR0 = Double(-1);
     return *this;
 }
 
 tagArmy tagArmy::toEnemy() {
-    DR0 = -1.0;
-    UR0 = -1.0;
+    DR0 = Double(-1);
+    UR0 = Double(-1);
     ConvertCooldown = -1;
     return *this;
 }
@@ -1070,7 +1070,7 @@ ImageResource::ImageResource()
 
 conditionDevelop::conditionDevelop() {}
 
-conditionDevelop::conditionDevelop(int civilization, int sort_building, double needTimes, int need_Wood, int need_Food, int need_Stone, int need_Gold)
+conditionDevelop::conditionDevelop(int civilization, int sort_building, Double needTimes, int need_Wood, int need_Food, int need_Stone, int need_Gold)
 {
     this->civilization = civilization;
     this->sort_building = sort_building;

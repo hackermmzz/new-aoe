@@ -13,13 +13,13 @@ public:
     static array<std::string,8> sound_work;
 public:
     Farmer(){}
-    Farmer(double DR,double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER,int FarmerType=FARMERTYPE_FARMER);
+    Farmer(Double DR,Double UR , Development* playerScience = NULL, int playerRepresent = MAXPLAYER,int FarmerType=FARMERTYPE_FARMER);
 
   /**********************虚函数**************************/
     void nextframe();
     void setNowRes();
     int getSort(){return SORT_FARMER;}
-    double getDis_attack();
+    Double getDis_attack();
     int get_AttackType();
     int get_add_specialAttack();
     QString getChineseName(){ return "村民"; }
@@ -104,15 +104,15 @@ public:
 
     int getState(){return state;}
 
-    double getResourceNowHave(){ return resource; }
+    Double getResourceNowHave(){ return resource; }
     int getResourceHave_Max(){ return resource_Max + playerScience->get_addition_ResourceSort(resourceSort)+farmer_addition_ResourceHold(); }
     int getResourceSort(){ return resourceSort; }
-    double get_quantityGather(){ return quantity_GatherOnce * playerScience->get_rate_ResorceGather(resourceSort); }
-    bool get_isFullBackpack(){ return resource >= getResourceHave_Max(); }//用于普通情况下判断farmer是否满背包
+    Double get_quantityGather(){ return quantity_GatherOnce * playerScience->get_rate_ResorceGather(resourceSort); }
+    bool get_isFullBackpack(){ return resource >= Double(getResourceHave_Max()); }//用于普通情况下判断farmer是否满背包
     //用于采集时，考虑不同种类资源类型情况，判断farmer背包满
-    bool get_isFullBackpack( int resourceSort ){ return resourceSort == this->resourceSort && resource >= getResourceHave_Max(); }
+    bool get_isFullBackpack( int resourceSort ){ return resourceSort == this->resourceSort && resource >= Double(getResourceHave_Max()); }
 
-    bool get_isEmptyBackpack(){ return resource == 0; }
+    bool get_isEmptyBackpack(){ return resource == Double(0); }
 
     //判断所持物与村民状态是否匹配
     bool get_MatchingOfResourceAndCarry(){ return (state == FARMER_LUMBER && resourceSort == HUMAN_WOOD)\
@@ -166,13 +166,13 @@ private:
     Coordinate *nowobject=NULL;
     //当前工作对象
 
-    double resource;
+    Double resource;
     //当前资源携带量
 
     int resource_Max = 10;
     //最大资源携带量
 
-    double quantity_GatherOnce = 0.55;
+    Double quantity_GatherOnce = Double("0.55");
 
     int resourceSort = 0;
     //指示所携带资源的类型

@@ -105,7 +105,7 @@ struct tagBuilding:tagObj
 
 struct tagResource:tagObj
 {
-    double DR, UR; //细节坐标
+    Double DR, UR; //细节坐标
     int Type; // 资源类型
     int ProductSort; // 产品种类
     int Cnt; // 剩余资源数量
@@ -114,8 +114,8 @@ struct tagResource:tagObj
 
 struct tagHuman:tagObj
 {
-    double DR, UR; //细节坐标
-    double DR0, UR0; // 目的地坐标
+    Double DR, UR; //细节坐标
+    Double DR0, UR0; // 目的地坐标
     int NowState; // 当前状态
     int WorkObjectSN; // 工作对象序列号
     int Blood; // 当前血量
@@ -139,10 +139,10 @@ struct tagArmy : public tagHuman
     int status;
     int starttime;
     int finishtime;
-    double startpointDR;
-    double startpointUR;
-    double destinaDR;
-    double destinaUR;
+    Double startpointDR;
+    Double startpointUR;
+    Double destinaDR;
+    Double destinaUR;
     bool ifAttack;
     int timelock;
     int ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
@@ -170,12 +170,12 @@ struct instruction {
     int option;
     int BlockDR, BlockUR;
     int SN = -1, obSN = -1;
-    double DR, UR;
+    Double DR, UR;
     bool isExist();
     instruction() { type = -1; }
     instruction(int type, int SN, int obSN, bool twoCoredinate);
     instruction(int type, int SN, int BlockDR, int BlockUR, int option);
-    instruction(int type, int SN, double DR, double UR);
+    instruction(int type, int SN, Double DR, Double UR);
     instruction(int type, int SN, int option);
 };
 
@@ -263,8 +263,8 @@ struct MouseEvent
 private:
     int memoryMapX;
     int memoryMapY;
-    double DR;
-    double UR;
+    Double DR;
+    Double UR;
     int mouseEventType;
 public:
     //鼠标点击类型 自定义对应关系 左键点击 左键拉框 右键点击等
@@ -276,10 +276,10 @@ public:
     int GetMemoryMapY();
     void SetMemoeyMapX(int v);
     void SetMemoryMapY(int v);
-    double GetDR();
-    double GetUR();
-    void SetDR(double v);
-    void SetUR(double v);
+    Double GetDR();
+    Double GetUR();
+    void SetDR(Double v);
+    void SetUR(Double v);
     void Reset();
 };
 
@@ -323,7 +323,7 @@ struct conditionDevelop
     int civilization;
     int sort_building;  //所属建筑
 
-    double times_second;
+    Double times_second;
 
     int acttimes = 0;    //表示执行的此数
 
@@ -343,7 +343,7 @@ struct conditionDevelop
     //**********************************************************
     //构造器 ， 创建conditionDevelop实例相关
     conditionDevelop();
-    conditionDevelop(int civilization, int sort_building, double needTimes, int need_Wood = 0, int need_Food = 0, int need_Stone = 0, int need_Gold = 0);
+    conditionDevelop(int civilization, int sort_building, Double needTimes, int need_Wood = 0, int need_Food = 0, int need_Stone = 0, int need_Gold = 0);
 
     //添加该行动的前置行动
     void addPreCondition(conditionDevelop* con_need);
@@ -448,18 +448,18 @@ void loadBlackRes(std::list<ImageResource>* res, std::list<ImageResource>* black
 
 void flipResource(std::list<ImageResource>* currentlist, std::list<ImageResource>* targetlist);
 void initMemory(ImageResource* res);
-double countdistance(double L, double U, double L0, double U0);
-bool isNear_Manhattan(double dr, double ur, double dr1, double ur1, double distance);
+Double countdistance(Double L, Double U, Double L0, Double U0);
+bool isNear_Manhattan(Double dr, Double ur, Double dr1, Double ur1, Double distance);
 
 int calculateManhattanDistance(int x1, int y1, int x2, int y2);
-double calculateManhattanDistance(double x1, double y1, double x2, double y2);
+Double calculateManhattanDistance(Double x1, Double y1, Double x2, Double y2);
 
-void calMirrorPoint(double& dr, double& ur, double dr_mirror, double ur_mirror, double dis);
+void calMirrorPoint(Double& dr, Double& ur, Double dr_mirror, Double ur_mirror, Double dis);
 
-double trans_BlockPointToDetailCenter(int p);
+Double trans_BlockPointToDetailCenter(int p);
 QString JsonMap(const QMap<QString, QVariant>&data);
 
-int sgn(double __x);
+int sgn(Double __x);
 void ParseArguments(const QApplication&app);
 void ReadConfig();
 

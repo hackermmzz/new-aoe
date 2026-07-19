@@ -27,8 +27,8 @@ public:
     static array<int,5> AnimalResouceSort;
     static array<int,5> AnimalCnt;
     static array<int,5>AnimalVision;
-    static array<double,5> AnimalSpeed;
-    static array<double,5> AnimalCrashLen;
+    static array<Double,5> AnimalSpeed;
+    static array<Double,5> AnimalCrashLen;
     static array<int,5> AnimalNowresStep;
 
     static array<int,5>AnimalAtk;
@@ -58,7 +58,7 @@ private:
 
 public:
     Animal(){}
-    Animal(int Num,double DR,double UR);
+    Animal(int Num,Double DR,Double UR);
   /**********************虚函数**************************/
     int getSort(){return SORT_ANIMAL;}
 
@@ -75,11 +75,14 @@ public:
     bool isMonitorObject(Coordinate* judOb);
     QString getChineseName(){ return QString::fromStdString(getAnimalDisplayName(Num)); }
 
-    double getSpeed(){ return ((int)changeToRun*1.5)*speed; }
+    Double getSpeed(){
+        static auto scale=Double("1.5");
+        return changeToRun?scale*speed:Double::Zero();
+    }
 
 
     /*******战斗相关*******/
-    double getDis_attack(){ return dis_Attack + (attackObject->getSideLength())/2.0; }
+    Double getDis_attack(){ return dis_Attack + (attackObject->getSideLength())/Double(2); }
     int get_add_specialAttack();
 
 

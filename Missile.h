@@ -13,11 +13,11 @@ public:
 public:
     Missile(){}
     Missile(int type, Coordinate* attacker , Coordinate* attackee,int beginHeight ,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
-    Missile(int type, Coordinate *attacker, double dr,double ur, int beginHeight, Development *playerScience, int playerRepresent= MAXPLAYER);
+    Missile(int type, Coordinate *attacker, Double dr,Double ur, int beginHeight, Development *playerScience, int playerRepresent= MAXPLAYER);
     ~Missile(){ if(AttackerRecord) delete AttackerRecord; }
 
   /**********************虚函数**************************/
-    int calculateAngle(double nextDR, double nextUR);
+    int calculateAngle(Double nextDR, Double nextUR);
     void nextframe();
     void setNowRes();
     void setAttribute();
@@ -70,24 +70,24 @@ public:
     void set_attackerDie(){ isAttackerDie = true; }
 
 
-    double distanceToGoal(){ return countdistance(DR , UR , DR0 , UR0); }
+    Double distanceToGoal(){ return countdistance(DR , UR , DR0 , UR0); }
 
-    double get_Distance_hitTarget(){ return DISTANCE_HIT_TARGET*playerScience->get_rate_HitTarget(); }
+    Double get_Distance_hitTarget(){ return DISTANCE_HIT_TARGET*playerScience->get_rate_HitTarget(); }
 
     BloodHaver* getAttackAponsor();
 
     Coordinate* getAttacker(){return AttackSponsor;}
 
-    void get_AttackSponsor_Position(double& DR , double& UR);
+    void get_AttackSponsor_Position(Double& DR , Double& UR);
 
     //攻击者死亡，设置missile的攻击发起者为NULL
     void deleteAttackerSponsor(Coordinate* attacker);
     int get_AttackAddition_Height(int goalHeigh){ return goalHeigh<Height_begin ? Height_begin - goalHeigh : 0; }
     //对于投掷物，为了实现类似天上飞的效果，我们对ImageX、ImageY成员特殊更新
     void updateViewPosition();
-    std::array<double,2> calculateViewPosition(double curDR,double curUR);
-    double getViewDR();
-    double getViewUR();
+    std::array<Double,2> calculateViewPosition(Double curDR,Double curUR);
+    Double getViewDR();
+    Double getViewUR();
     //判断是否为溅射伤害
     bool IsRangeAttack(){return isAOE;}
 private:
@@ -98,7 +98,7 @@ private:
     int Sort_attacker;
     int playerRepresent;//记录隶属的player阵营
 
-    double dDR, dUR;    //每帧移动量
+    Double dDR, dUR;    //每帧移动量
 
     bool isAOE; //是否具有喷溅伤害
     bool haveHitTarget = false;
@@ -111,10 +111,10 @@ private:
     int Height_begin = 0;   //记录起始高度,只能在初始化时设置
 
     //飞行物绘制按照这个坐标来
-    double viewDR;
-    double viewUR;
-    double initDR;
-    double initUR;
+    Double viewDR;
+    Double viewUR;
+    Double initDR;
+    Double initUR;
     //图像资源相关
     static std::list<ImageResource> *missile[NUMBER_MISSILE];
 };

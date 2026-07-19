@@ -20,15 +20,15 @@ array<int,5> Animal::AnimalCnt;
 array<int,5>  Animal::AnimalNowresStep;
 
 array<int,5> Animal::AnimalVision;
-array<double,5> Animal::AnimalCrashLen;
-array<double,5> Animal::AnimalSpeed;
+array<Double,5> Animal::AnimalCrashLen;
+array<Double,5> Animal::AnimalSpeed;
 array<int,5>  Animal::AnimalFriendly;
 array<bool,5> Animal::AnimalAttackable;
 array<int,5> Animal::AnimalAtk;
 
 
 /************构造与析构*************/
-Animal::Animal(int Num, double DR, double UR)
+Animal::Animal(int Num, Double DR, Double UR)
 {
 
     this->Num=Num;
@@ -95,8 +95,8 @@ void Animal::nextframe()
 
             updateMove();
         }
-        this->imageX=this->nowres->pix.width()/2.0;
-        this->imageY=this->nowres->pix.width()/4.0;
+        this->imageX=this->nowres->pix.width()/Double(2);
+        this->imageY=this->nowres->pix.width()/Double(4);
     }
 }
 

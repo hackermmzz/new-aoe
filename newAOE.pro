@@ -109,7 +109,11 @@ HEADERS += \
     CircleArea.h \
     LineArea.h \
     networkplugin.h \
-    library/perlin_noise/PerlinNoise.hpp
+    library/perlin_noise/PerlinNoise.hpp \
+    library/fixed_point/fixed.hpp \
+    library/fixed_point/math.hpp \
+    library/fixed_point/type.hpp \
+    library/fixed_point/include.h
 
 FORMS += \
         MainWidget.ui \

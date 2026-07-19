@@ -144,7 +144,7 @@ void Coordinate::setViewLab( int blockSize , int visionLen )
         for(int y = y0+1; y<my; y++)
         {
             yr = y - y0;
-            vL = (int)(sqrt((double)( R*R - yr*yr ))+0.5);
+            vL = (int)(sqrt((Double)( R*R - yr*yr ))+Double("0.5"));
 
             lx = -vL +1;
             mx = 2*x0 + vL;
@@ -167,7 +167,7 @@ void Coordinate::addViewLab( vector<Point>& blockLab , int lx , int mx , int y ,
 
 vector<Point> Coordinate::getViewLab()
 {
-    if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>0 && getVision() > 1)
+    if(viewLab[(int)BlockSizeLen][getVision()].empty() && BlockSizeLen>Double(0) && getVision() > 1)
         setViewLab((int)BlockSizeLen , getVision());
 
     return viewLab[(int)BlockSizeLen][getVision()];
@@ -192,14 +192,14 @@ bool Coordinate::isNowresShift()
 
 void Coordinate::updateImageXYByNowRes()
 {
-    this->imageX=this->nowres->pix.width()/2.0;
-    this->imageY=this->nowres->pix.width()/4.0;
+    this->imageX=this->nowres->pix.width()/Double(2);
+    this->imageY=this->nowres->pix.width()/Double(4);
 }
 
 /*******坐标相关*******/
 void Coordinate::setDetailPointAttrb_FormBlock()
 {
-    setDRUR( (BlockDR + BlockSizeLen/2.0)*BLOCKSIDELENGTH, (BlockUR + BlockSizeLen/2.0)*BLOCKSIDELENGTH );
+    setDRUR( (BlockDR + BlockSizeLen/Double(2))*BLOCKSIDELENGTH, (BlockUR + BlockSizeLen/Double(2))*BLOCKSIDELENGTH );
     setSideLenth();
 }
 

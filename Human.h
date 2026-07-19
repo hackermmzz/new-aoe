@@ -9,15 +9,15 @@ class Human:public MoveObject,public BloodHaver
 {
 public:
     Human();
-    Human(int Num,double DR,double UR,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
+    Human(int Num,Double DR,Double UR,Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
 
   /**********************虚函数**************************/
     void nextframe();
     bool isPlayerControl(){ return true; }
 
-    double getSpeed(){ return statFrozen ? frozenSpeed : speed*playerScience->get_rate_Move(getSort(),Num); }
-    int getMaxBlood(){ return statFrozen ? frozenMaxBlood : MaxBlood*playerScience->get_rate_Blood(getSort(),Num)+\
-                        playerScience->get_addition_Blood(getSort(),Num); }
+    Double getSpeed(){ return statFrozen ? frozenSpeed : speed*playerScience->get_rate_Move(getSort(),Num); }
+    int getMaxBlood(){ return statFrozen ? frozenMaxBlood : int(MaxBlood*playerScience->get_rate_Blood(getSort(),Num)+\
+                        playerScience->get_addition_Blood(getSort(),Num)); }
     int getPlayerRepresent(){ return playerRepresent; }
     int getATK(){ int atkBase = statFrozen ? frozenAtkBase : atk; \
                   int atkAdd  = statFrozen ? frozenAtkAdd  : playerScience->get_addition_Attack(getSort(),Num,ARMY_INFANTRY,get_AttackType()); \

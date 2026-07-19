@@ -19,8 +19,8 @@ public:
     /*************静态成员************/
 public:
     Army();
-    Army(double DR,double UR,int type , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
-    Army(double DR,double UR,int type ,int status, Development* playerScience=NULL, int playerRepresent=MAXPLAYER,int starttime=15,int finishtime=37500,double dDR=0,double dUR=0);
+    Army(Double DR,Double UR,int type , Development* playerScience = NULL, int playerRepresent = MAXPLAYER);
+    Army(Double DR,Double UR,int type ,int status, Development* playerScience=NULL, int playerRepresent=MAXPLAYER,int starttime=15,int finishtime=37500,Double dDR=0,Double dUR=0);
     ~Army();
     bool ifAttack;
     int timelock;
@@ -31,7 +31,7 @@ public:
 
     int getSort(){ return SORT_ARMY; }
 
-    double getSpeed();
+    Double getSpeed();
     int getMaxBlood();
     int getVision();
 
@@ -46,17 +46,17 @@ public:
 
     int getATK();
     int getDEF(int attackType_got);
-    double getDis_attack();
-    double getMinDis_attack();
+    Double getDis_attack();
+    Double getMinDis_attack();
     void freezeStats();
     //军队自动化
     int getstatus();
     int getstarttime();
     int getfinishtime();
-    double getstartpointDR();
-    double getstartpointUR();
-    double getdestinaDR();
-    double getdestinaUR();
+    Double getstartpointDR();
+    Double getstartpointUR();
+    Double getdestinaDR();
+    Double getdestinaUR();
     bool getifAttack();
     int gettimelock();
 
@@ -157,32 +157,32 @@ private:
     int status;
     int starttime;
     int finishtime;
-    double startpointDR;
-    double startpointUR;
-    double destinaDR;
-    double destinaUR;
+    Double startpointDR;
+    Double startpointUR;
+    Double destinaDR;
+    Double destinaUR;
 
     // 巡逻系统相关成员变量
     int patrolState;                    // 巡逻状态
-    double patrolCenterDR;              // 巡逻区域中心点DR
-    double patrolCenterUR;              // 巡逻区域中心点UR
-    double currentPatrolTargetDR;       // 当前巡逻目标点DR
-    double currentPatrolTargetUR;       // 当前巡逻目标点UR
+    Double patrolCenterDR;              // 巡逻区域中心点DR
+    Double patrolCenterUR;              // 巡逻区域中心点UR
+    Double currentPatrolTargetDR;       // 当前巡逻目标点DR
+    Double currentPatrolTargetUR;       // 当前巡逻目标点UR
     Coordinate* chaseTarget;            // 追击目标
     int patrolTimer;                    // 巡逻计时器
     int patrolDirection;                // 巡逻方向 (用于圆形巡逻)
-    double lastPatrolAngle;             // 上次巡逻角度 (用于圆形巡逻)
+    Double lastPatrolAngle;             // 上次巡逻角度 (用于圆形巡逻)
     bool patrolInitialized;             // 巡逻系统是否已初始化
 
     /*****************/
     //该部分数组存储可升级的兵种的属性,下标0表示初始兵种,下标又即升级次数
     int* MaxBlood_change = NULL;    //  最大血量
-    double* speed_change = NULL;    //移速
+    Double* speed_change = NULL;    //移速
     int* vision_change = NULL;      //视野
 
     int* atk_change  = NULL;        //攻击力
-    double* dis_Attack_change  = NULL;  //攻击距离
-    double* inter_Attack_change = NULL; //攻击间隔
+    Double* dis_Attack_change  = NULL;  //攻击距离
+    Double* inter_Attack_change = NULL; //攻击间隔
     int* defence_close_change  = NULL;  //肉搏防御
     int* defence_shoot_change  = NULL;  //投射防御
 

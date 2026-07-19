@@ -6,7 +6,7 @@ vector<Point> MoveObject::jud_Block[2][3][3];
 vector<Point> MoveObject::crashMove_Block[2][3][3];
 
 //角度计算
-int MoveObject::calculateAngle(double nextDR, double nextUR)
+int MoveObject::calculateAngle(Double nextDR, Double nextUR)
 {
     int dDR=nextDR-DR;
     int dUR=nextUR-UR;
@@ -53,7 +53,7 @@ void MoveObject::change_Angel(int Angel_new)
 
 //*****************************路径相关*********************************
 //路径设置
-void MoveObject::setPath(const stack<Point>&path , double goalDR, double goalUR)
+void MoveObject::setPath(const stack<Point>&path , Double goalDR, Double goalUR)
 {
     setdestination(goalDR,goalUR);
     if(!path.empty())
@@ -89,7 +89,7 @@ void MoveObject::resetpathIN()
     pathInit = true;
 }
 
-void MoveObject::setdestination(double DR0,double UR0)
+void MoveObject::setdestination(Double DR0,Double UR0)
 {
     setDR0(DR0);
     setUR0(UR0);
@@ -98,18 +98,18 @@ void MoveObject::setdestination(double DR0,double UR0)
     imageH=DR-UR;//更新高度
 }
 
-void MoveObject::setDR0(double DR0)
+void MoveObject::setDR0(Double DR0)
 {
-    if(DR0<0)
+    if(DR0<Double(0))
         this->DR0=0;
     else if(DR0>MAP_L*BLOCKSIDELENGTH)
         this->DR0=MAP_L*BLOCKSIDELENGTH-1;
     else
         this->DR0=DR0;
 }
-void MoveObject::setUR0(double UR0)
+void MoveObject::setUR0(Double UR0)
 {
-    if(UR0<0)
+    if(UR0<Double(0))
         this->UR0=0;
     else if(UR0>MAP_U*BLOCKSIDELENGTH)
         this->UR0=MAP_U*BLOCKSIDELENGTH-1;
@@ -138,8 +138,8 @@ void MoveObject::setNextBlock()
         {
             nextBlockDR=p.x;
             nextBlockUR=p.y;
-            nextDR=(p.x+0.5)*BLOCKSIDELENGTH;
-            nextUR=(p.y+0.5)*BLOCKSIDELENGTH;
+            nextDR=(p.x+Double("0.5"))*BLOCKSIDELENGTH;
+            nextUR=(p.y+Double("0.5"))*BLOCKSIDELENGTH;
             pathInit = false;
         }
         else
@@ -167,7 +167,7 @@ void MoveObject::updateLU()
     BlockUR = transBlock(UR);
 }
 
-void MoveObject::update_moveDire( double dDR , double dUR )
+void MoveObject::update_moveDire( Double dDR , Double dUR )
 {
     //只要移动，一定会更新
     dMove_BDR = sgn(dDR);
@@ -193,7 +193,7 @@ void MoveObject::updateMove()
         {0 , 7 , 6} \
     };
 
-    double dDR = 0, dUR = 0, dis = 0, ratio = 0;
+    Double dDR = 0, dUR = 0, dis = 0, ratio = 0;
 
     if(isWalking() && (DR!=DR0||UR!=UR0))
     {
@@ -204,7 +204,7 @@ void MoveObject::updateMove()
         if( path.empty() )
         {
             dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-            ratio = getSpeed() / static_cast<double>(dis);
+            ratio = getSpeed() / static_cast<Double>(dis);
             VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
             update_moveDire(dDR , dUR);
             //改变角度
@@ -216,13 +216,13 @@ void MoveObject::updateMove()
         else if( pathI == 0 )
         {
             dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-            ratio = getSpeed() / static_cast<double>(dis);
+            ratio = getSpeed() / static_cast<Double>(dis);
             VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
 
             update_moveDire(nextBlockDR - PreviousBlockDR , nextBlockUR - PreviousBlockUR);
             change_Angel(d_lab[dMove_BDR + 1][dMove_BUR + 1]);
             update_PredictPoint();
-            jud_ArrivePhaseGoal(dDR , dUR ,0.005);
+            jud_ArrivePhaseGoal(dDR , dUR ,Double("0.005"));
         }
         else
         {
@@ -257,9 +257,9 @@ void MoveObject::update_PredictPoint()
     }
 }
 
-void MoveObject::jud_ArrivePhaseGoal(double dDR , double dUR , double distance)
+void MoveObject::jud_ArrivePhaseGoal(Double dDR , Double dUR , Double distance)
 {
-    if(fabs(dDR)<distance && fabs(dUR)<distance)
+    if(abs(dDR)<distance && abs(dUR)<distance)
     {
         update_path_useBlock();
         pathI++;
@@ -270,14 +270,14 @@ void MoveObject::jud_ArrivePhaseGoal(double dDR , double dUR , double distance)
 vector<Point> MoveObject::get_JudCrush_Block()
 {
     int dblockDR,dblockUR;
-    double dDR = PredictedDR - DR,dUR = PredictedUR - UR;
+    Double dDR = PredictedDR - DR,dUR = PredictedUR - UR;
     vector<Point> blockLab;
     Point nowPosition(BlockDR,BlockUR);
-    if(dDR == 0) dblockDR = 0;
-    else dblockDR = dDR<0 ? -1 : 1;
+    if(dDR == Double(0)) dblockDR = 0;
+    else dblockDR = dDR<Double(0) ? -1 : 1;
 
-    if(dUR == 0) dblockUR = 0;
-    else dblockUR = dUR<0 ? -1 : 1;
+    if(dUR == Double(0)) dblockUR = 0;
+    else dblockUR = dUR<Double(0) ? -1 : 1;
 
     if(jud_Block[(int)BlockSizeLen][dblockDR+1][dblockUR+1].empty()) MoveObject::init_jud_Block((int)BlockSizeLen,dblockDR,dblockUR);
 
@@ -291,8 +291,8 @@ vector<Point> MoveObject::get_JudCrush_Block()
 bool MoveObject::isCrash(Coordinate* judOb)
 {
     MoveObject* moveOb = NULL;
-    double length = getCrashLength() + judOb->getCrashLength();
-    double dx,dy;
+    Double length = getCrashLength() + judOb->getCrashLength();
+    Double dx,dy;
     int blockDR_angle = sgn(DR - judOb->getDR()) , blockUR_angle = sgn(UR - judOb->getUR());
     judOb->printer_ToMoveObject((void**)&moveOb);
 
@@ -309,7 +309,7 @@ bool MoveObject::isCrash(Coordinate* judOb)
         dy = PredictedUR - moveOb->get_PredictedUR();
     }
 
-    if( fabs(dx)<length && fabs(dy)<length)
+    if( abs(dx)<length && abs(dy)<length)
     {
 //        call_debugText("red", " 碰撞: " + getChineseName()+ "(编号:" + QString::number(getglobalNum()) +\
 //                       " 与 " + judOb->getChineseName() + "(编号:" + QString::number(judOb->getglobalNum()) + " 发生碰撞",getPlayerRepresent());
@@ -404,14 +404,14 @@ void MoveObject::init_crashMove_Block( int foundation, int dblockDR, int dblockU
 
 }
 
-void MoveObject::setPosForced(double DR_, double UR_)
+void MoveObject::setPosForced(Double DR_, Double UR_)
 {
     PredictedDR=DR=DR_;
     PredictedUR=UR=UR_;
     setPath(stack<Point>(),DR_,UR_);
 }
 
-void MoveObject::ForceStand(double dr,double ur)
+void MoveObject::ForceStand(Double dr,Double ur)
 {
     setPosForced(dr,ur);
     setPreStand();

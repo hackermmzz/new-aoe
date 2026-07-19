@@ -332,8 +332,8 @@ void MainWidget::ExportCurrentState(const char* fileName)
             QJsonArray array;
             for(auto&p:d.data){
                 QJsonArray arr;
-                arr.append(p[0]);
-                arr.append(p[1]);
+                arr.append(double(p[0]));
+                arr.append(double(p[1]));
                 array.append(arr);
             }
             json.insert("Point",array);
@@ -345,9 +345,9 @@ void MainWidget::ExportCurrentState(const char* fileName)
 
         }else if(type==CircleArea::Name()){
             CircleAreaData&d=*(CircleAreaData*)data;
-            json.insert("DR",d.dr);
-            json.insert("UR",d.ur);
-            json.insert("R",d.rad);
+            json.insert("DR",double(d.dr));
+            json.insert("UR",double(d.ur));
+            json.insert("R",double(d.rad));
             
             // 根据区域类型设置名称
             QString areaName = (d.areaType == 1) ? "Beatarea" : 
@@ -356,10 +356,10 @@ void MainWidget::ExportCurrentState(const char* fileName)
             
         }else if(type==RectArea::Name()){
             RectAreaData&d=*(RectAreaData*)data;
-            json.insert("DR",d.dr);
-            json.insert("UR",d.ur);
-            json.insert("W",d.w);
-            json.insert("H",d.h);
+            json.insert("DR",double(d.dr));
+            json.insert("UR",double(d.ur));
+            json.insert("W",double(d.w));
+            json.insert("H",double(d.h));
             
             // 根据区域类型设置名称
             QString areaName = (d.areaType == 1) ? "Beatarea" : 
@@ -416,8 +416,8 @@ void MainWidget::ExportCurrentState(const char* fileName)
     int Human_idx = 0;
     for (Human* human : player[0]->human) {
         QJsonObject obj;
-        obj.insert("DR", human->getDR());
-        obj.insert("UR", human->getUR());
+        obj.insert("DR", double(human->getDR()));
+        obj.insert("UR", double(human->getUR()));
         obj.insert("Num", human->getNum());
         obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
         obj.insert("FarmerType", human->getSort() == SORT_FARMER ? ((Farmer*)human)->get_farmerType() : -1);
@@ -433,8 +433,8 @@ void MainWidget::ExportCurrentState(const char* fileName)
     }
     for (Human* human : player[1]->human) {
         QJsonObject obj;
-        obj.insert("DR", human->getDR());
-        obj.insert("UR", human->getUR());
+        obj.insert("DR", double(human->getDR()));
+        obj.insert("UR", double(human->getUR()));
         obj.insert("Num", human->getNum());
         obj.insert("Sort", human->getSort() == SORT_FARMER ? "Farmer" : "Army");
         obj.insert("Own", "LZ");
@@ -443,8 +443,8 @@ void MainWidget::ExportCurrentState(const char* fileName)
         QString unitInfo = QString("处理敌方单位: Num=%1, Sort=%2, DR=%3, UR=%4")
             .arg(human->getNum())
             .arg(human->getSort() == SORT_FARMER ? "Farmer" : "Army")
-            .arg(human->getDR())
-            .arg(human->getUR());
+            .arg(double(human->getDR()))
+            .arg(double(human->getUR()));
         call_debugText("cyan", unitInfo.toStdString().c_str(), 0);
         
         //获取区域限制 - 分别获取巡逻区域
@@ -520,8 +520,8 @@ void MainWidget::ExportCurrentState(const char* fileName)
     int animal_idx = 0;
     for (Animal* animal : map->animal) {
         QJsonObject obj;
-        obj.insert("DR", animal->getDR());
-        obj.insert("UR", animal->getUR());
+        obj.insert("DR", double(animal->getDR()));
+        obj.insert("UR", double(animal->getUR()));
         obj.insert("Num", animal->getNum());
         root.insert("Animal_" + QString::number(animal_idx++), obj);
     }
@@ -542,9 +542,9 @@ void MainWidget::updateEditor()
     static int preHeight = -1;
     static int needSave = 1;
     //
-    double DR = ui->Game->TranGlobalPosToDR(eventFilter->MouseX(),eventFilter->MouseY());
-    double UR = ui->Game->TranGlobalPosToUR(eventFilter->MouseX(),eventFilter->MouseY());
-    int L = DR / BLOCKSIDELENGTH, U = UR / BLOCKSIDELENGTH;
+    Double DR = ui->Game->TranGlobalPosToDR(eventFilter->MouseX(),eventFilter->MouseY());
+    Double UR = ui->Game->TranGlobalPosToUR(eventFilter->MouseX(),eventFilter->MouseY());
+    int L = int(DR / BLOCKSIDELENGTH), U = int(UR / BLOCKSIDELENGTH);
     if (L < 0 || L >= MAP_L || U < 0 || U >= MAP_U)return;
     // 如果左边一直被摁住
     if (eventFilter->LeftMousePress()) {
@@ -804,10 +804,10 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
                 // 先从map_Object中移除建筑，避免悬空指针
                 Coordinate* buildingToDelete = *itBuild;
                 for(int mapX = buildingToDelete->getBlockDR(); 
-                    mapX < buildingToDelete->getBlockDR() + buildingToDelete->get_BlockSizeLen(); 
+                    mapX < int(buildingToDelete->getBlockDR() + buildingToDelete->get_BlockSizeLen());
                     mapX++) {
                     for(int mapY = buildingToDelete->getBlockUR(); 
-                        mapY < buildingToDelete->getBlockUR() + buildingToDelete->get_BlockSizeLen(); 
+                        mapY < int(buildingToDelete->getBlockUR() + buildingToDelete->get_BlockSizeLen());
                         mapY++) {
                         if(mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
                             auto& objects = map->map_Object[mapX][mapY];
@@ -831,15 +831,15 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
         auto itHuman = humanList.begin();
         while (itHuman != humanList.end()) {
             // 将像素坐标转换为块坐标
-            int x = (*itHuman)->getDR() / BLOCKSIDELENGTH;
-            int y = (*itHuman)->getUR() / BLOCKSIDELENGTH;
+            int x = int((*itHuman)->getDR() / BLOCKSIDELENGTH);
+            int y = int((*itHuman)->getUR() / BLOCKSIDELENGTH);
             if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
                 // 先从map_Object中移除人物，避免悬空指针
                 Coordinate* humanToDelete = *itHuman;
-                int pixelX = (*itHuman)->getDR();
-                int pixelY = (*itHuman)->getUR();
-                if (pixelX >= 0 && pixelX < MAP_L * BLOCKSIDELENGTH && 
-                    pixelY >= 0 && pixelY < MAP_U * BLOCKSIDELENGTH) {
+                int pixelX = int((*itHuman)->getDR());
+                int pixelY = int((*itHuman)->getUR());
+                if (pixelX >= 0 && pixelX <int(MAP_L * BLOCKSIDELENGTH) &&
+                    pixelY >= 0 && pixelY <int(MAP_U * BLOCKSIDELENGTH)) {
                     int mapX = pixelX / BLOCKSIDELENGTH;
                     int mapY = pixelY / BLOCKSIDELENGTH;
                     if (mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
@@ -1096,7 +1096,7 @@ void MainWidget::MakeGrassland(int blockL, int blockU)
     }
 }
 
-void MainWidget::MakeTree(double DR, double UR)
+void MainWidget::MakeTree(Double DR, Double UR)
 {
     static const float minus = 1.0;
     std::list<Animal*>& list = map->animal;
@@ -1133,7 +1133,7 @@ void MainWidget::MakeStaticRes(int blockL, int blockU, int type)
     }
 }
 
-void MainWidget::MakeAnimal(double DR, double UR, int type)
+void MainWidget::MakeAnimal(Double DR, Double UR, int type)
 {
 
     int finalType = -1;
@@ -1180,7 +1180,7 @@ void MainWidget::MakeBuilding(int blockL, int blockU, int type)
     }
 }
 
-void MainWidget::MakeHuman(double DR, double UR, int type)
+void MainWidget::MakeHuman(Double DR, Double UR, int type)
 {
     // 将像素坐标转换为块坐标进行地形检查
     int blockX = DR / BLOCKSIDELENGTH;
@@ -2749,7 +2749,7 @@ void MainWidget::updateAreaButtons() {
 }
 
 // 获取指定位置的单位
-Coordinate* MainWidget::getUnitAtPosition(double DR, double UR) {
+Coordinate* MainWidget::getUnitAtPosition(Double DR, Double UR) {
     int blockX = DR / BLOCKSIDELENGTH;
     int blockY = UR / BLOCKSIDELENGTH;
     
@@ -2765,7 +2765,7 @@ Coordinate* MainWidget::getUnitAtPosition(double DR, double UR) {
         obj->printer_ToBloodHaver((void**)&bloodObj);
         if (bloodObj && !bloodObj->isDie()) {
             // 精确距离检查
-            double distance = sqrt(pow(obj->getDR() - DR, 2) + pow(obj->getUR() - UR, 2));
+            Double distance = sqrt(pow(obj->getDR() - DR, 2) + pow(obj->getUR() - UR, 2));
             if (distance <= BLOCKSIDELENGTH / 2) {  // 在单位范围内
                 return obj;
             }
@@ -2855,8 +2855,8 @@ void MainWidget::drawHighlightedAreas() {
     for (const auto& circleData : highlightedCircleAreas) {
         QColor highlightColor = (circleData.areaType == 1) ? Qt::cyan : Qt::magenta;
         // 圆形区域可能需要特殊的绘制方法，这里使用矩形边框来近似
-        ui->Game->AddEdge(circleData.dr - circleData.rad, circleData.ur - circleData.rad, 
-                         circleData.rad * 2, circleData.rad * 2, highlightColor);
+        ui->Game->AddEdge(Double::FromDouble(circleData.dr - circleData.rad), Double::FromDouble(circleData.ur - circleData.rad),
+                         Double::FromDouble(circleData.rad * 2), Double::FromDouble(circleData.rad * 2), highlightColor);
     }
     
     // 绘制高亮的线形区域
@@ -2883,9 +2883,9 @@ void MainWidget::drawHighlightedAreas() {
             }
             
             // 参考巡逻区域红色选中框的实现，使用单位的crashLength作为选中框大小
-            double unitDR = unit->getDR();
-            double unitUR = unit->getUR();
-            double crashLength = unit->getCrashLength();
+            Double unitDR = unit->getDR();
+            Double unitUR = unit->getUR();
+            Double crashLength = unit->getCrashLength();
             
             // 绘制选中框，与巡逻区域红色框保持相同的大小和位置
             ui->Game->AddEdge(unitDR, unitUR, crashLength, crashLength, highlightColor);
@@ -2966,7 +2966,7 @@ void MainWidget::checkAndDisplayPatrolArea(Coordinate* unit) {
         if (it->second.areaType == 1) {  // 巡逻区域
             hasPatrolArea = true;
             patrolInfo += QString("矩形巡逻区域: DR=%.1f, UR=%.1f, W=%.1f, H=%.1f; ")
-                .arg(it->second.dr).arg(it->second.ur).arg(it->second.w).arg(it->second.h);
+                .arg(double(it->second.dr)).arg(double(it->second.ur)).arg(double(it->second.w)).arg(double(it->second.h));
         }
     }
     
@@ -2977,7 +2977,7 @@ void MainWidget::checkAndDisplayPatrolArea(Coordinate* unit) {
         if (it->second.areaType == 1) {  // 巡逻区域
             hasPatrolArea = true;
             patrolInfo += QString("圆形巡逻区域: DR=%.1f, UR=%.1f, R=%.1f; ")
-                .arg(it->second.dr).arg(it->second.ur).arg(it->second.rad);
+                .arg(double(it->second.dr)).arg(double(it->second.ur)).arg(double(it->second.rad));
         }
     }
     
@@ -3144,7 +3144,7 @@ void MainWidget::EditorWidgetBind()
 
 }
 
-void MainWidget::handleEnemyStatusSelection(double DR, double UR) {
+void MainWidget::handleEnemyStatusSelection(Double DR, Double UR) {
     // 获取点击位置的单位
     Coordinate* clickedUnit = getUnitAtPosition(DR, UR);
     

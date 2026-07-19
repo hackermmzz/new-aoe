@@ -40,7 +40,7 @@ Building::Building(int Num, int BlockDR, int BlockUR, int civ, Development* play
     setBlockDRUR(BlockDR, BlockUR);
     this->civ=civ;
     this->visible=1;
-    this->imageH=(BlockDR-BlockUR)*BLOCKSIDELENGTH;
+    this->imageH=int((BlockDR-BlockUR)*BLOCKSIDELENGTH);
     this->Percent=Percent;
     if(isFinish()) recordConstruct();
     setAttribute();
@@ -67,7 +67,7 @@ void Building::nextframe()
         missionThrowStep = THROWMISSION_ARROWTOWN_TIMER;
 
     setNowRes();
-    if(Percent<100)
+    if(Percent<Double(100))
     {
         nowres = nowlist->begin();
         advance(nowres, (int)(Percent/25));
@@ -88,8 +88,8 @@ void Building::nextframe()
             if(fireNowRes == fireNowList->end())
                 fireNowRes = fireNowList->begin();
 
-            this->fireImageX = fireNowRes->pix.width()/2.0;
-            this->fireImageY = fireNowRes->pix.width()/4.0;
+            this->fireImageX = fireNowRes->pix.width()/Double(2);
+            this->fireImageY = fireNowRes->pix.width()/Double(4);
         }
 
         if(defencing)
@@ -102,7 +102,7 @@ void Building::nextframe()
 void Building::setNowRes()
 {
     std::list<ImageResource>* tempNowlist = NULL;
-    if(Percent<100) tempNowlist = Building::build[Foundation];
+    if(Percent<Double(100)) tempNowlist = Building::build[Foundation];
     else
     {
         // 判断敌我: 如果 playerRepresent != NOWPLAYERREPRESENT，则为敌方
@@ -196,8 +196,8 @@ int Building::get_civilization()
 
 void Building::init_Blood()
 {
-    if(Percent == 100) Blood = 1;
-    else Blood = 1.0/(double)getMaxBlood();
+    if(Percent == Double(100)) Blood = 1;
+    else Blood = Double(1)/(Double)getMaxBlood();
 }
 
 
@@ -214,7 +214,7 @@ void Building::setAction( int actNum)
 
 void Building::initAction()
 {
-    if(actSpeed != 0 && actNum != ACT_NULL)
+    if(actSpeed != Double(0) && actNum != ACT_NULL)
         playerScience->BuildingActionOverExecuting(Num, actNum);
 
     actName = ACT_NULL;
@@ -329,7 +329,7 @@ void Building::ActNumToActName()
 
 
 /*******战斗相关*******/
-double Building::getDis_attack()
+Double Building::getDis_attack()
 {
     if(getNum() == BUILDING_ARROWTOWER)
         return ( dis_Attack + getArrowTowerRangeAddition() )*BLOCKSIDELENGTH;
@@ -450,14 +450,14 @@ void Building::deallocatebuildFire(int type)
 
 /********************************************/
 /*****************act相关***************/
-bool Building::tryDeductRepairHpCost(double hpFractionRepaired, Player* owner)
+bool Building::tryDeductRepairHpCost(Double hpFractionRepaired, Player* owner)
 {
-    if (owner == NULL || hpFractionRepaired <= 0.0 || !isConstructed() || playerScience == NULL)
+    if (owner == NULL || hpFractionRepaired <= Double::Zero() || !isConstructed() || playerScience == NULL)
         return true;
 
     int wood = 0, food = 0, stone = 0, gold = 0;
     playerScience->get_Resource_Consume(Num, wood, food, stone, gold);
-    const double mult = REPAIR_COST_RATIO * hpFractionRepaired;
+    const Double mult = REPAIR_COST_RATIO * hpFractionRepaired;
 
     repairResDebtWood += wood * mult;
     repairResDebtFood += food * mult;
@@ -493,23 +493,23 @@ bool Building::tryDeductRepairHpCost(double hpFractionRepaired, Player* owner)
 
 void Building::update_Build()
 {
-    double ratio = get_retio_Build();
+    Double ratio = get_retio_Build();
 
     if(!constructed)
     {
         Percent+=ratio;
-        if(Percent>100) Percent = 100;
+        if(Percent>Double(100)) Percent = 100;
     }
 
     if(!isDie())
-        Blood+=ratio/100;
+        Blood+=ratio/Double(100);
 
-    if(Blood>1) Blood = 1;
+    if(Blood>Double(1)) Blood = 1;
 }
 
 void Building::update_Action(){
     actPercent += actSpeed;
-    if(actPercent > 100) actPercent = 100;
+    if(actPercent > Double(100)) actPercent = 100;
 }
 
 void Building::setActStatus(int wood , int food , int stone , int gold)
@@ -527,16 +527,16 @@ void Building::setActStatus(int wood , int food , int stone , int gold)
     }
 }
 
-double Building::get_retio_Build()
+Double Building::get_retio_Build()
 {
-    if(is_cheatAction) return 100.0;
-    else return 100.0/playerScience->get_buildTime(Num)/TimePerFrame;
+    if(is_cheatAction) return Double(100);
+    else return Double(100)/playerScience->get_buildTime(Num)/TimePerFrame;
 }
 
-double Building::get_retio_Action()
+Double Building::get_retio_Action()
 {
-    if(is_cheatAction) return 100.0;
-    else return 100.0/playerScience->get_actTime(Num, actNum)/TimePerFrame;
+    if(is_cheatAction) return Double(100);
+    else return Double(100)/playerScience->get_actTime(Num, actNum)/TimePerFrame;
 }
 
 

@@ -126,9 +126,9 @@ void ViewWidget::paintEvent(QPaintEvent *)
         }
     }
     //
-    double w=width(),h=height();
-    double Sin=h/sqrt(h*h+w*w),Cos=w/sqrt(h*h+w*w);
-    double fac=h/2/MAP_L/Sin;
+    Double w=width(),h=height();
+    Double Sin=h/sqrt(h*h+w*w),Cos=w/sqrt(h*h+w*w);
+    Double fac=h/2/MAP_L/Sin;
     auto MapTo=[&](int L,int U)->array<int,2>{
         int paintY = Sin*(L-U+MAP_U)*fac;
         int paintX = Cos * (L + U)*fac;

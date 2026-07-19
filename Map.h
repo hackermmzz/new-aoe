@@ -97,8 +97,8 @@ public:
 
     void add_Map_Vision( Coordinate* object );
     void add_Map_Object( Coordinate* object ){
-        for(int x = object->getBlockDR(); x<object->getBlockDR()+object->get_BlockSizeLen(); x++ )
-            for(int y = object->getBlockUR(); y<object->getBlockUR()+object->get_BlockSizeLen(); y++)
+        for(int x = object->getBlockDR(); x<int(object->getBlockDR()+object->get_BlockSizeLen()); x++ )
+            for(int y = object->getBlockUR(); y<int(object->getBlockUR()+object->get_BlockSizeLen()); y++)
                 map_Object[x][y].push_back(object);
     }
 
@@ -113,11 +113,11 @@ public:
 
     void setPlayer(Player** player){ this->player = player; }
 
-    int addStaticRes(int Num,double DR,double UR);
+    int addStaticRes(int Num,Double DR,Double UR);
 
     int addStaticRes(int Num, int BlockDR, int BlockUR);
 
-    bool addAnimal(int Num,double DR,double UR);
+    bool addAnimal(int Num,Double DR,Double UR);
 
     bool loadResource();
 
@@ -176,8 +176,8 @@ public:
     // 应用敌人状态到MainWidget
     void applyEnemyStatusToMainWidget(class MainWidget* mainWidget);
     bool  CheckIsNearOcean(int x,int y);
-    double tranL(double BlockL);
-    double tranU(double BlockU);
+    Double tranL(Double BlockL);
+    Double tranU(Double BlockU);
 
     //寻路障碍地图
     void clearfindPathMapTemperature();
