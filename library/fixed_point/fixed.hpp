@@ -62,7 +62,7 @@ public:
 
     static constexpr int kFractionBits = FractionBits;
     static constexpr BaseType Scale=static_cast<BaseType>(uint16_t(1)) << FractionBits;
-    static constexpr ThisType Zero(){ constexpr ThisType ret;return ret;}
+    __forceinline static constexpr ThisType Zero(){ constexpr ThisType ret(0);return ret;}
     // ------------------------------------------------------------------------
     // Data
     // ------------------------------------------------------------------------
