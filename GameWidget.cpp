@@ -670,7 +670,6 @@ void GameWidget::movemap()
     }
     DR=(BlockDR+Double("0.5"))*16*gen5;
     UR=(BlockUR+Double("0.5"))*16*gen5;
-
 }
 
 void GameWidget::UpdateData()

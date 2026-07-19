@@ -115,8 +115,8 @@ Fixed<BaseType, Store, FractionBits> atan2(const Fixed<BaseType, Store, Fraction
     static const F zero("0");
     static const F one ("1");
     static const F pi  = F("3.14159265358979323846");
-    static const F half_pi  = F("1.57079632679489661923");
-    static const F quart_pi = F("0.78539816339744830962");  // π/4
+    static const F half_pi  =pi/2;
+    static const F quart_pi = pi/4;  // π/4
     static const F half("0.5");
 
     if (x == zero && y == zero)

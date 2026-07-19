@@ -36,11 +36,11 @@ using FixedPoint128_64_32=Fixed<Int128,int64_t,32>;
 using FixedPoint128_64_16=Fixed<Int128,int64_t,16>;
 using FixedPoint64_32_16=Fixed<int64_t,int32_t,16>;
 using FixedPoint64_32_8=Fixed<int64_t,int32_t,8>;
-using Double=FixedPoint128_64_16;
+using Double=FixedPoint128_64_32;
 /**********debug消息************/
 #define REPRESENT_BOARDCAST_MESSAGE -1
 /********** 游戏配置数据 **********/
-#define gen5 sqrt(Double(5))
+const Double gen5=sqrt(Double(5),100);
 #define GENERATE_L (MAP_L+8)
 #define GENERATE_U (MAP_U+8)
 #define GAMEWIDGET_MIDBLOCKL 22

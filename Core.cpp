@@ -21,7 +21,6 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
 
 void Core::gameUpdate()
 {
-
     //如果是考试状态,做出一些调整
     if(IsExamining)PreProcessDuringExam();
     //
@@ -31,6 +30,7 @@ void Core::gameUpdate()
     //
 
     updateByObject();
+
     //重置人物的位置
     ResetHumanPos();
     loadRelationMap();
@@ -59,6 +59,8 @@ void Core::gameUpdate()
             FirstFrameProcess();
         }
     }
+
+
 }
 void Core::ResetHumanPos(){
     //
@@ -294,10 +296,11 @@ void Core::updateByObject()
             }
         }
     }
-
     std::list<Animal*>::iterator animaliter = theMap->animal.begin();
+
     while (animaliter != theMap->animal.end())
     {
+
         if ((*animaliter)->is_Surplus())
         {
             if ((*animaliter)->needTranState())
@@ -336,6 +339,7 @@ void Core::updateByObject()
             }
             animaliter++;
         }
+
         else if (!(*animaliter)->isDisappearing())
         {
             (*animaliter)->nextframe();
@@ -358,6 +362,7 @@ void Core::updateByObject()
                 animaliter++;
             }
         }
+
     }
 
     std::list<StaticRes*>::iterator SRiter = theMap->staticres.begin();
