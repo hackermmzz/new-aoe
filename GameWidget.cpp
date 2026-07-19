@@ -3,7 +3,7 @@
 #include "Map.h"
 #include <QDateTime>
 #include<QDateTime>
-#include "PerlinNoise.hpp"
+#include "library/perlin_noise/PerlinNoise.hpp"
 GameWidget::GameWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GameWidget)

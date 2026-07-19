@@ -109,7 +109,7 @@ HEADERS += \
     CircleArea.h \
     LineArea.h \
     networkplugin.h \
-    PerlinNoise.hpp
+    library/perlin_noise/PerlinNoise.hpp
 
 FORMS += \
         MainWidget.ui \
