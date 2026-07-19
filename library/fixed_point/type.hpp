@@ -18,42 +18,42 @@ struct Int128 {
 
     // ---- constructors ----
 
- __forceinline   constexpr  Int128() : lo(0), hi(0) {}
+    __forceinline  constexpr  Int128() : lo(0), hi(0) {}
+    __forceinline  constexpr Int128(uint16_t v) : lo(v), hi(0) {}
+    __forceinline  constexpr Int128(uint32_t v) : lo(v), hi(0) {}
+    __forceinline  constexpr Int128(uint64_t v) : lo(v), hi(0) {}
 
-   __forceinline  Int128(int64_t v) : lo(static_cast<uint64_t>(v)), hi(v < 0 ? -1 : 0) {}
+    __forceinline  Int128(int64_t v) : lo(static_cast<uint64_t>(v)), hi(v < 0 ? -1 : 0) {}
+    __forceinline   Int128(int32_t v) : lo(static_cast<uint64_t>(static_cast<int64_t>(v))), hi(v < 0 ? -1 : 0) {}
+    __forceinline  constexpr  Int128(int64_t hi_, uint64_t lo_) : lo(lo_), hi(hi_) {}
 
-  __forceinline  constexpr Int128(uint64_t v) : lo(v), hi(0) {}
 
-  __forceinline   Int128(int32_t v) : lo(static_cast<uint64_t>(static_cast<int64_t>(v))), hi(v < 0 ? -1 : 0) {}
 
-  __forceinline  constexpr Int128(uint32_t v) : lo(v), hi(0) {}
-
-  __forceinline  constexpr  Int128(int64_t hi_, uint64_t lo_) : lo(lo_), hi(hi_) {}
 
     // ---- unary ----
 
-  __forceinline   Int128 operator+() const { return *this; }
+    __forceinline   Int128 operator+() const { return *this; }
 
- __forceinline    Int128 operator-() const {
+    __forceinline    Int128 operator-() const {
         // -x = ~x + 1
         uint64_t neg_lo = ~lo + 1;
         int64_t  neg_hi = ~hi + (neg_lo == 0 ? 1 : 0);
         return Int128(neg_hi, neg_lo);
     }
 
-  __forceinline   Int128 operator~() const { return Int128(~hi, ~lo); }
+    __forceinline   Int128 operator~() const { return Int128(~hi, ~lo); }
 
     // ---- comparison ----
 
     __forceinline bool operator==(const Int128& rhs) const { return hi == rhs.hi && lo == rhs.lo; }
-   __forceinline  bool operator< (const Int128& rhs) const {
+    __forceinline  bool operator< (const Int128& rhs) const {
         if (hi != rhs.hi) return hi < rhs.hi;
         return lo < rhs.lo;
     }
 
     // ---- addition ----
 
-  __forceinline    Int128 operator+(const Int128& rhs) const {
+    __forceinline    Int128 operator+(const Int128& rhs) const {
         uint64_t sum_lo = lo + rhs.lo;
         int64_t  carry  = (sum_lo < lo) ? 1 : 0;
         int64_t  sum_hi = hi + rhs.hi + carry;
@@ -62,7 +62,7 @@ struct Int128 {
 
     // ---- subtraction ----
 
-   __forceinline   Int128 operator-(const Int128& rhs) const {
+    __forceinline   Int128 operator-(const Int128& rhs) const {
         uint64_t diff_lo = lo - rhs.lo;
         int64_t  borrow  = (diff_lo > lo) ? 1 : 0;
         int64_t  diff_hi = hi - rhs.hi - borrow;
@@ -71,7 +71,7 @@ struct Int128 {
 
     // ---- multiplication (128 × 128 → low 128 bits) ----
 
-   __forceinline   Int128 operator*(const Int128& rhs) const {
+    __forceinline   Int128 operator*(const Int128& rhs) const {
         // Decompose into 32-bit limbs: a = a1<<32 | a0,  b = b1<<32 | b0
         uint64_t a0 = lo & 0xFFFFFFFF;
         uint64_t a1 = lo >> 32;
@@ -125,24 +125,24 @@ struct Int128 {
 
     // ---- division ----
 
-  __forceinline    Int128 operator/(const Int128& rhs) const {
+    __forceinline    Int128 operator/(const Int128& rhs) const {
         return divmod(rhs).first;
     }
 
-   __forceinline   Int128 operator%(const Int128& rhs) const {
+    __forceinline   Int128 operator%(const Int128& rhs) const {
         return divmod(rhs).second;
     }
 
     // ---- shift ----
 
-  __forceinline   constexpr Int128 operator<<(int n) const {
+    __forceinline   constexpr Int128 operator<<(int n) const {
         if (n <= 0) return *this;
         if (n >= 128) return Int128(0, 0);
         if (n >= 64) return Int128(static_cast<int64_t>(lo << (n - 64)), 0);
         return Int128((hi << n) | static_cast<int64_t>(lo >> (64 - n)), lo << n);
     }
 
-   __forceinline  constexpr Int128 operator>>(int n) const {
+    __forceinline  constexpr Int128 operator>>(int n) const {
         if (n <= 0) return *this;
         if (n >= 128) return Int128(hi < 0 ? -1 : 0, hi < 0 ? ~uint64_t(0) : 0);
         if (n >= 64) return Int128(hi < 0 ? -1 : 0, static_cast<uint64_t>(hi) >> (n - 64));
@@ -190,7 +190,7 @@ private:
     }
 
     // Unsigned 128-bit subtraction: a -= b  (assumes a >= b).
-   __forceinline  static  void _u128_sub(U128& a, const U128& b) {
+    __forceinline  static  void _u128_sub(U128& a, const U128& b) {
         uint64_t sub_lo = a.lo - b.lo;
         uint64_t borrow = (sub_lo > a.lo) ? 1 : 0;
         a.hi = a.hi - b.hi - borrow;

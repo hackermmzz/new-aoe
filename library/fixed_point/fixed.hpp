@@ -61,7 +61,7 @@ public:
     using ThisType       = Fixed<BaseType, Store, FractionBits>;
 
     static constexpr int kFractionBits = FractionBits;
-    static constexpr BaseType Scale=static_cast<BaseType>(uint32_t(1)) << FractionBits;
+    static constexpr BaseType Scale=static_cast<BaseType>(uint16_t(1)) << FractionBits;
     static constexpr ThisType Zero(){ constexpr ThisType ret;return ret;}
     // ------------------------------------------------------------------------
     // Data
@@ -172,7 +172,7 @@ public:
         return Fixed::FromRaw(static_cast<Store>(neg ? -result : result));
     }
 
-private:
+    private:
     // ---- recursive  helpers (C++11-compatible, no loops) ----
 
     static   BaseType _pow10(int n) {
@@ -231,55 +231,55 @@ private:
         return neg ? -result : result;
     }
 
-public:
+    public:
 
     // ------------------------------------------------------------------------
     // Conversion operators
     // ------------------------------------------------------------------------
     template <typename Int,
               typename = typename std::enable_if<std::is_integral<Int>::value>::type>
-   __forceinline constexpr  operator Int() const {
+    __forceinline constexpr  operator Int() const {
         return static_cast<Int>(static_cast<BaseType>(raw_) / Scale);
     }
-   __forceinline constexpr operator char()const{
+    __forceinline constexpr operator char()const{
         return static_cast<char>(int());
     }
-   __forceinline constexpr operator unsigned char()const{
+    __forceinline constexpr operator unsigned char()const{
         return static_cast<unsigned char>(char());
     }
-   __forceinline constexpr  explicit operator float() const {
+    __forceinline constexpr  explicit operator float() const {
         return static_cast<float>(static_cast<BaseType>(raw_)) / static_cast<float>(Scale);
     }
 
-   __forceinline constexpr explicit operator double() const {
+    __forceinline constexpr explicit operator double() const {
         return static_cast<double>(static_cast<BaseType>(raw_)) / static_cast<double>(Scale);
     }
 
     // ------------------------------------------------------------------------
     // Raw access
     // ------------------------------------------------------------------------
-   __forceinline   Store raw() const { return raw_; }
+    __forceinline   Store raw() const { return raw_; }
 
     // ------------------------------------------------------------------------
     // Unary operators
     // ------------------------------------------------------------------------
-   __forceinline   Fixed operator+() const { return *this; }
-   __forceinline   Fixed operator-() const { return Fixed::FromRaw(static_cast<Store>(-raw_)); }
+    __forceinline   Fixed operator+() const { return *this; }
+    __forceinline   Fixed operator-() const { return Fixed::FromRaw(static_cast<Store>(-raw_)); }
 
     // ------------------------------------------------------------------------
     // Comparison operators
     // ------------------------------------------------------------------------
-   __forceinline   bool operator==(const Fixed& rhs) const { return raw_ == rhs.raw_; }
-   __forceinline   bool operator!=(const Fixed& rhs) const { return !(raw_ == rhs.raw_); }
-   __forceinline   bool operator< (const Fixed& rhs) const { return raw_ <  rhs.raw_; }
-   __forceinline  bool operator> (const Fixed& rhs) const { return rhs.raw_<raw_; }
-   __forceinline   bool operator<=(const Fixed& rhs) const { return !(raw_ > rhs.raw_); }
-   __forceinline   bool operator>=(const Fixed& rhs) const { return !(raw_ < rhs.raw_); }
+    __forceinline   bool operator==(const Fixed& rhs) const { return raw_ == rhs.raw_; }
+    __forceinline   bool operator!=(const Fixed& rhs) const { return !(raw_ == rhs.raw_); }
+    __forceinline   bool operator< (const Fixed& rhs) const { return raw_ <  rhs.raw_; }
+    __forceinline  bool operator> (const Fixed& rhs) const { return rhs.raw_<raw_; }
+    __forceinline   bool operator<=(const Fixed& rhs) const { return !(raw_ > rhs.raw_); }
+    __forceinline   bool operator>=(const Fixed& rhs) const { return !(raw_ < rhs.raw_); }
 
     // ------------------------------------------------------------------------
     // Arithmetic: Fixed OP Fixed
     // ------------------------------------------------------------------------
-   __forceinline   Fixed operator+(const Fixed& rhs) const {
+    __forceinline   Fixed operator+(const Fixed& rhs) const {
         return Fixed::FromRaw(static_cast<Store>(raw_ + rhs.raw_));
     }
 
@@ -287,7 +287,7 @@ public:
         return Fixed::FromRaw(static_cast<Store>(raw_ - rhs.raw_));
     }
 
-   __forceinline   Fixed operator*(const Fixed& rhs) const {
+    __forceinline   Fixed operator*(const Fixed& rhs) const {
         return Fixed::FromRaw(static_cast<Store>(
             (static_cast<BaseType>(raw_) * static_cast<BaseType>(rhs.raw_)) / Scale));
     }
@@ -297,7 +297,7 @@ public:
             (static_cast<BaseType>(raw_) * Scale) / static_cast<BaseType>(rhs.raw_)));
     }
 
-   __forceinline   Fixed operator%(const Fixed& rhs) const {
+    __forceinline   Fixed operator%(const Fixed& rhs) const {
         return Fixed::FromRaw(static_cast<Store>((raw_%rhs.raw_)));
     }
 
@@ -306,21 +306,21 @@ public:
     // ------------------------------------------------------------------------
 
     template <typename Int>
-   __forceinline   auto operator+(Int rhs) const ->
+    __forceinline   auto operator+(Int rhs) const ->
         typename std::enable_if<std::is_integral<Int>::value, Fixed>::type
     {
         return *this + Fixed(static_cast<BaseType>(rhs));
     }
 
     template <typename Int>
-   __forceinline   auto operator-(Int rhs) const ->
+    __forceinline   auto operator-(Int rhs) const ->
         typename std::enable_if<std::is_integral<Int>::value, Fixed>::type
     {
         return *this - Fixed(static_cast<BaseType>(rhs));
     }
 
     template <typename Int>
-   __forceinline   auto operator*(Int rhs) const ->
+    __forceinline   auto operator*(Int rhs) const ->
         typename std::enable_if<std::is_integral<Int>::value, Fixed>::type
     {
         return Fixed::FromRaw(static_cast<Store>(
@@ -330,7 +330,7 @@ public:
     }
 
     template <typename Int>
-   __forceinline   auto operator/(Int rhs) const ->
+    __forceinline   auto operator/(Int rhs) const ->
         typename std::enable_if<std::is_integral<Int>::value, Fixed>::type
     {
         return Fixed::FromRaw(static_cast<Store>(
@@ -340,7 +340,7 @@ public:
     // ------------------------------------------------------------------------
     // Compound-assignment: Fixed OP Fixed
     // ------------------------------------------------------------------------
-   __forceinline   Fixed& operator+=(const Fixed& rhs) {
+    __forceinline   Fixed& operator+=(const Fixed& rhs) {
         raw_ = static_cast<Store>(raw_ + rhs.raw_);
         return *this;
     }
@@ -350,19 +350,19 @@ public:
         return *this;
     }
 
-   __forceinline   Fixed& operator*=(const Fixed& rhs) {
+    __forceinline   Fixed& operator*=(const Fixed& rhs) {
         raw_ = static_cast<Store>(
             (static_cast<BaseType>(raw_) * static_cast<BaseType>(rhs.raw_)) / Scale);
         return *this;
     }
 
-   __forceinline   Fixed& operator/=(const Fixed& rhs) {
+    __forceinline   Fixed& operator/=(const Fixed& rhs) {
         raw_ = static_cast<Store>(
             (static_cast<BaseType>(raw_) * Scale) / static_cast<BaseType>(rhs.raw_));
         return *this;
     }
 
-   __forceinline   Fixed& operator%=(const Fixed& rhs) {
+    __forceinline   Fixed& operator%=(const Fixed& rhs) {
         raw_ = static_cast<Store>(raw_ % rhs.raw_);
         return *this;
     }
@@ -370,40 +370,40 @@ public:
     // ------------------------------------------------------------------------
     // Increment / Decrement
     // ------------------------------------------------------------------------
-   __forceinline   Fixed& operator++() { *this += Fixed(1); return *this; }
-   __forceinline   Fixed  operator++(int) { Fixed tmp = *this; ++*this; return tmp; }
-   __forceinline   Fixed& operator--() { *this -= Fixed(1); return *this; }
-   __forceinline   Fixed  operator--(int) { Fixed tmp = *this; --*this; return tmp; }
+    __forceinline   Fixed& operator++() { *this += Fixed(1); return *this; }
+    __forceinline   Fixed  operator++(int) { Fixed tmp = *this; ++*this; return tmp; }
+    __forceinline   Fixed& operator--() { *this -= Fixed(1); return *this; }
+    __forceinline   Fixed  operator--(int) { Fixed tmp = *this; --*this; return tmp; }
 
     // ------------------------------------------------------------------------
     // Absolute value
     // ------------------------------------------------------------------------
-   __forceinline   Fixed abs() const {
+    __forceinline   Fixed abs() const {
         return Fixed::FromRaw(raw_ < 0 ? static_cast<Store>(-raw_) : raw_);
     }
 
     // ------------------------------------------------------------------------
     // Round to nearest integer (returning a Fixed still in the same format)
     // ------------------------------------------------------------------------
-   __forceinline   Fixed round() const {
+    __forceinline   Fixed round() const {
         BaseType v   = static_cast<BaseType>(raw_);
         BaseType adj = ((*this) >= Zero()) ? (Scale / 2) : -(Scale / 2);
         return Fixed::FromRaw(static_cast<Store>(((v + adj) / Scale) * Scale));
     }
 
-  __forceinline    Fixed floor() const {
+    __forceinline    Fixed floor() const {
         BaseType v = static_cast<BaseType>(raw_);
         return Fixed::FromRaw(static_cast<Store>((v / Scale) * Scale));
     }
 
-   __forceinline   Fixed ceil() const {
+    __forceinline   Fixed ceil() const {
         BaseType v   = static_cast<BaseType>(raw_);
         BaseType rem = v % Scale;
         return Fixed::FromRaw(static_cast<Store>(
             rem == 0 ? v : v + (Scale - rem)));
     }
 
-   __forceinline   Fixed trunc() const {
+    __forceinline   Fixed trunc() const {
         // Always round toward zero — floor for positive, ceil for negative
         return (raw_ >= 0) ? floor() : -((-*this).floor());
     }
@@ -411,19 +411,19 @@ public:
     // ------------------------------------------------------------------------
     // Constants
     // ------------------------------------------------------------------------
-   __forceinline  static  Fixed min() {
+    __forceinline  static  Fixed min() {
         return Fixed::FromRaw(std::numeric_limits<Store>::min());
     }
-   __forceinline  static  Fixed max() {
+    __forceinline  static  Fixed max() {
         return Fixed::FromRaw(std::numeric_limits<Store>::max());
     }
-  __forceinline   static  Fixed epsilon() {
+    __forceinline   static  Fixed epsilon() {
         return Fixed::FromRaw(static_cast<Store>(1));
     }
-   __forceinline  static  Fixed pi() {
+    __forceinline  static  Fixed pi() {
         return Fixed::FromDouble(3.14159265358979323846);
     }
-   __forceinline  static  Fixed e() {
+    __forceinline  static  Fixed e() {
         return Fixed::FromDouble(2.71828182845904523536);
     }
 
@@ -433,63 +433,63 @@ public:
 // Symmetric operators:  integer OP Fixed
 // ============================================================================
 
-template <typename BaseType, typename Store, int FBits, typename Int>
-__forceinline  auto operator+(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
+    template <typename BaseType, typename Store, int FBits, typename Int>
+    __forceinline  auto operator+(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
     typename std::enable_if<std::is_integral<Int>::value,
                             Fixed<BaseType, Store, FBits>>::type
-{
+    {
     return rhs + lhs;
-}
+    }
 
-template <typename BaseType, typename Store, int FBits, typename Int>
- __forceinline auto operator-(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
+    template <typename BaseType, typename Store, int FBits, typename Int>
+    __forceinline auto operator-(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
     typename std::enable_if<std::is_integral<Int>::value,
                             Fixed<BaseType, Store, FBits>>::type
-{
+    {
     return Fixed<BaseType, Store, FBits>(static_cast<BaseType>(lhs)) - rhs;
-}
+    }
 
-template <typename BaseType, typename Store, int FBits, typename Int>
-__forceinline  auto operator*(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
+    template <typename BaseType, typename Store, int FBits, typename Int>
+    __forceinline  auto operator*(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
     typename std::enable_if<std::is_integral<Int>::value,
                             Fixed<BaseType, Store, FBits>>::type
-{
+    {
     return rhs * lhs;
-}
+    }
 
-template <typename BaseType, typename Store, int FBits, typename Int>
- __forceinline auto operator/(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
+    template <typename BaseType, typename Store, int FBits, typename Int>
+    __forceinline auto operator/(Int lhs, const Fixed<BaseType, Store, FBits>& rhs) ->
     typename std::enable_if<std::is_integral<Int>::value,
                             Fixed<BaseType, Store, FBits>>::type
-{
+    {
     return Fixed<BaseType, Store, FBits>(static_cast<BaseType>(lhs)) / rhs;
-}
+    }
 
-// ============================================================================
-// Stream output
-// ============================================================================
+    // ============================================================================
+    // Stream output
+    // ============================================================================
 
-template <typename BaseType, typename Store, int FractionBits>
-__forceinline std::ostream& operator<<(std::ostream& os, const Fixed<BaseType, Store, FractionBits>& v) {
+    template <typename BaseType, typename Store, int FractionBits>
+    __forceinline std::ostream& operator<<(std::ostream& os, const Fixed<BaseType, Store, FractionBits>& v) {
     return os << static_cast<double>(v);
-}
+    }
 
-// ============================================================================
-// Convenience aliases
-// ============================================================================
+    // ============================================================================
+    // Convenience aliases
+    // ============================================================================
 
-// Q-format nomenclature: Qm.n where m = integer bits, n = FractionBits
-// Storage = BaseType
+    // Q-format nomenclature: Qm.n where m = integer bits, n = FractionBits
+    // Storage = BaseType
 
-template <int FractionBits>
-using FixedQ = Fixed<int32_t, int32_t, FractionBits>;
+    template <int FractionBits>
+    using FixedQ = Fixed<int32_t, int32_t, FractionBits>;
 
-template <int FractionBits>
-using FixedQL = Fixed<int64_t, int64_t, FractionBits>;
+    template <int FractionBits>
+    using FixedQL = Fixed<int64_t, int64_t, FractionBits>;
 
-// Common fixed-point formats
-using Fixed16_16  = Fixed<int32_t, int32_t, 16>;   // Q16.16
-using Fixed8_24   = Fixed<int32_t, int32_t, 24>;   // Q8.24
-using Fixed24_8   = Fixed<int32_t, int32_t, 8>;    // Q24.8
-using Fixed32_32  = Fixed<int64_t, int64_t, 32>;   // Q32.32
-using Fixed16      = Fixed<int32_t, int32_t, 16>;  // legacy alias
+    // Common fixed-point formats
+    using Fixed16_16  = Fixed<int32_t, int32_t, 16>;   // Q16.16
+    using Fixed8_24   = Fixed<int32_t, int32_t, 24>;   // Q8.24
+    using Fixed24_8   = Fixed<int32_t, int32_t, 8>;    // Q24.8
+    using Fixed32_32  = Fixed<int64_t, int64_t, 32>;   // Q32.32
+    using Fixed16      = Fixed<int32_t, int32_t, 16>;  // legacy alias
