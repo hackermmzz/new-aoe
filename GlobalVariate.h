@@ -105,7 +105,7 @@ struct tagBuilding:tagObj
 
 struct tagResource:tagObj
 {
-    Double DR, UR; //细节坐标
+    double DR, UR; //细节坐标
     int Type; // 资源类型
     int ProductSort; // 产品种类
     int Cnt; // 剩余资源数量
@@ -114,8 +114,8 @@ struct tagResource:tagObj
 
 struct tagHuman:tagObj
 {
-    Double DR, UR; //细节坐标
-    Double DR0, UR0; // 目的地坐标
+    double DR, UR; //细节坐标
+    double DR0, UR0; // 目的地坐标
     int NowState; // 当前状态
     int WorkObjectSN; // 工作对象序列号
     int Blood; // 当前血量
@@ -139,10 +139,10 @@ struct tagArmy : public tagHuman
     int status;
     int starttime;
     int finishtime;
-    Double startpointDR;
-    Double startpointUR;
-    Double destinaDR;
-    Double destinaUR;
+    double startpointDR;
+    double startpointUR;
+    double destinaDR;
+    double destinaUR;
     bool ifAttack;
     int timelock;
     int ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1

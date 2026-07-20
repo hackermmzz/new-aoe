@@ -409,8 +409,8 @@ void Core::updateByPlayer(int id) {
         tagHuman taghuman;
         taghuman.SN = human->getglobalNum();
         taghuman.Blood = human->getBlood();
-        taghuman.DR = human->getDR();
-        taghuman.UR = human->getUR();
+        taghuman.DR = double(human->getDR());
+        taghuman.UR =  double(human->getUR());
         taghuman.BlockDR = human->getBlockDR();
         taghuman.BlockUR = human->getBlockUR();
         taghuman.Blood = human->getBlood();
@@ -421,8 +421,8 @@ void Core::updateByPlayer(int id) {
 
         taghuman.WorkObjectSN = interactionList->getObjectSN(human);
 
-        taghuman.DR0 = human->getDR0();
-        taghuman.UR0 = human->getUR0();
+        taghuman.DR0 =  double(human->getDR0());
+        taghuman.UR0 =  double(human->getUR0());
         if (human->getSort() == SORT_FARMER) {
             Farmer* farmer = static_cast<Farmer*> (human);
             tagFarmer tagfarmer;
@@ -452,10 +452,10 @@ void Core::updateByPlayer(int id) {
             tagarmy.status = army->getstatus();
             tagarmy.starttime = army->getstarttime();
             tagarmy.finishtime = army->getfinishtime();
-            tagarmy.startpointDR = army->getstartpointDR();
-            tagarmy.startpointUR = army->getstartpointUR();
-            tagarmy.destinaDR = army->getdestinaDR();
-            tagarmy.destinaUR = army->getdestinaUR();
+            tagarmy.startpointDR =  double(army->getstartpointDR());
+            tagarmy.startpointUR =  double(army->getstartpointUR());
+            tagarmy.destinaDR =  double(army->getdestinaDR());
+            tagarmy.destinaUR =  double(army->getdestinaUR());
             tagarmy.ifAttack = army->getifAttack();
             tagarmy.timelock = army->gettimelock();
             int convertRestFrames = army->getConvertRestEndFrame() - g_frame;
@@ -505,8 +505,8 @@ void Core::updateByPlayer(int id) {
         }
         resource.BlockDR = animal->getBlockDR();
         resource.BlockUR = animal->getBlockUR();
-        resource.DR = animal->getDR();
-        resource.UR = animal->getUR();
+        resource.DR =  double(animal->getDR());
+        resource.UR =  double(animal->getUR());
         resource.Blood = animal->getBlood();
         resource.Cnt = animal->get_Cnt();
         if (id == 1 || animal->getexplored() == 1)
@@ -517,8 +517,8 @@ void Core::updateByPlayer(int id) {
     for (StaticRes* staticRes : theMap->staticres) {
         tagResource resource;
         resource.SN = staticRes->getglobalNum();
-        resource.DR = staticRes->getDR();
-        resource.UR = staticRes->getUR();
+        resource.DR =  double(staticRes->getDR());
+        resource.UR =  double(staticRes->getUR());
         resource.BlockDR = staticRes->getBlockDR();
         resource.BlockUR = staticRes->getBlockUR();
         switch (staticRes->getNum()) {

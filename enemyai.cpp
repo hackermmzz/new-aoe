@@ -61,7 +61,7 @@ static map<int, bool> ifA;
 static int sum;
 static int mode = -3;
 
-static pair<Double,Double>Enemy_Center;                    //enemy武器工程厂
+static pair<double,double>Enemy_Center;                    //enemy武器工程厂
 static unordered_map<int,int> Defend_Center_Enemy;         //仅在内圈防御武器工程厂的人
 static unordered_map<int,int> PriestGuard_Center_Enemy;    //从厂区防守兵中抽调的祭司猎手
 // 第一波总目标（击杀 3 农民）是否已完成；完成后不再往 attackEnemy 里加人，避免反复加人/撤退
@@ -93,10 +93,10 @@ static vector<int> wave1KilledFarmers;
 static vector<int> wave2KilledFarmers;
 
 // 所有骚扰兵原始位置，用于撤退
-static map<int, pair<Double, Double>> HarassHome;
+static map<int, pair<double, double>> HarassHome;
 
 // 武器攻城厂附近防守兵原始位置
-static map<int, pair<Double, Double>> DefenseHome;
+static map<int, pair<double, double>> DefenseHome;
 
 // 防止每帧重复下令导致单位抽搐
 static map<int, int> waveLastOrderFrame;
@@ -113,11 +113,14 @@ static map<int, int> fieldSelfDefenseLastOrderFrame;
 #define DEFENSE_CHASE_LIMIT (radius_Outer + 3)
 #define PRIEST_GUARD_RANGE (radius_Outer + 5)
 #define WAVE3_PRIEST_HUNTER_LIMIT 3
-#define STONE_THROWER_EVADE_BUFFER_BLOCKS Double("1.5")
+#define STONE_THROWER_EVADE_BUFFER_BLOCKS 1.5
 #define PRIEST_GUARD_COMPOSITE_BOWMAN_COUNT 3
 #define PRIEST_GUARD_CHARIOT_ARCHER_COUNT 1
 #define PRIEST_GUARD_CHARIOT_COUNT 1
 
+double countdistance(double L0,double U0,double L1,double U1){
+    return sqrt(pow(L0-L1,2)+pow(U0-U1,2));
+}
 //isElementExists函数，用于判断目标容器中的element值是否还存活，存在返回true，不存在返回false，sort为需要检查的类型
 bool isElementExists( int element,int sort) {
     switch(sort){
@@ -347,13 +350,13 @@ static void ifATTACK(){
     //追击检查
     for(int i=0;i<enemyInfo.armies.size();i++){
         if(ifA[enemyInfo.armies[i].SN]==true&&enemyInfo.armies[i].status==DEFENSE){
-            if(countdistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR)>Double(600)){
+            if(countdistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR)>double(600)){
                ifA[enemyInfo.armies[i].SN]=false;
                timer[enemyInfo.armies[i].SN]=g_frame;
             }
         }
         else if(ifA[enemyInfo.armies[i].SN]==true&&enemyInfo.armies[i].status==AROUND){
-            if(countdistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR)>Double(1500)){
+            if(countdistance(enemyInfo.armies[i].DR,enemyInfo.armies[i].UR,enemyInfo.armies[i].startpointDR,enemyInfo.armies[i].startpointUR)>double(1500)){
                ifA[enemyInfo.armies[i].SN]=false;
                timer[enemyInfo.armies[i].SN]=g_frame;
             }
@@ -728,7 +731,7 @@ static int FindStoneThrowerDefenseTarget(const tagArmy& army)
     return bestSN;
 }
 
-static bool FindEnemyTargetDetailPosition(int targetSN, Double& dr, Double& ur)
+static bool FindEnemyTargetDetailPosition(int targetSN, double& dr, double& ur)
 {
     for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
         if (enemyArmy.SN == targetSN) {
@@ -751,48 +754,48 @@ static bool FindEnemyTargetDetailPosition(int targetSN, Double& dr, Double& ur)
 
 static bool GetStoneThrowerEvadePoint(const tagArmy& army,
                                       int targetSN,
-                                      Double& evadeDR,
-                                      Double& evadeUR)
+                                      double& evadeDR,
+                                      double& evadeUR)
 {
-    Double targetDR = 0;
-    Double targetUR = 0;
+    double targetDR = 0;
+    double targetUR = 0;
     if (!FindEnemyTargetDetailPosition(targetSN, targetDR, targetUR)) return false;
 
-    Double minRange = DIS_MIN_STONE_THROWER * BLOCKSIDELENGTH;
-    Double distance = countdistance(army.DR, army.UR, targetDR, targetUR);
+    double minRange = DIS_MIN_STONE_THROWER * BLOCKSIDELENGTH;
+    double distance = countdistance(army.DR, army.UR, targetDR, targetUR);
     if (distance >= minRange) return false;
 
-    Double awayDR = army.DR - targetDR;
-    Double awayUR = army.UR - targetUR;
+    double awayDR = army.DR - targetDR;
+    double awayUR = army.UR - targetUR;
 
-    if (distance <= Double("0.0001")) {
+    if (distance <=0.0001) {
         auto home = DefenseHome.find(army.SN);
         if (home != DefenseHome.end()) {
             awayDR = home->second.first - targetDR;
             awayUR = home->second.second - targetUR;
         } else {
-            awayDR = Enemy_Center.first * BLOCKSIDELENGTH - targetDR;
-            awayUR = Enemy_Center.second * BLOCKSIDELENGTH - targetUR;
+            awayDR = Enemy_Center.first * double(BLOCKSIDELENGTH) - targetDR;
+            awayUR = Enemy_Center.second * double(BLOCKSIDELENGTH) - targetUR;
         }
 
         distance = countdistance(0, 0, awayDR, awayUR);
-        if (distance <= Double("0.0001")) {
+        if (distance <=0.0001) {
             awayDR = BLOCKSIDELENGTH;
             awayUR = 0;
             distance = BLOCKSIDELENGTH;
         }
     }
 
-    Double desiredDistance = (DIS_MIN_STONE_THROWER + STONE_THROWER_EVADE_BUFFER_BLOCKS) * BLOCKSIDELENGTH;
-    Double moveDistance = desiredDistance - countdistance(army.DR, army.UR, targetDR, targetUR);
-    if (moveDistance < BLOCKSIDELENGTH) moveDistance = BLOCKSIDELENGTH;
+    double desiredDistance = (double(DIS_MIN_STONE_THROWER) + STONE_THROWER_EVADE_BUFFER_BLOCKS) * double(BLOCKSIDELENGTH);
+    double moveDistance = desiredDistance - countdistance(army.DR, army.UR, targetDR, targetUR);
+    if (moveDistance < double(BLOCKSIDELENGTH)) moveDistance = double(BLOCKSIDELENGTH);
 
     evadeDR = army.DR + awayDR / distance * moveDistance;
     evadeUR = army.UR + awayUR / distance * moveDistance;
 
-    Double minDetail = BLOCKSIDELENGTH / 2;
-    Double maxDR = (MAP_L - Double("0.5")) * BLOCKSIDELENGTH;
-    Double maxUR = (MAP_U - Double("0.5")) * BLOCKSIDELENGTH;
+    double minDetail = BLOCKSIDELENGTH / 2;
+    double maxDR = (MAP_L - 0.5) * double(BLOCKSIDELENGTH);
+    double maxUR = (MAP_U - 0.5) * double(BLOCKSIDELENGTH);
     evadeDR = std::max(minDetail, std::min(evadeDR, maxDR));
     evadeUR = std::max(minDetail, std::min(evadeUR, maxUR));
 
@@ -1919,10 +1922,10 @@ bool EnemyAI::shouldCooperateAttack(int unitSN) {
 }
 
 // 计算两点之间的距离
-Double EnemyAI::calculateDistance(int x1, int y1, int x2, int y2) {
+double EnemyAI::calculateDistance(int x1, int y1, int x2, int y2) {
     int dx = x2 - x1;
     int dy = y2 - y1;
-    return sqrt(Double(dx * dx + dy * dy));
+    return sqrt(double(dx * dx + dy * dy));
 }
 
 // 从目标列表中找到最近的目标
@@ -1930,7 +1933,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
     if (targets.empty()) return -1;
 
     int nearestTarget = -1;
-    Double minDistance = Double::FromDouble(1e9);
+    double minDistance = 1e9;
 
     for (int targetSN : targets) {
         // 找到目标的坐标
@@ -1972,7 +1975,7 @@ int EnemyAI::findNearestTarget(int attackerX, int attackerY, const vector<int>& 
         }
 
         if (found) {
-            Double distance = calculateDistance(attackerX, attackerY, targetX, targetY);
+            double distance = calculateDistance(attackerX, attackerY, targetX, targetY);
             if (distance < minDistance) {
                 minDistance = distance;
                 nearestTarget = targetSN;
@@ -1987,11 +1990,11 @@ tagArmy EnemyAI::Threated(tagArmy *army)
 {
     tagArmy nearestTarget;
     nearestTarget.SN = -1; // 标记为无效
-    Double minDistance = 10;
+    double minDistance = 10;
 
     for(tagArmy& enemyarmy:enemyInfo.enemy_armies)
     {
-        Double Distance=pow(Double(enemyarmy.BlockDR-army->BlockDR),2)+pow(Double(enemyarmy.BlockUR-army->BlockUR),2);
+        double Distance=pow(double(enemyarmy.BlockDR-army->BlockDR),2)+pow(double(enemyarmy.BlockUR-army->BlockUR),2);
         if(enemyarmy.WorkObjectSN==army->SN&&Distance<=minDistance)
         {
             nearestTarget = enemyarmy;
@@ -2074,7 +2077,7 @@ void EnemyAI::Initialize_Enemycenter()
 }
 void EnemyAI::Initialize_Enemymap()
 {
-    if (Enemy_Center.first == Double::Zero() && Enemy_Center.second == Double::Zero()) return;
+    if (Enemy_Center.first == 0 && Enemy_Center.second == 0) return;
 
     for (tagArmy& army : enemyInfo.armies) {
         int d2 = BlockDis2(army.BlockDR, army.BlockUR,
@@ -2092,7 +2095,7 @@ void EnemyAI::Initialize_Enemymap()
 }
 void EnemyAI::AssignDefense()
 {
-    if (Enemy_Center.first == Double::Zero() && Enemy_Center.second == Double::Zero()) return;
+    if (Enemy_Center.first ==0 && Enemy_Center.second == 0) return;
 
     for (auto it = Defend_Center_Enemy.begin(); it != Defend_Center_Enemy.end(); ) {
         int sn = it->first;
@@ -2177,8 +2180,8 @@ void EnemyAI::AssignDefense()
         }
 
         if (targetSN != -1) {
-            Double evadeDR = 0;
-            Double evadeUR = 0;
+            double evadeDR = 0;
+            double evadeUR = 0;
             if (army->Sort == AT_STONE_THROWER &&
                 GetStoneThrowerEvadePoint(*army, targetSN, evadeDR, evadeUR)) {
                 if (g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
