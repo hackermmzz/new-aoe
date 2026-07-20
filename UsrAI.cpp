@@ -4,6 +4,7 @@
 #include<unordered_map>
 #include<list>
 #include <cstdlib>
+
 using namespace std;
 tagGame tagUsrGame;
 ins UsrIns;
