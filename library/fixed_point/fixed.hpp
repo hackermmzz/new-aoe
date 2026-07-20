@@ -7,6 +7,20 @@
 #include <iostream>
 #include <cstdlib>
 
+
+// ============================================================================
+// fast_shr_trunc(x, n) - generic helper used by Fixed<> to divide the raw
+// intermediate value by 2^FractionBits (i.e. by Scale) after a multiply.
+//
+// For built-in integer types the compiler already turns "x / (T(1)<<n)"
+// into an efficient shift sequence when the divisor is a compile-time
+// constant, so the generic template is left as a plain division.
+// ============================================================================
+template <typename T,
+        typename = typename std::enable_if<std::is_integral<T>::value>::type>
+__forceinline constexpr T fast_shr_trunc(T v, int n) {
+    return v / (T(1) << n);
+}
 // ============================================================================
 // Fixed-point number template
 //
@@ -61,7 +75,7 @@ public:
     using ThisType       = Fixed<BaseType, Store, FractionBits>;
 
     static constexpr int kFractionBits = FractionBits;
-    static constexpr BaseType Scale=static_cast<BaseType>(uint16_t(1)) << FractionBits;
+    static constexpr BaseType Scale=static_cast<BaseType>(uint16_t(1)) << kFractionBits;
     __forceinline static ThisType Zero(){ ThisType ret; ret.raw_=static_cast<Store>(0); return ret;}
     // ------------------------------------------------------------------------
     // Data
@@ -72,7 +86,7 @@ public:
     // Construction
     // ------------------------------------------------------------------------
     __forceinline constexpr Fixed() : raw_(0) {}
-    __forceinline constexpr Fixed(const BaseType&val):raw_(val*Scale){}
+    __forceinline constexpr Fixed(const BaseType&val):raw_(val<<kFractionBits){}
     __forceinline constexpr Fixed(const Fixed&) = default;
     __forceinline constexpr Fixed& operator=(const Fixed&) = default;
 
@@ -88,7 +102,7 @@ public:
               typename = typename std::enable_if<
                   std::is_integral<T>::value || std::is_enum<T>::value>::type>
      __forceinline constexpr Fixed(T val)
-        : raw_(static_cast<Store>(static_cast<BaseType>(val) * Scale)) {}
+        : raw_(static_cast<Store>(static_cast<BaseType>(val)<<kFractionBits)) {}
 
     // Compile-time constructor (e.g. Fixed("3.14")).  No error checking —
     // invalid input produces a compile error at  time.
@@ -251,7 +265,8 @@ public:
         return static_cast<unsigned char>(char());
     }
     __forceinline constexpr  explicit operator float() const {
-        return static_cast<float>(static_cast<BaseType>(raw_)) / static_cast<float>(Scale);
+        // Go through double to avoid missing Int128->float conversion
+        return static_cast<float>(static_cast<double>(raw_) / static_cast<double>(Scale));
     }
 
     __forceinline constexpr explicit operator double() const {
@@ -390,47 +405,37 @@ public:
     // ------------------------------------------------------------------------
     // Round to nearest integer (returning a Fixed still in the same format)
     // ------------------------------------------------------------------------
-    __forceinline   Fixed round() const {
-        // Round to nearest integer. Add/subtract half the scale then truncate.
+    __forceinline Fixed round() const {
         Store v = raw_;
-        Store s = static_cast<Store>(Scale);
-        Store adj = (v >= 0) ? (s / 2) : -(s / 2);
-        Store t = v + adj;
-        // Truncate toward zero
-        Store q = t / s;
-        return Fixed::FromRaw(static_cast<Store>(q * s));
-    }
-
-    __forceinline    Fixed floor() const {
-        // C++ division truncates toward zero. For negative values with
-        // non-zero fractional part, we need to subtract one more unit.
-        Store v = raw_;
-        Store q = static_cast<Store>(v / static_cast<Store>(Scale));
-        Store r = v % static_cast<Store>(Scale);
-        if (r != 0 && v < 0) {
-            q = q - static_cast<Store>(1);
+        constexpr Store s = static_cast<Store>(Scale);   // 编译期已知的2的幂
+        constexpr Store mask = s - 1;
+        if (v >= 0) {
+            return Fixed::FromRaw(static_cast<Store>((v + s / 2) & ~mask));
+        } else {
+            Store nv = -v;
+            return Fixed::FromRaw(static_cast<Store>(-((nv + s / 2) & ~mask)));
         }
-        return Fixed::FromRaw(static_cast<Store>(q * static_cast<Store>(Scale)));
     }
 
-    __forceinline   Fixed ceil() const {
-        // C++ division truncates toward zero. For positive values with
-        // non-zero fractional part, we need to add one more unit.
-        Store v = raw_;
-        Store s = static_cast<Store>(Scale);
-        Store q = static_cast<Store>(v / s);
-        Store r = v % s;
-        if (r != 0 && v > 0) {
-            q = q + static_cast<Store>(1);
-        }
-        return Fixed::FromRaw(static_cast<Store>(q * s));
+    __forceinline Fixed floor() const {
+        constexpr Store s = static_cast<Store>(Scale);
+        constexpr Store mask = s - 1;
+        return Fixed::FromRaw(static_cast<Store>(raw_ & ~mask));
     }
 
-    __forceinline   Fixed trunc() const {
-        // Truncate toward zero: just drop fractional bits
-        Store s = static_cast<Store>(Scale);
-        Store q = raw_ / s;
-        return Fixed::FromRaw(static_cast<Store>(q * s));
+    __forceinline Fixed ceil() const {
+        constexpr Store s = static_cast<Store>(Scale);
+        constexpr Store mask = s - 1;
+        return Fixed::FromRaw(static_cast<Store>((raw_ + mask) & ~mask));
+    }
+
+    __forceinline Fixed trunc() const {
+        constexpr Store s = static_cast<Store>(Scale);
+        constexpr Store mask = s - 1;
+        // v >> 63 是算术右移：v为负时全1，v非负时全0，用它当"是否要补偏移量"的开关
+        Store sign_mask = raw_ >> (sizeof(Store) * 8 - 1);
+        Store adj = sign_mask & mask;
+        return Fixed::FromRaw(static_cast<Store>((raw_ + adj) & ~mask));
     }
 
     // ------------------------------------------------------------------------
