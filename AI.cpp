@@ -8,8 +8,8 @@ AI::~AI() {
     wait();
 }
 
-int AI::HumanMove(int SN, Double DR0, Double UR0){
-    return AddToIns(instruction(INS_HUMANMOVE,SN,DR0,UR0));
+int AI::HumanMove(int SN, double DR0, double UR0){
+    return AddToIns(instruction(INS_HUMANMOVE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
 }
 
 int AI::HumanAction(int SN,int obSN){
@@ -24,9 +24,9 @@ int AI::BuildingAction(int SN,int Action){
     return AddToIns(instruction(INS_BUILDINGACTION,SN,Action));
 }
 
-int AI::PinPointStrike(int SN, Double DR0, Double UR0)
+int AI::PinPointStrike(int SN, double DR0, double UR0)
 {
-    return AddToIns(instruction(INS_PINPOINT_STRIKE,SN,DR0,UR0));
+    return AddToIns(instruction(INS_PINPOINT_STRIKE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
 }
 
 void AI::cheatAction() {
@@ -82,7 +82,7 @@ bool AI::isBuilding(int SN) {
     return g_Object[SN] && (sort == SORT_BUILDING || sort == SORT_Building_Resource);
 }
 
-Double AI::calDistance(Double DR1, Double UR1, Double DR2, Double UR2)
+double AI::calDistance(double DR1, double UR1, double DR2, double UR2)
 {
     return pow(pow(DR1 - DR2, 2) + pow(UR1 - UR2, 2), 0.5);
 }
@@ -107,9 +107,9 @@ void AI::DebugText(int debugInt)
     call_debugText("black", " " + AIName[id] + "打印：" + QString::number(debugInt), id);
 }
 
-void AI::DebugText(double debugDouble)
+void AI::DebugText(double debugdouble)
 {
-    call_debugText("black", " " + AIName[id] + "打印：" + QString::number(debugDouble), id);
+    call_debugText("black", " " + AIName[id] + "打印：" + QString::number(debugdouble), id);
 }
 
 

@@ -18,11 +18,11 @@ public:
 
     ~AI();
 
-    int HumanMove(int SN, Double DR0, Double UR0);
+    int HumanMove(int SN, double DR0, double UR0);
     int HumanAction(int SN, int obSN);
     int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR);
     int BuildingAction(int SN, int Action);
-    int PinPointStrike(int SN,Double DR0,Double UR0);
+    int PinPointStrike(int SN,double DR0,double UR0);
     //    void printInsRet(int id);
     void cheatAction();
 
@@ -58,7 +58,7 @@ private:
 public:
     int ProcessDataWork = 0;
 
-    Double calDistance(Double DR1, Double UR1, Double DR2, Double UR2);
+    double calDistance(double DR1, double UR1, double DR2, double UR2);
 
     void DebugText(std::string debugStr);
 
@@ -68,7 +68,7 @@ public:
 
     void DebugText(int debugInt);
 
-    void DebugText(double debugDouble);
+    void DebugText(double debugdouble);
 signals:
     void cheatRes();
     void cheatAttack(int wave);
