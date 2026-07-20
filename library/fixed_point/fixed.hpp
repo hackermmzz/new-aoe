@@ -6,7 +6,7 @@
 #include <ostream>
 #include <iostream>
 #include <cstdlib>
-
+#include "macro.h"
 
 // ============================================================================
 // fast_shr_trunc(x, n) - generic helper used by Fixed<> to divide the raw
