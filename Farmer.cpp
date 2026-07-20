@@ -31,7 +31,7 @@ Farmer::Farmer(Double DR, Double UR , Development* playerScience, int playerRepr
 
     nowres_step = NOWRES_TIMER_FARMER;
 
-    this->Angle=rand()%8;
+    this->Angle=Rand.nextRaw()%8;
     this->state=HUMAN_STATE_IDLE;
     this->resource=0;
     this->DR=DR;

@@ -482,7 +482,7 @@ int Army::gettimelock(){
 void Army::setAttribute()
 {
     this->Blood=1;
-    this->Angle=rand()%8;
+    this->Angle=Rand.nextRaw()%8;
     //设置军队属性
     switch (Num) {
     case AT_CLUBMAN:        //棍棒兵,可升级1次

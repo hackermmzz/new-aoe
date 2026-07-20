@@ -541,7 +541,7 @@ void Core_List::manageRelationList()
 
                         const int minConvertFrames = 2000 / TimePerFrame;
                         const int maxConvertFrames = 6000 / TimePerFrame;
-                        const int randomConvertFrames = minConvertFrames + rand() % (maxConvertFrames - minConvertFrames + 1);
+                        const int randomConvertFrames = minConvertFrames + Rand.nextRaw() % (maxConvertFrames - minConvertFrames + 1);
                         const int restFrames = priest == NULL ? 0 : std::max(0, priest->getConvertRestEndFrame() - g_frame);
                         thisRelation.wait(restFrames + randomConvertFrames);
                     }
@@ -1204,7 +1204,7 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
     //随机生成浮点数
     static auto generateRandomDouble = [&](Double min, Double max) {
         // 生成一个0到RAND_MAX之间的随机整数
-        Double random = Double(rand())/RAND_MAX;
+        Double random = Rand.nextDouble<Double>();
         // 将随机整数映射到指定的范围
         return min + random * (max - min);
         };
@@ -1212,7 +1212,7 @@ void Core_List::object_Unload(Coordinate* object1, Coordinate* object2)
     if (satisfy.size()) {
         auto&& humans = ship->getHumanTransport();
         for (Human* human : humans) {
-            int idx = rand() % satisfy.size();
+            int idx = Rand.nextRaw() % satisfy.size();
             Double targetDr = satisfy[idx][0], targetUr = satisfy[idx][1];
             human->ForceStand(targetDr + generateRandomDouble(1, BLOCKSIDELENGTH - 1),targetUr + generateRandomDouble(1, BLOCKSIDELENGTH - 1));
             human->setTransported(0);
@@ -1512,8 +1512,8 @@ void Core_List::manageMontorAct()
                 do {
                     int L = int(dr / BLOCKSIDELENGTH), U = int(ur / BLOCKSIDELENGTH);
                     if (L >= 0 && U >= 0 && L < MAP_L && U < MAP_U && theMap->cell[L][U].getMapType() == MAPTYPE_OCEAN) {
-                        Double dir0 = Double(rand()) / RAND_MAX*((rand()&1)?-1:1);
-                        Double dir1 = sqrt(1 - dir0 * dir0)*((rand()&1)?-1:1);
+                        Double dir0 =Rand.nextDouble<Double>()*((Rand.nextRaw()&1)?-1:1);
+                        Double dir1 = sqrt(1 - dir0 * dir0)*((Rand.nextRaw()&1)?-1:1);
                         dr = ob_m->getDR() + dir0 * dis;
                         ur = ob_m->getUR() + dir1 * dis;
                         flag = 1;
@@ -1701,7 +1701,7 @@ void Core_List::crashHandle(MoveObject* moveOb)
             //
             auto& blockLab_canMove = theMap->findBlock_Free(nextBlockPoint, 1, landUnit);
 
-            if (blockLab_canMove.size()) PreviousPoint = blockLab_canMove[rand() % blockLab_canMove.size()];
+            if (blockLab_canMove.size()) PreviousPoint = blockLab_canMove[Rand.nextRaw() % blockLab_canMove.size()];
         }
         moveOb->pathOptimize(PreviousPoint);
 
@@ -1719,10 +1719,10 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
         relate_AllObject[moveOb].crash_DealPhase = false;
         moveOb->stateCrash = true;
         if (moveOb->getPlayerRepresent() == relate_AllObject[moveOb].crashRepresent)
-            relate_AllObject[moveOb].wait(rand() % 50);
-        else relate_AllObject[moveOb].wait(rand() % 20);
+            relate_AllObject[moveOb].wait(Rand.nextRaw() % 50);
+        else relate_AllObject[moveOb].wait(Rand.nextRaw() % 20);
 
-        if (rand() % 8 > 0) moveOb->setPath(stack<Point>(), moveOb->getDR(), moveOb->getUR());
+        if (Rand.nextRaw() % 8 > 0) moveOb->setPath(stack<Point>(), moveOb->getDR(), moveOb->getUR());
         if (!moveOb->isStand()) moveOb->setPreStand();
     }
 }

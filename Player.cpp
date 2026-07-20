@@ -380,7 +380,7 @@ void Player::enforcementAction( Building* actBuild, vector<pair<Point,int>>Block
             }
         }
         if(satisfy.size()==0)return;
-        Point block=satisfy[rand()%satisfy.size()];
+        Point block=satisfy[Rand.nextRaw()%satisfy.size()];
         //创建相应对象
         if(creatObjectSort == SORT_FARMER) {
             if(creatObjectNum==FARMERTYPE_FARMER){

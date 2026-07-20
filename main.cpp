@@ -7,7 +7,6 @@
 int main(int argc, char* argv[])
 {
 
-
     //
     QApplication app(argc, argv);
     Logger::init(Logger::LogLevel::Debug);

@@ -8,7 +8,7 @@
 #include<Rectarea.h>
 #include<CircleArea.h>
 #include<LineArea.h>
-int g_globalNum = rand() % 11;
+int g_globalNum = Rand.nextRaw() % 11;
 int g_frame = 0;
 // 全局区域对象定义
 RectArea* g_rectArea = nullptr;

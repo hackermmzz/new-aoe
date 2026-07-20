@@ -182,10 +182,10 @@ void Animal::setAttribute()
         this->Angle = 0;
 
         moveAble = false;
-        treeState = rand()%Stand[this->Num][this->Angle]->size();
+        treeState = Rand.nextRaw()%Stand[this->Num][this->Angle]->size();
     }
     else
-        this->Angle = rand()%8;
+        this->Angle = Rand.nextRaw()%8;
 
     if(Num == ANIMAL_ELEPHANT)
     {

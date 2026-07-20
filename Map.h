@@ -162,7 +162,7 @@ public:
     /************************************/
 
 public:
-    int mapIdx = rand()%4 + 1;
+    int mapIdx = Rand.nextRaw()%4 + 1;
     QString GetMapFileName();
     int CheckNeighborType(int x, int y, int selectType);
     bool CheckBorder(int x, int y, int currentCalHeight);

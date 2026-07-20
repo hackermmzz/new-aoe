@@ -81,7 +81,7 @@ void StaticRes::setNowRes()
     nowlist = staticResource[Num];
     listLen = nowlist->size();
 
-    nowres = next(nowlist->begin(), rand()%listLen);
+    nowres = next(nowlist->begin(), Rand.nextRaw()%listLen);
 
     updateImageXYByNowRes();
     this->imageH=DR-UR;

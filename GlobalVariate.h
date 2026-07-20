@@ -9,10 +9,12 @@
 #include"networkplugin.h"
 #include<QNetworkReply>
 #include "RuntimeConfig.h"
+#include "library/random/random.hpp"
 
 using namespace std;
 class Coordinate;
 //
+extern Random Rand;
 extern QString ResultLogFile;
 extern EventFilter *eventFilter;
 extern bool tryCaptured;
@@ -242,7 +244,7 @@ public:
     template<class T>
     void WLHHunYao(vector<T>& v) {
         vector<T> res = v;
-        static auto randint = [](int a, int b)->int {return rand() % (b - a + 1) + a;};
+        static auto randint = [](int a, int b)->int {return Rand.nextRaw() % (b - a + 1) + a;};
         for (int i = 0;i < v.size();++i) {
             int idx = randint(0, res.size() - 1);
             swap(res.back(), res[idx]);

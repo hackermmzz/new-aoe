@@ -114,7 +114,8 @@ HEADERS += \
     library/fixed_point/math.hpp \
     library/fixed_point/type.hpp \
     library/fixed_point/include.h \
-    library/fixed_point/macro.h
+    library/fixed_point/macro.h \
+    library/random/random.hpp
 
 FORMS += \
         MainWidget.ui \
