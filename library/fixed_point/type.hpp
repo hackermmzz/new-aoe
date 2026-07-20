@@ -22,10 +22,10 @@ struct Int128 {
     __forceinline  constexpr Int128(uint16_t v) : lo(v), hi(0) {}
     __forceinline  constexpr Int128(uint32_t v) : lo(v), hi(0) {}
     __forceinline  constexpr Int128(uint64_t v) : lo(v), hi(0) {}
-
-    __forceinline  Int128(int64_t v) : lo(static_cast<uint64_t>(v)), hi(v < 0 ? -1 : 0) {}
-    __forceinline   Int128(int32_t v) : lo(static_cast<uint64_t>(static_cast<int64_t>(v))), hi(v < 0 ? -1 : 0) {}
-    __forceinline  constexpr  Int128(int64_t hi_, uint64_t lo_) : lo(lo_), hi(hi_) {}
+   
+    __forceinline constexpr  Int128(int32_t v) : lo(static_cast<uint64_t>(static_cast<int64_t>(v))), hi(v < 0 ? -1 : 0) {}
+    __forceinline constexpr  Int128(int64_t v) : lo(static_cast<uint64_t>(v)), hi(v < 0 ? -1 : 0) {}
+    __forceinline constexpr  Int128(int64_t hi_, uint64_t lo_) : lo(lo_), hi(hi_) {}
 
 
 
@@ -150,6 +150,21 @@ struct Int128 {
         return Int128(hi >> n, shift_lo);
     }
 
+    // ---- fast power-of-2 division (avoids the O(128) long-division loop) ----
+
+    // Signed division by 2^n, truncating toward zero (same rounding as
+    // operator/), but O(1) instead of the general long-division loop used
+    // by operator/. Only valid for n in [0, 127]; callers only ever pass
+    // FractionBits which is already range-checked at compile time.
+    __forceinline Int128 divpow2(int n) const {
+        if (n <= 0) return *this;
+        if (is_neg()) {
+            Int128 neg = -(*this);
+            return -(neg >> n);
+        }
+        return (*this) >> n;
+    }
+
     // ---- compound assignment ----
 
     __forceinline  Int128& operator+=(const Int128& rhs) { *this = *this + rhs; return *this; }
@@ -163,7 +178,7 @@ struct Int128 {
     // ---- explicit conversions ----
 
      __forceinline explicit operator bool() const { return lo != 0 || hi != 0; }
-     __forceinline explicit operator int64_t() const { return static_cast<int64_t>(lo); }
+     __forceinline constexpr explicit operator int64_t() const { return static_cast<int64_t>(lo); }
      __forceinline explicit operator uint64_t() const { return lo; }
      __forceinline explicit operator int32_t() const { return static_cast<int32_t>(lo); }
      __forceinline explicit operator uint32_t() const { return static_cast<uint32_t>(lo); }
@@ -264,6 +279,21 @@ private:
 
         U128 a = _abs128(*this);
         U128 b = _abs128(rhs);
+
+        // Fast path: if both operands fit in 64 unsigned bits (the common
+        // case for game/physics-scale fixed-point values), use the CPU's
+        // native 64/64 division instruction directly instead of the
+        // general 128-round software long-division loop below. Result is
+        // bit-for-bit identical to the general path since both operands
+        // and results fit exactly in 64 bits here.
+        if (a.hi == 0 && b.hi == 0) {
+            uint64_t qq = a.lo / b.lo;
+            uint64_t rr = a.lo % b.lo;
+            Int128 quotient  = neg_q ? -Int128(static_cast<int64_t>(0), qq) : Int128(static_cast<int64_t>(0), qq);
+            Int128 remainder = neg_r ? -Int128(static_cast<int64_t>(0), rr) : Int128(static_cast<int64_t>(0), rr);
+            return {quotient, remainder};
+        }
+
         U128 q, r;
         _udiv128(a, b, q, r);
 
@@ -284,6 +314,27 @@ private:
         return Int128(static_cast<int64_t>(x.hi), x.lo);
     }
 };
+
+// ============================================================================
+// fast_shr_trunc(x, n) - generic helper used by Fixed<> to divide the raw
+// intermediate value by 2^FractionBits (i.e. by Scale) after a multiply.
+//
+// For built-in integer types the compiler already turns "x / (T(1)<<n)"
+// into an efficient shift sequence when the divisor is a compile-time
+// constant, so the generic template is left as a plain division.
+// Int128 has no such compiler help (it is a software type), so it gets a
+// dedicated O(1) overload built on Int128::divpow2 instead of falling
+// through to the very slow general Int128 division.
+// ============================================================================
+template <typename T,
+          typename = typename std::enable_if<std::is_integral<T>::value>::type>
+__forceinline constexpr T fast_shr_trunc(T v, int n) {
+    return v / (T(1) << n);
+}
+
+__forceinline Int128 fast_shr_trunc(const Int128& v, int n) {
+    return v.divpow2(n);
+}
 
 // ---- stream output ----
 __forceinline  std::ostream& operator<<(std::ostream& os, const Int128& v) {

@@ -62,7 +62,7 @@ public:
 
     static constexpr int kFractionBits = FractionBits;
     static constexpr BaseType Scale=static_cast<BaseType>(uint16_t(1)) << FractionBits;
-    __forceinline static constexpr ThisType Zero(){ constexpr ThisType ret(0);return ret;}
+    __forceinline static ThisType Zero(){ ThisType ret; ret.raw_=static_cast<Store>(0); return ret;}
     // ------------------------------------------------------------------------
     // Data
     // ------------------------------------------------------------------------
@@ -187,7 +187,7 @@ public:
                    : acc;
     }
 
-    static  __forceinline int _skip_digits(const char* s) {
+    static  int _skip_digits(const char* s) {
         return (*s >= '0' && *s <= '9') ? 1 + _skip_digits(s + 1) : 0;
     }
 
@@ -239,7 +239,10 @@ public:
     template <typename Int,
               typename = typename std::enable_if<std::is_integral<Int>::value>::type>
     __forceinline constexpr  operator Int() const {
-        return static_cast<Int>(static_cast<BaseType>(raw_) / Scale);
+        // raw_ is already stored at Store's width; dividing directly in
+        // Store avoids promoting to the (possibly much slower, e.g. Int128)
+        // BaseType just to perform a division that Store can do natively.
+        return static_cast<Int>(raw_ / static_cast<Store>(Scale));
     }
     __forceinline constexpr operator char()const{
         return static_cast<char>(int());
@@ -252,7 +255,9 @@ public:
     }
 
     __forceinline constexpr explicit operator double() const {
-        return static_cast<double>(static_cast<BaseType>(raw_)) / static_cast<double>(Scale);
+        // Direct conversion from raw fixed-point value to double.
+        // Avoids going through BaseType (Int128) which has broken negative conversion.
+        return static_cast<double>(raw_) / static_cast<double>(Scale);
     }
 
     // ------------------------------------------------------------------------
@@ -272,7 +277,7 @@ public:
     __forceinline   bool operator==(const Fixed& rhs) const { return raw_ == rhs.raw_; }
     __forceinline   bool operator!=(const Fixed& rhs) const { return !(raw_ == rhs.raw_); }
     __forceinline   bool operator< (const Fixed& rhs) const { return raw_ <  rhs.raw_; }
-    __forceinline  bool operator> (const Fixed& rhs) const { return rhs.raw_<raw_; }
+    __forceinline   bool operator> (const Fixed& rhs) const { return rhs.raw_<raw_; }
     __forceinline   bool operator<=(const Fixed& rhs) const { return !(raw_ > rhs.raw_); }
     __forceinline   bool operator>=(const Fixed& rhs) const { return !(raw_ < rhs.raw_); }
 
@@ -289,15 +294,15 @@ public:
 
     __forceinline   Fixed operator*(const Fixed& rhs) const {
         return Fixed::FromRaw(static_cast<Store>(
-            (static_cast<BaseType>(raw_) * static_cast<BaseType>(rhs.raw_)) / Scale));
+            fast_shr_trunc(static_cast<BaseType>(raw_) * static_cast<BaseType>(rhs.raw_), FractionBits)));
     }
 
-    __forceinline  Fixed operator/(const Fixed& rhs) const {
+    __forceinline constexpr Fixed operator/(const Fixed& rhs) const {
         return Fixed::FromRaw(static_cast<Store>(
-            (static_cast<BaseType>(raw_) * Scale) / static_cast<BaseType>(rhs.raw_)));
+            (static_cast<BaseType>(raw_) << FractionBits) / static_cast<BaseType>(rhs.raw_)));
     }
 
-    __forceinline   Fixed operator%(const Fixed& rhs) const {
+    __forceinline  constexpr Fixed operator%(const Fixed& rhs) const {
         return Fixed::FromRaw(static_cast<Store>((raw_%rhs.raw_)));
     }
 
@@ -352,13 +357,13 @@ public:
 
     __forceinline   Fixed& operator*=(const Fixed& rhs) {
         raw_ = static_cast<Store>(
-            (static_cast<BaseType>(raw_) * static_cast<BaseType>(rhs.raw_)) / Scale);
+            fast_shr_trunc(static_cast<BaseType>(raw_) * static_cast<BaseType>(rhs.raw_), FractionBits));
         return *this;
     }
 
     __forceinline   Fixed& operator/=(const Fixed& rhs) {
         raw_ = static_cast<Store>(
-            (static_cast<BaseType>(raw_) * Scale) / static_cast<BaseType>(rhs.raw_));
+            (static_cast<BaseType>(raw_) << FractionBits) / static_cast<BaseType>(rhs.raw_));
         return *this;
     }
 
@@ -386,26 +391,46 @@ public:
     // Round to nearest integer (returning a Fixed still in the same format)
     // ------------------------------------------------------------------------
     __forceinline   Fixed round() const {
-        BaseType v   = static_cast<BaseType>(raw_);
-        BaseType adj = ((*this) >= Zero()) ? (Scale / 2) : -(Scale / 2);
-        return Fixed::FromRaw(static_cast<Store>(((v + adj) / Scale) * Scale));
+        // Round to nearest integer. Add/subtract half the scale then truncate.
+        Store v = raw_;
+        Store s = static_cast<Store>(Scale);
+        Store adj = (v >= 0) ? (s / 2) : -(s / 2);
+        Store t = v + adj;
+        // Truncate toward zero
+        Store q = t / s;
+        return Fixed::FromRaw(static_cast<Store>(q * s));
     }
 
     __forceinline    Fixed floor() const {
-        BaseType v = static_cast<BaseType>(raw_);
-        return Fixed::FromRaw(static_cast<Store>((v / Scale) * Scale));
+        // C++ division truncates toward zero. For negative values with
+        // non-zero fractional part, we need to subtract one more unit.
+        Store v = raw_;
+        Store q = static_cast<Store>(v / static_cast<Store>(Scale));
+        Store r = v % static_cast<Store>(Scale);
+        if (r != 0 && v < 0) {
+            q = q - static_cast<Store>(1);
+        }
+        return Fixed::FromRaw(static_cast<Store>(q * static_cast<Store>(Scale)));
     }
 
     __forceinline   Fixed ceil() const {
-        BaseType v   = static_cast<BaseType>(raw_);
-        BaseType rem = v % Scale;
-        return Fixed::FromRaw(static_cast<Store>(
-            rem == 0 ? v : v + (Scale - rem)));
+        // C++ division truncates toward zero. For positive values with
+        // non-zero fractional part, we need to add one more unit.
+        Store v = raw_;
+        Store s = static_cast<Store>(Scale);
+        Store q = static_cast<Store>(v / s);
+        Store r = v % s;
+        if (r != 0 && v > 0) {
+            q = q + static_cast<Store>(1);
+        }
+        return Fixed::FromRaw(static_cast<Store>(q * s));
     }
 
     __forceinline   Fixed trunc() const {
-        // Always round toward zero — floor for positive, ceil for negative
-        return (raw_ >= 0) ? floor() : -((-*this).floor());
+        // Truncate toward zero: just drop fractional bits
+        Store s = static_cast<Store>(Scale);
+        Store q = raw_ / s;
+        return Fixed::FromRaw(static_cast<Store>(q * s));
     }
 
     // ------------------------------------------------------------------------

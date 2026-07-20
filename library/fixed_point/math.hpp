@@ -52,23 +52,28 @@ Fixed<BaseType, Store, FractionBits> pow(const Fixed<BaseType, Store, FractionBi
 
 template <typename BaseType, typename Store, int FractionBits>
 Fixed<BaseType, Store, FractionBits> sqrt(const Fixed<BaseType, Store, FractionBits>& x,
-                                           int iterations=20)
+                                           int iterations=8)
 {
     using F = Fixed<BaseType, Store, FractionBits>;
 
-    // Newton iteration: guess = (guess + x / guess) / 2
-    static const F two(2);
-    //
+    // x <= 0: sqrt(0) = 0; sqrt(negative) -> return 0
     if (!(x > F(0))) {
-        // x <= 0: sqrt(0) = 0; sqrt(negative) → return 0
-        return x == F(0) ? F(0) : F(0);
+        return F(0);
     }
 
-    // Initial guess: use double sqrt
-    F guess= x / two;
+    // guess and (guess + x/guess) are always strictly positive throughout
+    // this loop, so halving via raw_ >> 1 is exactly equivalent to a Fixed
+    // division by two, but O(1) instead of going through the general
+    // Fixed::operator/ (which needs a real division by guess.raw_).
+    auto half = [](const F& v) -> F {
+        return F::FromRaw(static_cast<Store>(v.raw() >> 1));
+    };
+
+    // Newton iteration: guess = (guess + x / guess) / 2
+    F guess = half(x);
 
     for (int i = 0; i < iterations; ++i) {
-        guess = (guess + x / guess) / two;
+        guess = half(guess + x / guess);
     }
 
     return guess;
