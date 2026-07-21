@@ -87,12 +87,13 @@ public:
     void update(int type, int num = 1, bool isConversion = false);
 };
 Score& scoreForPlayerRepresent(int playerRepresent);
-//
+/***********************************************结构体，主要要保证相同架构的平台的不同编译器内存对齐问题******************************/
 struct tagObj{
     int32_t SN;// 序列号
     int32_t BlockDR, BlockUR; //区块坐标
     bool operator <(const tagObj&obj)const;
 };
+
 struct tagBuilding:tagObj
 {
     int32_t Type; // 建筑类型
@@ -150,10 +151,7 @@ struct tagArmy : public tagHuman
     int32_t ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
     tagArmy toEnemy();
 };
-//struct tagBlock{
-//    bool explored=false;
-//    int height=0;
-//};
+
 
 struct instruction {
     ///用于存储ai发出的指令信息
@@ -164,14 +162,14 @@ struct instruction {
     /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
     /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
     /// type 4:对建筑self发出命令option
-    int ret = -1;
-    int type;
-    int id;
+    int32_t ret = -1;
+    int32_t type;
+    int32_t id;
     Coordinate* self;
     Coordinate* obj;
-    int option;
-    int BlockDR, BlockUR;
-    int SN = -1, obSN = -1;
+    int32_t option;
+    int32_t BlockDR, BlockUR;
+    int32_t SN = -1, obSN = -1;
     Double DR, UR;
     bool isExist();
     instruction() { type = -1; }
@@ -182,24 +180,22 @@ struct instruction {
 };
 
 struct ins {
-    int g_id = 0;
+    int32_t g_id = 0;
     std::queue<instruction> instructions;
     QMutex lock;
 };
 
 struct tagTerrain {
-    int height;
-    int type;
+    int32_t height;
+    int32_t type;
 };
 // 定义二维点的结构体
 struct Point {
-    int x;
-    int y;
-
+    int32_t x;
+    int32_t y;
     Point();
     Point(int x, int y);
     Point(const Point& board);
-
     Point operator +(const Point& ps);
     Point operator -(const Point& ps);
     bool operator ==(const Point& ps)const;
@@ -233,7 +229,7 @@ struct tagInfo
     void clear();
 };
 
-
+/***********************************************结构体，主要要保证相同架构的平台的不同编译器内存对齐问题******************************/
 
 struct tagGame
 {
