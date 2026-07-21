@@ -88,6 +88,7 @@ public:
 };
 Score& scoreForPlayerRepresent(int playerRepresent);
 /***********************************************结构体，主要要保证相同架构的平台的不同编译器内存对齐问题******************************/
+
 struct tagObj{
     int32_t SN;// 序列号
     int32_t BlockDR, BlockUR; //区块坐标
@@ -214,7 +215,6 @@ struct tagInfo
     vector<tagResource> resources; // 资源列表
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
     TerrainData*theMap;// 高程图
-    //tagTerrain theMap[MAP_L][MAP_U]; //弃用这种形式
     vector<Point>exploredUpdate;//多探索的区域
     int32_t GameFrame; // 游戏帧数
     int32_t civilizationStage; // 文明阶段
