@@ -21,6 +21,7 @@ static bool towerTargetInRange(int towerDR, int towerUR, int objDR, int objUR)
 
 void UsrAI::processData()
 {
+
     while(logo<15){
         cheatAction();
         cheatRes();

@@ -18,6 +18,7 @@ std::string g_GAME_VERSION = std::string();
 QString g_GAME_TITLE = QString();
 std::string g_MAPFILE_SUFFIX = std::string();
 QString g_FixedMapFile = QString();
+int g_MapRotationDegrees = 0;
 int g_MAXPLAYER = 0;
 int g_NOWPLAYER = 0;
 int g_NOWPLAYERREPRESENT = 0;
@@ -550,6 +551,11 @@ std::string RuntimeConfig_MAPFILE_SUFFIX()
 QString RuntimeConfig_FixedMapFile()
 {
     return g_FixedMapFile;
+}
+
+int RuntimeConfig_MapRotationDegrees()
+{
+    return g_MapRotationDegrees;
 }
 
 int RuntimeConfig_MAXPLAYER()
@@ -3378,3 +3384,4 @@ void RuntimeConfig_setIsExamining(bool v) { g_IsExamining = v; }
 void RuntimeConfig_setOffScreen(bool v) { g_OffScreen = v; }
 void RuntimeConfig_setINITIAL_FREQUENCY(int v) { g_INITIAL_FREQUENCY = v; }
 void RuntimeConfig_setFixedMapFile(const QString& v) { g_FixedMapFile = v; }
+void RuntimeConfig_setMapRotationDegrees(int v) { g_MapRotationDegrees = v; }

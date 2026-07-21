@@ -87,73 +87,72 @@ public:
     void update(int type, int num = 1, bool isConversion = false);
 };
 Score& scoreForPlayerRepresent(int playerRepresent);
-//
+/***********************************************结构体，主要要保证相同架构的平台的不同编译器内存对齐问题******************************/
+
 struct tagObj{
-    int SN;// 序列号
-    int BlockDR, BlockUR; //区块坐标
+    int32_t SN;// 序列号
+    int32_t BlockDR, BlockUR; //区块坐标
     bool operator <(const tagObj&obj)const;
 };
+
 struct tagBuilding:tagObj
 {
-    int Type; // 建筑类型
-    int Blood; // 当前血量
-    int MaxBlood; // 最大血量
-    int Percent; // 完成百分比
-    int Project; // 当前项目
-    int ProjectPercent; // 项目完成百分比
-    int Cnt; // 剩余资源量（仅农田）
+    int32_t Type; // 建筑类型
+    int32_t Blood; // 当前血量
+    int32_t MaxBlood; // 最大血量
+    int32_t Percent; // 完成百分比
+    int32_t Project; // 当前项目
+    int32_t ProjectPercent; // 项目完成百分比
+    int32_t Cnt; // 剩余资源量（仅农田）
     tagBuilding toEnemy();
 };
 
 struct tagResource:tagObj
 {
     double DR, UR; //细节坐标
-    int Type; // 资源类型
-    int ProductSort; // 产品种类
-    int Cnt; // 剩余资源数量
-    int Blood; // 当前血量
+    int32_t Type; // 资源类型
+    int32_t ProductSort; // 产品种类
+    int32_t Cnt; // 剩余资源数量
+    int32_t Blood; // 当前血量
 };
 
 struct tagHuman:tagObj
 {
     double DR, UR; //细节坐标
     double DR0, UR0; // 目的地坐标
-    int NowState; // 当前状态
-    int WorkObjectSN; // 工作对象序列号
-    int Blood; // 当前血量
-    int attack; // 攻击力
-    int rangedDefense; // 远程防御
-    int meleeDefense; // 近战防御
+    int32_t NowState; // 当前状态
+    int32_t WorkObjectSN; // 工作对象序列号
+    int32_t Blood; // 当前血量
+    int32_t attack; // 攻击力
+    int32_t rangedDefense; // 远程防御
+    int32_t meleeDefense; // 近战防御
     void cast_from(tagHuman taghuman);
 };
 
 struct tagFarmer : public tagHuman
 {
-    int ResourceSort; // 手持资源种类
-    int Resource; // 手持资源数量
-    int FarmerSort;//农民的类型
+    int32_t ResourceSort; // 手持资源种类
+    int32_t Resource; // 手持资源数量
+    int32_t FarmerSort;//农民的类型
     tagFarmer toEnemy();
 };
 
 struct tagArmy : public tagHuman
 {
-    int Sort; // 军队种类
-    int status;
-    int starttime;
-    int finishtime;
+    int32_t Sort; // 军队种类
+    int32_t status;
+    int32_t starttime;
+    int32_t finishtime;
     double startpointDR;
     double startpointUR;
     double destinaDR;
     double destinaUR;
     bool ifAttack;
-    int timelock;
-    int ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
+    int32_t timelock;
+    int32_t ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
     tagArmy toEnemy();
 };
-//struct tagBlock{
-//    bool explored=false;
-//    int height=0;
-//};
+
 
 struct instruction {
     ///用于存储ai发出的指令信息
@@ -164,14 +163,14 @@ struct instruction {
     /// type 2:将obj对象设定为村民self的工作对象，村民会自动走向对象并工作
     /// type 3:命令村民self在块坐标BlockL,BlockU处建造类型为option的新建筑
     /// type 4:对建筑self发出命令option
-    int ret = -1;
-    int type;
-    int id;
+    int32_t ret = -1;
+    int32_t type;
+    int32_t id;
     Coordinate* self;
     Coordinate* obj;
-    int option;
-    int BlockDR, BlockUR;
-    int SN = -1, obSN = -1;
+    int32_t option;
+    int32_t BlockDR, BlockUR;
+    int32_t SN = -1, obSN = -1;
     Double DR, UR;
     bool isExist();
     instruction() { type = -1; }
@@ -182,24 +181,22 @@ struct instruction {
 };
 
 struct ins {
-    int g_id = 0;
+    int32_t g_id = 0;
     std::queue<instruction> instructions;
     QMutex lock;
 };
 
 struct tagTerrain {
-    int height;
-    int type;
+    int32_t height;
+    int32_t type;
 };
 // 定义二维点的结构体
 struct Point {
-    int x;
-    int y;
-
+    int32_t x;
+    int32_t y;
     Point();
     Point(int x, int y);
     Point(const Point& board);
-
     Point operator +(const Point& ps);
     Point operator -(const Point& ps);
     bool operator ==(const Point& ps)const;
@@ -218,22 +215,21 @@ struct tagInfo
     vector<tagResource> resources; // 资源列表
     map<int, int> ins_ret; // 指令返回值，map<id, ret>
     TerrainData*theMap;// 高程图
-    //tagTerrain theMap[MAP_L][MAP_U]; //弃用这种形式
     vector<Point>exploredUpdate;//多探索的区域
-    int GameFrame; // 游戏帧数
-    int civilizationStage; // 文明阶段
-    int Wood; // 木材数量
-    int Meat; // 肉类数量
-    int Stone; // 石头数量
-    int Gold; // 黄金数量
-    int Human_MaxNum; // 最大人口数量
+    int32_t GameFrame; // 游戏帧数
+    int32_t civilizationStage; // 文明阶段
+    int32_t Wood; // 木材数量
+    int32_t Meat; // 肉类数量
+    int32_t Stone; // 石头数量
+    int32_t Gold; // 黄金数量
+    int32_t Human_MaxNum; // 最大人口数量
     // Assignment operator
     tagInfo& operator=(const tagInfo& other);
 
     void clear();
 };
 
-
+/***********************************************结构体，主要要保证相同架构的平台的不同编译器内存对齐问题******************************/
 
 struct tagGame
 {

@@ -32,6 +32,7 @@ SOURCES += \
     RuntimeConfig.cpp \
     GlobalVariate.cpp \
     Map.cpp \
+    MapRotation.cpp \
     Block.cpp \
     MoveObject.cpp \
     Building.cpp \
@@ -75,6 +76,7 @@ HEADERS += \
     Coordinate.h \
     GlobalVariate.h \
     Map.h \
+    MapRotation.h \
     Block.h \
     MoveObject.h \
     Building.h \
@@ -115,7 +117,8 @@ HEADERS += \
     library/fixed_point/type.hpp \
     library/fixed_point/include.h \
     library/fixed_point/macro.h \
-    library/random/random.hpp
+    library/random/random.hpp \
+    library/container/vector.hpp
 
 FORMS += \
         MainWidget.ui \

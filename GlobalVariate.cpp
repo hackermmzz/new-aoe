@@ -652,11 +652,16 @@ void ParseArguments(const QApplication&app){
          "1|2|4|8|MAX"
        );
     QCommandLineOption option4(
-        QStringList()<<"fix",
+        QStringList()<<"fix"<<"map",
          "fixed map file for debugging",
          "map.njust"
        );
-    QList<QCommandLineOption>options={option0,option1,option2,option3,option4};
+    QCommandLineOption option5(
+        QStringList()<<"rotate",
+         "rotate loaded map clockwise in memory: 90, 180 or 270",
+         "90|180|270"
+       );
+    QList<QCommandLineOption>options={option0,option1,option2,option3,option4,option5};
     parser.addOptions(options);
     parser.process(app);
     //
@@ -679,8 +684,18 @@ void ParseArguments(const QApplication&app){
         else RuntimeConfig_setINITIAL_FREQUENCY(value.toInt());
     }
     //
-    if(parser.isSet("fix")){
-        RuntimeConfig_setFixedMapFile(parser.value("fix"));
+    if(parser.isSet("fix") || parser.isSet("map")){
+        RuntimeConfig_setFixedMapFile(parser.isSet("fix") ? parser.value("fix") : parser.value("map"));
+    }
+    //
+    if(parser.isSet("rotate")){
+        bool ok = false;
+        int degrees = parser.value("rotate").toInt(&ok);
+        if(ok && (degrees == 90 || degrees == 180 || degrees == 270)){
+            RuntimeConfig_setMapRotationDegrees(degrees);
+        }else{
+            qWarning() << "invalid map rotate degrees, expected 90/180/270:" << parser.value("rotate");
+        }
     }
 }
 //Json化一个Map
