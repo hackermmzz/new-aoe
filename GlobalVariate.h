@@ -216,13 +216,13 @@ struct tagInfo
     TerrainData*theMap;// 高程图
     //tagTerrain theMap[MAP_L][MAP_U]; //弃用这种形式
     vector<Point>exploredUpdate;//多探索的区域
-    int GameFrame; // 游戏帧数
-    int civilizationStage; // 文明阶段
-    int Wood; // 木材数量
-    int Meat; // 肉类数量
-    int Stone; // 石头数量
-    int Gold; // 黄金数量
-    int Human_MaxNum; // 最大人口数量
+    int32_t GameFrame; // 游戏帧数
+    int32_t civilizationStage; // 文明阶段
+    int32_t Wood; // 木材数量
+    int32_t Meat; // 肉类数量
+    int32_t Stone; // 石头数量
+    int32_t Gold; // 黄金数量
+    int32_t Human_MaxNum; // 最大人口数量
     // Assignment operator
     tagInfo& operator=(const tagInfo& other);
 
