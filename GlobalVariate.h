@@ -89,65 +89,65 @@ public:
 Score& scoreForPlayerRepresent(int playerRepresent);
 //
 struct tagObj{
-    int SN;// 序列号
-    int BlockDR, BlockUR; //区块坐标
+    int32_t SN;// 序列号
+    int32_t BlockDR, BlockUR; //区块坐标
     bool operator <(const tagObj&obj)const;
 };
 struct tagBuilding:tagObj
 {
-    int Type; // 建筑类型
-    int Blood; // 当前血量
-    int MaxBlood; // 最大血量
-    int Percent; // 完成百分比
-    int Project; // 当前项目
-    int ProjectPercent; // 项目完成百分比
-    int Cnt; // 剩余资源量（仅农田）
+    int32_t Type; // 建筑类型
+    int32_t Blood; // 当前血量
+    int32_t MaxBlood; // 最大血量
+    int32_t Percent; // 完成百分比
+    int32_t Project; // 当前项目
+    int32_t ProjectPercent; // 项目完成百分比
+    int32_t Cnt; // 剩余资源量（仅农田）
     tagBuilding toEnemy();
 };
 
 struct tagResource:tagObj
 {
     double DR, UR; //细节坐标
-    int Type; // 资源类型
-    int ProductSort; // 产品种类
-    int Cnt; // 剩余资源数量
-    int Blood; // 当前血量
+    int32_t Type; // 资源类型
+    int32_t ProductSort; // 产品种类
+    int32_t Cnt; // 剩余资源数量
+    int32_t Blood; // 当前血量
 };
 
 struct tagHuman:tagObj
 {
     double DR, UR; //细节坐标
     double DR0, UR0; // 目的地坐标
-    int NowState; // 当前状态
-    int WorkObjectSN; // 工作对象序列号
-    int Blood; // 当前血量
-    int attack; // 攻击力
-    int rangedDefense; // 远程防御
-    int meleeDefense; // 近战防御
+    int32_t NowState; // 当前状态
+    int32_t WorkObjectSN; // 工作对象序列号
+    int32_t Blood; // 当前血量
+    int32_t attack; // 攻击力
+    int32_t rangedDefense; // 远程防御
+    int32_t meleeDefense; // 近战防御
     void cast_from(tagHuman taghuman);
 };
 
 struct tagFarmer : public tagHuman
 {
-    int ResourceSort; // 手持资源种类
-    int Resource; // 手持资源数量
-    int FarmerSort;//农民的类型
+    int32_t ResourceSort; // 手持资源种类
+    int32_t Resource; // 手持资源数量
+    int32_t FarmerSort;//农民的类型
     tagFarmer toEnemy();
 };
 
 struct tagArmy : public tagHuman
 {
-    int Sort; // 军队种类
-    int status;
-    int starttime;
-    int finishtime;
+    int32_t Sort; // 军队种类
+    int32_t status;
+    int32_t starttime;
+    int32_t finishtime;
     double startpointDR;
     double startpointUR;
     double destinaDR;
     double destinaUR;
     bool ifAttack;
-    int timelock;
-    int ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
+    int32_t timelock;
+    int32_t ConvertCooldown; // 祭司剩余转换冷却（毫秒）；0表示可转换，敌方视角为-1
     tagArmy toEnemy();
 };
 //struct tagBlock{
