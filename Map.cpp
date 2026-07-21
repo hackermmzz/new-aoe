@@ -1652,12 +1652,13 @@ void Map::loadGenerateMapText()
     QJsonObject root=doc.object();
     const int rotateDegrees = RuntimeConfig_MapRotationDegrees();
     if(rotateDegrees != 0){
+        const double blockSize = static_cast<double>(BLOCKSIDELENGTH);
         MapRotation::Result rotation = MapRotation::rotateNjustMapRoot(
             root,
             rotateDegrees,
             MAP_L,
             MAP_U,
-            BLOCKSIDELENGTH
+            blockSize
         );
 
         for(const QString& warning : rotation.warnings){
