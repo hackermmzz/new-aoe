@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "MapRotation.h"
 #include <tuple>
 #include <unordered_map>
 #include <iostream>
@@ -1649,6 +1650,41 @@ void Map::loadGenerateMapText()
     };
     /////////////////////////////////开始解析
     QJsonObject root=doc.object();
+    const int rotateDegrees = RuntimeConfig_MapRotationDegrees();
+    if(rotateDegrees != 0){
+        MapRotation::Result rotation = MapRotation::rotateNjustMapRoot(
+            root,
+            rotateDegrees,
+            MAP_L,
+            MAP_U,
+            BLOCKSIDELENGTH
+        );
+
+        for(const QString& warning : rotation.warnings){
+            qWarning() << "map rotation warning:" << warning;
+        }
+
+        if(!rotation.errors.isEmpty()){
+            qWarning() << "map rotation failed, map will not be loaded. degrees:" << rotateDegrees;
+            for(int i = 0; i < rotation.errors.size() && i < 50; ++i){
+                qWarning() << "map rotation error:" << rotation.errors.at(i);
+            }
+            if(rotation.errors.size() > 50){
+                qWarning() << "map rotation error: ... and" << (rotation.errors.size() - 50) << "more";
+            }
+            return;
+        }
+
+        if(rotation.outputWidth != MAP_L || rotation.outputHeight != MAP_U){
+            qWarning() << "rotated map size differs from runtime MAP_L/MAP_U:"
+                       << rotation.outputWidth << "x" << rotation.outputHeight
+                       << "runtime:" << MAP_L << "x" << MAP_U;
+        }
+
+        root = rotation.root;
+        qInfo() << "map rotated in memory. degrees:" << rotateDegrees
+                << "shore changes:" << rotation.shoreChanges;
+    }
     QStringList allKeys=root.keys();
     for(QString&key:allKeys){
         QJsonObject obj=root[key].toObject();

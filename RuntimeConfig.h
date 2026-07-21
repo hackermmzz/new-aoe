@@ -46,6 +46,8 @@ std::string RuntimeConfig_MAPFILE_SUFFIX();
 
 QString RuntimeConfig_FixedMapFile();
 
+int RuntimeConfig_MapRotationDegrees();
+
 int RuntimeConfig_MAXPLAYER();
 #define MAXPLAYER (RuntimeConfig_MAXPLAYER())
 

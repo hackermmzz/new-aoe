@@ -32,6 +32,7 @@ SOURCES += \
     RuntimeConfig.cpp \
     GlobalVariate.cpp \
     Map.cpp \
+    MapRotation.cpp \
     Block.cpp \
     MoveObject.cpp \
     Building.cpp \
@@ -75,6 +76,7 @@ HEADERS += \
     Coordinate.h \
     GlobalVariate.h \
     Map.h \
+    MapRotation.h \
     Block.h \
     MoveObject.h \
     Building.h \
