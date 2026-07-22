@@ -659,12 +659,19 @@ void SelectWidget::refreshActs()
                 // 详细设置
                 if (objBuilding->getNum() == BUILDING_HOME)
                 {
-                    const int populationHalfSlots = round(human_num * Double(2));
+                    // 模拟层使用定点数，Qt界面显示时显式转为double，避免隐式重载产生异常。
+                    const double displayHumanNum = static_cast<double>(human_num);
+                    const int populationHalfSlots = qRound(displayHumanNum * 2.0);
                     const QString populationText = (populationHalfSlots % 2 == 0)
                         ? QString::number(populationHalfSlots / 2)
-                        : QString::number(human_num, 'f', 1);
+                        : QString::number(displayHumanNum, 'f', 1);
                     ui->objText->setText(populationText + "/" + QString::number(build_hold_human_num));
-                    ui->objIconSmall->setPixmap(resMap["SmallIcon_People"].front());
+
+                    auto peopleIcon = resMap.find("SmallIcon_People");
+                    if (peopleIcon != resMap.end() && !peopleIcon->second.empty())
+                        ui->objIconSmall->setPixmap(peopleIcon->second.front());
+                    else
+                        ui->objIconSmall->clear();
                 }
                 else if (objBuilding->getNum() == BUILDING_FARM)
                 {

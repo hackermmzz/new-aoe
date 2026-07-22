@@ -59,7 +59,7 @@ public:
 
     //获取血量
     Double getBloodPercent(){ return Blood; }
-    int getBlood(){ return  ceil(int(Blood*getMaxBlood())); }
+    int getBlood(){ return static_cast<int>((Blood * Double(getMaxBlood())).ceil()); }
     //获取“复仇”目标
     Coordinate* getAvangeObject(){ return avangeObject; }
     //如果攻击方式需要投掷物，获取投掷物类型

@@ -38,6 +38,17 @@ int scoreTypeForCreatedObject(int objectSort, int objectNum)
         return objectNum <= AT_BOWMAN ? _HUMAN1 : _HUMAN2;
     return _TECH;
 }
+
+bool isFriendlyMissileAfterConversion(Missile* missile, Coordinate* target)
+{
+    if (missile == NULL || target == NULL || missile->isAttackerHaveDie() || !target->isPlayerControl())
+        return false;
+
+    Coordinate* liveAttacker = missile->getAttacker();
+    return liveAttacker != NULL &&
+        liveAttacker->getPlayerRepresent() != missile->getPlayerRepresent() &&
+        liveAttacker->getPlayerRepresent() == target->getPlayerRepresent();
+}
 }
 //int timerStand = 0;
 Core_List::Core_List(Map* theMap, Player* player[])
@@ -828,9 +839,10 @@ void Core_List::change_HumanRepresent(Human *human, int represent)
         // 攻防已定格，把科技指针切到新主人，避免长期持有(可能被销毁的)原主人科技树
         human->setPlayerScience(newPlayer->getPlayerScience());
 
-        // 立刻下达一次“原地移动”来打断当前行为
-        suspendRelation(human);
-        addRelation(human, human->getDR(), human->getUR(), CoreEven_JustMoveTo, false);
+        // 完整结束旧阵营下的行动，并清除受击/复仇目标；下一帧即可按新阵营重新自动索敌。
+        object_FinishAction_Absolute(human);
+        human->setAttackObject(NULL);
+        human->initAvengeObject();
     }
 }
 
@@ -842,11 +854,12 @@ void Core_List::change_BuildingRepresent(Building *building, int represent)
 
     // 与 change_HumanRepresent 类似，但建筑关联的状态更多，以下步骤顺序不可调换
 
-    // 1.在切换阵营之前打断建筑当前行动：
-    //   若正在生产/研究，suspendRelation 内部会把预扣资源退还给原主人，
-    //   并经 initAction 回滚原主人科技树的“执行中”标记；
-    //   若是箭塔正在攻击，也一并打断，避免其继续射击转换后的友军
-    suspendRelation(building);
+    // 1.在切换阵营之前完整结束建筑当前行动：
+    //   若正在生产/研究，会把预扣资源退还给原主人，并回滚科技树的“执行中”标记；
+    //   箭塔的旧攻击关系、攻击计时及受击/复仇目标也一并清除。
+    object_FinishAction_Absolute(building);
+    building->setAttackObject(NULL);
+    building->initAvengeObject();
 
     // 2.暂停原主人单位以该建筑为目标的采集/修理行动，避免其继续为敌方建筑工作
     //   (正在攻击该建筑的行动不打断，它现在确实是敌方建筑)
@@ -975,6 +988,15 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     bool isFriendlyPriestHealing = object2 != NULL &&
         object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
         object1->getPlayerRepresent() == object2->getPlayerRepresent();
+
+    // 阵营在行动建立后可能因祭司转换而改变；旧攻击关系不得继续攻击新友军。
+    if (object2 != NULL && object1->isPlayerControl() && object2->isPlayerControl() &&
+        object1->getPlayerRepresent() == object2->getPlayerRepresent() && !isFriendlyPriestHealing)
+    {
+        object_FinishAction_Absolute(object1);
+        return;
+    }
+
     set<pair<Coordinate*,int>>attackees;
     if (attackee != NULL && attacker != NULL && attacker->canAttack())  //若指针均非空
     {
@@ -1039,6 +1061,9 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     }
     else if (missile != NULL && missile->is_HitTarget() && attackee != NULL)
     {
+        // 发射后若攻击者被转换，旧箭命中新阵营友军时直接失效。
+        if (isFriendlyMissileAfterConversion(missile, object2)) return;
+
         NeedCalculateDamage = true;
         auto extra_damage = missile->get_AttackAddition_Height(theMap->get_MapHeight(object2->getBlockDR(), object2->getBlockUR()));
         attackees.insert({object2,extra_damage});
@@ -2166,6 +2191,9 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
     }
 
     if(attackee==NULL||attacker==NULL)return;
+
+    // 范围投射物逐个目标结算，避免转换前发出的投射物伤害攻击者的新友军。
+    if (isFriendlyMissileAfterConversion(missile, object2)) return;
     //
     bool isDead = attackee->isDie();
     int sort=object1->getSort();

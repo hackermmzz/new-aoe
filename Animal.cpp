@@ -203,7 +203,11 @@ bool Animal::isMonitorObject(Coordinate* judOb)
 {
     int judNum = judOb->getNum(), judSort = judOb->getSort();
     if(Num == ANIMAL_LION)
+    {
+        if(judSort == SORT_ARMY && judNum == AT_PRIEST)
+            return false;
         return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_GAZELLE);
+    }
     if(Num == ANIMAL_GAZELLE)
         return judSort == SORT_ARMY || judSort == SORT_FARMER || (judSort == SORT_ANIMAL && judNum == ANIMAL_LION);
     return false;
