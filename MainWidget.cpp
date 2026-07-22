@@ -101,7 +101,7 @@ MainWidget::MainWidget(QWidget* parent) :
     qInfo() << " 开始初始化...";
     ui->setupUi(this);
     g_mainWidget = this; // 设置全局MainWidget实例指针
-    mouseEvent==new MouseEvent();
+    mouseEvent = new MouseEvent();
     memorymap=new int*[MEMORYROW];
     //申请资源
     QResource::registerResource("./res.rcc");
@@ -1535,6 +1535,7 @@ MainWidget::~MainWidget()
     deleteArmy();
     deleteMissile();
     delete core;
+    delete mouseEvent;
 }
 
 void MainWidget::paintEvent(QPaintEvent*)
