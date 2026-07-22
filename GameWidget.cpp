@@ -582,6 +582,7 @@ void GameWidget::drawmemory(int X, int Y,  ImageResource&res, int globalNum)
                 if(res.memorymap.getMemoryMap(i,j)!=0)
                 {
                     mainwidget->memorymap[mx/4][my/4]=globalNum;
+                    mainwidget->editorHitMap[mx/4][my/4]=1;
                 }
             }
         }
@@ -596,6 +597,7 @@ void GameWidget::emptymemorymap()
         for(int j=0;j<MEMORYCOLUMN;j++)
         {
             mainwidget->memorymap[i][j]=0;
+            mainwidget->editorHitMap[i][j]=0;
         }
     }
 }

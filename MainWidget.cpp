@@ -567,8 +567,17 @@ void MainWidget::updateEditor()
             if (preHeight >= 0)LowerLand(L, U, preHeight);
             break;
         case DELETEOBJECT:
-            clearArea(L, U);
+        {
+            // 人物等精灵通常向“脚下格”上方延伸。优先命中鼠标实际点到的
+            // 最上层可见精灵，避免点击人物身体时落到相邻逻辑格。
+            Coordinate* clickedObject = getEditorObjectAtPixel(eventFilter->MouseX(),
+                                                                eventFilter->MouseY());
+            if (!clickedObject || !deleteEditorObject(clickedObject)) {
+                // 点击透明区域时仍保留原有的按占地格删除能力。
+                clearArea(L, U);
+            }
             break;
+        }
         case FLAT:
             MakeGrassland(L, U);
             break;
@@ -592,8 +601,15 @@ void MainWidget::updateEditor()
         
         // 单位选择逻辑 - 检查是否应该选择单位
         // 使用Qt的键盘状态检测Ctrl键
+        // Keep every action in this click on the same coordinate snapshot.
+        // mouseEvent is updated by a later receiver and still contains the previous click here.
+        const Double clickDR = DR;
+        const Double clickUR = UR;
+        const int clickL = L;
+        const int clickU = U;
+
         bool isCtrlPressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
-        Coordinate* clickedUnit = getUnitAtPosition(DR, UR);
+        Coordinate* clickedUnit = getUnitAtPosition(clickDR, clickUR);
         
         // 如果点击了敌方单位，且当前没有选择特定的编辑工具，则进行单位选择
         if (clickedUnit && clickedUnit->getPlayerRepresent() == 1 && 
@@ -614,113 +630,115 @@ void MainWidget::updateEditor()
         //
         switch (currentSelected) {
         case TREE:
-            MakeTree(mouseEvent->GetDR(), mouseEvent->GetUR());
+            MakeTree(clickDR, clickUR);
             break;
         case GOLDORE:
-            MakeStaticRes(L, U, GOLDORE);
+            MakeStaticRes(clickL, clickU, GOLDORE);
             break;
         case STONM:
-            MakeStaticRes(L, U, STONM);
+            MakeStaticRes(clickL, clickU, STONM);
             break;
         case BERRY:
-            MakeStaticRes(L, U, BERRY);
+            MakeStaticRes(clickL, clickU, BERRY);
             break;
         case ELEPHANT:
-            MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), ELEPHANT);
+            MakeAnimal(clickDR, clickUR, ELEPHANT);
             break;
         case LION:
-            MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), LION);
+            MakeAnimal(clickDR, clickUR, LION);
             break;
         case GAZELLE:
-            MakeAnimal(mouseEvent->GetDR(), mouseEvent->GetUR(), GAZELLE);
+            MakeAnimal(clickDR, clickUR, GAZELLE);
             break;
         case PLAYERDOWNTOWN:
-            MakeBuilding(L, U, PLAYERDOWNTOWN);
+            MakeBuilding(clickL, clickU, PLAYERDOWNTOWN);
             break;
         case PLAYERARROWTOWER:
-            MakeBuilding(L, U, PLAYERARROWTOWER);
+            MakeBuilding(clickL, clickU, PLAYERARROWTOWER);
             break;
         case PLAYERREPOSITORY:
-            MakeBuilding(L, U, PLAYERREPOSITORY);
+            MakeBuilding(clickL, clickU, PLAYERREPOSITORY);
             break;
         case PLAYERHOME:
-            MakeBuilding(L, U, PLAYERHOME);
+            MakeBuilding(clickL, clickU, PLAYERHOME);
             break;
         case PLAYERGRANARY:
-            MakeBuilding(L, U, PLAYERGRANARY);
+            MakeBuilding(clickL, clickU, PLAYERGRANARY);
+            break;
         case AIARROWTOWER:
-            MakeBuilding(L, U, AIARROWTOWER);
+            MakeBuilding(clickL, clickU, AIARROWTOWER);
             break;
         case AISIEGE:
-            MakeBuilding(L, U, AISIEGE);
+            MakeBuilding(clickL, clickU, AISIEGE);
+            break;
         case PLAYERFARMER:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERFARMER);
+            MakeHuman(clickDR, clickUR, PLAYERFARMER);
             break;
         case PLAYERCLUBMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERCLUBMAN);
+            MakeHuman(clickDR, clickUR, PLAYERCLUBMAN);
             break;
         case PLAYERAXEMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERAXEMAN);
+            MakeHuman(clickDR, clickUR, PLAYERAXEMAN);
             break;
         case PLAYERSCOUT:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERSCOUT);
+            MakeHuman(clickDR, clickUR, PLAYERSCOUT);
             break;
         case PLAYERBOWMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERBOWMAN);
+            MakeHuman(clickDR, clickUR, PLAYERBOWMAN);
             break;
         case PLAYERPRIEST:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERPRIEST);
+            MakeHuman(clickDR, clickUR, PLAYERPRIEST);
             break;
         case AICLUBMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICLUBMAN);
+            MakeHuman(clickDR, clickUR, AICLUBMAN);
             break;
         case AIAXEMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIAXEMAN);
+            MakeHuman(clickDR, clickUR, AIAXEMAN);
             break;
         case AIBOWMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIBOWMAN);
+            MakeHuman(clickDR, clickUR, AIBOWMAN);
             break;
         case AISCOUT:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AISCOUT);
+            MakeHuman(clickDR, clickUR, AISCOUT);
             break;
         case AIPRIEST:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIPRIEST);
+            MakeHuman(clickDR, clickUR, AIPRIEST);
             break;
         case AIHOPLITE:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIHOPLITE);
+            MakeHuman(clickDR, clickUR, AIHOPLITE);
             break;
         case AICOMPARCHER:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICOMPARCHER);
+            MakeHuman(clickDR, clickUR, AICOMPARCHER);
             break;
         case AICHARIOT:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICHARIOT);
+            MakeHuman(clickDR, clickUR, AICHARIOT);
             break;
         case AICHARIOTARCHER:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICHARIOTARCHER);
+            MakeHuman(clickDR, clickUR, AICHARIOTARCHER);
             break;
         case AIBROADSWORDSMAN:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIBROADSWORDSMAN);
+            MakeHuman(clickDR, clickUR, AIBROADSWORDSMAN);
             break;
         case AISTONETHROWER:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AISTONETHROWER);
+            MakeHuman(clickDR, clickUR, AISTONETHROWER);
             break;
         case AICAVALRY:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AICAVALRY);
+            MakeHuman(clickDR, clickUR, AICAVALRY);
             break;
         case PLAYERDOCK:
-            MakeBuilding(L, U, PLAYERDOCK);
+            MakeBuilding(clickL, clickU, PLAYERDOCK);
             break;
         case AIWARSHIP:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), AIWARSHIP);
+            MakeHuman(clickDR, clickUR, AIWARSHIP);
             break;
         case PLAYERFISHINGBOAT:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERFISHINGBOAT);
+            MakeHuman(clickDR, clickUR, PLAYERFISHINGBOAT);
             break;
         case PLAYERTRANSPORTSHIP:
-            MakeHuman(mouseEvent->GetDR(), mouseEvent->GetUR(), PLAYERTRANSPORTSHIP);
+            MakeHuman(clickDR, clickUR, PLAYERTRANSPORTSHIP);
             break;
         case PLAYERFISHERY:
-            MakeStaticRes(L, U, PLAYERFISHERY);
+            MakeStaticRes(clickL, clickU, PLAYERFISHERY);
             break;
         
         // 巡逻区域的处理将由区域绘制系统自动处理
@@ -733,7 +751,7 @@ void MainWidget::updateEditor()
         case ENEMY_STATUS_ATTACK:
         case ENEMY_STATUS_DEFEND:
             // 处理敌人状态选择
-            handleEnemyStatusSelection(DR, UR);
+            handleEnemyStatusSelection(clickDR, clickUR);
             break;
             
         case NORMAL_MOUSE:
@@ -765,106 +783,140 @@ void MainWidget::clearArea(int blockL, int blockU, int radius) {
     // 保存当前状态以支持撤销
     // SaveCurrentState();
 
-    // 清空静态资源（金矿、石堆）
-    auto& staticResList = map->staticres;
-    auto itStatic = staticResList.begin();
-    while (itStatic != staticResList.end()) {
-        int x = (*itStatic)->getBlockDR();
-        int y = (*itStatic)->getBlockUR();
-        if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-            delete* itStatic;
-            itStatic = staticResList.erase(itStatic);
-        }
-        else {
-            ++itStatic;
-        }
-    }
+    auto intersectsDeleteArea = [&](Coordinate* object) {
+        if (!object) return false;
+        int objectL = object->getBlockDR();
+        int objectU = object->getBlockUR();
+        int objectSize = std::max(1, int(object->get_BlockSizeLen()));
+        int deleteLeft = blockL - radius;
+        int deleteTop = blockU - radius;
+        int deleteRight = blockL + radius + 1;
+        int deleteBottom = blockU + radius + 1;
+        return objectL < deleteRight && objectL + objectSize > deleteLeft &&
+               objectU < deleteBottom && objectU + objectSize > deleteTop;
+    };
 
-    // 清空动物（树、瞪羚等）
-    auto& animalList = map->animal;
-    auto itAnimal = animalList.begin();
-    while (itAnimal != animalList.end()) {
-        int x = (*itAnimal)->getBlockDR();
-        int y = (*itAnimal)->getBlockUR();
-        if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-            delete* itAnimal;
-            itAnimal = animalList.erase(itAnimal);
-        }
-        else {
-            ++itAnimal;
-        }
-    }
-
-    // 清空玩家建筑 - 修复版本
+    vector<Coordinate*> objectsToDelete;
+    for (StaticRes* resource : map->staticres)
+        if (intersectsDeleteArea(resource)) objectsToDelete.push_back(resource);
+    for (Animal* animal : map->animal)
+        if (intersectsDeleteArea(animal)) objectsToDelete.push_back(animal);
     for (int i = 0; i < MAXPLAYER; ++i) {
-        auto& buildList = player[i]->build;
-        auto itBuild = buildList.begin();
-        while (itBuild != buildList.end()) {
-            int x = (*itBuild)->getBlockDR();
-            int y = (*itBuild)->getBlockUR();
-            if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-                // 先从map_Object中移除建筑，避免悬空指针
-                Coordinate* buildingToDelete = *itBuild;
-                for(int mapX = buildingToDelete->getBlockDR(); 
-                    mapX < int(buildingToDelete->getBlockDR() + buildingToDelete->get_BlockSizeLen());
-                    mapX++) {
-                    for(int mapY = buildingToDelete->getBlockUR(); 
-                        mapY < int(buildingToDelete->getBlockUR() + buildingToDelete->get_BlockSizeLen());
-                        mapY++) {
-                        if(mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
-                            auto& objects = map->map_Object[mapX][mapY];
-                            objects.erase(remove(objects.begin(), objects.end(), buildingToDelete), objects.end());
-                        }
-                    }
-                }
-                
-                delete* itBuild;
-                itBuild = buildList.erase(itBuild);
-            }
-            else {
-                ++itBuild;
-            }
-        }
+        for (Building* building : player[i]->build)
+            if (intersectsDeleteArea(building)) objectsToDelete.push_back(building);
+        for (Human* human : player[i]->human)
+            if (intersectsDeleteArea(human)) objectsToDelete.push_back(human);
     }
 
-    // 清空玩家人物单位（包括敌方人物）
+    bool deletedAny = false;
+    for (Coordinate* object : objectsToDelete)
+        deletedAny = deleteEditorObject(object, false) || deletedAny;
+
+    if (deletedAny) {
+        map->loadBarrierMap(true);
+        ui->Game->update();
+    }
+}
+
+Coordinate* MainWidget::getEditorObjectAtPixel(int mouseX, int mouseY) const
+{
+    if (!EditorMode || !memorymap || mouseX < 0 || mouseY < 0) return nullptr;
+
+    int memoryX = mouseX / 4;
+    int memoryY = mouseY / 4;
+    if (memoryX < 0 || memoryX >= MEMORYROW ||
+        memoryY < 0 || memoryY >= MEMORYCOLUMN) return nullptr;
+    if (memoryX >= int(editorHitMap.size()) ||
+        memoryY >= int(editorHitMap[memoryX].size()) ||
+        editorHitMap[memoryX][memoryY] == 0) return nullptr;
+
+    auto objectIt = g_Object.find(memorymap[memoryX][memoryY]);
+    return objectIt == g_Object.end() ? nullptr : objectIt->second;
+}
+
+bool MainWidget::deleteEditorObject(Coordinate* object, bool refreshRuntime)
+{
+    if (!object) return false;
+    const QString objectName = object->getChineseName();
+
+    auto finishDelete = [&]() {
+        if (refreshRuntime) {
+            map->loadBarrierMap(true);
+            ui->Game->update();
+        }
+        call_debugText("green", objectName.isEmpty() ? " 已删除对象"
+                                                      : " 已删除：" + objectName, 0);
+        return true;
+    };
+
+    for (auto it = map->staticres.begin(); it != map->staticres.end(); ++it) {
+        if (*it != object) continue;
+        removeEditorObjectFromRuntime(object);
+        delete *it;
+        map->staticres.erase(it);
+        return finishDelete();
+    }
+
+    for (auto it = map->animal.begin(); it != map->animal.end(); ++it) {
+        if (*it != object) continue;
+        removeEditorObjectFromRuntime(object);
+        delete *it;
+        map->animal.erase(it);
+        return finishDelete();
+    }
+
     for (int i = 0; i < MAXPLAYER; ++i) {
-        auto& humanList = player[i]->human;
-        auto itHuman = humanList.begin();
-        while (itHuman != humanList.end()) {
-            // 将像素坐标转换为块坐标
-            int x = int((*itHuman)->getDR() / BLOCKSIDELENGTH);
-            int y = int((*itHuman)->getUR() / BLOCKSIDELENGTH);
-            if (abs(x - blockL) <= radius && abs(y - blockU) <= radius) {
-                // 先从map_Object中移除人物，避免悬空指针
-                Coordinate* humanToDelete = *itHuman;
-                int pixelX = int((*itHuman)->getDR());
-                int pixelY = int((*itHuman)->getUR());
-                if (pixelX >= 0 && pixelX <int(MAP_L * BLOCKSIDELENGTH) &&
-                    pixelY >= 0 && pixelY <int(MAP_U * BLOCKSIDELENGTH)) {
-                    int mapX = pixelX / BLOCKSIDELENGTH;
-                    int mapY = pixelY / BLOCKSIDELENGTH;
-                    if (mapX >= 0 && mapX < MAP_L && mapY >= 0 && mapY < MAP_U) {
-                        auto& objects = map->map_Object[mapX][mapY];
-                        objects.erase(remove(objects.begin(), objects.end(), humanToDelete), objects.end());
-                    }
-                }
-                
-                // 清理选择状态和区域关系
-                cleanupUnitReferences(humanToDelete);
-                
-                delete *itHuman;
-                itHuman = humanList.erase(itHuman);
-            }
-            else {
-                ++itHuman;
-            }
+        for (auto it = player[i]->build.begin(); it != player[i]->build.end(); ++it) {
+            if (*it != object) continue;
+            cleanupUnitReferences(object);
+            removeEditorObjectFromRuntime(object);
+            player[i]->deleteMissile_Attacker(object);
+            player[i]->deleteBuilding(it);
+            return finishDelete();
+        }
+
+        for (auto it = player[i]->human.begin(); it != player[i]->human.end(); ++it) {
+            if (*it != object) continue;
+            // Player::deleteHuman 会统一清理选择、状态和巡逻区域引用。
+            removeEditorObjectFromRuntime(object);
+            player[i]->deleteMissile_Attacker(object);
+            player[i]->humanNumDecrease(*it);
+            player[i]->deleteHuman(it);
+            return finishDelete();
         }
     }
 
-    // 更新障碍物地图和资源地图
-    map->loadBarrierMap(true);
-    ui->Game->update();  // 触发界面重绘
+    return false;
+}
+
+void MainWidget::removeEditorObjectFromRuntime(Coordinate* object)
+{
+    if (!object) return;
+
+    int startL = std::max(0, object->getBlockDR());
+    int startU = std::max(0, object->getBlockUR());
+    int size = std::max(1, int(object->get_BlockSizeLen()));
+    int endL = std::min(MAP_L, object->getBlockDR() + size);
+    int endU = std::min(MAP_U, object->getBlockUR() + size);
+
+    for (int mapL = startL; mapL < endL; ++mapL) {
+        for (int mapU = startU; mapU < endU; ++mapU) {
+            auto& objects = map->map_Object[mapL][mapU];
+            objects.erase(remove(objects.begin(), objects.end(), object), objects.end());
+        }
+    }
+
+    for (const Point& point : map->get_ObjectVisionBlock(object)) {
+        auto& observers = map->map_Vision[point.x][point.y];
+        observers.erase(remove(observers.begin(), observers.end(), object), observers.end());
+    }
+
+    if (core && core->interactionList) {
+        core->interactionList->eraseObject(object);
+        core->deleteOb_setNowobNULL(object);
+    }
+    auto objectIt = g_Object.find(object->getglobalNum());
+    if (objectIt != g_Object.end()) objectIt->second = nullptr;
 }
 
 
@@ -1426,6 +1478,7 @@ void MainWidget::initMap() {
     for (int i = 0; i < MEMORYROW; i++) {
         memorymap[i] = new int[MEMORYCOLUMN];
     }
+    editorHitMap.assign(MEMORYROW, vector<unsigned char>(MEMORYCOLUMN, 0));
     
     // 应用从地图文件中读取的敌人状态
     if (EditorMode) {
