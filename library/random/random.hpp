@@ -38,7 +38,7 @@ public:
 
     __forceinline int32_t nextInt(int32_t min, int32_t max)
     {
-        if (min >= max) swap(min,max);
+        if (min >= max) min^=max,max^=min,min^=max;
         return min + nextInt(max - min);
     }
 
