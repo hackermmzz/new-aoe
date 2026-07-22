@@ -102,7 +102,7 @@ MainWidget::MainWidget(QWidget* parent) :
     ui->setupUi(this);
     g_mainWidget = this; // 设置全局MainWidget实例指针
     mouseEvent==new MouseEvent();
-    memorymap=new int*[MEMORYROW]
+    memorymap=new int*[MEMORYROW];
     //申请资源
     QResource::registerResource("./res.rcc");
     //初始化一些变量
