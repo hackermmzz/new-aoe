@@ -35,6 +35,8 @@ public:
     Map *map;
     MouseEvent *mouseEvent;
     int **memorymap;    //动态
+    // 编辑器逐像素命中的有效位。与内核使用的 memorymap 分开，避免改变其 0 空值约定。
+    vector<vector<unsigned char>> editorHitMap;
 
     //获取实体信息框的按钮
     ActWidget* getActs(int num){return acts[num];}
@@ -193,7 +195,10 @@ private:
     void MakeAnimal(Double DR,Double UR,int type);
     void MakeBuilding(int blockL,int blockU,int type);
     void MakeHuman(Double DR,Double UR,int type);
-    void clearArea(int blockL, int blockU, int radius = 1);  // 清空指定区域资源
+    void clearArea(int blockL, int blockU, int radius = 0);  // 删除点击格内对象
+    Coordinate* getEditorObjectAtPixel(int mouseX, int mouseY) const;
+    bool deleteEditorObject(Coordinate* object, bool refreshRuntime = true);
+    void removeEditorObjectFromRuntime(Coordinate* object);
     
     // 单位选择和区域管理相关函数
     void selectUnit(Coordinate* unit, bool addToSelection = false);  // 选择单位
