@@ -1021,7 +1021,7 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             if (moveOb != NULL) moveOb->adjustAngle(object2->getDR(), object2->getUR());
             if (isFriendlyPriestHealing)
             {
-                const Double healAmount = attacker->getATK() * TimePerFrame / 1000;
+                const Double healAmount = Double(attacker->getATK()) * Double(TimePerFrame) / Double(1000);
                 attackee->updateBlood(-healAmount);
                 if (attackee->isFullHp()) suspendRelation(object1);
                 return;

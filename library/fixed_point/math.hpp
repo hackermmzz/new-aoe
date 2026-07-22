@@ -46,14 +46,14 @@ __forceinline Fixed<BaseType, Store, FractionBits> pow(const Fixed<BaseType, Sto
 // sqrt(x, iterations) — Newton's method (Babylonian method)
 //
 //   x          : Fixed<...>   — value to take square root of
-//   iterations : int          — number of Newton iterations (3~6 is plenty)
+//   iterations : int          — maximum number of Newton iterations
 //
 //   要求 x >= 0，否则返回 0。
 // ============================================================================
 
 template <typename BaseType, typename Store, int FractionBits>
 __forceinline Fixed<BaseType, Store, FractionBits> sqrt(const Fixed<BaseType, Store, FractionBits>& x,
-                                           int iterations=8)
+                                           int iterations=32)
 {
     using F = Fixed<BaseType, Store, FractionBits>;
 
@@ -70,11 +70,20 @@ __forceinline Fixed<BaseType, Store, FractionBits> sqrt(const Fixed<BaseType, St
         return F::FromRaw(static_cast<Store>(v.raw() >> 1));
     };
 
-    // Newton iteration: guess = (guess + x / guess) / 2
-    F guess = half(x);
+    // Use 1 for fractional inputs so the initial guess can never truncate to zero.
+    F guess = x > F(1) ? half(x) : F(1);
+    F previous = F(0);
 
     for (int i = 0; i < iterations; ++i) {
-        guess = half(guess + x / guess);
+        F next = half(guess + x / guess);
+        if (next == guess)
+            return next;
+        // Fixed-point Newton iteration can alternate between two adjacent raw values.
+        // Return the larger value to avoid underestimating game distances by one ulp.
+        if (next == previous)
+            return next > guess ? next : guess;
+        previous = guess;
+        guess = next;
     }
 
     return guess;

@@ -258,18 +258,12 @@ public:
         // BaseType just to perform a division that Store can do natively.
         return static_cast<Int>(raw_ / static_cast<Store>(Scale));
     }
-    __forceinline constexpr operator char()const{
-        return static_cast<char>(int());
-    }
-    __forceinline constexpr operator unsigned char()const{
-        return static_cast<unsigned char>(char());
-    }
     __forceinline constexpr  explicit operator float() const {
         // Go through double to avoid missing Int128->float conversion
         return static_cast<float>(static_cast<double>(raw_) / static_cast<double>(Scale));
     }
 
-    __forceinline constexpr explicit operator double() const {
+    __forceinline constexpr operator double() const {
         // Direct conversion from raw fixed-point value to double.
         // Avoids going through BaseType (Int128) which has broken negative conversion.
         return static_cast<double>(raw_) / static_cast<double>(Scale);

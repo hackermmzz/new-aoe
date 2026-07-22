@@ -139,9 +139,23 @@ TEST(conv_to_int64) {
     PASS();
 }
 
+TEST(conv_to_char) {
+    FixedType f(65);
+    char c = f;
+    if (c != 'A') { FAIL("char conv 65->A"); return; }
+    PASS();
+}
+
+TEST(conv_to_uchar) {
+    FixedType f(255);
+    unsigned char c = f;
+    if (c != 255) { FAIL("unsigned char conv 255"); return; }
+    PASS();
+}
+
 TEST(conv_to_double_pos) {
     FixedType f = FixedType::FromDouble(123.456789);
-    double d = (double)f;
+    double d = f;
     if (!approx(d, 123.456789, 1e-5)) { FAIL("double pos"); return; }
     PASS();
 }
@@ -743,6 +757,20 @@ TEST(math_sqrt_small) {
     PASS();
 }
 
+TEST(math_sqrt_large_default_iterations) {
+    FixedType x(100000000);
+    FixedType r = sqrt(x);
+    if (!approx((double)r, 10000.0, 1e-3)) { FAIL("sqrt(100000000)=10000"); return; }
+    PASS();
+}
+
+TEST(math_sqrt_tiny_default_iterations) {
+    FixedType x = FixedType::FromDouble(0.0001);
+    FixedType r = sqrt(x);
+    if (!approx((double)r, 0.01, 1e-5)) { FAIL("sqrt(0.0001)=0.01"); return; }
+    PASS();
+}
+
 TEST(math_abs_free_func) {
     FixedType f = FixedType::FromDouble(-7.5);
     FixedType r = abs(f);
@@ -963,6 +991,8 @@ int main() {
     printf("\n--- Type Conversion ---\n");
     RUN(conv_to_int);
     RUN(conv_to_int64);
+    RUN(conv_to_char);
+    RUN(conv_to_uchar);
     RUN(conv_to_double_pos);
     RUN(conv_to_double_neg);
     RUN(conv_to_float);
@@ -1060,6 +1090,8 @@ int main() {
     RUN(math_sqrt_one);
     RUN(math_sqrt_zero);
     RUN(math_sqrt_small);
+    RUN(math_sqrt_large_default_iterations);
+    RUN(math_sqrt_tiny_default_iterations);
     RUN(math_abs_free_func);
     RUN(math_floor_free_func);
     RUN(math_ceil_free_func);
