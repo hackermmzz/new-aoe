@@ -84,6 +84,27 @@ int buildingFootprint(const QJsonObject& obj)
     return 3;
 }
 
+int objectFootprint(const QString& topKey, const QJsonObject& obj)
+{
+    if (isBuildingEntry(topKey, obj)) {
+        return buildingFootprint(obj);
+    }
+
+    if (topKey.startsWith(QStringLiteral("StaticRes_"))) {
+        switch (obj.value(QStringLiteral("Num")).toInt()) {
+        case NUM_STATICRES_Stone:
+        case NUM_STATICRES_GoldOre:
+        case NUM_STATICRES_Fish:
+            return SIZELEN_SMALL;
+        case NUM_STATICRES_Bush:
+        default:
+            return SIZELEN_SINGEL;
+        }
+    }
+
+    return SIZELEN_SINGEL;
+}
+
 std::pair<int, int> rotateBlockAnchor(
     int blockDR,
     int blockUR,
@@ -103,6 +124,211 @@ std::pair<int, int> rotateBlockAnchor(
         return {blockUR, width - blockDR - footprint};
     }
     return {blockDR, blockUR};
+}
+
+int terrainHeightAt(const std::vector<std::vector<int>>& heights, int x, int y)
+{
+    const int width = static_cast<int>(heights.size());
+    const int height = width > 0 ? static_cast<int>(heights[0].size()) : 0;
+    if (x < 0 || y < 0 || x >= width || y >= height) {
+        return MAPHEIGHT_FLAT;
+    }
+    return heights[x][y];
+}
+
+bool hasNearbyOcean(const std::vector<std::vector<int>>& heights, int x, int y)
+{
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            if (terrainHeightAt(heights, x + dx, y + dy) == MAPHEIGHT_OCEAN) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int calculateHeightTerrainType(const std::vector<std::vector<int>>& heights, int x, int y)
+{
+    const int height = terrainHeightAt(heights, x, y);
+    if (height == MAPHEIGHT_OCEAN || hasNearbyOcean(heights, x, y)) {
+        return MAPTYPE_OCEAN;
+    }
+
+    const auto heightDiff = [&](int dx, int dy) {
+        return terrainHeightAt(heights, x + dx, y + dy) - height;
+    };
+    const int cornerDiff = std::abs(heightDiff(-1, -1))
+        + std::abs(heightDiff(1, -1))
+        + std::abs(heightDiff(-1, 1))
+        + std::abs(heightDiff(1, 1));
+    const int edgeDiff = std::abs(heightDiff(-1, 0))
+        + std::abs(heightDiff(1, 0))
+        + std::abs(heightDiff(0, -1))
+        + std::abs(heightDiff(0, 1));
+
+    int type = MAPTYPE_FLAT;
+    if (cornerDiff == 1) {
+        if (heightDiff(1, 1) == 1) {
+            type = MAPTYPE_A3_UPTOR;
+        } else if (heightDiff(1, -1) == 1) {
+            type = MAPTYPE_A2_DOWNTOU;
+        } else if (heightDiff(-1, 1) == 1) {
+            type = MAPTYPE_A2_UPTOU;
+        } else if (heightDiff(-1, -1) == 1) {
+            type = MAPTYPE_A1_UPTOL;
+        }
+    }
+
+    if (edgeDiff == 2) {
+        if (heightDiff(1, 0) == 1 && heightDiff(0, 1) == 1) {
+            type = MAPTYPE_A1_DOWNTOL;
+        } else if (heightDiff(-1, 0) == 1 && heightDiff(0, -1) == 1) {
+            type = MAPTYPE_A3_DOWNTOR;
+        } else if ((heightDiff(-1, 0) == 1 && heightDiff(0, 1) == 1)
+            || (heightDiff(1, 0) == 1 && heightDiff(0, -1) == 1)) {
+            type = MAPTYPE_A0_DOWNTOD;
+        }
+    } else if (edgeDiff == 1) {
+        if (heightDiff(1, 0) == 1) {
+            type = MAPTYPE_L3_UPTORD;
+        } else if (heightDiff(-1, 0) == 1) {
+            type = MAPTYPE_L1_UPTOLU;
+        } else if (heightDiff(0, 1) == 1) {
+            type = MAPTYPE_L2_UPTORU;
+        } else if (heightDiff(0, -1) == 1) {
+            type = MAPTYPE_L0_UPTOLD;
+        }
+    }
+    return type;
+}
+
+QSet<QString> findScreenSpaceTerrainCorrections(
+    const QJsonObject& root,
+    int width,
+    int height
+)
+{
+    std::vector<std::vector<int>> heights(width, std::vector<int>(height, MAPHEIGHT_FLAT));
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if (!it.key().startsWith(QStringLiteral("Cell_")) || !it.value().isObject()) {
+            continue;
+        }
+        const QJsonObject cell = it.value().toObject();
+        const int x = cell.value(QStringLiteral("BlockDR")).toInt();
+        const int y = cell.value(QStringLiteral("BlockUR")).toInt();
+        if (x >= 0 && y >= 0 && x < width && y < height) {
+            heights[x][y] = cell.value(QStringLiteral("Height")).toInt(MAPHEIGHT_FLAT);
+        }
+    }
+
+    QSet<QString> corrections;
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if (!it.key().startsWith(QStringLiteral("Cell_")) || !it.value().isObject()) {
+            continue;
+        }
+        const QJsonObject cell = it.value().toObject();
+        const int type = cell.value(QStringLiteral("Type")).toInt(MAPTYPE_FLAT);
+        if (type == MAPTYPE_FLAT || type == MAPTYPE_OCEAN) {
+            continue;
+        }
+        const int x = cell.value(QStringLiteral("BlockDR")).toInt();
+        const int y = cell.value(QStringLiteral("BlockUR")).toInt();
+        if (x >= 0 && y >= 0 && x < width && y < height
+            && calculateHeightTerrainType(heights, x, y) == MAPTYPE_FLAT) {
+            corrections.insert(it.key());
+        }
+    }
+    return corrections;
+}
+
+bool isTerrainCellCoveredByObject(
+    const QJsonObject& root,
+    int cellX,
+    int cellY
+)
+{
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if (it.key().startsWith(QStringLiteral("Cell_")) || !it.value().isObject()) {
+            continue;
+        }
+        const QJsonObject obj = it.value().toObject();
+        if (!obj.contains(QStringLiteral("BlockDR"))
+            || !obj.contains(QStringLiteral("BlockUR"))) {
+            continue;
+        }
+        const int objectX = obj.value(QStringLiteral("BlockDR")).toInt();
+        const int objectY = obj.value(QStringLiteral("BlockUR")).toInt();
+        const int footprint = objectFootprint(it.key(), obj);
+        if (cellX >= objectX && cellX < objectX + footprint
+            && cellY >= objectY && cellY < objectY + footprint) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int rotateDirectionalTerrainType90(int type)
+{
+    switch (type) {
+    case MAPTYPE_A2_UPTOU: return MAPTYPE_A1_UPTOL;
+    case MAPTYPE_A1_UPTOL: return MAPTYPE_A2_DOWNTOU;
+    case MAPTYPE_A2_DOWNTOU: return MAPTYPE_A3_UPTOR;
+    case MAPTYPE_A3_UPTOR: return MAPTYPE_A2_UPTOU;
+
+    case MAPTYPE_A0_DOWNTOD: return MAPTYPE_A3_DOWNTOR;
+    case MAPTYPE_A3_DOWNTOR: return MAPTYPE_A0_UPTOD;
+    case MAPTYPE_A0_UPTOD: return MAPTYPE_A1_DOWNTOL;
+    case MAPTYPE_A1_DOWNTOL: return MAPTYPE_A0_DOWNTOD;
+
+    case MAPTYPE_L1_UPTOLU: return MAPTYPE_L0_UPTOLD;
+    case MAPTYPE_L0_UPTOLD: return MAPTYPE_L3_UPTORD;
+    case MAPTYPE_L3_UPTORD: return MAPTYPE_L2_UPTORU;
+    case MAPTYPE_L2_UPTORU: return MAPTYPE_L1_UPTOLU;
+    default: return type;
+    }
+}
+
+int rotateDirectionalTerrainType(int type, int degrees)
+{
+    for (int step = 0; step < degrees / 90; ++step) {
+        type = rotateDirectionalTerrainType90(type);
+    }
+    return type;
+}
+
+void setTerrainVisual(QJsonObject* cell, int type)
+{
+    if (type == MAPTYPE_FLAT || type == MAPTYPE_OCEAN) {
+        return;
+    }
+    const int height = cell->value(QStringLiteral("Height")).toInt(MAPHEIGHT_FLAT);
+    int offsetX = 0;
+    int offsetY = height > MAPHEIGHT_FLAT ? DRAW_OFFSET * height : 0;
+
+    if (type == MAPTYPE_A2_UPTOU || type == MAPTYPE_A0_DOWNTOD
+        || type == MAPTYPE_L1_UPTOLU || type == MAPTYPE_L2_UPTORU
+        || type == MAPTYPE_A1_DOWNTOL || type == MAPTYPE_A3_DOWNTOR) {
+        offsetY = DRAW_OFFSET;
+    } else if (type == MAPTYPE_L0_UPTOLD) {
+        offsetX = -1;
+    } else if (type == MAPTYPE_L3_UPTORD) {
+        offsetX = 1;
+    } else if (type == MAPTYPE_A0_UPTOD) {
+        offsetY = 1;
+    }
+
+    cell->insert(QStringLiteral("Type"), type);
+    cell->insert(QStringLiteral("Pattern"), MAPPATTERN_GRASS);
+    cell->insert(QStringLiteral("Num"), 15 + type);
+    cell->insert(QStringLiteral("OffsetX"), offsetX);
+    cell->insert(QStringLiteral("OffsetY"), offsetY);
+}
+
+void rotateTerrainVisual(QJsonObject* cell, int degrees)
+{
+    const int oldType = cell->value(QStringLiteral("Type")).toInt(MAPTYPE_FLAT);
+    setTerrainVisual(cell, rotateDirectionalTerrainType(oldType, degrees));
 }
 
 double clampDetail(double value, double upper)
@@ -296,10 +522,7 @@ QJsonObject transformObject(
     QJsonObject out = obj;
 
     if (out.contains(QStringLiteral("BlockDR")) && out.contains(QStringLiteral("BlockUR"))) {
-        int footprint = 1;
-        if (isBuildingEntry(topKey, out)) {
-            footprint = buildingFootprint(out);
-        }
+        const int footprint = objectFootprint(topKey, out);
 
         const auto rotated = rotateBlockAnchor(
             out.value(QStringLiteral("BlockDR")).toInt(),
@@ -311,6 +534,10 @@ QJsonObject transformObject(
         );
         out.insert(QStringLiteral("BlockDR"), rotated.first);
         out.insert(QStringLiteral("BlockUR"), rotated.second);
+    }
+
+    if (topKey.startsWith(QStringLiteral("Cell_"))) {
+        rotateTerrainVisual(&out, degrees);
     }
 
     if (out.contains(QStringLiteral("DR")) && out.contains(QStringLiteral("UR"))) {
@@ -401,6 +628,9 @@ int rebuildShores(QJsonObject* data, int width, int height)
 {
     std::map<std::pair<int, int>, QString> cellsByPos;
     for (auto it = data->begin(); it != data->end(); ++it) {
+        if (!it.key().startsWith(QStringLiteral("Cell_"))) {
+            continue;
+        }
         if (!it.value().isObject()) {
             continue;
         }
@@ -540,10 +770,7 @@ void validateValue(
     const QString topKey = path.section('.', 0, 0).section('[', 0, 0);
 
     if (obj.contains(QStringLiteral("BlockDR")) && obj.contains(QStringLiteral("BlockUR"))) {
-        int footprint = 1;
-        if (isBuildingEntry(topKey, obj)) {
-            footprint = buildingFootprint(obj);
-        }
+        const int footprint = objectFootprint(topKey, obj);
 
         const int blockDR = obj.value(QStringLiteral("BlockDR")).toInt();
         const int blockUR = obj.value(QStringLiteral("BlockUR")).toInt();
@@ -621,6 +848,9 @@ Result rotateNjustMapRoot(
         return result;
     }
 
+    const QSet<QString> screenSpaceTerrainCorrections =
+        findScreenSpaceTerrainCorrections(root, mapWidth, mapHeight);
+
     QJsonObject rotated;
     for (auto it = root.begin(); it != root.end(); ++it) {
         rotated.insert(
@@ -633,13 +863,29 @@ Result rotateNjustMapRoot(
     result.outputWidth = outputSize.first;
     result.outputHeight = outputSize.second;
 
-    result.directionalCellTypes = countDirectionalCellTypes(rotated);
-    if (result.directionalCellTypes > 0) {
-        result.warnings.append(
-            QStringLiteral("%1 cells use directional/non-flat terrain Type values; positions were rotated but slope Type direction codes were not remapped.")
-                .arg(result.directionalCellTypes)
-        );
+    for (const QString& key : screenSpaceTerrainCorrections) {
+        if (!rotated.value(key).isObject() || !root.value(key).isObject()) {
+            continue;
+        }
+        QJsonObject cell = rotated.value(key).toObject();
+        const QJsonObject originalCell = root.value(key).toObject();
+        const int originalX = originalCell.value(QStringLiteral("BlockDR")).toInt();
+        const int originalY = originalCell.value(QStringLiteral("BlockUR")).toInt();
+        if (isTerrainCellCoveredByObject(root, originalX, originalY)) {
+            // Hidden orphan slopes can contain black mask pixels that the original
+            // object sprite happened to cover. Object sprites are not image-rotated,
+            // so use the opaque downward seam cover after rotating the map.
+            setTerrainVisual(&cell, MAPTYPE_A0_DOWNTOD);
+        } else {
+            // Uncovered orphan slopes are intentional screen-space seam covers.
+            const int originalType = originalCell.value(QStringLiteral("Type"))
+                .toInt(MAPTYPE_FLAT);
+            setTerrainVisual(&cell, originalType);
+        }
+        rotated.insert(key, cell);
     }
+
+    result.directionalCellTypes = countDirectionalCellTypes(rotated);
 
     result.shoreChanges = rebuildShores(&rotated, result.outputWidth, result.outputHeight);
     result.errors = validate(rotated, result.outputWidth, result.outputHeight, blockSize);
