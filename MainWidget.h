@@ -34,7 +34,7 @@ public:
     Player** player;
     Map *map;
     MouseEvent *mouseEvent;
-    int **memorymap=new int*[MEMORYROW];    //动态
+    int **memorymap;    //动态
 
     //获取实体信息框的按钮
     ActWidget* getActs(int num){return acts[num];}
