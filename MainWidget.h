@@ -33,7 +33,7 @@ public:
 
     Player** player;
     Map *map;
-    MouseEvent *mouseEvent=new MouseEvent();
+    MouseEvent *mouseEvent;
     int **memorymap=new int*[MEMORYROW];    //动态
 
     //获取实体信息框的按钮
