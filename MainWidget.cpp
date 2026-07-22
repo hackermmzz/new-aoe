@@ -155,11 +155,32 @@ MainWidget::MainWidget(QWidget* parent) :
     editor->show();
     if (!EditorMode) editor->hide();
 
-    // 导出地图
     connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
-        this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
-        call_debugText("green", " 导出地图", 0);
+        QString exportPath = map ? map->GetMapFileName() : QString();
+        QString fixedMapFile = RuntimeConfig_FixedMapFile().trimmed();
+
+        if (!fixedMapFile.isEmpty()) {
+            exportPath = fixedMapFile;
+            if (QFileInfo(exportPath).suffix().isEmpty()) {
+                exportPath += "." + QString::fromStdString(MAPFILE_SUFFIX);
+            }
+            if (!QFileInfo(exportPath).isAbsolute()) {
+                exportPath = QDir::current().absoluteFilePath(exportPath);
+            }
+        }
+        else if (!exportPath.isEmpty() && !QFileInfo(exportPath).isAbsolute()) {
+            exportPath = QDir::current().absoluteFilePath(exportPath);
+        }
+
+        if (exportPath.isEmpty()) {
+            call_debugText("red", " 当前没有可覆盖的地图文件", 0);
+            return;
+        }
+
+        this->ExportCurrentState(exportPath);
+        call_debugText("green", " 已覆盖当前地图: " + exportPath, 0);
         });
+
     connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {
         call_debugText("green", " 删除资源/建筑", 0);
         this->currentSelected = DELETEOBJECT;
@@ -285,7 +306,7 @@ MainWidget::MainWidget(QWidget* parent) :
 }
 
 //******************导出地图*******************
-void MainWidget::ExportCurrentState(const char* fileName)
+void MainWidget::ExportCurrentState(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -2468,8 +2489,6 @@ void MainWidget::initVar()
 void MainWidget::initEditor()
 {
     if(!EditorMode)return;
-    //创建editor对象
-    editor = new Editor(this);
     // 初始化单位选择和区域管理相关变量
     selectedUnits.clear();
     //初始化编辑器默认状态
@@ -2482,10 +2501,6 @@ void MainWidget::initEditor()
     g_rectArea = (RectArea*)rectArea;
     g_circleArea = (CircleArea*)circleArea;
     g_lineArea = (LineArea*)lineArea;
-    // 显示编辑器
-    editor->show();
-    // 地图编辑器按键绑定
-    EditorWidgetBind();
     //注册全局事件监听
     ::eventFilter->RegistReciver([&](){
         //轮询编辑器
@@ -3077,7 +3092,30 @@ string MainWidget::getEnemyStatus(Coordinate* unit) {
 void MainWidget::EditorWidgetBind()
 {
     connect(editor->ui->export_map, &QPushButton::clicked, this, [=]() {
-        this->ExportCurrentState((string("map.")+MAPFILE_SUFFIX).c_str());
+        QString exportPath = map ? map->GetMapFileName() : QString();
+        QString fixedMapFile = RuntimeConfig_FixedMapFile().trimmed();
+
+        // Map stores only the basename. Rebuild the full path for maps selected
+        // explicitly with --map/--fix; randomly selected maps live in the cwd.
+        if (!fixedMapFile.isEmpty()) {
+            exportPath = fixedMapFile;
+            if (QFileInfo(exportPath).suffix().isEmpty()) {
+                exportPath += "." + QString::fromStdString(MAPFILE_SUFFIX);
+            }
+            if (!QFileInfo(exportPath).isAbsolute()) {
+                exportPath = QDir::current().absoluteFilePath(exportPath);
+            }
+        }
+        else if (!exportPath.isEmpty() && !QFileInfo(exportPath).isAbsolute()) {
+            exportPath = QDir::current().absoluteFilePath(exportPath);
+        }
+
+        if (exportPath.isEmpty()) {
+            call_debugText("red", " 当前没有可覆盖的地图文件", 0);
+            return;
+        }
+
+        this->ExportCurrentState(exportPath);
         call_debugText("green", " 导出地图", 0);
         });
     connect(editor->ui->delete_object, &QPushButton::clicked, this, [=]() {

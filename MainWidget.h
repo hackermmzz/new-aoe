@@ -183,7 +183,7 @@ private:
 //****************编辑器*****************
     void EditorWidgetBind();    //编辑器槽绑定
     void SaveCurrentState();
-    void ExportCurrentState(const char*file);
+    void ExportCurrentState(const QString& file);
     void updateEditor();
     void HigherLand(int blockL,int blockU,int height);
     void LowerLand(int blockL,int blockU,int height);
