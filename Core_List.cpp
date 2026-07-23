@@ -1637,10 +1637,13 @@ void Core_List::deal_RangeAttack(Missile *missile, const array<Double, 2> &cente
 
             for(auto*obj:theMap->map_Object[blockDR][blockUR]){
                 if(!damagedObjects.insert(obj).second)continue;
+                // 单棵树和树林都属于地图资源，不参与投石车范围伤害。
+                if(obj->getSort()==SORT_ANIMAL
+                    && (obj->getNum()==ANIMAL_TREE || obj->getNum()==ANIMAL_FOREST))continue;
 
                 BloodHaver*attackee=NULL;
                 obj->printer_ToBloodHaver((void**)&attackee);
-                // 军队、农民、建筑、动物和树木拥有血量；石头、黄金等静态资源没有血量，直接排除。
+                // 军队、农民、建筑和非树木动物拥有血量；石头、黄金等静态资源没有血量，直接排除。
                 if(attackee==NULL)continue;
 
                 const Double centerDistance=countdistance(center[0],center[1],obj->getDR(),obj->getUR());
