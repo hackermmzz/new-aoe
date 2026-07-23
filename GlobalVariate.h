@@ -123,6 +123,7 @@ struct tagHuman:tagObj
     int32_t NowState; // 当前状态
     int32_t WorkObjectSN; // 工作对象序列号
     int32_t Blood; // 当前血量
+    int32_t MaxBlood; // 最大血量
     int32_t attack; // 攻击力
     int32_t rangedDefense; // 远程防御
     int32_t meleeDefense; // 近战防御

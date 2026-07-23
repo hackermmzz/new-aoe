@@ -870,6 +870,7 @@ void tagHuman::cast_from(tagHuman taghuman) {
     this->NowState = taghuman.NowState;
     this->WorkObjectSN = taghuman.WorkObjectSN;
     this->Blood = taghuman.Blood;
+    this->MaxBlood = taghuman.MaxBlood;
     this->SN = taghuman.SN;
 }
 

@@ -409,6 +409,7 @@ void Core::updateByPlayer(int id) {
         tagHuman taghuman;
         taghuman.SN = human->getglobalNum();
         taghuman.Blood = human->getBlood();
+        taghuman.MaxBlood = human->getMaxBlood();
         taghuman.DR = double(human->getDR());
         taghuman.UR =  double(human->getUR());
         taghuman.BlockDR = human->getBlockDR();
