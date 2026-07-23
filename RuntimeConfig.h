@@ -174,6 +174,9 @@ int RuntimeConfig_VISION_FARMER();
 int RuntimeConfig_BLOOD_FARMER();
 #define BLOOD_FARMER (RuntimeConfig_BLOOD_FARMER())
 
+int RuntimeConfig_DIS_FARMER_HUNT();
+#define DIS_FARMER_HUNT (RuntimeConfig_DIS_FARMER_HUNT())
+
 int RuntimeConfig_FARMER_CARRYLIMIT_WOOD();
 #define FARMER_CARRYLIMIT_WOOD (RuntimeConfig_FARMER_CARRYLIMIT_WOOD())
 
@@ -1335,7 +1338,7 @@ int RuntimeConfig_ATK_PRIEST();
 Double RuntimeConfig_DIS_PRIEST();
 #define DIS_PRIEST (RuntimeConfig_DIS_PRIEST())
 
-int RuntimeConfig_INTERVAL_PRIEST();
+Double RuntimeConfig_INTERVAL_PRIEST();
 #define INTERVAL_PRIEST (RuntimeConfig_INTERVAL_PRIEST())
 
 int RuntimeConfig_DEFCLOSE_PRIEST();

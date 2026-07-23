@@ -61,6 +61,7 @@ int g_BLOOD_TREE = 0;
 int g_CNT_TREE = 0;
 int g_VISION_FARMER = 0;
 int g_BLOOD_FARMER = 0;
+int g_DIS_FARMER_HUNT = 0;
 int g_FARMER_CARRYLIMIT_WOOD = 0;
 int g_FARMER_CARRYLIMIT_FOOD = 0;
 int g_FARMER_CARRYLIMIT_GOLD = 0;
@@ -448,7 +449,7 @@ Double g_SPEED_PRIEST = Double::Zero();
 int g_VISION_PRIEST = 0;
 int g_ATK_PRIEST = 0;
 Double g_DIS_PRIEST = Double::Zero();
-int g_INTERVAL_PRIEST = 0;
+Double g_INTERVAL_PRIEST = Double::Zero();
 int g_DEFCLOSE_PRIEST = 0;
 int g_DEFSHOOT_PRIEST = 0;
 Double g_Missile_Speed_Spear = Double::Zero();
@@ -766,6 +767,11 @@ int RuntimeConfig_VISION_FARMER()
 int RuntimeConfig_BLOOD_FARMER()
 {
     return g_BLOOD_FARMER;
+}
+
+int RuntimeConfig_DIS_FARMER_HUNT()
+{
+    return g_DIS_FARMER_HUNT;
 }
 
 int RuntimeConfig_FARMER_CARRYLIMIT_WOOD()
@@ -2703,7 +2709,7 @@ Double RuntimeConfig_DIS_PRIEST()
     return g_DIS_PRIEST;
 }
 
-int RuntimeConfig_INTERVAL_PRIEST()
+Double RuntimeConfig_INTERVAL_PRIEST()
 {
     return g_INTERVAL_PRIEST;
 }
@@ -2944,6 +2950,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_CNT_TREE = config.value(QStringLiteral("CNT_TREE")).toInt();
     g_VISION_FARMER = config.value(QStringLiteral("VISION_FARMER")).toInt();
     g_BLOOD_FARMER = config.value(QStringLiteral("BLOOD_FARMER")).toInt();
+    g_DIS_FARMER_HUNT = config.value(QStringLiteral("DIS_FARMER_HUNT")).toInt();
     g_FARMER_CARRYLIMIT_WOOD = config.value(QStringLiteral("FARMER_CARRYLIMIT_WOOD")).toInt();
     g_FARMER_CARRYLIMIT_FOOD = config.value(QStringLiteral("FARMER_CARRYLIMIT_FOOD")).toInt();
     g_FARMER_CARRYLIMIT_GOLD = config.value(QStringLiteral("FARMER_CARRYLIMIT_GOLD")).toInt();
@@ -3333,7 +3340,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_VISION_PRIEST = config.value(QStringLiteral("VISION_PRIEST")).toInt();
     g_ATK_PRIEST = config.value(QStringLiteral("ATK_PRIEST")).toInt();
     g_DIS_PRIEST = Double::FromDouble(config.value(QStringLiteral("DIS_PRIEST")).toDouble());
-    g_INTERVAL_PRIEST = config.value(QStringLiteral("INTERVAL_PRIEST")).toInt();
+    g_INTERVAL_PRIEST = Double::FromDouble(config.value(QStringLiteral("INTERVAL_PRIEST")).toDouble());
     g_DEFCLOSE_PRIEST = config.value(QStringLiteral("DEFCLOSE_PRIEST")).toInt();
     g_DEFSHOOT_PRIEST = config.value(QStringLiteral("DEFSHOOT_PRIEST")).toInt();
     g_Missile_Speed_Spear = Double::FromDouble(config.value(QStringLiteral("Missile_Speed_Spear")).toDouble());

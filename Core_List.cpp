@@ -1647,10 +1647,11 @@ void Core_List::deal_RangeAttack(Missile *missile, const array<Double, 2> &cente
                 const Double effectiveDistance=max(Double::Zero(),centerDistance-obj->getCrashLength());
                 if(effectiveDistance>blastRadius)continue;
 
-                const Double damageRate=max(Double::Zero(),min(Double(1),Double(1)-effectiveDistance/blastRadius));
                 const int extraDamage=missile->get_AttackAddition_Height(
                     theMap->get_MapHeight(obj->getBlockDR(),obj->getBlockUR()));
-                calculateDamage(missile,obj,extraDamage,damageRate);
+                // 投石车范围伤害暂不按距离衰减，爆炸范围内的有效目标均承受完整伤害。
+                // const Double damageRate=max(Double::Zero(),min(Double(1),Double(1)-effectiveDistance/blastRadius));
+                calculateDamage(missile,obj,extraDamage);
             }
         }
     }

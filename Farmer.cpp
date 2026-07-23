@@ -161,7 +161,7 @@ Double Farmer::getDis_attack()
 {
     Double dis;
 
-    if(get_AttackType() == ATTACKTYPE_SHOOT) dis = 3 ;
+    if(get_AttackType() == ATTACKTYPE_SHOOT) dis = DIS_FARMER_HUNT;
     else dis = 0;
 
     if(dis == Double::Zero())
