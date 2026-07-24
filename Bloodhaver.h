@@ -74,7 +74,12 @@ public:
 
     void initAvengeObject(){ avangeObject = NULL; gotAttack = false; }
 
-    void haveAttack(){ attack_OneCircle = false; }
+    void haveAttack()
+    {
+        attack_OneCircle = false;
+        if (attackType != ATTACKTYPE_CHANGE && inter_Attack > Double::Zero() && TimePerFrame > 0)
+            attackCooldownFrames = int((inter_Attack * Double(1000) / Double(TimePerFrame)).ceil());
+    }
 
     bool get_isRangeAttack(){return isRangeAttack;}
 
@@ -100,6 +105,7 @@ protected:
     int atk = 0;    //攻击力
     Double dis_Attack = DISTANCE_ATTACK_CLOSE;  //攻击距离
     int type_Missile = -1;
+    int attackCooldownFrames = 0;
 
     bool attack_OneCircle = true;   //用于限制计算重复攻击
 
@@ -123,7 +129,16 @@ protected:
     Double frozenDisRaw = 0;    //冻结时的攻击距离（单位自身值，未乘BLOCKSIDELENGTH；0表示近战特例）
     int frozenDisAdd = 0;       //冻结时的攻击距离科技加成
 
-    void initAttack_perCircle(){ attack_OneCircle = true; }
+    void updateAttackCooldown()
+    {
+        if (attackCooldownFrames > 0 && --attackCooldownFrames == 0)
+            attack_OneCircle = true;
+    }
+    void initAttack_perCircle()
+    {
+        if (attackCooldownFrames == 0)
+            attack_OneCircle = true;
+    }
 };
 
 #endif // BLOODHAVER_H

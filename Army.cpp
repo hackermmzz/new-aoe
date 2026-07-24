@@ -121,6 +121,8 @@ Army::Army(Double DR,Double UR,int Num ,int status, Development* playerScience, 
 
 void Army::nextframe()
 {
+    updateAttackCooldown();
+
     if(isDie())
     {
         if( !isDying() )
@@ -426,25 +428,29 @@ int Army::get_add_specialAttack()
 
     if(Num == AT_SLINGER)
     {
-       /* if(interactSort == SORT_ARMY)
+        if(interactSort == SORT_ARMY)
         {
-            if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED) addition+=2;
+            if(interactNum == AT_BOWMAN || interactNum == AT_IMPROVED ||
+               interactNum == AT_COMPOSITE_BOWMAN || interactNum == AT_CHARIOT_ARCHER)
+                addition += 2;
         }
-        else */if( interactSort == SORT_BUILDING)
+        else if(interactSort == SORT_BUILDING)
         {
             if(interactNum == BUILDING_ARROWTOWER || interactNum == BUILDING_WALL)
-                addition += DEFSHOOT_BUILD_ARROWTOWER;
+                addition += 7;
         }
     }
-//    else if(Num == AT_CAVALRY)
-//    {
-//        if(interactSort == SORT_ARMY)
-//        {
-//            if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN)
-//                addition+=5;
-//        }
-
-//    }
+    else if(Num == AT_CAVALRY && interactSort == SORT_ARMY)
+    {
+        if(interactNum == AT_CLUBMAN || interactNum == AT_SWORDSMAN ||
+           interactNum == AT_BROADSWORDSMAN)
+            addition += 5;
+    }
+    else if((Num == AT_CHARIOT || Num == AT_CHARIOT_ARCHER) &&
+            interactSort == SORT_ARMY && interactNum == AT_PRIEST)
+    {
+        addition += 7;
+    }
 
     return addition;
 }
@@ -498,6 +504,7 @@ void Army::setAttribute()
         atk_change  = new int[2]{ATK_CLUBMAN1,ATK_CLUBMAN2};
         dis_Attack_change  = new Double[2]{DIS_CLUBMAN1 , DIS_CLUBMAN2};
         inter_Attack_change = new Double[2]{ INTERVAL_CLUBMAN1,INTERVAL_CLUBMAN2 };
+        inter_Attack = INTERVAL_CLUBMAN1;
         defence_close_change  = new int[2]{ DEFCLOSE_CLUBMAN1,DEFCLOSE_CLUBMAN2 };
         defence_shoot_change  = new int[2]{ DEFSHOOT_CLUBMAN1,DEFSHOOT_CLUBMAN2 };
 
