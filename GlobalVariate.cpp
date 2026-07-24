@@ -663,7 +663,25 @@ void ParseArguments(const QApplication&app){
        );
     QList<QCommandLineOption>options={option0,option1,option2,option3,option4,option5};
     parser.addOptions(options);
-    parser.process(app);
+
+    // QCommandLineParser会把缺少值的-map直接当成参数错误并结束程序。
+    // 启动前先移除这种空-map选项，使FixedMapFile保持为空并沿用随机地图逻辑。
+    QStringList arguments = app.arguments();
+    for(int i = 1; i < arguments.size(); ++i){
+        const QString argument = arguments[i];
+        if(argument != "-map" && argument != "--map"){
+            continue;
+        }
+
+        const bool missingMapName =
+            i + 1 >= arguments.size() || arguments[i + 1].startsWith("-");
+        if(missingMapName){
+            qWarning() << "map option has no file name; falling back to a random map";
+            arguments.removeAt(i);
+            --i;
+        }
+    }
+    parser.process(arguments);
     //
     if(parser.isSet("exam")){
         RuntimeConfig_setIsExamining(true);
@@ -855,7 +873,11 @@ bool tagObj::operator <(const tagObj &obj) const{
 
 tagBuilding tagBuilding::toEnemy() {
     this->Cnt = -1;
-    this->Project = -1;
+    // 普通建筑继续隐藏生产/研究项目；箭塔保留当前攻击目标，
+    // 供EnemyAI精确判断是哪座玩家箭塔正在攻击自己的单位。
+    if (this->Type != BUILDING_ARROWTOWER) {
+        this->Project = -1;
+    }
     this->ProjectPercent = -1;
     return *this;
 }
