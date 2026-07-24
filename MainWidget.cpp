@@ -3096,7 +3096,7 @@ void MainWidget::EditorWidgetBind()
         QString fixedMapFile = RuntimeConfig_FixedMapFile().trimmed();
 
         // Map stores only the basename. Rebuild the full path for maps selected
-        // explicitly with --map/--fix; randomly selected maps live in the cwd.
+        // explicitly with --map; randomly selected maps live in the cwd.
         if (!fixedMapFile.isEmpty()) {
             exportPath = fixedMapFile;
             if (QFileInfo(exportPath).suffix().isEmpty()) {
