@@ -74,7 +74,7 @@ static bool wave2Completed = false;
 static map<int, int> lastAssignFrame;
 // 每单位上次补发攻击指令的帧号（目标仍活着但引擎清空指令时），用较短间隔快速补发避免卡住
 static map<int, int> lastReissueFrame;
-// 每单位士兵当前的行动目标
+// 每个敌方士兵当前锁定的目标；目标存活期间不因优先级变化而切换。
 static map<int, int> currentTarget;
 static bool wave1Started = false;
 static bool wave2Started = false;
@@ -773,6 +773,50 @@ static bool FindEnemyTargetDetailPosition(int targetSN, double& dr, double& ur)
     return false;
 }
 
+static bool EnemyTargetAlive(int sn)
+{
+    if (sn == -1) return false;
+
+    for (tagArmy& a : enemyInfo.enemy_armies) {
+        if (a.SN == sn) return true;
+    }
+
+    for (tagFarmer& f : enemyInfo.enemy_farmers) {
+        if (f.SN == sn) return true;
+    }
+
+    for (tagBuilding& b : enemyInfo.enemy_buildings) {
+        if (b.SN == sn) return true;
+    }
+
+    return false;
+}
+
+static int GetLockedArmyTarget(int armySN)
+{
+    auto it = currentTarget.find(armySN);
+    if (it == currentTarget.end()) return -1;
+
+    if (EnemyTargetAlive(it->second)) {
+        return it->second;
+    }
+
+    currentTarget.erase(it);
+    return -1;
+}
+
+static void CleanDeadOwnerTargetLocks()
+{
+    for (auto it = currentTarget.begin(); it != currentTarget.end(); ) {
+        if (FindMyArmyBySN(it->first) == nullptr) {
+            it = currentTarget.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+}
+
 static bool FindEnemyUnitBlockPosition(int targetSN, int& blockDR, int& blockUR)
 {
     for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
@@ -992,8 +1036,10 @@ static void ReserveCurrentFarmerTargets(const vector<int>& units, vector<int>& r
 static int FindWaveTargetByPriority(const tagArmy& army,
                                     const vector<int>& reservedFarmers)
 {
-    auto it = currentTarget.find(army.SN);
-    const int previousTarget = it == currentTarget.end() ? -1 : it->second;
+    const int previousTarget = GetLockedArmyTarget(army.SN);
+
+    // 一旦锁定任何存活目标，就不再因新威胁或更高优先级目标出现而切换。
+    if (previousTarget != -1) return previousTarget;
 
     // 所有波次普通单位使用相同优先级：
     // 攻击自己的对象 > 玩家祭司 > 玩家农民。
@@ -1001,16 +1047,12 @@ static int FindWaveTargetByPriority(const tagArmy& army,
     if (threat != -1) return threat;
 
     // 其次锁定玩家祭司，再锁定玩家农民。
-    if (EnemyPriestAlive(previousTarget)) return previousTarget;
-
     int priest = FindNearestEnemyPriest(army.BlockDR, army.BlockUR);
     if (priest != -1) return priest;
 
-    if (EnemyFarmerAlive(previousTarget)) return previousTarget;
-
     return FindNearestWaveFarmerAvoiding(army.BlockDR,
-                                         army.BlockUR,
-                                         reservedFarmers);
+                                          army.BlockUR,
+                                          reservedFarmers);
 }
 
 static bool IsArcherTargetSort(int sort)
@@ -1099,8 +1141,14 @@ void EnemyAI::OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN)
         tagArmy* army = FindMyArmyBySN(sn);
         if (!army) continue;
 
-        if (army->WorkObjectSN != targetSN) {
-            HumanAction(sn, targetSN);
+        int lockedTarget = GetLockedArmyTarget(sn);
+        if (lockedTarget == -1) {
+            lockedTarget = targetSN;
+            currentTarget[sn] = lockedTarget;
+        }
+
+        if (army->WorkObjectSN != lockedTarget) {
+            HumanAction(sn, lockedTarget);
             waveLastOrderFrame[sn] = g_frame;
         }
     }
@@ -1108,6 +1156,9 @@ void EnemyAI::OrderWaveUnitsToAttackTarget(vector<int>& units, int targetSN)
 
 static int FindStoneThrowerWaveTarget(const tagArmy& army)
 {
+    int lockedTarget = GetLockedArmyTarget(army.SN);
+    if (lockedTarget != -1) return lockedTarget;
+
     // 第三波投石车：箭塔 > 弓箭手类 > 其他建筑 > 祭司 > 农民 > 其他单位。
     int tower = FindNearestEnemyTower(army.BlockDR, army.BlockUR);
     if (tower != -1) return tower;
@@ -1219,6 +1270,24 @@ static int FindDirectThreatToArmySN(int myArmySN)
         }
     }
 
+    // 小范围内的玩家箭塔正在攻击我方这个 enemy 士兵
+    for (tagBuilding& enemyBuilding : enemyInfo.enemy_buildings) {
+        if (enemyBuilding.Type != BUILDING_ARROWTOWER) continue;
+        if (enemyBuilding.Project != myArmySN) continue;
+        if (BlockDis(myArmy->BlockDR, myArmy->BlockUR,
+                     enemyBuilding.BlockDR, enemyBuilding.BlockUR) > FIELD_ASSIST_RADIUS) {
+            continue;
+        }
+
+        int d = BlockDis2(myArmy->BlockDR, myArmy->BlockUR,
+                          enemyBuilding.BlockDR, enemyBuilding.BlockUR);
+
+        if (d < bestDis) {
+            bestDis = d;
+            bestSN = enemyBuilding.SN;
+        }
+    }
+
     return bestSN;
 }
 
@@ -1260,6 +1329,24 @@ static int FindAssistThreatNearArmy(const tagArmy& myArmy)
                 bestSN = enemyFarmer.SN;
             }
         }
+
+        // 小范围内的玩家箭塔正在攻击附近友军时，过去协助摧毁箭塔
+        for (tagBuilding& enemyBuilding : enemyInfo.enemy_buildings) {
+            if (enemyBuilding.Type != BUILDING_ARROWTOWER) continue;
+            if (enemyBuilding.Project != ally.SN) continue;
+            if (BlockDis(myArmy.BlockDR, myArmy.BlockUR,
+                         enemyBuilding.BlockDR, enemyBuilding.BlockUR) > FIELD_ASSIST_RADIUS) {
+                continue;
+            }
+
+            int d = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                              enemyBuilding.BlockDR, enemyBuilding.BlockUR);
+
+            if (d < bestDis) {
+                bestDis = d;
+                bestSN = enemyBuilding.SN;
+            }
+        }
     }
 
     return bestSN;
@@ -1274,10 +1361,13 @@ void EnemyAI::AssignFieldSelfDefense()
         // 正在执行波次骚扰/全面进攻的兵，不归这里管
         if (IsCurrentActiveHarassUnit(army.SN)) continue;
 
-        int targetSN = -1;
+        int targetSN = GetLockedArmyTarget(army.SN);
 
-        // 最高优先级：谁正在打我，我就反击谁
-        targetSN = FindDirectThreatToArmySN(army.SN);
+        // 没有存活锁定目标时，才按原优先级寻找新目标。
+        if (targetSN == -1) {
+            // 最高优先级：谁正在打我，我就反击谁
+            targetSN = FindDirectThreatToArmySN(army.SN);
+        }
 
         // 如果我自己没被打，但附近友军被打，则过去帮忙
         if (targetSN == -1) {
@@ -1285,8 +1375,9 @@ void EnemyAI::AssignFieldSelfDefense()
         }
 
         if (targetSN == -1) continue;
+        currentTarget[army.SN] = targetSN;
 
-        if (army.WorkObjectSN != targetSN ||
+        if (army.WorkObjectSN != targetSN &&
             g_frame - fieldSelfDefenseLastOrderFrame[army.SN] >= FIELD_SELF_DEFENSE_ORDER_INTERVAL) {
             HumanAction(army.SN, targetSN);
             fieldSelfDefenseLastOrderFrame[army.SN] = g_frame;
@@ -1701,6 +1792,7 @@ tagArmy EnemyAI::Threated(tagArmy *army)
 void EnemyAI::processData() {
 
         enemyInfo = getInfo();
+        CleanDeadOwnerTargetLocks();
 
         Initialize_Enemycenter();
         Initialize_Enemymap();
@@ -1708,7 +1800,8 @@ void EnemyAI::processData() {
         // 武器攻城厂周围防守兵逻辑，永远优先执行
         AssignDefense();
         AssignFieldSelfDefense();
-        // 自家箭塔锁定攻击范围内最近的玩家单位；目标死亡或离开射程后重新选敌。
+        // 自家箭塔保持原逻辑：当前目标仍在射程内就继续攻击，
+        // 目标死亡或离开射程后，重新选择射程内最近的玩家单位。
         for (tagBuilding& b : enemyInfo.buildings) {
             if (b.Type != BUILDING_ARROWTOWER) continue;
 
@@ -1741,7 +1834,6 @@ void EnemyAI::processData() {
                          currentTargetDR, currentTargetUR) <= towerRange;
 
             if (currentTargetInRange) {
-                // 保持原目标，直到其死亡或离开射程。
                 continue;
             }
 
@@ -1824,6 +1916,7 @@ void EnemyAI::AssignDefense()
             defenseLastOrderFrame.erase(sn);
             PriestGuardTarget.erase(sn);
             PriestGuard_Center_Enemy.erase(sn);
+            currentTarget.erase(sn);
             it = Defend_Center_Enemy.erase(it);
             continue;
         }
@@ -1834,9 +1927,14 @@ void EnemyAI::AssignDefense()
         // 独立祭司猎手：3 骑兵 + 2 战车弓兵。
         // 在厂区 20 格内发现祭司后锁定，直到祭司死亡或猎手被消灭。
         if (PriestGuard_Center_Enemy.find(sn) != PriestGuard_Center_Enemy.end()) {
-            int priestSN = -1;
+            const int armyLockedTarget = GetLockedArmyTarget(sn);
+            int priestSN = EnemyPriestAlive(armyLockedTarget)
+                ? armyLockedTarget
+                : -1;
             auto lockedTarget = PriestGuardTarget.find(sn);
-            if (lockedTarget != PriestGuardTarget.end()) {
+            if (armyLockedTarget == -1 &&
+                priestSN == -1 &&
+                lockedTarget != PriestGuardTarget.end()) {
                 if (EnemyPriestAlive(lockedTarget->second)) {
                     priestSN = lockedTarget->second;
                 } else {
@@ -1844,15 +1942,16 @@ void EnemyAI::AssignDefense()
                 }
             }
 
-            if (priestSN == -1) {
+            if (armyLockedTarget == -1 && priestSN == -1) {
                 priestSN = FindNearestPriestNearSiegeCenter(*army);
                 if (priestSN != -1) {
                     PriestGuardTarget[sn] = priestSN;
+                    currentTarget[sn] = priestSN;
                 }
             }
 
             if (priestSN != -1) {
-                if (army->WorkObjectSN != priestSN ||
+                if (army->WorkObjectSN != priestSN &&
                     g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
                     HumanAction(sn, priestSN);
                     defenseLastOrderFrame[sn] = g_frame;
@@ -1872,6 +1971,9 @@ void EnemyAI::AssignDefense()
                           defenseHome->second.first,
                           defenseHome->second.second) > double(BLOCKSIDELENGTH);
         if (distToCenter > chaseLimit && hasLeftDefenseHome) {
+            // 普通守军越过追击上限就放弃当前目标，避免回防后再次追逐同一远处目标。
+            currentTarget.erase(sn);
+
             if (g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
                 if (defenseHome != DefenseHome.end()) {
                     HumanMove(sn, defenseHome->second.first, defenseHome->second.second);
@@ -1885,12 +1987,12 @@ void EnemyAI::AssignDefense()
             continue;
         }
 
-        int targetSN = -1;
+        int targetSN = GetLockedArmyTarget(sn);
 
-        if (army->Sort == AT_STONE_THROWER) {
+        if (targetSN == -1 && army->Sort == AT_STONE_THROWER) {
             // 攻城厂守卫投石车：复合弓兵 > 其他远程攻击单位 > 其他军队；范围/回防仍沿用普通防守逻辑
             targetSN = FindStoneThrowerDefenseTarget(*army);
-        } else {
+        } else if (targetSN == -1) {
             // 只攻击靠近武器攻城厂的玩家单位
             int bestDis = 1000000000;
 
@@ -1922,6 +2024,7 @@ void EnemyAI::AssignDefense()
         }
 
         if (targetSN != -1) {
+            currentTarget[sn] = targetSN;
             double evadeDR = 0;
             double evadeUR = 0;
             if (army->Sort == AT_STONE_THROWER &&
@@ -1935,7 +2038,7 @@ void EnemyAI::AssignDefense()
                 continue;
             }
 
-            if (army->WorkObjectSN != targetSN ||
+            if (army->WorkObjectSN != targetSN &&
                 g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
                 HumanAction(sn, targetSN);
                 defenseLastOrderFrame[sn] = g_frame;
@@ -1998,6 +2101,7 @@ void EnemyAI::FirstAttack()
             if (home != HarassHome.end()) {
                 HumanMove(sn, home->second.first, home->second.second);
             }
+            currentTarget.erase(sn);
         }
 
         wave1Completed = true;
@@ -2080,6 +2184,7 @@ void EnemyAI::SecondAttack()
             if (home != HarassHome.end()) {
                 HumanMove(sn, home->second.first, home->second.second);
             }
+            currentTarget.erase(sn);
         }
 
         wave2Completed = true;
