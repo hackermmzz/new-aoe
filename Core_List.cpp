@@ -1569,6 +1569,8 @@ void Core_List::manageMontorAct()
         Human*tar=0;
         relation.goalObject->printer_ToHuman((void**)&tar);
         if(!tar)continue;
+        // 大象受击后持续追击最先锁定的攻击者，不因目标离开视野而放弃。
+        if(animal->getNum()==ANIMAL_ELEPHANT)continue;
         //判断人类是否还在他的视野范围内
         int view=animal->getVision();
         int dis=abs(obj->getBlockDR()-tar->getBlockDR())+abs(obj->getBlockUR()-tar->getBlockUR());
