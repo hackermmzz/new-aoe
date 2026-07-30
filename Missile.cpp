@@ -21,6 +21,8 @@ Missile::Missile(int type, Coordinate *attacker, Double target_dr, Double target
     this->UR0 = target_ur;
     this->initDR=this->DR;
     this->initUR=this->UR;
+    this->viewDR=this->DR;
+    this->viewUR=this->UR;
     BlockDR = transBlock(DR);
     BlockUR = transBlock(UR);
     Height_begin = beginHeight; //设置初始出发高度
@@ -223,6 +225,9 @@ void Missile::updateViewPosition()
 
 std::array<Double, 2> Missile::calculateViewPosition(Double curDR, Double curUR)
 {
+    // 原版弓箭采用平直弹道；投石车巨石等投掷物继续使用抛物线显示。
+    if(Num == Missile_Arrow) return std::array<Double,2>{curDR,curUR};
+
     //////////////////////////////////////////////////这里作者汪，只提供最简单的变换，更加逼真的仿射变换交给你
     //这边有bug，除以0的bug
     static Double factor("1.732050807568877");
