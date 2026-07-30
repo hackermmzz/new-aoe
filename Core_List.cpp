@@ -1670,6 +1670,7 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Doub
     Point destination = Point(tranBlockDR(DR0), tranBlockUR(UR0));
     Point crashBlockPoint;
     stack<Point> path;
+    bool nullPath = false;
 
     auto& findPathMap = theMap->loadfindPathMap(moveOb);
     int* pre = 0, preval = 0;//用于恢复寻路模板
@@ -1688,6 +1689,7 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Doub
     else {
         auto&& ret = findPath(findPathMap, theMap, start, destination, moveOb, goalOb);
         path = ret.first;
+        nullPath = path.empty() && !(start == destination);
         auto& dest = ret.second;
         if (dest[0] < Double::FromDouble(1e9)) {
             DR0 = dest[0];
@@ -1695,7 +1697,13 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Doub
         }
     }
     if (pre)*pre = preval;//恢复寻路模板
-    relate_AllObject[moveOb].nullPath = path.empty();
+    relate_AllObject[moveOb].nullPath = nullPath;
+    if (nullPath)
+    {
+        relate_AllObject[moveOb].wait(max(1, TIME_NOPATH_RETRY_MS / TimePerFrame));
+        moveOb->setPath(stack<Point>(), moveOb->getDR(), moveOb->getUR());
+        return;
+    }
     moveOb->setPath(path, DR0, UR0);
 }
 
@@ -1785,6 +1793,7 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
                              Point(1,0),Point(-1,0) , Point(0,1), Point(0,-1) };
     static vector<vector<Data>> preNode(MAP_L + 1, vector<Data>(MAP_U + 1));
     static vector<vector<Double>>mndis(MAP_L + 1, vector<Double>(MAP_U + 1));
+    static vector<vector<unsigned long long>> closedMap(MAP_L + 1, vector<unsigned long long>(MAP_U + 1));
     static vector<Data>vis;
     static Double Sqrt2 = sqrt(Double(2));
     static vector<Data>goalPoint;
@@ -1937,7 +1946,9 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
         }
     }
 
-    //if (isNoPath) return { path,{1e9,1e9} };
+    // 纯坐标移动可以直接判定封闭终点；对象目标可能允许远程攻击或隔格工作，不能在这里提前否决。
+    if (isNoPath && goalOb == NULL && !(start == destination))
+        return { path,{dr0,ur0} };
     goalMap[destination.x][destination.y] = mask;
     if (goalMap[start.x][start.y] == mask)
     {
@@ -1954,9 +1965,10 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     while (!qu.empty() && !meetGoal)
     {
         auto p = qu.top();
-        auto d = get<0>(p);
         int x = get<1>(p), y = get<2>(p);
         qu.pop();
+        if (closedMap[x][y] == mask) continue;
+        closedMap[x][y] = mask;
         //
         for (int i = 0;i < 8;++i) {
             auto& offset = dire[i];

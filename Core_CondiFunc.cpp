@@ -583,6 +583,8 @@ bool condition_Object2CanbeGather(Coordinate* object1, relation_Object& relation
 //取消判断无效的行动
 bool condition_UselessAction(Coordinate* object1, relation_Object& relation, int& operate , bool isNegation)
 {
+    if (relation.nullPath)
+        return (relation.useless_norm >= max(1, TIME_NOPATH_RETRY_MS / TimePerFrame)) ^ isNegation;
     return (relation.useless_norm>operate)^isNegation;
 }
 
