@@ -364,8 +364,39 @@ int Development::getActionPopulationHalfSlots(int buildingNum, int actNum)
     return getPopulationHalfSlots(buildingNum, createSort);
 }
 
+bool Development::hasAgeUpgradeBuildings(int civilization)
+{
+    int builtTypeCount = 0;
+    if (civilization == CIVILIZATION_STONEAGE)
+    {
+        builtTypeCount = (getBuildTimes(BUILDING_GRANARY) > 0)
+                       + (getBuildTimes(BUILDING_STOCK) > 0)
+                       + (getBuildTimes(BUILDING_DOCK) > 0)
+                       + (getBuildTimes(BUILDING_ARMYCAMP) > 0);
+    }
+    else if (civilization == CIVILIZATION_TOOLAGE)
+    {
+        builtTypeCount = (getBuildTimes(BUILDING_MARKET) > 0)
+                       + (getBuildTimes(BUILDING_RANGE) > 0)
+                       + (getBuildTimes(BUILDING_STABLE) > 0);
+    }
+    else
+    {
+        return true;
+    }
+    return builtTypeCount >= 2;
+}
+
 bool Development::get_isBuildActionAble(int buildingNum, int actNum, int civilization, int wood, int food, int stone, int gold, int* oper)
 {
+    if (buildingNum == BUILDING_CENTER &&
+        actNum == BUILDING_CENTER_UPGRADE &&
+        !hasAgeUpgradeBuildings(civilization))
+    {
+        if (oper != NULL) *oper = 2;
+        return false;
+    }
+
     //如果需要创建人口，按照该行动的实际人口权重判断容量。
     int requiredHalfSlots = getActionPopulationHalfSlots(buildingNum, actNum);
     if (requiredHalfSlots > 0 && !get_isHumanHaveSpace(requiredHalfSlots))
@@ -749,6 +780,7 @@ void Development::init_DevelopLab()
     //攻城武器厂
     {
         developLab[BUILDING_SIEGE].buildCon=new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_SIEGE,TIME_BUILD_SIEGE,BUILD_SIEGE_WOOD,0,0,0);
+        developLab[BUILDING_SIEGE].buildCon->addPreCondition(developLab[BUILDING_RANGE].buildCon);
         newNode=new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_SIEGE,TIME_BUILDING_SIEGE_CREATE_STONE_THROWER,BUILDING_SIEGE_CREATE_STONE_THROWER_WOOD,0,0,BUILDING_SIEGE_CREATE_STONE_THROWER_GOLD);
         newNode->setCreatObjectAfterAction(SORT_ARMY,AT_STONE_THROWER);
         developLab[BUILDING_SIEGE].actCon[BUILDING_SIEGE_CREATE_STONE_THROWER].setHead(newNode);
@@ -757,6 +789,7 @@ void Development::init_DevelopLab()
     //学院
     {
         developLab[BUILDING_COLLAGE].buildCon=new conditionDevelop(CIVILIZATION_BRONZEAGE,BUILDING_COLLAGE,TIME_BUILD_COLLAGE,BUILD_COLLAGE_WOOD,0,0,0);
+        developLab[BUILDING_COLLAGE].buildCon->addPreCondition(developLab[BUILDING_STABLE].buildCon);
 
         // 训练方阵兵
                newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_COLLAGE, TIME_BUILDING_COLLAGE_CREATE_HOPLITE,

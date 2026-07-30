@@ -371,25 +371,13 @@ int Core_List::addRelation(Coordinate* object1, int evenType, int actNum)
         //判断行动是否可进行，是否可进行主要受资源数量限制，对于产人行动，还受当前人口数量限制。
         if (!player[buildOb->getPlayerRepresent()]->get_isBuildActionAble(buildOb, actNum, &oper))
         {
-            /** oper == 1 说明是由于人口上限
+            /** oper == 2 说明是由于时代升级建筑前置不足
+             *  oper == 1 说明是由于人口上限
              *  oper == 0 说明是由于资源数量
             */
             if (oper == 1) return ACTION_INVALID_BUILDACT_MAXHUMAN;
+            else if (oper == 2) return ACTION_INVALID_UPGRADE_TIME;
             else if (oper == 0) return ACTION_INVALID_RESOURCE;
-        }
-        //对于时代升级,需要判断是否有不少于2个非房屋得已经完成得建筑
-        if(evenType==CoreEven_BuildingAct&&actNum==BUILDING_CENTER_UPGRADE){
-            int cnt=0;
-            auto*p=player[object1->getPlayerRepresent()];
-            for(Building*obj:p->build){
-                if(obj->isFinish())
-                {
-                    if(obj->getNum()!=BUILDING_HOME&&obj->getNum()!=BUILDING_CENTER){
-                        ++cnt;
-                    }
-                }
-            }
-            if(cnt<2)return ACTION_INVALID_UPGRADE_TIME;
         }
 
         player[buildOb->getPlayerRepresent()]->changeResource_byBuildAction(buildOb, actNum);

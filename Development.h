@@ -142,6 +142,9 @@ private:
 
     map< int , st_buildAction > developLab;
 
+    // 升级时代前，检查是否已建成当前时代要求的两种不同科技建筑。
+    bool hasAgeUpgradeBuildings(int civilization);
+
     /*****************游戏进程信息*******************/
     //时代升级，进入下一时代
     void civiChange();
