@@ -401,9 +401,10 @@ Double Army::getMinDis_attack()
 void Army::freezeStats()
 {
     if(statFrozen) return;      //已冻结则保持，不重复快照（永久锁定）
+    frozenLevel = getLevel();   //切换科技归属前锁定原兵种等级及对应外观
 
     //攻击：基础值(按等级)与科技加成分开存，保留对建筑×2/特攻等情景加成实时叠加
-    if(upgradable) frozenAtkBase = atk_change[getLevel()];
+    if(upgradable) frozenAtkBase = atk_change[frozenLevel];
     else frozenAtkBase = atk;
     frozenAtkAdd = playerScience->get_addition_Attack(getSort(),Num,armyClass,get_AttackType());
 
@@ -415,7 +416,7 @@ void Army::freezeStats()
     frozenVision   = getVision();
 
     //攻击距离：存单位自身值与科技加成，近战特例(0)保持实时
-    if(upgradable) frozenDisRaw = dis_Attack_change[getLevel()];
+    if(upgradable) frozenDisRaw = dis_Attack_change[frozenLevel];
     else frozenDisRaw = dis_Attack;
     frozenDisAdd = playerScience->get_addition_DisAttack(getSort(),Num,armyClass,get_AttackType());
 
@@ -836,6 +837,7 @@ int Army::getLevel()
     *   通过查询player科技树表，得到当前player管控的该种类士兵的等级
     *   如果该种类士兵无法升级，则默认为0级
     */
+    if(statFrozen) return frozenLevel;
     if(upgradable) return playerScience->getActLevel(dependBuildNum , dependBuildAct);
     else return 0;
 }

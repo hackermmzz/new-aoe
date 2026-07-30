@@ -154,6 +154,7 @@ private:
     bool upgradable = false;
     int dependBuildNum = -1;
     int dependBuildAct = -1;
+    int frozenLevel = 0;                // 转换瞬间的兵种等级，用于锁定名称、图标与动画
     int status;
     int starttime;
     int finishtime;
