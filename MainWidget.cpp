@@ -2245,7 +2245,7 @@ static bool HasAlivePlayerCenter(Player* p)
     return false;
 }
 
-static bool HasAlivePlayerPriest(Player* p)
+static bool HasPlayerPriestBeforeDisappear(Player* p)
 {
     if (p == nullptr) return false;
 
@@ -2253,7 +2253,7 @@ static bool HasAlivePlayerPriest(Player* p)
         if (human == nullptr) continue;
         if (human->getSort() == SORT_ARMY &&
             human->getNum() == AT_PRIEST &&
-            !human->isDie()) {
+            !human->isDisappearing()) {
             return true;
         }
     }
@@ -2269,14 +2269,20 @@ bool MainWidget::isLoss()
 
     //查看当前是否拥有存活的巫师英雄(祭司)与市镇中心
     Player* currentPlayer = player[NOWPLAYERREPRESENT];
-    bool havePriest = HasAlivePlayerPriest(currentPlayer);
+    bool havePriest = HasPlayerPriestBeforeDisappear(currentPlayer);
     bool haveCenter = HasAlivePlayerCenter(currentPlayer);
 
-    if (havePriest) everHavePriest = true;
+    if (havePriest) {
+        everHavePriest = true;
+        priestLossDelayFrames = 0;
+    }
     if (haveCenter) everHaveCenter = true;
 
-    //2.巫师英雄(祭司)死亡：曾拥有过，现不再拥有存活的祭司
-    if (everHavePriest && !havePriest) return true;
+    //2.巫师英雄(祭司)死亡：完整播放倒地动画，并保留尸体若干帧后再结束游戏
+    static const int PRIEST_LOSS_DELAY_FRAMES = 15;
+    if (everHavePriest && !havePriest && !pause &&
+        ++priestLossDelayFrames >= PRIEST_LOSS_DELAY_FRAMES)
+        return true;
     //3.市镇中心被摧毁：曾拥有过，现不再拥有存活的市镇中心
     if (everHaveCenter && !haveCenter) return true;
 

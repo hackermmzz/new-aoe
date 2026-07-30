@@ -114,6 +114,7 @@ struct relation_Object
 
     bool needResourceBuilding = false;
     bool respondConduct = false;
+    bool finishPriestConversionAnimation = false;
 
     //行动无用指标，当如移动长时间不实际进行时增加，当达到一定限度时被认为行动无用，强制结束行动
     int useless_norm = 0;

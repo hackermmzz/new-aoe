@@ -436,6 +436,15 @@ void Core_List::manageRelationList()
         {
             //更新object1对应表内信息
             manageRelation_updateMassage(object1);
+
+            // 转换结果按随机计时立即生效，但让祭司把当前挥手动画自然播放到结尾再待机。
+            if (thisRelation.finishPriestConversionAnimation)
+            {
+                if (object1->get_isActionEnd()) suspendRelation(object1);
+                iter++;
+                continue;
+            }
+
             int& nowPhaseNum = thisRelation.nowPhaseNum;
             int exePhaseNum = nowPhaseNum;
             detail_EventPhase& thisDetailEven = relation_Event_static[thisRelation.relationAct];
@@ -2242,8 +2251,8 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
             updateDefeatScore(converterScore, object2, 2, true);
             //转化成功，进入休整冷却（PRIEST_REST_TIME 单位为秒，换算成帧）
             attacker->setConvertRestEndFrame(g_frame + PRIEST_REST_TIME*1000/TimePerFrame);
-            //转换成功后目标已变为友军，令祭司停手，避免继续攻击或治疗刚转换的目标
-            suspendRelation(object1);
+            //目标已完成转换；关系保留到本轮挥手动画结束，避免动作被突然截断
+            relate_AllObject[object1].finishPriestConversionAnimation = true;
         }
     }
     //普通伤害攻击

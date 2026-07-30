@@ -235,6 +235,7 @@ private:
     //避免地图开局未放置对应单位/建筑时开局即误判失败
     bool everHavePriest = false;
     bool everHaveCenter = false;
+    int priestLossDelayFrames = 0;
 //*****************************************
 
 //****************Music*********************
