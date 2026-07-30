@@ -845,16 +845,25 @@ void SelectWidget::refreshActs()
             ui->objName->setText(objArmy->getChineseName());
             std::string buttonName = "Button_" + objArmy->getArmyName(objArmy->getNum(), objArmy->getLevel());
             ui->objIcon->setPixmap(resMap[buttonName].front().scaled(110, 110));
-            ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); // 攻击图标
             ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
 
             // 判断是否是弓兵类型（远程攻击类型）
             bool isRangedUnit = (objArmy->get_AttackType() == ATTACKTYPE_SHOOT);
 
-            if (objArmy->showATK_Addition() == 0)
-                ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()));
+            // 祭司的攻击值实际表示每秒治疗量，不作为伤害属性展示。
+            if (objArmy->getNum() == AT_PRIEST)
+            {
+                ui->objIconSmall_ATK->setPixmap(QPixmap());
+                ui->objText_ATK->setText("");
+            }
             else
-                ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()) + "+" + QString::number(objArmy->showATK_Addition())); // 显示攻击力（基础+额外）
+            {
+                ui->objIconSmall_ATK->setPixmap(resMap["SmallIcon_Attack"].front().scaled(40, 30)); // 攻击图标
+                if (objArmy->showATK_Addition() == 0)
+                    ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()));
+                else
+                    ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()) + "+" + QString::number(objArmy->showATK_Addition())); // 显示攻击力（基础+额外）
+            }
             if (objArmy->showDEF_Close_Addition() == 0)
                 ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()));
             else
