@@ -549,9 +549,12 @@ bool condition_ObjectNearby( Coordinate* object1, relation_Object& relation, int
     //对飞行物的距离判定进行特判
     if(operate == OPERATECON_NEAR_MISSILE)
     {
-        if( !((Missile*)object1)->is_haveToArrive() && relation.goalObject!=NULL && countdistance(dr1 ,ur1 , dr2 , ur2 ) <= dis+relation.goalObject->getCrashLength()/2 )
-            ((Missile*)object1)->hitTarget();
-        return isNegation^((Missile*)object1)->isMissileFinishTask();
+        Missile* missile = (Missile*)object1;
+        if (!missile->is_haveToArrive() && relation.goalObject != NULL
+            && missile->isTrajectoryHitTarget(
+                dr2, ur2, dis + relation.goalObject->getCrashLength() / Double(2)))
+            missile->hitTarget();
+        return isNegation ^ missile->isMissileFinishTask();
     }
     //对渔场资源进行特判（考虑到建在岸边的渔场农民采集会出现问题，直接在这里对这种情况特判即可）
     //

@@ -17,6 +17,8 @@ Missile::Missile(int type, Coordinate *attacker, Double target_dr, Double target
     this->Num = type;
     this->DR = attacker->getDR();
     this->UR = attacker->getUR();
+    this->previousFrameDR = this->DR;
+    this->previousFrameUR = this->UR;
     this->DR0 = target_dr;
     this->UR0 = target_ur;
     this->initDR=this->DR;
@@ -66,10 +68,31 @@ void Missile::setAttribute()
 
 void Missile::nextframe()
 {
+    previousFrameDR = DR;
+    previousFrameUR = UR;
     updateMove();
     updateViewPosition();
     setNowRes();
     updateLU();
+}
+
+bool Missile::isTrajectoryHitTarget(Double targetDR, Double targetUR, Double hitDistance)
+{
+    const Double segmentDR = DR - previousFrameDR;
+    const Double segmentUR = UR - previousFrameUR;
+    const Double segmentLengthSquared = segmentDR * segmentDR + segmentUR * segmentUR;
+
+    if (segmentLengthSquared <= Double::Zero())
+        return countdistance(DR, UR, targetDR, targetUR) <= hitDistance;
+
+    Double progress = ((targetDR - previousFrameDR) * segmentDR
+        + (targetUR - previousFrameUR) * segmentUR) / segmentLengthSquared;
+    if (progress < Double::Zero()) progress = Double::Zero();
+    if (progress > Double(1)) progress = Double(1);
+
+    const Double nearestDR = previousFrameDR + segmentDR * progress;
+    const Double nearestUR = previousFrameUR + segmentUR * progress;
+    return countdistance(nearestDR, nearestUR, targetDR, targetUR) <= hitDistance;
 }
 
 void Missile::setNowRes()

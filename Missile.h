@@ -72,7 +72,14 @@ public:
 
     Double distanceToGoal(){ return countdistance(DR , UR , DR0 , UR0); }
 
-    Double get_Distance_hitTarget(){ return DISTANCE_HIT_TARGET*playerScience->get_rate_HitTarget(); }
+    Double get_Distance_hitTarget()
+    {
+        const Double halfBlock = BLOCKSIDELENGTH / Double(2);
+        const Double baseDistance = DISTANCE_HIT_TARGET > halfBlock ? DISTANCE_HIT_TARGET : halfBlock;
+        return baseDistance * playerScience->get_rate_HitTarget();
+    }
+
+    bool isTrajectoryHitTarget(Double targetDR, Double targetUR, Double hitDistance);
 
     BloodHaver* getAttackAponsor();
 
@@ -115,6 +122,8 @@ private:
     Double viewUR;
     Double initDR;
     Double initUR;
+    Double previousFrameDR;
+    Double previousFrameUR;
     //图像资源相关
     static std::list<ImageResource> *missile[NUMBER_MISSILE];
 };
