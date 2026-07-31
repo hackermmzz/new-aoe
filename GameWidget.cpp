@@ -249,9 +249,11 @@ void GameWidget::paintEvent(QPaintEvent *)
                 auto&res=*(*iter)->getNowRes();
                 int w=res.pix.width(),h=res.pix.height();
                 int localX=xx-x,localY=yy-y;
-                // 复用贴图加载时生成的像素命中图，透明区域不再遮挡后面的单位。
+                int sort=(*iter)->getSort();
+                bool isUnit=sort==SORT_FARMER||sort==SORT_ARMY;
+                // 单位使用整张贴图的矩形命中；建筑等对象仍使用非透明像素精确命中。
                 if(localX>=0&&localX<w&&localY>=0&&localY<h&&
-                        res.memorymap.getMemoryMap(localX,localY)!=0){
+                        (isUnit||res.memorymap.getMemoryMap(localX,localY)!=0)){
                     {
                         int tp=mainwidget->mouseEvent->GetMouseEventType();
                         if(tp==LEFT_PRESS){
