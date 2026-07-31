@@ -257,7 +257,11 @@ void GameWidget::paintEvent(QPaintEvent *)
                     {
                         int tp=mainwidget->mouseEvent->GetMouseEventType();
                         if(tp==LEFT_PRESS){
-                            LeftMouseObjCapture=*iter;
+                            bool capturedUnit=LeftMouseObjCapture&&
+                                    (LeftMouseObjCapture->getSort()==SORT_FARMER||
+                                     LeftMouseObjCapture->getSort()==SORT_ARMY);
+                            // 左键选择时单位优先，避免后绘制的建筑覆盖单位命中结果。
+                            if(isUnit||!capturedUnit) LeftMouseObjCapture=*iter;
                         }
                         else if(tp==RIGHT_PRESS){
                             RightMouseObjCaptrue=*iter;
