@@ -244,11 +244,14 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(mainwidget->mouseEvent->HaveEvent()){//如果需要捕捉点击对象
                 tryCaptured=true;
                 int xx=mainwidget->mouseEvent->GetMemoryMapX()*4,yy=mainwidget->mouseEvent->GetMemoryMapY()*4;
-                int x=tranX(dr-DR, ur-UR)-(*iter)->getimageX();
+                int x=tranX(dr-DR, ur-UR)-(*iter)->getimageX()+mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetX();
                 int y=(*iter)->getimageY()-(*iter)->getNowRes()->pix.height()+tranY(dr-DR,ur-UR)+mainwidget->map->cell[tmpBlockDR][tmpBlockUR].getOffsetY();
                 auto&res=*(*iter)->getNowRes();
                 int w=res.pix.width(),h=res.pix.height();
-                if(xx>=x&&xx<=(x+w)&&yy>=y&&yy<=(y+h)){
+                int localX=xx-x,localY=yy-y;
+                // 复用贴图加载时生成的像素命中图，透明区域不再遮挡后面的单位。
+                if(localX>=0&&localX<w&&localY>=0&&localY<h&&
+                        res.memorymap.getMemoryMap(localX,localY)!=0){
                     {
                         int tp=mainwidget->mouseEvent->GetMouseEventType();
                         if(tp==LEFT_PRESS){

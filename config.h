@@ -558,6 +558,7 @@ enum CoreDetailType {
 #define OPERATE_TIMEMAX 10
 #define OPERATECON_TIMES_USELESSACT_MOVE 250
 #define TIME_NOPATH_RETRY_MS 2000
+#define TIME_FARMER_COLLISION_RETRY_MS 400
 /********** 占地边长-块坐标常量 **********/
 enum SizeLenType {
     SIZELEN_SINGEL = 1,

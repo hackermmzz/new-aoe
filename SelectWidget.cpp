@@ -845,10 +845,10 @@ void SelectWidget::refreshActs()
             ui->objName->setText(objArmy->getChineseName());
             std::string buttonName = "Button_" + objArmy->getArmyName(objArmy->getNum(), objArmy->getLevel());
             ui->objIcon->setPixmap(resMap[buttonName].front().scaled(110, 110));
-            ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
 
             // 判断是否是弓兵类型（远程攻击类型）
             bool isRangedUnit = (objArmy->get_AttackType() == ATTACKTYPE_SHOOT);
+            bool isSlinger = (objArmy->getNum() == AT_SLINGER);
 
             // 祭司的攻击值实际表示每秒治疗量，不作为伤害属性展示。
             if (objArmy->getNum() == AT_PRIEST)
@@ -864,10 +864,20 @@ void SelectWidget::refreshActs()
                 else
                     ui->objText_ATK->setText(QString::number(objArmy->showATK_Basic()) + "+" + QString::number(objArmy->showATK_Addition())); // 显示攻击力（基础+额外）
             }
-            if (objArmy->showDEF_Close_Addition() == 0)
-                ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()));
+            // 投石兵没有近战甲，只在该位置显示固定的远程盾。
+            if (isSlinger)
+            {
+                ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
+                ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Shoot()));
+            }
             else
-                ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()) + "+" + QString::number(objArmy->showDEF_Close_Addition())); // 显示近战防御（基础+额外）
+            {
+                ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Melee"].front().scaled(40, 30));
+                if (objArmy->showDEF_Close_Addition() == 0)
+                    ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()));
+                else
+                    ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Close()) + "+" + QString::number(objArmy->showDEF_Close_Addition())); // 显示近战防御（基础+额外）
+            }
 
             // 第三行：弓兵类型显示射程，其他兵种显示远程防御
             if (isRangedUnit)
@@ -896,6 +906,7 @@ void SelectWidget::refreshActs()
             // 设置血量
             ui->objHp->setText(QString::number(objArmy->getBlood()) + "/" + QString::number(objArmy->getMaxBlood()));
             this->update();
+            this->show();
         }
         else if (type == SORT_ANIMAL) // 动物
         {

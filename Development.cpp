@@ -144,6 +144,10 @@ int Development::get_addition_Defence(int sort, int type, int armyClass, int att
     Double addition = 0;
     int level = 0;
 
+    // 投石兵的0近战甲、2远程盾为固定属性，不受仓库护甲科技影响。
+    if (sort == SORT_ARMY && type == AT_SLINGER)
+        return 0;
+
     if (sort == SORT_ARMY)
     {
         if (attackType_got == ATTACKTYPE_ANIMAL || attackType_got == ATTACKTYPE_CLOSE)

@@ -1671,6 +1671,7 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Doub
     Point crashBlockPoint;
     stack<Point> path;
     bool nullPath = false;
+    const bool collisionReroute = !relate_AllObject[moveOb].crashPointLab.empty();
 
     auto& findPathMap = theMap->loadfindPathMap(moveOb);
     int* pre = 0, preval = 0;//用于恢复寻路模板
@@ -1700,7 +1701,10 @@ void Core_List::setPath(MoveObject* moveOb, Coordinate* goalOb, Double DR0, Doub
     relate_AllObject[moveOb].nullPath = nullPath;
     if (nullPath)
     {
-        relate_AllObject[moveOb].wait(max(1, TIME_NOPATH_RETRY_MS / TimePerFrame));
+        const int retryMs = collisionReroute && moveOb->getSort() == SORT_FARMER
+                                ? TIME_FARMER_COLLISION_RETRY_MS
+                                : TIME_NOPATH_RETRY_MS;
+        relate_AllObject[moveOb].wait(max(1, retryMs / TimePerFrame));
         moveOb->setPath(stack<Point>(), moveOb->getDR(), moveOb->getUR());
         return;
     }
@@ -1719,7 +1723,10 @@ void Core_List::crashHandle(MoveObject* moveOb)
         /*call_debugText("red", moveOb->getChineseName()+ "(编号:" + QString::number(moveOb->getglobalNum()) + "当前位置为 ("+\
                        QString::number(moveOb->getDR()) +"," + QString::number(moveOb->getUR())+") , 目标点 ("+\
                        QString::number(moveOb->getDR0()) + "," + QString::number(moveOb->getUR0()) + ") 附近不可抵达",moveOb->getPlayerRepresent());*/
-        relate_AllObject[moveOb].wait(100);
+        const int waitFrames = moveOb->getSort() == SORT_FARMER
+                                   ? max(1, TIME_FARMER_COLLISION_RETRY_MS / TimePerFrame)
+                                   : 100;
+        relate_AllObject[moveOb].wait(waitFrames);
 
         moveOb->stateCrash = true;
         if (!moveOb->isStand()) moveOb->setPreStand();
@@ -1754,7 +1761,12 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
     {
         relate_AllObject[moveOb].crash_DealPhase = false;
         moveOb->stateCrash = true;
-        if (moveOb->getPlayerRepresent() == relate_AllObject[moveOb].crashRepresent)
+        if (moveOb->getSort() == SORT_FARMER)
+        {
+            const int maxWaitFrames = max(2, TIME_FARMER_COLLISION_RETRY_MS / TimePerFrame);
+            relate_AllObject[moveOb].wait(Rand.nextRaw() % maxWaitFrames);
+        }
+        else if (moveOb->getPlayerRepresent() == relate_AllObject[moveOb].crashRepresent)
             relate_AllObject[moveOb].wait(Rand.nextRaw() % 50);
         else relate_AllObject[moveOb].wait(Rand.nextRaw() % 20);
 

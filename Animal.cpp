@@ -95,9 +95,10 @@ void Animal::nextframe()
 
             updateMove();
         }
-        this->imageX=this->nowres->pix.width()/Double(2);
-        this->imageY=this->nowres->pix.width()/Double(4);
     }
+
+    if(nowlist != NULL && !nowlist->empty() && nowres != nowlist->end())
+        updateImageXYByNowRes();
 }
 
 void Animal::setNowRes()

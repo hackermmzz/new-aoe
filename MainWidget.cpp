@@ -2211,7 +2211,14 @@ void MainWidget::gameDataUpdate()
     }
     else
     {
-        core->resetNowObject_Click(pause);
+        // 暂停时内核不再通过 manageMouseEvent 消费鼠标事件；
+        // 等画面完成一次对象捕获后处理并清空，保证一次点击只输出一次。
+        if (tryCaptured && mouseEvent->HaveEvent())
+        {
+            core->resetNowObject_Click(true);
+            tryCaptured = false;
+            mouseEvent->SetMouseEventType(NULL_MOUSEEVENT);
+        }
     }
     makeSound();
 }

@@ -319,6 +319,7 @@ void Core::updateByObject()
             if ((*animaliter)->isDie())
             {
                 (*animaliter)->nextframe();
+                theMap->add_Map_Object(*animaliter);
             }
             else
             {
