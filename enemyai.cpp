@@ -74,8 +74,12 @@ static bool wave2Completed = false;
 static map<int, int> lastAssignFrame;
 // 每单位上次补发攻击指令的帧号（目标仍活着但引擎清空指令时），用较短间隔快速补发避免卡住
 static map<int, int> lastReissueFrame;
-// 每个敌方士兵当前锁定的目标；目标存活期间不因优先级变化而切换。
+// 每个敌方士兵当前锁定的目标；波次单位的普通锁可被直接攻击者打断。
 static map<int, int> currentTarget;
+// 波次单位因“正在攻击自己”而锁定的反击目标。
+static map<int, int> waveRetaliationTarget;
+// 每个波次单位首次观察到各攻击者的帧号，用于选择最先攻击自己的对象。
+static map<int, map<int, int>> waveThreatFirstSeenFrame;
 static bool wave1Started = false;
 static bool wave2Started = false;
 static bool wave3Started = false;
@@ -802,14 +806,26 @@ static int GetLockedArmyTarget(int armySN)
     }
 
     currentTarget.erase(it);
+    waveRetaliationTarget.erase(armySN);
+    waveThreatFirstSeenFrame.erase(armySN);
     return -1;
+}
+
+static void ClearArmyTargetLock(int armySN)
+{
+    currentTarget.erase(armySN);
+    waveRetaliationTarget.erase(armySN);
+    waveThreatFirstSeenFrame.erase(armySN);
 }
 
 static void CleanDeadOwnerTargetLocks()
 {
     for (auto it = currentTarget.begin(); it != currentTarget.end(); ) {
         if (FindMyArmyBySN(it->first) == nullptr) {
+            int armySN = it->first;
             it = currentTarget.erase(it);
+            waveRetaliationTarget.erase(armySN);
+            waveThreatFirstSeenFrame.erase(armySN);
         } else {
             ++it;
         }
@@ -980,47 +996,59 @@ static int FindNearestWaveFarmerAvoiding(int blockDR,
 
 static int FindThreatToArmy(const tagArmy& army)
 {
-    int bestSN = -1;
-    int bestDis = 1000000000;
+    vector<int> currentAttackers;
 
     // 玩家军队（包括祭司）正在攻击本单位。
     for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
         if (enemyArmy.WorkObjectSN != army.SN) continue;
-
-        int d = BlockDis2(army.BlockDR, army.BlockUR,
-                          enemyArmy.BlockDR, enemyArmy.BlockUR);
-        if (d < bestDis) {
-            bestDis = d;
-            bestSN = enemyArmy.SN;
-        }
+        AddUnique(currentAttackers, enemyArmy.SN);
     }
 
     // 玩家农民正在攻击本单位。
     for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
         if (enemyFarmer.WorkObjectSN != army.SN) continue;
-
-        int d = BlockDis2(army.BlockDR, army.BlockUR,
-                          enemyFarmer.BlockDR, enemyFarmer.BlockUR);
-        if (d < bestDis) {
-            bestDis = d;
-            bestSN = enemyFarmer.SN;
-        }
+        AddUnique(currentAttackers, enemyFarmer.SN);
     }
 
     // 玩家箭塔的Project保留当前攻击目标；只反击确实锁定本单位的箭塔。
     for (tagBuilding& enemyBuilding : enemyInfo.enemy_buildings) {
         if (enemyBuilding.Type != BUILDING_ARROWTOWER) continue;
         if (enemyBuilding.Project != army.SN) continue;
+        AddUnique(currentAttackers, enemyBuilding.SN);
+    }
 
-        int d = BlockDis2(army.BlockDR, army.BlockUR,
-                          enemyBuilding.BlockDR, enemyBuilding.BlockUR);
-        if (d < bestDis) {
-            bestDis = d;
-            bestSN = enemyBuilding.SN;
+    map<int, int>& firstSeen = waveThreatFirstSeenFrame[army.SN];
+
+    // 已经停止攻击的对象不再占用“第一个攻击者”的顺序。
+    for (auto it = firstSeen.begin(); it != firstSeen.end(); ) {
+        if (!ContainsInt(currentAttackers, it->first)) {
+            it = firstSeen.erase(it);
+        } else {
+            ++it;
         }
     }
 
-    return bestSN;
+    for (int attackerSN : currentAttackers) {
+        if (firstSeen.find(attackerSN) == firstSeen.end()) {
+            firstSeen[attackerSN] = g_frame;
+        }
+    }
+
+    int firstAttackerSN = -1;
+    int firstFrame = 0x7fffffff;
+    for (auto& kv : firstSeen) {
+        if (kv.second < firstFrame ||
+            (kv.second == firstFrame && (firstAttackerSN == -1 || kv.first < firstAttackerSN))) {
+            firstFrame = kv.second;
+            firstAttackerSN = kv.first;
+        }
+    }
+
+    if (currentAttackers.empty()) {
+        waveThreatFirstSeenFrame.erase(army.SN);
+    }
+
+    return firstAttackerSN;
 }
 
 static void ReserveCurrentFarmerTargets(const vector<int>& units, vector<int>& reservedFarmers)
@@ -1038,13 +1066,25 @@ static int FindWaveTargetByPriority(const tagArmy& army,
 {
     const int previousTarget = GetLockedArmyTarget(army.SN);
 
-    // 一旦锁定任何存活目标，就不再因新威胁或更高优先级目标出现而切换。
-    if (previousTarget != -1) return previousTarget;
+    // 一旦锁定反击目标，只有该目标死亡才会解锁。
+    auto retaliation = waveRetaliationTarget.find(army.SN);
+    if (previousTarget != -1 &&
+        retaliation != waveRetaliationTarget.end() &&
+        retaliation->second == previousTarget) {
+        return previousTarget;
+    }
 
     // 所有波次普通单位使用相同优先级：
     // 攻击自己的对象 > 玩家祭司 > 玩家农民。
     int threat = FindThreatToArmy(army);
-    if (threat != -1) return threat;
+    if (threat != -1) {
+        waveRetaliationTarget[army.SN] = threat;
+        waveThreatFirstSeenFrame.erase(army.SN);
+        return threat;
+    }
+
+    // 祭司/农民的普通锁仍然保持，但可以被首个攻击自己的对象打断。
+    if (previousTarget != -1) return previousTarget;
 
     // 其次锁定玩家祭司，再锁定玩家农民。
     int priest = FindNearestEnemyPriest(army.BlockDR, army.BlockUR);
@@ -1916,7 +1956,7 @@ void EnemyAI::AssignDefense()
             defenseLastOrderFrame.erase(sn);
             PriestGuardTarget.erase(sn);
             PriestGuard_Center_Enemy.erase(sn);
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
             it = Defend_Center_Enemy.erase(it);
             continue;
         }
@@ -1972,7 +2012,7 @@ void EnemyAI::AssignDefense()
                           defenseHome->second.second) > double(BLOCKSIDELENGTH);
         if (distToCenter > chaseLimit && hasLeftDefenseHome) {
             // 普通守军越过追击上限就放弃当前目标，避免回防后再次追逐同一远处目标。
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
 
             if (g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
                 if (defenseHome != DefenseHome.end()) {
@@ -2101,7 +2141,7 @@ void EnemyAI::FirstAttack()
             if (home != HarassHome.end()) {
                 HumanMove(sn, home->second.first, home->second.second);
             }
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
         }
 
         wave1Completed = true;
@@ -2119,7 +2159,7 @@ void EnemyAI::FirstAttack()
 
         int targetSN = FindWaveTargetByPriority(*army, assignedFarmers);
         if (targetSN == -1) {
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
             continue;
         }
 
@@ -2184,7 +2224,7 @@ void EnemyAI::SecondAttack()
             if (home != HarassHome.end()) {
                 HumanMove(sn, home->second.first, home->second.second);
             }
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
         }
 
         wave2Completed = true;
@@ -2202,7 +2242,7 @@ void EnemyAI::SecondAttack()
 
         int targetSN = FindWaveTargetByPriority(*army, assignedFarmers);
         if (targetSN == -1) {
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
             continue;
         }
 
@@ -2304,7 +2344,7 @@ void EnemyAI::ThirdAttack()
             ? FindStoneThrowerWaveTarget(*army)
             : FindWaveTargetByPriority(*army, assignedFarmers);
         if (targetSN == -1) {
-            currentTarget.erase(sn);
+            ClearArmyTargetLock(sn);
             continue;
         }
 
