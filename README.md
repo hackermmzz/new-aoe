@@ -310,7 +310,7 @@ flowchart TD
 | 建筑行动（研发/造兵） | `BuildingAction(建筑SN, Action)` | Action 为 config.h 中 BuildingAction 枚举常量。 |
 | 投石车定点投射 | `PinPointStrike(投石车SN, DR0, UR0)` | 对地图一点进行定点打击；取消方式为对该单位下发 HumanMove 或 HumanAction。 |
 
-状态获取：`tagInfo info = getInfo();`，包含 `farmers`、`armies`、`buildings`、`resources`、`enemy_armies`、`enemy_farmers`、`enemy_buildings`、`Wood`/`Meat`/`Stone`/`Gold`、`ins_ret` 等。
+状态获取：`tagInfo info = getInfo();`，包含 `farmers`、`armies`、`buildings`、`resources`、`enemy_armies`、`enemy_farmers`、`enemy_buildings`、`Wood`/`Meat`/`Stone`/`Gold`、`Human_Num`/`Human_MaxNum`、`ins_ret` 等。
 
 ### AI 与接口
 

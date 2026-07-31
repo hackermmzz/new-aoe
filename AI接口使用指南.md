@@ -57,6 +57,7 @@ struct tagInfo
     int GameFrame;                       // 当前游戏帧
     int civilizationStage;               // 当前文明阶段
     int Wood, Meat, Stone, Gold;         // 当前资源
+    double Human_Num;                    // 当前人口，可能为0.5的倍数
     int Human_MaxNum;                    // 当前人口上限
 };
 ```
@@ -261,7 +262,7 @@ for (const tagBuilding& building : info.buildings) {
     if (building.Percent < 100) continue;
     if (building.Project != ACT_NULL) continue;
 
-    if (building.Type == BUILDING_CENTER && info.farmers.size() < info.Human_MaxNum) {
+    if (building.Type == BUILDING_CENTER && info.Human_Num < info.Human_MaxNum) {
         BuildingAction(building.SN, BUILDING_CENTER_CREATEFARMER);
     }
 

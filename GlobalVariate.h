@@ -223,6 +223,7 @@ struct tagInfo
     int32_t Meat; // 肉类数量
     int32_t Stone; // 石头数量
     int32_t Gold; // 黄金数量
+    double Human_Num; // 当前人口（支持后勤科技的0.5人口）
     int32_t Human_MaxNum; // 最大人口数量
     // Assignment operator
     tagInfo& operator=(const tagInfo& other);

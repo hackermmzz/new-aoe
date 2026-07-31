@@ -952,6 +952,7 @@ tagInfo &tagInfo::operator=(const tagInfo &other) {
         Meat = other.Meat;
         Stone = other.Stone;
         Gold = other.Gold;
+        Human_Num = other.Human_Num;
         Human_MaxNum = other.Human_MaxNum;
     }
     return *this;

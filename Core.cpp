@@ -392,6 +392,7 @@ void Core::updateByPlayer(int id) {
     Player* self = player[id];
     tagInfo& taginfo = currentBuff[id];
     //更新基础数据
+    taginfo.Human_Num = double(self->getHumanNum());
     taginfo.Human_MaxNum = self->getMaxHumanNum();
     taginfo.Gold = self->getGold();
     taginfo.Stone = self->getStone();
