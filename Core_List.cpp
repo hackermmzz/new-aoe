@@ -1606,9 +1606,11 @@ void Core_List::deal_RangeAttack(Coordinate* attacker, Coordinate* attackee)
                 judOb->printer_ToBloodHaver((void**)&bloodee);
                 if (bloodee && countdistance(attacker->getDR(), attacker->getUR(), judOb->getDR(), judOb->getUR()) <= blooder->getDis_attack())
                 {
-                    damage = blooder->getATK() - bloodee->getDEF(blooder->get_AttackType());   //统一伤害计算公式
+                    Double rawDamage = blooder->getATK() - bloodee->getDEF(blooder->get_AttackType());
+                    if (judOb->getSort() == SORT_BUILDING) rawDamage *= Double("0.2");
+                    damage = (int)round(rawDamage);
                     if (damage < 1) damage = 1;
-                    bloodee->updateBlood(damage);  //damage反映到受攻击者血量减少
+                    bloodee->updateBlood(damage);
                 }
             }
         }
@@ -2275,10 +2277,13 @@ void Core_List::calculateDamage(Coordinate *object1, Coordinate *object2, int ex
         const int defenceType=isBoulder ? ATTACKTYPE_CLOSE : attacker->get_AttackType();
         Double rawDamage=attacker->getATK()-attackee->getDEF(defenceType)+extraDamage;
 
-        // 原版投石车对建筑有分类加成，建筑最终只承受20%的攻城伤害。
-        if(isBoulder && object2->getSort()==SORT_BUILDING){
-            const int buildingBonus=object2->getNum()==BUILDING_ARROWTOWER ? 50 : 140;
-            rawDamage=(rawDamage+buildingBonus)*Double("0.2");
+        // 所有攻击对建筑只造成20%伤害；投石车额外保留原有的建筑分类加成。
+        if(object2->getSort()==SORT_BUILDING){
+            if(isBoulder){
+                const int buildingBonus=object2->getNum()==BUILDING_ARROWTOWER ? 50 : 140;
+                rawDamage+=buildingBonus;
+            }
+            rawDamage*=Double("0.2");
         }
 
         int damage=(int)round(rawDamage*damageRate);

@@ -41,7 +41,15 @@ void Core::gameUpdate()
 
     if (mouseEvent->HaveEvent())
     {
-        if (mapmoveFrequency >=8) resetNowObject_Click();
+        if (mapmoveFrequency >=8)
+        {
+            if (tryCaptured)
+            {
+                resetNowObject_Click();
+                tryCaptured=false;
+                mouseEvent->SetMouseEventType(NULL_MOUSEEVENT);
+            }
+        }
         else manageMouseEvent();
     }
     manageOrder(0);

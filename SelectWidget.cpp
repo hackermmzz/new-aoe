@@ -868,7 +868,10 @@ void SelectWidget::refreshActs()
             if (isSlinger)
             {
                 ui->objIconSmall_DEF_melee->setPixmap(resMap["SmallIcon_Defense_Range"].front().scaled(40, 30));
-                ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Shoot()));
+                if (objArmy->showDEF_Shoot_Addition() == 0)
+                    ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Shoot()));
+                else
+                    ui->objText_DEF_melee->setText(QString::number(objArmy->showDEF_Shoot()) + "+" + QString::number(objArmy->showDEF_Shoot_Addition()));
             }
             else
             {

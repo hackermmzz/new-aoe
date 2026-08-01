@@ -144,8 +144,8 @@ int Development::get_addition_Defence(int sort, int type, int armyClass, int att
     Double addition = 0;
     int level = 0;
 
-    // 投石兵的0近战甲、2远程盾为固定属性，不受仓库护甲科技影响。
-    if (sort == SORT_ARMY && type == AT_SLINGER)
+    // 投石兵不受近战护甲科技影响，但会获得青铜盾的远程防御加成。
+    if (sort == SORT_ARMY && type == AT_SLINGER && attackType_got != ATTACKTYPE_SHOOT)
         return 0;
 
     if (sort == SORT_ARMY)
