@@ -13,5 +13,6 @@ ins UsrIns;
 void UsrAI::processData()
 {
 
-    //代码请写在这里
+
+
 }
