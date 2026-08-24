@@ -1002,6 +1002,12 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
             suspendRelation(object1);
             return;
         }
+        if (isEnemyPriestConversion && g_frame < attacker->getConvertRestEndFrame())
+        {
+            object1->printer_ToMoveObject((void**)&moveOb);
+            if (moveOb != NULL && !moveOb->isStand()) moveOb->setPreStand();
+            return;
+        }
         if (!attacker->isAttacking())
         {
             object2->printer_ToAnimal((void**)&animalOb);
