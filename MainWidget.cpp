@@ -2271,8 +2271,8 @@ static bool HasPlayerPriestBeforeDisappear(Player* p)
 bool MainWidget::isLoss()
 {
     //失败条件(任一满足即失败)：
-    //1.游戏时长耗尽(时长上限由 config.json 的 GAME_LOSE_SEC 配置，当前为25分钟)
-    if (sel->getSecend() > GAME_LOSE_SEC) return true;
+    //1.游戏时长耗尽(时长上限由 config.json 的 GAME_LOSE_SEC 配置，当前为30分钟)
+    if (sel->getSecend() >= GAME_LOSE_SEC) return true;
 
     //查看当前是否拥有存活的巫师英雄(祭司)与市镇中心
     Player* currentPlayer = player[NOWPLAYERREPRESENT];
