@@ -110,6 +110,7 @@ static map<int, int> fieldSelfDefenseLastOrderFrame;
 
 #define FIELD_SELF_DEFENSE_ORDER_INTERVAL 12
 #define FIELD_ASSIST_RADIUS 8
+#define FIELD_FARMER_AGGRO_RADIUS 6
 
 #define DEFENSE_ORDER_INTERVAL 20
 #define STONE_THROWER_EVADE_BUFFER_BLOCKS 1.5
@@ -1331,6 +1332,29 @@ static int FindDirectThreatToArmySN(int myArmySN)
     return bestSN;
 }
 
+// 野外兵的主动警戒：农民进入 6 格直线距离内时，锁定最近者并追击。
+static int FindNearbyEnemyFarmerToAttack(const tagArmy& myArmy)
+{
+    // 战船不参与陆地农民的野外主动警戒。
+    if (myArmy.Sort == AT_SHIP) return -1;
+
+    int bestSN = -1;
+    int bestDis2 = FIELD_FARMER_AGGRO_RADIUS * FIELD_FARMER_AGGRO_RADIUS;
+
+    for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+        if (enemyFarmer.Blood <= 0) continue;
+
+        int dis2 = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                             enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+        if (dis2 < bestDis2) {
+            bestDis2 = dis2;
+            bestSN = enemyFarmer.SN;
+        }
+    }
+
+    return bestSN;
+}
+
 static int FindAssistThreatNearArmy(const tagArmy& myArmy)
 {
     int bestSN = -1;
@@ -1407,6 +1431,11 @@ void EnemyAI::AssignFieldSelfDefense()
         if (targetSN == -1) {
             // 最高优先级：谁正在打我，我就反击谁
             targetSN = FindDirectThreatToArmySN(army.SN);
+        }
+
+        // 未受攻击时，农民进入 6 格直线距离内则主动追击。
+        if (targetSN == -1) {
+            targetSN = FindNearbyEnemyFarmerToAttack(army);
         }
 
         // 如果我自己没被打，但附近友军被打，则过去帮忙
