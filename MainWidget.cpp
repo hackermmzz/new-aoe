@@ -2198,14 +2198,23 @@ void MainWidget::gameDataUpdate()
         core->gameUpdate();
         //如果当前模式是编辑器功能，那么不运行ai
         if(!EditorMode){
-            //尝试获取锁，如果获取不了那么就继续让内核跑下去
-            if(tagUsrGame.tryLock()&&tagEnemyGame.tryLock()){
-                core->infoShare();
-                //释放锁
-                tagUsrGame.release();
-                tagEnemyGame.release();
-                //AI继续跑
-                emit startAI();
+            // 只有两个 AI 信息锁都获取成功时才同步数据。
+            // 如果第二把锁获取失败，必须释放已获取的第一把锁，避免后续 AI 永久停止。
+            const bool usrGameLocked = tagUsrGame.tryLock();
+            if (usrGameLocked) {
+                const bool enemyGameLocked = tagEnemyGame.tryLock();
+                if (enemyGameLocked) {
+                    core->infoShare();
+
+                    tagEnemyGame.release();
+                    tagUsrGame.release();
+
+                    // AI继续跑
+                    emit startAI();
+                }
+                else {
+                    tagUsrGame.release();
+                }
             }
         }
     }
