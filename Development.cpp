@@ -600,12 +600,12 @@ void Development::init_DevelopLab()
 
         //升级阔剑兵科技
         newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_ARMYCAMP, TIME_BUILDING_ARMYCAMP_UPGRADE_BROADSWORD,
-                                      0, BUILDING_ARMYCAMP_UPGRADE_BROADSWORD_FOOD, BUILDING_ARMYCAMP_UPGRADE_BROADSWORD_GOLD);
+                                      0, BUILDING_ARMYCAMP_UPGRADE_BROADSWORD_FOOD, 0, BUILDING_ARMYCAMP_UPGRADE_BROADSWORD_GOLD);
         developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_UPGRADE_BROADSWORD].setHead(newNode);
 
         //训练阔剑兵（需要阔剑科技）
         newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_ARMYCAMP, TIME_BUILDING_ARMYCAMP_CREATE_BROADSWORD,
-                                      0, BUILDING_ARMYCAMP_CREATE_BROADSWORD_FOOD, BUILDING_ARMYCAMP_CREATE_BROADSWORD_GOLD);
+                                      0, BUILDING_ARMYCAMP_CREATE_BROADSWORD_FOOD, 0, BUILDING_ARMYCAMP_CREATE_BROADSWORD_GOLD);
         // 添加阔剑科技作为前置条件
         newNode->addPreCondition(developLab[BUILDING_ARMYCAMP].actCon[BUILDING_ARMYCAMP_UPGRADE_BROADSWORD].headAct);
         newNode->setCreatObjectAfterAction(SORT_ARMY, AT_BROADSWORDSMAN);
@@ -742,7 +742,7 @@ void Development::init_DevelopLab()
 
         //训练复合弓兵（需要复合弓科技）
         newNode = new conditionDevelop(CIVILIZATION_BRONZEAGE, BUILDING_RANGE, TIME_BUILDING_RANGE_CREATE_COMPOSITE_BOWMAN,
-                                      0, BUILDING_RANGE_CREATE_COMPOSITE_BOWMAN_FOOD, BUILDING_RANGE_CREATE_COMPOSITE_BOWMAN_GOLD);
+                                      0, BUILDING_RANGE_CREATE_COMPOSITE_BOWMAN_FOOD, 0, BUILDING_RANGE_CREATE_COMPOSITE_BOWMAN_GOLD);
         // 添加复合弓科技作为前置条件
         newNode->addPreCondition(developLab[BUILDING_RANGE].actCon[BUILDING_RANGE_UPGRADE_COMPOSITE_BOW].headAct);
         newNode->setCreatObjectAfterAction(SORT_ARMY, AT_COMPOSITE_BOWMAN);
