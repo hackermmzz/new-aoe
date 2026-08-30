@@ -43,9 +43,11 @@ tagInfo enemyInfo;
 #define FAT 6000     //第一波骚扰时间
 #define SAT 13500    //第二波骚扰时间
 #define TAT 21000    //第三波骚扰时间
-#define radius_Inner 15
-#define DEFENSE_ALERT_RANGE 15
-#define DEFENSE_CHASE_LIMIT 18
+#define radius_Inner 20
+#define DEFENSE_ALERT_RANGE 20
+#define DEFENSE_CLOSE_ALERT_RANGE 6
+#define DEFENSE_ASSIST_RADIUS 8
+#define DEFENSE_CHASE_LIMIT 25
 #define PRIEST_GUARD_RANGE 20
 
 static int vision[128][128];
@@ -110,7 +112,7 @@ static map<int, int> fieldSelfDefenseLastOrderFrame;
 
 #define FIELD_SELF_DEFENSE_ORDER_INTERVAL 12
 #define FIELD_ASSIST_RADIUS 8
-#define FIELD_FARMER_AGGRO_RADIUS 6
+#define FIELD_LAND_AGGRO_RADIUS 6
 
 #define DEFENSE_ORDER_INTERVAL 20
 #define STONE_THROWER_EVADE_BUFFER_BLOCKS 1.5
@@ -520,11 +522,6 @@ static void ifDead(vector <int> &x,int sort){
 }
 
 
-static int BlockDis(int x1, int y1, int x2, int y2)
-{
-    return abs(x1 - x2) + abs(y1 - y2);
-}
-
 static int BlockDis2(int x1, int y1, int x2, int y2)
 {
     int dx = x1 - x2;
@@ -684,15 +681,90 @@ static int FindNearestPriestNearSiegeCenter(const tagArmy& army)
     for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
         if (enemyArmy.Sort != AT_PRIEST) continue;
 
-        int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
-                                 Enemy_Center.first, Enemy_Center.second);
-        if (dToCenter > PRIEST_GUARD_RANGE) continue;
+        int dToCenter2 = BlockDis2(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                   Enemy_Center.first, Enemy_Center.second);
+        if (dToCenter2 > PRIEST_GUARD_RANGE * PRIEST_GUARD_RANGE) continue;
 
         int d = BlockDis2(army.BlockDR, army.BlockUR,
                           enemyArmy.BlockDR, enemyArmy.BlockUR);
         if (d < bestDis) {
             bestDis = d;
             bestSN = enemyArmy.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+// 基地守军的近身警戒：任意玩家军队或农民进入守军 6 格内时，选择最近者。
+static int FindNearestPlayerUnitNearDefenseArmy(const tagArmy& army)
+{
+    int bestSN = -1;
+    int bestDis2 = DEFENSE_CLOSE_ALERT_RANGE * DEFENSE_CLOSE_ALERT_RANGE;
+
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.Blood <= 0) continue;
+
+        int dis2 = BlockDis2(army.BlockDR, army.BlockUR,
+                             enemyArmy.BlockDR, enemyArmy.BlockUR);
+        if (dis2 < bestDis2) {
+            bestDis2 = dis2;
+            bestSN = enemyArmy.SN;
+        }
+    }
+
+    for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+        if (enemyFarmer.Blood <= 0) continue;
+
+        int dis2 = BlockDis2(army.BlockDR, army.BlockUR,
+                             enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+        if (dis2 < bestDis2) {
+            bestDis2 = dis2;
+            bestSN = enemyFarmer.SN;
+        }
+    }
+
+    return bestSN;
+}
+
+// 普通基地守军协同：8 格内的基地友军被玩家军队或农民攻击时，
+// 选择距离自己最近的攻击者；玩家箭塔不参与该协同逻辑。
+static int FindAssistThreatNearDefenseArmy(const tagArmy& army)
+{
+    int bestSN = -1;
+    int bestDis2 = 1000000000;
+
+    for (const auto& defenseEntry : Defend_Center_Enemy) {
+        if (defenseEntry.first == army.SN) continue;
+
+        tagArmy* ally = FindMyArmyBySN(defenseEntry.first);
+        if (!ally) continue;
+        if (BlockDis2(army.BlockDR, army.BlockUR,
+                      ally->BlockDR, ally->BlockUR) >
+            DEFENSE_ASSIST_RADIUS * DEFENSE_ASSIST_RADIUS) {
+            continue;
+        }
+
+        for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+            if (enemyArmy.WorkObjectSN != ally->SN || enemyArmy.Blood <= 0) continue;
+
+            int dis2 = BlockDis2(army.BlockDR, army.BlockUR,
+                                 enemyArmy.BlockDR, enemyArmy.BlockUR);
+            if (dis2 < bestDis2) {
+                bestDis2 = dis2;
+                bestSN = enemyArmy.SN;
+            }
+        }
+
+        for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+            if (enemyFarmer.WorkObjectSN != ally->SN || enemyFarmer.Blood <= 0) continue;
+
+            int dis2 = BlockDis2(army.BlockDR, army.BlockUR,
+                                 enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+            if (dis2 < bestDis2) {
+                bestDis2 = dis2;
+                bestSN = enemyFarmer.SN;
+            }
         }
     }
 
@@ -723,9 +795,9 @@ static int FindStoneThrowerDefenseTarget(const tagArmy& army)
     int bestDis = 1000000000;
 
     for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
-        int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
-                                 Enemy_Center.first, Enemy_Center.second);
-        if (dToCenter > DEFENSE_ALERT_RANGE) continue;
+        int dToCenter2 = BlockDis2(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                   Enemy_Center.first, Enemy_Center.second);
+        if (dToCenter2 > DEFENSE_ALERT_RANGE * DEFENSE_ALERT_RANGE) continue;
 
         int priority = StoneThrowerDefensePriority(enemyArmy.Sort);
         int d = BlockDis2(army.BlockDR, army.BlockUR,
@@ -742,9 +814,9 @@ static int FindStoneThrowerDefenseTarget(const tagArmy& army)
 
     // 没有玩家军队靠近时，沿用普通防守逻辑，把靠近厂区的农民作为最后兜底目标
     for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
-        int dToCenter = BlockDis(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
-                                 Enemy_Center.first, Enemy_Center.second);
-        if (dToCenter > DEFENSE_ALERT_RANGE) continue;
+        int dToCenter2 = BlockDis2(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
+                                   Enemy_Center.first, Enemy_Center.second);
+        if (dToCenter2 > DEFENSE_ALERT_RANGE * DEFENSE_ALERT_RANGE) continue;
 
         int d = BlockDis2(army.BlockDR, army.BlockUR,
                           enemyFarmer.BlockDR, enemyFarmer.BlockUR);
@@ -1315,8 +1387,9 @@ static int FindDirectThreatToArmySN(int myArmySN)
     for (tagBuilding& enemyBuilding : enemyInfo.enemy_buildings) {
         if (enemyBuilding.Type != BUILDING_ARROWTOWER) continue;
         if (enemyBuilding.Project != myArmySN) continue;
-        if (BlockDis(myArmy->BlockDR, myArmy->BlockUR,
-                     enemyBuilding.BlockDR, enemyBuilding.BlockUR) > FIELD_ASSIST_RADIUS) {
+        if (BlockDis2(myArmy->BlockDR, myArmy->BlockUR,
+                      enemyBuilding.BlockDR, enemyBuilding.BlockUR) >
+            FIELD_ASSIST_RADIUS * FIELD_ASSIST_RADIUS) {
             continue;
         }
 
@@ -1332,17 +1405,29 @@ static int FindDirectThreatToArmySN(int myArmySN)
     return bestSN;
 }
 
-// 野外兵的主动警戒：农民进入 6 格直线距离内时，锁定最近者并追击。
-static int FindNearbyEnemyFarmerToAttack(const tagArmy& myArmy)
+// 野外兵的主动警戒：任意玩家陆地单位进入 6 格直线距离内时，锁定最近者并追击。
+static int FindNearbyEnemyLandUnitToAttack(const tagArmy& myArmy)
 {
-    // 战船不参与陆地农民的野外主动警戒。
+    // 战船不参与陆地单位的野外主动警戒。
     if (myArmy.Sort == AT_SHIP) return -1;
 
     int bestSN = -1;
-    int bestDis2 = FIELD_FARMER_AGGRO_RADIUS * FIELD_FARMER_AGGRO_RADIUS;
+    int bestDis2 = FIELD_LAND_AGGRO_RADIUS * FIELD_LAND_AGGRO_RADIUS;
+
+    for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+        if (enemyArmy.Sort == AT_SHIP || enemyArmy.Blood <= 0) continue;
+
+        int dis2 = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                             enemyArmy.BlockDR, enemyArmy.BlockUR);
+        if (dis2 < bestDis2) {
+            bestDis2 = dis2;
+            bestSN = enemyArmy.SN;
+        }
+    }
 
     for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
-        if (enemyFarmer.Blood <= 0) continue;
+        if (enemyFarmer.FarmerSort != FARMERTYPE_FARMER ||
+            enemyFarmer.Blood <= 0) continue;
 
         int dis2 = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
                              enemyFarmer.BlockDR, enemyFarmer.BlockUR);
@@ -1365,10 +1450,10 @@ static int FindAssistThreatNearArmy(const tagArmy& myArmy)
         if (ally.SN == myArmy.SN) continue;
         if (IsDefenseArmySN(ally.SN)) continue;
 
-        int allyDist = BlockDis(myArmy.BlockDR, myArmy.BlockUR,
-                                ally.BlockDR, ally.BlockUR);
+        int allyDist2 = BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                                  ally.BlockDR, ally.BlockUR);
 
-        if (allyDist > FIELD_ASSIST_RADIUS) continue;
+        if (allyDist2 > FIELD_ASSIST_RADIUS * FIELD_ASSIST_RADIUS) continue;
 
         for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
             if (enemyArmy.WorkObjectSN != ally.SN) continue;
@@ -1398,8 +1483,9 @@ static int FindAssistThreatNearArmy(const tagArmy& myArmy)
         for (tagBuilding& enemyBuilding : enemyInfo.enemy_buildings) {
             if (enemyBuilding.Type != BUILDING_ARROWTOWER) continue;
             if (enemyBuilding.Project != ally.SN) continue;
-            if (BlockDis(myArmy.BlockDR, myArmy.BlockUR,
-                         enemyBuilding.BlockDR, enemyBuilding.BlockUR) > FIELD_ASSIST_RADIUS) {
+            if (BlockDis2(myArmy.BlockDR, myArmy.BlockUR,
+                          enemyBuilding.BlockDR, enemyBuilding.BlockUR) >
+                FIELD_ASSIST_RADIUS * FIELD_ASSIST_RADIUS) {
                 continue;
             }
 
@@ -1433,9 +1519,9 @@ void EnemyAI::AssignFieldSelfDefense()
             targetSN = FindDirectThreatToArmySN(army.SN);
         }
 
-        // 未受攻击时，农民进入 6 格直线距离内则主动追击。
+        // 未受攻击时，玩家陆地单位进入 6 格直线距离内则主动追击。
         if (targetSN == -1) {
-            targetSN = FindNearbyEnemyFarmerToAttack(army);
+            targetSN = FindNearbyEnemyLandUnitToAttack(army);
         }
 
         // 如果我自己没被打，但附近友军被打，则过去帮忙
@@ -1875,21 +1961,22 @@ void EnemyAI::processData() {
             if (b.Type != BUILDING_ARROWTOWER) continue;
 
             int targetSN = -1;
-            int bestDis = 1000000000;
+            int bestDis2 = 1000000000;
             const int towerRange = ArrowTowerAttackRangeBlocks();
+            const int towerRange2 = towerRange * towerRange;
 
             for (tagArmy& obj : enemyInfo.enemy_armies) {
-                int d = BlockDis(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
-                if (d <= towerRange && d < bestDis) {
-                    bestDis = d;
+                int d2 = BlockDis2(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
+                if (d2 <= towerRange2 && d2 < bestDis2) {
+                    bestDis2 = d2;
                     targetSN = obj.SN;
                 }
             }
 
             for (tagFarmer& obj : enemyInfo.enemy_farmers) {
-                int d = BlockDis(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
-                if (d <= towerRange && d < bestDis) {
-                    bestDis = d;
+                int d2 = BlockDis2(b.BlockDR, b.BlockUR, obj.BlockDR, obj.BlockUR);
+                if (d2 <= towerRange2 && d2 < bestDis2) {
+                    bestDis2 = d2;
                     targetSN = obj.SN;
                 }
             }
@@ -1899,8 +1986,8 @@ void EnemyAI::processData() {
             const bool currentTargetInRange =
                 b.Project != -1 &&
                 FindEnemyUnitBlockPosition(b.Project, currentTargetDR, currentTargetUR) &&
-                BlockDis(b.BlockDR, b.BlockUR,
-                         currentTargetDR, currentTargetUR) <= towerRange;
+                BlockDis2(b.BlockDR, b.BlockUR,
+                          currentTargetDR, currentTargetUR) <= towerRange2;
 
             if (currentTargetInRange) {
                 continue;
@@ -1953,9 +2040,9 @@ void EnemyAI::Initialize_Enemymap()
         int d2 = BlockDis2(army.BlockDR, army.BlockUR,
                            Enemy_Center.first, Enemy_Center.second);
 
-        if (d2 <   radius_Inner * radius_Inner) {
+        if (d2 <= radius_Inner * radius_Inner) {
             Defend_Center_Enemy[army.SN] = 1;
-            // 祭司猎手只能从地图初始时位于厂区15格内的守军中选择。
+            // 祭司猎手只能从地图初始时位于厂区20格内的守军中选择。
             // 如果守军兵种或数量不足，则保持缺编，绝不从外围敌军补人。
             if (!PriestGuardInitialized) {
                 TryAddPriestGuard(army);
@@ -1990,8 +2077,8 @@ void EnemyAI::AssignDefense()
             continue;
         }
 
-        int distToCenter = BlockDis(army->BlockDR, army->BlockUR,
-                                    Enemy_Center.first, Enemy_Center.second);
+        int distToCenter2 = BlockDis2(army->BlockDR, army->BlockUR,
+                                      Enemy_Center.first, Enemy_Center.second);
 
         // 独立祭司猎手：3 骑兵 + 2 战车弓兵。
         // 在厂区 20 格内发现祭司后锁定，直到祭司死亡或猎手被消灭。
@@ -2001,9 +2088,7 @@ void EnemyAI::AssignDefense()
                 ? armyLockedTarget
                 : -1;
             auto lockedTarget = PriestGuardTarget.find(sn);
-            if (armyLockedTarget == -1 &&
-                priestSN == -1 &&
-                lockedTarget != PriestGuardTarget.end()) {
+            if (priestSN == -1 && lockedTarget != PriestGuardTarget.end()) {
                 if (EnemyPriestAlive(lockedTarget->second)) {
                     priestSN = lockedTarget->second;
                 } else {
@@ -2011,17 +2096,17 @@ void EnemyAI::AssignDefense()
                 }
             }
 
-            if (armyLockedTarget == -1 && priestSN == -1) {
+            if (priestSN == -1) {
                 priestSN = FindNearestPriestNearSiegeCenter(*army);
-                if (priestSN != -1) {
-                    PriestGuardTarget[sn] = priestSN;
-                    currentTarget[sn] = priestSN;
-                }
             }
 
             if (priestSN != -1) {
+                const bool switchedToPriest = armyLockedTarget != priestSN;
+                PriestGuardTarget[sn] = priestSN;
+                currentTarget[sn] = priestSN;
                 if (army->WorkObjectSN != priestSN &&
-                    g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
+                    (switchedToPriest ||
+                     g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL)) {
                     HumanAction(sn, priestSN);
                     defenseLastOrderFrame[sn] = g_frame;
                 }
@@ -2031,7 +2116,7 @@ void EnemyAI::AssignDefense()
             }
         }
 
-        // 近战守军最多追到核心外约 18 格；远程守军再扣除自身射程。
+        // 近战守军最多追到核心外约 25 格；远程守军再扣除自身射程。
         const int chaseLimit = DefenseChaseLimitBlocks(*army);
         auto defenseHome = DefenseHome.find(sn);
         const bool hasLeftDefenseHome =
@@ -2039,7 +2124,7 @@ void EnemyAI::AssignDefense()
             countdistance(army->DR, army->UR,
                           defenseHome->second.first,
                           defenseHome->second.second) > double(BLOCKSIDELENGTH);
-        if (distToCenter > chaseLimit && hasLeftDefenseHome) {
+        if (distToCenter2 > chaseLimit * chaseLimit && hasLeftDefenseHome) {
             // 普通守军越过追击上限就放弃当前目标，避免回防后再次追逐同一远处目标。
             ClearArmyTargetLock(sn);
 
@@ -2062,33 +2147,48 @@ void EnemyAI::AssignDefense()
             // 攻城厂守卫投石车：复合弓兵 > 其他远程攻击单位 > 其他军队；范围/回防仍沿用普通防守逻辑
             targetSN = FindStoneThrowerDefenseTarget(*army);
         } else if (targetSN == -1) {
-            // 只攻击靠近武器攻城厂的玩家单位
-            int bestDis = 1000000000;
+            // 普通守军没有锁定目标时，先反击正在攻击自己的玩家单位。
+            targetSN = FindDirectThreatToArmySN(sn);
 
-            for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
-                int dToCenter = BlockDis(enemyArmy.BlockDR, enemyArmy.BlockUR,
-                                         Enemy_Center.first, Enemy_Center.second);
-                if (dToCenter > DEFENSE_ALERT_RANGE) continue;
+            // 没有直接攻击者时，再攻击靠近武器攻城厂的玩家单位。
+            if (targetSN == -1) {
+                int bestDis = 1000000000;
 
-                int d = BlockDis2(army->BlockDR, army->BlockUR,
-                                  enemyArmy.BlockDR, enemyArmy.BlockUR);
-                if (d < bestDis) {
-                    bestDis = d;
-                    targetSN = enemyArmy.SN;
+                for (tagArmy& enemyArmy : enemyInfo.enemy_armies) {
+                    int dToCenter2 = BlockDis2(enemyArmy.BlockDR, enemyArmy.BlockUR,
+                                               Enemy_Center.first, Enemy_Center.second);
+                    if (dToCenter2 > DEFENSE_ALERT_RANGE * DEFENSE_ALERT_RANGE) continue;
+
+                    int d = BlockDis2(army->BlockDR, army->BlockUR,
+                                      enemyArmy.BlockDR, enemyArmy.BlockUR);
+                    if (d < bestDis) {
+                        bestDis = d;
+                        targetSN = enemyArmy.SN;
+                    }
+                }
+
+                for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
+                    int dToCenter2 = BlockDis2(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
+                                               Enemy_Center.first, Enemy_Center.second);
+                    if (dToCenter2 > DEFENSE_ALERT_RANGE * DEFENSE_ALERT_RANGE) continue;
+
+                    int d = BlockDis2(army->BlockDR, army->BlockUR,
+                                      enemyFarmer.BlockDR, enemyFarmer.BlockUR);
+                    if (d < bestDis) {
+                        bestDis = d;
+                        targetSN = enemyFarmer.SN;
+                    }
                 }
             }
 
-            for (tagFarmer& enemyFarmer : enemyInfo.enemy_farmers) {
-                int dToCenter = BlockDis(enemyFarmer.BlockDR, enemyFarmer.BlockUR,
-                                         Enemy_Center.first, Enemy_Center.second);
-                if (dToCenter > DEFENSE_ALERT_RANGE) continue;
+            // 基地中心 20 格内没有目标时，再检查自身 6 格近身警戒。
+            if (targetSN == -1) {
+                targetSN = FindNearestPlayerUnitNearDefenseArmy(*army);
+            }
 
-                int d = BlockDis2(army->BlockDR, army->BlockUR,
-                                  enemyFarmer.BlockDR, enemyFarmer.BlockUR);
-                if (d < bestDis) {
-                    bestDis = d;
-                    targetSN = enemyFarmer.SN;
-                }
+            // 最后协同攻击 8 格内正在攻击基地友军的玩家军队或农民。
+            if (targetSN == -1) {
+                targetSN = FindAssistThreatNearDefenseArmy(*army);
             }
         }
 
@@ -2114,7 +2214,7 @@ void EnemyAI::AssignDefense()
             }
         } else {
             // 没敌人靠近，防守兵回原位
-            if (distToCenter > radius_Inner &&
+            if (distToCenter2 > radius_Inner * radius_Inner &&
                 g_frame - defenseLastOrderFrame[sn] >= DEFENSE_ORDER_INTERVAL) {
                 auto home = DefenseHome.find(sn);
                 if (home != DefenseHome.end()) {
