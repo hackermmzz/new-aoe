@@ -1169,6 +1169,55 @@ vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool landUnit)
     return Block_Free;
 }
 
+bool Map::isTerrainValidForMove(const Point& block, bool landUnit)
+{
+    if (isOverBorder(block.x, block.y)) return false;
+
+    const bool ocean = cell[block.x][block.y].getMapType() == MAPTYPE_OCEAN;
+    return landUnit ? !ocean : ocean;
+}
+
+Point Map::findNearestValidTerrainBlock(const Point& start, bool landUnit)
+{
+    const int startDR = max(0, min(MAP_L - 1, start.x));
+    const int startUR = max(0, min(MAP_U - 1, start.y));
+
+    queue<Point> pending;
+    vector<vector<bool>> visited(MAP_L, vector<bool>(MAP_U, false));
+    pending.push(Point(startDR, startUR));
+    visited[startDR][startUR] = true;
+
+    static const Point directions[4] = {
+        Point(1, 0), Point(-1, 0), Point(0, 1), Point(0, -1)
+    };
+    Point occupiedFallback(-1, -1);
+
+    while (!pending.empty())
+    {
+        const Point current = pending.front();
+        pending.pop();
+
+        if (isTerrainValidForMove(current, landUnit))
+        {
+            if (occupiedFallback.x < 0) occupiedFallback = current;
+            if (map_Object[current.x][current.y].empty()) return current;
+        }
+
+        for (const Point& direction : directions)
+        {
+            const int nextDR = current.x + direction.x;
+            const int nextUR = current.y + direction.y;
+            if (isOverBorder(nextDR, nextUR) || visited[nextDR][nextUR]) continue;
+
+            visited[nextDR][nextUR] = true;
+            pending.push(Point(nextDR, nextUR));
+        }
+    }
+
+    //地图对象表在本帧仍可能处于构建过程中；没有空格时至少保证地形合法。
+    return occupiedFallback;
+}
+
 
 vector<Point> Map::get_ObjectVisionBlock(Coordinate* object)
 {

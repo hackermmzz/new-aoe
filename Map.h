@@ -59,6 +59,11 @@ public:
     vector<pair<Point,int>> findBlock_Free(Coordinate* object , int disLen = 1 , bool mustFind = true);
     vector<Point>& findBlock_Free(Point blockPoint, int lenth,bool landUnit);
 
+    //判断指定格是否符合移动对象的地形类型；landUnit=true表示只能位于非海洋格
+    bool isTerrainValidForMove(const Point& block, bool landUnit);
+    //用于恢复已经位于错误地形中的对象；优先返回未被占用的最近合法格
+    Point findNearestValidTerrainBlock(const Point& start, bool landUnit);
+
     bool isOverBorder(int blockDR, int blockUR){ return blockDR<0 || blockDR>=MAP_L || blockUR<0 ||blockUR>=MAP_U; }
 
     //用于查找Object视野范围内的格子，返回格子的列表容器

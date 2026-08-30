@@ -30,9 +30,6 @@ void Core::gameUpdate()
     //
 
     updateByObject();
-
-    //重置人物的位置
-    ResetHumanPos();
     loadRelationMap();
     //刷新视野并处理区域探索结果
     theMap->reset_ObjectExploreAndVisible();
@@ -70,31 +67,24 @@ void Core::gameUpdate()
 
 
 }
-void Core::ResetHumanPos(){
-    //
-    auto ResetLandUnit=[&](MoveObject&obj)->void{
-        if(theMap->cell[obj.BlockDR][obj.BlockUR].getMapType()==MAPTYPE_OCEAN){
-            Point&&p=obj.get_PreviousBlock();
-            obj.ForceStand((p.x+Double("0.5"))*BLOCKSIDELENGTH,(p.y+Double("0.5"))*BLOCKSIDELENGTH);
-        }
-    };
-    auto ResetOceanUnit=[&](MoveObject&obj)->void{
-        if(theMap->cell[obj.BlockDR][obj.BlockUR].getMapType()!=MAPTYPE_OCEAN){
-            Point&&p=obj.get_PreviousBlock();
-            obj.ForceStand((p.x+Double("0.5"))*BLOCKSIDELENGTH,(p.y+Double("0.5"))*BLOCKSIDELENGTH);
-        }
-    };
-    auto ResetPos=[&](MoveObject&obj)->void{
-        bool landUnit=Core_List::JudgeMoveObjIsLandUnit(&obj);
-        landUnit?ResetLandUnit(obj):ResetOceanUnit(obj);
-    };
-    //
-    auto solve=[&](Player&player)->void{
-        for(auto*human:player.human)ResetPos(*human);
-    };
-    //
-    solve(*(player[0]));
-    solve(*(player[1]));
+void Core::correctMoveObjectTerrain(MoveObject* object)
+{
+    if (object == NULL) return;
+
+    const bool landUnit = Core_List::JudgeMoveObjIsLandUnit(object);
+    const Point current(object->getBlockDR(), object->getBlockUR());
+    if (theMap->isTerrainValidForMove(current, landUnit)) return;
+
+    //正常越界优先退回路径中的上一合法格；旧存档中的异常位置则搜索最近合法地形。
+    Point fallback = object->get_PreviousBlock();
+    if (!theMap->isTerrainValidForMove(fallback, landUnit))
+        fallback = theMap->findNearestValidTerrainBlock(current, landUnit);
+
+    if (!theMap->isTerrainValidForMove(fallback, landUnit)) return;
+
+    object->ForceStand(
+        (Double(fallback.x) + Double("0.5")) * BLOCKSIDELENGTH,
+        (Double(fallback.y) + Double("0.5")) * BLOCKSIDELENGTH);
 }
 void Core::updateByObject()
 {
@@ -225,6 +215,8 @@ void Core::updateByObject()
                 //                    theMap->add_Map_Vision(*humaniter);
                 interactionList->conduct_Attacked(*humaniter);
                 (*humaniter)->updateLU();
+                //先纠正错误地形，再把本帧坐标写入对象、碰撞和寻路地图。
+                correctMoveObjectTerrain(*humaniter);
                 (*humaniter)->nextframe();
                 //移动后，记录当前位置
                 theMap->add_Map_Object(*humaniter);
@@ -332,6 +324,8 @@ void Core::updateByObject()
             else
             {
                 (*animaliter)->updateLU();
+                if (!(*animaliter)->isTree())
+                    correctMoveObjectTerrain(*animaliter);
                 (*animaliter)->nextframe();
                 if ((*animaliter)->isTree())
                     (*animaliter)->initAvengeObject();

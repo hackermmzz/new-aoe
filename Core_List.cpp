@@ -1785,6 +1785,8 @@ void Core_List::work_CrashPhase(MoveObject* moveOb)
 
 bool Core_List::JudgeMoveObjIsLandUnit(MoveObject* moveOb)
 {
+    if (moveOb == NULL) return true;
+
     bool ship = 0;
     {
         Human* human = 0;moveOb->printer_ToHuman((void**)&human);
@@ -1817,6 +1819,7 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     static vector<Data>vis;
     static Double Sqrt2 = sqrt(Double(2));
     static vector<Data>goalPoint;
+    Double dr0 = Double::FromDouble(1e9), ur0 = Double::FromDouble(1e9);
     /////////////////////////////////////////////////////////启发函数
     static auto PredictDistance = [&](const Data& start, const Data& end)->Double {
         static vector<Double>power((MAP_L+MAP_U+1)*(MAP_L+MAP_U+1));
@@ -1834,8 +1837,8 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
         //限制范围
         {
             int x=destination.x,y=destination.y;
-            x=min(x,MAP_L);x=max(x,0);
-            y=min(y,MAP_U);y=max(y,0);
+            x=min(x,MAP_L-1);x=max(x,0);
+            y=min(y,MAP_U-1);y=max(y,0);
             destination.x=x;
             destination.y=y;
         }
@@ -1883,10 +1886,11 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
             }
         }
         //
-        if (!flag && (tx != start.x || ty != start.y)) {
-            static const Double fac = Double("0.001");
-            goalOb = 0;
-            destination.x = tx, destination.y = ty;
+        if (!flag) {
+            goalOb = NULL;
+            destination = Point(tx, ty);
+            dr0 = (Double(tx) + Double("0.5")) * BLOCKSIDELENGTH;
+            ur0 = (Double(ty) + Double("0.5")) * BLOCKSIDELENGTH;
         }
 
     }
@@ -1894,7 +1898,6 @@ pair<stack<Point>, array<Double, 2>> Core_List::findPath(Map::TypeRef&findPathMa
     goalPoint.clear();
     stack<Point> path;
     bool meetGoal = false;
-    Double dr0 = Double::FromDouble(1e9), ur0 =  Double::FromDouble(1e9);
     ++mask;//把寻路掩码递增1
     //initMap_HaveJud();
     //memset(goalMap,0,sizeof(goalMap));
@@ -2175,19 +2178,13 @@ bool Core_List::checkIsCoast(int x, int y)
 
 bool Core_List::checkIsLandUint(Coordinate *obj)
 {
-    //可能是船类
-    Farmer*human=0;
-    obj->printer_ToHuman((void**)(&human));
-    if(human){
-        if(human->getSort()==SORT_FARMER){
-            Farmer*f=(Farmer*)human;
-            return f->get_farmerType()==FARMERTYPE_FARMER;
-        }
-        else if(human->getSort()==SORT_ARMY){
-            Army*army=(Army*)human;
-            return army->getNum()!=AT_SHIP;
-        }
-    }
+    if (obj == NULL) return true;
+
+    //所有可移动对象统一使用同一个陆地/水上分类入口，避免寻路和位置纠错结论不一致。
+    MoveObject* moveObject = NULL;
+    obj->printer_ToMoveObject((void**)&moveObject);
+    if (moveObject != NULL) return JudgeMoveObjIsLandUnit(moveObject);
+
     //可能是建筑类
     Building*building=0;
     obj->printer_ToBuilding((void**)(&building));

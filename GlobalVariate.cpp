@@ -110,13 +110,13 @@ int InitImageResMap(QString path)
             for(int i=0;i<10;++i)list.push_back(tmp);
         }
     }
-    //投石车巨石就使用普通投石兵石头，但是我们对其进行放大
+    //投石车巨石使用普通投石兵石头，并按原版观感等比放大到1.4倍。
     {
         auto&stone=resMap["Cobblestone"];
         auto&boulders=resMap["Boulders"];
         for(QPixmap&pix:stone){
             QPixmap scaledPix = pix.scaled(
-                pix.size() * 3.0,
+                pix.size() * 1.4,
                 Qt::KeepAspectRatio,
                 Qt::SmoothTransformation
             );
