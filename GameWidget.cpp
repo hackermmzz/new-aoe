@@ -114,9 +114,6 @@ void GameWidget::paintEvent(QPaintEvent *)
                 if(pix){
                     painter.drawPixmap(x,y,w,h,*pix);
                 }
-                else{
-                     cout<<"AOE occurs bug!"<<endl;
-                }
                 if(showLine)
                 {
                     const int cellWidth = qMax(1, w - 1);
