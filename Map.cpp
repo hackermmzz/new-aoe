@@ -15,7 +15,9 @@
 #include<Rectarea.h>
 #include<LineArea.h>
 #include<CircleArea.h>
-
+#include"library/perlin_noise/PerlinNoise.hpp"
+#include"math.h"
+#include <algorithm>
 // 前向声明
 class RectArea;
 class CircleArea;
@@ -243,11 +245,710 @@ void Map::refineShore() {
     vector<vector<int>> tempMap(MAP_L,vector<int>(MAP_U));    //tempMap[左右][上下]
     for (int i = 0; i < MAP_L; ++i) {
         for (int j = 0; j < MAP_U; ++j) {
-            tempMap[i][j] = (cell[i][j].getMapType() == MAPTYPE_OCEAN) ? 1 : 0;
+            tempMap[i][j] = IsOcean(i,j)?1:0;
         }
     }
     drawEdge(tempMap, OceanCodeToNum, 0, 1, 2);  // 绘制海洋边缘，陆地是0，海洋是1，海滩被标记为2
     drawEdge(tempMap, SandCodeToNum, 0, 2, 3);  // 绘制沙地边缘，陆地是0，沙地是2，边界被标记为2
+}
+
+
+/*
+ * 函数：Map::refineBaseTerrain
+ * 参数：无
+ * 内容：更新地图的基础地形的绘制风格，使得基础地形看起来更接近《帝国时代》
+ * 返回值：无
+ */
+
+#include <QImage>
+#include <QColor>
+
+#include <random>
+#include <algorithm>
+#include <vector>
+#include <cstdint>
+
+
+namespace GrassGenerator
+{
+
+// ============================================================
+// 随机数辅助
+// ============================================================
+
+class Random
+{
+public:
+    explicit Random(uint32_t seed)
+        : Engine(seed)
+    {
+    }
+
+    float Float(float min, float max)
+    {
+        std::uniform_real_distribution<float> dist(min, max);
+        return dist(Engine);
+    }
+
+    int Int(int min, int max)
+    {
+        std::uniform_int_distribution<int> dist(min, max);
+        return dist(Engine);
+    }
+
+    uint32_t UInt()
+    {
+        return Engine();
+    }
+
+private:
+    std::mt19937 Engine;
+};
+
+template <class T>
+T clamp(T val,T min,T max){
+    if(min<=val&val<=max)return val;
+    if(val>max)return max;
+    return min;
+}
+
+// ============================================================
+// RGBA 颜色
+// ============================================================
+
+struct RGBA
+{
+    int R;
+    int G;
+    int B;
+    int A;
+};
+
+
+// ============================================================
+// Alpha 混合
+//
+// 注意：最终仍然保持原图 Alpha。
+// 这里只修改 RGB。
+// ============================================================
+
+static void BlendPixel(
+    QImage& Image,
+    int X,
+    int Y,
+    int R,
+    int G,
+    int B,
+    int Alpha)
+{
+    if (X < 0 ||
+        X >= Image.width() ||
+        Y < 0 ||
+        Y >= Image.height())
+    {
+        return;
+    }
+
+    uchar* Pixel = Image.scanLine(Y) + X * 4;
+
+    const int SrcR = Pixel[0];
+    const int SrcG = Pixel[1];
+    const int SrcB = Pixel[2];
+
+    const int A = clamp(Alpha, 0, 255);
+
+    Pixel[0] = static_cast<uchar>(
+        (SrcR * (255 - A) + R * A) / 255
+    );
+
+    Pixel[1] = static_cast<uchar>(
+        (SrcG * (255 - A) + G * A) / 255
+    );
+
+    Pixel[2] = static_cast<uchar>(
+        (SrcB * (255 - A) + B * A) / 255
+    );
+
+    // Pixel[3] 不动
+}
+
+
+// ============================================================
+// 生成一个草地变体
+// ============================================================
+
+QImage GenerateGrassVariant(
+    const QImage& Source,
+    uint32_t Seed)
+{
+    if (Source.isNull())
+    {
+        return QImage();
+    }
+
+    // 确保每个像素都是 RGBA8888
+    const QImage Original =
+        Source.convertToFormat(QImage::Format_RGBA8888);
+
+    QImage Result = Original.copy();
+
+    const int Width = Result.width();
+    const int Height = Result.height();
+
+    Random Rng(Seed);
+
+    // ========================================================
+    // 1. 整体颜色变化
+    // ========================================================
+
+    // Python:
+    //
+    // hue_shift = random.uniform(-0.045, 0.045)
+    //
+    // HSV Hue 是 0~1
+    // Qt QColor HSV Hue 是 0~359
+    //
+
+    const float HueShift =
+        Rng.Float(-0.045f, 0.045f);
+
+    const float SaturationScale =
+        Rng.Float(0.88f, 1.12f);
+
+    const float BrightnessScale =
+        Rng.Float(0.90f, 1.10f);
+
+
+    // ========================================================
+    // 2. 整张图做 HSV 变化
+    // ========================================================
+
+    for (int Y = 0; Y < Height; ++Y)
+    {
+        uchar* Pixels = Result.scanLine(Y);
+
+        for (int X = 0; X < Width; ++X)
+        {
+            uchar* Pixel = Pixels + X * 4;
+
+            const int R = Pixel[0];
+            const int G = Pixel[1];
+            const int B = Pixel[2];
+            const int A = Pixel[3];
+
+            if (A == 0)
+            {
+                continue;
+            }
+
+            QColor Color(R, G, B, A);
+
+            int H;
+            int S;
+            int V;
+            int Alpha;
+
+            Color.getHsv(
+                &H,
+                &S,
+                &V,
+                &Alpha
+            );
+
+            // ------------------------------------------------
+            // Hue
+            // ------------------------------------------------
+
+            if (H >= 0)
+            {
+                int Hue = static_cast<int>(
+                    H + HueShift * 359.0f
+                );
+
+                Hue %= 360;
+
+                if (Hue < 0)
+                {
+                    Hue += 360;
+                }
+
+                H = Hue;
+            }
+
+            // ------------------------------------------------
+            // Saturation
+            // ------------------------------------------------
+
+            S = static_cast<int>(
+                S * SaturationScale
+            );
+
+            S = clamp(S, 0, 255);
+
+            // ------------------------------------------------
+            // Value
+            // ------------------------------------------------
+
+            V = static_cast<int>(
+                V * BrightnessScale
+            );
+
+            V = clamp(V, 0, 255);
+
+            QColor NewColor =
+                QColor::fromHsv(
+                    H,
+                    S,
+                    V,
+                    A
+                );
+
+            Pixel[0] = NewColor.red();
+            Pixel[1] = NewColor.green();
+            Pixel[2] = NewColor.blue();
+
+            // Alpha 保持原样
+            Pixel[3] = static_cast<uchar>(A);
+        }
+    }
+
+
+    // ========================================================
+    // 3. 收集原图中的颜色
+    //
+    // 后面随机生成细节时，
+    // 从原图颜色中随机取样。
+    // ========================================================
+
+    std::vector<RGBA> Colors;
+
+    Colors.reserve(200);
+
+    for (int i = 0; i < 200; ++i)
+    {
+        const int X =
+            Rng.Int(0, Width - 1);
+
+        const int Y =
+            Rng.Int(0, Height - 1);
+
+        const uchar* Pixel =
+            Original.constScanLine(Y) + X * 4;
+
+        if (Pixel[3] > 0)
+        {
+            Colors.push_back(
+            {
+                Pixel[0],
+                Pixel[1],
+                Pixel[2],
+                Pixel[3]
+            });
+        }
+    }
+
+
+    if (Colors.empty())
+    {
+        return Result;
+    }
+
+
+    // ========================================================
+    // 4. 大块自然色彩变化
+    // ========================================================
+
+    const int PatchCount =
+        Rng.Int(4, 9);
+
+    for (int i = 0; i < PatchCount; ++i)
+    {
+        const int X =
+            Rng.Int(
+                2,
+                std::max(2, Width - 3)
+            );
+
+        const int Y =
+            Rng.Int(
+                2,
+                std::max(2, Height - 3)
+            );
+
+        const int RX =
+            Rng.Int(
+                2,
+                std::max(2, Width / 8)
+            );
+
+        const int RY =
+            Rng.Int(
+                1,
+                std::max(1, Height / 5)
+            );
+
+        const RGBA Color =
+            Colors[
+                Rng.Int(
+                    0,
+                    static_cast<int>(Colors.size()) - 1
+                )
+            ];
+
+        const int R =clamp(
+            static_cast<int>(
+                Color.R * Rng.Float(0.85f, 1.15f)
+            ),
+            0,
+            255
+        );
+
+        const int G = clamp(
+            static_cast<int>(
+                Color.G * Rng.Float(0.85f, 1.15f)
+            ),
+            0,
+            255
+        );
+
+        const int B = clamp(
+            static_cast<int>(
+                Color.B * Rng.Float(0.85f, 1.15f)
+            ),
+            0,
+            255
+        );
+
+        const int Alpha =
+            Rng.Int(25, 65);
+
+
+        // ----------------------------------------------------
+        // 椭圆色块
+        // ----------------------------------------------------
+
+        const int MinX =
+            std::max(0, X - RX);
+
+        const int MaxX =
+            std::min(Width - 1, X + RX);
+
+        const int MinY =
+            std::max(0, Y - RY);
+
+        const int MaxY =
+            std::min(Height - 1, Y + RY);
+
+
+        for (int PY = MinY; PY <= MaxY; ++PY)
+        {
+            for (int PX = MinX; PX <= MaxX; ++PX)
+            {
+                const float DX =
+                    static_cast<float>(PX - X) /
+                    static_cast<float>(RX);
+
+                const float DY =
+                    static_cast<float>(PY - Y) /
+                    static_cast<float>(RY);
+
+                if (DX * DX + DY * DY <= 1.0f)
+                {
+                    const uchar OriginalAlpha =
+                        Original.constScanLine(PY)[PX * 4 + 3];
+
+                    if (OriginalAlpha > 0)
+                    {
+                        BlendPixel(
+                            Result,
+                            PX,
+                            PY,
+                            R,
+                            G,
+                            B,
+                            Alpha
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+
+    // ========================================================
+    // 5. 少量草叶细节
+    // ========================================================
+
+    const int GrassCount =
+        Rng.Int(6, 15);
+
+    for (int i = 0; i < GrassCount; ++i)
+    {
+        const int X =
+            Rng.Int(
+                1,
+                std::max(1, Width - 2)
+            );
+
+        const int Y =
+            Rng.Int(
+                1,
+                std::max(1, Height - 2)
+            );
+
+        const RGBA Color =
+            Colors[
+                Rng.Int(
+                    0,
+                    static_cast<int>(Colors.size()) - 1
+                )
+            ];
+
+
+        const int R = clamp(
+            static_cast<int>(
+                Color.R * Rng.Float(0.75f, 0.95f)
+            ),
+            0,
+            255
+        );
+
+        const int G = clamp(
+            static_cast<int>(
+                Color.G * Rng.Float(1.05f, 1.20f)
+            ),
+            0,
+            255
+        );
+
+        const int B = clamp(
+            static_cast<int>(
+                Color.B * Rng.Float(0.65f, 0.90f)
+            ),
+            0,
+            255
+        );
+
+        const int Alpha =
+            Rng.Int(80, 160);
+
+
+        BlendPixel(
+            Result,
+            X,
+            Y,
+            R,
+            G,
+            B,
+            Alpha
+        );
+
+
+        // 60% 概率向右延伸一个像素
+        if (Rng.Float(0.0f, 1.0f) < 0.6f)
+        {
+            if (X + 1 < Width)
+            {
+                BlendPixel(
+                    Result,
+                    X + 1,
+                    Y,
+                    R,
+                    G,
+                    B,
+                    Alpha
+                );
+            }
+        }
+
+
+        // 30% 概率向上延伸一个像素
+        if (Rng.Float(0.0f, 1.0f) < 0.3f)
+        {
+            if (Y > 0)
+            {
+                BlendPixel(
+                    Result,
+                    X,
+                    Y - 1,
+                    R,
+                    G,
+                    B,
+                    Alpha
+                );
+            }
+        }
+    }
+
+
+    // ========================================================
+    // 6. 少量黄绿色干草
+    // ========================================================
+
+    const int DryGrassCount =
+        Rng.Int(2, 5);
+
+    for (int i = 0; i < DryGrassCount; ++i)
+    {
+        const int X =
+            Rng.Int(
+                1,
+                std::max(1, Width - 2)
+            );
+
+        const int Y =
+            Rng.Int(
+                1,
+                std::max(1, Height - 2)
+            );
+
+
+        const int R =
+            Rng.Int(120, 175);
+
+        const int G =
+            Rng.Int(120, 170);
+
+        const int B =
+            Rng.Int(35, 80);
+
+        const int Alpha =
+            Rng.Int(90, 170);
+
+
+        BlendPixel(
+            Result,
+            X,
+            Y,
+            R,
+            G,
+            B,
+            Alpha
+        );
+    }
+
+
+    // ========================================================
+    // 7. 最后再次保证 Alpha 和原图完全一致
+    // ========================================================
+
+    for (int Y = 0; Y < Height; ++Y)
+    {
+        uchar* ResultPixels =
+            Result.scanLine(Y);
+
+        const uchar* OriginalPixels =
+            Original.constScanLine(Y);
+
+        for (int X = 0; X < Width; ++X)
+        {
+            ResultPixels[X * 4 + 3] =
+                OriginalPixels[X * 4 + 3];
+        }
+    }
+
+
+    return Result;
+}
+
+} // namespace GrassGenerator
+
+void Map::refineBaseTerrain()
+{
+    using Data=array<int,2>;
+    //判断是否和海洋8相邻
+    auto CheckNearOcean=[&](int i,int j)->bool{
+        static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1}};
+        for(auto*o:off){
+            int ii=o[0]+i,jj=o[1]+j;
+            if(!isOverBorder(ii,jj)&&IsOcean(ii,jj)){
+                return true;
+            }
+        }
+        return false;
+    };
+    //大陆区域（不包含海洋和沙滩）
+    vector<vector<bool>>blockLegal(MAP_L,vector<bool>(MAP_U));
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            blockLegal[i][j]= !IsBeach(i,j) && !IsOcean(i,j) && !CheckNearOcean(i,j);
+        }
+    }
+
+    //大陆分块(不包含沙滩）
+    vector<vector<int>>landIdx(MAP_L,vector<int>(MAP_U));
+    vector<vector<Data>>areas;
+    int idx=1;
+    for(int i=0;i<MAP_L;++i){
+        for(int j=0;j<MAP_U;++j){
+            if(!landIdx[i][j] && blockLegal[i][j]){
+                queue<Data>q;
+                q.push({i,j});
+                areas.push_back({{i,j}});
+                landIdx[i][j]=idx;
+                while(q.size()){
+                    int siz=q.size();
+                    while(siz--){
+                        auto dt=q.front();
+                        q.pop();
+                        static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
+                        for(auto*o:off){
+                            int ii=o[0]+dt[0],jj=o[1]+dt[1];
+                            if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U&&!landIdx[ii][jj]&&blockLegal[ii][jj]){
+                                q.push({ii,jj});
+                                landIdx[ii][jj]=idx;
+                                areas.back().push_back({ii,jj});
+                            }
+                        }
+                    }
+                }
+                ++idx;
+            }
+        }
+    }
+    /*生成指导
+     * 没有淡入淡出，要么是草地要么是土地
+     * 沙滩就是旱地
+     * 要加点修饰物进去
+     */
+    //
+    const double fac=10;
+    const int ImageSize=50;
+    const siv::PerlinNoise perlin{20050119};
+    QImage grass("extra_asset/grass.png");
+    QImage dirt("extra_asset/dirt.png");
+    grass = grass.convertToFormat(QImage::Format_RGB888);
+    dirt=dirt.convertToFormat(QImage::Format_RGB888);
+    grass =grass.scaled(ImageSize,ImageSize,Qt::IgnoreAspectRatio,Qt::FastTransformation);
+    dirt=dirt.scaled(ImageSize,ImageSize,Qt::IgnoreAspectRatio,Qt::FastTransformation);
+    Random rd;
+    for(int i=0;i<100;++i){
+        QImage img=GrassGenerator::GenerateGrassVariant(resMap["Grass"].front().toImage(),rd.nextInt(0,20050119));
+        Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(img)));
+    }
+    //Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(grass)));
+    Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(dirt)));
+    while(areas.size()){
+        auto&area=areas.back();
+        //
+        while(area.size()){
+            int blockOffset=areas.size()*320921;
+            auto blockPos=area.back();area.pop_back();
+            auto&block=cell[blockPos[0]][blockPos[1]];
+            int xBase=block.getBlockDR(),yBase=block.getBlockUR();
+            //逐块生成
+            double val=perlin.octave2D_01(xBase/fac+blockOffset,yBase/fac+blockOffset,4);
+            if(val>=0.4){
+                block.NumForDeepRender=rd.nextInt(0,Block::blockForDeepRender.size()-3);
+            }else{
+                block.NumForDeepRender=1;
+            }
+        }
+        //
+        areas.pop_back();
+    }
+    //处理高低斜街处
+
 }
 
 /*
@@ -268,7 +969,7 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
     for (int i = minL; i <= maxL; i++) {
         for (int j = minU; j <= maxU; j++) {
             // 如果不是海洋，先重置为草地
-            if (cell[i][j].getMapType() != MAPTYPE_OCEAN) {
+            if (!IsOcean(i,j)) {
                 resetBlockToGrass(i, j);
             }
         }
@@ -284,7 +985,7 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
         for (int j = minU; j <= maxU; j++) {
             int localI = i - minL;
             int localJ = j - minU;
-            tempMap[localI][localJ] = (cell[i][j].getMapType() == MAPTYPE_OCEAN) ? 1 : 0;
+            tempMap[localI][localJ] = IsOcean(i,j)?1:0;
         }
     }
     
@@ -297,23 +998,23 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
                 
                 // 检查八个方向是否有海洋
                 int left = (localI > 0) ? tempMap[localI-1][localJ] : 
-                          (globalI > 0 && cell[globalI-1][globalJ].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                          (globalI > 0 && IsOcean(globalI-1,globalJ)?1:0);
                 int up = (localJ+1 < height) ? tempMap[localI][localJ+1] : 
-                        (globalJ+1 < MAP_U && cell[globalI][globalJ+1].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                        (globalJ+1 < MAP_U && IsOcean(globalI,globalJ+1)?1:0);
                 int right = (localI+1 < width) ? tempMap[localI+1][localJ] : 
-                           (globalI+1 < MAP_L && cell[globalI+1][globalJ].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                           (globalI+1 < MAP_L && IsOcean(globalI+1,globalJ)?1:0);
                 int down = (localJ > 0) ? tempMap[localI][localJ-1] : 
-                          (globalJ > 0 && cell[globalI][globalJ-1].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                          (globalJ > 0 && IsOcean(globalI,globalJ-1)?1:0);
                 
                 // 检查角落方向
                 int upLeft = (localI > 0 && localJ+1 < height) ? tempMap[localI-1][localJ+1] : 
-                            (globalI > 0 && globalJ+1 < MAP_U && cell[globalI-1][globalJ+1].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                            (globalI > 0 && globalJ+1 < MAP_U && IsOcean(globalI-1,globalJ+1)?1:0);
                 int upRight = (localI+1 < width && localJ+1 < height) ? tempMap[localI+1][localJ+1] : 
-                             (globalI+1 < MAP_L && globalJ+1 < MAP_U && cell[globalI+1][globalJ+1].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                             (globalI+1 < MAP_L && globalJ+1 < MAP_U && IsOcean(globalI+1,globalJ+1)?1:0);
                 int downRight = (localI+1 < width && localJ > 0) ? tempMap[localI+1][localJ-1] : 
-                               (globalI+1 < MAP_L && globalJ > 0 && cell[globalI+1][globalJ-1].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                               (globalI+1 < MAP_L && globalJ > 0 && IsOcean(globalI+1,globalJ-1)?1:0);
                 int downLeft = (localI > 0 && localJ > 0) ? tempMap[localI-1][localJ-1] : 
-                              (globalI > 0 && globalJ > 0 && cell[globalI-1][globalJ-1].getMapType() == MAPTYPE_OCEAN ? 1 : 0);
+                              (globalI > 0 && globalJ > 0 &&IsOcean(globalI-1,globalJ-1)?1:0);
                 
                 // 计算主方向编码
                 int mainDirCode = (left << 0) | (up << 1) | (right << 2) | (down << 3);
@@ -346,12 +1047,11 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
             int localI = i - minL;
             int localJ = j - minU;
             // 如果是海洋保持为1，如果是海滩设为2，其他陆地设为0
-            if (cell[i][j].getMapType() == MAPTYPE_OCEAN) {
+            if (IsOcean(i,j)) {
                 tempMap[localI][localJ] = 1;
             } else {
                 // 检查是否是海滩纹理（海滩纹理的Num值在29-40范围内）
-                bool isBeach = (cell[i][j].Num >= 29 && cell[i][j].Num <= 40);
-                tempMap[localI][localJ] = isBeach ? 2 : 0;
+                tempMap[localI][localJ] = IsBeach(i,j) ? 2 : 0;
             }
         }
     }
@@ -365,23 +1065,23 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
                 
                 // 检查八个方向是否有海滩
                 int left = (localI > 0) ? (tempMap[localI-1][localJ] == 2 ? 1 : 0) : 
-                          (globalI > 0 && cell[globalI-1][globalJ].Num >= 29 && cell[globalI-1][globalJ].Num <= 40 ? 1 : 0);
+                          (globalI > 0 && IsBeach(globalI-1,globalJ) ? 1 : 0);
                 int up = (localJ+1 < height) ? (tempMap[localI][localJ+1] == 2 ? 1 : 0) : 
-                        (globalJ+1 < MAP_U && cell[globalI][globalJ+1].Num >= 29 && cell[globalI][globalJ+1].Num <= 40 ? 1 : 0);
+                        (globalJ+1 < MAP_U && IsBeach(globalI,globalJ+1) ? 1 : 0);
                 int right = (localI+1 < width) ? (tempMap[localI+1][localJ] == 2 ? 1 : 0) : 
-                           (globalI+1 < MAP_L && cell[globalI+1][globalJ].Num >= 29 && cell[globalI+1][globalJ].Num <= 40 ? 1 : 0);
+                           (globalI+1 < MAP_L && IsBeach(globalI+1,globalJ)? 1 : 0);
                 int down = (localJ > 0) ? (tempMap[localI][localJ-1] == 2 ? 1 : 0) : 
-                          (globalJ > 0 && cell[globalI][globalJ-1].Num >= 29 && cell[globalI][globalJ-1].Num <= 40 ? 1 : 0);
+                          (globalJ > 0 && IsBeach(globalI,globalJ-1) ? 1 : 0);
                 
                 // 检查角落方向
                 int upLeft = (localI > 0 && localJ+1 < height) ? (tempMap[localI-1][localJ+1] == 2 ? 1 : 0) : 
-                            (globalI > 0 && globalJ+1 < MAP_U && cell[globalI-1][globalJ+1].Num >= 29 && cell[globalI-1][globalJ+1].Num <= 40 ? 1 : 0);
+                            (globalI > 0 && globalJ+1 < MAP_U &&IsBeach(globalI-1,globalJ+1)? 1 : 0);
                 int upRight = (localI+1 < width && localJ+1 < height) ? (tempMap[localI+1][localJ+1] == 2 ? 1 : 0) : 
-                             (globalI+1 < MAP_L && globalJ+1 < MAP_U && cell[globalI+1][globalJ+1].Num >= 29 && cell[globalI+1][globalJ+1].Num <= 40 ? 1 : 0);
+                             (globalI+1 < MAP_L && globalJ+1 < MAP_U && IsBeach(globalI+1,globalJ+1) ? 1 : 0);
                 int downRight = (localI+1 < width && localJ > 0) ? (tempMap[localI+1][localJ-1] == 2 ? 1 : 0) : 
-                               (globalI+1 < MAP_L && globalJ > 0 && cell[globalI+1][globalJ-1].Num >= 29 && cell[globalI+1][globalJ-1].Num <= 40 ? 1 : 0);
+                               (globalI+1 < MAP_L && globalJ > 0 && IsBeach(globalI+1,globalJ-1)? 1 : 0);
                 int downLeft = (localI > 0 && localJ > 0) ? (tempMap[localI-1][localJ-1] == 2 ? 1 : 0) : 
-                              (globalI > 0 && globalJ > 0 && cell[globalI-1][globalJ-1].Num >= 29 && cell[globalI-1][globalJ-1].Num <= 40 ? 1 : 0);
+                              (globalI > 0 && globalJ > 0 && IsBeach(globalI-1,globalJ-1)? 1 : 0);
                 
                 // 计算主方向编码
                 int mainDirCode = (left << 0) | (up << 1) | (right << 2) | (down << 3);
@@ -408,6 +1108,8 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
     }
 }
 
+
+
 /*
  * 函数：Map::resetBlockToGrass
  * 参数：blockL, blockU - block坐标
@@ -417,7 +1119,7 @@ void Map::updateShoreArea(int centerL, int centerU, int radius) {
 void Map::resetBlockToGrass(int blockL, int blockU) {
     if (blockL >= 0 && blockL < MAP_L && blockU >= 0 && blockU < MAP_U) {
         // 只有在不是海洋的情况下才重置为草地
-        if (cell[blockL][blockU].getMapType() != MAPTYPE_OCEAN) {
+        if (!IsOcean(blockL,blockU)) {
             cell[blockL][blockU].Num = 0;  // 草地纹理编号
             cell[blockL][blockU].setMapPattern(MAPPATTERN_GRASS);
         }
@@ -436,7 +1138,7 @@ bool Map::shouldBeBeach(int blockL, int blockU) {
     }
     
     // 如果自己就是海洋，不需要绘制海滩
-    if (cell[blockL][blockU].getMapType() == MAPTYPE_OCEAN) {
+    if (IsOcean(blockL,blockU)) {
         return false;
     }
     
@@ -449,7 +1151,7 @@ bool Map::shouldBeBeach(int blockL, int blockU) {
             int nj = blockU + dj;
             
             if (ni >= 0 && ni < MAP_L && nj >= 0 && nj < MAP_U) {
-                if (cell[ni][nj].getMapType() == MAPTYPE_OCEAN) {
+                if (IsOcean(ni,nj)) {
                     return true;  // 有相邻的海洋，应该绘制海滩
                 }
             }
@@ -639,7 +1341,7 @@ array<int, 2> Map::GetCellOffset(int BlockDR, int BlockUR)
        oy = this->cell[i][j].getOffsetY()+1;
     }
     //如果是海洋，按照wlh的方式来偏移
-    if(block.getMapType()==MAPTYPE_OCEAN)
+    if(IsOcean(i,j))
         oy=2;
     return {ox,oy};
 }
@@ -667,13 +1369,13 @@ void Map::divideTheMap_oceanPlay()
                 auto&e=q.front();
                 int i=e[0],j=e[1];
                 q.pop();
-                bool flag=cell[i][j].getMapType()==MAPTYPE_OCEAN;
+                bool flag=IsOcean(i,j);
                 static const int off[][2]={{0,1},{0,-1},{1,0},{-1,0}};
                 for(auto*o:off){
                     int ii=o[0]+i,jj=o[1]+j;
                     if(ii>=0&&ii<MAP_L&&jj>=0&&jj<MAP_U){
                         if(!vis[ii][jj]){
-                            bool flag1=cell[ii][jj].getMapType()==MAPTYPE_OCEAN;
+                            bool flag1=IsOcean(ii,jj);
                             if(flag1==flag){
                                 vis[ii][jj]=1;
                                 blockIndex[ii][jj]=idx;
@@ -729,7 +1431,7 @@ void Map::divideTheMap_oceanPlay()
     //如果是海洋并且与己方大陆相距两格，那么可见
     auto checkLand=[&](int x,int y)->bool{
         if(x>=0&&x<MAP_L&&y>=0&&y<MAP_U){
-            return cell[x][y].getMapType()!=MAPTYPE_OCEAN&&blockIndex[x][y]==mask;
+            return !IsOcean(x,y)&&blockIndex[x][y]==mask;
         }
         return false;
     };
@@ -752,7 +1454,7 @@ void Map::divideTheMap_oceanPlay()
                 block.Visible=0;
                 block.Explored=1;
             }
-            else if(block.getMapType()==MAPTYPE_OCEAN&&checkOceanNeedSetExplored(i,j)){
+            else if(IsOcean(i,j)&&checkOceanNeedSetExplored(i,j)){
                     block.Visible=0;
                     block.Explored=1;
             }
@@ -1156,7 +1858,7 @@ vector<Point>& Map::findBlock_Free(Point blockPoint, int lenth,bool landUnit)
         for(int y = bURD; y<bURU;y++)
         {
             if(x == blockDR && y==blockUR) continue;
-            bool ocean=cell[x][y].getMapType()==MAPTYPE_OCEAN;
+            bool ocean=IsOcean(x,y);
             if(map_Object[x][y].empty()&&(ocean^landUnit))
             {
                 tempPoint.x = x;
@@ -1173,7 +1875,7 @@ bool Map::isTerrainValidForMove(const Point& block, bool landUnit)
 {
     if (isOverBorder(block.x, block.y)) return false;
 
-    const bool ocean = cell[block.x][block.y].getMapType() == MAPTYPE_OCEAN;
+    const bool ocean = IsOcean(block.x,block.y);
     return landUnit ? !ocean : ocean;
 }
 
@@ -1471,7 +2173,7 @@ void Map::GenerateType() {
     for(int i = 0; i < MAP_L; i ++) {
         for(int j = 0; j < MAP_U; j ++) {
             Block&block=cell[i][j];
-            if(block.getMapType()==MAPTYPE_OCEAN||CheckIsNearOcean(i+4,j+4))continue;//如果是海洋或者周围是海洋就不要检测了
+            if(IsOcean(i,j)||CheckIsNearOcean(i+4,j+4))continue;//如果是海洋或者周围是海洋就不要检测了
             int count = CheckNeighborType(i, j, MAPTYPE_A2_UPTOU) +
                     CheckNeighborType(i, j, MAPTYPE_L3_DOWNTORD) +
                     CheckNeighborType(i, j, MAPTYPE_L0_DOWNTOLD)+
@@ -1521,7 +2223,7 @@ void Map::InitFaultHandle() {
         {
             this->cell[i][j].setMapPattern(0);
             //如果是海洋直接设置Num为0
-            if(this->cell[i][j].getMapType()==MAPTYPE_OCEAN)this->cell[i][j].Num=0;
+            if(IsOcean(i,j))this->cell[i][j].Num=0;
             //
             else if(this->cell[i][j].getMapType() != 0 && this->cell[i][j].getMapType() != 1)
             {
@@ -1982,6 +2684,7 @@ void Map::init() {
     loadGenerateMapText();  //载入地图
     divideTheMap_commonPlay();                 //把地图化分成一个一个连通块
     refineShore();
+    if(!OffScreen && DeepRender)refineBaseTerrain();
 }
 
 void Map::ResetMapType(int blockL, int blockU)

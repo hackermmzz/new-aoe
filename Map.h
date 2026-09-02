@@ -19,9 +19,15 @@ public:
 
     // 重绘海岸
     void refineShore();
+    //重绘基础地形
+    void refineBaseTerrain();
     // 实时更新指定区域的海滩绘制
     void updateShoreArea(int centerL, int centerU, int radius = 2);
-    // 重置block为草地
+    //判断某一块土地是否是沙滩
+    __forceinline bool IsBeach(int x,int y){return (cell[x][y].Num >= 29 && cell[x][y].Num <= 40);}
+    //判断某一块土地是否是海洋
+    __forceinline bool IsOcean(int x,int y){  return cell[x][y].getMapType() == MAPTYPE_OCEAN;}
+    // 重置block为草地__forceinline bool Map::IsBeach(int x, int y)
     void resetBlockToGrass(int blockL, int blockU);
     // 检查block是否应该为海滩
     bool shouldBeBeach(int blockL, int blockU);

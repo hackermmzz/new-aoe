@@ -1449,6 +1449,8 @@ Double RuntimeConfig_MUSIC_VOLUME();
 bool RuntimeConfig_isPlayerBuildingDisabled(int buildingNum);
 #define isPlayerBuildingDisabled(b) (RuntimeConfig_isPlayerBuildingDisabled(b))
 
+bool RuntimeConfig_DeepRender();
+#define DeepRender (RuntimeConfig_DeepRender())
 void ApplyRuntimeConfigFromJson(const QJsonObject& config);
 
 #endif // RUNTIMECONFIG_H

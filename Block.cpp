@@ -3,6 +3,7 @@
 std::list<ImageResource>* Block::block[BLOCK_COUNT];
 std::list<ImageResource>* Block::grayblock[BLOCK_COUNT];
 std::list<ImageResource>* Block::blackblock[BLOCK_COUNT];
+std::vector<QPixmap*> Block::blockForDeepRender;
 
 std::string Block::Blockname[BLOCK_COUNT] = {
     "Grass",            // 0
@@ -51,6 +52,7 @@ std::string Block::Blockname[BLOCK_COUNT] = {
 
 Block::Block()
 {
+    this->NumForDeepRender=-1;
     this->Num = 0;
     this->nowres = block[this->Num]->begin();
     this->OffsetX = 0;

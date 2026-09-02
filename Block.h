@@ -72,10 +72,13 @@ public:
 
     // 用于分辨地块种类的变量
     int Num;
-
+    // 用于深层次渲染使用
+    int NumForDeepRender;
+    //
     bool Visible=false;//是否可见
     bool Explored=false;//是否被探索
 
+    static std::vector<QPixmap*> blockForDeepRender;
     static std::list<ImageResource> *block[BLOCK_COUNT];
     static std::list<ImageResource> *grayblock[BLOCK_COUNT];
     static std::list<ImageResource> *blackblock[BLOCK_COUNT];

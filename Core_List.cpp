@@ -155,7 +155,13 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
                     return ACTION_INVALID_RESOURCE;
                  }
             }
-
+        }
+        //如果当前是祭祀
+        {
+            if(eventType==CoreEven_Attacking&&object1->getSort()==SORT_ARMY&&object1->getNum()==AT_PRIEST&&object1==object2){
+                //祭祀不能对自己进行操作
+                return ACTION_INVALID_OBSN;
+            }
         }
         //
         if (eventType == CoreEven_Transport) {//运输船运输人必须保持距离合适

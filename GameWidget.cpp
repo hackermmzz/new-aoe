@@ -54,8 +54,6 @@ void GameWidget::paintEvent(QPaintEvent *)
 
     for(int i = 0; i < GAMEWIDGET_HEIGHT / (mainwidget->map->cell[0][0].block[0]->front().pix.height() / 2.0) + 6; i++)
     {
-
-
         x2=x1;
         y2=y1;
         if(i%2==1)
@@ -82,13 +80,21 @@ void GameWidget::paintEvent(QPaintEvent *)
             if(i%2==1)x=64*j + block.getOffsetX(),y=-16+16*i + block.getOffsetY();
             w=Block::block[block.Num]->front().pix.width(),h=Block::block[block.Num]->front().pix.height();
             list<ImageResource>*targetList=0;
-            if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::block[block.Num];
+            if(mainwidget->map->cell[x2][y2].Visible == true && mainwidget->map->cell[x2][y2].Explored == true)
+            {
+                if(block.NumForDeepRender>=0){
+                    pix=Block::blockForDeepRender[block.NumForDeepRender];
+                }
+                else{
+                   targetList=Block::block[block.Num];
+                }
+            }
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == true)targetList=Block::grayblock[block.Num];
             else if(mainwidget->map->cell[x2][y2].Visible == false && mainwidget->map->cell[x2][y2].Explored == false)targetList=Block::blackblock[block.Num];
             //如果没超出屏幕，那么绘制
             if(RectInRect(x,y,w,h)){
                 //如果是海洋
-                if(block.getMapType()==MAPTYPE_OCEAN){
+                if(mainwidget->map->IsOcean(x2,y2)){
                     static QPixmap*ocean=nullptr;
                     static QPixmap*grayOcean=0;
                     if(!ocean)
@@ -101,10 +107,16 @@ void GameWidget::paintEvent(QPaintEvent *)
                     else if(block.Explored)pix=grayOcean;
                     else pix=0;
                 }
-                else pix=&(targetList->front().pix);
+                else if(targetList){
+                    pix=&(targetList->front().pix);
+                }
                 //绘制
-                if(pix)
-                painter.drawPixmap(x,y,w,h,*pix);
+                if(pix){
+                    painter.drawPixmap(x,y,w,h,*pix);
+                }
+                else{
+                     cout<<"AOE occurs bug!"<<endl;
+                }
                 if(showLine)
                 {
                     const int cellWidth = qMax(1, w - 1);

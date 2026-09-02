@@ -1,4 +1,5 @@
 {
+    "DeepRender":false,
     "OffScreen":false,
     "DefaultCivilization":2,
     "EnemyTechnologyMaxCivilization":3,
