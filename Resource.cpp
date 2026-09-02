@@ -29,3 +29,8 @@ int Resource::get_ReturnBuildingType()
 
     return buildingType;
 }
+
+void Resource::setSurplusCnt(Double cnt)
+{
+    Cnt=cnt;
+}

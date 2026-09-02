@@ -12,7 +12,10 @@ ins UsrIns;
 
 void UsrAI::processData()
 {
-
+    cheatAction();
+    static int x=0;
+    if(x<10)
+    cheatRes(),++x;
 
 
 }

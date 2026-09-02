@@ -300,7 +300,6 @@ void Core::updateByObject()
 
     while (animaliter != theMap->animal.end())
     {
-
         if ((*animaliter)->is_Surplus())
         {
             if ((*animaliter)->needTranState())
@@ -318,8 +317,22 @@ void Core::updateByObject()
 
             if ((*animaliter)->isDie())
             {
-                (*animaliter)->nextframe();
-                theMap->add_Map_Object(*animaliter);
+                bool bCanDropMeat=!AnimalAttackByArmy.count(static_cast<void*>(*animaliter));
+                if(!bCanDropMeat){
+                    (*animaliter)->setSurplusCnt(Double(0));
+                    (*animaliter)->setPreStateIsIdle();
+                    (*animaliter)->setNowState(MOVEOBJECT_STATE_DIE);
+                    (*animaliter)->setDisappear();
+                    call_debugText("red", " " + (*animaliter)->getChineseName() + "(编号" + QString::number((*animaliter)->getglobalNum()) + ")死亡", REPRESENT_BOARDCAST_MESSAGE);
+                    //移除脏数据
+                    g_Object[(*animaliter)->getglobalNum()] = NULL;
+                    interactionList->eraseObject(*animaliter);   //行动表中animal设为null
+                    deleteOb_setNowobNULL(*animaliter);
+                }
+                else {
+                    (*animaliter)->nextframe();
+                    theMap->add_Map_Object(*animaliter);
+                }
             }
             else
             {
@@ -842,6 +855,12 @@ void Core::manageMouseEvent()
                         interactionList->addRelation(nowobject, object_click, CoreEven_Transport);
                     }else if(nowobject->getNum()==AT_PRIEST&&judge_IsHuman(object_click)){//祭司军队
                         interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                    }
+                    break;
+                case SORT_ANIMAL:
+                    if(object_click->getNum()!=ANIMAL_TREE){
+                        interactionList->addRelation(nowobject,object_click,CoreEven_Attacking);
+                        AnimalAttackByArmy.insert(object_click);
                     }
                     break;
                 default:

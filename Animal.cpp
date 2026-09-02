@@ -67,12 +67,7 @@ void Animal::nextframe()
         else if(!get_isActionEnd() && isNowresShift()) nowres++;
         else if(!changeToDisappear && !is_Surplus())
         {
-            changeToDisappear = true;
-            if(!isTree())
-            {
-                nowres_step = 1000;
-                setNowRes();
-            }
+            setDisappear();
         }
     }
     else
@@ -198,6 +193,16 @@ void Animal::setAttribute()
         attackType = ATTACKTYPE_ANIMAL;
 
     setSideLenth();
+}
+
+void Animal::setDisappear()
+{
+    changeToDisappear = true;
+    if(!isTree())
+    {
+        nowres_step = 1000;
+        setNowRes();
+    }
 }
 
 bool Animal::isMonitorObject(Coordinate* judOb)

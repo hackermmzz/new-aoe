@@ -147,6 +147,17 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
         if (eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER && object2->getSort() == SORT_BUILDING\
             && buildGoalOb != NULL && !buildGoalOb->isMatchResourceType(((Farmer*)object1)->getResourceSort()))
             return ACTION_INVALID_HUMANACTION_BUILD2RESOURCENOMATCH;
+        //当前生物已经死亡且无供给，直接返回
+        {
+            if(eventType==CoreEven_Gather&&object2->getSort()==SORT_ANIMAL){
+                 Animal*animal=static_cast<Animal*>(object2);
+                 if(!animal->is_Surplus()){
+                    return ACTION_INVALID_RESOURCE;
+                 }
+            }
+
+        }
+        //
         if (eventType == CoreEven_Transport) {//运输船运输人必须保持距离合适
             Farmer* f0 = (Farmer*)object2;
             Human* f1 = (Human*)object1;

@@ -2,6 +2,7 @@
 #define CORE_H
 
 #include "Core_List.h"
+#include "set"
 class SelectWidget;
 class Core
 {
@@ -63,6 +64,7 @@ private:
     Player** player;    //player信息
     MouseEvent* mouseEvent; //记录当前鼠标事件
     vector<MoveObject*> moveOb_judCrush;
+    set<void*> AnimalAttackByArmy; //被军队攻击的动物
     //移动对象提交新坐标后、写入地图对象表前，纠正与单位类型不匹配的地形位置
     void correctMoveObjectTerrain(MoveObject* object);
     //

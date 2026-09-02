@@ -72,6 +72,7 @@ public:
 
     /*******状态与属性设置、获取*******/
     void setAttribute();
+    void setDisappear();
     bool isMonitorObject(Coordinate* judOb);
     QString getChineseName(){ return QString::fromStdString(getAnimalDisplayName(Num)); }
 
