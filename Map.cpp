@@ -853,6 +853,28 @@ QImage GenerateGrassVariant(
 
 } // namespace GrassGenerator
 
+QImage TopDownToIsometric(QImage& src){
+
+    src=src.convertToFormat(QImage::Format_RGB888);
+    int w=src.width(),h=src.height();
+    int tarW=(w+h+1)>>1,tarH=(w+h+3)>>2;
+    QImage ret(tarW,tarH,QImage::Format_RGBA8888);
+    ret.fill(Qt::transparent);
+    //反向映射
+    for(int si=0;si<tarW;++si){
+        for(int sj=0;sj<tarH;++sj){
+            int i=(2*si+4*sj-tarW)/2;
+            int j=(4*sj-2*si+tarW)/2;
+            if(i<0||i>=w||j<0||j>=h)
+            {
+                continue;
+            }
+            ret.setPixelColor(si,sj,src.pixelColor(i,j));
+        }
+    }
+    //
+    return ret;
+}
 void Map::refineBaseTerrain()
 {
     using Data=array<int,2>;
@@ -871,7 +893,7 @@ void Map::refineBaseTerrain()
     vector<vector<bool>>blockLegal(MAP_L,vector<bool>(MAP_U));
     for(int i=0;i<MAP_L;++i){
         for(int j=0;j<MAP_U;++j){
-            blockLegal[i][j]= !IsBeach(i,j) && !IsOcean(i,j) && !CheckNearOcean(i,j);
+            blockLegal[i][j]= !IsBeach(i,j) && !IsOcean(i,j) ;
         }
     }
 
@@ -923,8 +945,8 @@ void Map::refineBaseTerrain()
     dirt=dirt.scaled(ImageSize,ImageSize,Qt::IgnoreAspectRatio,Qt::FastTransformation);
     Random rd;
     for(int i=0;i<100;++i){
-        QImage img=GrassGenerator::GenerateGrassVariant(resMap["Grass"].front().toImage(),rd.nextInt(0,20050119));
-        Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(img)));
+        QImage img=GrassGenerator::GenerateGrassVariant(grass,rd.nextInt(0,20050119));
+        Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(TopDownToIsometric(img))));
     }
     //Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(grass)));
     Block::blockForDeepRender.push_back(new QPixmap(QPixmap::fromImage(dirt)));
