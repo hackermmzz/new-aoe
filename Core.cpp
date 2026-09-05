@@ -496,6 +496,7 @@ void Core::updateByPlayer(int id) {
 
         tagResource resource;
         resource.SN = animal->getglobalNum();
+        resource.WorkObjectSN=-1;
         switch (animal->getNum()) {
         case ANIMAL_ELEPHANT:
             resource.Type = RESOURCE_ELEPHANT;
@@ -527,6 +528,7 @@ void Core::updateByPlayer(int id) {
         resource.UR =  double(animal->getUR());
         resource.Blood = animal->getBlood();
         resource.Cnt = animal->get_Cnt();
+        resource.WorkObjectSN=interactionList->getObjectSN(animal);
         if (id == 1 || animal->getexplored() == 1)
             taginfo.resources.push_back(resource);
     }

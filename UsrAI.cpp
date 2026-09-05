@@ -16,6 +16,10 @@ void UsrAI::processData()
     static int x=0;
     if(x<10)
     cheatRes(),++x;
-
+    for(tagResource res:getInfo().resources){
+        if(res.WorkObjectSN!=-1){
+            cout<<res.WorkObjectSN<<endl;
+        }
+    }
 
 }

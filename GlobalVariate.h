@@ -114,6 +114,7 @@ struct tagResource:tagObj
     int32_t ProductSort; // 产品种类
     int32_t Cnt; // 剩余资源数量
     int32_t Blood; // 当前血量
+    int32_t WorkObjectSN;//攻击的对象
 };
 
 struct tagHuman:tagObj

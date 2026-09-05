@@ -1,5 +1,5 @@
 {
-    "DeepRender":true,
+    "DeepRender":false,
     "OffScreen":false,
     "DefaultCivilization":2,
     "EnemyTechnologyMaxCivilization":3,
@@ -7,7 +7,7 @@
     "IsExamining": false,
     "TimePerFrame": 40,
     "EditorMode": false,
-    "GlobalVision":true,
+    "GlobalVision":false,
     "only_debug_Player0": true,
     "filterRepetitionMessage": false,
     "GAME_WIDTH": 1920,

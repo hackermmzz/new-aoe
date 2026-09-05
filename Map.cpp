@@ -2706,7 +2706,7 @@ void Map::init() {
     loadGenerateMapText();  //载入地图
     divideTheMap_commonPlay();                 //把地图化分成一个一个连通块
     refineShore();
-    if(!OffScreen && DeepRender)refineBaseTerrain();
+    if(!OffScreen && DeepRender&& !EditorMode)refineBaseTerrain();
 }
 
 void Map::ResetMapType(int blockL, int blockU)
