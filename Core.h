@@ -3,6 +3,9 @@
 
 #include "Core_List.h"
 #include "set"
+#include"farchive.h"
+#include<broadcast.h>
+
 class SelectWidget;
 class Core
 {
@@ -12,8 +15,8 @@ public:
     std::remove_const<tagInfo::TerrainData>::type playerMap;//记录tagInfo传给学生的信息
     vector<Point>explored;
     Core() {}
-    Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent);
-
+    Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent,FArchive*archive,BroadCast&GameOverBroadcast);
+    void GameOverHandle();
     void PreProcessDuringExam();
     void gameUpdate();
     void updateByObject();
@@ -60,11 +63,17 @@ public:
     /************管理添加表************/
     void manageMouseEvent();    //鼠标添加
     void manageOrder(int id);     //指令添加
+    void ProcessGameReplay();   //处理录像播放
+    void ProcessGameRecord(instruction ins,int playerID);   //录像
 private:
+    int64_t CoreExecuteFrames=0;   //内核跑了多少帧
     Player** player;    //player信息
     MouseEvent* mouseEvent; //记录当前鼠标事件
     vector<MoveObject*> moveOb_judCrush;
     set<void*> AnimalAttackByArmy; //被军队攻击的动物
+    FArchive* GameRecordOrReplayArchive;//录像/回放
+    vector<InstructionForSave> GameReplayData;//回放数据
+    QFile* GameRecordFileHandle;//录像的文件句柄
     //移动对象提交新坐标后、写入地图对象表前，纠正与单位类型不匹配的地形位置
     void correctMoveObjectTerrain(MoveObject* object);
     //
@@ -75,7 +84,8 @@ private:
     int handlePinPointStrike(Coordinate* self, Double dr0,Double ur0, int id);
     void deduplicateInstructions(std::queue<instruction>& instructions); // 去重指令队列
     bool filter_instruction(const instruction& ins);
-    void FirstFrameProcess();//游戏开始的第一帧需要干的事情
+    void PostFirstFrameProcess();//游戏开始的第一帧需要干的事情（第一帧结束）
+    void PreFirstFrameProcess();//游戏开始的第一帧需要干的事情（第一帧开始）
 public:
     Core_List* interactionList;
 };

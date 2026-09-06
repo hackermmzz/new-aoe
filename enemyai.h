@@ -27,16 +27,11 @@ private:
     tagInfo getInfo(){
         return tagEnemyGame.getInfo();
     }
-    int AddToIns(instruction ins) override{
-        EnemyIns.lock.lock();
-        ins.id=EnemyIns.g_id;
-        EnemyIns.g_id++;
-        EnemyIns.instructions.push(ins);
-        EnemyIns.lock.unlock();
-        return ins.id;
-    }
     void clearInsRet() override{
         tagEnemyGame.clearInsRet();
+    }
+    virtual ins& GetInsStruct(){
+        return EnemyIns;
     }
      void Around();
      void Attack();

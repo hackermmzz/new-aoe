@@ -4,7 +4,10 @@
 #include <QSet>
 
 namespace {
-
+QString g_GameReplayFile;
+QString g_GameRecordFile;
+bool g_GameRecord=0;
+bool g_GameReplay=0;
 bool g_DeepRender=0;
 int g_GAME_LOSE_SEC = 0;
 bool g_IsExamining = false;
@@ -2899,8 +2902,32 @@ Double RuntimeConfig_MUSIC_VOLUME()
 bool RuntimeConfig_DeepRender(){
     return g_DeepRender;
 }
+
+bool RuntimeConfig_GameReplay(){
+    return g_GameReplay;
+}
+
+bool RuntimeConfig_GameRecord(){
+    return g_GameRecord;
+}
+
+QString RuntimeConfig_GameRecordFile()
+{
+    return g_GameRecordFile;
+}
+
+QString RuntimeConfig_GameReplayFile()
+{
+    return g_GameReplayFile;
+}
+
+
 void ApplyRuntimeConfigFromJson(const QJsonObject& config)
 {
+    g_GameRecordFile=config.value(QStringLiteral("GameRecordFile")).toString();
+    g_GameReplayFile=config.value(QStringLiteral("GameReplayFile")).toString();
+    g_GameRecord=config.value(QStringLiteral("GameRecord")).toBool();
+    g_GameReplay=config.value(QStringLiteral("GameReplay")).toBool();
     g_DeepRender=config.value(QStringLiteral("DeepRender")).toBool();
     g_GAME_LOSE_SEC = config.value(QStringLiteral("GAME_LOSE_SEC")).toInt();
     g_IsExamining = config.value(QStringLiteral("IsExamining")).toBool();
@@ -3398,4 +3425,6 @@ void RuntimeConfig_setOffScreen(bool v) { g_OffScreen = v; }
 void RuntimeConfig_setINITIAL_FREQUENCY(int v) { g_INITIAL_FREQUENCY = v; }
 void RuntimeConfig_setFixedMapFile(const QString& v) { g_FixedMapFile = v; }
 void RuntimeConfig_setMapRotationDegrees(int v) { g_MapRotationDegrees = v; }
+
+
 

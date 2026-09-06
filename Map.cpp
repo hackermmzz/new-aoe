@@ -2299,36 +2299,41 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
  * 返回值：空。
  */
 
-void Map::loadGenerateMapText()
+void Map::loadGenerateMapText(QString targetMapPath)
 {
     // 使用高精度时间为种子的真随机数生成器
     QString mapPath;
-    QString fixedMapFile = RuntimeConfig_FixedMapFile().trimmed();
-    QString mapSuffix = QString::fromStdString(MAPFILE_SUFFIX);
-
-    if(!fixedMapFile.isEmpty()){
-        mapPath = fixedMapFile;
-        if(QFileInfo(mapPath).suffix().isEmpty()){
-            mapPath += "." + mapSuffix;
-        }
-        if(!QFileInfo(mapPath).isAbsolute()){
-            mapPath = QDir::current().absoluteFilePath(mapPath);
-        }
-        if(!QFileInfo(mapPath).isFile()){
-            qWarning() << "fixed map file not found:" << mapPath;
-            return;
+    //随机地图或者配置文件指定地图
+    if(targetMapPath.size()==0){
+        QString fixedMapFile = RuntimeConfig_FixedMapFile().trimmed();
+        QString mapSuffix = QString::fromStdString(MAPFILE_SUFFIX);
+        if(!fixedMapFile.isEmpty()){
+            mapPath = fixedMapFile;
+            if(QFileInfo(mapPath).suffix().isEmpty()){
+                mapPath += "." + mapSuffix;
+            }
+            if(!QFileInfo(mapPath).isAbsolute()){
+                mapPath = QDir::current().absoluteFilePath(mapPath);
+            }
+            if(!QFileInfo(mapPath).isFile()){
+                qWarning() << "fixed map file not found:" << mapPath;
+                return;
+            }
+        }else{
+            auto AllMapFile=GetAllTargetFiles(mapSuffix);
+            if(AllMapFile.empty()){
+                qWarning() << "map file not found, suffix:" << mapSuffix;
+                return;
+            }
+            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+            std::mt19937 gen(seed);
+            std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
+            int mapIdx = dis(gen); // 1~4
+            mapPath=AllMapFile[mapIdx];
         }
     }else{
-        auto AllMapFile=GetAllTargetFiles(mapSuffix);
-        if(AllMapFile.empty()){
-            qWarning() << "map file not found, suffix:" << mapSuffix;
-            return;
-        }
-        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-        std::mt19937 gen(seed);
-        std::uniform_int_distribution<> dis(0,AllMapFile.size()-1);
-        int mapIdx = dis(gen); // 1~4
-        mapPath=AllMapFile[mapIdx];
+        //传进来的地图
+        mapPath=targetMapPath;
     }
     QFile file(mapPath);
     MapFileName=mapPath.split("/").back();
@@ -2701,9 +2706,9 @@ bool Map::CheckIsNearOcean(int x, int y)
  * 内容：初始化地图的总函数；
  * 返回值：空。
  */
-void Map::init() {
+void Map::init(QString mapPath) {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
-    loadGenerateMapText();  //载入地图
+    loadGenerateMapText(mapPath);  //载入地图
     divideTheMap_commonPlay();                 //把地图化分成一个一个连通块
     refineShore();
     if(!OffScreen && DeepRender&& !EditorMode)refineBaseTerrain();

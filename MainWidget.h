@@ -14,7 +14,7 @@
 #include "Editor.h"
 #include "ui_Editor.h"
 #include"AreaSelected.h"
-
+#include<broadcast.h>
 // 前向声明，避免循环包含
 struct RectAreaData;
 struct CircleAreaData;
@@ -79,6 +79,11 @@ public:
     vector<RectAreaData> highlightedRectAreas;  // 需要高亮显示的矩形区域
     vector<CircleAreaData> highlightedCircleAreas;  // 需要高亮显示的圆形区域
     vector<LineAreaData> highlightedLineAreas;  // 需要高亮显示的线形区域
+
+    //回放/录制类
+    FArchive*GameRecordOrReplay;
+    //广播游戏结束
+    BroadCast GameOverBroadCast;
     // 枚举编辑器中的功能键
     enum EditorElement{
         DELETEOBJECT,
@@ -163,10 +168,14 @@ private:
     bool eventFilter(QObject *watched, QEvent *event);
     //绘制窗口界面的图片
     void paintEvent(QPaintEvent *);
+    //窗口关闭事件
+    void closeEvent(QCloseEvent*event);
     //更新UI信息
     void statusUpdate();
     //更新资源信息
     void showPlayerResource(int playerRepresent);
+    //加载Json文件数据(失败则退出)
+    static vector<uint8_t> LoadBinaryFileData(const QString& filePath);
 //*********************************
 
 //***********UI组件**************
@@ -255,6 +264,7 @@ private:
     void initInfoPane();
     void initGameTimer();
     void initPlayers();
+    void initGameRecordOrReplay();
     void initMap();
     void initAI();
     void setupCore();

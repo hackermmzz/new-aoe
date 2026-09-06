@@ -65,7 +65,11 @@ SOURCES += \
     RectArea.cpp \
     CircleArea.cpp \
     LineArea.cpp \
-    networkplugin.cpp
+    networkplugin.cpp \
+    Farchive.cpp \
+    FarchiveIn.cpp \
+    FarchiveOut.cpp \
+    BroadCast.cpp
 
 HEADERS += \
         MainWidget.h \
@@ -118,7 +122,11 @@ HEADERS += \
     library/fixed_point/include.h \
     library/fixed_point/macro.h \
     library/random/random.hpp \
-    library/container/vector.hpp
+    library/container/vector.hpp \
+    Farchive.h \
+    FarchiveIn.h \
+    FarchiveOut.h \
+    BroadCast.h
 
 FORMS += \
         MainWidget.ui \

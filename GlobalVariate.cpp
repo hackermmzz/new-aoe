@@ -522,6 +522,10 @@ bool instruction::isExist() {
     return type != -1;
 }
 
+instruction::instruction() {
+    type=-1;
+}
+
 instruction::instruction(int type,int SN, int obSN , bool twoCoredinate){
     this->SN = SN;
     this->obSN = obSN;
@@ -550,6 +554,52 @@ instruction::instruction(int type,int SN,int option){
     this->self=g_Object[SN];
     this->option=option;
 }
+
+void instruction::Serialize(FArchive *arc)
+{
+    arc->Serialize(type);
+    arc->Serialize(SN);
+    switch (type) {
+    case INS_HUMANMOVE:
+    {
+        arc->Serialize(DR.raw_);
+        arc->Serialize(UR.raw_);
+    }
+        break;
+    case INS_HUMANACTION:
+    {
+        arc->Serialize(obSN);
+    }
+        break;
+    case INS_HUMANBUILD:
+    {
+        arc->Serialize(BlockDR);
+        arc->Serialize(BlockUR);
+        arc->Serialize(option);
+    }
+        break;
+    case INS_BUILDINGACTION:
+    {
+         arc->Serialize(option);
+    }
+        break;
+    case INS_PINPOINT_STRIKE:
+    {
+        arc->Serialize(DR.raw_);
+        arc->Serialize(UR.raw_);
+    }
+        break;
+    default:
+        cerr<<"Can't Serialize the instruction type!This might be a bug and report it;"<<endl;
+        break;
+    }
+    //如果是读，要小心点
+    if(arc->IsRead()){
+        this->self=g_Object[SN];
+        this->obj=g_Object[obSN];
+    }
+}
+
 
 int sgn(Double __x)
 {
@@ -1272,4 +1322,17 @@ void ReadConfig()
     ApplyRuntimeConfigFromJson(config);
 
 
+}
+
+void InstructionForSave::Serialize(FArchive *arc)
+{
+    arc->Serialize(frame);
+    arc->Serialize(playerID);
+    arc->Serialize(ins);
+}
+
+bool InstructionForSave::operator< (const InstructionForSave &oth) const
+{
+    if(oth.frame==frame)return ins.id<oth.ins.id;
+    return frame<oth.frame;
 }

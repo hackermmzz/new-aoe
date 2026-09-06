@@ -8,6 +8,8 @@
 #include<Rectarea.h>
 #include<CircleArea.h>
 #include<LineArea.h>
+#include<farchivein.h>
+#include<farchiveout.h>
 int g_globalNum = Rand.nextRaw() % 11;
 int g_frame = 0;
 // 全局区域对象定义
@@ -123,6 +125,8 @@ MainWidget::MainWidget(QWidget* parent) :
     initGameTimer();
     // 初始化玩家
     initPlayers();
+    //初始化播放配置
+    initGameRecordOrReplay();
     // 初始化地图
     initMap();
     // 设置内核
@@ -1487,11 +1491,29 @@ void MainWidget::initPlayers() {
     // player[1]->addArmy(AT_SCOUT , 35*BLOCKSIDELENGTH , 35*BLOCKSIDELENGTH);
 }
 
+void MainWidget::initGameRecordOrReplay()
+{
+    //录制
+    if(GameRecord)
+    {
+        GameRecordOrReplay=new FArchiveOut;
+    }
+    //加载录像文件
+    else if(GameReplay){
+        auto&&ret=LoadBinaryFileData(GameReplayFile);
+        GameRecordOrReplay=new FArchiveIn(ret.data(),ret.size());
+    }
+}
+
 void MainWidget::initMap() {
+    string mapFileName="";
+    if(GameReplay){
+        GameRecordOrReplay->Serialize(mapFileName);
+    }
     qDebug() << "初始化地图...";
     map = new Map;
     map->setPlayer(player);
-    map->init();
+    map->init(QString::fromStdString(mapFileName));
     map->init_Map_Height();
 
     // 内存图开辟空间
@@ -1522,7 +1544,7 @@ void MainWidget::initAI() {
 
 void MainWidget::setupCore() {
     qDebug() << "加载内核...";
-    core = new Core(map, player, memorymap, mouseEvent);
+    core = new Core(map, player, memorymap, mouseEvent,GameRecordOrReplay,GameOverBroadCast);
     sel->setCore(core);
     core->sel = sel;
 }
@@ -1621,6 +1643,12 @@ void MainWidget::paintEvent(QPaintEvent*)
     pix = resMap["Interface"].back();
     painter.drawPixmap(0, GAME_HEIGHT - 203.5, 1440, 203.5, pix);
 
+}
+
+void MainWidget::closeEvent(QCloseEvent *event)
+{
+    GameOverBroadCast.broadcast();
+    QWidget::closeEvent(event);
 }
 
 
@@ -2171,6 +2199,29 @@ void MainWidget::showPlayerResource(int playerRepresent)
     ui->resGold->setText(QString::number(gold));
 }
 
+vector<uint8_t> MainWidget::LoadBinaryFileData(const QString &filePath)
+{
+    std::vector<uint8_t> out;
+    QFile file(filePath);
+    // 二进制只读，不要QIODevice::Text
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        std::cerr << "打开文件失败: " << file.errorString().toStdString() << std::endl;
+        // 不要exit！UI组件不要直接杀死进程
+        return out;
+    }
+
+    QByteArray rawData = file.readAll();
+    file.close();
+
+    // QByteArray -> std::vector<uint8_t
+    out.assign(
+        reinterpret_cast<const uint8_t*>(rawData.constData()),
+        reinterpret_cast<const uint8_t*>(rawData.constData()) + rawData.size()
+    );
+    return out;
+}
+
 void MainWidget::statusUpdate()
 {
     showPlayerResource(0);
@@ -2551,10 +2602,9 @@ void MainWidget::ScoreSave(string gameResult)
 void MainWidget::HandleGameOver()
 {
     //
-    bool win=isWin();
-    //
     auto*p=player[NOWPLAYERREPRESENT];
-    ResultLogInfo(win,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
+    ResultLogInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
+    GameOverBroadCast.broadcast();
 }
 //**************槽函数***************
 // 游戏帧更新

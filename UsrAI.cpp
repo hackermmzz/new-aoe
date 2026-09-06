@@ -1,25 +1,18 @@
 #include "UsrAI.h"
-#include<set>
-#include <iostream>
-#include<unordered_map>
-#include<list>
+#include <cmath>
 #include <cstdlib>
-
+#include <climits>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
 using namespace std;
+
 tagGame tagUsrGame;
 ins UsrIns;
 /*##########DO NOT MODIFY THE CODE ABOVE##########*/
-
-void UsrAI::processData()
+/* ============================== 主入口 ============================== */
+void UsrAI::processData ()
 {
-    cheatAction();
-    static int x=0;
-    if(x<10)
-    cheatRes(),++x;
-    for(tagResource res:getInfo().resources){
-        if(res.WorkObjectSN!=-1){
-            cout<<res.WorkObjectSN<<endl;
-        }
-    }
 
 }

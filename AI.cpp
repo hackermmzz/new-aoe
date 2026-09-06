@@ -57,9 +57,15 @@ void AI::run() {
             return;
         if (g_frame > 10) {
             ProcessDataWork = 1;
-            processData();
+            if(!GameReplay){
+                //非回放模式才会执行数据处理
+                processData();
+            }
             ProcessDataWork = 0;
         }
+        //将所有命令放入Ins结构体
+        CommitInstruction();
+        //
         condition.wait(&mutex);
     }
 }
@@ -70,6 +76,27 @@ bool AI::trylock() {
 
 void AI::unlock() {
     aiLock.unlock();
+}
+
+int AI::AddToIns(instruction ins)
+{
+    ins.id=InsID++;
+    InsPerFrame.push_back(ins);
+    return ins.id;
+}
+
+void AI::CommitInstruction()
+{
+    ins&Ins=GetInsStruct();
+    //
+    Ins.lock.lock();
+    for(auto&val:InsPerFrame)
+    {
+        Ins.instructions.push(val);
+    }
+    Ins.lock.unlock();
+    //
+    InsPerFrame.clear();
 }
 
 bool AI::isHuman(int SN) {

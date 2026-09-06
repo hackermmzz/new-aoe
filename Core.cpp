@@ -3,11 +3,17 @@
 #include "MainWidget.h"
 #include <QDateTime>
 #include <iostream>
+#include"farchivein.h"
 tagInfo Buffer0[2];
 tagInfo Buffer1[2];
 int buff = 0;
 tagInfo* currentBuff;
-Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEvent)
+Core::Core(Map* theMap, Player* player[],
+           int** memorymap,
+           MouseEvent* mouseEvent,
+           FArchive* GameRecordOrReplayArchive_,
+           BroadCast&GameOverBroadcast
+           )
 {
     this->playerMap=vector<vector<tagTerrain>>(MAP_L,vector<tagTerrain>(MAP_U));
     ::memorymap=memorymap;
@@ -15,12 +21,19 @@ Core::Core(Map* theMap, Player* player[], int** memorymap, MouseEvent* mouseEven
     this->player = player;  //所有player的数组
     this->mouseEvent = mouseEvent;  //点击窗口的鼠标事件
     this->interactionList = new Core_List(this->theMap, this->player);   //本类中管理的对象交互动态表
+    GameRecordOrReplayArchive=GameRecordOrReplayArchive_;
     InitPlayerMap();
+    GameOverBroadcast.subscribe(this,Core::GameOverHandle);
 }
+
+
 
 
 void Core::gameUpdate()
 {
+    ++CoreExecuteFrames;
+    //如果是第一帧开始前进行处理
+    PreFirstFrameProcess();
     //如果是考试状态,做出一些调整
     if(IsExamining)PreProcessDuringExam();
     //
@@ -35,37 +48,33 @@ void Core::gameUpdate()
     theMap->reset_ObjectExploreAndVisible();
     //判断并标记碰撞，在Corelist里处理碰撞
     judge_Crush();
-
-    if (mouseEvent->HaveEvent())
-    {
-        if (mapmoveFrequency >=8)
+    //运行指令
+    if(GameReplay){
+        //播放录像
+        ProcessGameReplay();
+    }else{
+        //鼠标操作/程序操作
+        if (mouseEvent->HaveEvent())
         {
-            if (tryCaptured)
+            if (mapmoveFrequency >=8)
             {
-                resetNowObject_Click();
-                tryCaptured=false;
-                mouseEvent->SetMouseEventType(NULL_MOUSEEVENT);
+                if (tryCaptured)
+                {
+                    resetNowObject_Click();
+                    tryCaptured=false;
+                    mouseEvent->SetMouseEventType(NULL_MOUSEEVENT);
+                }
             }
+            else manageMouseEvent();
         }
-        else manageMouseEvent();
     }
     manageOrder(0);
     manageOrder(1);
-    //
-
+    //更新静态表
     GenerateHumanLock=0;//每一帧都保证只能生产出一个人
     interactionList->update();
-
     //判断是否是第一帧,第一帧需要初始化一些数据
-    {
-        static bool firstFrame=1;
-        if(firstFrame){
-            firstFrame=0;
-            FirstFrameProcess();
-        }
-    }
-
-
+    PostFirstFrameProcess();
 }
 void Core::correctMoveObjectTerrain(MoveObject* object)
 {
@@ -1190,13 +1199,12 @@ int Core::handlePinPointStrike(Coordinate *self, Double dr0,Double ur0, int id)
 void Core::deduplicateInstructions(std::queue<instruction>& instructions) {
     // 使用map按SN进行去重，如果两个指令的self相同，保留靠后的
     std::map<int, instruction> uniqueInstructions;
-
     // 将队列中的指令转移到map中，如果有相同的self，map会自动覆盖为最新的指令
     while (!instructions.empty()) {
         instruction cur = instructions.front();
         instructions.pop();
         if (cur.self != nullptr) {
-            uniqueInstructions[cur.self->getglobalNum()] = cur;
+            uniqueInstructions[cur.SN] = cur;
         }
     }
 
@@ -1206,8 +1214,9 @@ void Core::deduplicateInstructions(std::queue<instruction>& instructions) {
     }
 }
 
-void Core::FirstFrameProcess()
+void Core::PostFirstFrameProcess()
 {
+    if(CoreExecuteFrames!=1)return;
     //如我需要把所有探索的区域给学生
     explored.clear();
     for(int i=0;i<MAP_L;++i){
@@ -1221,12 +1230,71 @@ void Core::FirstFrameProcess()
     call_debugText("red",QString("打开的地图是:")+theMap->GetMapFileName(),0);;
 }
 
+void Core::PreFirstFrameProcess()
+{
+    if(CoreExecuteFrames!=1)return;
+    //
+    if(GameReplay){
+        while(GameRecordOrReplayArchive->Bytes()){
+            InstructionForSave ins;
+            GameRecordOrReplayArchive->Serialize(ins);
+            GameReplayData.push_back(ins);
+        }
+        sort(GameReplayData.begin(),GameReplayData.end());
+        reverse(GameReplayData.begin(),GameReplayData.end());//倒序
+    }else if(GameRecord){
+        //计录地图信息
+        string mapFile=theMap->GetMapFileName().toStdString();
+        GameRecordOrReplayArchive->Serialize(mapFile);
+        //打开文件句柄
+        GameRecordFileHandle = new QFile(GameRecordFile);
+        if (!GameRecordFileHandle->open(QIODevice::WriteOnly))
+        {
+            std::cerr << "无法打开录像文件：" << GameRecordFileHandle->errorString().toStdString() << std::endl;
+            exit(0);
+            return;
+        }
+    }
+}
+
 
 bool Core::filter_instruction(const instruction& ins)
 {
     if (ins.type == INS_HUMANBUILD)
         return !RuntimeConfig_isPlayerBuildingDisabled(ins.option);
     return true;
+}
+void Core::ProcessGameRecord(instruction ins,int playerID)
+{
+    static int PreFlushFrame=0;
+    //
+    InstructionForSave saveData;
+    saveData.ins=ins;
+    saveData.frame=CoreExecuteFrames;
+    saveData.playerID=playerID;
+    GameRecordOrReplayArchive->Serialize(saveData);
+    //写入文件
+    void*data=GameRecordOrReplayArchive->GetData();
+    auto bytes=GameRecordOrReplayArchive->Bytes();
+
+    //
+    qint64 writeLen = GameRecordFileHandle->write(
+        reinterpret_cast<const char*>(data),
+        static_cast<qint64>(bytes)
+    );
+
+    if(writeLen !=bytes)
+    {
+        cerr<<"二进制写入失败:"<<GameRecordFileHandle->errorString().toStdString()<<endl;
+    }
+    //清空缓存
+    GameRecordOrReplayArchive->Clear();
+    //判断是否刷盘
+    if(CoreExecuteFrames-PreFlushFrame>=20){
+        PreFlushFrame=CoreExecuteFrames;
+        // 刷盘
+        GameRecordFileHandle->flush();
+    }
 }
 
 //后续编写，用于处理AI指令
@@ -1246,7 +1314,6 @@ void Core::manageOrder(int id)
     NowIns->lock.lock();
     //对NowIns->instructions进行去重，如果两个指令的self相同，保留靠后的
     deduplicateInstructions(NowIns->instructions);
-
     //获取可以发起指令的所有对象数量(也就是说，就算ai给再多指令，我每一帧只处理ObjCnt这么多指令)
     int ObjCnt =self->build.size() + self->human.size();//目前貌似只有建筑和人才可以当指令主体
     //
@@ -1255,7 +1322,8 @@ void Core::manageOrder(int id)
         NowIns->instructions.pop();
         Coordinate* self = cur.self;
         int ret = ACTION_INVALID_SN; // 默认错误码
-
+        //录像
+        if(GameRecord)ProcessGameRecord(cur,id);
         // 判断是否是己方对象 并 再次判断SN对象是否存在
         if (g_Object[cur.SN] == NULL || self->getPlayerRepresent() != id) {
             cur.ret = ACTION_INVALID_SN;
@@ -1380,8 +1448,20 @@ void Core::manageOrder(int id)
     NowIns->lock.unlock();
 }
 
+void Core::ProcessGameReplay()
+{
+    if(GameReplayData.back().frame<CoreExecuteFrames){
+        cerr<<"There is an error that GameReplayData first frame less than current frame!"<<endl;
+        exit(0);
+        return;
+    }
+    while(GameReplayData.back().frame==CoreExecuteFrames){
+        auto ins=GameReplayData.back();GameReplayData.pop_back();
+        auto&heap=ins.playerID==NOWPLAYERREPRESENT?UsrIns:EnemyIns;
+        heap.instructions.push(ins.ins);
+    }
 
-
+}
 
 
 int Core::deleteSelf(Coordinate* object) //删除对象，返回错误码
@@ -1550,4 +1630,13 @@ void Core::PreProcessDuringExam()
     //输出每帧的实时状态信息
     Player*p=player[NOWPLAYERREPRESENT];
     ResultLogInfo(0,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
+}
+
+void Core::GameOverHandle()
+{
+    //将录像缓冲区全部flush
+    if(GameRecord){
+        GameRecordFileHandle->flush();
+        GameRecordFileHandle->close();
+    }
 }

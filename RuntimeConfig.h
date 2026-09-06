@@ -1451,6 +1451,19 @@ bool RuntimeConfig_isPlayerBuildingDisabled(int buildingNum);
 
 bool RuntimeConfig_DeepRender();
 #define DeepRender (RuntimeConfig_DeepRender())
+
+bool RuntimeConfig_GameReplay();
+#define GameReplay (RuntimeConfig_GameReplay())
+
+QString RuntimeConfig_GameReplayFile();
+#define GameReplayFile (RuntimeConfig_GameReplayFile())
+
+bool RuntimeConfig_GameRecord();
+#define GameRecord (RuntimeConfig_GameRecord())
+
+QString RuntimeConfig_GameRecordFile();
+#define GameRecordFile (RuntimeConfig_GameRecordFile())
+
 void ApplyRuntimeConfigFromJson(const QJsonObject& config);
 
 #endif // RUNTIMECONFIG_H

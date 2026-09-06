@@ -1,4 +1,8 @@
 {
+    "GameReplayFile":"GameReplayOrRecord.video",
+    "GameRecordFile":"GameReplayOrRecord.video",
+    "GameRecord":false,
+    "GameReplay":false,
     "DeepRender":false,
     "OffScreen":false,
     "DefaultCivilization":2,

@@ -41,14 +41,17 @@ protected:
 
     void unlock();
 
-    virtual int AddToIns(instruction ins) = 0;
+    int AddToIns(instruction ins) ;
+    virtual ins& GetInsStruct()=0;
     virtual void clearInsRet() = 0;
-
-private:
+    void CommitInstruction();
+protected:
     QMutex aiLock;
     QMutex mutex;
     QWaitCondition condition;
     bool stopThread = false;
+    vector<instruction> InsPerFrame;
+    int InsID=0;
     static std::vector<QString> AIName;
 
     bool isHuman(int SN);
