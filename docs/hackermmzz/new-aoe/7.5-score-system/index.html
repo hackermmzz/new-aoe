@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-dw-locale="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>评分系统 | hackermmzz/new-aoe | DeepWiki Export</title>
+    <meta name="description" content="评分系统 相关源文件 以下文件被用作生成此 Wiki 页面时的上下文： GlobalVariate.cpp GlobalVariate.h 评分系统通过为各种成就授予分数来跟踪玩家和敌方在整个游戏中的表现，这些成就包括资源采集、科技研究、单位生产、建筑建造和战斗胜利。该系统维护累计分数，并通过调试消息接口提供实时反馈。" />
+    <link rel="canonical" href="https://deepwiki.com/hackermmzz/new-aoe/7.5-score-system" />
+    <link rel="preload" href="../../../_next/static/media/4cf2300e9c8272f7-s.p.woff2" as="font" crossorigin type="font/woff2" />
+<link rel="preload" href="../../../_next/static/media/93f479601ee12b01-s.p.woff2" as="font" crossorigin type="font/woff2" />
+    <link rel="stylesheet" href="../../../_next/static/css/de70bee13400563f.css" />
+<link rel="stylesheet" href="../../../_next/static/css/776f0ebb1639b0c7.css" />
+    <link rel="icon" href="../../../favicon.ico" />
+<link rel="icon" href="../../../icon.png" />
+<link rel="icon" href="../../../apple-icon.png" />
+    <link rel="stylesheet" href="../../../assets/site.css" />
+    <script>((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=["light","dark"];function k(b){var c;(Array.isArray(a)?a:[a]).forEach(a=>{let c="class"===a,d=c&&f?e.map(a=>f[a]||a):e;c?(i.classList.remove(...d),i.classList.add(f&&f[b]?f[b]:b)):i.setAttribute(a,b)}),c=b,h&&j.includes(c)&&(i.style.colorScheme=c)}if(d)k(d);else try{let a=localStorage.getItem(b)||c,d=g&&"system"===a?window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light":a;k(d)}catch(a){}})("class","theme","light",null,["light","dark"],null,true,true)</script>
+    <script>(function(defaultLocale,available){var root=document.documentElement;var locale=defaultLocale;try{var saved=localStorage.getItem('dw-locale');if(available.indexOf(saved)!==-1){locale=saved;}}catch(e){}root.setAttribute('data-dw-locale',locale);root.setAttribute('lang',locale==='zh'?'zh-CN':'en');})("zh",["zh", "en"])</script>
+  </head>
+  <body class="__variable_188709 font-geist-sans relative min-h-screen bg-background antialiased">
+    <div class="flex min-h-screen w-full flex-col text-white" id="deepwiki-export-page">
+      <div class="bg-background border-b-border sticky top-0 z-30 border-b border-dashed">
+        <div class="container-wrapper">
+          <div class="container mx-auto flex w-full flex-row items-center gap-2 py-4 md:py-6">
+            <a class="flex items-center gap-3" href="..">
+              <span class="text-base font-medium leading-none md:text-lg hidden sm:block">DeepWiki</span>
+            </a>
+            <div class="flex-1">
+              <div class="flex flex-row items-center gap-2">
+                <a class="block text-xs font-medium leading-none text-white sm:hidden md:text-lg" href="..">DeepWiki</a>
+                <p class="text-sm font-normal leading-none md:text-lg">
+                  <a href="https://github.com/hackermmzz/new-aoe" target="_blank" rel="noopener noreferrer" title="Open repository" class="text-muted-foreground hover:text-muted-foreground/80 group inline-flex items-center gap-1 transition-colors">
+                    hackermmzz/new-aoe
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="dw-locale-switch" data-locale-switch="true"><button type="button" class="dw-locale-button" data-set-locale="zh" aria-label="Switch language to ZH">中</button><button type="button" class="dw-locale-button" data-set-locale="en" aria-label="Switch language to EN">EN</button></div>
+              <div class="hidden items-center gap-3 md:flex">
+              <button type="button" class="flex items-center rounded-md !text-white cursor-pointer transition-all border bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600 gap-1.5 px-3 py-1.5 text-sm" aria-label="Share" data-share-page="true">
+                <span data-locale-text="zh">分享</span>
+                <span data-locale-text="en">Share</span>
+              </button>
+              <button type="button" class="flex size-9 items-center justify-center rounded-md border border-border bg-surface hover:border-border-hover hover:bg-component" aria-label="Toggle theme" data-theme-toggle="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M120,40V24a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66a8,8,0,0,0,11.32-11.32l-12-12A8,8,0,0,0,46.34,57.66Zm0,116.68-12,12a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM232,120H216a8,8,0,0,0,0,16h16a8,8,0,0,0,0-16ZM69.66,186.34a8,8,0,0,0-11.32,11.32l12,12a8,8,0,0,0,11.32-11.32Zm128,11.32a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM216,120h16a8,8,0,0,0,0-16H216a8,8,0,0,0,0,16ZM186.34,58.34a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM128,216a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V224A8,8,0,0,0,128,216Z"></path></svg>
+              </button>
+              </div>
+            </div>
+            <button type="button" class="dw-mobile-sidebar-toggle flex items-center rounded-md cursor-pointer transition-all border border-border bg-surface hover:border-border-hover hover:bg-component gap-2 px-3 py-1.5 text-sm md:hidden" data-sidebar-toggle="true">
+              <span data-locale-text="zh">目录</span>
+              <span data-locale-text="en">Contents</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="w-full flex-1">
+        <div class="container-wrapper relative mx-auto h-full px-0">
+          <div class="container relative mx-auto flex h-full w-full flex-col gap-0 max-md:!px-0 md:flex-row md:gap-6 lg:gap-10">
+            <aside class="dw-sidebar-panel border-r-border hidden max-h-screen border-r border-dashed py-6 pr-4 transition-[border-radius] md:sticky md:left-0 md:top-20 md:block md:h-[calc(100vh-82px)] md:w-64 md:flex-shrink-0 md:overflow-y-auto lg:py-9 xl:w-72">
+              <div class="flex h-full w-full max-w-full flex-shrink-0 flex-col overflow-hidden" style="scrollbar-color:var(--color-border) transparent">
+                <div class="flex-shrink-0 px-2">
+                  <div class="text-secondary pb-1 text-xs">
+                    <span data-locale-text="zh">最近索引：13 March 2026</span>
+                    <span data-locale-text="en">Last indexed: 13 March 2026</span>
+                    (<a href="https://github.com/hackermmzz/new-aoe/commits/882596c8" target="_blank" rel="noopener noreferrer" class="underline-offset-2 hover:underline">882596c</a>)
+                  </div>
+                </div>
+                <ul class="flex-1 flex-shrink-0 space-y-1 overflow-y-auto py-1" style="scrollbar-width:none">
+                  <li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1-overview"><span data-locale-text="zh">概述</span><span data-locale-text="en">Overview</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1.1-system-architecture"><span data-locale-text="zh">系统架构</span><span data-locale-text="en">System Architecture</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1.2-getting-started"><span data-locale-text="zh">快速开始</span><span data-locale-text="en">Getting Started</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2-core-systems"><span data-locale-text="zh">核心系统</span><span data-locale-text="en">Core Systems</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.1-mainwidget-and-game-loop"><span data-locale-text="zh">MainWidget 与游戏循环</span><span data-locale-text="en">MainWidget and Game Loop</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.2-game-core-engine"><span data-locale-text="zh">游戏核心引擎</span><span data-locale-text="en">Game Core Engine</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.3-configuration-system"><span data-locale-text="zh">配置系统</span><span data-locale-text="en">Configuration System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3-game-mechanics"><span data-locale-text="zh">游戏机制</span><span data-locale-text="en">Game Mechanics</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.1-resource-and-economy-system"><span data-locale-text="zh">资源与经济系统</span><span data-locale-text="en">Resource and Economy System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.2-technology-tree"><span data-locale-text="zh">科技树</span><span data-locale-text="en">Technology Tree</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.3-units-and-buildings"><span data-locale-text="zh">单位与建筑</span><span data-locale-text="en">Units and Buildings</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.4-combat-system"><span data-locale-text="zh">战斗系统</span><span data-locale-text="en">Combat System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4-user-interface"><span data-locale-text="zh">用户界面</span><span data-locale-text="en">User Interface</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.1-selectwidget-and-command-panel"><span data-locale-text="zh">SelectWidget 与命令面板</span><span data-locale-text="en">SelectWidget and Command Panel</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.2-map-editor"><span data-locale-text="zh">地图编辑器</span><span data-locale-text="en">Map Editor</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.3-rendering-and-display"><span data-locale-text="zh">渲染与显示</span><span data-locale-text="en">Rendering and Display</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.4-event-handling"><span data-locale-text="zh">事件处理</span><span data-locale-text="en">Event Handling</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5-ai-system"><span data-locale-text="zh">AI 系统</span><span data-locale-text="en">AI System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5.1-ai-architecture"><span data-locale-text="zh">AI 架构</span><span data-locale-text="en">AI Architecture</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5.2-instruction-and-command-system"><span data-locale-text="zh">指令与命令系统</span><span data-locale-text="en">Instruction and Command System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6-map-and-world"><span data-locale-text="zh">地图与世界</span><span data-locale-text="en">Map and World</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.1-map-structure"><span data-locale-text="zh">地图结构</span><span data-locale-text="en">Map Structure</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.2-terrain-and-objects"><span data-locale-text="zh">地形与对象</span><span data-locale-text="en">Terrain and Objects</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.3-collision-and-pathfinding"><span data-locale-text="zh">碰撞与寻路</span><span data-locale-text="en">Collision and Pathfinding</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7-advanced-topics"><span data-locale-text="zh">高级主题</span><span data-locale-text="en">Advanced Topics</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.1-area-management-system"><span data-locale-text="zh">区域管理系统</span><span data-locale-text="en">Area Management System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.2-enemy-status-and-ai-behavior"><span data-locale-text="zh">敌人状态与 AI 行为</span><span data-locale-text="en">Enemy Status and AI Behavior</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.3-network-and-exam-mode"><span data-locale-text="zh">网络与考试模式</span><span data-locale-text="en">Network and Exam Mode</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.4-debug-and-logging-system"><span data-locale-text="zh">调试与日志系统</span><span data-locale-text="en">Debug and Logging System</span></a></li>
+<li style="padding-left:12px"><a data-selected="true" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="."><span data-locale-text="zh">评分系统</span><span data-locale-text="en">Score System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8-data-structures-reference"><span data-locale-text="zh">数据结构参考</span><span data-locale-text="en">Data Structures Reference</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.1-game-state-structures"><span data-locale-text="zh">游戏状态结构</span><span data-locale-text="en">Game State Structures</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.2-development-structures"><span data-locale-text="zh">开发结构</span><span data-locale-text="en">Development Structures</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.3-constants-and-enumerations"><span data-locale-text="zh">常量与枚举</span><span data-locale-text="en">Constants and Enumerations</span></a></li>
+                </ul>
+              </div>
+            </aside>
+            <main class="min-w-0 flex-1">
+              <div class="border-b-border max-md:border-b max-md:border-dashed md:py-9">
+                <div class="mx-auto max-w-2xl px-4 pb-8 pt-6 md:px-0 md:pb-0">
+                  <div class="prose prose-invert dark:prose-invert prose-headings:text-inherit prose-p:text-inherit max-w-none">
+                    <div class="prose-custom prose-custom-md prose-custom-gray !max-w-none text-neutral-300 [overflow-wrap:anywhere]">
+                      <section class="dw-locale-article" data-locale-article="zh"><h1 class="group" data-header="true" id="zh-评分系统">评分系统<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h1>
+<details><summary>相关源文件</summary><p>以下文件被用作生成此 Wiki 页面时的上下文：</p>
+<ul>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span></a></li>
+</ul></details>
+<p>评分系统通过为各种成就授予分数来跟踪玩家和敌方在整个游戏中的表现，这些成就包括资源采集、科技研究、单位生产、建筑建造和战斗胜利。该系统维护累计分数，并通过调试消息接口提供实时反馈。</p>
+<p>有关调试消息和日志记录的信息，请参见 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../7.4-debug-and-logging-system">调试与日志系统</a>。有关资源采集机制，请参见 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../3.1-resource-and-economy-system">资源与经济系统</a>。</p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-概述">概述<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>评分系统通过 <code>Score</code> 结构体和 <code>ScoreType</code> 枚举实现，它们对 24 种不同类型的成就进行分类和跟踪。两个全局评分实例分别跟踪玩家和敌方的表现，在响应游戏事件时更新，并将变化广播到调试控制台。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L670" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-670</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L579-L580" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">579-580</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-核心数据结构">核心数据结构<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-score-结构体">Score 结构体<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><code>Score</code> 结构体封装了单个玩家的所有评分逻辑和状态：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>int</code></td>
+<td>玩家标识符（0 表示用户，1 表示敌方）</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td><code>int</code></td>
+<td>累计总分</td>
+</tr>
+<tr>
+<td><code>scoreTypes[SCORE_TYPE_COUNT]</code></td>
+<td><code>int[]</code></td>
+<td>各成就类型的独立计数器</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键方法：</strong></p>
+<ul>
+<li><code>Score(int id)</code> - 初始化玩家 ID 和零分数的构造函数</li>
+<li><code>int getScore()</code> - 返回当前累计分数</li>
+<li><code>void update(int type, int num = 1)</code> - 处理成就的主评分方法</li>
+<li><code>void addScore(int points, const QString&amp; message)</code> - 增加分数并广播消息的私有辅助方法</li>
+</ul>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L587-L670" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">587-670</span></a></p>
+<h3 class="group" data-header="true" id="zh-scoretype-枚举">ScoreType 枚举<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><code>ScoreType</code> 枚举定义了 24 个不同的成就类别：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="k">enum</span><span class="w"> </span><span class="nc">ScoreType</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">_WOOD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">_STONE</span><span class="p">,</span><span class="w"> </span><span class="n">_GOLD</span><span class="p">,</span><span class="w"> </span><span class="n">_MEAT</span><span class="p">,</span><span class="w">              </span><span class="c1">// Resource counters (0-3)</span>
+<span class="w">    </span><span class="n">_BERRY</span><span class="p">,</span><span class="w"> </span><span class="n">_GAZELLE</span><span class="p">,</span><span class="w"> </span><span class="n">_ELEPHANT</span><span class="p">,</span><span class="w"> </span><span class="n">_FARM</span><span class="p">,</span><span class="w"> </span><span class="n">_FISH</span><span class="p">,</span><span class="w">    </span><span class="c1">// Resource source types (4-8)</span>
+<span class="w">    </span><span class="n">_ISWOOD</span><span class="p">,</span><span class="w"> </span><span class="n">_ISGOLD</span><span class="p">,</span><span class="w"> </span><span class="n">_ISSTONE</span><span class="p">,</span><span class="w">                   </span><span class="c1">// First-time resource flags (9-11)</span>
+<span class="w">    </span><span class="n">_TECH</span><span class="p">,</span><span class="w">                                         </span><span class="c1">// Technology research (12)</span>
+<span class="w">    </span><span class="n">_BUILDING1</span><span class="p">,</span><span class="w"> </span><span class="n">_BUILDING2</span><span class="p">,</span><span class="w">                        </span><span class="c1">// Building construction (13-14)</span>
+<span class="w">    </span><span class="n">_HUMAN1</span><span class="p">,</span><span class="w"> </span><span class="n">_HUMAN2</span><span class="p">,</span><span class="w">                              </span><span class="c1">// Unit production (15-16)</span>
+<span class="w">    </span><span class="n">_KILL2</span><span class="p">,</span><span class="w"> </span><span class="n">_KILL10</span><span class="p">,</span><span class="w">                               </span><span class="c1">// Combat kills (17-18)</span>
+<span class="w">    </span><span class="n">_DESTORY2</span><span class="p">,</span><span class="w"> </span><span class="n">_DESTORY4</span><span class="p">,</span><span class="w"> </span><span class="n">_DESTORY5</span><span class="p">,</span><span class="w"> </span><span class="n">_DESTORY10</span><span class="p">,</span><span class="w">  </span><span class="c1">// Building destruction (19-22)</span>
+<span class="w">    </span><span class="n">_FINDENEMYLAND</span><span class="p">,</span><span class="w">                                </span><span class="c1">// Exploration (23)</span>
+<span class="w">    </span><span class="n">SCORE_TYPE_COUNT</span><span class="w">                               </span><span class="c1">// Array size marker (24)</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L585" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-585</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-评分类别与分值">评分类别与分值<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-资源采集">资源采集<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<h4 class="group" data-header="true" id="zh-里程碑奖励">里程碑奖励<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>对于基础资源（<code>_WOOD</code>、<code>_STONE</code>、<code>_GOLD</code>、<code>_MEAT</code>），系统每收集 <strong>100 个资源奖励 1 分</strong>：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-text">scoreTypes[type] 跟踪累计采集量
+奖励分数：floor(total / 100) - floor(previous / 100)
+</code></pre></div></div>
+<h4 class="group" data-header="true" id="zh-首次采集奖励">首次采集奖励<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>当玩家首次采集某些资源类型时，会获得额外奖励分：</p>
+<table>
+<thead>
+<tr>
+<th>成就</th>
+<th>分数</th>
+<th>触发条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>首次获得新资源类型</td>
+<td>+5</td>
+<td>任意 <code>_BERRY</code>、<code>_GAZELLE</code>、<code>_ELEPHANT</code>、<code>_FARM</code>、<code>_FISH</code></td>
+</tr>
+<tr>
+<td>首次采集黄金</td>
+<td>+10</td>
+<td><code>_ISGOLD</code> 标志（可与 +5 叠加）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L607-L621" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">607-621</span></a></p>
+<h3 class="group" data-header="true" id="zh-生产与研究">生产与研究<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>分数</th>
+<th>ScoreType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>研究科技</td>
+<td>+2</td>
+<td><code>_TECH</code></td>
+</tr>
+<tr>
+<td>建造房屋/农场</td>
+<td>+1</td>
+<td><code>_BUILDING1</code></td>
+</tr>
+<tr>
+<td>建造普通建筑</td>
+<td>+2</td>
+<td><code>_BUILDING2</code></td>
+</tr>
+<tr>
+<td>训练基础单位</td>
+<td>+1</td>
+<td><code>_HUMAN1</code></td>
+</tr>
+<tr>
+<td>训练特殊单位</td>
+<td>+2</td>
+<td><code>_HUMAN2</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L636-L650" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">636-650</span></a></p>
+<h3 class="group" data-header="true" id="zh-战斗成就">战斗成就<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>分数</th>
+<th>ScoreType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>击杀敌方单位</td>
+<td>+2</td>
+<td><code>_KILL2</code></td>
+</tr>
+<tr>
+<td>摧毁房屋/农场</td>
+<td>+2</td>
+<td><code>_DESTORY2</code></td>
+</tr>
+<tr>
+<td>摧毁普通建筑</td>
+<td>+4</td>
+<td><code>_DESTORY4</code></td>
+</tr>
+<tr>
+<td>摧毁箭塔</td>
+<td>+5</td>
+<td><code>_DESTORY5</code></td>
+</tr>
+<tr>
+<td>摧毁城镇中心</td>
+<td>+10</td>
+<td><code>_DESTORY10</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L651-L665" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">651-665</span></a></p>
+<h3 class="group" data-header="true" id="zh-探索">探索<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>成就</th>
+<th>分数</th>
+<th>ScoreType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>到达敌方大陆</td>
+<td>+10</td>
+<td><code>_FINDENEMYLAND</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L607-L610" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">607-610</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-分数更新机制">分数更新机制<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-更新流程">更新流程<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TD
+    Event["Game Event&lt;br/&gt;(resource collected,&lt;br/&gt;unit trained, etc.)"]
+    Update["Score::update(type, num)"]
+    Check1{"type == _FINDENEMYLAND?"}
+    Check2{"First-time resource?"}
+    Check3{"Resource milestone?"}
+    Switch["Switch on type"]
+    AddScore["addScore(points, message)"]
+    Increment["score += points"]
+    Debug["call_debugText(color, message)"]
+    UpdateCounter["scoreTypes[type] += num"]
+    
+    Event --&gt; Update
+    Update --&gt; Check1
+    Check1 --&gt;|Yes| AddScore
+    Check1 --&gt;|No| Check2
+    Check2 --&gt;|Yes| AddScore
+    Check2 --&gt;|No| UpdateCounter
+    UpdateCounter --&gt; Check3
+    Check3 --&gt;|Yes| AddScore
+    Check3 --&gt;|No| Switch
+    Switch --&gt; AddScore
+    AddScore --&gt; Increment
+    Increment --&gt; Debug</code></pre></div>
+<p><strong>图示：分数更新流程</strong></p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L606-L669" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">606-669</span></a></p>
+<h3 class="group" data-header="true" id="zh-特殊更新逻辑">特殊更新逻辑<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<h4 class="group" data-header="true" id="zh-首次资源采集">首次资源采集<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>系统将 <code>scoreTypes</code> 数组同时用作资源的计数器和标志系统：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">_ISSTONE</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">_MEAT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">addScore</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="s">" 采集到新资源，分数+5"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_ISGOLD</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">addScore</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="s">" 采集到黄金，分数+10"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">_MEAT</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">_ISSTONE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Set flag</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>对于 <code>_ISWOOD</code>、<code>_ISGOLD</code>、<code>_ISSTONE</code> 这几种类型，计数器充当二进制标志（0 或 1）。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L611-L621" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">611-621</span></a></p>
+<h4 class="group" data-header="true" id="zh-资源里程碑检测">资源里程碑检测<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>对于基础资源，系统会计算跨越了多少个里程碑阈值：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">int</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">num</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">_MEAT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">before</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">change</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">addScore</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">" 单种资源收集满100个，分数+1"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">change</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这会在单次更新中每跨越一个 100 资源阈值奖励 1 分。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L623-L633" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">623-633</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-集成架构">集成架构<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TB
+    subgraph "Global Score Instances"
+        UsrScore["usrScore&lt;br/&gt;Score(0)"]
+        EnemyScore["enemyScore&lt;br/&gt;Score(1)"]
+    end
+    
+    subgraph "Score Structure"
+        ScoreStruct["Score struct"]
+        ID["id: int"]
+        TotalScore["score: int"]
+        TypeCounters["scoreTypes[24]: int[]"]
+        
+        ScoreStruct --&gt; ID
+        ScoreStruct --&gt; TotalScore
+        ScoreStruct --&gt; TypeCounters
+    end
+    
+    subgraph "Update Methods"
+        UpdateMethod["update(type, num)"]
+        AddScoreMethod["addScore(points, message)"]
+        GetScore["getScore()"]
+        
+        UpdateMethod --&gt; AddScoreMethod
+    end
+    
+    subgraph "Integration Points"
+        DebugSystem["call_debugText()&lt;br/&gt;Debug Message System"]
+        GameEvents["Game Events&lt;br/&gt;(Resource, Combat, Tech)"]
+    end
+    
+    UsrScore -.implements.-&gt; ScoreStruct
+    EnemyScore -.implements.-&gt; ScoreStruct
+    ScoreStruct --&gt; UpdateMethod
+    ScoreStruct --&gt; GetScore
+    AddScoreMethod --&gt; DebugSystem
+    GameEvents --&gt; UpdateMethod</code></pre></div>
+<p><strong>图示：评分系统架构</strong></p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L670" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-670</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L579-L580" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">579-580</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-全局评分实例">全局评分实例<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>两个全局 <code>Score</code> 对象用于跟踪玩家和敌方的表现：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>类型</th>
+<th>玩家 ID</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>usrScore</code></td>
+<td><code>Score</code></td>
+<td>0</td>
+<td>跟踪用户玩家的成就</td>
+</tr>
+<tr>
+<td><code>enemyScore</code></td>
+<td><code>Score</code></td>
+<td>1</td>
+<td>跟踪敌方 AI 的成就</td>
+</tr>
+</tbody>
+</table>
+<p>这些实例会在程序启动时初始化：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="n">Score</span><span class="w"> </span><span class="n">usrScore</span><span class="o">=</span><span class="n">Score</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">Score</span><span class="w"> </span><span class="n">enemyScore</span><span class="o">=</span><span class="n">Score</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div></div>
+<p>玩家 ID 决定调试消息的颜色：玩家（ID 0）为蓝色，敌方（ID 1）为红色。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L579-L580" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">579-580</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-调试消息广播">调试消息广播<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-消息生成">消息生成<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>当分数发生变化时，<code>addScore</code> 方法会通过调试系统广播消息：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">void</span><span class="w"> </span><span class="nf">addScore</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">points</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="o">&amp;</span><span class="w"> </span><span class="n">message</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">score</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">points</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="n">call_debugText</span><span class="p">(</span><span class="s">"blue"</span><span class="p">,</span><span class="w"> </span><span class="s">" 玩家"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">REPRESENT_BOARDCAST_MESSAGE</span><span class="p">);</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">call_debugText</span><span class="p">(</span><span class="s">"red"</span><span class="p">,</span><span class="w"> </span><span class="s">" 敌方"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">REPRESENT_BOARDCAST_MESSAGE</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h3 class="group" data-header="true" id="zh-颜色编码">颜色编码<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<ul>
+<li><strong>蓝色消息</strong>：用户玩家成就（ID 0）</li>
+<li><strong>红色消息</strong>：敌方 AI 成就（ID 1）</li>
+</ul>
+<h3 class="group" data-header="true" id="zh-消息示例">消息示例<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>中文消息文本包括：</p>
+<ul>
+<li>"采集到新资源，分数+5"（采集到新资源，+5 分）</li>
+<li>"采集到黄金，分数+10"（采集到黄金，+10 分）</li>
+<li>"单种资源收集满100个，分数+1"（某种资源收集满 100 个，+1 分）</li>
+<li>"解锁新科技，分数+2"（解锁新科技，+2 分）</li>
+<li>"生产普通单位，分数+1"（训练基础单位，+1 分）</li>
+<li>"击杀一般敌人，分数+2"（击杀敌方单位，+2 分）</li>
+<li>"摧毁主营，分数+10"（摧毁城镇中心，+10 分）</li>
+</ul>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L593-L599" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">593-599</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L607-L665" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">607-665</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-分数获取">分数获取<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-公共接口">公共接口<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><code>Score</code> 结构体公开了一个查询方法：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">int</span><span class="w"> </span><span class="nf">getScore</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">score</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>该方法返回累计总分。<code>scoreTypes[]</code> 中的各个成就计数器是私有的，无法从结构体外部直接访问。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L603-L605" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">603-605</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-汇总表所有分值">汇总表：所有分值<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<table>
+<thead>
+<tr>
+<th>成就类型</th>
+<th>分数</th>
+<th>ScoreType 常量</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>收集 100 木材</td>
+<td>1</td>
+<td><code>_WOOD</code></td>
+<td>可重复的里程碑</td>
+</tr>
+<tr>
+<td>收集 100 石料</td>
+<td>1</td>
+<td><code>_STONE</code></td>
+<td>可重复的里程碑</td>
+</tr>
+<tr>
+<td>收集 100 黄金</td>
+<td>1</td>
+<td><code>_GOLD</code></td>
+<td>可重复的里程碑</td>
+</tr>
+<tr>
+<td>收集 100 肉类</td>
+<td>1</td>
+<td><code>_MEAT</code></td>
+<td>可重复的里程碑</td>
+</tr>
+<tr>
+<td>首次采集浆果</td>
+<td>5</td>
+<td><code>_BERRY</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>首次猎杀瞪羚</td>
+<td>5</td>
+<td><code>_GAZELLE</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>首次猎杀大象</td>
+<td>5</td>
+<td><code>_ELEPHANT</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>首次收获农场</td>
+<td>5</td>
+<td><code>_FARM</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>首次捕鱼</td>
+<td>5</td>
+<td><code>_FISH</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>首次收集木材</td>
+<td>5</td>
+<td><code>_ISWOOD</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>首次收集黄金</td>
+<td>15</td>
+<td><code>_ISGOLD</code></td>
+<td>一次性（5+10）</td>
+</tr>
+<tr>
+<td>首次收集石料</td>
+<td>5</td>
+<td><code>_ISSTONE</code></td>
+<td>一次性奖励</td>
+</tr>
+<tr>
+<td>研究科技</td>
+<td>2</td>
+<td><code>_TECH</code></td>
+<td>每次研究</td>
+</tr>
+<tr>
+<td>建造房屋/农场</td>
+<td>1</td>
+<td><code>_BUILDING1</code></td>
+<td>每座建筑</td>
+</tr>
+<tr>
+<td>建造普通建筑</td>
+<td>2</td>
+<td><code>_BUILDING2</code></td>
+<td>每座建筑</td>
+</tr>
+<tr>
+<td>训练基础单位</td>
+<td>1</td>
+<td><code>_HUMAN1</code></td>
+<td>每个单位</td>
+</tr>
+<tr>
+<td>训练特殊单位</td>
+<td>2</td>
+<td><code>_HUMAN2</code></td>
+<td>每个单位</td>
+</tr>
+<tr>
+<td>击杀敌方单位</td>
+<td>2</td>
+<td><code>_KILL2</code></td>
+<td>每次击杀</td>
+</tr>
+<tr>
+<td>摧毁房屋/农场</td>
+<td>2</td>
+<td><code>_DESTORY2</code></td>
+<td>每次摧毁</td>
+</tr>
+<tr>
+<td>摧毁普通建筑</td>
+<td>4</td>
+<td><code>_DESTORY4</code></td>
+<td>每次摧毁</td>
+</tr>
+<tr>
+<td>摧毁箭塔</td>
+<td>5</td>
+<td><code>_DESTORY5</code></td>
+<td>每次摧毁</td>
+</tr>
+<tr>
+<td>摧毁城镇中心</td>
+<td>10</td>
+<td><code>_DESTORY10</code></td>
+<td>每次摧毁</td>
+</tr>
+<tr>
+<td>发现敌方领地</td>
+<td>10</td>
+<td><code>_FINDENEMYLAND</code></td>
+<td>一次性</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L669" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-669</span></a></p></section><section class="dw-locale-article" data-locale-article="en"><h1 class="group" data-header="true" id="en-score-system">Score System<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h1>
+<details><summary>Relevant source files</summary><p>The following files were used as context for generating this wiki page:</p>
+<ul>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span></a></li>
+</ul></details>
+<p>The Score System tracks player and enemy performance throughout the game by awarding points for various achievements including resource collection, technology research, unit production, building construction, and combat victories. The system maintains cumulative scores and provides real-time feedback through the debug message interface.</p>
+<p>For information about debug messages and logging, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../7.4-debug-and-logging-system">Debug and Logging System</a>. For resource collection mechanics, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../3.1-resource-and-economy-system">Resource and Economy System</a>.</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-overview">Overview<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The scoring system is implemented through the <code>Score</code> struct and <code>ScoreType</code> enumeration, which categorize and track 24 different types of achievements. Two global score instances track player and enemy performance independently, updating in response to gameplay events and broadcasting changes to the debug console.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L670" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-670</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L579-L580" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">579-580</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-core-data-structures">Core Data Structures<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-score-struct">Score Struct<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>Score</code> struct encapsulates all scoring logic and state for a single player:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>int</code></td>
+<td>Player identifier (0 for user, 1 for enemy)</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td><code>int</code></td>
+<td>Cumulative total score</td>
+</tr>
+<tr>
+<td><code>scoreTypes[SCORE_TYPE_COUNT]</code></td>
+<td><code>int[]</code></td>
+<td>Individual counters for each achievement type</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Methods:</strong></p>
+<ul>
+<li><code>Score(int id)</code> - Constructor initializing player ID and zero score</li>
+<li><code>int getScore()</code> - Returns current cumulative score</li>
+<li><code>void update(int type, int num = 1)</code> - Main scoring method that processes achievements</li>
+<li><code>void addScore(int points, const QString&amp; message)</code> - Private helper that increments score and broadcasts message</li>
+</ul>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L587-L670" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">587-670</span></a></p>
+<h3 class="group" data-header="true" id="en-scoretype-enumeration">ScoreType Enumeration<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>ScoreType</code> enum defines 24 distinct achievement categories:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="k">enum</span><span class="w"> </span><span class="nc">ScoreType</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">_WOOD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">_STONE</span><span class="p">,</span><span class="w"> </span><span class="n">_GOLD</span><span class="p">,</span><span class="w"> </span><span class="n">_MEAT</span><span class="p">,</span><span class="w">              </span><span class="c1">// Resource counters (0-3)</span>
+<span class="w">    </span><span class="n">_BERRY</span><span class="p">,</span><span class="w"> </span><span class="n">_GAZELLE</span><span class="p">,</span><span class="w"> </span><span class="n">_ELEPHANT</span><span class="p">,</span><span class="w"> </span><span class="n">_FARM</span><span class="p">,</span><span class="w"> </span><span class="n">_FISH</span><span class="p">,</span><span class="w">    </span><span class="c1">// Resource source types (4-8)</span>
+<span class="w">    </span><span class="n">_ISWOOD</span><span class="p">,</span><span class="w"> </span><span class="n">_ISGOLD</span><span class="p">,</span><span class="w"> </span><span class="n">_ISSTONE</span><span class="p">,</span><span class="w">                   </span><span class="c1">// First-time resource flags (9-11)</span>
+<span class="w">    </span><span class="n">_TECH</span><span class="p">,</span><span class="w">                                         </span><span class="c1">// Technology research (12)</span>
+<span class="w">    </span><span class="n">_BUILDING1</span><span class="p">,</span><span class="w"> </span><span class="n">_BUILDING2</span><span class="p">,</span><span class="w">                        </span><span class="c1">// Building construction (13-14)</span>
+<span class="w">    </span><span class="n">_HUMAN1</span><span class="p">,</span><span class="w"> </span><span class="n">_HUMAN2</span><span class="p">,</span><span class="w">                              </span><span class="c1">// Unit production (15-16)</span>
+<span class="w">    </span><span class="n">_KILL2</span><span class="p">,</span><span class="w"> </span><span class="n">_KILL10</span><span class="p">,</span><span class="w">                               </span><span class="c1">// Combat kills (17-18)</span>
+<span class="w">    </span><span class="n">_DESTORY2</span><span class="p">,</span><span class="w"> </span><span class="n">_DESTORY4</span><span class="p">,</span><span class="w"> </span><span class="n">_DESTORY5</span><span class="p">,</span><span class="w"> </span><span class="n">_DESTORY10</span><span class="p">,</span><span class="w">  </span><span class="c1">// Building destruction (19-22)</span>
+<span class="w">    </span><span class="n">_FINDENEMYLAND</span><span class="p">,</span><span class="w">                                </span><span class="c1">// Exploration (23)</span>
+<span class="w">    </span><span class="n">SCORE_TYPE_COUNT</span><span class="w">                               </span><span class="c1">// Array size marker (24)</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L585" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-585</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-score-categories-and-point-values">Score Categories and Point Values<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-resource-collection">Resource Collection<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<h4 class="group" data-header="true" id="en-milestone-awards">Milestone Awards<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>For basic resources (<code>_WOOD</code>, <code>_STONE</code>, <code>_GOLD</code>, <code>_MEAT</code>), the system awards <strong>1 point per 100 resources</strong> collected:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-text">scoreTypes[type] tracks total collected
+Points awarded: floor(total / 100) - floor(previous / 100)
+</code></pre></div></div>
+<h4 class="group" data-header="true" id="en-first-time-collection-bonuses">First-Time Collection Bonuses<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>When a player first collects certain resource types, they receive bonus points:</p>
+<table>
+<thead>
+<tr>
+<th>Achievement</th>
+<th>Points</th>
+<th>Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First new resource type</td>
+<td>+5</td>
+<td>Any of <code>_BERRY</code>, <code>_GAZELLE</code>, <code>_ELEPHANT</code>, <code>_FARM</code>, <code>_FISH</code></td>
+</tr>
+<tr>
+<td>First gold collection</td>
+<td>+10</td>
+<td><code>_ISGOLD</code> flag (cumulative with +5)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L607-L621" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">607-621</span></a></p>
+<h3 class="group" data-header="true" id="en-production-and-research">Production and Research<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Points</th>
+<th>ScoreType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Research technology</td>
+<td>+2</td>
+<td><code>_TECH</code></td>
+</tr>
+<tr>
+<td>Build house/farm</td>
+<td>+1</td>
+<td><code>_BUILDING1</code></td>
+</tr>
+<tr>
+<td>Build general building</td>
+<td>+2</td>
+<td><code>_BUILDING2</code></td>
+</tr>
+<tr>
+<td>Train basic unit</td>
+<td>+1</td>
+<td><code>_HUMAN1</code></td>
+</tr>
+<tr>
+<td>Train special unit</td>
+<td>+2</td>
+<td><code>_HUMAN2</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L636-L650" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">636-650</span></a></p>
+<h3 class="group" data-header="true" id="en-combat-achievements">Combat Achievements<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Points</th>
+<th>ScoreType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kill enemy unit</td>
+<td>+2</td>
+<td><code>_KILL2</code></td>
+</tr>
+<tr>
+<td>Destroy house/farm</td>
+<td>+2</td>
+<td><code>_DESTORY2</code></td>
+</tr>
+<tr>
+<td>Destroy general building</td>
+<td>+4</td>
+<td><code>_DESTORY4</code></td>
+</tr>
+<tr>
+<td>Destroy arrow tower</td>
+<td>+5</td>
+<td><code>_DESTORY5</code></td>
+</tr>
+<tr>
+<td>Destroy town center</td>
+<td>+10</td>
+<td><code>_DESTORY10</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L651-L665" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">651-665</span></a></p>
+<h3 class="group" data-header="true" id="en-exploration">Exploration<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<table>
+<thead>
+<tr>
+<th>Achievement</th>
+<th>Points</th>
+<th>ScoreType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reach enemy continent</td>
+<td>+10</td>
+<td><code>_FINDENEMYLAND</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L607-L610" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">607-610</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-score-update-mechanism">Score Update Mechanism<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-update-flow">Update Flow<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TD
+    Event["Game Event&lt;br/&gt;(resource collected,&lt;br/&gt;unit trained, etc.)"]
+    Update["Score::update(type, num)"]
+    Check1{"type == _FINDENEMYLAND?"}
+    Check2{"First-time resource?"}
+    Check3{"Resource milestone?"}
+    Switch["Switch on type"]
+    AddScore["addScore(points, message)"]
+    Increment["score += points"]
+    Debug["call_debugText(color, message)"]
+    UpdateCounter["scoreTypes[type] += num"]
+    
+    Event --&gt; Update
+    Update --&gt; Check1
+    Check1 --&gt;|Yes| AddScore
+    Check1 --&gt;|No| Check2
+    Check2 --&gt;|Yes| AddScore
+    Check2 --&gt;|No| UpdateCounter
+    UpdateCounter --&gt; Check3
+    Check3 --&gt;|Yes| AddScore
+    Check3 --&gt;|No| Switch
+    Switch --&gt; AddScore
+    AddScore --&gt; Increment
+    Increment --&gt; Debug</code></pre></div>
+<p><strong>Diagram: Score Update Process Flow</strong></p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L606-L669" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">606-669</span></a></p>
+<h3 class="group" data-header="true" id="en-special-update-logic">Special Update Logic<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<h4 class="group" data-header="true" id="en-first-time-resource-collection">First-Time Resource Collection<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>The system uses the <code>scoreTypes</code> array as both a counter and a flag system for resources:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">_ISSTONE</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">_MEAT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">addScore</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="s">" 采集到新资源，分数+5"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">_ISGOLD</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">addScore</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="s">" 采集到黄金，分数+10"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">_MEAT</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">_ISSTONE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Set flag</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>For types <code>_ISWOOD</code>, <code>_ISGOLD</code>, <code>_ISSTONE</code>, the counter acts as a binary flag (0 or 1).</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L611-L621" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">611-621</span></a></p>
+<h4 class="group" data-header="true" id="en-resource-milestone-detection">Resource Milestone Detection<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h4>
+<p>For basic resources, the system calculates milestone crossings:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">int</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">num</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">_MEAT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scoreTypes</span><span class="p">[</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">before</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">change</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">addScore</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">" 单种资源收集满100个，分数+1"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">change</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This awards 1 point for each 100-resource threshold crossed in a single update.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L623-L633" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">623-633</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-integration-architecture">Integration Architecture<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TB
+    subgraph "Global Score Instances"
+        UsrScore["usrScore&lt;br/&gt;Score(0)"]
+        EnemyScore["enemyScore&lt;br/&gt;Score(1)"]
+    end
+    
+    subgraph "Score Structure"
+        ScoreStruct["Score struct"]
+        ID["id: int"]
+        TotalScore["score: int"]
+        TypeCounters["scoreTypes[24]: int[]"]
+        
+        ScoreStruct --&gt; ID
+        ScoreStruct --&gt; TotalScore
+        ScoreStruct --&gt; TypeCounters
+    end
+    
+    subgraph "Update Methods"
+        UpdateMethod["update(type, num)"]
+        AddScoreMethod["addScore(points, message)"]
+        GetScore["getScore()"]
+        
+        UpdateMethod --&gt; AddScoreMethod
+    end
+    
+    subgraph "Integration Points"
+        DebugSystem["call_debugText()&lt;br/&gt;Debug Message System"]
+        GameEvents["Game Events&lt;br/&gt;(Resource, Combat, Tech)"]
+    end
+    
+    UsrScore -.implements.-&gt; ScoreStruct
+    EnemyScore -.implements.-&gt; ScoreStruct
+    ScoreStruct --&gt; UpdateMethod
+    ScoreStruct --&gt; GetScore
+    AddScoreMethod --&gt; DebugSystem
+    GameEvents --&gt; UpdateMethod</code></pre></div>
+<p><strong>Diagram: Score System Architecture</strong></p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L670" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-670</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L579-L580" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">579-580</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-global-score-instances">Global Score Instances<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>Two global <code>Score</code> objects track player and enemy performance:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Player ID</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>usrScore</code></td>
+<td><code>Score</code></td>
+<td>0</td>
+<td>Tracks user player achievements</td>
+</tr>
+<tr>
+<td><code>enemyScore</code></td>
+<td><code>Score</code></td>
+<td>1</td>
+<td>Tracks enemy AI achievements</td>
+</tr>
+</tbody>
+</table>
+<p>These instances are initialized at program startup:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="n">Score</span><span class="w"> </span><span class="n">usrScore</span><span class="o">=</span><span class="n">Score</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">Score</span><span class="w"> </span><span class="n">enemyScore</span><span class="o">=</span><span class="n">Score</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div></div>
+<p>The player ID determines the debug message color: blue for player (ID 0), red for enemy (ID 1).</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L579-L580" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">579-580</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-debug-message-broadcasting">Debug Message Broadcasting<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-message-generation">Message Generation<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>When scores change, the <code>addScore</code> method broadcasts messages through the debug system:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">void</span><span class="w"> </span><span class="nf">addScore</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">points</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="o">&amp;</span><span class="w"> </span><span class="n">message</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">score</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">points</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="n">call_debugText</span><span class="p">(</span><span class="s">"blue"</span><span class="p">,</span><span class="w"> </span><span class="s">" 玩家"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">REPRESENT_BOARDCAST_MESSAGE</span><span class="p">);</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">call_debugText</span><span class="p">(</span><span class="s">"red"</span><span class="p">,</span><span class="w"> </span><span class="s">" 敌方"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">REPRESENT_BOARDCAST_MESSAGE</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h3 class="group" data-header="true" id="en-color-coding">Color Coding<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<ul>
+<li><strong>Blue messages</strong>: User player achievements (ID 0)</li>
+<li><strong>Red messages</strong>: Enemy AI achievements (ID 1)</li>
+</ul>
+<h3 class="group" data-header="true" id="en-message-examples">Message Examples<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The Chinese text messages include:</p>
+<ul>
+<li>"采集到新资源，分数+5" (Collected new resource, +5 points)</li>
+<li>"采集到黄金，分数+10" (Collected gold, +10 points)</li>
+<li>"单种资源收集满100个，分数+1" (Collected 100 of a resource, +1 point)</li>
+<li>"解锁新科技，分数+2" (Unlocked new technology, +2 points)</li>
+<li>"生产普通单位，分数+1" (Trained basic unit, +1 point)</li>
+<li>"击杀一般敌人，分数+2" (Killed enemy unit, +2 points)</li>
+<li>"摧毁主营，分数+10" (Destroyed town center, +10 points)</li>
+</ul>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L593-L599" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">593-599</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L607-L665" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">607-665</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-score-retrieval">Score Retrieval<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-public-interface">Public Interface<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>Score</code> struct exposes one public query method:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">int</span><span class="w"> </span><span class="nf">getScore</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">score</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This returns the cumulative total score. Individual achievement counters in <code>scoreTypes[]</code> are private and not directly accessible from outside the struct.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L603-L605" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">603-605</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-summary-table-all-score-values">Summary Table: All Score Values<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<table>
+<thead>
+<tr>
+<th>Achievement Type</th>
+<th>Points</th>
+<th>ScoreType Constant</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100 wood collected</td>
+<td>1</td>
+<td><code>_WOOD</code></td>
+<td>Repeatable milestone</td>
+</tr>
+<tr>
+<td>100 stone collected</td>
+<td>1</td>
+<td><code>_STONE</code></td>
+<td>Repeatable milestone</td>
+</tr>
+<tr>
+<td>100 gold collected</td>
+<td>1</td>
+<td><code>_GOLD</code></td>
+<td>Repeatable milestone</td>
+</tr>
+<tr>
+<td>100 meat collected</td>
+<td>1</td>
+<td><code>_MEAT</code></td>
+<td>Repeatable milestone</td>
+</tr>
+<tr>
+<td>First berry collection</td>
+<td>5</td>
+<td><code>_BERRY</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>First gazelle hunted</td>
+<td>5</td>
+<td><code>_GAZELLE</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>First elephant hunted</td>
+<td>5</td>
+<td><code>_ELEPHANT</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>First farm harvested</td>
+<td>5</td>
+<td><code>_FARM</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>First fish caught</td>
+<td>5</td>
+<td><code>_FISH</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>First wood collected</td>
+<td>5</td>
+<td><code>_ISWOOD</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>First gold collected</td>
+<td>15</td>
+<td><code>_ISGOLD</code></td>
+<td>One-time (5+10)</td>
+</tr>
+<tr>
+<td>First stone collected</td>
+<td>5</td>
+<td><code>_ISSTONE</code></td>
+<td>One-time bonus</td>
+</tr>
+<tr>
+<td>Technology researched</td>
+<td>2</td>
+<td><code>_TECH</code></td>
+<td>Per research</td>
+</tr>
+<tr>
+<td>House/farm built</td>
+<td>1</td>
+<td><code>_BUILDING1</code></td>
+<td>Per building</td>
+</tr>
+<tr>
+<td>General building built</td>
+<td>2</td>
+<td><code>_BUILDING2</code></td>
+<td>Per building</td>
+</tr>
+<tr>
+<td>Basic unit trained</td>
+<td>1</td>
+<td><code>_HUMAN1</code></td>
+<td>Per unit</td>
+</tr>
+<tr>
+<td>Special unit trained</td>
+<td>2</td>
+<td><code>_HUMAN2</code></td>
+<td>Per unit</td>
+</tr>
+<tr>
+<td>Enemy unit killed</td>
+<td>2</td>
+<td><code>_KILL2</code></td>
+<td>Per kill</td>
+</tr>
+<tr>
+<td>House/farm destroyed</td>
+<td>2</td>
+<td><code>_DESTORY2</code></td>
+<td>Per destruction</td>
+</tr>
+<tr>
+<td>General building destroyed</td>
+<td>4</td>
+<td><code>_DESTORY4</code></td>
+<td>Per destruction</td>
+</tr>
+<tr>
+<td>Arrow tower destroyed</td>
+<td>5</td>
+<td><code>_DESTORY5</code></td>
+<td>Per destruction</td>
+</tr>
+<tr>
+<td>Town center destroyed</td>
+<td>10</td>
+<td><code>_DESTORY10</code></td>
+<td>Per destruction</td>
+</tr>
+<tr>
+<td>Enemy land discovered</td>
+<td>10</td>
+<td><code>_FINDENEMYLAND</code></td>
+<td>One-time</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L555-L669" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">555-669</span></a></p></section>
+                    </div>
+                    <div class="dw-prev-next mt-12 grid gap-3 md:grid-cols-2"><a href="../7.4-debug-and-logging-system" class="rounded-xl border border-dashed border-border bg-surface/30 px-4 py-3 transition-colors hover:bg-surface/60"><div class="text-xs uppercase tracking-wide text-secondary"><span data-locale-text="zh">上一页</span><span data-locale-text="en">Previous</span></div><div class="mt-1 text-sm text-primary"><span data-locale-text="zh">调试与日志系统</span><span data-locale-text="en">Debug and Logging System</span></div></a><a href="../8-data-structures-reference" class="rounded-xl border border-dashed border-border bg-surface/30 px-4 py-3 transition-colors hover:bg-surface/60"><div class="text-xs uppercase tracking-wide text-secondary"><span data-locale-text="zh">下一页</span><span data-locale-text="en">Next</span></div><div class="mt-1 text-sm text-primary"><span data-locale-text="zh">数据结构参考</span><span data-locale-text="en">Data Structures Reference</span></div></a></div>
+                  </div>
+                </div>
+              </div>
+            </main>
+            <aside class="dw-toc-panel hidden xl:sticky xl:top-20 xl:block xl:h-[calc(100vh-82px)] xl:w-72 xl:flex-shrink-0 xl:py-9">
+              <div class="dw-toc-card rounded-xl border border-dashed border-border bg-surface/30">
+                <h3 class="px-4 pb-5 pt-4 text-lg font-medium leading-none">
+                  <span data-locale-text="zh">本页内容</span>
+                  <span data-locale-text="en">On this page</span>
+                </h3>
+                <ul style="scrollbar-width:none" class="dw-toc-list min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pt-0" data-locale-panel="zh"><li><a href="#zh-评分系统" class="hover:text-primary pr-1 transition-all text-primary font-medium">评分系统</a></li>
+<li class="ml-3"><a href="#zh-概述" class="hover:text-primary pr-1 transition-all text-secondary">概述</a></li>
+<li class="ml-3"><a href="#zh-核心数据结构" class="hover:text-primary pr-1 transition-all text-secondary">核心数据结构</a></li>
+<li class="ml-3"><a href="#zh-score-结构体" class="hover:text-primary pr-1 transition-all text-secondary">Score 结构体</a></li>
+<li class="ml-3"><a href="#zh-scoretype-枚举" class="hover:text-primary pr-1 transition-all text-secondary">ScoreType 枚举</a></li>
+<li class="ml-3"><a href="#zh-评分类别与分值" class="hover:text-primary pr-1 transition-all text-secondary">评分类别与分值</a></li>
+<li class="ml-3"><a href="#zh-资源采集" class="hover:text-primary pr-1 transition-all text-secondary">资源采集</a></li>
+<li class="ml-3"><a href="#zh-里程碑奖励" class="hover:text-primary pr-1 transition-all text-secondary">里程碑奖励</a></li>
+<li class="ml-3"><a href="#zh-首次采集奖励" class="hover:text-primary pr-1 transition-all text-secondary">首次采集奖励</a></li>
+<li class="ml-3"><a href="#zh-生产与研究" class="hover:text-primary pr-1 transition-all text-secondary">生产与研究</a></li>
+<li class="ml-3"><a href="#zh-战斗成就" class="hover:text-primary pr-1 transition-all text-secondary">战斗成就</a></li>
+<li class="ml-3"><a href="#zh-探索" class="hover:text-primary pr-1 transition-all text-secondary">探索</a></li>
+<li class="ml-3"><a href="#zh-分数更新机制" class="hover:text-primary pr-1 transition-all text-secondary">分数更新机制</a></li>
+<li class="ml-3"><a href="#zh-更新流程" class="hover:text-primary pr-1 transition-all text-secondary">更新流程</a></li>
+<li class="ml-3"><a href="#zh-特殊更新逻辑" class="hover:text-primary pr-1 transition-all text-secondary">特殊更新逻辑</a></li>
+<li class="ml-3"><a href="#zh-首次资源采集" class="hover:text-primary pr-1 transition-all text-secondary">首次资源采集</a></li>
+<li class="ml-3"><a href="#zh-资源里程碑检测" class="hover:text-primary pr-1 transition-all text-secondary">资源里程碑检测</a></li>
+<li class="ml-3"><a href="#zh-集成架构" class="hover:text-primary pr-1 transition-all text-secondary">集成架构</a></li>
+<li class="ml-3"><a href="#zh-全局评分实例" class="hover:text-primary pr-1 transition-all text-secondary">全局评分实例</a></li>
+<li class="ml-3"><a href="#zh-调试消息广播" class="hover:text-primary pr-1 transition-all text-secondary">调试消息广播</a></li>
+<li class="ml-3"><a href="#zh-消息生成" class="hover:text-primary pr-1 transition-all text-secondary">消息生成</a></li>
+<li class="ml-3"><a href="#zh-颜色编码" class="hover:text-primary pr-1 transition-all text-secondary">颜色编码</a></li>
+<li class="ml-3"><a href="#zh-消息示例" class="hover:text-primary pr-1 transition-all text-secondary">消息示例</a></li>
+<li class="ml-3"><a href="#zh-分数获取" class="hover:text-primary pr-1 transition-all text-secondary">分数获取</a></li>
+<li class="ml-3"><a href="#zh-公共接口" class="hover:text-primary pr-1 transition-all text-secondary">公共接口</a></li>
+<li class="ml-3"><a href="#zh-汇总表所有分值" class="hover:text-primary pr-1 transition-all text-secondary">汇总表：所有分值</a></li></ul><ul style="scrollbar-width:none" class="dw-toc-list min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pt-0" data-locale-panel="en"><li><a href="#en-score-system" class="hover:text-primary pr-1 transition-all text-primary font-medium">Score System</a></li>
+<li class="ml-3"><a href="#en-overview" class="hover:text-primary pr-1 transition-all text-secondary">Overview</a></li>
+<li class="ml-3"><a href="#en-core-data-structures" class="hover:text-primary pr-1 transition-all text-secondary">Core Data Structures</a></li>
+<li class="ml-3"><a href="#en-score-struct" class="hover:text-primary pr-1 transition-all text-secondary">Score Struct</a></li>
+<li class="ml-3"><a href="#en-scoretype-enumeration" class="hover:text-primary pr-1 transition-all text-secondary">ScoreType Enumeration</a></li>
+<li class="ml-3"><a href="#en-score-categories-and-point-values" class="hover:text-primary pr-1 transition-all text-secondary">Score Categories and Point Values</a></li>
+<li class="ml-3"><a href="#en-resource-collection" class="hover:text-primary pr-1 transition-all text-secondary">Resource Collection</a></li>
+<li class="ml-3"><a href="#en-milestone-awards" class="hover:text-primary pr-1 transition-all text-secondary">Milestone Awards</a></li>
+<li class="ml-3"><a href="#en-first-time-collection-bonuses" class="hover:text-primary pr-1 transition-all text-secondary">First-Time Collection Bonuses</a></li>
+<li class="ml-3"><a href="#en-production-and-research" class="hover:text-primary pr-1 transition-all text-secondary">Production and Research</a></li>
+<li class="ml-3"><a href="#en-combat-achievements" class="hover:text-primary pr-1 transition-all text-secondary">Combat Achievements</a></li>
+<li class="ml-3"><a href="#en-exploration" class="hover:text-primary pr-1 transition-all text-secondary">Exploration</a></li>
+<li class="ml-3"><a href="#en-score-update-mechanism" class="hover:text-primary pr-1 transition-all text-secondary">Score Update Mechanism</a></li>
+<li class="ml-3"><a href="#en-update-flow" class="hover:text-primary pr-1 transition-all text-secondary">Update Flow</a></li>
+<li class="ml-3"><a href="#en-special-update-logic" class="hover:text-primary pr-1 transition-all text-secondary">Special Update Logic</a></li>
+<li class="ml-3"><a href="#en-first-time-resource-collection" class="hover:text-primary pr-1 transition-all text-secondary">First-Time Resource Collection</a></li>
+<li class="ml-3"><a href="#en-resource-milestone-detection" class="hover:text-primary pr-1 transition-all text-secondary">Resource Milestone Detection</a></li>
+<li class="ml-3"><a href="#en-integration-architecture" class="hover:text-primary pr-1 transition-all text-secondary">Integration Architecture</a></li>
+<li class="ml-3"><a href="#en-global-score-instances" class="hover:text-primary pr-1 transition-all text-secondary">Global Score Instances</a></li>
+<li class="ml-3"><a href="#en-debug-message-broadcasting" class="hover:text-primary pr-1 transition-all text-secondary">Debug Message Broadcasting</a></li>
+<li class="ml-3"><a href="#en-message-generation" class="hover:text-primary pr-1 transition-all text-secondary">Message Generation</a></li>
+<li class="ml-3"><a href="#en-color-coding" class="hover:text-primary pr-1 transition-all text-secondary">Color Coding</a></li>
+<li class="ml-3"><a href="#en-message-examples" class="hover:text-primary pr-1 transition-all text-secondary">Message Examples</a></li>
+<li class="ml-3"><a href="#en-score-retrieval" class="hover:text-primary pr-1 transition-all text-secondary">Score Retrieval</a></li>
+<li class="ml-3"><a href="#en-public-interface" class="hover:text-primary pr-1 transition-all text-secondary">Public Interface</a></li>
+<li class="ml-3"><a href="#en-summary-table-all-score-values" class="hover:text-primary pr-1 transition-all text-secondary">Summary Table: All Score Values</a></li></ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.__DW_PAGE = {"routePath": "hackermmzz/new-aoe/7.5-score-system", "titles": {"zh": "评分系统", "en": "Score System"}, "descriptions": {"zh": "评分系统 相关源文件 以下文件被用作生成此 Wiki 页面时的上下文： GlobalVariate.cpp GlobalVariate.h 评分系统通过为各种成就授予分数来跟踪玩家和敌方在整个游戏中的表现，这些成就包括资源采集、科技研究、单位生产、建筑建造和战斗胜利。该系统维护累计分数，并通过调试消息接口提供实时反馈。", "en": "Score System Relevant source files The following files were used as context for generating this wiki page: GlobalVariate.cpp GlobalVariate.h The Score System tr"}, "defaultLocale": "zh", "availableLocales": ["zh", "en"], "repoName": "hackermmzz/new-aoe"};
+      window.__DW_ASSET_PREFIX = "../../../assets/";
+    </script>
+    <script src="../../../assets/site.js"></script>
+  </body>
+</html>
