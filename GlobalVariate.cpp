@@ -6,7 +6,9 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QtWidgets>
+#include <chrono>
 #include<iostream>
+#include <random>
 
 using namespace std;
 
@@ -764,6 +766,19 @@ void ParseArguments(const QApplication&app){
         }else{
             qWarning() << "invalid map rotate degrees, expected 0/90/180/270:" << parser.value("rotate");
         }
+    }
+
+    // 未指定 -rotate 时随机方向，与是否通过 -map 指定地图无关；
+    // 显式 -rotate（包括 0）始终优先。
+    if(!parser.isSet("rotate")){
+        const unsigned seed = static_cast<unsigned>(
+            std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        std::mt19937 gen(seed);
+        std::uniform_int_distribution<int> dis(0, 3);
+        const int rotations[] = {0, 90, 180, 270};
+        const int degrees = rotations[dis(gen)];
+        RuntimeConfig_setMapRotationDegrees(degrees);
+        qInfo() << "random map rotation selected:" << degrees;
     }
 }
 //Json化一个Map
