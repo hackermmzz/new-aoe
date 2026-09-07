@@ -529,14 +529,28 @@ void Building::setActStatus(int wood , int food , int stone , int gold)
 
 Double Building::get_retio_Build()
 {
-    if(is_cheatAction) return Double(100);
-    else return Double(100)/playerScience->get_buildTime(Num)/TimePerFrame;
+    if (is_cheatAction)
+        return Double(100);
+
+    Double seconds = playerScience->get_buildTime(Num);
+    if (seconds <= Double(0))
+        return Double(100);
+
+    return Double(100) * Double(TimePerFrame)
+           / (seconds * Double(1000));
 }
 
 Double Building::get_retio_Action()
 {
-    if(is_cheatAction) return Double(100);
-    else return Double(100)/playerScience->get_actTime(Num, actNum)/TimePerFrame;
+    if (is_cheatAction)
+        return Double(100);
+
+    Double seconds = playerScience->get_actTime(Num, actNum);
+    if (seconds <= Double(0))
+        return Double(100);
+
+    return Double(100) * Double(TimePerFrame)
+           / (seconds * Double(1000));
 }
 
 
