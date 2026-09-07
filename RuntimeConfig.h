@@ -1287,7 +1287,7 @@ int RuntimeConfig_ATK_SHIP();
 Double RuntimeConfig_DIS_SHIP();
 #define DIS_SHIP (RuntimeConfig_DIS_SHIP())
 
-int RuntimeConfig_INTERVAL_SHIP();
+Double RuntimeConfig_INTERVAL_SHIP();
 #define INTERVAL_SHIP (RuntimeConfig_INTERVAL_SHIP())
 
 int RuntimeConfig_DEFCLOSE_SHIP();
@@ -1314,7 +1314,7 @@ Double RuntimeConfig_DIS_STONE_THROWER();
 Double RuntimeConfig_DIS_MIN_STONE_THROWER();
 #define DIS_MIN_STONE_THROWER (RuntimeConfig_DIS_MIN_STONE_THROWER())
 
-int RuntimeConfig_INTERVAL_STONE_THROWER();
+Double RuntimeConfig_INTERVAL_STONE_THROWER();
 #define INTERVAL_STONE_THROWER (RuntimeConfig_INTERVAL_STONE_THROWER())
 
 int RuntimeConfig_DEFCLOSE_STONE_THROWER();

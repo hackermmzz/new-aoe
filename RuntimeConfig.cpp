@@ -436,7 +436,7 @@ Double g_SPEED_SHIP = Double::Zero();
 int g_VISION_SHIP = 0;
 int g_ATK_SHIP = 0;
 Double g_DIS_SHIP = Double::Zero();
-int g_INTERVAL_SHIP = 0;
+Double g_INTERVAL_SHIP = Double::Zero();
 int g_DEFCLOSE_SHIP = 0;
 int g_DEFSHOOT_SHIP = 0;
 int g_BLOOD_STONE_THROWER = 0;
@@ -445,7 +445,7 @@ int g_VISION_STONE_THROWER = 0;
 int g_ATK_STONE_THROWER = 0;
 Double g_DIS_STONE_THROWER = Double::Zero();
 Double g_DIS_MIN_STONE_THROWER = Double::Zero();
-int g_INTERVAL_STONE_THROWER = 0;
+Double g_INTERVAL_STONE_THROWER = Double::Zero();
 int g_DEFCLOSE_STONE_THROWER = 0;
 int g_DEFSHOOT_STONE_THROWER = 0;
 int g_BLOOD_PRIEST = 0;
@@ -2628,7 +2628,7 @@ Double RuntimeConfig_DIS_SHIP()
     return g_DIS_SHIP;
 }
 
-int RuntimeConfig_INTERVAL_SHIP()
+Double RuntimeConfig_INTERVAL_SHIP()
 {
     return g_INTERVAL_SHIP;
 }
@@ -2673,7 +2673,7 @@ Double RuntimeConfig_DIS_MIN_STONE_THROWER()
     return g_DIS_MIN_STONE_THROWER;
 }
 
-int RuntimeConfig_INTERVAL_STONE_THROWER()
+Double RuntimeConfig_INTERVAL_STONE_THROWER()
 {
     return g_INTERVAL_STONE_THROWER;
 }
@@ -3356,7 +3356,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_VISION_SHIP = config.value(QStringLiteral("VISION_SHIP")).toInt();
     g_ATK_SHIP = config.value(QStringLiteral("ATK_SHIP")).toInt();
     g_DIS_SHIP = Double::FromDouble(config.value(QStringLiteral("DIS_SHIP")).toDouble());
-    g_INTERVAL_SHIP = config.value(QStringLiteral("INTERVAL_SHIP")).toInt();
+    g_INTERVAL_SHIP = Double::FromDouble(config.value(QStringLiteral("INTERVAL_SHIP")).toDouble());
     g_DEFCLOSE_SHIP = config.value(QStringLiteral("DEFCLOSE_SHIP")).toInt();
     g_DEFSHOOT_SHIP = config.value(QStringLiteral("DEFSHOOT_SHIP")).toInt();
     g_BLOOD_STONE_THROWER = config.value(QStringLiteral("BLOOD_STONE_THROWER")).toInt();
@@ -3365,7 +3365,7 @@ void ApplyRuntimeConfigFromJson(const QJsonObject& config)
     g_ATK_STONE_THROWER = config.value(QStringLiteral("ATK_STONE_THROWER")).toInt();
     g_DIS_STONE_THROWER = Double::FromDouble(config.value(QStringLiteral("DIS_STONE_THROWER")).toDouble());
     g_DIS_MIN_STONE_THROWER = Double::FromDouble(config.value(QStringLiteral("DIS_MIN_STONE_THROWER")).toDouble());
-    g_INTERVAL_STONE_THROWER = config.value(QStringLiteral("INTERVAL_STONE_THROWER")).toInt();
+    g_INTERVAL_STONE_THROWER = Double::FromDouble(config.value(QStringLiteral("INTERVAL_STONE_THROWER")).toDouble());
     g_DEFCLOSE_STONE_THROWER = config.value(QStringLiteral("DEFCLOSE_STONE_THROWER")).toInt();
     g_DEFSHOOT_STONE_THROWER = config.value(QStringLiteral("DEFSHOOT_STONE_THROWER")).toInt();
     g_BLOOD_PRIEST = config.value(QStringLiteral("BLOOD_PRIEST")).toInt();
