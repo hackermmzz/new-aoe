@@ -122,7 +122,7 @@ public:
                                            ||(state==FARMER_FISHER&&resourceSort==HUMAN_DOCKFOOD); }
     void setState( int state ){ this->state = state; }
     void set_ResourceSort( int sort ){ this->resourceSort = sort; }
-    void update_addResource(){ resource+=quantity_GatherOnce; }
+    void update_addResource(Double quantity){ resource+=quantity; }
     void update_resourceClear(){ resource = 0; }
     void update_transportHuman(Human*human){resource+=1;HumanTransport.push_back(human);}
     void updateState();
@@ -172,7 +172,7 @@ private:
     int resource_Max = 10;
     //最大资源携带量
 
-    Double quantity_GatherOnce = Double("0.55");
+    Double quantity_GatherOnce = Double("0.5");
 
     int resourceSort = 0;
     //指示所携带资源的类型

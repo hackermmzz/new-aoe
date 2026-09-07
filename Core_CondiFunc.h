@@ -95,6 +95,8 @@ struct relation_Object
     int resourceBuildingType;
     int relationAct;    //记录当前行动的种类
     int nowPhaseNum = 0;    //记录当前行动所属的detail阶段
+    // 仅供 CoreEven_Gather 使用；记录下一次允许采集的游戏帧。
+    int gatherNextFrame = -1;
     Double DR_goal, UR_goal, DR_alter, UR_alter;   //移动等目标位置，alter为暂时更改的目标的位置
     Double DR_Predicted, UR_Predicted;   //object1下一步的移动位置
     Double crashLength_goal = 0, crashLength_alter = 0;
@@ -188,6 +190,8 @@ struct relation_Object
     void set_ExecutionTime(int times) { times_Execution = times; }
     void excutionOnce() { if (times_Execution > 0) times_Execution--; }
     bool is_ExecutionOver() { return times_Execution == 0; }
+
+    void resetGatherTimer() { gatherNextFrame = -1; }
 
     void useless() { useless_norm++; }
     void useOnce()

@@ -37,6 +37,7 @@ public:
         object->initAction();
         auto&ele=relate_AllObject[object];
         ele.isExist = 0;
+        ele.resetGatherTimer();
         ele.goalObject=0;
         ele.alterOb=0;
     } //指令因意外原因停止
@@ -98,7 +99,7 @@ private:
     void object_Move(Coordinate * object , Double DR , Double UR);  //控制移动
     void object_Attack(Coordinate* , Coordinate*); //控制因object1影响object2血量
     void object_PinPoint_Attack(Coordinate*,Double dr,Double ur);
-    void object_Gather(Coordinate* , Coordinate* ); //控制采集
+    void object_Gather(Coordinate* , Coordinate*, relation_Object& ); //控制采集
     void object_Transport(Coordinate* , Coordinate* );//控制运输
      void object_Unload(Coordinate* , Coordinate* );//控制运输
     void object_ResourceChange( Coordinate* , relation_Object& );

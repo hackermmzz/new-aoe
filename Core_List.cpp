@@ -39,6 +39,13 @@ int scoreTypeForCreatedObject(int objectSort, int objectNum)
     return _TECH;
 }
 
+int gatherIntervalFrames()
+{
+    return TimePerFrame > 0
+        ? (1000 + TimePerFrame - 1) / TimePerFrame
+        : 1;
+}
+
 bool isFriendlyMissileAfterConversion(Missile* missile, Coordinate* target)
 {
     if (missile == NULL || target == NULL || missile->isAttackerHaveDie() || !target->isPlayerControl())
@@ -421,6 +428,7 @@ void Core_List::suspendRelation(Coordinate* object)
         }
         object->initAction();  //行动全部重置
 
+        relate_AllObject[object].resetGatherTimer();
         relate_AllObject[object].isExist = false;
     }
 }
@@ -527,7 +535,7 @@ void Core_List::manageRelationList()
                     object_PinPoint_Attack(object1,thisRelation.DR_goal,thisRelation.UR_goal);
                     break;
                 case CoreDetail_Gather:
-                    object_Gather(object1, object2);
+                    object_Gather(object1, object2, thisRelation);
                     break;
                 case CoreDetail_ResourceIn:
                     object_ResourceChange(object1, thisRelation);
@@ -572,8 +580,11 @@ void Core_List::manageRelationList()
                     }
                     break;
                 case CoreDetail_Gather:
+                {
                     thisRelation.needResourceBuilding = true;
+                    thisRelation.resetGatherTimer();
                     break;
+                }
                 case CoreDetail_ResourceIn:
                     break;
                 default:
@@ -630,6 +641,7 @@ void Core_List::manageRelation_deleteGoalOb(Coordinate* goalObject)
             coord->printer_ToMissile((void**)(&missile));
             if (missile)continue;
             iterNow->second.isExist = false;
+            iterNow->second.resetGatherTimer();
             //对于Human类对象,需要对其路径重置
             Human* obj = 0;
             coord->printer_ToHuman((void**)(&obj));
@@ -1158,7 +1170,7 @@ void Core_List::object_PinPoint_Attack(Coordinate *object, Double dr, Double ur)
     }
 }
 
-void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
+void Core_List::object_Gather(Coordinate* object1, Coordinate* object2, relation_Object& relation)
 {
     Farmer* gatherer = (Farmer*)object1;
     Resource* res = NULL;
@@ -1172,6 +1184,8 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
         if (!gatherer->isWorking())
         {
             gatherer->setPreWork();
+            if (relation.gatherNextFrame < 0)
+                relation.gatherNextFrame = g_frame + gatherIntervalFrames();
             gatherer->adjustAngle(object2->getDR(), object2->getUR());
             if (gatherer->getResourceSort() != res->get_ResourceSort())
             {
@@ -1179,9 +1193,22 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
                 gatherer->update_resourceClear();
             }
         }
-        else if (res->isFarmerGatherable(gatherer) && gatherer->get_isActionEnd())
+        else if (res->isFarmerGatherable(gatherer))
         {
-            res->updateCnt_byGather(gatherer->get_quantityGather());
+            if (relation.gatherNextFrame < 0)
+                relation.gatherNextFrame = g_frame + gatherIntervalFrames();
+
+            if (g_frame < relation.gatherNextFrame)
+                return;
+
+            const Double gatheredAmount =
+                res->updateCnt_byGather(gatherer->get_quantityGather());
+            if (gatheredAmount <= Double::Zero())
+            {
+                relation.resetGatherTimer();
+                return;
+            }
+
             Score& gatherScore = scoreForPlayerRepresent(gatherer->getPlayerRepresent());
 
             //更新首次收集得分
@@ -1219,7 +1246,8 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2)
                 gatherScore.update(_ISGOLD);
             }
 
-            gatherer->update_addResource();
+            gatherer->update_addResource(gatheredAmount);
+            relation.gatherNextFrame = g_frame + gatherIntervalFrames();
         }
     }
 }

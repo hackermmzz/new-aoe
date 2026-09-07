@@ -20,7 +20,15 @@ public:
     int get_Cnt(){ return (int)Cnt; }
     int get_ReturnBuildingType();
 
-    void updateCnt_byGather( Double gather){  Cnt -= gather ;}
+    Double updateCnt_byGather(Double gather)
+    {
+        if (gather <= Double::Zero() || Cnt <= Double::Zero())
+            return Double::Zero();
+
+        Double actualAmount = gather < Cnt ? gather : Cnt;
+        Cnt -= actualAmount;
+        return actualAmount;
+    }
     void updateCnt_byDecay(){ Cnt*=(1-DecayRate); }
     bool is_Surplus(){ return Cnt>=Double("0.5");} //按娄老师和学生要求，对于小于1个得直接判死}
     void setSurplusCnt(Double cnt);//设置资源剩余个数
