@@ -185,6 +185,7 @@ struct instruction {
 };
 
 struct ins {
+    int g_id;
     std::queue<instruction> instructions;
     QMutex lock;
 };

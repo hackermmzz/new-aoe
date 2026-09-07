@@ -9,24 +9,24 @@ AI::~AI() {
 }
 
 int AI::HumanMove(int SN, double DR0, double UR0){
-    return AddToIns(instruction(INS_HUMANMOVE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
+    return AI::AddToIns(instruction(INS_HUMANMOVE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
 }
 
 int AI::HumanAction(int SN,int obSN){
-    return AddToIns(instruction(INS_HUMANACTION,SN,obSN , true));
+    return AI::AddToIns(instruction(INS_HUMANACTION,SN,obSN , true));
 }
 
 int AI::HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR){
-    return AddToIns(instruction(INS_HUMANBUILD,SN,BlockDR,BlockUR,BuildingNum));
+    return AI::AddToIns(instruction(INS_HUMANBUILD,SN,BlockDR,BlockUR,BuildingNum));
 }
 
 int AI::BuildingAction(int SN,int Action){
-    return AddToIns(instruction(INS_BUILDINGACTION,SN,Action));
+    return AI::AddToIns(instruction(INS_BUILDINGACTION,SN,Action));
 }
 
 int AI::PinPointStrike(int SN, double DR0, double UR0)
 {
-    return AddToIns(instruction(INS_PINPOINT_STRIKE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
+    return AI::AddToIns(instruction(INS_PINPOINT_STRIKE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
 }
 
 void AI::cheatAction() {
@@ -85,6 +85,12 @@ int AI::AddToIns(instruction ins)
     return ins.id;
 }
 
+ins &AI::GetInsStruct()
+{
+    extern ins UsrIns;
+    return UsrIns;
+}
+
 void AI::CommitInstruction()
 {
     ins&Ins=GetInsStruct();
@@ -138,5 +144,4 @@ void AI::DebugText(double debugdouble)
 {
     call_debugText("black", " " + AIName[id] + "打印：" + QString::number(debugdouble), id);
 }
-
 

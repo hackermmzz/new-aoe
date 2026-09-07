@@ -23,6 +23,7 @@ MainWidget* g_mainWidget = nullptr;
 // 全局单位清理回调函数指针定义
 void(*g_cleanupUnitCallback)(Coordinate*) = nullptr;
 
+
 // 全局单位清理函数定义
 void g_globalCleanupUnit(Coordinate* unit) {
     if (g_mainWidget) {

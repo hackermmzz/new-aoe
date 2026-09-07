@@ -41,8 +41,8 @@ protected:
 
     void unlock();
 
-    int AddToIns(instruction ins) ;
-    virtual ins& GetInsStruct()=0;
+    virtual int AddToIns(instruction ins) ;
+    virtual ins& GetInsStruct();
     virtual void clearInsRet() = 0;
     void CommitInstruction();
 protected:

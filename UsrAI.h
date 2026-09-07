@@ -16,9 +16,15 @@ public:
 
 private:
     void processData() override;
-    virtual ins& GetInsStruct(){
-        return UsrIns;
-    }
+    int AddToIns(instruction ins) override
+        {
+            UsrIns.lock.lock();
+            ins.id=UsrIns.g_id;
+            UsrIns.g_id++;
+            UsrIns.instructions.push(ins);
+            UsrIns.lock.unlock();
+            return ins.id;
+        }
     tagInfo getInfo(){return tagUsrGame.getInfo();}
     void clearInsRet() override
     {
