@@ -1667,7 +1667,9 @@ void Map::loadfindPathMapTemperature()
         for(int x=0; x<MAP_L; x++)
             for(int y=0; y<MAP_U; y++)
             {
-                if(TreeBlock[x][y] || barrierMap[x][y] || (represent == NOWPLAYERREPRESENT && !cell[x][y].Explored))
+                if(TreeBlock[x][y] || barrierMap[x][y]
+                        /*||(represent == NOWPLAYERREPRESENT && !cell[x][y].Explored)*/
+                        )
                     findPathMapTemperature[represent][x][y] = 1;
             }
     return;

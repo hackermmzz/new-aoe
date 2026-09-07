@@ -95,6 +95,7 @@ void Core::correctMoveObjectTerrain(MoveObject* object)
         (Double(fallback.x) + Double("0.5")) * BLOCKSIDELENGTH,
         (Double(fallback.y) + Double("0.5")) * BLOCKSIDELENGTH);
 }
+
 void Core::updateByObject()
 {
     //player管理的各个ob更新状态
