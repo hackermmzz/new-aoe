@@ -1227,8 +1227,13 @@ void Core::PostFirstFrameProcess()
             }
         }
     }
-    //给出debug提示打开了哪副地图
-    call_debugText("red",QString("打开的地图是:")+theMap->GetMapFileName(),0);;
+    //给出debug提示打开了哪副地图以及本局实际采用的旋转角度
+    call_debugText(
+        "red",
+        QString("打开的地图是:%1，顺时针旋转:%2度")
+            .arg(theMap->GetMapFileName())
+            .arg(RuntimeConfig_MapRotationDegrees()),
+        0);
 }
 
 void Core::PreFirstFrameProcess()
