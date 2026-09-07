@@ -216,11 +216,13 @@ int Development::get_addition_ResourceSort(int resourceSort)
     if (resourceSort == HUMAN_WOOD)  //对搬运wood加成
     {
         level = getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE);
-        switch (level) {
-        case 1:
+        if (level >= 1)
+        {
             addition += BUILDING_MARKET_WOOD_UPGRADE_ADDITION_CARRY;
-        default:
-            break;
+        }
+        if (level >= 2)
+        {
+            addition += BUILDING_MARKET_CRAFT_UPGRADE_ADDITION_CARRY;
         }
     }
     else if (resourceSort == HUMAN_STONE)    //对搬运stone加成
@@ -250,7 +252,13 @@ int Development::get_addition_ResourceSort(int resourceSort)
 
 Double Development::get_rate_ResorceGather(int resourceSort)
 {
-    int rate = 1;
+    Double rate(1);
+
+    // 采集速率配置使用整数百分比：20 表示 +20%。
+    auto addGatherRatePercent = [&rate](int percent)
+    {
+        rate += Double(percent) / Double(100);
+    };
 
     int level = 0;
     if (resourceSort == HUMAN_WOOD)  //对搬运wood加成
@@ -258,12 +266,12 @@ Double Development::get_rate_ResorceGather(int resourceSort)
         // 检查木材加工科技（工具时代）
         if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 1)
         {
-            rate += BUILDING_MARKET_WOOD_UPGRADE_ADDITION_GATHERRATE;
+            addGatherRatePercent(BUILDING_MARKET_WOOD_UPGRADE_ADDITION_GATHERRATE);
         }
         // 检查工艺科技（铜器时代，在木材加工基础上再增加）
         if (getActLevel(BUILDING_MARKET, BUILDING_MARKET_WOOD_UPGRADE) >= 2)
         {
-            rate += BUILDING_MARKET_CRAFT_UPGRADE_ADDITION_GATHERRATE;
+            addGatherRatePercent(BUILDING_MARKET_CRAFT_UPGRADE_ADDITION_GATHERRATE);
         }
     }
     else if (resourceSort == HUMAN_STONE)    //对搬运stone加成
@@ -271,7 +279,7 @@ Double Development::get_rate_ResorceGather(int resourceSort)
         level = getActLevel(BUILDING_MARKET, BUILDING_MARKET_STONE_UPGRADE);
         switch (level) {
         case 1:
-            rate += BUILDING_MARKET_STONE_UPGRADE_ADDITION_GATHERRATE;
+            addGatherRatePercent(BUILDING_MARKET_STONE_UPGRADE_ADDITION_GATHERRATE);
         default:
             break;
         }
@@ -281,7 +289,7 @@ Double Development::get_rate_ResorceGather(int resourceSort)
         level = getActLevel(BUILDING_MARKET, BUILDING_MARKET_GOLD_UPGRADE);
         switch (level) {
         case 1:
-            rate += BUILDING_MARKET_GOLD_UPGRADE_ADDITION_GATHERRATE;
+            addGatherRatePercent(BUILDING_MARKET_GOLD_UPGRADE_ADDITION_GATHERRATE);
         default:
             break;
         }
