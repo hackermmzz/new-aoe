@@ -1022,6 +1022,16 @@ void Core_List::object_Attack(Coordinate* object1, Coordinate* object2)
     object1->printer_ToBloodHaver((void**)&attacker);   //攻击者指针赋值(object1强制转换)
     if (object2) object2->printer_ToBloodHaver((void**)&attackee);   //受攻击者指针赋值(object2强制转换)
     object1->printer_ToMissile((void**)&missile);   //判断obect1是否为投射物
+
+    // 敌方单位或建筑一旦进入对玩家的实际攻击阶段，就持续刷新临时显形。
+    // 这样主画面、小地图和用户AI敌军列表会使用同一可见状态。
+    if (object1->isPlayerControl() && object2 != NULL &&
+        object1->getPlayerRepresent() != NOWPLAYERREPRESENT &&
+        object2->getPlayerRepresent() == NOWPLAYERREPRESENT)
+    {
+        object1->visibleSomeTimes();
+    }
+
     bool isEnemyPriestConversion = object2 != NULL &&
         object1->getSort() == SORT_ARMY && object1->getNum() == AT_PRIEST &&
         object1->getPlayerRepresent() != object2->getPlayerRepresent();

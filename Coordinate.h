@@ -214,7 +214,7 @@ public:
 
 
     /*******可见性相关*******/
-    void time_BeVisible(){ timer_Visible--;}
+    void time_BeVisible(){ if(timer_Visible > 0) timer_Visible--; }
     static void setViewLab( int blockSize , int visionLen );
     static void addViewLab( vector<Point>& blockLab , int lx , int mx , int y , int y_mirr );
 

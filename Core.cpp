@@ -108,6 +108,9 @@ void Core::updateByObject()
         //更新human子类的状态
         while (humaniter != humaniterEnd)
         {
+            // 临时显形属于所有玩家单位的公共状态，在核心层统一倒计时。
+            (*humaniter)->time_BeVisible();
+
             //如果当前对象需要变换行动状态，如从采集浆果->移动
             if ((*humaniter)->needTranState())
             {
@@ -242,6 +245,9 @@ void Core::updateByObject()
 
         while (builditer != builditerEnd)
         {
+            // 箭塔等建筑也可能因攻击玩家而临时显形。
+            (*builditer)->time_BeVisible();
+
             interactionList->conduct_Attacked(*builditer);
             if ((*builditer)->isDie() || ((*builditer)->getSort() == SORT_Building_Resource && !((Building_Resource*)(*builditer))->is_Surplus()))
             {
@@ -609,7 +615,7 @@ void Core::updateByPlayer(int id) {
         taginfo.buildings.push_back(building);
         for (int i = 0;i < NOWPLAYER;i++) {
             if (i == id) { continue; }
-            if (build->getexplored() == 1 || i != 0)
+            if (build->getexplored() == 1 || build->getvisible() == 1 || i != 0)
                 currentBuff[i].enemy_buildings.push_back(building.toEnemy());
         }
     }

@@ -166,8 +166,6 @@ void Army::nextframe()
         setNowRes();
     }
 
-    if(playerRepresent != 0 && timer_Visible>0) time_BeVisible();
-
     updateImageXYByNowRes();
     
 }

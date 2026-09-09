@@ -69,6 +69,19 @@ void ViewWidget::paintEvent(QPaintEvent *)
                 setdata(resL,resU,Qt::yellow,6,6);
         }
     }
+
+    // 先覆盖未探索区域，再绘制临时显形的敌军，避免红点被黑色遮罩盖住。
+    for(int L = 0; L < MAP_L; L++)
+    {
+        for(int U = 0; U < MAP_U; U++)
+        {
+            if(!(mainwidget->map->cell[L][U].Explored))
+            {
+                setdata(L,U,Qt::black,7,4);
+            }
+        }
+    }
+
     if(!enemyFarmerList->empty()){
         auto farmerIter = enemyFarmerList->begin();
         for(; farmerIter != enemyFarmerList->end(); farmerIter++)
@@ -76,7 +89,7 @@ void ViewWidget::paintEvent(QPaintEvent *)
             if(!(*farmerIter)->isDie()){
                 int farmerL = (*farmerIter)->getDR() / 16 / gen5;
                 int farmerU = (*farmerIter)->getUR() / 16 / gen5;
-                if(mainwidget->map->cell[farmerL][farmerU].Visible)
+                if((*farmerIter)->getvisible())
                     setdata(farmerL,farmerU,Qt::red,6,6);
             }
         }
@@ -87,7 +100,7 @@ void ViewWidget::paintEvent(QPaintEvent *)
         {
             int buildL = (*buildIter)->getDR() / 16 / gen5;
             int buildU = (*buildIter)->getUR() / 16 / gen5;
-            if(mainwidget->map->cell[buildL][buildU].Visible)
+            if((*buildIter)->getvisible())
                 setdata(buildL,buildU,Qt::red,8,8);
         }
     }
@@ -110,19 +123,6 @@ void ViewWidget::paintEvent(QPaintEvent *)
             int buildL = (*buildIter)->getDR() / 16 / gen5;
             int buildU = (*buildIter)->getUR() / 16 / gen5;
             setdata(buildL,buildU,Qt::blue,8,8);
-        }
-    }
-    for(int L = 0; L < MAP_L; L++)
-    {
-        for(int U = 0; U < MAP_U; U++)
-        {
-            int paintY = 1.23 * (MAP_L + L - U);
-            int paintX = 3.55 * (L + U);
-            if(!(mainwidget->map->cell[L][U].Explored))
-            {
-                setdata(L,U,Qt::black,7,4);
-            }
-
         }
     }
     //
