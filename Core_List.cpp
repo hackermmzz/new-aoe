@@ -1262,6 +1262,30 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2, relation
     }
 }
 
+bool Core_List::isCoGatherer(Coordinate* object1, Coordinate* object2)
+{
+    if (object1 == NULL || object2 == NULL || object1 == object2) return false;
+    if (object1->getSort() != SORT_FARMER || object2->getSort() != SORT_FARMER) return false;
+    if (object1->getPlayerRepresent() != object2->getPlayerRepresent()) return false;
+
+    //使用find而非operator[]，避免为无关系的对象在动态表中插入空记录
+    auto iter1 = relate_AllObject.find(object1);
+    auto iter2 = relate_AllObject.find(object2);
+    if (iter1 == relate_AllObject.end() || iter2 == relate_AllObject.end()) return false;
+
+    const relation_Object& relation1 = iter1->second;
+    const relation_Object& relation2 = iter2->second;
+    if (!relation1.isExist || !relation2.isExist) return false;
+    if (relation1.relationAct != CoreEven_Gather || relation2.relationAct != CoreEven_Gather) return false;
+
+    //采集同一资源
+    if (relation1.goalObject != NULL && relation1.goalObject == relation2.goalObject) return true;
+    //向同一资源建筑运送
+    if (relation1.alterOb != NULL && relation1.alterOb == relation2.alterOb) return true;
+
+    return false;
+}
+
 void Core_List::object_Transport(Coordinate* object1, Coordinate* object2)
 {
     //

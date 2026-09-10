@@ -177,7 +177,9 @@ void GameWidget::paintEvent(QPaintEvent *)
         while(!b->empty()&&biter!=b->end())
         {
             Coordinate *p=*biter;
-            if(CheckInScreen(*biter)&&(*biter)->getvisible())
+            // 建筑一旦被探索过就保留在战争迷雾中显示；当前视野离开后不再隐藏。
+            // getexplored() 不会因视野消失而回退，建筑被摧毁时仍会从玩家建筑列表移除。
+            if(CheckInScreen(*biter)&&((*biter)->getvisible() || (*biter)->getexplored()))
                 insert(p,&drawlist);
             else (*biter)->setNotInWidget();
             biter++;
