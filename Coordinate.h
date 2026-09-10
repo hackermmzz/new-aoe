@@ -103,8 +103,10 @@ public:
 
     /*******可见性相关*******/
     void setExplored(int explored){ this->explored = explored; }
+    // 建筑被攻击而暴露后，即使离开当前视野也保持已发现状态。
+    void setExploredPermanently(){ exploredPermanently = true; }
     void setvisible( int visible  ){ this->visible = visible; }
-    int getexplored(){ return explored; }
+    int getexplored(){ return (int)(explored || exploredPermanently); }
     int getvisible(){ return (int)(visible||timer_Visible>0); }
     void visibleSomeTimes(){ timer_Visible = 250;}
     vector<Point> getViewLab();
@@ -186,6 +188,8 @@ public:
 
     int explored=0;
     //0为未探索 1为探索
+    bool exploredPermanently = false;
+    //被攻击等事件永久暴露的对象，不随当前地图格的探索状态回退
     int visible=0;
     //0为不可见 1为可见
 
