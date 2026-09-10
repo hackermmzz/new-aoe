@@ -201,7 +201,16 @@ void Player::recalculateHumanPopulation()
 {
     int totalHalfSlots = 0;
     for (Human* humanObject : human)
+    {
+        if (humanObject == NULL) continue;
+
+        // 死亡单位播放尸体动画期间仍暂留在 human 列表中，
+        // 但已从全局有效对象表移除，不能重新计入人口。
+        auto objectIter = g_Object.find(humanObject->getglobalNum());
+        if (objectIter == g_Object.end() || objectIter->second != humanObject) continue;
+
         totalHalfSlots += getHumanPopulationHalfSlots(humanObject);
+    }
 
     playerScience->setHumanPopulationHalfSlots(totalHalfSlots);
 }

@@ -43,6 +43,9 @@ void Core::gameUpdate()
     //
 
     updateByObject();
+    // 以当前仍然有效的单位对象为准校准人口，避免死亡动画期间的对象被重算为幽灵人口。
+    for (int playerIndex = 0; playerIndex < MAXPLAYER; ++playerIndex)
+        player[playerIndex]->recalculateHumanPopulation();
     loadRelationMap();
     //刷新视野并处理区域探索结果
     theMap->reset_ObjectExploreAndVisible();
