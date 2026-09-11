@@ -713,7 +713,11 @@ void ParseArguments(const QApplication&app){
          "rotate loaded map clockwise in memory: 0, 90, 180 or 270",
          "0|90|180|270"
        );
-    QList<QCommandLineOption>options={option0,option1,option2,option3,option4,option5};
+    QCommandLineOption option6(
+        QStringList()<<"record",
+         "record the instruction"
+       );
+    QList<QCommandLineOption>options={option0,option1,option2,option3,option4,option5,option6};
     parser.addOptions(options);
 
     // QCommandLineParser会把缺少值的-map直接当成参数错误并结束程序。
@@ -735,6 +739,9 @@ void ParseArguments(const QApplication&app){
     }
     parser.process(arguments);
     //
+    if(parser.isSet("record")){
+        RuntimeConfig_setGameRecord(true);
+    }
     if(parser.isSet("exam")){
         RuntimeConfig_setIsExamining(true);
     }

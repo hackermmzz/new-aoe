@@ -9,5 +9,5 @@ void RuntimeConfig_setOffScreen(bool v);
 void RuntimeConfig_setINITIAL_FREQUENCY(int v);
 void RuntimeConfig_setFixedMapFile(const QString& v);
 void RuntimeConfig_setMapRotationDegrees(int v);
-
+void RuntimeConfig_setGameRecord(bool v);
 #endif
