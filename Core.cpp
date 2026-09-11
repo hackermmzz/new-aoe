@@ -23,7 +23,7 @@ Core::Core(Map* theMap, Player* player[],
     this->interactionList = new Core_List(this->theMap, this->player);   //本类中管理的对象交互动态表
     GameRecordOrReplayArchive=GameRecordOrReplayArchive_;
     InitPlayerMap();
-    GameOverBroadcast.subscribe(this,Core::GameOverHandle);
+    GameOverBroadcast.subscribe(this,&Core::GameOverHandle);
 }
 
 
