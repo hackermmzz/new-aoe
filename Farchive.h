@@ -3,6 +3,8 @@
 
 #include<vector>
 #include"string"
+#include <cstdint>
+#include <cstring>
 using namespace std;
 using Byte=unsigned char;
 class FArchive
