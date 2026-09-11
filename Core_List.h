@@ -56,9 +56,6 @@ public:
     void resourceBuildHaveChange(){ this->resourceBuildingChange = true; }
     //判断是否为陆地单位
     static bool JudgeMoveObjIsLandUnit(MoveObject*moveOb);
-    //判断两个对象是否为同一玩家、正在采集同一资源(或向同一资源建筑运送)的协作农民
-    //协作农民之间不判定碰撞，避免多人围采同一堆黄金/石头时互相挤住、反复绕路直到行动被判定无效
-    bool isCoGatherer(Coordinate* object1, Coordinate* object2);
 
 private:
     Map* theMap;    //地图信息

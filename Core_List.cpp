@@ -46,6 +46,31 @@ int gatherIntervalFrames()
         : 1;
 }
 
+int gatherSourceState(Coordinate* target)
+{
+    if (target == NULL)
+        return -1;
+
+    if (target->getSort() == SORT_ANIMAL)
+    {
+        if (target->getNum() == ANIMAL_TREE || target->getNum() == ANIMAL_FOREST)
+            return FARMER_LUMBER;
+        return FARMER_HUNTER;
+    }
+    if (target->getSort() == SORT_STATICRES)
+    {
+        if (target->getNum() == NUM_STATICRES_Bush)
+            return FARMER_GATHERER;
+        if (target->getNum() == NUM_STATICRES_Fish)
+            return FARMER_FISHER;
+        return FARMER_MINER;
+    }
+    if (target->getSort() == SORT_Building_Resource && target->getNum() == BUILDING_FARM)
+        return FARMER_FARMER;
+
+    return -1;
+}
+
 bool isFriendlyMissileAfterConversion(Missile* missile, Coordinate* target)
 {
     if (missile == NULL || target == NULL || missile->isAttackerHaveDie() || !target->isPlayerControl())
@@ -177,6 +202,16 @@ int Core_List::addRelation(Coordinate* object1, Coordinate* object2, int eventTy
             //如果满载,返回错误码
             if (f0->getResourceNowHave() >= Double(5))return ACTION_INVALID_FULLY_LOAD;
         }
+        //同类采集目标之间保留背包；即使资源种类相同，来源改变（如农田到浆果）仍清空。
+        if (eventType == CoreEven_Gather && object1->getSort() == SORT_FARMER)
+        {
+            Farmer* farmer = static_cast<Farmer*>(object1);
+            const int newGatherState = gatherSourceState(object2);
+            if (!farmer->get_isEmptyBackpack() && newGatherState >= 0 &&
+                farmer->getState() != newGatherState)
+                farmer->update_resourceClear();
+        }
+
         //为工作者设置交互对象类别属性，主要用于farmer的status判断/Attack...
         bool isSameReprensent;
         if (object1->isPlayerControl() && object2->isPlayerControl())
@@ -594,12 +629,24 @@ void Core_List::manageRelationList()
             //状态额外操作
             {
                 //从部分其他的状态需要清空当前资源
-                if(object1->getSort()==SORT_FARMER){
+                if(nowPhaseNum == exePhaseNum && object1->getSort()==SORT_FARMER){
                     switch (thisDetailEven.phaseList[nowPhaseNum]) {
-                    case CoreDetail_Attack:case CoreDetail_PinPoint_Attack:case CoreDetail_UpdateRatio:
+                    case CoreDetail_Attack:
+                    case CoreDetail_PinPoint_Attack:
                         {
-                            Farmer*farmer=static_cast<Farmer*>(object1);
+                            //采集树木时的攻击阶段属于砍伐，不应丢弃已携带的木材。
+                            if (iter->second.relationAct != CoreEven_Gather)
+                            {
+                                Farmer* farmer=static_cast<Farmer*>(object1);
+                                farmer->update_resourceClear();
+                            }
+                            break;
+                        }
+                    case CoreDetail_UpdateRatio:
+                        {
+                            Farmer* farmer=static_cast<Farmer*>(object1);
                             farmer->update_resourceClear();
+                            break;
                         }
                     }
                 }
@@ -1263,30 +1310,6 @@ void Core_List::object_Gather(Coordinate* object1, Coordinate* object2, relation
             relation.gatherNextFrame = g_frame + gatherIntervalFrames();
         }
     }
-}
-
-bool Core_List::isCoGatherer(Coordinate* object1, Coordinate* object2)
-{
-    if (object1 == NULL || object2 == NULL || object1 == object2) return false;
-    if (object1->getSort() != SORT_FARMER || object2->getSort() != SORT_FARMER) return false;
-    if (object1->getPlayerRepresent() != object2->getPlayerRepresent()) return false;
-
-    //使用find而非operator[]，避免为无关系的对象在动态表中插入空记录
-    auto iter1 = relate_AllObject.find(object1);
-    auto iter2 = relate_AllObject.find(object2);
-    if (iter1 == relate_AllObject.end() || iter2 == relate_AllObject.end()) return false;
-
-    const relation_Object& relation1 = iter1->second;
-    const relation_Object& relation2 = iter2->second;
-    if (!relation1.isExist || !relation2.isExist) return false;
-    if (relation1.relationAct != CoreEven_Gather || relation2.relationAct != CoreEven_Gather) return false;
-
-    //采集同一资源
-    if (relation1.goalObject != NULL && relation1.goalObject == relation2.goalObject) return true;
-    //向同一资源建筑运送
-    if (relation1.alterOb != NULL && relation1.alterOb == relation2.alterOb) return true;
-
-    return false;
 }
 
 void Core_List::object_Transport(Coordinate* object1, Coordinate* object2)

@@ -1541,8 +1541,6 @@ void Core::judge_Crush()
                 /****当前取消移动物体之间的碰撞******/
                 if (!theMap->CanCrush(barrierOb))continue;
                 /****当前取消移动物体之间的碰撞******/
-                //同一玩家、采集同一资源的农民之间不判定碰撞，防止多人围采一堆资源时互相卡住
-                if (interactionList->isCoGatherer(judOb, barrierOb)) continue;
                 //判断碰撞，碰撞箱有重合
                 if (judOb->isCrash(barrierOb))
                 {
