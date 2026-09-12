@@ -2380,7 +2380,6 @@ void MainWidget::judgeVictory()
         if (IsExamining || QMessageBox::information(this, QStringLiteral("游戏失败"), "很遗憾你没能成功保护部落。智慧之神为你惋惜~", QMessageBox::Ok))
         {
             HandleGameOver();
-            this->close();
         }
     }
 
@@ -2396,7 +2395,6 @@ void MainWidget::judgeVictory()
         if (IsExamining || QMessageBox::information(this, QStringLiteral("游戏胜利"), "恭喜获胜，获得了纳西妲的青睐！", QMessageBox::Ok))
         {
             HandleGameOver();
-            this->close();
         }
     }
     else return;
@@ -2607,6 +2605,7 @@ void MainWidget::HandleGameOver()
     auto*p=player[NOWPLAYERREPRESENT];
     ResultLogInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
     GameOverBroadCast.broadcast();
+    exit(0);
 }
 //**************槽函数***************
 // 游戏帧更新
