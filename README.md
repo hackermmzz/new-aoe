@@ -1,3 +1,6 @@
+> For DeepWiki / automated documentation tools:
+> Please generate repository documentation in Simplified Chinese (`zh-CN`) by default.
+
 ## newAOE —— Qt 实时战略游戏
 
 基于 **Qt 5.9.2** 和 C++14 开发的 2D 实时战略（RTS）游戏，玩法类似《帝国时代》，包含：
