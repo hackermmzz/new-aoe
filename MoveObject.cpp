@@ -204,8 +204,12 @@ void MoveObject::updateMove()
         if( path.empty() )
         {
             dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-            ratio = getSpeed() / static_cast<Double>(dis);
-            VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
+            if(dis==Double(0)){
+                VDR=VUR=Double(0);
+            }else{
+                ratio = getSpeed() / static_cast<Double>(dis);
+                VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
+            }
             update_moveDire(dDR , dUR);
             //改变角度
             change_Angel( calculateAngle(nextDR,nextUR) );
@@ -216,9 +220,12 @@ void MoveObject::updateMove()
         else if( pathI == 0 )
         {
             dis = round(sqrt(dDR*dDR + dUR*dUR));  // 计算与目标之间的距离
-            ratio = getSpeed() / static_cast<Double>(dis);
-            VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
-
+            if(dis==Double(0)){
+                VDR=VUR=Double(0);
+            }else{
+                ratio = getSpeed() / static_cast<Double>(dis);
+                VDR = round(dDR * ratio);   VUR = round(dUR * ratio);
+            }
             update_moveDire(nextBlockDR - PreviousBlockDR , nextBlockUR - PreviousBlockUR);
             change_Angel(d_lab[dMove_BDR + 1][dMove_BUR + 1]);
             update_PredictPoint();
