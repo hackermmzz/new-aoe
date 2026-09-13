@@ -1,0 +1,22 @@
+name: Sync to Gitee
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync to Gitee
+        run: |
+          git remote add gitee https://crackermmzz:${{2139f450f0ff29cd4a5be6c7ba696334}}@gitee.com/crackermmzz/new-aoe.git
+          git push gitee --all
+          git push gitee --tags
