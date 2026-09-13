@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-dw-locale="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>碰撞与寻路 | hackermmzz/new-aoe | DeepWiki Export</title>
+    <meta name="description" content="碰撞与寻路 相关源文件 以下文件被用作生成此 wiki 页面时的上下文： GlobalVariate.cpp GlobalVariate.h config.json 本文档说明了游戏引擎中使用的碰撞检测和空间计算系统。内容涵盖坐标系、基于像素内存图与 crashbox 值的碰撞检测、使用曼哈顿与欧几里得度量的距离计算，" />
+    <link rel="canonical" href="https://deepwiki.com/hackermmzz/new-aoe/6.3-collision-and-pathfinding" />
+    <link rel="preload" href="../../../_next/static/media/4cf2300e9c8272f7-s.p.woff2" as="font" crossorigin type="font/woff2" />
+<link rel="preload" href="../../../_next/static/media/93f479601ee12b01-s.p.woff2" as="font" crossorigin type="font/woff2" />
+    <link rel="stylesheet" href="../../../_next/static/css/de70bee13400563f.css" />
+<link rel="stylesheet" href="../../../_next/static/css/776f0ebb1639b0c7.css" />
+    <link rel="icon" href="../../../favicon.ico" />
+<link rel="icon" href="../../../icon.png" />
+<link rel="icon" href="../../../apple-icon.png" />
+    <link rel="stylesheet" href="../../../assets/site.css" />
+    <script>((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=["light","dark"];function k(b){var c;(Array.isArray(a)?a:[a]).forEach(a=>{let c="class"===a,d=c&&f?e.map(a=>f[a]||a):e;c?(i.classList.remove(...d),i.classList.add(f&&f[b]?f[b]:b)):i.setAttribute(a,b)}),c=b,h&&j.includes(c)&&(i.style.colorScheme=c)}if(d)k(d);else try{let a=localStorage.getItem(b)||c,d=g&&"system"===a?window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light":a;k(d)}catch(a){}})("class","theme","light",null,["light","dark"],null,true,true)</script>
+    <script>(function(defaultLocale,available){var root=document.documentElement;var locale=defaultLocale;try{var saved=localStorage.getItem('dw-locale');if(available.indexOf(saved)!==-1){locale=saved;}}catch(e){}root.setAttribute('data-dw-locale',locale);root.setAttribute('lang',locale==='zh'?'zh-CN':'en');})("zh",["zh", "en"])</script>
+  </head>
+  <body class="__variable_188709 font-geist-sans relative min-h-screen bg-background antialiased">
+    <div class="flex min-h-screen w-full flex-col text-white" id="deepwiki-export-page">
+      <div class="bg-background border-b-border sticky top-0 z-30 border-b border-dashed">
+        <div class="container-wrapper">
+          <div class="container mx-auto flex w-full flex-row items-center gap-2 py-4 md:py-6">
+            <a class="flex items-center gap-3" href="..">
+              <span class="text-base font-medium leading-none md:text-lg hidden sm:block">DeepWiki</span>
+            </a>
+            <div class="flex-1">
+              <div class="flex flex-row items-center gap-2">
+                <a class="block text-xs font-medium leading-none text-white sm:hidden md:text-lg" href="..">DeepWiki</a>
+                <p class="text-sm font-normal leading-none md:text-lg">
+                  <a href="https://github.com/hackermmzz/new-aoe" target="_blank" rel="noopener noreferrer" title="Open repository" class="text-muted-foreground hover:text-muted-foreground/80 group inline-flex items-center gap-1 transition-colors">
+                    hackermmzz/new-aoe
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="dw-locale-switch" data-locale-switch="true"><button type="button" class="dw-locale-button" data-set-locale="zh" aria-label="Switch language to ZH">中</button><button type="button" class="dw-locale-button" data-set-locale="en" aria-label="Switch language to EN">EN</button></div>
+              <div class="hidden items-center gap-3 md:flex">
+              <button type="button" class="flex items-center rounded-md !text-white cursor-pointer transition-all border bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600 gap-1.5 px-3 py-1.5 text-sm" aria-label="Share" data-share-page="true">
+                <span data-locale-text="zh">分享</span>
+                <span data-locale-text="en">Share</span>
+              </button>
+              <button type="button" class="flex size-9 items-center justify-center rounded-md border border-border bg-surface hover:border-border-hover hover:bg-component" aria-label="Toggle theme" data-theme-toggle="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M120,40V24a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66a8,8,0,0,0,11.32-11.32l-12-12A8,8,0,0,0,46.34,57.66Zm0,116.68-12,12a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM232,120H216a8,8,0,0,0,0,16h16a8,8,0,0,0,0-16ZM69.66,186.34a8,8,0,0,0-11.32,11.32l12,12a8,8,0,0,0,11.32-11.32Zm128,11.32a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM216,120h16a8,8,0,0,0,0-16H216a8,8,0,0,0,0,16ZM186.34,58.34a8,8,0,0,0,11.32,11.32l12-12a8,8,0,0,0-11.32-11.32ZM128,216a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V224A8,8,0,0,0,128,216Z"></path></svg>
+              </button>
+              </div>
+            </div>
+            <button type="button" class="dw-mobile-sidebar-toggle flex items-center rounded-md cursor-pointer transition-all border border-border bg-surface hover:border-border-hover hover:bg-component gap-2 px-3 py-1.5 text-sm md:hidden" data-sidebar-toggle="true">
+              <span data-locale-text="zh">目录</span>
+              <span data-locale-text="en">Contents</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="w-full flex-1">
+        <div class="container-wrapper relative mx-auto h-full px-0">
+          <div class="container relative mx-auto flex h-full w-full flex-col gap-0 max-md:!px-0 md:flex-row md:gap-6 lg:gap-10">
+            <aside class="dw-sidebar-panel border-r-border hidden max-h-screen border-r border-dashed py-6 pr-4 transition-[border-radius] md:sticky md:left-0 md:top-20 md:block md:h-[calc(100vh-82px)] md:w-64 md:flex-shrink-0 md:overflow-y-auto lg:py-9 xl:w-72">
+              <div class="flex h-full w-full max-w-full flex-shrink-0 flex-col overflow-hidden" style="scrollbar-color:var(--color-border) transparent">
+                <div class="flex-shrink-0 px-2">
+                  <div class="text-secondary pb-1 text-xs">
+                    <span data-locale-text="zh">最近索引：13 March 2026</span>
+                    <span data-locale-text="en">Last indexed: 13 March 2026</span>
+                    (<a href="https://github.com/hackermmzz/new-aoe/commits/882596c8" target="_blank" rel="noopener noreferrer" class="underline-offset-2 hover:underline">882596c</a>)
+                  </div>
+                </div>
+                <ul class="flex-1 flex-shrink-0 space-y-1 overflow-y-auto py-1" style="scrollbar-width:none">
+                  <li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1-overview"><span data-locale-text="zh">概述</span><span data-locale-text="en">Overview</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1.1-system-architecture"><span data-locale-text="zh">系统架构</span><span data-locale-text="en">System Architecture</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../1.2-getting-started"><span data-locale-text="zh">快速开始</span><span data-locale-text="en">Getting Started</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2-core-systems"><span data-locale-text="zh">核心系统</span><span data-locale-text="en">Core Systems</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.1-mainwidget-and-game-loop"><span data-locale-text="zh">MainWidget 与游戏循环</span><span data-locale-text="en">MainWidget and Game Loop</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.2-game-core-engine"><span data-locale-text="zh">游戏核心引擎</span><span data-locale-text="en">Game Core Engine</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../2.3-configuration-system"><span data-locale-text="zh">配置系统</span><span data-locale-text="en">Configuration System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3-game-mechanics"><span data-locale-text="zh">游戏机制</span><span data-locale-text="en">Game Mechanics</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.1-resource-and-economy-system"><span data-locale-text="zh">资源与经济系统</span><span data-locale-text="en">Resource and Economy System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.2-technology-tree"><span data-locale-text="zh">科技树</span><span data-locale-text="en">Technology Tree</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.3-units-and-buildings"><span data-locale-text="zh">单位与建筑</span><span data-locale-text="en">Units and Buildings</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../3.4-combat-system"><span data-locale-text="zh">战斗系统</span><span data-locale-text="en">Combat System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4-user-interface"><span data-locale-text="zh">用户界面</span><span data-locale-text="en">User Interface</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.1-selectwidget-and-command-panel"><span data-locale-text="zh">SelectWidget 与命令面板</span><span data-locale-text="en">SelectWidget and Command Panel</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.2-map-editor"><span data-locale-text="zh">地图编辑器</span><span data-locale-text="en">Map Editor</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.3-rendering-and-display"><span data-locale-text="zh">渲染与显示</span><span data-locale-text="en">Rendering and Display</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../4.4-event-handling"><span data-locale-text="zh">事件处理</span><span data-locale-text="en">Event Handling</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5-ai-system"><span data-locale-text="zh">AI 系统</span><span data-locale-text="en">AI System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5.1-ai-architecture"><span data-locale-text="zh">AI 架构</span><span data-locale-text="en">AI Architecture</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../5.2-instruction-and-command-system"><span data-locale-text="zh">指令与命令系统</span><span data-locale-text="en">Instruction and Command System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6-map-and-world"><span data-locale-text="zh">地图与世界</span><span data-locale-text="en">Map and World</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.1-map-structure"><span data-locale-text="zh">地图结构</span><span data-locale-text="en">Map Structure</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../6.2-terrain-and-objects"><span data-locale-text="zh">地形与对象</span><span data-locale-text="en">Terrain and Objects</span></a></li>
+<li style="padding-left:12px"><a data-selected="true" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="."><span data-locale-text="zh">碰撞与寻路</span><span data-locale-text="en">Collision and Pathfinding</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7-advanced-topics"><span data-locale-text="zh">高级主题</span><span data-locale-text="en">Advanced Topics</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.1-area-management-system"><span data-locale-text="zh">区域管理系统</span><span data-locale-text="en">Area Management System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.2-enemy-status-and-ai-behavior"><span data-locale-text="zh">敌人状态与 AI 行为</span><span data-locale-text="en">Enemy Status and AI Behavior</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.3-network-and-exam-mode"><span data-locale-text="zh">网络与考试模式</span><span data-locale-text="en">Network and Exam Mode</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.4-debug-and-logging-system"><span data-locale-text="zh">调试与日志系统</span><span data-locale-text="en">Debug and Logging System</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../7.5-score-system"><span data-locale-text="zh">评分系统</span><span data-locale-text="en">Score System</span></a></li>
+<li style="padding-left:0px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8-data-structures-reference"><span data-locale-text="zh">数据结构参考</span><span data-locale-text="en">Data Structures Reference</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.1-game-state-structures"><span data-locale-text="zh">游戏状态结构</span><span data-locale-text="en">Game State Structures</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.2-development-structures"><span data-locale-text="zh">开发结构</span><span data-locale-text="en">Development Structures</span></a></li>
+<li style="padding-left:12px"><a data-selected="false" class="hover:bg-hover block w-full rounded px-2 py-1.5 text-left text-sm transition-none text-secondary data-[selected=true]:bg-hover data-[selected=true]:text-primary font-normal data-[selected=true]:font-normal" href="../8.3-constants-and-enumerations"><span data-locale-text="zh">常量与枚举</span><span data-locale-text="en">Constants and Enumerations</span></a></li>
+                </ul>
+              </div>
+            </aside>
+            <main class="min-w-0 flex-1">
+              <div class="border-b-border max-md:border-b max-md:border-dashed md:py-9">
+                <div class="mx-auto max-w-2xl px-4 pb-8 pt-6 md:px-0 md:pb-0">
+                  <div class="prose prose-invert dark:prose-invert prose-headings:text-inherit prose-p:text-inherit max-w-none">
+                    <div class="prose-custom prose-custom-md prose-custom-gray !max-w-none text-neutral-300 [overflow-wrap:anywhere]">
+                      <section class="dw-locale-article" data-locale-article="zh"><h1 class="group" data-header="true" id="zh-碰撞与寻路">碰撞与寻路<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h1>
+<details><summary>相关源文件</summary><p>以下文件被用作生成此 wiki 页面时的上下文：</p>
+<ul>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span></a></li>
+</ul></details>
+<p>本文档说明了游戏引擎中使用的碰撞检测和空间计算系统。内容涵盖坐标系、基于像素内存图与 crashbox 值的碰撞检测、使用曼哈顿与欧几里得度量的距离计算，以及支持单位移动和交互的空间查询工具。</p>
+<p>关于单位移动行为和寻路逻辑，请参见“单位 AI 与移动”部分（尚未编写）。关于地图结构和地形表示的信息，请参见 <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../6.1-map-structure">地图结构</a>。</p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-坐标系">坐标系<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>游戏使用两种协同工作的坐标系来进行空间计算：</p>
+<p><strong>块坐标</strong> (<code>BlockDR</code>, <code>BlockUR</code>)：整数网格坐标，每个块代表一个地图图块。地图尺寸由 <code>MAP_L</code> 和 <code>MAP_U</code> 定义（通常为 100x100 个块）。</p>
+<p><strong>细节坐标</strong> (<code>DR</code>, <code>UR</code>)：表示游戏世界中精确位置的浮点坐标。其单位为 detail units，每个块的边长为 <code>BLOCKSIDELENGTH</code>（约 35.78 个 detail units）。</p>
+<p><code>trans_BlockPointToDetailCenter()</code> 函数会将块坐标转换为该块中心点对应的细节坐标：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-text">detail_coordinate = (block_coordinate + 0.5) * BLOCKSIDELENGTH
+</code></pre></div></div>
+<p>这种双坐标系设计使得系统既能在块级别高效执行空间查询，又能在细节级别保持单位移动的平滑性。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1089-L1092" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1089-1092</span></a>, <a href="">config.json:25,27-28</a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L228-L231" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">228-231</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-碰撞检测系统">碰撞检测系统<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-pixmemorymap-结构">pixMemoryMap 结构<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><code>pixMemoryMap</code> 结构通过从精灵图的 alpha 通道创建二值内存图，提供像素级精度的碰撞检测。精灵图中的每个像素都会根据其 alpha 值被标记为占用（1）或空闲（0）。</p>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TB
+    subgraph "图像资源加载"
+        IMG["QPixmap&lt;br/&gt;(精灵图像)"]
+        ALPHA["Alpha 通道&lt;br/&gt;提取"]
+        PMM["pixMemoryMap&lt;br/&gt;(二值网格)"]
+    end
+    
+    subgraph "pixMemoryMap 结构"
+        VEC["vector&amp;lt;char&amp;gt; 内存图"]
+        W["int 宽度"]
+        H["int 高度"]
+    end
+    
+    subgraph "碰撞检测方法"
+        SET["setMemoryMap(i,j)&lt;br/&gt;标记像素为占用"]
+        GET["getMemoryMap(i,j)&lt;br/&gt;检查像素状态"]
+        FILL["fillBlockMemoryMap()&lt;br/&gt;菱形图案填充"]
+    end
+    
+    IMG --&gt; ALPHA
+    ALPHA --&gt; PMM
+    PMM --&gt; VEC
+    PMM --&gt; W
+    PMM --&gt; H
+    
+    VEC --&gt; SET
+    VEC --&gt; GET
+    VEC --&gt; FILL</code></pre></div>
+<p><code>initMemory()</code> 函数会处理每个精灵图，以创建其碰撞图：</p>
+<ol>
+<li>将 <code>QPixmap</code> 转换为 <code>QImage</code> 以便访问像素</li>
+<li>遍历每一个像素</li>
+<li>检查 alpha 通道是否非零：<code>(piximage.pixel(i,j)) &amp; (0xff000000) != 0</code></li>
+<li>将被占用的像素及其邻居一并标记（3x3 膨胀，以获得更平滑的碰撞效果）</li>
+</ol>
+<p><code>fillBlockMemoryMap()</code> 方法会为等距视角的块精灵创建菱形碰撞区域，并根据几何约束填充像素。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1002-L1084" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1002-1084</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L970-L1013" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">970-1013</span></a></p>
+<hr/>
+<h3 class="group" data-header="true" id="zh-crashbox-值">Crashbox 值<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Crashbox 值定义了不同对象类型的碰撞半径。这些是以细节坐标单位测量的圆形碰撞区域：</p>
+<table>
+<thead>
+<tr>
+<th>Crashbox 类型</th>
+<th>数值</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CRASHBOX_MICRO</code></td>
+<td>1.0</td>
+<td>点对象</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SINGLEOB</code></td>
+<td>5.96</td>
+<td>小型资源（浆果）</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SMALLOB</code></td>
+<td>8.925</td>
+<td>中型资源</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_BIGOB</code></td>
+<td>17.7</td>
+<td>大型资源（树木）</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SINGLEBLOCK</code></td>
+<td>16.36</td>
+<td>1x1 建筑</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SMALLBLOCK</code></td>
+<td>34.21</td>
+<td>小型建筑</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SMALL</code></td>
+<td>32.72</td>
+<td>小型单位/建筑</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_MIDDLE</code></td>
+<td>50.57</td>
+<td>中型建筑</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_BIG</code></td>
+<td>68.42</td>
+<td>大型建筑</td>
+</tr>
+</tbody>
+</table>
+<p>这些值从 <code>config.json</code> 中加载，并在整个代码库中用于距离检查和碰撞规避。当两个对象中心点之间的距离小于其 crashbox 半径之和时，就认为它们发生了碰撞。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L84-L92" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">84-92</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L21-L29" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">21-29</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L99-L107" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">99-107</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-距离计算">距离计算<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-曼哈顿距离">曼哈顿距离<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>游戏主要使用曼哈顿距离（L1 度量）来进行寻路和空间查询。曼哈顿距离的计算方式如下：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-text">distance = |x1 - x2| + |y1 - y2|
+</code></pre></div></div>
+<p><strong>关键函数：</strong></p>
+<p><strong><code>calculateManhattanDistance()</code></strong> - 针对整数和双精度坐标提供两个重载版本：</p>
+<ul>
+<li><code>int calculateManhattanDistance(int x1, int y1, int x2, int y2)</code></li>
+<li><code>double calculateManhattanDistance(double x1, double y1, double x2, double y2)</code></li>
+</ul>
+<p><strong><code>isNear_Manhattan()</code></strong> - 检查两点是否在某个曼哈顿距离阈值之内：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">bool</span><span class="w"> </span><span class="nf">isNear_Manhattan</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">dr</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ur</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">dr1</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ur1</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">distance</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">dr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dr1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">ur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ur1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>该函数使用了简化检查：两个坐标轴上的差值都必须 ≤ distance。</p>
+<p><strong>曼哈顿距离常量：</strong></p>
+<table>
+<thead>
+<tr>
+<th>常量</th>
+<th>数值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DISTANCE_Manhattan_MoveEndNEAR</code></td>
+<td>0.0001</td>
+<td>移动完成容差</td>
+</tr>
+<tr>
+<td><code>DISTANCE_Manhattan_PathMove</code></td>
+<td>0.01</td>
+<td>寻路步进阈值</td>
+</tr>
+<tr>
+<td><code>DISTANCE_Manhattan_Unload</code></td>
+<td>42.93</td>
+<td>船只卸载范围</td>
+</tr>
+<tr>
+<td><code>DISTANCE_Manhattan_Transport</code></td>
+<td>51.52</td>
+<td>船只运输范围</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源：</strong> <a href="">GlobalVariate.cpp:1068-1077,1019-1022</a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L258-L261" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">258-261</span></a>, <a href="">GlobalVariate.h:300-303,1311-1314</a></p>
+<hr/>
+<h3 class="group" data-header="true" id="zh-欧几里得距离">欧几里得距离<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>对于精确距离测量（攻击范围、视野），游戏使用欧几里得距离（L2 度量）：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">double</span><span class="w"> </span><span class="nf">countdistance</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">L</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">L0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">U0</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">L</span><span class="o">-</span><span class="n">L0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">L</span><span class="o">-</span><span class="n">L0</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">U</span><span class="o">-</span><span class="n">U0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">U</span><span class="o">-</span><span class="n">U0</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p><strong>欧几里得距离常量：</strong></p>
+<table>
+<thead>
+<tr>
+<th>常量</th>
+<th>数值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DISTANCE_ATTACK_CLOSE</code></td>
+<td>17.89</td>
+<td>近战范围</td>
+</tr>
+<tr>
+<td><code>DISTANCE_HIT_TARGET</code></td>
+<td>4.0</td>
+<td>命中检测阈值</td>
+</tr>
+<tr>
+<td><code>DISTANCE_ELEPHANT_ATTACK</code></td>
+<td>42.57</td>
+<td>大象攻击范围</td>
+</tr>
+<tr>
+<td><code>SHIP_ACT_MAX_DISTANCE</code></td>
+<td>1843.2</td>
+<td>船只交互范围（平方）</td>
+</tr>
+</tbody>
+</table>
+<p>注意，<code>SHIP_ACT_MAX_DISTANCE</code> 看起来是一个平方距离值，用于优化（避免进行平方根计算）。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1015-L1018" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1015-1018</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L262-L265" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">262-265</span></a>, <a href="">GlobalVariate.h:304-307,1310</a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-碰撞检测工作流程">碰撞检测工作流程<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TD
+    subgraph "资源加载阶段"
+        LOAD["InitImageResMap()&lt;br/&gt;加载精灵"]
+        INIT["initMemory()&lt;br/&gt;创建 pixMemoryMap"]
+        STORE["ImageResource&lt;br/&gt;{pix, memorymap}"]
+    end
+    
+    subgraph "对象放置"
+        POS["设置对象位置&lt;br/&gt;(DR, UR)"]
+        CRASH["根据对象类型&lt;br/&gt;分配 crashbox 值"]
+    end
+    
+    subgraph "碰撞查询"
+        Q1["检查对象中心之间的&lt;br/&gt;距离"]
+        Q2{"距离 &lt;&lt;br/&gt;crashbox 半径之和？"}
+        Q3["检查 pixMemoryMap&lt;br/&gt;是否存在像素重叠"]
+        COLL["检测到碰撞"]
+        NOCOLL["无碰撞"]
+    end
+    
+    LOAD --&gt; INIT
+    INIT --&gt; STORE
+    
+    STORE --&gt; POS
+    POS --&gt; CRASH
+    
+    CRASH --&gt; Q1
+    Q1 --&gt; Q2
+    Q2 --&gt;|是| Q3
+    Q2 --&gt;|否| NOCOLL
+    Q3 --&gt;|重叠| COLL
+    Q3 --&gt;|不重叠| NOCOLL</code></pre></div>
+<p>碰撞系统采用两级方法：</p>
+<ol>
+<li><strong>宽阶段</strong>：使用 crashbox 半径进行快速距离检查（圆与圆碰撞）</li>
+<li><strong>窄阶段</strong>：使用 <code>pixMemoryMap</code> 进行像素级精确碰撞检测，以判断精灵图是否真正重叠</li>
+</ol>
+<p>这种混合方法在性能和精度之间取得了平衡。</p>
+<p><strong>来源：</strong> <a href="">GlobalVariate.cpp:590-697,970-1013</a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1086-L1103" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1086-1103</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-空间查询与定位">空间查询与定位<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="zh-邻近性检查">邻近性检查<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><code>isNear_Manhattan()</code> 函数是整个代码库中进行邻近查询的主要工具。它用于：</p>
+<ul>
+<li>检查单位是否已到达目的地</li>
+<li>判断单位之间是否足够接近以进行交互</li>
+<li>资源采集范围检查</li>
+<li>建筑放置合法性验证</li>
+</ul>
+<p>示例用法模式：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="c1">// Check if unit reached target position</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isNear_Manhattan</span><span class="p">(</span><span class="n">current_dr</span><span class="p">,</span><span class="w"> </span><span class="n">current_ur</span><span class="p">,</span><span class="w"> </span><span class="n">target_dr</span><span class="p">,</span><span class="w"> </span><span class="n">target_ur</span><span class="p">,</span><span class="w"> </span><span class="n">DISTANCE_Manhattan_MoveEndNEAR</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Arrival logic</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1019-L1022" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1019-1022</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1311" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1311</span></a></p>
+<hr/>
+<h3 class="group" data-header="true" id="zh-镜像点计算">镜像点计算<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p><code>calMirrorPoint()</code> 函数会围绕一个镜像点计算反射后的位置，用于单位定位和编队：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">void</span><span class="w"> </span><span class="nf">calMirrorPoint</span><span class="p">(</span><span class="kt">double</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dr</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ur</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">dr_mirror</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ur_mirror</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">dis</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dr_deta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dr_mirror</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dr</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">ur_deta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ur_mirror</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ur</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">dr_deta</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">ur_deta</span><span class="p">);</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">dr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dr_mirror</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dr_deta</span><span class="o">/</span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dis</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ur_mirror</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ur_deta</span><span class="o">/</span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dis</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>该函数会：</p>
+<ol>
+<li>计算从当前点指向镜像点的方向向量</li>
+<li>使用曼哈顿距离进行归一化</li>
+<li>沿相同方向，将该点投影到镜像点之外 <code>dis</code> 个单位的位置</li>
+</ol>
+<p>这对于将单位放置在建筑或资源的另一侧非常有用，例如农民在采集时需要调整自己的站位。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1079-L1087" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1079-1087</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1316" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1316</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-距离常量参考">距离常量参考<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>下表汇总了所有用于空间查询的距离相关常量：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>常量</th>
+<th>数值</th>
+<th>单位</th>
+<th>用法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>移动</strong></td>
+<td><code>DISTANCE_Manhattan_MoveEndNEAR</code></td>
+<td>0.0001</td>
+<td>Detail</td>
+<td>移动完成</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_Manhattan_PathMove</code></td>
+<td>0.01</td>
+<td>Detail</td>
+<td>寻路步进</td>
+</tr>
+<tr>
+<td><strong>船只</strong></td>
+<td><code>DISTANCE_Manhattan_Unload</code></td>
+<td>42.93</td>
+<td>Detail</td>
+<td>卸载范围</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_Manhattan_Transport</code></td>
+<td>51.52</td>
+<td>Detail</td>
+<td>运输登船</td>
+</tr>
+<tr>
+<td></td>
+<td><code>SHIP_ACT_MAX_DISTANCE</code></td>
+<td>1843.2</td>
+<td>Detail²</td>
+<td>最大交互距离</td>
+</tr>
+<tr>
+<td><strong>战斗</strong></td>
+<td><code>DISTANCE_ATTACK_CLOSE</code></td>
+<td>17.89</td>
+<td>Detail</td>
+<td>近战范围</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_HIT_TARGET</code></td>
+<td>4.0</td>
+<td>Detail</td>
+<td>命中检测</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_ELEPHANT_ATTACK</code></td>
+<td>42.57</td>
+<td>Detail</td>
+<td>大象攻击</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DIS_ARROWTOWER</code></td>
+<td>7.0</td>
+<td>Blocks</td>
+<td>箭塔攻击范围</td>
+</tr>
+</tbody>
+</table>
+<p>额外的单位专属攻击范围以 <code>DIS_*</code> 值的形式存储在配置中（例如 <code>DIS_BOWMAN</code>、<code>DIS_SHIP</code>），其单位为 block units。</p>
+<p><strong>来源：</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L247-L265" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">247-265</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L300-L307" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">300-307</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L349-L356" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">349-356</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-坐标系工具函数">坐标系工具函数<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph LR
+    subgraph "转换函数"
+        BLOCK["块坐标&lt;br/&gt;(int BlockDR, BlockUR)"]
+        TRANS["trans_BlockPointToDetailCenter()"]
+        DETAIL["细节坐标&lt;br/&gt;(double DR, UR)"]
+    end
+    
+    subgraph "距离度量"
+        EUCL["countdistance()&lt;br/&gt;欧几里得 (L2)"]
+        MANH["calculateManhattanDistance()&lt;br/&gt;曼哈顿 (L1)"]
+        NEAR["isNear_Manhattan()&lt;br/&gt;邻近性检查"]
+    end
+    
+    subgraph "定位"
+        MIRROR["calMirrorPoint()&lt;br/&gt;反射计算"]
+        SGN["sgn()&lt;br/&gt;符号函数"]
+    end
+    
+    BLOCK --&gt; TRANS
+    TRANS --&gt; DETAIL
+    
+    DETAIL --&gt; EUCL
+    DETAIL --&gt; MANH
+    MANH --&gt; NEAR
+    
+    DETAIL --&gt; MIRROR
+    DETAIL --&gt; SGN</code></pre></div>
+<p><strong><code>sgn(double x)</code></strong> - 返回一个数的符号（-1、0 或 1），用于方向计算：</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">int</span><span class="w"> </span><span class="nf">sgn</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">__x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">__x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这些工具函数构成了游戏中所有空间计算的基础，从简单的距离检查到复杂的定位算法都依赖于它们。</p>
+<p><strong>来源：</strong> <a href="">GlobalVariate.cpp:1089-1092,1136-1141</a>, <a href="">GlobalVariate.h:1318,1321</a></p>
+<hr/>
+<h2 class="group" data-header="true" id="zh-集成说明">集成说明<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>碰撞与寻路系统会与其他游戏系统按如下方式集成：</p>
+<ul>
+<li><strong>地图系统</strong>（<a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../6.1-map-structure">地图结构</a>）：块坐标可直接映射到地形网格</li>
+<li><strong>移动系统</strong>：使用曼哈顿距离做出寻路决策</li>
+<li><strong>战斗系统</strong>（<a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../3.4-combat-system">战斗系统</a>）：使用欧几里得距离进行攻击范围检查</li>
+<li><strong>资源系统</strong>：使用 crashbox 值进行放置验证和采集范围判断</li>
+</ul>
+<p>pixMemoryMap 碰撞数据存储在全局 <code>resMap</code> 中的 <code>ImageResource</code> 结构体内，因此渲染系统和游戏逻辑系统都可以访问到这些数据。</p>
+<p><strong>来源：</strong> <a href="">GlobalVariate.h:1086-1103,524-526</a></p></section><section class="dw-locale-article" data-locale-article="en"><h1 class="group" data-header="true" id="en-collision-and-pathfinding">Collision and Pathfinding<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h1>
+<details><summary>Relevant source files</summary><p>The following files were used as context for generating this wiki page:</p>
+<ul>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span></a></li>
+<li><a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span></a></li>
+</ul></details>
+<p>This document explains the collision detection and spatial calculation systems used in the game engine. It covers the coordinate systems, collision detection using pixel-based memory maps and crashbox values, distance calculations using Manhattan and Euclidean metrics, and spatial query utilities that support unit movement and interaction.</p>
+<p>For information about unit movement behavior and pathfinding logic, see the Unit AI and Movement section (not yet written). For information about the map structure and terrain representation, see <a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../6.1-map-structure">Map Structure</a>.</p>
+<hr/>
+<h2 class="group" data-header="true" id="en-coordinate-systems">Coordinate Systems<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The game uses two coordinate systems that work together for spatial calculations:</p>
+<p><strong>Block Coordinates</strong> (<code>BlockDR</code>, <code>BlockUR</code>): Integer grid coordinates where each block represents a map tile. The map dimensions are defined by <code>MAP_L</code> and <code>MAP_U</code> (typically 100x100 blocks).</p>
+<p><strong>Detail Coordinates</strong> (<code>DR</code>, <code>UR</code>): Floating-point coordinates that represent precise positions within the game world. These are measured in detail units, where each block has side length <code>BLOCKSIDELENGTH</code> (approximately 35.78 detail units).</p>
+<p>The <code>trans_BlockPointToDetailCenter()</code> function converts block coordinates to the detail coordinate at the center of that block:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-text">detail_coordinate = (block_coordinate + 0.5) * BLOCKSIDELENGTH
+</code></pre></div></div>
+<p>This dual coordinate system allows for efficient spatial queries at the block level while maintaining smooth unit movement at the detail level.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1089-L1092" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1089-1092</span></a>, <a href="">config.json:25,27-28</a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L228-L231" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">228-231</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-collision-detection-system">Collision Detection System<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-pixmemorymap-structure">pixMemoryMap Structure<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>pixMemoryMap</code> struct provides pixel-accurate collision detection by creating binary memory maps from sprite alpha channels. Each pixel in a sprite is marked as occupied (1) or free (0) based on its alpha value.</p>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TB
+    subgraph "Image Resource Loading"
+        IMG["QPixmap&lt;br/&gt;(Sprite Image)"]
+        ALPHA["Alpha Channel&lt;br/&gt;Extraction"]
+        PMM["pixMemoryMap&lt;br/&gt;(Binary Grid)"]
+    end
+    
+    subgraph "pixMemoryMap Structure"
+        VEC["vector&amp;lt;char&amp;gt; MemoryMap"]
+        W["int width"]
+        H["int height"]
+    end
+    
+    subgraph "Collision Detection Methods"
+        SET["setMemoryMap(i,j)&lt;br/&gt;Mark pixel occupied"]
+        GET["getMemoryMap(i,j)&lt;br/&gt;Check pixel state"]
+        FILL["fillBlockMemoryMap()&lt;br/&gt;Diamond pattern fill"]
+    end
+    
+    IMG --&gt; ALPHA
+    ALPHA --&gt; PMM
+    PMM --&gt; VEC
+    PMM --&gt; W
+    PMM --&gt; H
+    
+    VEC --&gt; SET
+    VEC --&gt; GET
+    VEC --&gt; FILL</code></pre></div>
+<p>The <code>initMemory()</code> function processes each sprite to create its collision map:</p>
+<ol>
+<li>Converts <code>QPixmap</code> to <code>QImage</code> for pixel access</li>
+<li>Iterates through each pixel</li>
+<li>Checks if alpha channel is non-zero: <code>(piximage.pixel(i,j)) &amp; (0xff000000) != 0</code></li>
+<li>Marks occupied pixels and their neighbors (3x3 dilation for smoother collision)</li>
+</ol>
+<p>The <code>fillBlockMemoryMap()</code> method creates a diamond-shaped collision area for isometric block sprites, filling pixels based on geometric constraints.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1002-L1084" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1002-1084</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L970-L1013" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">970-1013</span></a></p>
+<hr/>
+<h3 class="group" data-header="true" id="en-crashbox-values">Crashbox Values<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>Crashbox values define the collision radius for different object types. These are circular collision areas measured in detail coordinate units:</p>
+<table>
+<thead>
+<tr>
+<th>Crashbox Type</th>
+<th>Value</th>
+<th>Typical Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CRASHBOX_MICRO</code></td>
+<td>1.0</td>
+<td>Point objects</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SINGLEOB</code></td>
+<td>5.96</td>
+<td>Small resources (berries)</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SMALLOB</code></td>
+<td>8.925</td>
+<td>Medium resources</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_BIGOB</code></td>
+<td>17.7</td>
+<td>Large resources (trees)</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SINGLEBLOCK</code></td>
+<td>16.36</td>
+<td>1x1 buildings</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SMALLBLOCK</code></td>
+<td>34.21</td>
+<td>Small buildings</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_SMALL</code></td>
+<td>32.72</td>
+<td>Small units/buildings</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_MIDDLE</code></td>
+<td>50.57</td>
+<td>Medium buildings</td>
+</tr>
+<tr>
+<td><code>CRASHBOX_BIG</code></td>
+<td>68.42</td>
+<td>Large buildings</td>
+</tr>
+</tbody>
+</table>
+<p>These values are loaded from <code>config.json</code> and used throughout the codebase for distance checks and collision avoidance. Objects are considered colliding when the distance between their centers is less than the sum of their crashbox radii.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L84-L92" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">84-92</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L21-L29" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">21-29</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L99-L107" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">99-107</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-distance-calculations">Distance Calculations<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-manhattan-distance">Manhattan Distance<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The game primarily uses Manhattan distance (L1 metric) for pathfinding and spatial queries. Manhattan distance is calculated as:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-text">distance = |x1 - x2| + |y1 - y2|
+</code></pre></div></div>
+<p><strong>Key Functions:</strong></p>
+<p><strong><code>calculateManhattanDistance()</code></strong> - Two overloaded versions for integer and double coordinates:</p>
+<ul>
+<li><code>int calculateManhattanDistance(int x1, int y1, int x2, int y2)</code></li>
+<li><code>double calculateManhattanDistance(double x1, double y1, double x2, double y2)</code></li>
+</ul>
+<p><strong><code>isNear_Manhattan()</code></strong> - Checks if two points are within a Manhattan distance threshold:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">bool</span><span class="w"> </span><span class="nf">isNear_Manhattan</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">dr</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ur</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">dr1</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ur1</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">distance</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">dr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dr1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">ur</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ur1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This function uses a simplified check: both coordinate differences must be ≤ distance.</p>
+<p><strong>Manhattan Distance Constants:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DISTANCE_Manhattan_MoveEndNEAR</code></td>
+<td>0.0001</td>
+<td>Movement completion tolerance</td>
+</tr>
+<tr>
+<td><code>DISTANCE_Manhattan_PathMove</code></td>
+<td>0.01</td>
+<td>Pathfinding step threshold</td>
+</tr>
+<tr>
+<td><code>DISTANCE_Manhattan_Unload</code></td>
+<td>42.93</td>
+<td>Ship unload range</td>
+</tr>
+<tr>
+<td><code>DISTANCE_Manhattan_Transport</code></td>
+<td>51.52</td>
+<td>Ship transport range</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sources:</strong> <a href="">GlobalVariate.cpp:1068-1077,1019-1022</a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L258-L261" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">258-261</span></a>, <a href="">GlobalVariate.h:300-303,1311-1314</a></p>
+<hr/>
+<h3 class="group" data-header="true" id="en-euclidean-distance">Euclidean Distance<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>For precise distance measurements (attack ranges, vision), the game uses Euclidean distance (L2 metric):</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">double</span><span class="w"> </span><span class="nf">countdistance</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">L</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">L0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">U0</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">L</span><span class="o">-</span><span class="n">L0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">L</span><span class="o">-</span><span class="n">L0</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">U</span><span class="o">-</span><span class="n">U0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">U</span><span class="o">-</span><span class="n">U0</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p><strong>Euclidean Distance Constants:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DISTANCE_ATTACK_CLOSE</code></td>
+<td>17.89</td>
+<td>Close combat range</td>
+</tr>
+<tr>
+<td><code>DISTANCE_HIT_TARGET</code></td>
+<td>4.0</td>
+<td>Hit detection threshold</td>
+</tr>
+<tr>
+<td><code>DISTANCE_ELEPHANT_ATTACK</code></td>
+<td>42.57</td>
+<td>Elephant attack range</td>
+</tr>
+<tr>
+<td><code>SHIP_ACT_MAX_DISTANCE</code></td>
+<td>1843.2</td>
+<td>Ship interaction range (squared)</td>
+</tr>
+</tbody>
+</table>
+<p>Note that <code>SHIP_ACT_MAX_DISTANCE</code> appears to be a squared distance value used for optimization (avoiding square root calculation).</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1015-L1018" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1015-1018</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L262-L265" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">262-265</span></a>, <a href="">GlobalVariate.h:304-307,1310</a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-collision-detection-workflow">Collision Detection Workflow<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph TD
+    subgraph "Resource Loading Phase"
+        LOAD["InitImageResMap()&lt;br/&gt;Load sprites"]
+        INIT["initMemory()&lt;br/&gt;Create pixMemoryMap"]
+        STORE["ImageResource&lt;br/&gt;{pix, memorymap}"]
+    end
+    
+    subgraph "Object Placement"
+        POS["Set object position&lt;br/&gt;(DR, UR)"]
+        CRASH["Assign crashbox value&lt;br/&gt;based on object type"]
+    end
+    
+    subgraph "Collision Query"
+        Q1["Check distance between&lt;br/&gt;object centers"]
+        Q2{"distance &lt; sum of&lt;br/&gt;crashbox radii?"}
+        Q3["Check pixMemoryMap&lt;br/&gt;for pixel overlap"]
+        COLL["Collision detected"]
+        NOCOLL["No collision"]
+    end
+    
+    LOAD --&gt; INIT
+    INIT --&gt; STORE
+    
+    STORE --&gt; POS
+    POS --&gt; CRASH
+    
+    CRASH --&gt; Q1
+    Q1 --&gt; Q2
+    Q2 --&gt;|Yes| Q3
+    Q2 --&gt;|No| NOCOLL
+    Q3 --&gt;|Overlap| COLL
+    Q3 --&gt;|No overlap| NOCOLL</code></pre></div>
+<p>The collision system uses a two-tier approach:</p>
+<ol>
+<li><strong>Broad Phase</strong>: Quick distance check using crashbox radii (circle-circle collision)</li>
+<li><strong>Narrow Phase</strong>: Pixel-perfect collision using <code>pixMemoryMap</code> for precise sprite overlap detection</li>
+</ol>
+<p>This hybrid approach balances performance and accuracy.</p>
+<p><strong>Sources:</strong> <a href="">GlobalVariate.cpp:590-697,970-1013</a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1086-L1103" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1086-1103</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-spatial-queries-and-positioning">Spatial Queries and Positioning<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<h3 class="group" data-header="true" id="en-proximity-checks">Proximity Checks<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>isNear_Manhattan()</code> function is the primary tool for proximity queries throughout the codebase. It's used for:</p>
+<ul>
+<li>Checking if a unit has reached its destination</li>
+<li>Determining if units are close enough to interact</li>
+<li>Resource gathering range checks</li>
+<li>Building placement validation</li>
+</ul>
+<p>Example usage pattern:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="c1">// Check if unit reached target position</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isNear_Manhattan</span><span class="p">(</span><span class="n">current_dr</span><span class="p">,</span><span class="w"> </span><span class="n">current_ur</span><span class="p">,</span><span class="w"> </span><span class="n">target_dr</span><span class="p">,</span><span class="w"> </span><span class="n">target_ur</span><span class="p">,</span><span class="w"> </span><span class="n">DISTANCE_Manhattan_MoveEndNEAR</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Arrival logic</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1019-L1022" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1019-1022</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1311" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1311</span></a></p>
+<hr/>
+<h3 class="group" data-header="true" id="en-mirror-point-calculation">Mirror Point Calculation<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h3>
+<p>The <code>calMirrorPoint()</code> function calculates a reflected position around a mirror point, used for unit positioning and formation:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">void</span><span class="w"> </span><span class="nf">calMirrorPoint</span><span class="p">(</span><span class="kt">double</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dr</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ur</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">dr_mirror</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ur_mirror</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">dis</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dr_deta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dr_mirror</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dr</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">ur_deta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ur_mirror</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ur</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">dr_deta</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fabs</span><span class="p">(</span><span class="n">ur_deta</span><span class="p">);</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">dr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dr_mirror</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dr_deta</span><span class="o">/</span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dis</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ur_mirror</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ur_deta</span><span class="o">/</span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dis</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>This function:</p>
+<ol>
+<li>Calculates the direction vector from point to mirror point</li>
+<li>Normalizes using Manhattan distance</li>
+<li>Projects the point <code>dis</code> units beyond the mirror point in the same direction</li>
+</ol>
+<p>This is useful for positioning units on the opposite side of a building or resource, such as when farmers need to position themselves for gathering.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L1079-L1087" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1079-1087</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L1316" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">1316</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-distance-constants-reference">Distance Constants Reference<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The following table summarizes all distance-related constants used for spatial queries:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Constant</th>
+<th>Value</th>
+<th>Units</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Movement</strong></td>
+<td><code>DISTANCE_Manhattan_MoveEndNEAR</code></td>
+<td>0.0001</td>
+<td>Detail</td>
+<td>Movement completion</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_Manhattan_PathMove</code></td>
+<td>0.01</td>
+<td>Detail</td>
+<td>Pathfinding step</td>
+</tr>
+<tr>
+<td><strong>Ships</strong></td>
+<td><code>DISTANCE_Manhattan_Unload</code></td>
+<td>42.93</td>
+<td>Detail</td>
+<td>Unload range</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_Manhattan_Transport</code></td>
+<td>51.52</td>
+<td>Detail</td>
+<td>Transport boarding</td>
+</tr>
+<tr>
+<td></td>
+<td><code>SHIP_ACT_MAX_DISTANCE</code></td>
+<td>1843.2</td>
+<td>Detail²</td>
+<td>Max interaction</td>
+</tr>
+<tr>
+<td><strong>Combat</strong></td>
+<td><code>DISTANCE_ATTACK_CLOSE</code></td>
+<td>17.89</td>
+<td>Detail</td>
+<td>Melee range</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_HIT_TARGET</code></td>
+<td>4.0</td>
+<td>Detail</td>
+<td>Hit detection</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISTANCE_ELEPHANT_ATTACK</code></td>
+<td>42.57</td>
+<td>Detail</td>
+<td>Elephant attack</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DIS_ARROWTOWER</code></td>
+<td>7.0</td>
+<td>Blocks</td>
+<td>Tower attack range</td>
+</tr>
+</tbody>
+</table>
+<p>Additional per-unit attack ranges are stored in configuration as <code>DIS_*</code> values (e.g., <code>DIS_BOWMAN</code>, <code>DIS_SHIP</code>) measured in block units.</p>
+<p><strong>Sources:</strong> <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/config.json#L247-L265" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>config.json</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">247-265</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.h#L300-L307" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.h</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">300-307</span></a>, <a class="mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75" href="https://github.com/hackermmzz/new-aoe/blob/882596c8/GlobalVariate.cpp#L349-L356" rel="noopener noreferrer" target="_blank"><span class="flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4]"><svg class="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 opacity-40 md:block" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GlobalVariate.cpp</span><span class="flex flex-shrink-0 items-center rounded-r border-l px-2 py-1.5 border-[#dddddd] bg-[#d8d8d8] text-[#666666] dark:border-[#333333] dark:bg-[#2a2a2a] dark:text-[#888888]">349-356</span></a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-coordinate-system-utilities">Coordinate System Utilities<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<div class="dw-mermaid-shell"><pre class="px-2 py-1.5 has-[code]:rounded-md has-[code]:!bg-[#e5e5e5] has-[div]:bg-transparent has-[div]:!p-0 has-[code]:text-stone-900 dark:has-[code]:!bg-[#242424] has-[code]:dark:text-white [&amp;_code]:block [&amp;_code]:border-none [&amp;_code]:bg-transparent [&amp;_code]:p-0"><code class="language-mermaid">graph LR
+    subgraph "Conversion Functions"
+        BLOCK["Block Coordinates&lt;br/&gt;(int BlockDR, BlockUR)"]
+        TRANS["trans_BlockPointToDetailCenter()"]
+        DETAIL["Detail Coordinates&lt;br/&gt;(double DR, UR)"]
+    end
+    
+    subgraph "Distance Metrics"
+        EUCL["countdistance()&lt;br/&gt;Euclidean (L2)"]
+        MANH["calculateManhattanDistance()&lt;br/&gt;Manhattan (L1)"]
+        NEAR["isNear_Manhattan()&lt;br/&gt;Proximity check"]
+    end
+    
+    subgraph "Positioning"
+        MIRROR["calMirrorPoint()&lt;br/&gt;Reflection calculation"]
+        SGN["sgn()&lt;br/&gt;Sign function"]
+    end
+    
+    BLOCK --&gt; TRANS
+    TRANS --&gt; DETAIL
+    
+    DETAIL --&gt; EUCL
+    DETAIL --&gt; MANH
+    MANH --&gt; NEAR
+    
+    DETAIL --&gt; MIRROR
+    DETAIL --&gt; SGN</code></pre></div>
+<p><strong><code>sgn(double x)</code></strong> - Returns the sign of a number (-1, 0, or 1), used for direction calculations:</p>
+<div class="dw-code-shell"><button class="dw-copy-code" data-copy-code="true" type="button">Copy</button><div class="dw-code-block px-2 py-1.5 rounded-md bg-[#e5e5e5] text-stone-900 dark:bg-[#242424] dark:text-white"><pre class="highlight"><code class="language-cpp"><span class="kt">int</span><span class="w"> </span><span class="nf">sgn</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">__x</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">__x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">__x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>These utility functions form the foundation for all spatial calculations in the game, from simple distance checks to complex positioning algorithms.</p>
+<p><strong>Sources:</strong> <a href="">GlobalVariate.cpp:1089-1092,1136-1141</a>, <a href="">GlobalVariate.h:1318,1321</a></p>
+<hr/>
+<h2 class="group" data-header="true" id="en-integration-notes">Integration Notes<button aria-label="Copy link to header" class="relative ml-2 cursor-pointer align-baseline text-gray-400 opacity-0 transition-opacity hover:text-blue-400 focus:opacity-100 group-hover:opacity-100" data-copy-header="true"><svg class="h-4 w-4" fill="currentColor" height="1em" viewbox="0 0 256 256" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M117.18,188.74a12,12,0,0,1,0,17l-5.12,5.12A58.26,58.26,0,0,1,70.6,228h0A58.62,58.62,0,0,1,29.14,127.92L63.89,93.17a58.64,58.64,0,0,1,98.56,28.11,12,12,0,1,1-23.37,5.44,34.65,34.65,0,0,0-58.22-16.58L46.11,144.89A34.62,34.62,0,0,0,70.57,204h0a34.41,34.41,0,0,0,24.49-10.14l5.11-5.12A12,12,0,0,1,117.18,188.74ZM226.83,45.17a58.65,58.65,0,0,0-82.93,0l-5.11,5.11a12,12,0,0,0,17,17l5.12-5.12a34.63,34.63,0,1,1,49,49L175.1,145.86A34.39,34.39,0,0,1,150.61,156h0a34.63,34.63,0,0,1-33.69-26.72,12,12,0,0,0-23.38,5.44A58.64,58.64,0,0,0,150.56,180h.05a58.28,58.28,0,0,0,41.47-17.17l34.75-34.75a58.62,58.62,0,0,0,0-82.91Z"></path></svg></button></h2>
+<p>The collision and pathfinding system integrates with other game systems as follows:</p>
+<ul>
+<li><strong>Map System</strong> (<a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../6.1-map-structure">Map Structure</a>): Block coordinates map directly to terrain grid</li>
+<li><strong>Movement System</strong>: Uses Manhattan distance for pathfinding decisions</li>
+<li><strong>Combat System</strong> (<a class="text-neutral-300 hover:text-neutral-200 hover:underline" href="../3.4-combat-system">Combat System</a>): Uses Euclidean distance for attack range checks</li>
+<li><strong>Resource System</strong>: Uses crashbox values for placement validation and gathering range</li>
+</ul>
+<p>The pixMemoryMap collision data is stored in <code>ImageResource</code> structs within the global <code>resMap</code>, making it accessible throughout the rendering and game logic systems.</p>
+<p><strong>Sources:</strong> <a href="">GlobalVariate.h:1086-1103,524-526</a></p></section>
+                    </div>
+                    <div class="dw-prev-next mt-12 grid gap-3 md:grid-cols-2"><a href="../6.2-terrain-and-objects" class="rounded-xl border border-dashed border-border bg-surface/30 px-4 py-3 transition-colors hover:bg-surface/60"><div class="text-xs uppercase tracking-wide text-secondary"><span data-locale-text="zh">上一页</span><span data-locale-text="en">Previous</span></div><div class="mt-1 text-sm text-primary"><span data-locale-text="zh">地形与对象</span><span data-locale-text="en">Terrain and Objects</span></div></a><a href="../7-advanced-topics" class="rounded-xl border border-dashed border-border bg-surface/30 px-4 py-3 transition-colors hover:bg-surface/60"><div class="text-xs uppercase tracking-wide text-secondary"><span data-locale-text="zh">下一页</span><span data-locale-text="en">Next</span></div><div class="mt-1 text-sm text-primary"><span data-locale-text="zh">高级主题</span><span data-locale-text="en">Advanced Topics</span></div></a></div>
+                  </div>
+                </div>
+              </div>
+            </main>
+            <aside class="dw-toc-panel hidden xl:sticky xl:top-20 xl:block xl:h-[calc(100vh-82px)] xl:w-72 xl:flex-shrink-0 xl:py-9">
+              <div class="dw-toc-card rounded-xl border border-dashed border-border bg-surface/30">
+                <h3 class="px-4 pb-5 pt-4 text-lg font-medium leading-none">
+                  <span data-locale-text="zh">本页内容</span>
+                  <span data-locale-text="en">On this page</span>
+                </h3>
+                <ul style="scrollbar-width:none" class="dw-toc-list min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pt-0" data-locale-panel="zh"><li><a href="#zh-碰撞与寻路" class="hover:text-primary pr-1 transition-all text-primary font-medium">碰撞与寻路</a></li>
+<li class="ml-3"><a href="#zh-坐标系" class="hover:text-primary pr-1 transition-all text-secondary">坐标系</a></li>
+<li class="ml-3"><a href="#zh-碰撞检测系统" class="hover:text-primary pr-1 transition-all text-secondary">碰撞检测系统</a></li>
+<li class="ml-3"><a href="#zh-pixmemorymap-结构" class="hover:text-primary pr-1 transition-all text-secondary">pixMemoryMap 结构</a></li>
+<li class="ml-3"><a href="#zh-crashbox-值" class="hover:text-primary pr-1 transition-all text-secondary">Crashbox 值</a></li>
+<li class="ml-3"><a href="#zh-距离计算" class="hover:text-primary pr-1 transition-all text-secondary">距离计算</a></li>
+<li class="ml-3"><a href="#zh-曼哈顿距离" class="hover:text-primary pr-1 transition-all text-secondary">曼哈顿距离</a></li>
+<li class="ml-3"><a href="#zh-欧几里得距离" class="hover:text-primary pr-1 transition-all text-secondary">欧几里得距离</a></li>
+<li class="ml-3"><a href="#zh-碰撞检测工作流程" class="hover:text-primary pr-1 transition-all text-secondary">碰撞检测工作流程</a></li>
+<li class="ml-3"><a href="#zh-空间查询与定位" class="hover:text-primary pr-1 transition-all text-secondary">空间查询与定位</a></li>
+<li class="ml-3"><a href="#zh-邻近性检查" class="hover:text-primary pr-1 transition-all text-secondary">邻近性检查</a></li>
+<li class="ml-3"><a href="#zh-镜像点计算" class="hover:text-primary pr-1 transition-all text-secondary">镜像点计算</a></li>
+<li class="ml-3"><a href="#zh-距离常量参考" class="hover:text-primary pr-1 transition-all text-secondary">距离常量参考</a></li>
+<li class="ml-3"><a href="#zh-坐标系工具函数" class="hover:text-primary pr-1 transition-all text-secondary">坐标系工具函数</a></li>
+<li class="ml-3"><a href="#zh-集成说明" class="hover:text-primary pr-1 transition-all text-secondary">集成说明</a></li></ul><ul style="scrollbar-width:none" class="dw-toc-list min-h-0 flex-1 space-y-3 overflow-y-auto p-4 pt-0" data-locale-panel="en"><li><a href="#en-collision-and-pathfinding" class="hover:text-primary pr-1 transition-all text-primary font-medium">Collision and Pathfinding</a></li>
+<li class="ml-3"><a href="#en-coordinate-systems" class="hover:text-primary pr-1 transition-all text-secondary">Coordinate Systems</a></li>
+<li class="ml-3"><a href="#en-collision-detection-system" class="hover:text-primary pr-1 transition-all text-secondary">Collision Detection System</a></li>
+<li class="ml-3"><a href="#en-pixmemorymap-structure" class="hover:text-primary pr-1 transition-all text-secondary">pixMemoryMap Structure</a></li>
+<li class="ml-3"><a href="#en-crashbox-values" class="hover:text-primary pr-1 transition-all text-secondary">Crashbox Values</a></li>
+<li class="ml-3"><a href="#en-distance-calculations" class="hover:text-primary pr-1 transition-all text-secondary">Distance Calculations</a></li>
+<li class="ml-3"><a href="#en-manhattan-distance" class="hover:text-primary pr-1 transition-all text-secondary">Manhattan Distance</a></li>
+<li class="ml-3"><a href="#en-euclidean-distance" class="hover:text-primary pr-1 transition-all text-secondary">Euclidean Distance</a></li>
+<li class="ml-3"><a href="#en-collision-detection-workflow" class="hover:text-primary pr-1 transition-all text-secondary">Collision Detection Workflow</a></li>
+<li class="ml-3"><a href="#en-spatial-queries-and-positioning" class="hover:text-primary pr-1 transition-all text-secondary">Spatial Queries and Positioning</a></li>
+<li class="ml-3"><a href="#en-proximity-checks" class="hover:text-primary pr-1 transition-all text-secondary">Proximity Checks</a></li>
+<li class="ml-3"><a href="#en-mirror-point-calculation" class="hover:text-primary pr-1 transition-all text-secondary">Mirror Point Calculation</a></li>
+<li class="ml-3"><a href="#en-distance-constants-reference" class="hover:text-primary pr-1 transition-all text-secondary">Distance Constants Reference</a></li>
+<li class="ml-3"><a href="#en-coordinate-system-utilities" class="hover:text-primary pr-1 transition-all text-secondary">Coordinate System Utilities</a></li>
+<li class="ml-3"><a href="#en-integration-notes" class="hover:text-primary pr-1 transition-all text-secondary">Integration Notes</a></li></ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.__DW_PAGE = {"routePath": "hackermmzz/new-aoe/6.3-collision-and-pathfinding", "titles": {"zh": "碰撞与寻路", "en": "Collision and Pathfinding"}, "descriptions": {"zh": "碰撞与寻路 相关源文件 以下文件被用作生成此 wiki 页面时的上下文： GlobalVariate.cpp GlobalVariate.h config.json 本文档说明了游戏引擎中使用的碰撞检测和空间计算系统。内容涵盖坐标系、基于像素内存图与 crashbox 值的碰撞检测、使用曼哈顿与欧几里得度量的距离计算，", "en": "Collision and Pathfinding Relevant source files The following files were used as context for generating this wiki page: GlobalVariate.cpp GlobalVariate.h config"}, "defaultLocale": "zh", "availableLocales": ["zh", "en"], "repoName": "hackermmzz/new-aoe"};
+      window.__DW_ASSET_PREFIX = "../../../assets/";
+    </script>
+    <script src="../../../assets/site.js"></script>
+  </body>
+</html>
