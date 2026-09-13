@@ -761,7 +761,7 @@ void Army::setAttribute()
     case AT_STONE_THROWER://投石车
         upgradable = false;
         dependBuildNum = BUILDING_SIEGE;
-        armyClass = ARMY_INFANTRY;
+        armyClass = ARMY_SIEGE;
         attackType = ATTACKTYPE_SHOOT;
 
         MaxBlood = BLOOD_STONE_THROWER;
