@@ -719,7 +719,8 @@ void ParseArguments(const QApplication&app){
        );
     QCommandLineOption option7(
         QStringList()<<"RecordOutputFile",
-         "record the instruction output file"
+         "record the instruction output file",
+        "fileName"
        );
     QList<QCommandLineOption>options={option0,option1,option2,option3,option4,option5,option6,option7};
     parser.addOptions(options);
