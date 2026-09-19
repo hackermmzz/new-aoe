@@ -668,9 +668,26 @@ void Core_List::manageRelation_deleteGoalOb(Coordinate* goalObject)
         bool flag = 0;
         if (iterNow->second.goalObject == goalObject)
         {
-            flag = 1;
             iterNow->second.update_GoalPoint();
             iterNow->second.goalObject = NULL;
+
+            // 采集目标耗尽时，村民背包里可能还有未满载的资源。
+            // 保留采集关系并转到“资源耗尽判断”阶段，由原有状态机
+            // 将剩余资源送往仓库；没有可用仓库时仍按原逻辑终止。
+            Farmer* farmer = NULL;
+            if (iterNow->first->getSort() == SORT_FARMER)
+                farmer = static_cast<Farmer*>(iterNow->first);
+
+            if (iterNow->second.relationAct == CoreEven_Gather &&
+                farmer != NULL &&
+                !farmer->get_isEmptyBackpack() &&
+                iterNow->second.alterOb != NULL)
+            {
+                iterNow->second.nowPhaseNum = 8;
+                iterNow->second.resetGatherTimer();
+            }
+            else
+                flag = 1;
         }
 
         if (iterNow->second.alterOb == goalObject)
