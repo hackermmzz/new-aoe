@@ -83,6 +83,7 @@ private:
     int handleBuildingAction(Coordinate* self, int option, int id);
     int handlePinPointStrike(Coordinate* self, Double dr0,Double ur0, int id);
     void deduplicateInstructions(std::queue<instruction>& instructions); // 去重指令队列
+    bool preValidateInstruction(instruction& cur, Player* commandPlayer, tagGame* tagAIGame, int playerId);
     bool filter_instruction(const instruction& ins);
     void PostFirstFrameProcess();//游戏开始的第一帧需要干的事情（第一帧结束）
     void PreFirstFrameProcess();//游戏开始的第一帧需要干的事情（第一帧开始）

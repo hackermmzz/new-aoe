@@ -1236,6 +1236,36 @@ void Core::deduplicateInstructions(std::queue<instruction>& instructions) {
     }
 }
 
+// 在按 SN 去重前排除科技前置尚未满足的建筑行动。
+// 否则同一建筑后发的未解锁生产指令会覆盖前面的科技研发指令。
+bool Core::preValidateInstruction(instruction& cur, Player* commandPlayer, tagGame* tagAIGame, int playerId)
+{
+    if (cur.type != INS_BUILDINGACTION)
+        return true;
+
+    // option == 0 是停止行动；option == SN 是删除建筑。
+    if (cur.option == 0 || cur.option == cur.SN)
+        return true;
+
+    Coordinate* commandObject = g_Object[cur.SN];
+    if (commandObject == NULL || commandObject->getPlayerRepresent() != playerId)
+        return true; // 交给原有流程返回 SN/归属错误。
+
+    Building* building = NULL;
+    commandObject->printer_ToBuilding((void**)&building);
+    if (building == NULL || !building->isConstructed())
+        return true; // 保留原有的对象类型和未建成错误优先级。
+
+    if (!commandPlayer->get_isBuildActionShowAble(building->getNum(), cur.option))
+    {
+        cur.ret = ACTION_INVALID_BUILDACT_LOCK;
+        tagAIGame->insertInsRet(cur.id, cur);
+        return false;
+    }
+
+    return true;
+}
+
 void Core::PostFirstFrameProcess()
 {
     if(CoreExecuteFrames!=1)return;
@@ -1339,6 +1369,19 @@ void Core::manageOrder(int id)
         tagAIGame = &tagEnemyGame;
     }
     NowIns->lock.lock();
+
+    // 先过滤科技前置未成立的建筑行动，并为它们写入真实返回码。
+    // 被过滤的命令不再参与同 SN 去重，因此不会覆盖前面的科技研发指令。
+    std::queue<instruction> filteredInstructions;
+    while (!NowIns->instructions.empty())
+    {
+        instruction cur = NowIns->instructions.front();
+        NowIns->instructions.pop();
+        if (preValidateInstruction(cur, self, tagAIGame, id))
+            filteredInstructions.push(cur);
+    }
+    NowIns->instructions.swap(filteredInstructions);
+
     //对NowIns->instructions进行去重，如果两个指令的self相同，保留靠后的
     deduplicateInstructions(NowIns->instructions);
     //获取可以发起指令的所有对象数量(也就是说，就算ai给再多指令，我每一帧只处理ObjCnt这么多指令)
