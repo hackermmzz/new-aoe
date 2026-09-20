@@ -1699,7 +1699,7 @@ void Core::PreProcessDuringExam()
     is_cheatAction=false;
     //输出每帧的实时状态信息
     Player*p=player[NOWPLAYERREPRESENT];
-    ResultLogInfo(0,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getScore()).LogOut();
+    ResultLogInfo(0,usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getStone()).LogOut();
 }
 
 void Core::GameOverHandle()
