@@ -46,3 +46,6 @@ res.rcc
 
 # 本地生成的架构文档
 docs/architecture/
+
+# 本地测试地图
+map_test.njust
