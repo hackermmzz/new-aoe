@@ -2078,8 +2078,11 @@ void Map::clear_CellVisible()
 {
     while(blockLab_Visible.size())
     {
-        cell[blockLab_Visible.top().x][blockLab_Visible.top().y].Visible = false;
+        int x=blockLab_Visible.top().x,y=blockLab_Visible.top().y;
         blockLab_Visible.pop();
+        if(!isOverBorder(x,y)){
+            cell[x][y].Visible = false;
+        }
     }
 
     return;
