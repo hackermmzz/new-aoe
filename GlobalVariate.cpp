@@ -532,8 +532,8 @@ instruction::instruction(int type,int SN, int obSN , bool twoCoredinate){
     this->SN = SN;
     this->obSN = obSN;
     this->type=type;
-    this->self=g_Object[SN];
-    this->obj=g_Object[obSN];
+    //this->self=g_Object[SN];
+    //this->obj=g_Object[obSN];
 }
 instruction::instruction(int type,int SN,int BL,int BU,int option){
     this->SN = SN;
@@ -546,14 +546,14 @@ instruction::instruction(int type,int SN,int BL,int BU,int option){
 instruction::instruction(int type,int SN,Double L,Double U){
     this->SN = SN;
     this->type=type;
-    this->self=g_Object[SN];
+    //this->self=g_Object[SN];
     this->DR=L;
     this->UR=U;
 }
 instruction::instruction(int type,int SN,int option){
     this->SN = SN;
     this->type=type;
-    this->self=g_Object[SN];
+    //this->self=g_Object[SN];
     this->option=option;
 }
 

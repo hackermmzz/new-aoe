@@ -1393,6 +1393,10 @@ void Core::manageOrder(int id)
     while (!NowIns->instructions.empty() && ObjCnt--) {
         instruction cur = NowIns->instructions.front();
         NowIns->instructions.pop();
+        //
+        cur.self=g_Object[cur.SN];
+        cur.obj=g_Object[cur.obSN];
+        //
         Coordinate* self = cur.self;
         int ret = ACTION_INVALID_SN; // 默认错误码
         //录像
