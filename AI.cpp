@@ -66,7 +66,9 @@ void AI::run() {
             ProcessDataWork = 0;
         }
         //将所有命令放入Ins结构体
-        CommitInstruction();
+        if(!GameReplay){//虽然回放模式不会产生指令，但保险起见还是加一下
+            CommitInstruction();
+        }
         //
         condition.wait(&mutex);
     }

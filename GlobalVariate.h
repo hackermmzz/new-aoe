@@ -16,6 +16,7 @@ using namespace std;
 class Coordinate;
 //
 extern Random Rand;
+extern Random RenderRand;
 extern QString ResultLogFile;
 extern EventFilter *eventFilter;
 extern bool tryCaptured;
@@ -195,7 +196,6 @@ struct InstructionForSave{
     int64_t frame;
     int playerID;
     void Serialize(FArchive*arc);
-    bool operator< (const InstructionForSave&oth)const;
 };
 struct tagTerrain {
     int32_t height;

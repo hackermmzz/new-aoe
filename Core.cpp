@@ -1298,7 +1298,7 @@ void Core::PreFirstFrameProcess()
             GameRecordOrReplayArchive->Serialize(ins);
             GameReplayData.push_back(ins);
         }
-        sort(GameReplayData.begin(),GameReplayData.end());
+        //写入是有序的，所以读出来肯定是有序的
         reverse(GameReplayData.begin(),GameReplayData.end());//倒序
     }else if(GameRecord){
         //计录地图信息
@@ -1528,6 +1528,12 @@ void Core::manageOrder(int id)
 
 void Core::ProcessGameReplay()
 {
+    //指令全跑完了，就得退出了
+    if(GameReplayData.size()==0){
+        QMessageBox::information(0, QStringLiteral("回放结束"), "回放结束", QMessageBox::Ok);
+        exit(0);
+    }
+    //
     if(GameReplayData.back().frame<CoreExecuteFrames){
         cerr<<"There is an error that GameReplayData first frame less than current frame!"<<endl;
         exit(0);

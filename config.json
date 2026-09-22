@@ -2,7 +2,7 @@
     "GameReplayFile":"GameReplayOrRecord.video",
     "GameRecordFile":"GameReplayOrRecord.video",
     "GameRecord":false,
-    "GameReplay":false,
+    "GameReplay":true,
     "DeepRender":false,
     "OffScreen":false,
     "DefaultCivilization":2,

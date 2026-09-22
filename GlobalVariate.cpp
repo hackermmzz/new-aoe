@@ -14,6 +14,7 @@ using namespace std;
 
 /*************************全局随机数生成器******************/
 Random Rand(119);
+Random RenderRand(120);//渲染使用随机数
 /*************************配置读取量***********************/
 QString ResultLogFile;//实时信息输出日志
 /************************全局初始量************************/
@@ -565,6 +566,7 @@ void instruction::Serialize(FArchive *arc)
     case INS_CANCEL:
     {
         //不用管了
+        break;
     }
     case INS_HUMANMOVE:
     {
@@ -1367,8 +1369,3 @@ void InstructionForSave::Serialize(FArchive *arc)
     arc->Serialize(ins);
 }
 
-bool InstructionForSave::operator< (const InstructionForSave &oth) const
-{
-    if(oth.frame==frame)return ins.id<oth.ins.id;
-    return frame<oth.frame;
-}

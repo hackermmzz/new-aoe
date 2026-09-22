@@ -389,7 +389,7 @@ void GameWidget::paintEffect(QPainter &painter)
     for(auto*missile:missiles){
         if(missile->isNeedDelete())continue;
         Double dr=missile->getViewDR(),ur=missile->getViewUR();
-        data.push_back({dr,ur,g_frame,Rand.nextRaw()%trail_effect.size()});
+        data.push_back({dr,ur,g_frame,RenderRand.nextRaw()%trail_effect.size()});
     }
     //开始绘制
     for(auto itr=data.begin();itr!=data.end();){
@@ -526,7 +526,7 @@ QImage GameWidget::GenBoulderTrailEffect()
     const siv::PerlinNoise perlin{119};
     uchar *bits = img.bits();
     int bytesPerPixel = img.depth() / 8;
-    int ox=Rand.nextRaw(),oy=Rand.nextRaw();
+    int ox=RenderRand.nextRaw(),oy=RenderRand.nextRaw();
     int hw=w/2,hh=h/2;
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
