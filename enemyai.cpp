@@ -1997,7 +1997,7 @@ void EnemyAI::processData() {
                 if (targetSN != -1) {
                     HumanAction(b.SN, targetSN);
                 } else if (b.Project != -1) {
-                    AddToIns(instruction(INS_CANCEL, b.SN, 0));
+                    ActionCancel(b.SN);
                 }
                 timer[b.SN] = g_frame;
             }

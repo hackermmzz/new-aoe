@@ -17,7 +17,7 @@ public:
     explicit AI(QObject* parent = nullptr) : QThread(parent), stopThread(false) { ; }
 
     ~AI();
-
+    int ActionCancel(int SN);
     int HumanMove(int SN, double DR0, double UR0);
     int HumanAction(int SN, int obSN);
     int HumanBuild(int SN, int BuildingNum, int BlockDR, int BlockUR);

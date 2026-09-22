@@ -2304,7 +2304,7 @@ void Map::InitCell(int Num, bool isExplored, bool isVisible) {
  * 返回值：空。
  */
 
-void Map::loadGenerateMapText(QString targetMapPath)
+void Map::loadGenerateMapText(QString targetMapPath,int maprotateDegree)
 {
     // 使用高精度时间为种子的真随机数生成器
     QString mapPath;
@@ -2433,7 +2433,7 @@ void Map::loadGenerateMapText(QString targetMapPath)
     };
     /////////////////////////////////开始解析
     QJsonObject root=doc.object();
-    const int rotateDegrees = RuntimeConfig_MapRotationDegrees();
+    const int rotateDegrees =GameReplay?maprotateDegree:RuntimeConfig_MapRotationDegrees();
     if(rotateDegrees != 0){
         const double blockSize = static_cast<double>(BLOCKSIDELENGTH);
         MapRotation::Result rotation = MapRotation::rotateNjustMapRoot(
@@ -2711,9 +2711,9 @@ bool Map::CheckIsNearOcean(int x, int y)
  * 内容：初始化地图的总函数；
  * 返回值：空。
  */
-void Map::init(QString mapPath) {
+void Map::init(QString mapPath,int maprotateDegree) {
     InitCell(0, MAP_EXPLORE, false);    // 第二个参数修改为true时可令地图全部可见
-    loadGenerateMapText(mapPath);  //载入地图
+    loadGenerateMapText(mapPath,maprotateDegree);  //载入地图
     divideTheMap_commonPlay();                 //把地图化分成一个一个连通块
     refineShore();
     if(!OffScreen && DeepRender&& !EditorMode)refineBaseTerrain();

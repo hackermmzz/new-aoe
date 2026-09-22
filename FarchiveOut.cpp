@@ -7,8 +7,7 @@ FArchiveOut::FArchiveOut()
 
 void FArchiveOut::Serialize(void *src, uint32_t bytes)
 {
-    if (bytes == 0)
-            return;
+    if (bytes == 0)return;
 
     const uint8_t* pSrc = reinterpret_cast<const uint8_t*>(src);
     size_t oldSize = data.size();

@@ -7,7 +7,9 @@ AI::~AI() {
     condition.wakeAll();
     wait();
 }
-
+int AI::ActionCancel(int SN){
+    return AI::AddToIns(instruction(INS_CANCEL, SN,0));
+}
 int AI::HumanMove(int SN, double DR0, double UR0){
     return AI::AddToIns(instruction(INS_HUMANMOVE,SN,Double::FromDouble(DR0),Double::FromDouble(UR0)));
 }

@@ -18,8 +18,10 @@ public:
     void Serialize(T&val);
     template<class T>
     void Serialize(T&val,uint32_t bytes);
+    void Serialize(int16_t&val);
     void Serialize(int32_t&val);
     void Serialize(int64_t&val);
+    void Serialize(uint16_t&val);
     void Serialize(uint32_t&val);
     void Serialize(uint64_t&val);
     void Serialize(double&val);

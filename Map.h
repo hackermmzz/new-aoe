@@ -15,7 +15,7 @@ class Map
 public:
     Map();
     ~Map();
-    void init(QString mapPath="");
+    void init(QString mapPath="",int maprotateDegree=0);
 
     // 重绘海岸
     void refineShore();
@@ -182,7 +182,7 @@ public:
     void InitFaultHandle();     // 初始化错误处理
     void InitCell(int Num, bool isExplored, bool isVisible);
     void ResetMapType(int blockL, int blockU);
-    void loadGenerateMapText(QString mapPath);
+    void loadGenerateMapText(QString mapPath,int maprotateDegree);
     
     // 应用敌人状态到MainWidget
     void applyEnemyStatusToMainWidget(class MainWidget* mainWidget);

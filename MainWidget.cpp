@@ -1508,13 +1508,15 @@ void MainWidget::initGameRecordOrReplay()
 
 void MainWidget::initMap() {
     string mapFileName="";
+    int16_t maprotateDegree;
     if(GameReplay){
         GameRecordOrReplay->Serialize(mapFileName);
+        GameRecordOrReplay->Serialize(maprotateDegree);
     }
     qDebug() << "初始化地图...";
     map = new Map;
     map->setPlayer(player);
-    map->init(QString::fromStdString(mapFileName));
+    map->init(QString::fromStdString(mapFileName),maprotateDegree);
     map->init_Map_Height();
 
     // 内存图开辟空间

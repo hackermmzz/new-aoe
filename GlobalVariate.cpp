@@ -562,6 +562,10 @@ void instruction::Serialize(FArchive *arc)
     arc->Serialize(type);
     arc->Serialize(SN);
     switch (type) {
+    case INS_CANCEL:
+    {
+        //不用管了
+    }
     case INS_HUMANMOVE:
     {
         arc->Serialize(DR.raw_);

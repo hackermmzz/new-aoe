@@ -5,6 +5,16 @@ FArchive::FArchive()
     write=0;
 }
 
+void FArchive::Serialize(int16_t &val)
+{
+    Serialize(static_cast<void*>(&val),sizeof(val));
+}
+
+void FArchive::Serialize(uint16_t &val)
+{
+   Serialize(static_cast<void*>(&val),sizeof(val));
+}
+
 void FArchive::Serialize(int64_t&val)
 {
     Serialize(static_cast<void*>(&val),sizeof(val));

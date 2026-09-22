@@ -78,6 +78,7 @@ void Core::gameUpdate()
     interactionList->update();
     //判断是否是第一帧,第一帧需要初始化一些数据
     PostFirstFrameProcess();
+
 }
 void Core::correctMoveObjectTerrain(MoveObject* object)
 {
@@ -1302,7 +1303,9 @@ void Core::PreFirstFrameProcess()
     }else if(GameRecord){
         //计录地图信息
         string mapFile=theMap->GetMapFileName().toStdString();
+        int16_t degree=RuntimeConfig_MapRotationDegrees();
         GameRecordOrReplayArchive->Serialize(mapFile);
+        GameRecordOrReplayArchive->Serialize(degree);//序列化旋转角度
         //打开文件句柄
         GameRecordFileHandle = new QFile(GameRecordFile);
         if (!GameRecordFileHandle->open(QIODevice::WriteOnly))
@@ -1357,6 +1360,7 @@ void Core::ProcessGameRecord(instruction ins,int playerID)
 //后续编写，用于处理AI指令
 void Core::manageOrder(int id)
 {
+
     ins* NowIns;
     tagGame* tagAIGame;
     Player* self = player[id];
@@ -1381,7 +1385,6 @@ void Core::manageOrder(int id)
             filteredInstructions.push(cur);
     }
     NowIns->instructions.swap(filteredInstructions);
-
     //对NowIns->instructions进行去重，如果两个指令的self相同，保留靠后的
     deduplicateInstructions(NowIns->instructions);
     //获取可以发起指令的所有对象数量(也就是说，就算ai给再多指令，我每一帧只处理ObjCnt这么多指令)
@@ -1508,6 +1511,7 @@ void Core::manageOrder(int id)
         cur.ret = ret;
         tagAIGame->insertInsRet(cur.id, cur);
         if (ret != ACTION_SUCCESS) {
+
             qWarning() << id << "号玩家指令：" + cur.id << "执行失败，错误码：" << cur.ret << endl;
         }
         else {
