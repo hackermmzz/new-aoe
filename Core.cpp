@@ -1512,10 +1512,10 @@ void Core::manageOrder(int id)
         tagAIGame->insertInsRet(cur.id, cur);
         if (ret != ACTION_SUCCESS) {
 
-            qWarning() << id << "号玩家指令：" + cur.id << "执行失败，错误码：" << cur.ret << endl;
+            qWarning() << id << "号玩家指令：" << cur.id << "执行失败，错误码：" << cur.ret << endl;
         }
         else {
-            qInfo() << id << "号玩家指令：" + cur.id << "执行成功" << endl;
+            qInfo() << id << "号玩家指令：" <<cur.id << "执行成功" << endl;
         }
     }
     NowIns->instructions=std::queue<instruction>();
