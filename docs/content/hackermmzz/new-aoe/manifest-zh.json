@@ -1,0 +1,245 @@
+{
+  "repo_name": "hackermmzz/new-aoe",
+  "commit_hash": "882596c8",
+  "generated_at": "2026-03-13T12:25:33.706189",
+  "pages": [
+    {
+      "page_id": "1",
+      "title": "概览",
+      "route_slug": "1-overview",
+      "route_path": "hackermmzz/new-aoe/1-overview",
+      "depth": 0
+    },
+    {
+      "page_id": "1.1",
+      "title": "系统架构",
+      "route_slug": "1.1-system-architecture",
+      "route_path": "hackermmzz/new-aoe/1.1-system-architecture",
+      "depth": 1
+    },
+    {
+      "page_id": "1.2",
+      "title": "快速开始",
+      "route_slug": "1.2-getting-started",
+      "route_path": "hackermmzz/new-aoe/1.2-getting-started",
+      "depth": 1
+    },
+    {
+      "page_id": "2",
+      "title": "核心系统",
+      "route_slug": "2-core-systems",
+      "route_path": "hackermmzz/new-aoe/2-core-systems",
+      "depth": 0
+    },
+    {
+      "page_id": "2.1",
+      "title": "MainWidget 与游戏循环",
+      "route_slug": "2.1-mainwidget-and-game-loop",
+      "route_path": "hackermmzz/new-aoe/2.1-mainwidget-and-game-loop",
+      "depth": 1
+    },
+    {
+      "page_id": "2.2",
+      "title": "游戏核心引擎",
+      "route_slug": "2.2-game-core-engine",
+      "route_path": "hackermmzz/new-aoe/2.2-game-core-engine",
+      "depth": 1
+    },
+    {
+      "page_id": "2.3",
+      "title": "配置系统",
+      "route_slug": "2.3-configuration-system",
+      "route_path": "hackermmzz/new-aoe/2.3-configuration-system",
+      "depth": 1
+    },
+    {
+      "page_id": "3",
+      "title": "游戏机制",
+      "route_slug": "3-game-mechanics",
+      "route_path": "hackermmzz/new-aoe/3-game-mechanics",
+      "depth": 0
+    },
+    {
+      "page_id": "3.1",
+      "title": "资源与经济系统",
+      "route_slug": "3.1-resource-and-economy-system",
+      "route_path": "hackermmzz/new-aoe/3.1-resource-and-economy-system",
+      "depth": 1
+    },
+    {
+      "page_id": "3.2",
+      "title": "科技树",
+      "route_slug": "3.2-technology-tree",
+      "route_path": "hackermmzz/new-aoe/3.2-technology-tree",
+      "depth": 1
+    },
+    {
+      "page_id": "3.3",
+      "title": "单位与建筑",
+      "route_slug": "3.3-units-and-buildings",
+      "route_path": "hackermmzz/new-aoe/3.3-units-and-buildings",
+      "depth": 1
+    },
+    {
+      "page_id": "3.4",
+      "title": "战斗系统",
+      "route_slug": "3.4-combat-system",
+      "route_path": "hackermmzz/new-aoe/3.4-combat-system",
+      "depth": 1
+    },
+    {
+      "page_id": "4",
+      "title": "用户界面",
+      "route_slug": "4-user-interface",
+      "route_path": "hackermmzz/new-aoe/4-user-interface",
+      "depth": 0
+    },
+    {
+      "page_id": "4.1",
+      "title": "SelectWidget 与命令面板",
+      "route_slug": "4.1-selectwidget-and-command-panel",
+      "route_path": "hackermmzz/new-aoe/4.1-selectwidget-and-command-panel",
+      "depth": 1
+    },
+    {
+      "page_id": "4.2",
+      "title": "地图编辑器",
+      "route_slug": "4.2-map-editor",
+      "route_path": "hackermmzz/new-aoe/4.2-map-editor",
+      "depth": 1
+    },
+    {
+      "page_id": "4.3",
+      "title": "渲染与显示",
+      "route_slug": "4.3-rendering-and-display",
+      "route_path": "hackermmzz/new-aoe/4.3-rendering-and-display",
+      "depth": 1
+    },
+    {
+      "page_id": "4.4",
+      "title": "事件处理",
+      "route_slug": "4.4-event-handling",
+      "route_path": "hackermmzz/new-aoe/4.4-event-handling",
+      "depth": 1
+    },
+    {
+      "page_id": "5",
+      "title": "AI 系统",
+      "route_slug": "5-ai-system",
+      "route_path": "hackermmzz/new-aoe/5-ai-system",
+      "depth": 0
+    },
+    {
+      "page_id": "5.1",
+      "title": "AI 架构",
+      "route_slug": "5.1-ai-architecture",
+      "route_path": "hackermmzz/new-aoe/5.1-ai-architecture",
+      "depth": 1
+    },
+    {
+      "page_id": "5.2",
+      "title": "指令与命令系统",
+      "route_slug": "5.2-instruction-and-command-system",
+      "route_path": "hackermmzz/new-aoe/5.2-instruction-and-command-system",
+      "depth": 1
+    },
+    {
+      "page_id": "6",
+      "title": "地图与世界",
+      "route_slug": "6-map-and-world",
+      "route_path": "hackermmzz/new-aoe/6-map-and-world",
+      "depth": 0
+    },
+    {
+      "page_id": "6.1",
+      "title": "地图结构",
+      "route_slug": "6.1-map-structure",
+      "route_path": "hackermmzz/new-aoe/6.1-map-structure",
+      "depth": 1
+    },
+    {
+      "page_id": "6.2",
+      "title": "地形与物体",
+      "route_slug": "6.2-terrain-and-objects",
+      "route_path": "hackermmzz/new-aoe/6.2-terrain-and-objects",
+      "depth": 1
+    },
+    {
+      "page_id": "6.3",
+      "title": "碰撞与寻路",
+      "route_slug": "6.3-collision-and-pathfinding",
+      "route_path": "hackermmzz/new-aoe/6.3-collision-and-pathfinding",
+      "depth": 1
+    },
+    {
+      "page_id": "7",
+      "title": "高级主题",
+      "route_slug": "7-advanced-topics",
+      "route_path": "hackermmzz/new-aoe/7-advanced-topics",
+      "depth": 0
+    },
+    {
+      "page_id": "7.1",
+      "title": "区域管理系统",
+      "route_slug": "7.1-area-management-system",
+      "route_path": "hackermmzz/new-aoe/7.1-area-management-system",
+      "depth": 1
+    },
+    {
+      "page_id": "7.2",
+      "title": "敌人状态与 AI 行为",
+      "route_slug": "7.2-enemy-status-and-ai-behavior",
+      "route_path": "hackermmzz/new-aoe/7.2-enemy-status-and-ai-behavior",
+      "depth": 1
+    },
+    {
+      "page_id": "7.3",
+      "title": "网络与考试模式",
+      "route_slug": "7.3-network-and-exam-mode",
+      "route_path": "hackermmzz/new-aoe/7.3-network-and-exam-mode",
+      "depth": 1
+    },
+    {
+      "page_id": "7.4",
+      "title": "调试与日志系统",
+      "route_slug": "7.4-debug-and-logging-system",
+      "route_path": "hackermmzz/new-aoe/7.4-debug-and-logging-system",
+      "depth": 1
+    },
+    {
+      "page_id": "7.5",
+      "title": "分数系统",
+      "route_slug": "7.5-score-system",
+      "route_path": "hackermmzz/new-aoe/7.5-score-system",
+      "depth": 1
+    },
+    {
+      "page_id": "8",
+      "title": "数据结构参考",
+      "route_slug": "8-data-structures-reference",
+      "route_path": "hackermmzz/new-aoe/8-data-structures-reference",
+      "depth": 0
+    },
+    {
+      "page_id": "8.1",
+      "title": "游戏状态结构",
+      "route_slug": "8.1-game-state-structures",
+      "route_path": "hackermmzz/new-aoe/8.1-game-state-structures",
+      "depth": 1
+    },
+    {
+      "page_id": "8.2",
+      "title": "开发结构",
+      "route_slug": "8.2-development-structures",
+      "route_path": "hackermmzz/new-aoe/8.2-development-structures",
+      "depth": 1
+    },
+    {
+      "page_id": "8.3",
+      "title": "常量与枚举",
+      "route_slug": "8.3-constants-and-enumerations",
+      "route_path": "hackermmzz/new-aoe/8.3-constants-and-enumerations",
+      "depth": 1
+    }
+  ]
+}
