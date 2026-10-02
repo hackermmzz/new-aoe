@@ -2608,6 +2608,7 @@ void MainWidget::HandleGameOver()
     ResultLogInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getStone()).LogOut(true);
     GameOverBroadCast.broadcast();
     exit(0);
+
 }
 //**************槽函数***************
 // 游戏帧更新
