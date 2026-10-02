@@ -518,6 +518,8 @@ void call_debugText(QString color, QString content,int playerID)
             debugMassagePackage.push(st_DebugMassage(color, content));
             debugMessageRecord[content] = g_frame;
         }
+    }else if(IsExamining){
+        cout<<"DebugText[ "<<"color:"<<color.toStdString()<<" PlayerID:"<<playerID<<" Content:"<<content.toStdString()<<" ]"<<endl;
     }
 }
 //*************************************************************
