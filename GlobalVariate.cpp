@@ -847,7 +847,7 @@ void ResultLogInfo::LogOut(bool force)
        out=new QTextStream(file);
    }
    ++totalFrame;
-   if(!force||totalFrame%25){
+   if(!(force||totalFrame%25==0)){
        return;
    }
    //////////////////////////////////////写入信息
