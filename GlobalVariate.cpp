@@ -11,7 +11,8 @@
 #include <random>
 
 using namespace std;
-
+/*************************进程开始的时间戳******************/
+const qint64 ProcessBegin=QDateTime::currentMSecsSinceEpoch();
 /*************************全局随机数生成器******************/
 Random Rand(119);
 Random RenderRand(120);//渲染使用随机数
@@ -832,7 +833,6 @@ ResultLogInfo::ResultLogInfo(bool win_, int score_,int wood_, int food_, int gol
 
 void ResultLogInfo::LogOut()
 {
-
    static QTextStream*out=0;
    if(!out){
        //打开文件：WriteOnly 只写模式
@@ -854,7 +854,7 @@ QString ResultLogInfo::ToString()
 {
     QJsonObject obj;
     obj["win"]=win;
-    obj["time"]=g_frame*TimePerFrame;
+    obj["time"]=QDateTime::currentMSecsSinceEpoch()-ProcessBegin;//g_frame*TimePerFrame;
     obj["frame"]=g_frame;
     obj["score"]=score;
     obj["wood"]=wood;
