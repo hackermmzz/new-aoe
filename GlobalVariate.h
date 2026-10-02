@@ -15,6 +15,7 @@
 using namespace std;
 class Coordinate;
 //
+extern const qint64 ProcessBegin;
 extern Random Rand;
 extern Random RenderRand;
 extern QString ResultLogFile;
@@ -58,7 +59,7 @@ struct ResultLogInfo{
     int score;
     string msg;
     ResultLogInfo(bool win_,int score_,int wood_,int food_,int gold_,int stone_,string msg_="");
-    void LogOut();
+    void LogOut(bool force=false);
     QString ToString();
 };
 //当前选中对象

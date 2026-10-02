@@ -831,8 +831,9 @@ ResultLogInfo::ResultLogInfo(bool win_, int score_,int wood_, int food_, int gol
 
 
 
-void ResultLogInfo::LogOut()
+void ResultLogInfo::LogOut(bool force)
 {
+   static qint64 totalFrame=0;
    static QTextStream*out=0;
    if(!out){
        //打开文件：WriteOnly 只写模式
@@ -844,6 +845,10 @@ void ResultLogInfo::LogOut()
        }
        //创建文本流
        out=new QTextStream(file);
+   }
+   ++totalFrame;
+   if(!force||totalFrame%25){
+       return;
    }
    //////////////////////////////////////写入信息
    (*out)<<ToString()<<"\n";
