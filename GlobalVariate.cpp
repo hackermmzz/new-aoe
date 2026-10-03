@@ -22,7 +22,6 @@ QString ResultLogFile;//实时信息输出日志
 int mapmoveFrequency;//地图移动速度
 bool is_cheatAction = false;
 EventFilter *eventFilter;
-NetworkPlugin*NetworkManager;
 map<std::string, std::list<QPixmap>> resMap;
 map<string, QSoundEffect*> SoundMap;
 std::queue<string> soundQueue;
@@ -511,15 +510,15 @@ Double trans_BlockPointToDetailCenter( int p )
 
 void call_debugText(QString color, QString content,int playerID)
 {
-    if( !IsExamining && (!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE) )
+    if(!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE)
     {
-        if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
-        {
-            debugMassagePackage.push(st_DebugMassage(color, content));
-            debugMessageRecord[content] = g_frame;
+        if( !IsExamining ){
+            if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
+            {
+                debugMassagePackage.push(st_DebugMassage(color, content));
+                debugMessageRecord[content] = g_frame;
+            }
         }
-    }else if(IsExamining){
-        cout<<"DebugText[ "<<"color:"<<color.toStdString()<<" PlayerID:"<<playerID<<" Content:"<<content.toStdString()<<" ]"<<endl;
     }
 }
 //*************************************************************

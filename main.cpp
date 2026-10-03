@@ -14,9 +14,6 @@ int main(int argc, char* argv[])
     ParseArguments(app);
     //开启GPU加速
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
-    //创建网络插件
-    NetworkManager=new NetworkPlugin(&app);
-    NetworkManager->start();
     //安装全局事件器
     eventFilter=new EventFilter();
     app.installEventFilter(eventFilter);

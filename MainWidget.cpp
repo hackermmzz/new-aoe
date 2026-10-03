@@ -2602,13 +2602,14 @@ void MainWidget::ScoreSave(string gameResult)
 
 void MainWidget::HandleGameOver()
 {
-    cout<<"GameOver"<<endl;
+    cout<<"GameOver,Win:"<<isWin()<<endl;
+    cout<<"\n\nDebugText\n\n";
+    cout<<ui->DebugTexter->toPlainText().toStdString()<<endl;
     //
     auto*p=player[NOWPLAYERREPRESENT];
     ResultLogInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getStone()).LogOut(true);
     GameOverBroadCast.broadcast();
     exit(0);
-
 }
 //**************槽函数***************
 // 游戏帧更新

@@ -22,7 +22,6 @@ extern QString ResultLogFile;
 extern EventFilter *eventFilter;
 extern bool tryCaptured;
 extern bool is_cheatAction;
-extern NetworkPlugin*NetworkManager;
 //
 extern bool AIfinished;
 extern bool INSfinshed;
