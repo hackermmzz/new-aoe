@@ -1535,7 +1535,8 @@ void MainWidget::initMap() {
 
 void MainWidget::initAI() {
     qDebug() << "加载AI...";
-    UsrAi = new UsrAI();
+    extern UsrAI* MMZZ_NewUsrAI();
+    UsrAi = MMZZ_NewUsrAI();
     EnemyAi = new EnemyAI();
     connect(this, &MainWidget::startAI, UsrAi, &AI::startProcessing);
     connect(this, &MainWidget::startAI, EnemyAi, &AI::startProcessing);

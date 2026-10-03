@@ -2503,3 +2503,8 @@ void Mgr::update(const tagInfo& info)
 
     CommitInstruction();
 }
+
+
+UsrAI* MMZZ_NewUsrAI(){
+    return new UsrAI();
+}
