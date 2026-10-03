@@ -2604,7 +2604,8 @@ void MainWidget::HandleGameOver()
 {
     cout<<"GameOver,Win:"<<isWin()<<endl;
     cout<<"\n\nDebugText\n\n";
-    cout<<ui->DebugTexter->toPlainText().toStdString()<<endl;
+    for(auto&val:HistoryDebugText)cout<<val.toStdString()<<'\n';
+    cout<<endl;
     //
     auto*p=player[NOWPLAYERREPRESENT];
     ResultLogInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getStone()).LogOut(true);
@@ -2710,18 +2711,20 @@ void MainWidget::respond_DebugMessage()
 
 void MainWidget::debugText(const QString& color, const QString& content)
 {
+    QString msg=sel->getShowTime() + content;
     if (color == "blue")
-        ui->DebugTexter->insertHtml(COLOR_BLUE(sel->getShowTime() + content));
+        ui->DebugTexter->insertHtml(COLOR_BLUE(msg));
     else if (color == "red")
-        ui->DebugTexter->insertHtml(COLOR_RED(sel->getShowTime() + content));
+        ui->DebugTexter->insertHtml(COLOR_RED(msg));
     else if (color == "green")
-        ui->DebugTexter->insertHtml(COLOR_GREEN(sel->getShowTime() + content));
+        ui->DebugTexter->insertHtml(COLOR_GREEN(msg));
     else if (color == "black")
-        ui->DebugTexter->insertHtml(COLOR_BLACK(sel->getShowTime() + content));
-
+        ui->DebugTexter->insertHtml(COLOR_BLACK(msg));
     ui->DebugTexter->insertPlainText("\n");
     QScrollBar* bar = ui->DebugTexter->verticalScrollBar();
     bar->setValue(bar->maximum());
+    //
+    if(IsExamining)HistoryDebugText.push_back(msg);
 }
 
 void MainWidget::clearDebugText()

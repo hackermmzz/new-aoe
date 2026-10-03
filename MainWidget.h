@@ -177,7 +177,7 @@ private:
     //加载Json文件数据(失败则退出)
     static vector<uint8_t> LoadBinaryFileData(const QString& filePath);
 //*********************************
-
+    vector<QString>HistoryDebugText;
 //***********UI组件**************
     SelectWidget *sel;
     Option *option = NULL;

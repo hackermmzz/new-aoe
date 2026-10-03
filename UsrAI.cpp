@@ -2473,6 +2473,7 @@ void Mgr::strategy()
 
 void Mgr::update(const tagInfo& info)
 {
+  //  DebugText(0.0);
     makeFrame(info);
     laborFrame();
 
