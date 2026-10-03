@@ -1533,9 +1533,20 @@ void MainWidget::initMap() {
     
 }
 
+#if defined(_MSC_VER)
+UsrAI* __declspec(selectany) MMZZ_NewUsrAI(){
+    return new UsrAI();
+}
+#else
+__attribute__((weak))
+UsrAI* MMZZ_NewUsrAI(){
+    return new UsrAI();
+}
+#endif
+
+
 void MainWidget::initAI() {
     qDebug() << "加载AI...";
-    extern UsrAI* MMZZ_NewUsrAI();
     UsrAi = MMZZ_NewUsrAI();
     EnemyAi = new EnemyAI();
     connect(this, &MainWidget::startAI, UsrAi, &AI::startProcessing);

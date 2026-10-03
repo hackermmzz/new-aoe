@@ -2505,6 +2505,3 @@ void Mgr::update(const tagInfo& info)
 }
 
 
-UsrAI* MMZZ_NewUsrAI(){
-    return new UsrAI();
-}
