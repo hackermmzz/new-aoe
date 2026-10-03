@@ -512,7 +512,8 @@ void call_debugText(QString color, QString content,int playerID)
 {
     if(!only_debug_Player0 || playerID==NOWPLAYERREPRESENT || playerID == REPRESENT_BOARDCAST_MESSAGE)
     {
-        if( !IsExamining ){
+        //if( !IsExamining )
+        {
             if(  !filterRepetitionMessage || debugMessageRecord[content] == 0 || color == "black"|| color == "green" )
             {
                 debugMassagePackage.push(st_DebugMassage(color, content));
