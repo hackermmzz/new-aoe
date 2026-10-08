@@ -820,7 +820,7 @@ QString JsonMap(const QMap<QString, QVariant>&data){
 
 
 
-ResultLogInfo::ResultLogInfo(bool win_, int score_,int wood_, int food_, int gold_, int stone_, string msg_){
+ResultLogoutInfo::ResultLogoutInfo(bool win_, int score_,int wood_, int food_, int gold_, int stone_, string msg_){
     win=win_;
     wood=wood_;
     food=food_;
@@ -833,7 +833,7 @@ ResultLogInfo::ResultLogInfo(bool win_, int score_,int wood_, int food_, int gol
 
 
 
-void ResultLogInfo::LogOut(bool force)
+void ResultLogoutInfo::LogOut(bool force)
 {
    static qint64 totalFrame=0;
    static QTextStream*out=0;
@@ -857,7 +857,7 @@ void ResultLogInfo::LogOut(bool force)
    out->flush();
 }
 
-QString ResultLogInfo::ToString()
+QString ResultLogoutInfo::ToString()
 {
     QJsonObject obj;
     obj["win"]=win;

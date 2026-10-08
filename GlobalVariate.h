@@ -49,7 +49,7 @@ extern Coordinate* LeftMouseObjCapture;
 extern Coordinate*RightMouseObjCaptrue;
 extern bool GenerateHumanLock;//
 //每一帧传输到输出日志的结构体
-struct ResultLogInfo{
+struct ResultLogoutInfo{
     bool win;
     int wood;
     int food;
@@ -57,7 +57,7 @@ struct ResultLogInfo{
     int stone;
     int score;
     string msg;
-    ResultLogInfo(bool win_,int score_,int wood_,int food_,int gold_,int stone_,string msg_="");
+    ResultLogoutInfo(bool win_,int score_,int wood_,int food_,int gold_,int stone_,string msg_="");
     void LogOut(bool force=false);
     QString ToString();
 };

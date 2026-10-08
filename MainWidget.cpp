@@ -2620,7 +2620,7 @@ void MainWidget::HandleGameOver()
     cout<<endl;
     //
     auto*p=player[NOWPLAYERREPRESENT];
-    ResultLogInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getStone()).LogOut(true);
+    ResultLogoutInfo(isWin(),usrScore.getScore(),p->getWood(),p->getFood(),p->getGold(),p->getStone()).LogOut(true);
     GameOverBroadCast.broadcast();
     exit(0);
 }
