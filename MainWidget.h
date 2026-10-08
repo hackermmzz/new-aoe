@@ -45,7 +45,6 @@ public:
     void cleanupUnitReferences(Coordinate* unit);  // 清理单位的所有引用
     
     // 获取核心对象
-    Core* getCore() const { return core; }
     AI* getUsrAI(){return UsrAi;}
     bool isPaused() const { return pause; }
     // 敌人状态相关函数 - 需要被外部调用，所以放在public中
